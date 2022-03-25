@@ -1,0 +1,3 @@
+# ignore cmake output directory
+
+/build/*
