@@ -15,6 +15,7 @@ find_package(Vulkan REQUIRED)
 
 set(thirdparty_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(thirdparty_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+set(apps_dir "${CMAKE_CURRENT_SOURCE_DIR}/apps")
 
 # link dependency libs
 
@@ -45,3 +46,7 @@ include_directories(
 
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
+
+# applications
+
+add_subdirectory("${apps_dir}/importance_sampling_rt")

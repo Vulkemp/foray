@@ -1,3 +1,6 @@
 # ignore cmake output directory
 
 /build/*
+
+/out
+/.vs
