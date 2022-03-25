@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
 
-project("importance_sampling_rt")
+set(app "importancesamplingrt")
 
 file(GLOB_RECURSE src "*.cpp")
 
-add_executable(${PROJECT_NAME} ${src})
+add_executable(${app} ${src})
+
+target_link_libraries(
+	${app}
+	PUBLIC ${PROJECT_NAME}
+)
+
 
 target_include_directories(
-	${PROJECT_NAME}
+	${app}
 	PUBLIC "../../src"
 	PUBLIC ${Vulkan_INCLUDE_DIRS}
     PUBLIC ${thirdparty_include_dir}

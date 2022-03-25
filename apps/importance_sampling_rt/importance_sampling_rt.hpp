@@ -1,15 +1,15 @@
 #pragma once
 
-#include <hsk_base_app.hpp>
+#include <hsk_rtrpf.hpp>
 #include <stdint.h>
 
-class ImportanceSamplingRtProject : public hsk::BaseApp
+class ImportanceSamplingRtProject : public hsk::MinimalAppBase
 {
 public:
 	ImportanceSamplingRtProject() = default;
 	~ImportanceSamplingRtProject() = default;
 
-	int32_t Run();
-
 protected:
+
+	virtual void Init() override;
 };

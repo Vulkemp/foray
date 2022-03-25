@@ -4,7 +4,6 @@
 #include <iostream>
 
 // rtrpf
-#include "hsk_base_app.hpp"
 #include <spdlog/spdlog.h>
 
 int main()
@@ -13,9 +12,8 @@ int main()
 	return project.Run();
 }
 
-int32_t ImportanceSamplingRtProject::Run()
+void ImportanceSamplingRtProject::Init()
 {
 	spdlog::info("hello");
-	return 0;
 }
 

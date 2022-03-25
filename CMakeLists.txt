@@ -42,6 +42,8 @@ include_directories(
     PUBLIC ${thirdparty_include_dir}
 )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
+
 # subdirectories
 
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
