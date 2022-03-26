@@ -18,6 +18,7 @@ namespace hsk
 		auto maxFiles = 5;
 		auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs/log.txt", maxSize, maxFiles, true);
 
+		// create a logger that logs both to console and to logfiles in a rotating manner
 		defaultLogger = new spdlog::logger("main_logger", { consoleSink, fileSink });
 		return defaultLogger;
 	}

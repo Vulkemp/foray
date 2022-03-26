@@ -3,7 +3,7 @@
 #include <hsk_rtrpf.hpp>
 #include <stdint.h>
 
-class ImportanceSamplingRtProject : public hsk::MinimalAppBase
+class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 {
 public:
 	ImportanceSamplingRtProject() = default;

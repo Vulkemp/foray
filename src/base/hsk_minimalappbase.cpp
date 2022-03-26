@@ -5,8 +5,6 @@
 #include <chrono>
 #include <exception>
 
-#include "hsk_logger.hpp"
-
 namespace hsk
 {
     using clock_t = std::chrono::steady_clock;
@@ -22,11 +20,10 @@ namespace hsk
 
         try
         {
-            logger()->info("Setup MinimalAppBase ...");
             this->State(EState::Preparing);
             this->BaseInitSdlSubsystem();
             this->BeforeInstanceCreate(mVkbInstanceBuilder);
-            this->BaseInitVulkanInstance();
+            this->BaseInit();
             this->Init();
         }
         catch (const std::exception &e)
@@ -37,7 +34,6 @@ namespace hsk
 
         try
         {
-            logger()->info("Starting main loop ...");
             clock_t clock;
             float deltaMillis = 0;
             this->State(EState::Running);
@@ -98,8 +94,29 @@ namespace hsk
     }
 
     void MinimalAppBase::BaseInitSdlSubsystem(){}
-    void MinimalAppBase::BaseInitVulkanInstance(){
-        //mVkbInstanceBuilder.enable_extension("not available extension to produce error");
+
+    void MinimalAppBase::BaseInit()
+    {
+        // print validation layer messages with the logger
+        mVkbInstanceBuilder.set_debug_callback(
+            [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                VkDebugUtilsMessageTypeFlagsEXT messageType,
+                const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                void* pUserData)
+            -> VkBool32 {
+                auto severity = vkb::to_string_message_severity(messageSeverity);
+                auto type = vkb::to_string_message_type(messageType);
+                logger()->debug("[%s: %s] %s\n", severity, type, pCallbackData->pMessage);
+                return VK_FALSE;
+            }
+        );
+
+        if (mEnableDefaultValidationLayers)
+        {
+            mVkbInstanceBuilder.enable_layer("VK_LAYER_KHRONOS_validation");
+            mVkbInstanceBuilder.enable_validation_layers();
+        }
+
         auto instanceBuildRet = mVkbInstanceBuilder.build();
        
         if (!instanceBuildRet)

@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <vkbootstrap/VkBootstrap.h>
+#include "hsk_logger.hpp"
 
 namespace hsk
 {
@@ -49,7 +50,31 @@ namespace hsk
 
 	protected:
 		EState mState = EState::Uninitialized;
-		inline void State(EState state) { mState = state; }
+		inline void State(EState state) { PrintStateChange(mState, state);  mState = state; }
+
+		void PrintStateChange(EState oldState, EState newState)
+		{
+			logger()->info("{} => {}", StateToString(oldState), StateToString(newState));
+		}
+
+		std::string StateToString(EState state)
+		{
+			switch (state)
+			{
+			case EState::Uninitialized:
+				return "Uninitialized";
+			case EState::Preparing:
+				return "Preparing";
+			case EState::Running:
+				return "Running";
+			case EState::StopRequested:
+				return "StopRequested";
+			case EState::Finalizing:
+				return "Finalizing";
+			default:
+				return "StateUnknown";
+			}
+		}
 
 	public:
 		inline EState State() const { return mState; }
@@ -60,8 +85,8 @@ namespace hsk
 	protected: // Base methods (Used by the base for lifetime management. Usually don't need to override those)
 		/// @brief Inits the SDL subsystem
 		virtual void BaseInitSdlSubsystem();
-		/// @brief Inits the Vulkan instance and discovers physical devices
-		virtual void BaseInitVulkanInstance();
+		/// @brief Inits the applications basic vulkan objects
+		virtual void BaseInit();
 		/// @brief Polls and distributes events from the SDL subsystem
 		virtual void BasePollEvents();
 		/// @brief Destroys the vulkan instance
@@ -86,6 +111,7 @@ namespace hsk
 		vkb::InstanceBuilder mVkbInstanceBuilder{};
 		vkb::Instance mVkbInstance;
 		VkInstance mInstance{};
+		bool mEnableDefaultValidationLayers{true};
 #pragma endregion
 	};
 

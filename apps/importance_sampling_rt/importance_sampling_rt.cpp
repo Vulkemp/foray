@@ -6,7 +6,7 @@
 // rtrpf
 #include <spdlog/spdlog.h>
 
-int main()
+int main(int argv, char** args)
 {
 	ImportanceSamplingRtProject project;
 	return project.Run();

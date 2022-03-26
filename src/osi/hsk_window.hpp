@@ -26,14 +26,13 @@ namespace hsk
         glm::ivec2 mPosition;
         SDL_threadID mOwningThreadID;
 
+    public:
         Window();
 
-        Window(const std::string &title, EDisplayMode displaymode, Extent2D size)
-            : mTitle(title), mDisplayMode(displaymode), mDisplayId(), mFullScreenSize{0, 0}, mWindowedSize(size), mPosition{WINDOWPOS_AUTO, WINDOWPOS_AUTO}, mOwningThreadID()
+        Window(const std::string& title, EDisplayMode displaymode, Extent2D size)
+            : mTitle(title), mDisplayMode(displaymode), mDisplayId(), mFullScreenSize{ 0, 0 }, mWindowedSize(size), mPosition{ WINDOWPOS_AUTO, WINDOWPOS_AUTO }, mOwningThreadID()
         {
         }
-
-    public:
         Window(const Window &other) = delete;
         Window(const Window &&other) = delete;
         void operator=(const Window &other) = delete;

@@ -17,7 +17,7 @@ set(thirdparty_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(thirdparty_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(apps_dir "${CMAKE_CURRENT_SOURCE_DIR}/apps")
 set(sdl2_dll "${thirdparty_dir}/sdl2/win/x64/SDL2.dll")
-
+set(sdl2_libmain "${thirdparty_dir}/sdl2/win/x64/SDL2main.lib")
 # link dependency libs
 
 if (WIN32) 
