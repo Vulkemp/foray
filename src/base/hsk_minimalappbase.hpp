@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <vkbootstrap/VkBootstrap.h>
 
 namespace hsk
 {
@@ -69,8 +70,8 @@ namespace hsk
 		virtual void BaseCleanupSdlSubsystem();
 
 	protected: // Virtual methods every application should override
-		/// @brief Override this method to alter vulkan instance creation parameters
-		inline virtual void BeforeInstanceCreate() {}
+		/// @brief Override this method to alter vulkan instance creation parameters via the instance builder
+		inline virtual void BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
 		/// @brief Override this method to init your application
 		inline virtual void Init() {}
 		/// @brief Override this method to render your application
@@ -79,7 +80,12 @@ namespace hsk
 		inline virtual void OnEvent() {}
 		/// @brief Override this method to cleanup your application
 		inline virtual void Cleanup() {}
+#pragma endregion
 
+#pragma region Vulkan
+		vkb::InstanceBuilder mVkbInstanceBuilder{};
+		vkb::Instance mVkbInstance;
+		VkInstance mInstance{};
 #pragma endregion
 	};
 

@@ -5,6 +5,8 @@
 #include <chrono>
 #include <exception>
 
+#include "hsk_logger.hpp"
+
 namespace hsk
 {
     using clock_t = std::chrono::steady_clock;
@@ -22,7 +24,7 @@ namespace hsk
         {
             this->State(EState::Preparing);
             this->BaseInitSdlSubsystem();
-            this->BeforeInstanceCreate();
+            this->BeforeInstanceCreate(mVkbInstanceBuilder);
             this->BaseInitVulkanInstance();
             this->Init();
         }
@@ -94,7 +96,19 @@ namespace hsk
     }
 
     void MinimalAppBase::BaseInitSdlSubsystem(){}
-    void MinimalAppBase::BaseInitVulkanInstance(){}
+    void MinimalAppBase::BaseInitVulkanInstance(){
+        //mVkbInstanceBuilder.enable_extension("not available extension to produce error");
+        auto instanceBuildRet = mVkbInstanceBuilder.build();
+       
+        if (!instanceBuildRet)
+        {
+            logger()->error("Create vkInst failed: {}", instanceBuildRet.error().message());
+            return;
+        }
+
+        mVkbInstance = instanceBuildRet.value();
+        mInstance = mVkbInstance.instance;
+    }
     void MinimalAppBase::BasePollEvents(){}
     void MinimalAppBase::BaseCleanupVkInstance(){}
     void MinimalAppBase::BaseCleanupSdlSubsystem(){}
