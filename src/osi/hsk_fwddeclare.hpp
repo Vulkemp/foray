@@ -1,3 +1,4 @@
+#pragma once
 #include "../hsk_basics.hpp"
 #include <cstring>
 
