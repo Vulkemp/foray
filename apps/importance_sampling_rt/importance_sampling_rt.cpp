@@ -14,6 +14,5 @@ int main()
 
 void ImportanceSamplingRtProject::Init()
 {
-	spdlog::info("hello");
 }
 

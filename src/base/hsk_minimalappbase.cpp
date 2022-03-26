@@ -22,6 +22,7 @@ namespace hsk
 
         try
         {
+            logger()->info("Setup MinimalAppBase ...");
             this->State(EState::Preparing);
             this->BaseInitSdlSubsystem();
             this->BeforeInstanceCreate(mVkbInstanceBuilder);
@@ -30,12 +31,13 @@ namespace hsk
         }
         catch (const std::exception &e)
         {
-            spdlog::error("Exception thrown during initialization: {}", e.what());
+            logger()->error("Exception thrown during initialization: {}", e.what());
             return -1;
         }
 
         try
         {
+            logger()->info("Starting main loop ...");
             clock_t clock;
             float deltaMillis = 0;
             this->State(EState::Running);
@@ -74,7 +76,7 @@ namespace hsk
         }
         catch (const std::exception &e)
         {
-            spdlog::error("Exception thrown during runtime: {}", e.what());
+            logger()->error("Exception thrown during runtime: {}", e.what());
             return -1;
         }
 
@@ -87,7 +89,7 @@ namespace hsk
         }
         catch (const std::exception &e)
         {
-            spdlog::error("Exception thrown during deconstruct: {}", e.what());
+            logger()->error("Exception thrown during deconstruct: {}", e.what());
             return -1;
         }
 
@@ -103,7 +105,7 @@ namespace hsk
         if (!instanceBuildRet)
         {
             logger()->error("Create vkInst failed: {}", instanceBuildRet.error().message());
-            return;
+            throw std::exception();
         }
 
         mVkbInstance = instanceBuildRet.value();
