@@ -16,6 +16,7 @@ find_package(Vulkan REQUIRED)
 set(thirdparty_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(thirdparty_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(apps_dir "${CMAKE_CURRENT_SOURCE_DIR}/apps")
+set(sdl2_dll "${thirdparty_dir}/sdl2/win/x64/SDL2.dll")
 
 # link dependency libs
 
@@ -25,7 +26,7 @@ if (WIN32)
         PUBLIC ${Vulkan_LIBRARIES}
         PUBLIC glm_static
         PUBLIC vkbootstrap
-        PUBLIC "${thirdpart_dir}/sdl2/win/x64/SDL2.lib")
+        PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
 else () 
     target_link_libraries(
         ${PROJECT_NAME}
