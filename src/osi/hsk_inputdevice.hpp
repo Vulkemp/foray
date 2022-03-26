@@ -1,13 +1,16 @@
 #include "hsk_fwddeclare.hpp"
 #include <string>
 #include <vector>
-
+#include <memory>
 
 namespace hsk
 {
     class InputDevice
     {
     public:
+        using loanptr = const InputDevice*;
+        using ptr = std::unique_ptr<InputDevice>;
+
         enum class EType : uint8_t
         {
             Unknown = 0,
