@@ -6,3 +6,4 @@
 /.vs
 .vscode/settings.json
 .vscode/logs/*
+apps/importance_sampling_rt/logs/*

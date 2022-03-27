@@ -1,5 +1,0 @@
-[2022-03-27 18:33:39.866] [main_logger] [info] Uninitialized => Preparing
-[2022-03-27 18:33:40.915] [main_logger] [info] Preparing => Running
-[2022-03-27 18:33:50.902] [main_logger] [info] Running => StopRequested
-[2022-03-27 18:33:50.903] [main_logger] [info] StopRequested => Finalizing
-[2022-03-27 18:33:50.922] [main_logger] [info] Finalizing => Uninitialized
