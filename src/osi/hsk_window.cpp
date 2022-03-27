@@ -1,5 +1,5 @@
 #include "hsk_window.hpp"
-#include "sdl2/SDL_vulkan.h"
+#include "hsk_osi.hpp"
 #include <exception>
 
 namespace hsk
@@ -16,7 +16,8 @@ namespace hsk
         Destroy();
         for (auto iter = sWindows.begin(); iter != sWindows.end(); ++iter)
         {
-            if ((*iter) == this){
+            if ((*iter) == this)
+            {
                 sWindows.erase(iter);
                 break;
             }
@@ -61,13 +62,13 @@ namespace hsk
         }
     }
 
-    void Window::Position(glm::ivec2 pos)
+    void Window::Position(Pos2D pos)
     {
         mPosition = pos;
         if (Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
         {
-            int x = (mPosition.x == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.x);
-            int y = (mPosition.y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.y);
+            int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
+            int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
             SDL_SetWindowPosition(mHandle, x, y);
         }
     }
@@ -91,8 +92,8 @@ namespace hsk
         {
             mTitle = "Raytracing Rapid Prototyping Framework - Hochschule Kempten";
         }
-        int x = (mPosition.x == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.x);
-        int y = (mPosition.y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.y);
+        int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
+        int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
 
         switch (mDisplayMode)
         {
@@ -118,7 +119,8 @@ namespace hsk
     {
         mId = 0;
         mOwningThreadID = 0;
-        if (!Exists()){
+        if (!Exists())
+        {
             return;
         }
         SDL_DestroyWindow(mHandle);
@@ -183,7 +185,8 @@ namespace hsk
         }
     }
 
-    std::vector<Window::loanptr>& Window::Windows() {
+    std::vector<Window::loanptr> &Window::Windows()
+    {
         return sWindows;
     }
 
@@ -191,8 +194,10 @@ namespace hsk
     {
         Window::loanptr out;
 
-        for (auto window : sWindows){
-            if (window->SDLId() == id){
+        for (auto window : sWindows)
+        {
+            if (window->SDLId() == id)
+            {
                 out = window;
                 break;
             }

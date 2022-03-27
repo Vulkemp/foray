@@ -1,4 +1,5 @@
 #include "hsk_inputdevice.hpp"
+#include "hsk_osi.hpp"
 #include <sstream>
 #include <nameof/nameof.hpp>
 

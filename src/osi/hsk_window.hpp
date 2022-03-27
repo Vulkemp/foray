@@ -3,10 +3,10 @@
 #include <vector>
 #include "../hsk_basics.hpp"
 #include "../hsk_memory.hpp"
-#include "hsk_fwddeclare.hpp"
-#include <glm/glm.hpp>
+#include "hsk_osi_declares.hpp"
+#include "hsk_helpers.hpp"
 #include <sdl2/SDL.h>
-#include <vulkan/vulkan.hpp>
+#include <sdl2/SDL_vulkan.h>
 
 namespace hsk
 {
@@ -42,7 +42,7 @@ namespace hsk
         int32_t mDisplayId;
         Extent2D mFullScreenSize;
         Extent2D mWindowedSize;
-        glm::ivec2 mPosition;
+        Pos2D mPosition;
 
         SDL_threadID mOwningThreadID;
 
@@ -74,9 +74,9 @@ namespace hsk
         /// @param size Hardware-Level size in Pixels
         void Size(const Extent2D size);
         /// @brief (Getter) Window Position
-        inline glm::ivec2 Position() const { return mPosition; }
+        inline Pos2D Position() const { return mPosition; }
         /// @brief (Setter) Window Position
-        void Position(const glm::ivec2 pos);
+        void Position(const Pos2D pos);
         /// @brief (Setter) Display Mode
         void DisplayMode(EDisplayMode mode, bool preserveSize = false);
         /// @brief (Getter) Display Mode

@@ -1,7 +1,7 @@
-#include "hsk_event.hpp"
-#include "hsk_inputdevice.hpp"
+#pragma once
+#include "hsk_osi_declares.hpp"
+#include "../hsk_memory.hpp"
 #include <sdl2/SDL.h>
-#include "hsk_window.hpp"
 #include <vector>
 
 namespace hsk
@@ -10,13 +10,13 @@ namespace hsk
     {
     protected:
         /// @brief A collection of all non-standard input devices recognized by this application
-        std::vector<InputDevice::ptr> m_InputDevices;
+        std::vector<std::unique_ptr<InputDevice>> m_InputDevices;
 
     public:
         /// @brief Mouse input device. Assumed standard and always present
-        InputDevice::loanptr m_Mouse;
+        loan_ptr<InputDevice> m_Mouse;
         /// @brief Keyboard input device. Assumed standard and always present
-        InputDevice::loanptr m_Keyboard;
+        loan_ptr<InputDevice> m_Keyboard;
 
         OsManager();
 
@@ -29,23 +29,23 @@ namespace hsk
         inline static OsManager* Instance = nullptr;
         
         /// @brief A collection of all non-standard input devices recognized by this application
-        std::vector<InputDevice::loanptr> InputDevices();
+        std::vector<loan_ptr<InputDevice>> InputDevices();
 
     public:
         void Init();
         void Cleanup();
 
-        Event::ptr PollEvent();
+        std::shared_ptr<Event> PollEvent();
 
     protected:
-        bool HandleSDLEvent(const SDL_Event &sdl_event, Event::ptr &ref_event);
+        bool HandleSDLEvent(const SDL_Event &sdl_event, std::shared_ptr<Event> &ref_event);
 
-        Event::ptr TranslateEvent_MouseButton(const SDL_Event &sdl_event);
-        Event::ptr TranslateEvent_Keyboard(const SDL_Event &sdl_event);
-        Event::ptr TranslateEvent_MouseMoved(const SDL_Event &sdl_event);
-        Event::ptr TranslateEvent_JoyAxis(const SDL_Event &sdl_event);
-        Event::ptr TranslateEvent_JoyButton(const SDL_JoyButtonEvent &sdl_event);
-        Event::ptr TranslateEvent_WindowClosed(const Window::loanptr window, uint32_t timestamp);
-        Event::ptr TranslateEvent_WindowResized(const Window::loanptr window, const SDL_WindowEvent &wevent);
+        std::shared_ptr<Event> TranslateEvent_MouseButton(const SDL_Event &sdl_event);
+        std::shared_ptr<Event> TranslateEvent_Keyboard(const SDL_Event &sdl_event);
+        std::shared_ptr<Event> TranslateEvent_MouseMoved(const SDL_Event &sdl_event);
+        std::shared_ptr<Event> TranslateEvent_JoyAxis(const SDL_Event &sdl_event);
+        std::shared_ptr<Event> TranslateEvent_JoyButton(const SDL_JoyButtonEvent &sdl_event);
+        std::shared_ptr<Event> TranslateEvent_WindowClosed(const loan_ptr<Window> window, uint32_t timestamp);
+        std::shared_ptr<Event> TranslateEvent_WindowResized(const loan_ptr<Window> window, const SDL_WindowEvent &wevent);
     };
 }

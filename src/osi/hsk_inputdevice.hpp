@@ -1,4 +1,6 @@
-#include "hsk_fwddeclare.hpp"
+#pragma once
+#include "hsk_osi_declares.hpp"
+#include "hsk_helpers.hpp"
 #include "../hsk_memory.hpp"
 #include <string>
 #include <vector>

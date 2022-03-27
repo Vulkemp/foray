@@ -49,6 +49,9 @@ include_directories(
     PUBLIC ${thirdparty_include_dir}
 )
 
+target_precompile_headers(${PROJECT_NAME}
+    PRIVATE "src/osi/hsk_osi.hpp")
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 
 # subdirectories

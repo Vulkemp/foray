@@ -12,5 +12,5 @@ public:
 protected:
 
 	virtual void Init() override;
-	virtual void OnEvent(hsk::Event::ptr event) override;
+	virtual void OnEvent(std::shared_ptr<hsk::Event> event) override;	
 };

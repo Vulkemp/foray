@@ -373,19 +373,6 @@ namespace hsk
         FullscreenWindowed
     };
 
-    class Window;
-    class Event;
-    class OsManager;
-    class InputDevice;
-
-    struct GUID128
-    {
-        uint8_t data[16];
-
-        GUID128() : data{} {}
-        GUID128(const GUID128 &other) : data{} { std::memcpy(data, other.data, sizeof(data)); }
-    };
-
     struct Extent2D
     {
     public:
@@ -393,5 +380,12 @@ namespace hsk
         int32_t Height = 1;
 
         bool IsZeroArea() const { return Width <= 0 || Height <= 0; }
+    };
+
+    struct Pos2D
+    {
+    public:
+        int32_t X = 0;
+        int32_t Y = 0;
     };
 }

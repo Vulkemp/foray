@@ -37,3 +37,7 @@ target_include_directories(
 	PUBLIC ${Vulkan_INCLUDE_DIRS}
     PUBLIC ${thirdparty_include_dir}
 )
+
+message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+target_precompile_headers(${app}
+  PUBLIC "${CMAKE_SOURCE_DIR}/src/hsk_rtrpf.hpp")

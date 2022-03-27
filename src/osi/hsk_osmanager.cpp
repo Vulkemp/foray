@@ -1,4 +1,5 @@
 #include "hsk_osmanager.hpp"
+#include "hsk_osi.hpp"
 #include <sdl2/SDL.h>
 
 namespace hsk
@@ -116,10 +117,10 @@ namespace hsk
     {
         SDL_MouseMotionEvent mevent = sdl_event.motion;
         Window::loanptr window = GetWindowPtr<SDL_MouseMotionEvent>(this, mevent);
-        glm::vec2 current(mevent.x, mevent.y);
-        glm::vec2 previous = current - glm::vec2(mevent.xrel, mevent.yrel);
+        fp32_t currentx = mevent.x;
+        fp32_t currenty = mevent.y;
 
-        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, nullptr, current, previous);
+        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, nullptr, currentx, currenty);
         return result;
     }
 
@@ -142,7 +143,7 @@ namespace hsk
                 sourceDevice = inpDevPtr;
             }
         }
-        return std::make_shared<EventInputAnalogue>(window, ev.timestamp, sourceDevice, ev.axis, ev.value, 0);
+        return std::make_shared<EventInputAnalogue>(window, ev.timestamp, sourceDevice, ev.axis, ev.value);
     }
 
     Event::ptr OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent &sdl_event)

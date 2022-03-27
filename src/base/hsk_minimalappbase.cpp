@@ -6,6 +6,7 @@
 #include <exception>
 
 #include "../osi/hsk_window.hpp"
+#include "../osi/hsk_event.hpp"
 
 namespace hsk
 {
@@ -150,5 +151,6 @@ namespace hsk
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
         OSI.Cleanup();
+        logger()->flush();
     }
 }

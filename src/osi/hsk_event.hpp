@@ -2,8 +2,8 @@
 #include "../hsk_basics.hpp"
 #include "../hsk_memory.hpp"
 #include <memory>
-#include <glm/glm.hpp>
-#include "hsk_fwddeclare.hpp"
+#include "hsk_osi_declares.hpp"
+#include "hsk_helpers.hpp"
 
 namespace hsk{
         /// @brief Event Base class
@@ -80,16 +80,12 @@ namespace hsk{
         /// @brief id of the axis that was moved
         const uint32_t AxisId;
         /// @brief Current reading from the axis
-        const fp64_t Current;
-        /// @brief Previous reading from the axis
-        const fp64_t Before;
+        const fp32_t Current;
 
-        inline EventInputAnalogue(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, uint32_t axis, fp64_t current, fp64_t before)
-            : EventInput(source, timestamp, EType::InputAnalogue, device), AxisId(axis), Current(current), Before(before)
+        inline EventInputAnalogue(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, uint32_t axis, fp32_t current)
+            : EventInput(source, timestamp, EType::InputAnalogue, device), AxisId(axis), Current(current)
         {
         }
-
-        fp64_t Delta() const { return Before - Current; }
     };
 
 
@@ -114,11 +110,11 @@ namespace hsk{
       public:
         using ptr = std::shared_ptr<EventInputMouseMoved>;
 
-        glm::vec2 m_Current;
-        glm::vec2 m_Before;
+        fp32_t CurrentX;
+        fp32_t CurrentY;
 
-        EventInputMouseMoved(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, glm::vec2 current, glm::vec2 before)
-            : EventInput(source, timestamp, EType::InputMouseMoved, device), m_Current(current), m_Before(before)
+        EventInputMouseMoved(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, fp32_t currentx, fp32_t currenty)
+            : EventInput(source, timestamp, EType::InputMouseMoved, device), CurrentX(currentx), CurrentY(currenty)
         {
         }
     };
