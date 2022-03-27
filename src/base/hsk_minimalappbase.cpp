@@ -5,6 +5,8 @@
 #include <chrono>
 #include <exception>
 
+#include "../osi/hsk_window.hpp"
+
 namespace hsk
 {
     using clock_t = std::chrono::steady_clock;
@@ -93,23 +95,26 @@ namespace hsk
         return 0;
     }
 
-    void MinimalAppBase::BaseInitSdlSubsystem(){}
+    void MinimalAppBase::BaseInitSdlSubsystem()
+    {
+        OSI.Init();
+    }
 
     void MinimalAppBase::BaseInit()
     {
         // print validation layer messages with the logger
         mVkbInstanceBuilder.set_debug_callback(
             [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                VkDebugUtilsMessageTypeFlagsEXT messageType,
-                const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                void* pUserData)
-            -> VkBool32 {
+               VkDebugUtilsMessageTypeFlagsEXT messageType,
+               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+               void *pUserData)
+                -> VkBool32
+            {
                 auto severity = vkb::to_string_message_severity(messageSeverity);
                 auto type = vkb::to_string_message_type(messageType);
                 logger()->debug("[%s: %s] %s\n", severity, type, pCallbackData->pMessage);
                 return VK_FALSE;
-            }
-        );
+            });
 
         if (mEnableDefaultValidationLayers)
         {
@@ -118,7 +123,7 @@ namespace hsk
         }
 
         auto instanceBuildRet = mVkbInstanceBuilder.build();
-       
+
         if (!instanceBuildRet)
         {
             logger()->error("Create vkInst failed: {}", instanceBuildRet.error().message());
@@ -128,7 +133,22 @@ namespace hsk
         mVkbInstance = instanceBuildRet.value();
         mInstance = mVkbInstance.instance;
     }
-    void MinimalAppBase::BasePollEvents(){}
-    void MinimalAppBase::BaseCleanupVkInstance(){}
-    void MinimalAppBase::BaseCleanupSdlSubsystem(){}
+    void MinimalAppBase::BasePollEvents()
+    {
+        for (Event::ptr event = OSI.PollEvent(); event != nullptr; event = OSI.PollEvent())
+        {
+            OnEvent(event);
+            if (event->Source)
+            {
+                if (event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() == 1){
+                    State(EState::StopRequested);
+                }
+            }
+        }
+    }
+    void MinimalAppBase::BaseCleanupVkInstance() {}
+    void MinimalAppBase::BaseCleanupSdlSubsystem()
+    {
+        OSI.Cleanup();
+    }
 }

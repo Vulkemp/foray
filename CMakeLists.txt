@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 
 project("rtrpf")
 
+# Use C++ 20 Standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # declare lib
 
 file(GLOB_RECURSE src "src/*.cpp")
@@ -33,7 +37,9 @@ else ()
         PUBLIC -lvulkan
         PUBLIC glm_static
         PUBLIC vkbootstrap
-        PUBLIC -lSDL2)
+        PUBLIC -lSDL2
+        PUBLIC -ldl
+        )
 endif()
 
 # include directories

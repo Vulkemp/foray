@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_basics.hpp"
+#include "../hsk_memory.hpp"
 #include <memory>
 #include <glm/glm.hpp>
 #include "hsk_fwddeclare.hpp"
@@ -40,7 +41,7 @@ namespace hsk{
 
       public:
         /// @brief Source window that recorded the event, if applicable
-        const Window *const Source;
+        const loan_ptr<const Window> Source;
         /// @brief Timestamp when the action was recorded
         const uint32_t Timestamp;
         /// @brief EType enum for aiding in type casting
@@ -48,8 +49,8 @@ namespace hsk{
         /// @brief For custom event type overloads, this value may be set
         int8_t CustomType;
 
-        inline Event(const Window* source, const uint32_t timestamp, const EType type) : Source(source), Timestamp(timestamp), Type(type), CustomType(0) {}
-        inline Event(const Window* source, const uint32_t timestamp, const int8_t customtype)
+        inline Event(loan_ptr<const Window> source, const uint32_t timestamp, const EType type) : Source(source), Timestamp(timestamp), Type(type), CustomType(0) {}
+        inline Event(loan_ptr<const Window> source, const uint32_t timestamp, const int8_t customtype)
             : Source(source), Timestamp(timestamp), Type(EType::Custom), CustomType(customtype)
         {
         }
@@ -66,9 +67,9 @@ namespace hsk{
         using ptr = std::shared_ptr<EventInput>;
 
         /// @brief Input Device that the input was read from
-        const InputDevice*const Device;
+        const loan_ptr<const InputDevice> Device;
 
-        inline EventInput(const Window* source, const uint32_t timestamp, const EType type, const InputDevice* device) : Event(source, timestamp, type), Device(device) {}
+        inline EventInput(loan_ptr<const Window> source, const uint32_t timestamp, const EType type, loan_ptr<const InputDevice> device) : Event(source, timestamp, type), Device(device) {}
     };
 
     class EventInputAnalogue : public EventInput
@@ -83,7 +84,7 @@ namespace hsk{
         /// @brief Previous reading from the axis
         const fp64_t Before;
 
-        inline EventInputAnalogue(const Window* source, const uint32_t timestamp, const InputDevice* device, uint32_t axis, fp64_t current, fp64_t before)
+        inline EventInputAnalogue(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, uint32_t axis, fp64_t current, fp64_t before)
             : EventInput(source, timestamp, EType::InputAnalogue, device), AxisId(axis), Current(current), Before(before)
         {
         }
@@ -102,7 +103,7 @@ namespace hsk{
         /// @brief If true, the button was pressed - released otherwise
         const bool Pressed;
 
-        inline EventInputBinary(const Window* source, const uint32_t timestamp, const InputDevice* device, EButton button, bool pressed)
+        inline EventInputBinary(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, EButton button, bool pressed)
             : EventInput(source, timestamp, EType::InputBinary, device), Button(button), Pressed(pressed)
         {
         }
@@ -116,7 +117,7 @@ namespace hsk{
         glm::vec2 m_Current;
         glm::vec2 m_Before;
 
-        EventInputMouseMoved(const Window* source, const uint32_t timestamp, const InputDevice* device, glm::vec2 current, glm::vec2 before)
+        EventInputMouseMoved(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, glm::vec2 current, glm::vec2 before)
             : EventInput(source, timestamp, EType::InputMouseMoved, device), m_Current(current), m_Before(before)
         {
         }
@@ -127,9 +128,9 @@ namespace hsk{
       public:
         using ptr = std::shared_ptr<EventWindowResized>;
 
-        const glm::ivec2 Current;
+        const Extent2D Current;
 
-        EventWindowResized(const Window* source, const uint32_t timestamp, glm::ivec2 current) : Event(source, timestamp, EType::WindowResized), Current(current) {}
+        EventWindowResized(loan_ptr<const Window> source, const uint32_t timestamp, Extent2D current) : Event(source, timestamp, EType::WindowResized), Current(current) {}
     };
 
     class EventWindowFocusChanged : public Event
@@ -140,7 +141,7 @@ namespace hsk{
         const bool MouseFocus;
         const bool InputFocus;
 
-        EventWindowFocusChanged(const Window* source, const uint32_t timestamp, bool mouseFocus, bool inputFocus) : Event(source, timestamp, EType::WindowFocusChanged), MouseFocus(mouseFocus), InputFocus(inputFocus) {}
+        EventWindowFocusChanged(loan_ptr<const Window> source, const uint32_t timestamp, bool mouseFocus, bool inputFocus) : Event(source, timestamp, EType::WindowFocusChanged), MouseFocus(mouseFocus), InputFocus(inputFocus) {}
     };
 
     class EventWindowCloseRequested : public Event
@@ -148,7 +149,7 @@ namespace hsk{
       public:
         using ptr = std::shared_ptr<EventWindowCloseRequested>;
 
-        EventWindowCloseRequested(const Window* source, const uint32_t timestamp) : Event(source, timestamp, EType::WindowCloseRequested) {}
+        EventWindowCloseRequested(loan_ptr<const Window> source, const uint32_t timestamp) : Event(source, timestamp, EType::WindowCloseRequested) {}
     };
 
     class EventWindowItemDropped : public Event
@@ -158,6 +159,6 @@ namespace hsk{
 
         const char*const m_Path;
 
-        EventWindowItemDropped(const Window* source, const uint32_t timestamp, const char* path) : Event(source, timestamp, EType::WindowItemDropped), m_Path(path) {}
+        EventWindowItemDropped(loan_ptr<const Window> source, const uint32_t timestamp, const char* path) : Event(source, timestamp, EType::WindowItemDropped), m_Path(path) {}
     };
 }

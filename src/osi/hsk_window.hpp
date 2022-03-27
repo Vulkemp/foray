@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "../hsk_basics.hpp"
+#include "../hsk_memory.hpp"
 #include "hsk_fwddeclare.hpp"
 #include <glm/glm.hpp>
 #include <sdl2/SDL.h>
@@ -9,14 +10,32 @@
 
 namespace hsk
 {
-    /// @brief WindowPtr interface class. Provides access to common properties of operating system level windows
+    class IWindowRegistry
+    {
+    public:
+        virtual void RegisterWindow(uint32_t id, loan_ptr<Window>) = 0;
+        virtual void UnregisterWindow(uint32_t id) = 0;
+    };
+
+    /// @brief Window class. Provides access to common properties of operating system level windows
     class Window
     {
     public:
+        using loanptr = loan_ptr<Window>;
+        using ptr = std::unique_ptr<Window>;
+
         static const int32_t WINDOWPOS_AUTO = INT32_MAX;
+
+    public:
+        inline static std::vector<Window::loanptr> sWindows = std::vector<Window::loanptr>();
+
+        static std::vector<Window::loanptr>& Windows();
+
+        static Window::loanptr FindBySDLId(uint32_t id);
 
     protected:
         SDL_Window *mHandle;
+        uint32_t mId;
 
         std::string mTitle;
         EDisplayMode mDisplayMode;
@@ -24,15 +43,12 @@ namespace hsk
         Extent2D mFullScreenSize;
         Extent2D mWindowedSize;
         glm::ivec2 mPosition;
+
         SDL_threadID mOwningThreadID;
 
     public:
         Window();
 
-        Window(const std::string& title, EDisplayMode displaymode, Extent2D size)
-            : mTitle(title), mDisplayMode(displaymode), mDisplayId(), mFullScreenSize{ 0, 0 }, mWindowedSize(size), mPosition{ WINDOWPOS_AUTO, WINDOWPOS_AUTO }, mOwningThreadID()
-        {
-        }
         Window(const Window &other) = delete;
         Window(const Window &&other) = delete;
         void operator=(const Window &other) = delete;
@@ -70,6 +86,9 @@ namespace hsk
 
         VkSurfaceKHR GetSurfaceKHR(const VkInstance &instance) const;
         std::vector<const char *> GetVkSurfaceExtensions() const;
+
+    protected:
+        void assertThreadIsOwner();
     };
 
 }

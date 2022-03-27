@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <vkbootstrap/VkBootstrap.h>
 #include "hsk_logger.hpp"
+#include "../osi/hsk_osmanager.hpp"
 
 namespace hsk
 {
@@ -47,6 +48,7 @@ namespace hsk
 
 	public:
 		AppUpdateTiming UpdateTiming;
+		OsManager OSI;
 
 	protected:
 		EState mState = EState::Uninitialized;
@@ -102,7 +104,7 @@ namespace hsk
 		/// @brief Override this method to render your application
 		inline virtual void Render(float delta) {}
 		/// @brief Override this method to react to events
-		inline virtual void OnEvent() {}
+		inline virtual void OnEvent(Event::ptr event) {}
 		/// @brief Override this method to cleanup your application
 		inline virtual void Cleanup() {}
 #pragma endregion
