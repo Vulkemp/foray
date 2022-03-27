@@ -5,3 +5,4 @@
 /out
 /.vs
 .vscode/settings.json
+.vscode/logs/*
