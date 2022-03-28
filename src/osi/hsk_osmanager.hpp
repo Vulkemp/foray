@@ -10,13 +10,13 @@ namespace hsk
     {
     protected:
         /// @brief A collection of all non-standard input devices recognized by this application
-        std::vector<std::unique_ptr<InputDevice>> m_InputDevices;
+        std::vector<std::unique_ptr<InputDevice>> mInputDevices;
 
     public:
         /// @brief Mouse input device. Assumed standard and always present
-        loan_ptr<InputDevice> m_Mouse;
+        loan_ptr<InputDevice> Mouse;
         /// @brief Keyboard input device. Assumed standard and always present
-        loan_ptr<InputDevice> m_Keyboard;
+        loan_ptr<InputDevice> Keyboard;
 
         OsManager();
 
@@ -47,5 +47,6 @@ namespace hsk
         std::shared_ptr<Event> TranslateEvent_JoyButton(const SDL_JoyButtonEvent &sdl_event);
         std::shared_ptr<Event> TranslateEvent_WindowClosed(const loan_ptr<Window> window, uint32_t timestamp);
         std::shared_ptr<Event> TranslateEvent_WindowResized(const loan_ptr<Window> window, const SDL_WindowEvent &wevent);
+        std::shared_ptr<Event> TranslateEvent_WindowFocus(const loan_ptr<Window> window, const SDL_WindowEvent &wevent, bool mouseonly, bool focus);
     };
 }

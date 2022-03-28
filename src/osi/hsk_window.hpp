@@ -87,7 +87,13 @@ namespace hsk
         VkSurfaceKHR GetSurfaceKHR(const VkInstance &instance) const;
         std::vector<const char *> GetVkSurfaceExtensions() const;
 
+        void HandleEvent(std::shared_ptr<Event> event);
+
     protected:
+
+        void HandleEvent_Resized(std::shared_ptr<EventWindowResized> event);
+        void HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event);
+
         void assertThreadIsOwner();
     };
 

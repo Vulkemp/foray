@@ -204,5 +204,34 @@ namespace hsk
         }
         return out;
     }
+
+    void Window::HandleEvent(std::shared_ptr<Event> event)
+    {
+        auto resized = std::dynamic_pointer_cast<EventWindowResized>(event);
+        auto closed = std::dynamic_pointer_cast<EventWindowCloseRequested>(event);
+        if (resized)
+        {
+            HandleEvent_Resized(resized);
+        }
+        if (closed)
+        {
+            HandleEvent_Closed(closed);
+        }
+    }
+
+    void Window::HandleEvent_Resized(std::shared_ptr<EventWindowResized> event)
+    {
+        if (mDisplayMode <= EDisplayMode::WindowedResizable){
+            mWindowedSize = event->Current;
+        }
+        else {
+            mFullScreenSize = event->Current;
+        }
+    }
+
+    void Window::HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event)
+    {
+        Destroy();
+    }
 }
 // namespace hsk

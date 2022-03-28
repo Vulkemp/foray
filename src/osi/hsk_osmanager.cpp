@@ -5,7 +5,7 @@
 namespace hsk
 {
     OsManager::OsManager()
-        : m_InputDevices(), m_Mouse(), m_Keyboard()
+        : mInputDevices(), Mouse(), Keyboard()
     {
         if (Instance != nullptr)
         {
@@ -22,30 +22,30 @@ namespace hsk
     void OsManager::Init()
     {
         SDL_Init(SDL_INIT_JOYSTICK);
-        m_Keyboard = InputDevice::InitKeyboard(m_InputDevices);
-        m_Mouse = InputDevice::InitMouse(m_InputDevices);
-        
+        Keyboard = InputDevice::InitKeyboard(mInputDevices);
+        Mouse = InputDevice::InitMouse(mInputDevices);
+
         int numJoySticks = SDL_NumJoysticks();
         for (int i = 0; i < numJoySticks; i++)
         {
             SDL_Joystick *joy = SDL_JoystickOpen(i);
             if (joy)
             {
-                InputDevice::InitJoystick(m_InputDevices, joy);
+                InputDevice::InitJoystick(mInputDevices, joy);
             }
         }
     }
 
     void OsManager::Cleanup()
     {
-        m_InputDevices.clear();
+        mInputDevices.clear();
         SDL_Quit();
     }
 
     std::vector<InputDevice::loanptr> OsManager::InputDevices()
     {
-        std::vector<InputDevice::loanptr> out(m_InputDevices.size());
-        for (auto &inputdevice : m_InputDevices)
+        std::vector<InputDevice::loanptr> out(mInputDevices.size());
+        for (auto &inputdevice : mInputDevices)
         {
             out.push_back(inputdevice);
         }
@@ -64,7 +64,7 @@ namespace hsk
     }
 
     template <typename TEvStr>
-    Window::loanptr GetWindowPtr(OsManager *manager, const TEvStr &evstr)
+    Window::loanptr GetWindowPtr(const TEvStr &evstr)
     {
         if (evstr.windowID)
         {
@@ -76,7 +76,7 @@ namespace hsk
     Event::ptr OsManager::TranslateEvent_MouseButton(const SDL_Event &sdl_event)
     {
         SDL_MouseButtonEvent mbevent = sdl_event.button;
-        Window::loanptr window = GetWindowPtr<SDL_MouseButtonEvent>(this, mbevent);
+        Window::loanptr window = GetWindowPtr<SDL_MouseButtonEvent>(mbevent);
         EButton button = EButton::Undefined;
         switch (mbevent.button)
         {
@@ -96,27 +96,44 @@ namespace hsk
             button = EButton::Mouse_X2;
             break;
         }
-        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, mbevent.timestamp, m_Mouse, button, mbevent.state == SDL_PRESSED);
+        loan_ptr<const InputBinary> input = Mouse->FindButton(button);
+        if (!input)
+        {
+            throw std::runtime_error("unable to find button from event on mouse!");
+        }
+        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, mbevent.timestamp, input, mbevent.state == SDL_PRESSED);
         return result;
     }
+
+    // Event::ptr OsManager::TranslateEvent_MouseWheel(const SDL_Event &sdl_event){
+    //     SDL_MouseWheelEvent meevent = sdl_event.wheel;
+    //     Window::loanptr window = GetWindowPtr<SDL_MouseWheelEvent>(meevent);
+
+    //     std::shared_ptr<Event
+    // }
 
     Event::ptr OsManager::TranslateEvent_Keyboard(const SDL_Event &sdl_event)
     {
         SDL_KeyboardEvent kbevent = sdl_event.key;
-        Window::loanptr window = GetWindowPtr<SDL_KeyboardEvent>(this, kbevent);
+        Window::loanptr window = GetWindowPtr<SDL_KeyboardEvent>(kbevent);
         EButton button = (EButton)(int)kbevent.keysym.scancode;
         if (kbevent.repeat > 0)
         {
             return nullptr;
         }
-        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, kbevent.timestamp, m_Keyboard, button, kbevent.state == SDL_PRESSED);
+        loan_ptr<const InputBinary> input = Keyboard->FindButton(button);
+        if (!input)
+        {
+            throw std::runtime_error("unable to find button from event on keyboard!");
+        }
+        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, kbevent.timestamp, input, kbevent.state == SDL_PRESSED);
         return result;
     }
 
     Event::ptr OsManager::TranslateEvent_MouseMoved(const SDL_Event &sdl_event)
     {
         SDL_MouseMotionEvent mevent = sdl_event.motion;
-        Window::loanptr window = GetWindowPtr<SDL_MouseMotionEvent>(this, mevent);
+        Window::loanptr window = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
         fp32_t currentx = mevent.x;
         fp32_t currenty = mevent.y;
 
@@ -124,11 +141,19 @@ namespace hsk
         return result;
     }
 
-    Event::ptr OsManager::TranslateEvent_WindowClosed(const Window::loanptr window, uint32_t timestamp) { return std::make_shared<EventWindowCloseRequested>(window, 0); }
+    Event::ptr OsManager::TranslateEvent_WindowClosed(const Window::loanptr window, uint32_t timestamp)
+    {
+        return std::make_shared<EventWindowCloseRequested>(window, timestamp);
+    }
 
+    Event::ptr OsManager::TranslateEvent_WindowFocus(const Window::loanptr window, const SDL_WindowEvent &wevent, bool mouseonly, bool focus)
+    {
+        return std::make_shared<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
+    }
     Event::ptr OsManager::TranslateEvent_WindowResized(const Window::loanptr window, const SDL_WindowEvent &wevent)
     {
-        return std::make_shared<EventWindowResized>(window, wevent.timestamp, Extent2D{wevent.data1, wevent.data2});
+        Extent2D newSize{wevent.data1, wevent.data2};
+        return std::make_shared<EventWindowResized>(window, wevent.timestamp, newSize);
     }
 
     Event::ptr OsManager::TranslateEvent_JoyAxis(const SDL_Event &sdl_event)
@@ -136,37 +161,53 @@ namespace hsk
         SDL_JoyAxisEvent ev = sdl_event.jaxis;
         Window::loanptr window = nullptr;
         InputDevice::loanptr sourceDevice = nullptr;
-        for (InputDevice::loanptr inpDevPtr : m_InputDevices)
+        loan_ptr<const InputAnalogue> input = nullptr;
+
+        for (InputDevice::loanptr inpDevPtr : mInputDevices)
         {
             if (inpDevPtr->JoystickID() == ev.which)
             {
                 sourceDevice = inpDevPtr;
+                break;
             }
         }
-        return std::make_shared<EventInputAnalogue>(window, ev.timestamp, sourceDevice, ev.axis, ev.value);
+        if (sourceDevice)
+        {
+            const std::vector<loan_ptr<const InputAnalogue>> &axes = sourceDevice->Axes();
+            input = axes[ev.axis];
+        }
+        if (!input)
+        {
+            throw std::runtime_error("unable to find button from event on a device!");
+        }
+        return std::make_shared<EventInputAnalogue>(window, ev.timestamp, input, ev.value);
     }
 
     Event::ptr OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent &sdl_event)
     {
         Window::loanptr window = nullptr;
         InputDevice::loanptr sourceDevice = nullptr;
-        for (InputDevice::loanptr inpDevPtr : m_InputDevices)
+        loan_ptr<const InputBinary> input = nullptr;
+        EButton button;
+
+        for (InputDevice::loanptr inpDevPtr : mInputDevices)
         {
             if (inpDevPtr->JoystickID() == sdl_event.which)
             {
                 sourceDevice = inpDevPtr;
+                break;
             }
         }
-        EButton button;
-        if (sdl_event.button >= 50)
-        {
-            button = EButton::Undefined;
-        }
-        else
+        if (sdl_event.button <= 50 && sourceDevice)
         {
             button = static_cast<EButton>(static_cast<int>(EButton::JoystickButton_0) + static_cast<int>(sdl_event.button));
+            input = sourceDevice->FindButton(button);
         }
-        return std::make_shared<EventInputBinary>(window, sdl_event.timestamp, sourceDevice, button, sdl_event.state == SDL_PRESSED);
+        if (!input)
+        {
+            throw std::runtime_error("unable to find button from event on a device!");
+        }
+        return std::make_shared<EventInputBinary>(window, sdl_event.timestamp, input, sdl_event.state == SDL_PRESSED);
     }
 
     bool OsManager::HandleSDLEvent(const SDL_Event &sdl_event, Event::ptr &ref_event)
@@ -177,46 +218,47 @@ namespace hsk
         case SDL_CONTROLLERAXISMOTION: // the SDL controller subsystem is not initialized, controllers are treated like any joystick
         case SDL_CONTROLLERBUTTONUP:
         case SDL_CONTROLLERBUTTONDOWN:
-            return false;
             break;
         case SDL_DROPTEXT: // Todo: Handle Droptext/file events
         case SDL_DROPFILE:
             // WindowPtr Drop Event
-            return false;
+
+            // TODO Low Priority
+
             break;
         case SDL_KEYUP:
         case SDL_KEYDOWN:
             // Binary Event
             ref_event = TranslateEvent_Keyboard(sdl_event);
-            return true;
+            break;
         case SDL_JOYAXISMOTION:
             // Axis Event
             ref_event = TranslateEvent_JoyAxis(sdl_event);
-            return true;
+            break;
         case SDL_JOYBALLMOTION: // TODO: Handle Joystick Ball & Hat input
         case SDL_JOYHATMOTION:
-            return false;
+            // Neither true Analogue nor Binary -> Requires additional event structure
             break;
         case SDL_JOYBUTTONUP:
         case SDL_JOYBUTTONDOWN:
             // Binary Event
             ref_event = TranslateEvent_JoyButton(sdl_event.jbutton);
-            return true;
+            break;
         case SDL_MOUSEMOTION:
             // Mouse Move Event
             ref_event = TranslateEvent_MouseMoved(sdl_event);
-            return true;
+            break;
         case SDL_MOUSEBUTTONUP:
         case SDL_MOUSEBUTTONDOWN:
             // Binary Event
             ref_event = TranslateEvent_MouseButton(sdl_event);
-            return true;
+            break;
         case SDL_MOUSEWHEEL: // Todo: Handle Mousewheel
-            // Axis Event
-            return false;
+            // Neither true Analogue nor Binary -> Requires additional event structure
+            break;
         case SDL_QUIT:
-            // Quit Event
-            return false;
+            // Quit Event (Handled explicitly via window events at a higher level)
+            break;
         case SDL_WINDOWEVENT:
             // Multiple WindowPtr Events
             {
@@ -226,31 +268,50 @@ namespace hsk
                 {
                 case SDL_WINDOWEVENT_CLOSE:
                     ref_event = TranslateEvent_WindowClosed(window, wevent.timestamp);
-                    return true;
-                case SDL_WINDOWEVENT_RESIZED:
-                    ref_event = TranslateEvent_WindowResized(window, wevent);
-                    return true;
+                    break;
+                case SDL_WINDOWEVENT_RESIZED: // Ignored since size_changed is called either way
                 case SDL_WINDOWEVENT_SHOWN:
                 case SDL_WINDOWEVENT_HIDDEN:
                 case SDL_WINDOWEVENT_EXPOSED:
                 case SDL_WINDOWEVENT_MOVED:
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    ref_event = TranslateEvent_WindowResized(window, wevent);
+                    break;
                 case SDL_WINDOWEVENT_MINIMIZED:
                 case SDL_WINDOWEVENT_MAXIMIZED:
                 case SDL_WINDOWEVENT_RESTORED:
                 case SDL_WINDOWEVENT_ENTER:
+                    ref_event = TranslateEvent_WindowFocus(window, wevent, true, true);
+                    break;
                 case SDL_WINDOWEVENT_LEAVE:
+                    ref_event = TranslateEvent_WindowFocus(window, wevent, true, false);
+                    break;
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    ref_event = TranslateEvent_WindowFocus(window, wevent, false, true);
+                    break;
                 case SDL_WINDOWEVENT_FOCUS_LOST:
+                    ref_event = TranslateEvent_WindowFocus(window, wevent, false, false);
+                    break;
                 case SDL_WINDOWEVENT_TAKE_FOCUS:
                 case SDL_WINDOWEVENT_HIT_TEST:
-                default:
-                    return false;
+                    break;
                 }
+                break;
             }
         default:
-            return false;
+            break;
         }
+
+        if (ref_event)
+        {
+            if (ref_event->Source)
+            {
+                loan_ptr<Window> window = Window::FindBySDLId(ref_event->Source->SDLId());
+                window->HandleEvent(ref_event);
+            }
+            return true;
+        }
+        return false;
     }
 
 }

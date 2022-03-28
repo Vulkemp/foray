@@ -90,7 +90,7 @@ namespace hsk
     InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::ptr> &out)
     {
         InputDevice::ptr &device = out.emplace_back(std::make_unique<InputDevice>());
-        InputDevice::loanptr result(device);
+        loan_ptr<InputDevice> result(device);
         result->mName = "Default Keyboard";
         result->mType = EType::Keyboard;
         result->mKeyboardButtons = new ButtonKeyboard[240];
@@ -104,10 +104,11 @@ namespace hsk
             {
                 break;
             }
-            ButtonKeyboard button;
-            button.Id = static_cast<int32_t>(buttonId);
-            button.Button = buttonId;
-            button.Name = NAMEOF_ENUM(buttonId);
+            ButtonKeyboard button(
+                result, 
+                static_cast<int32_t>(buttonId),
+                NAMEOF_ENUM(buttonId),
+                buttonId);
             result->mKeyboardButtons[index] = button;
             result->mButtons.push_back(result->mKeyboardButtons + index);
             index++;
@@ -127,10 +128,11 @@ namespace hsk
 
         for (EButton buttonId : mouseButtons)
         {
-            ButtonMouse button;
-            button.Id = static_cast<int32_t>(buttonId);
-            button.Button = buttonId;
-            button.Name = NAMEOF_ENUM(buttonId);
+            ButtonMouse button(
+                result, 
+                static_cast<int32_t>(buttonId),
+                NAMEOF_ENUM(buttonId),
+                buttonId);
             result->mMouseButtons[index] = button;
             result->mButtons.push_back(result->mMouseButtons + index);
             index++;
@@ -157,29 +159,30 @@ namespace hsk
 
         for (int i = 0; i < numAxes; i++)
         {
-            AxisJoystick axis;
-
-            axis.Id = i;
-            axis.Axis = (EAxis)i;
-            axis.Joystick = joystick;
-            axis.Name = NAMEOF_ENUM(axis.Axis);
+            AxisJoystick axis(
+                result,
+                i,
+                NAMEOF_ENUM((EAxis)i),
+                joystick
+            );
             result->mJoystickAxes[i] = axis;
             result->mAxes.push_back(result->mJoystickAxes + i);
         }
 
         for (int i = 0; i < numButtons; i++)
         {
-            ButtonJoystick button;
             EButton buttonId;
             if (i < 50)
             {
                 buttonId = static_cast<EButton>(static_cast<int32_t>(EButton::JoystickButton_0) + i);
             }
-
-            button.Id = i;
-            button.Joystick = joystick;
-            button.Button = buttonId;
-            button.Name = NAMEOF_ENUM(buttonId);
+            ButtonJoystick button(
+                result,
+                i,
+                NAMEOF_ENUM(buttonId),
+                buttonId,
+                joystick
+            );
             result->mJoystickButtons[i] = button;
             result->mButtons.push_back(result->mJoystickButtons + i);
         }

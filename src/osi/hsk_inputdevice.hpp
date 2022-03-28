@@ -1,6 +1,7 @@
 #pragma once
 #include "hsk_osi_declares.hpp"
 #include "hsk_helpers.hpp"
+#include "hsk_input.hpp"
 #include "../hsk_memory.hpp"
 #include <string>
 #include <vector>
@@ -23,80 +24,50 @@ namespace hsk
             Joystick
         };
 
-        class AxisBase
-        {
-        public:
-            int32_t Id;
-            std::string Name;
-            EAxis Axis;
+        using AxisPtr = loan_ptr<const InputAnalogue>;
+        using ButtonPtr = loan_ptr<const InputBinary>;
 
-        protected:
-            AxisBase() : Id(-1), Name() {}
-            AxisBase(int32_t id, const std::string &name, EAxis axis) : Id(id), Name(name) {}
-
-        public:
-            virtual int16_t State() const = 0;
-        };
-
-        class ButtonBase
-        {
-        public:
-            int32_t Id;
-            std::string Name;
-            EButton Button;
-
-        protected:
-            ButtonBase() : Id{}, Name(), Button() {}
-            ButtonBase(int32_t id, const std::string &name, EButton button) : Id(id), Name(name), Button(button) {}
-
-        public:
-            virtual bool State() const = 0;
-        };
-
-        using AxisPtr = AxisBase *;
-        using ButtonPtr = ButtonBase *;
-
-        class AxisJoystick : public AxisBase
+        class AxisJoystick : public InputAnalogue
         {
         public:
             SDL_Joystick *Joystick;
 
-            AxisJoystick() : AxisBase(), Joystick() {}
-            AxisJoystick(int32_t id, const std::string &name, SDL_Joystick *joystick) : AxisBase(id, name, (EAxis)id), Joystick(joystick) {}
+            AxisJoystick() : InputAnalogue(), Joystick() {}
+            AxisJoystick(loan_ptr<InputDevice> device, int32_t id, std::string_view name, SDL_Joystick *joystick) : InputAnalogue(device, id, name, (EAxis)id), Joystick(joystick) {}
 
             // Inherited via Axis
             virtual int16_t State() const override;
         };
 
-        class ButtonJoystick : public ButtonBase
+        class ButtonJoystick : public InputBinary
         {
         public:
             SDL_Joystick *Joystick;
 
-            ButtonJoystick() : ButtonBase(), Joystick() {}
-            ButtonJoystick(int32_t id, const std::string &name, EButton button, SDL_Joystick *joystick) : ButtonBase(id, name, button), Joystick(joystick) {}
+            ButtonJoystick() : InputBinary(), Joystick() {}
+            ButtonJoystick(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button, SDL_Joystick *joystick) : InputBinary(device, id, name, button), Joystick(joystick) {}
 
-            // Inherited via ButtonBase
+            // Inherited via InputBinary
             virtual bool State() const override;
         };
 
-        class ButtonMouse : public ButtonBase
+        class ButtonMouse : public InputBinary
         {
         public:
-            ButtonMouse() : ButtonBase() {}
-            ButtonMouse(int32_t id, const std::string &name, EButton button) : ButtonBase(id, name, button) {}
+            ButtonMouse() : InputBinary() {}
+            ButtonMouse(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
 
-            // Inherited via ButtonBase
+            // Inherited via InputBinary
             virtual bool State() const override;
         };
 
-        class ButtonKeyboard : public ButtonBase
+        class ButtonKeyboard : public InputBinary
         {
         public:
-            ButtonKeyboard() : ButtonBase() {}
-            ButtonKeyboard(int32_t id, const std::string &name, EButton button) : ButtonBase(id, name, button) {}
+            ButtonKeyboard() : InputBinary() {}
+            ButtonKeyboard(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
 
-            // Inherited via ButtonBase
+            // Inherited via InputBinary
             virtual bool State() const override;
         };
 
@@ -117,19 +88,19 @@ namespace hsk
         std::vector<ButtonPtr> mButtons;
 
     public:
-        InputDevice() : mId(), mName(), mType(EType::Unknown), mJoystick(), mJoystickID(), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons() {}
+        InputDevice() : mId(), mName(), mType(EType::Unknown), mJoystick(), mJoystickID(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons() {}
         InputDevice(const InputDevice &other) = delete;
         InputDevice(const InputDevice &&other) = delete;
         InputDevice &operator=(const InputDevice &other) = delete;
 
-        const std::vector<AxisPtr> Axes() const { return mAxes; }
-        const std::vector<ButtonPtr> Buttons() const { return mButtons; }
+        const std::vector<AxisPtr>& Axes() const { return mAxes; }
+        const std::vector<ButtonPtr>& Buttons() const { return mButtons; }
 
         const std::string &Name() const { return mName; }
         EType Type() const { return mType; }
 
         /// @brief Finds a button object based on the corresponding enum value.
-        /// ButtonBase objects are valid until the input device is deleted, so storing the object for later use is a good idea.
+        /// InputBinary objects are valid until the input device is deleted, so storing the object for later use is a good idea.
         /// @return nullptr if not found, a valid button object
         const ButtonPtr FindButton(EButton button) const;
 
