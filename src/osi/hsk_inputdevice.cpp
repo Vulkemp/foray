@@ -87,9 +87,9 @@ namespace hsk
         return builder.str();
     }
 
-    InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::ptr> &out)
+    InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::uniqueptr> &out)
     {
-        InputDevice::ptr &device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
         loan_ptr<InputDevice> result(device);
         result->mName = "Default Keyboard";
         result->mType = EType::Keyboard;
@@ -115,9 +115,9 @@ namespace hsk
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitMouse(std::vector<InputDevice::ptr> &out)
+    InputDevice::loanptr InputDevice::InitMouse(std::vector<InputDevice::uniqueptr> &out)
     {
-        InputDevice::ptr &device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
         InputDevice::loanptr result(device);
         result->mName = "Default Mouse";
         result->mType = EType::Mouse;
@@ -139,15 +139,15 @@ namespace hsk
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitJoystick(std::vector<InputDevice::ptr> &out, SDL_Joystick *joystick)
+    InputDevice::loanptr InputDevice::InitJoystick(std::vector<InputDevice::uniqueptr> &out, SDL_Joystick *joystick)
     {
-        InputDevice::ptr &device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
         InputDevice::loanptr result(device);
         result->mType = EType::Joystick;
         result->mName = SDL_JoystickName(joystick);
-        result->mJoystick = joystick;
-        result->mJoystickID = SDL_JoystickInstanceID(joystick);
-        result->mId = SDL_JoystickGetGUID(joystick);
+        result->Joystick = joystick;
+        result->JoystickId = SDL_JoystickInstanceID(joystick);
+        result->Guid = SDL_JoystickGetGUID(joystick);
 
         int numAxes = SDL_JoystickNumAxes(joystick);
         int numBalls = SDL_JoystickNumBalls(joystick);
@@ -192,9 +192,9 @@ namespace hsk
 
     InputDevice::~InputDevice()
     {
-        if (mJoystick)
+        if (Joystick)
         {
-            SDL_JoystickClose(mJoystick);
+            SDL_JoystickClose(Joystick);
         }
         delete[] mJoystickAxes;
         delete[] mJoystickButtons;

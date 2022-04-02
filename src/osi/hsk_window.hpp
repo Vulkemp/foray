@@ -10,13 +10,6 @@
 
 namespace hsk
 {
-    class IWindowRegistry
-    {
-    public:
-        virtual void RegisterWindow(uint32_t id, loan_ptr<Window>) = 0;
-        virtual void UnregisterWindow(uint32_t id) = 0;
-    };
-
     /// @brief Window class. Provides access to common properties of operating system level windows
     class Window
     {

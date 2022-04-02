@@ -10,11 +10,12 @@
 
 namespace hsk
 {
+    /// @brief Wraps a generic input device (mouse, keyboard, joystick, controller ...) in a hardware agnostic way
     class InputDevice
     {
     public:
         using loanptr = loan_ptr<InputDevice>;
-        using ptr = std::unique_ptr<InputDevice>;
+        using uniqueptr = std::unique_ptr<InputDevice>;
 
         enum class EType : uint8_t
         {
@@ -71,10 +72,13 @@ namespace hsk
             virtual bool State() const override;
         };
 
-    protected:
-        SDL_JoystickGUID mId;
-        SDL_Joystick *mJoystick;
-        SDL_JoystickID mJoystickID;
+    public:
+        SDL_JoystickGUID Guid;
+        SDL_Joystick *Joystick;
+        SDL_JoystickID JoystickId;
+
+    protected: // array pointers for hardware specific inputs
+
         ButtonJoystick *mJoystickButtons;
         AxisJoystick *mJoystickAxes;
         ButtonKeyboard *mKeyboardButtons;
@@ -88,13 +92,13 @@ namespace hsk
         std::vector<ButtonPtr> mButtons;
 
     public:
-        InputDevice() : mId(), mName(), mType(EType::Unknown), mJoystick(), mJoystickID(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons() {}
+        InputDevice() : Guid(), mName(), mType(EType::Unknown), Joystick(), JoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons() {}
         InputDevice(const InputDevice &other) = delete;
         InputDevice(const InputDevice &&other) = delete;
         InputDevice &operator=(const InputDevice &other) = delete;
 
-        const std::vector<AxisPtr>& Axes() const { return mAxes; }
-        const std::vector<ButtonPtr>& Buttons() const { return mButtons; }
+        const std::vector<AxisPtr> &Axes() const { return mAxes; }
+        const std::vector<ButtonPtr> &Buttons() const { return mButtons; }
 
         const std::string &Name() const { return mName; }
         EType Type() const { return mType; }
@@ -106,11 +110,9 @@ namespace hsk
 
         std::string BuildDebugPrint() const;
 
-        SDL_JoystickID JoystickID() const { return mJoystickID; }
-
-        static InputDevice::loanptr InitKeyboard(std::vector<InputDevice::ptr> &out);
-        static InputDevice::loanptr InitMouse(std::vector<InputDevice::ptr> &out);
-        static InputDevice::loanptr InitJoystick(std::vector<InputDevice::ptr> &out, SDL_Joystick *joystick);
+        static InputDevice::loanptr InitKeyboard(std::vector<InputDevice::uniqueptr> &out);
+        static InputDevice::loanptr InitMouse(std::vector<InputDevice::uniqueptr> &out);
+        static InputDevice::loanptr InitJoystick(std::vector<InputDevice::uniqueptr> &out, SDL_Joystick *joystick);
 
         virtual ~InputDevice();
     };

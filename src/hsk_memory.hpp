@@ -54,6 +54,11 @@ namespace hsk
         inline bool operator==(const T *other) const { return Data == other; }
         inline bool operator==(const loan_ptr<T> &other) const { return Data == other.Data; }
         inline bool operator==(const std::unique_ptr<T> &other) const { return Data == other.get(); }
+
+        inline bool operator!=(const nullptr_t &other) const { return Data != nullptr; }
+        inline bool operator!=(const T *other) const { return Data != other; }
+        inline bool operator!=(const loan_ptr<T> &other) const { return Data != other.Data; }
+        inline bool operator!=(const std::unique_ptr<T> &other) const { return Data != other.get(); }
     };
 
 #pragma region loan_ptr functions

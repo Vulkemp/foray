@@ -4,6 +4,8 @@
 
 namespace hsk
 {
+#pragma region lifetime
+
     OsManager::OsManager()
         : mInputDevices(), Mouse(), Keyboard()
     {
@@ -42,6 +44,9 @@ namespace hsk
         SDL_Quit();
     }
 
+#pragma endregion
+#pragma region misc
+
     std::vector<InputDevice::loanptr> OsManager::InputDevices()
     {
         std::vector<InputDevice::loanptr> out(mInputDevices.size());
@@ -58,11 +63,15 @@ namespace hsk
         SDL_Event rawevent;
         if (SDL_PollEvent(&rawevent) != 0)
         {
-            HandleSDLEvent(rawevent, out);
+            TranslateSDLEvent(rawevent, out);
         }
         return out;
     }
 
+#pragma endregion
+#pragma region event translation
+
+    /// @brief Helper for getting a window id from a generic SDL event struct and matching it to the correct window
     template <typename TEvStr>
     Window::loanptr GetWindowPtr(const TEvStr &evstr)
     {
@@ -73,6 +82,108 @@ namespace hsk
         return nullptr;
     }
 
+    bool OsManager::TranslateSDLEvent(const SDL_Event &sdl_event, Event::ptr &result)
+    {
+        result = nullptr;
+        switch (sdl_event.type)
+        {
+        case SDL_DROPTEXT: // TODO Low Priority Handle Droptext/file events
+        case SDL_DROPFILE: // WindowPtr Drop Event
+            break;
+        case SDL_KEYUP:
+        case SDL_KEYDOWN:
+            // Binary Event
+            result = TranslateEvent_Keyboard(sdl_event);
+            break;
+        case SDL_JOYAXISMOTION:
+            // Axis Event
+            result = TranslateEvent_JoyAxis(sdl_event);
+            break;
+        case SDL_JOYBALLMOTION: // TODO Low Priority: Handle Joystick Ball & Hat input
+        case SDL_JOYHATMOTION:
+            // Neither true Analogue nor Binary -> Requires additional event structure
+            break;
+        case SDL_JOYBUTTONUP:
+        case SDL_JOYBUTTONDOWN:
+            // Binary Event
+            result = TranslateEvent_JoyButton(sdl_event.jbutton);
+            break;
+        case SDL_JOYDEVICEADDED:
+        case SDL_JOYDEVICEREMOVED:
+            result = TranslateEvent_JoyDevice(sdl_event.jdevice);
+            break;
+        case SDL_MOUSEMOTION:
+            // Mouse Move Event
+            result = TranslateEvent_MouseMoved(sdl_event);
+            break;
+        case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONDOWN:
+            // Binary Event
+            result = TranslateEvent_MouseButton(sdl_event);
+            break;
+        case SDL_MOUSEWHEEL: // Todo: Handle Mousewheel
+            // Neither true Analogue nor Binary -> Requires additional event structure
+            break;
+        case SDL_WINDOWEVENT:
+            // Multiple WindowPtr Events
+            {
+                SDL_WindowEvent wevent = sdl_event.window;
+                Window::loanptr window = Window::FindBySDLId(wevent.windowID);
+                switch (wevent.event)
+                {
+                case SDL_WINDOWEVENT_CLOSE:
+                    result = TranslateEvent_WindowClosed(window, wevent.timestamp);
+                    break;
+                case SDL_WINDOWEVENT_RESIZED: // Ignored since size_changed is called either way
+                case SDL_WINDOWEVENT_SHOWN:
+                case SDL_WINDOWEVENT_HIDDEN:
+                case SDL_WINDOWEVENT_EXPOSED:
+                case SDL_WINDOWEVENT_MOVED:
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    result = TranslateEvent_WindowResized(window, wevent);
+                    break;
+                case SDL_WINDOWEVENT_MINIMIZED:
+                case SDL_WINDOWEVENT_MAXIMIZED:
+                case SDL_WINDOWEVENT_RESTORED:
+                case SDL_WINDOWEVENT_ENTER:
+                    result = TranslateEvent_WindowFocus(window, wevent, true, true);
+                    break;
+                case SDL_WINDOWEVENT_LEAVE:
+                    result = TranslateEvent_WindowFocus(window, wevent, true, false);
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    result = TranslateEvent_WindowFocus(window, wevent, false, true);
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    result = TranslateEvent_WindowFocus(window, wevent, false, false);
+                    break;
+                case SDL_WINDOWEVENT_TAKE_FOCUS:
+                case SDL_WINDOWEVENT_HIT_TEST:
+                    break;
+                }
+                break;
+            }
+        case SDL_CONTROLLERAXISMOTION: // the SDL controller subsystem is not initialized, controllers are treated like any joystick
+        case SDL_CONTROLLERBUTTONUP:
+        case SDL_CONTROLLERBUTTONDOWN:
+        case SDL_QUIT: // Quit Event (Handled explicitly via window events at a higher level)
+        default:
+            break;
+        }
+
+        if (result)
+        {
+            if (result->Source)
+            {
+                loan_ptr<Window> window = Window::FindBySDLId(result->Source->SDLId());
+                window->HandleEvent(result);
+            }
+            return true;
+        }
+        return false;
+    }
+
+#pragma region input
     Event::ptr OsManager::TranslateEvent_MouseButton(const SDL_Event &sdl_event)
     {
         SDL_MouseButtonEvent mbevent = sdl_event.button;
@@ -105,13 +216,6 @@ namespace hsk
         return result;
     }
 
-    // Event::ptr OsManager::TranslateEvent_MouseWheel(const SDL_Event &sdl_event){
-    //     SDL_MouseWheelEvent meevent = sdl_event.wheel;
-    //     Window::loanptr window = GetWindowPtr<SDL_MouseWheelEvent>(meevent);
-
-    //     std::shared_ptr<Event
-    // }
-
     Event::ptr OsManager::TranslateEvent_Keyboard(const SDL_Event &sdl_event)
     {
         SDL_KeyboardEvent kbevent = sdl_event.key;
@@ -141,21 +245,6 @@ namespace hsk
         return result;
     }
 
-    Event::ptr OsManager::TranslateEvent_WindowClosed(const Window::loanptr window, uint32_t timestamp)
-    {
-        return std::make_shared<EventWindowCloseRequested>(window, timestamp);
-    }
-
-    Event::ptr OsManager::TranslateEvent_WindowFocus(const Window::loanptr window, const SDL_WindowEvent &wevent, bool mouseonly, bool focus)
-    {
-        return std::make_shared<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
-    }
-    Event::ptr OsManager::TranslateEvent_WindowResized(const Window::loanptr window, const SDL_WindowEvent &wevent)
-    {
-        Extent2D newSize{wevent.data1, wevent.data2};
-        return std::make_shared<EventWindowResized>(window, wevent.timestamp, newSize);
-    }
-
     Event::ptr OsManager::TranslateEvent_JoyAxis(const SDL_Event &sdl_event)
     {
         SDL_JoyAxisEvent ev = sdl_event.jaxis;
@@ -165,7 +254,7 @@ namespace hsk
 
         for (InputDevice::loanptr inpDevPtr : mInputDevices)
         {
-            if (inpDevPtr->JoystickID() == ev.which)
+            if (inpDevPtr->JoystickId == ev.which)
             {
                 sourceDevice = inpDevPtr;
                 break;
@@ -192,7 +281,7 @@ namespace hsk
 
         for (InputDevice::loanptr inpDevPtr : mInputDevices)
         {
-            if (inpDevPtr->JoystickID() == sdl_event.which)
+            if (inpDevPtr->JoystickId == sdl_event.which)
             {
                 sourceDevice = inpDevPtr;
                 break;
@@ -210,108 +299,40 @@ namespace hsk
         return std::make_shared<EventInputBinary>(window, sdl_event.timestamp, input, sdl_event.state == SDL_PRESSED);
     }
 
-    bool OsManager::HandleSDLEvent(const SDL_Event &sdl_event, Event::ptr &ref_event)
+    Event::ptr OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent &sdl_event)
     {
-        ref_event = nullptr;
-        switch (sdl_event.type)
+
+        loan_ptr<InputDevice> sourceDevice;
+        for (InputDevice::loanptr inpDevPtr : mInputDevices)
         {
-        case SDL_CONTROLLERAXISMOTION: // the SDL controller subsystem is not initialized, controllers are treated like any joystick
-        case SDL_CONTROLLERBUTTONUP:
-        case SDL_CONTROLLERBUTTONDOWN:
-            break;
-        case SDL_DROPTEXT: // Todo: Handle Droptext/file events
-        case SDL_DROPFILE:
-            // WindowPtr Drop Event
-
-            // TODO Low Priority
-
-            break;
-        case SDL_KEYUP:
-        case SDL_KEYDOWN:
-            // Binary Event
-            ref_event = TranslateEvent_Keyboard(sdl_event);
-            break;
-        case SDL_JOYAXISMOTION:
-            // Axis Event
-            ref_event = TranslateEvent_JoyAxis(sdl_event);
-            break;
-        case SDL_JOYBALLMOTION: // TODO: Handle Joystick Ball & Hat input
-        case SDL_JOYHATMOTION:
-            // Neither true Analogue nor Binary -> Requires additional event structure
-            break;
-        case SDL_JOYBUTTONUP:
-        case SDL_JOYBUTTONDOWN:
-            // Binary Event
-            ref_event = TranslateEvent_JoyButton(sdl_event.jbutton);
-            break;
-        case SDL_MOUSEMOTION:
-            // Mouse Move Event
-            ref_event = TranslateEvent_MouseMoved(sdl_event);
-            break;
-        case SDL_MOUSEBUTTONUP:
-        case SDL_MOUSEBUTTONDOWN:
-            // Binary Event
-            ref_event = TranslateEvent_MouseButton(sdl_event);
-            break;
-        case SDL_MOUSEWHEEL: // Todo: Handle Mousewheel
-            // Neither true Analogue nor Binary -> Requires additional event structure
-            break;
-        case SDL_QUIT:
-            // Quit Event (Handled explicitly via window events at a higher level)
-            break;
-        case SDL_WINDOWEVENT:
-            // Multiple WindowPtr Events
+            if (inpDevPtr->JoystickId == sdl_event.which)
             {
-                SDL_WindowEvent wevent = sdl_event.window;
-                Window::loanptr window = Window::FindBySDLId(wevent.windowID);
-                switch (wevent.event)
-                {
-                case SDL_WINDOWEVENT_CLOSE:
-                    ref_event = TranslateEvent_WindowClosed(window, wevent.timestamp);
-                    break;
-                case SDL_WINDOWEVENT_RESIZED: // Ignored since size_changed is called either way
-                case SDL_WINDOWEVENT_SHOWN:
-                case SDL_WINDOWEVENT_HIDDEN:
-                case SDL_WINDOWEVENT_EXPOSED:
-                case SDL_WINDOWEVENT_MOVED:
-                case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    ref_event = TranslateEvent_WindowResized(window, wevent);
-                    break;
-                case SDL_WINDOWEVENT_MINIMIZED:
-                case SDL_WINDOWEVENT_MAXIMIZED:
-                case SDL_WINDOWEVENT_RESTORED:
-                case SDL_WINDOWEVENT_ENTER:
-                    ref_event = TranslateEvent_WindowFocus(window, wevent, true, true);
-                    break;
-                case SDL_WINDOWEVENT_LEAVE:
-                    ref_event = TranslateEvent_WindowFocus(window, wevent, true, false);
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    ref_event = TranslateEvent_WindowFocus(window, wevent, false, true);
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_LOST:
-                    ref_event = TranslateEvent_WindowFocus(window, wevent, false, false);
-                    break;
-                case SDL_WINDOWEVENT_TAKE_FOCUS:
-                case SDL_WINDOWEVENT_HIT_TEST:
-                    break;
-                }
+                sourceDevice = inpDevPtr;
                 break;
             }
-        default:
-            break;
         }
-
-        if (ref_event)
-        {
-            if (ref_event->Source)
-            {
-                loan_ptr<Window> window = Window::FindBySDLId(ref_event->Source->SDLId());
-                window->HandleEvent(ref_event);
-            }
-            return true;
-        }
-        return false;
+        // TODO edit mInputDevices and query new data (low priority)
+        return std::make_shared<EventInputDeviceAvailability>(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
     }
 
+#pragma endregion
+#pragma region window
+
+    Event::ptr OsManager::TranslateEvent_WindowClosed(const Window::loanptr window, uint32_t timestamp)
+    {
+        return std::make_shared<EventWindowCloseRequested>(window, timestamp);
+    }
+
+    Event::ptr OsManager::TranslateEvent_WindowFocus(const Window::loanptr window, const SDL_WindowEvent &wevent, bool mouseonly, bool focus)
+    {
+        return std::make_shared<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
+    }
+    Event::ptr OsManager::TranslateEvent_WindowResized(const Window::loanptr window, const SDL_WindowEvent &wevent)
+    {
+        Extent2D newSize{wevent.data1, wevent.data2};
+        return std::make_shared<EventWindowResized>(window, wevent.timestamp, newSize);
+    }
+
+#pragma endregion
+#pragma endregion
 }

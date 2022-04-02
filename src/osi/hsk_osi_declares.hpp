@@ -1,4 +1,5 @@
 #pragma once
+// Forward declares
 
 namespace hsk
 {
