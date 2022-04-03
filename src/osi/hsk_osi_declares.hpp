@@ -1,8 +1,7 @@
 #pragma once
 // Forward declares
 
-namespace hsk
-{
+namespace hsk {
     class Window;
     class Event;
     class EventInput;
@@ -18,4 +17,4 @@ namespace hsk
     class InputDevice;
     class InputAnalogue;
     class InputBinary;
-}
+}  // namespace hsk

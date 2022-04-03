@@ -1,50 +1,49 @@
 #pragma once
-#include <string>
-#include <vector>
 #include "../hsk_basics.hpp"
 #include "../hsk_memory.hpp"
-#include "hsk_osi_declares.hpp"
 #include "hsk_helpers.hpp"
+#include "hsk_osi_declares.hpp"
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_vulkan.h>
+#include <string>
+#include <vector>
 
-namespace hsk
-{
+namespace hsk {
     /// @brief Window class. Provides access to common properties of operating system level windows
     class Window
     {
-    public:
+      public:
         using loanptr = loan_ptr<Window>;
-        using ptr = std::unique_ptr<Window>;
+        using ptr     = std::unique_ptr<Window>;
 
         static const int32_t WINDOWPOS_AUTO = INT32_MAX;
 
-    public:
+      public:
         inline static std::vector<Window::loanptr> sWindows = std::vector<Window::loanptr>();
 
         static std::vector<Window::loanptr>& Windows();
 
         static Window::loanptr FindBySDLId(uint32_t id);
 
-    protected:
-        SDL_Window *mHandle;
-        uint32_t mId;
+      protected:
+        SDL_Window* mHandle;
+        uint32_t    mId;
 
-        std::string mTitle;
+        std::string  mTitle;
         EDisplayMode mDisplayMode;
-        int32_t mDisplayId;
-        Extent2D mFullScreenSize;
-        Extent2D mWindowedSize;
-        Pos2D mPosition;
+        int32_t      mDisplayId;
+        Extent2D     mFullScreenSize;
+        Extent2D     mWindowedSize;
+        Pos2D        mPosition;
 
         SDL_threadID mOwningThreadID;
 
-    public:
+      public:
         Window();
 
-        Window(const Window &other) = delete;
-        Window(const Window &&other) = delete;
-        void operator=(const Window &other) = delete;
+        Window(const Window& other)  = delete;
+        Window(const Window&& other) = delete;
+        void operator=(const Window& other) = delete;
         virtual ~Window();
 
         /// @brief Check if the window exists on an OS level
@@ -56,10 +55,10 @@ namespace hsk
         void Destroy();
 
         /// @brief (Getter) WindowPtr Title
-        inline const std::string &Title() const { return mTitle; };
+        inline const std::string& Title() const { return mTitle; };
         /// @brief (Setter) WindowPtr Title
         /// @param title utf-8 encoded null terminated source to copy the updated title from
-        void Title(const std::string &title);
+        void Title(const std::string& title);
         /// @brief (Getter) WindowPtr Size
         /// @return Hardware-Level size in Pixels
         inline Extent2D Size() const { return (mDisplayMode > EDisplayMode::WindowedResizable ? mFullScreenSize : mWindowedSize); };
@@ -77,17 +76,16 @@ namespace hsk
 
         uint32_t SDLId() const;
 
-        VkSurfaceKHR GetSurfaceKHR(const VkInstance &instance) const;
-        std::vector<const char *> GetVkSurfaceExtensions() const;
+        VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;
+        std::vector<const char*> GetVkSurfaceExtensions() const;
 
         void HandleEvent(std::shared_ptr<Event> event);
 
-    protected:
-
+      protected:
         void HandleEvent_Resized(std::shared_ptr<EventWindowResized> event);
         void HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event);
 
         void assertThreadIsOwner();
     };
 
-}
+}  // namespace hsk

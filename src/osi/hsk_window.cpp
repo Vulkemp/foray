@@ -2,8 +2,7 @@
 #include "hsk_osi.hpp"
 #include <exception>
 
-namespace hsk
-{
+namespace hsk {
 
     Window::Window()
         : mTitle(), mDisplayMode(EDisplayMode::Windowed), mDisplayId(), mFullScreenSize{0, 0}, mWindowedSize{1280, 720}, mPosition{WINDOWPOS_AUTO, WINDOWPOS_AUTO}, mHandle(nullptr)
@@ -14,9 +13,9 @@ namespace hsk
     Window::~Window()
     {
         Destroy();
-        for (auto iter = sWindows.begin(); iter != sWindows.end(); ++iter)
+        for(auto iter = sWindows.begin(); iter != sWindows.end(); ++iter)
         {
-            if ((*iter) == this)
+            if((*iter) == this)
             {
                 sWindows.erase(iter);
                 break;
@@ -26,38 +25,35 @@ namespace hsk
 
     void Window::DisplayMode(EDisplayMode mode, bool preserveSize)
     {
-        if (mDisplayMode == mode)
+        if(mDisplayMode == mode)
         {
             return;
         }
         mDisplayMode = mode;
-        if (Exists())
+        if(Exists())
         {
             SDL_DisplayMode displayMode;
             SDL_GetDisplayMode(mDisplayId, 0, &displayMode);
             mFullScreenSize = Extent2D{displayMode.w, displayMode.h};
 
-            switch (mDisplayMode)
+            switch(mDisplayMode)
             {
-            case EDisplayMode::Windowed:
-            case EDisplayMode::WindowedResizable:
-            {
-                SDL_SetWindowFullscreen(mHandle, 0);
-                SDL_SetWindowResizable(mHandle, mDisplayMode == EDisplayMode::WindowedResizable ? SDL_TRUE : SDL_FALSE);
-                Size(mWindowedSize);
-                break;
-            }
-            case EDisplayMode::FullscreenHardware:
-            {
-                SDL_SetWindowFullscreen(mHandle, SDL_WINDOW_FULLSCREEN);
-                SDL_SetWindowDisplayMode(mHandle, &displayMode);
-                break;
-            }
-            case EDisplayMode::FullscreenWindowed:
-            {
-                SDL_SetWindowFullscreen(mHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                break;
-            }
+                case EDisplayMode::Windowed:
+                case EDisplayMode::WindowedResizable: {
+                    SDL_SetWindowFullscreen(mHandle, 0);
+                    SDL_SetWindowResizable(mHandle, mDisplayMode == EDisplayMode::WindowedResizable ? SDL_TRUE : SDL_FALSE);
+                    Size(mWindowedSize);
+                    break;
+                }
+                case EDisplayMode::FullscreenHardware: {
+                    SDL_SetWindowFullscreen(mHandle, SDL_WINDOW_FULLSCREEN);
+                    SDL_SetWindowDisplayMode(mHandle, &displayMode);
+                    break;
+                }
+                case EDisplayMode::FullscreenWindowed: {
+                    SDL_SetWindowFullscreen(mHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    break;
+                }
             }
         }
     }
@@ -65,7 +61,7 @@ namespace hsk
     void Window::Position(Pos2D pos)
     {
         mPosition = pos;
-        if (Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
+        if(Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
         {
             int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
             int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
@@ -75,7 +71,7 @@ namespace hsk
 
     void Window::Create()
     {
-        if (Exists())
+        if(Exists())
         {
             return;
         }
@@ -84,42 +80,42 @@ namespace hsk
         SDL_DisplayMode displayMode;
         SDL_GetDisplayMode(mDisplayId, 0, &displayMode);
         mFullScreenSize = Extent2D{displayMode.w, displayMode.h};
-        if (mWindowedSize.IsZeroArea())
+        if(mWindowedSize.IsZeroArea())
         {
             mWindowedSize = Extent2D{1280, 720};
         }
-        if (mTitle.length() == 0)
+        if(mTitle.length() == 0)
         {
             mTitle = "Raytracing Rapid Prototyping Framework - Hochschule Kempten";
         }
         int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
         int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
 
-        switch (mDisplayMode)
+        switch(mDisplayMode)
         {
-        case EDisplayMode::Windowed:
-            mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN);
-            break;
-        case EDisplayMode::WindowedResizable:
-            mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
-            break;
-        case EDisplayMode::FullscreenHardware:
-            mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
-                                       SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN);
-            break;
-        case EDisplayMode::FullscreenWindowed:
-            mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
-                                       SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN_DESKTOP);
-            break;
+            case EDisplayMode::Windowed:
+                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN);
+                break;
+            case EDisplayMode::WindowedResizable:
+                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+                break;
+            case EDisplayMode::FullscreenHardware:
+                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
+                                           SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN);
+                break;
+            case EDisplayMode::FullscreenWindowed:
+                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
+                                           SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN_DESKTOP);
+                break;
         }
         mId = SDL_GetWindowID(mHandle);
     }
 
     inline void Window::Destroy()
     {
-        mId = 0;
+        mId             = 0;
         mOwningThreadID = 0;
-        if (!Exists())
+        if(!Exists())
         {
             return;
         }
@@ -128,16 +124,16 @@ namespace hsk
     }
     uint32_t Window::SDLId() const
     {
-        if (Exists())
+        if(Exists())
         {
             return mId;
         }
         return 0;
     }
 
-    VkSurfaceKHR Window::GetSurfaceKHR(const VkInstance &instance) const
+    VkSurfaceKHR Window::GetSurfaceKHR(const VkInstance& instance) const
     {
-        if (!Exists())
+        if(!Exists())
         {
             return nullptr;
         }
@@ -146,23 +142,23 @@ namespace hsk
         return surface;
     }
 
-    std::vector<const char *> Window::GetVkSurfaceExtensions() const
+    std::vector<const char*> Window::GetVkSurfaceExtensions() const
     {
-        if (!Exists())
+        if(!Exists())
         {
-            return std::vector<const char *>();
+            return std::vector<const char*>();
         }
         uint32_t count = 0;
         SDL_Vulkan_GetInstanceExtensions(mHandle, &count, nullptr);
-        std::vector<const char *> extensions(count);
+        std::vector<const char*> extensions(count);
         SDL_Vulkan_GetInstanceExtensions(mHandle, &count, extensions.data());
         return extensions;
     }
 
-    void Window::Title(const std::string &title)
+    void Window::Title(const std::string& title)
     {
         mTitle = title;
-        if (Exists())
+        if(Exists())
         {
             SDL_SetWindowTitle(mHandle, mTitle.data());
         }
@@ -170,7 +166,7 @@ namespace hsk
     void Window::Size(Extent2D size)
     {
         mWindowedSize = size;
-        if (Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
+        if(Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
         {
             SDL_SetWindowSize(mHandle, mWindowedSize.Width, mWindowedSize.Height);
         }
@@ -179,24 +175,21 @@ namespace hsk
     void Window::assertThreadIsOwner()
     {
         auto threadId = SDL_ThreadID();
-        if (threadId != mOwningThreadID)
+        if(threadId != mOwningThreadID)
         {
             throw std::runtime_error("Attempted altering a window from a thread which is not the owner!");
         }
     }
 
-    std::vector<Window::loanptr> &Window::Windows()
-    {
-        return sWindows;
-    }
+    std::vector<Window::loanptr>& Window::Windows() { return sWindows; }
 
     Window::loanptr Window::FindBySDLId(uint32_t id)
     {
         Window::loanptr out;
 
-        for (auto window : sWindows)
+        for(auto window : sWindows)
         {
-            if (window->SDLId() == id)
+            if(window->SDLId() == id)
             {
                 out = window;
                 break;
@@ -208,12 +201,12 @@ namespace hsk
     void Window::HandleEvent(std::shared_ptr<Event> event)
     {
         auto resized = std::dynamic_pointer_cast<EventWindowResized>(event);
-        auto closed = std::dynamic_pointer_cast<EventWindowCloseRequested>(event);
-        if (resized)
+        auto closed  = std::dynamic_pointer_cast<EventWindowCloseRequested>(event);
+        if(resized)
         {
             HandleEvent_Resized(resized);
         }
-        if (closed)
+        if(closed)
         {
             HandleEvent_Closed(closed);
         }
@@ -221,17 +214,16 @@ namespace hsk
 
     void Window::HandleEvent_Resized(std::shared_ptr<EventWindowResized> event)
     {
-        if (mDisplayMode <= EDisplayMode::WindowedResizable){
+        if(mDisplayMode <= EDisplayMode::WindowedResizable)
+        {
             mWindowedSize = event->Current;
         }
-        else {
+        else
+        {
             mFullScreenSize = event->Current;
         }
     }
 
-    void Window::HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event)
-    {
-        Destroy();
-    }
-}
+    void Window::HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event) { Destroy(); }
+}  // namespace hsk
 // namespace hsk

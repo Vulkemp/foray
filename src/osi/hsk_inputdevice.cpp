@@ -1,15 +1,14 @@
 #include "hsk_inputdevice.hpp"
 #include "hsk_osi.hpp"
-#include <sstream>
 #include <nameof/nameof.hpp>
+#include <sstream>
 
-namespace hsk
-{
+namespace hsk {
     std::vector<EButton> DefinedButtons = std::vector<EButton>();
 
-    const std::vector<EButton> &GetDefinedButtons()
+    const std::vector<EButton>& GetDefinedButtons()
     {
-        if (DefinedButtons.size() == 0)
+        if(DefinedButtons.size() == 0)
         {
 
             /*
@@ -23,27 +22,27 @@ namespace hsk
             */
 
             DefinedButtons.push_back(EButton::Undefined);
-            for (int i = 4; i <= 129; i++)
+            for(int i = 4; i <= 129; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
-            for (int i = 133; i <= 164; i++)
+            for(int i = 133; i <= 164; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
-            for (int i = 176; i <= 221; i++)
+            for(int i = 176; i <= 221; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
-            for (int i = 224; i <= 231; i++)
+            for(int i = 224; i <= 231; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
-            for (int i = 257; i <= 277; i++)
+            for(int i = 257; i <= 277; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
-            for (int i = 281; i <= 342; i++)
+            for(int i = 281; i <= 342; i++)
             {
                 DefinedButtons.push_back(static_cast<EButton>(i));
             }
@@ -53,9 +52,9 @@ namespace hsk
 
     const InputDevice::ButtonPtr InputDevice::FindButton(EButton button) const
     {
-        for (ButtonPtr buttonptr : mButtons)
+        for(ButtonPtr buttonptr : mButtons)
         {
-            if (buttonptr->Button == button)
+            if(buttonptr->Button == button)
             {
                 return buttonptr;
             }
@@ -67,18 +66,18 @@ namespace hsk
         std::stringstream builder;
 
         builder << Name() << "\n";
-        if (mButtons.size() > 0)
+        if(mButtons.size() > 0)
         {
             builder << "\t" << mButtons.size() << " Buttons:\n";
-            for (ButtonPtr button : mButtons)
+            for(ButtonPtr button : mButtons)
             {
                 builder << "\t\t" << button->Name << "\n";
             }
         }
-        if (mAxes.size() > 0)
+        if(mAxes.size() > 0)
         {
             builder << "\t" << mAxes.size() << " Axes:\n";
-            for (AxisPtr axis : mAxes)
+            for(AxisPtr axis : mAxes)
             {
                 builder << "\t\t" << axis->Name << "\n";
             }
@@ -87,102 +86,83 @@ namespace hsk
         return builder.str();
     }
 
-    InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::uniqueptr> &out)
+    InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::uniqueptr>& out)
     {
-        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
-        loan_ptr<InputDevice> result(device);
-        result->mName = "Default Keyboard";
-        result->mType = EType::Keyboard;
+        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
+        loan_ptr<InputDevice>   result(device);
+        result->mName            = "Default Keyboard";
+        result->mType            = EType::Keyboard;
         result->mKeyboardButtons = new ButtonKeyboard[240];
 
-        int index = 0;
-        const std::vector<EButton> &buttonList = GetDefinedButtons();
+        int                         index      = 0;
+        const std::vector<EButton>& buttonList = GetDefinedButtons();
 
-        for (EButton buttonId : buttonList)
+        for(EButton buttonId : buttonList)
         {
-            if (buttonId >= EButton::Mouse_Left)
+            if(buttonId >= EButton::Mouse_Left)
             {
                 break;
             }
-            ButtonKeyboard button(
-                result, 
-                static_cast<int32_t>(buttonId),
-                NAMEOF_ENUM(buttonId),
-                buttonId);
+            ButtonKeyboard button(result, static_cast<int32_t>(buttonId), NAMEOF_ENUM(buttonId), buttonId);
             result->mKeyboardButtons[index] = button;
             result->mButtons.push_back(result->mKeyboardButtons + index);
             index++;
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitMouse(std::vector<InputDevice::uniqueptr> &out)
+    InputDevice::loanptr InputDevice::InitMouse(std::vector<InputDevice::uniqueptr>& out)
     {
-        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
-        InputDevice::loanptr result(device);
-        result->mName = "Default Mouse";
-        result->mType = EType::Mouse;
+        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice::loanptr    result(device);
+        result->mName         = "Default Mouse";
+        result->mType         = EType::Mouse;
         result->mMouseButtons = new ButtonMouse[5];
 
-        int index = 0;
+        int     index          = 0;
         EButton mouseButtons[] = {EButton::Mouse_Left, EButton::Mouse_Right, EButton::Mouse_Middle, EButton::Mouse_X1, EButton::Mouse_X2};
 
-        for (EButton buttonId : mouseButtons)
+        for(EButton buttonId : mouseButtons)
         {
-            ButtonMouse button(
-                result, 
-                static_cast<int32_t>(buttonId),
-                NAMEOF_ENUM(buttonId),
-                buttonId);
+            ButtonMouse button(result, static_cast<int32_t>(buttonId), NAMEOF_ENUM(buttonId), buttonId);
             result->mMouseButtons[index] = button;
             result->mButtons.push_back(result->mMouseButtons + index);
             index++;
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitJoystick(std::vector<InputDevice::uniqueptr> &out, SDL_Joystick *joystick)
+    InputDevice::loanptr InputDevice::InitJoystick(std::vector<InputDevice::uniqueptr>& out, SDL_Joystick* joystick)
     {
-        InputDevice::uniqueptr &device = out.emplace_back(std::make_unique<InputDevice>());
-        InputDevice::loanptr result(device);
-        result->mType = EType::Joystick;
-        result->mName = SDL_JoystickName(joystick);
-        result->Joystick = joystick;
+        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice::loanptr    result(device);
+        result->mType      = EType::Joystick;
+        result->mName      = SDL_JoystickName(joystick);
+        result->Joystick   = joystick;
         result->JoystickId = SDL_JoystickInstanceID(joystick);
-        result->Guid = SDL_JoystickGetGUID(joystick);
+        result->Guid       = SDL_JoystickGetGUID(joystick);
 
-        int numAxes = SDL_JoystickNumAxes(joystick);
-        int numBalls = SDL_JoystickNumBalls(joystick);
+        int numAxes    = SDL_JoystickNumAxes(joystick);
+        int numBalls   = SDL_JoystickNumBalls(joystick);
         int numButtons = SDL_JoystickNumButtons(joystick);
-        int numHats = SDL_JoystickNumHats(joystick);
+        int numHats    = SDL_JoystickNumHats(joystick);
 
-        result->mJoystickAxes = new AxisJoystick[numAxes];
+        result->mJoystickAxes    = new AxisJoystick[numAxes];
         result->mJoystickButtons = new ButtonJoystick[numButtons];
 
-        for (int i = 0; i < numAxes; i++)
+        for(int i = 0; i < numAxes; i++)
         {
-            AxisJoystick axis(
-                result,
-                i,
-                NAMEOF_ENUM((EAxis)i),
-                joystick
-            );
+            AxisJoystick axis(result, i, NAMEOF_ENUM((EAxis)i), joystick);
             result->mJoystickAxes[i] = axis;
             result->mAxes.push_back(result->mJoystickAxes + i);
         }
 
-        for (int i = 0; i < numButtons; i++)
+        for(int i = 0; i < numButtons; i++)
         {
             EButton buttonId;
-            if (i < 50)
+            if(i < 50)
             {
                 buttonId = static_cast<EButton>(static_cast<int32_t>(EButton::JoystickButton_0) + i);
             }
-            ButtonJoystick button(
-                result,
-                i,
-                NAMEOF_ENUM(buttonId),
-                buttonId,
-                joystick
-            );
+            ButtonJoystick button(result, i, NAMEOF_ENUM(buttonId), buttonId, joystick);
             result->mJoystickButtons[i] = button;
             result->mButtons.push_back(result->mJoystickButtons + i);
         }
@@ -192,7 +172,7 @@ namespace hsk
 
     InputDevice::~InputDevice()
     {
-        if (Joystick)
+        if(Joystick)
         {
             SDL_JoystickClose(Joystick);
         }
@@ -202,42 +182,42 @@ namespace hsk
         delete[] mMouseButtons;
     }
     int16_t InputDevice::AxisJoystick::State() const { return SDL_JoystickGetAxis(Joystick, Id); }
-    bool InputDevice::ButtonJoystick::State() const { return SDL_JoystickGetButton(Joystick, Id) > 0; }
-    bool InputDevice::ButtonMouse::State() const
+    bool    InputDevice::ButtonJoystick::State() const { return SDL_JoystickGetButton(Joystick, Id) > 0; }
+    bool    InputDevice::ButtonMouse::State() const
     {
         uint32_t mouseState = SDL_GetMouseState(nullptr, nullptr);
         uint32_t mask;
-        switch (Button)
+        switch(Button)
         {
-        case EButton::Mouse_Left:
-            mask = SDL_BUTTON_LMASK;
-            break;
-        case EButton::Mouse_Right:
-            mask = SDL_BUTTON_RMASK;
-            break;
-        case EButton::Mouse_Middle:
-            mask = SDL_BUTTON_MMASK;
-            break;
-        case EButton::Mouse_X1:
-            mask = SDL_BUTTON_X1MASK;
-            break;
-        case EButton::Mouse_X2:
-            mask = SDL_BUTTON_X2MASK;
-            break;
-        default:
-            mask = 0;
-            break;
+            case EButton::Mouse_Left:
+                mask = SDL_BUTTON_LMASK;
+                break;
+            case EButton::Mouse_Right:
+                mask = SDL_BUTTON_RMASK;
+                break;
+            case EButton::Mouse_Middle:
+                mask = SDL_BUTTON_MMASK;
+                break;
+            case EButton::Mouse_X1:
+                mask = SDL_BUTTON_X1MASK;
+                break;
+            case EButton::Mouse_X2:
+                mask = SDL_BUTTON_X2MASK;
+                break;
+            default:
+                mask = 0;
+                break;
         }
         return (mouseState & mask) != 0;
     }
     bool InputDevice::ButtonKeyboard::State() const
     {
-        int num = 0;
-        const uint8_t *arr = SDL_GetKeyboardState(&num);
-        if (arr == nullptr || (int)Button >= num)
+        int            num = 0;
+        const uint8_t* arr = SDL_GetKeyboardState(&num);
+        if(arr == nullptr || (int)Button >= num)
         {
-            return false; // Break out if arr is null or the button encoded in this button object is not a valid keyboard key
+            return false;  // Break out if arr is null or the button encoded in this button object is not a valid keyboard key
         }
         return arr[(int)Button] != 0;
     }
-}
+}  // namespace hsk
