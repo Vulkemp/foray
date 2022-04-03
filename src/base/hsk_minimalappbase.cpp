@@ -83,7 +83,7 @@ namespace hsk
         {
             this->State(EState::Finalizing);
             Cleanup();
-            BaseCleanupVkInstance();
+            BaseCleanupVulkan();
             BaseCleanupSdlSubsystem();
         }
         catch (const std::exception &e)
@@ -147,7 +147,10 @@ namespace hsk
             }
         }
     }
-    void MinimalAppBase::BaseCleanupVkInstance() {}
+    void MinimalAppBase::BaseCleanupVulkan() {
+        vkb::destroy_instance(mVkbInstance);
+        mInstance = nullptr;
+    }
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
         OSI.Cleanup();

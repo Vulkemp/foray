@@ -50,5 +50,29 @@ namespace hsk
 		mVkbDevice = deviceBuilderReturn.value();
 		mDevice = mVkbDevice.device;
 
+		vkb::SwapchainBuilder swapchainBuilder(mVkbDevice, mSurface);
+
+		BeforeSwapchainBuilding(swapchainBuilder);
+
+		auto swapchainBuilderReturn = swapchainBuilder.build();
+		if (!swapchainBuilderReturn){
+			logger()->error("Swapchain building: {}", swapchainBuilderReturn.error().message());
+			throw std::exception();
+		}
+
+		mVkbSwapchain = swapchainBuilderReturn.value();
+		mSwapchain = mVkbSwapchain.swapchain;
+	}
+
+	void DefaultAppBase::BaseCleanupVulkan()
+	{
+		vkb::destroy_swapchain(mVkbSwapchain);
+		mSwapchain = nullptr;
+		vkb::destroy_device(mVkbDevice);
+		mDevice = nullptr;
+		vkb::destroy_surface(mVkbInstance, mSurface);
+		mSurface = nullptr;
+		mWindow.Destroy();
+		MinimalAppBase::BaseCleanupVulkan();
 	}
 }

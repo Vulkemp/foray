@@ -92,7 +92,7 @@ namespace hsk
 		/// @brief Polls and distributes events from the SDL subsystem
 		virtual void BasePollEvents();
 		/// @brief Destroys the vulkan instance
-		virtual void BaseCleanupVkInstance();
+		virtual void BaseCleanupVulkan();
 		/// @brief Destroys the SDL subsystem
 		virtual void BaseCleanupSdlSubsystem();
 
