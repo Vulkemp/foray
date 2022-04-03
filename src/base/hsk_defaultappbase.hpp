@@ -47,7 +47,7 @@ namespace hsk
 			VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtpfeatures;
 			VkPhysicalDeviceAccelerationStructureFeaturesKHR asfeatures;
 			VkPhysicalDeviceDescriptorIndexingFeaturesEXT difeatures;
-		} mDeviceFeatures;
+		} mDeviceFeatures = {};
 
 #pragma endregion
 	};

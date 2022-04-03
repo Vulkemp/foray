@@ -68,21 +68,21 @@ namespace hsk
 
 			// This currently causes a segfault, so commented out for the time being
 
-			// mDeviceFeatures.bdafeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-			// mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
-			// deviceBuilder.add_pNext(&mDeviceFeatures.bdafeatures);
+			mDeviceFeatures.bdafeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+			mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
+			deviceBuilder.add_pNext(&mDeviceFeatures.bdafeatures);
 
-			// mDeviceFeatures.rtpfeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-			// mDeviceFeatures.rtpfeatures.rayTracingPipeline = VK_TRUE;
-			// deviceBuilder.add_pNext(&mDeviceFeatures.rtpfeatures);
+			mDeviceFeatures.rtpfeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+			mDeviceFeatures.rtpfeatures.rayTracingPipeline = VK_TRUE;
+			deviceBuilder.add_pNext(&mDeviceFeatures.rtpfeatures);
 
-			// mDeviceFeatures.asfeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-			// mDeviceFeatures.asfeatures.accelerationStructure = VK_TRUE;
-			// deviceBuilder.add_pNext(&mDeviceFeatures.asfeatures);
+			mDeviceFeatures.asfeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+			mDeviceFeatures.asfeatures.accelerationStructure = VK_TRUE;
+			deviceBuilder.add_pNext(&mDeviceFeatures.asfeatures);
 
-			// mDeviceFeatures.difeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-			// mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
-			// deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
+			mDeviceFeatures.difeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+			mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+			deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
 
 			
 
