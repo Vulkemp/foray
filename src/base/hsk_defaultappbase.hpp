@@ -33,14 +33,14 @@ namespace hsk
 #pragma region Vulkan
 		VkSurfaceKHR mSurface{};
 
-		vkb::PhysicalDevice mVkbPhysicalDevice;
+		vkb::PhysicalDevice mVkbPhysicalDevice{};
 		VkPhysicalDevice mPhysicalDevice{};
 
-		vkb::Device mVkbDevice;
+		vkb::Device mVkbDevice{};
 		VkDevice mDevice{};
 
-		vkb::Swapchain mVkbSwapchain;
-		VkSwapchainKHR mSwapchain;
+		vkb::Swapchain mVkbSwapchain{};
+		VkSwapchainKHR mSwapchain{};
 
 		struct {
 			VkPhysicalDeviceBufferDeviceAddressFeatures bdafeatures;

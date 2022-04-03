@@ -111,7 +111,7 @@ namespace hsk
 
 #pragma region Vulkan
 		vkb::InstanceBuilder mVkbInstanceBuilder{};
-		vkb::Instance mVkbInstance;
+		vkb::Instance mVkbInstance{};
 		VkInstance mInstance{};
 		bool mEnableDefaultValidationLayers{true};
 #pragma endregion
