@@ -23,6 +23,10 @@ namespace hsk {
         /// @brief Base init is heavily overriden by this class, because a complete simple vulkan setup is included.
         virtual void BaseInit() override;
 
+        virtual void BaseInitSelectPhysicalDevice();
+        virtual void BaseInitBuildDevice();
+        virtual void BaseInitBuildSwapchain();
+
         virtual void BaseCleanupVulkan() override;
 
         /// @brief The main window used for rendering.
