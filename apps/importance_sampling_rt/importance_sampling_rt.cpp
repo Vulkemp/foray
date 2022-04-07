@@ -16,6 +16,7 @@ int main(int argv, char** args)
 void ImportanceSamplingRtProject::Init()
 {
     mWindow.DisplayMode(hsk::EDisplayMode::WindowedResizable);
+    initVulkan();
 }
 
 void ImportanceSamplingRtProject::OnEvent(hsk::Event::ptr event)

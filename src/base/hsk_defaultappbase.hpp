@@ -26,6 +26,7 @@ namespace hsk {
         virtual void BaseInitSelectPhysicalDevice();
         virtual void BaseInitBuildDevice();
         virtual void BaseInitBuildSwapchain();
+        virtual void BaseInitGetVkQueues();
 
         virtual void BaseCleanupVulkan() override;
 
@@ -51,6 +52,18 @@ namespace hsk {
             VkPhysicalDeviceAccelerationStructureFeaturesKHR asfeatures;
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    difeatures;
         } mDeviceFeatures = {};
+
+        struct QueueInfo
+        {
+            VkQueue  Queue{};
+            uint32_t QueueFamilyIndex{};
+        };
+
+        /// @brief Assuming the default queue supports graphics, transfer and compute. (TODO: are we sure, we don't need dedicated queues? For example dedicated transfer queues for asynchron transfers)
+        QueueInfo mDefaultQueue{};
+
+        /// @brief Queue that supports presenting to the connected screen.
+        QueueInfo mPresentQueue{};
 
 #pragma endregion
     };

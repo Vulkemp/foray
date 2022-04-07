@@ -23,6 +23,7 @@ namespace hsk {
         BaseInitSelectPhysicalDevice();
         BaseInitBuildDevice();
         BaseInitBuildSwapchain();
+        BaseInitGetVkQueues();
         
     }
 
@@ -142,6 +143,28 @@ namespace hsk {
 
         mVkbSwapchain = swapchainBuilderReturn.value();
         mSwapchain    = mVkbSwapchain.swapchain;
+    }
+
+    void DefaultAppBase::BaseInitGetVkQueues()
+    {
+        // Get the graphics queue with a helper function
+        auto defaultQueueReturn = mVkbDevice.get_queue(vkb::QueueType::graphics);
+        if(!defaultQueueReturn)
+        {
+            logger()->error("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
+            throw std::exception();
+        }
+        mDefaultQueue.Queue = defaultQueueReturn.value();
+        mDefaultQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+        auto presentQueueReturn = mVkbDevice.get_queue(vkb::QueueType::present);
+        if(!presentQueueReturn)
+        {
+            logger()->error("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
+            throw std::exception();
+        }
+        mPresentQueue.Queue = presentQueueReturn.value();
+        mPresentQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::present).value();
     }
 
     void DefaultAppBase::BaseCleanupVulkan()
