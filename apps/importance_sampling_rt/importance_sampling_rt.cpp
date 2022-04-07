@@ -25,10 +25,10 @@ void ImportanceSamplingRtProject::OnEvent(hsk::Event::ptr event)
     auto axisInput   = std::dynamic_pointer_cast<hsk::EventInputAnalogue>(event);
     if(buttonInput)
     {
-        spdlog::info("Device \"{}\" Button {} - {}", buttonInput->Device->Name(), buttonInput->Button->Name, buttonInput->Pressed ? "pressed" : "released");
+        spdlog::info("Device \"{}\" Button {} - {}", buttonInput->Device()->Name(), buttonInput->Button()->Name(), buttonInput->Pressed() ? "pressed" : "released");
     }
     if(axisInput)
     {
-        spdlog::info("Device \"{}\" Axis {} - {}", axisInput->Device->Name(), axisInput->Axis->Name, axisInput->State);
+        spdlog::info("Device \"{}\" Axis {} - {}", axisInput->Device()->Name(), axisInput->Axis()->Name(), axisInput->State());
     }
 }

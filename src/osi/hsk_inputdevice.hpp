@@ -1,5 +1,4 @@
 #pragma once
-#include "../hsk_memory.hpp"
 #include "hsk_helpers.hpp"
 #include "hsk_input.hpp"
 #include "hsk_osi_declares.hpp"
@@ -13,9 +12,6 @@ namespace hsk {
     class InputDevice
     {
       public:
-        using loanptr   = loan_ptr<InputDevice>;
-        using uniqueptr = std::unique_ptr<InputDevice>;
-
         enum class EType : uint8_t
         {
             Unknown = 0,
@@ -24,8 +20,8 @@ namespace hsk {
             Joystick
         };
 
-        using AxisPtr   = loan_ptr<const InputAnalogue>;
-        using ButtonPtr = loan_ptr<const InputBinary>;
+        using AxisPtr   = const InputAnalogue*;
+        using ButtonPtr = const InputBinary*;
 
         class AxisJoystick : public InputAnalogue
         {
@@ -33,9 +29,7 @@ namespace hsk {
             SDL_Joystick* Joystick;
 
             AxisJoystick() : InputAnalogue(), Joystick() {}
-            AxisJoystick(loan_ptr<InputDevice> device, int32_t id, std::string_view name, SDL_Joystick* joystick) : InputAnalogue(device, id, name, (EAxis)id), Joystick(joystick)
-            {
-            }
+            AxisJoystick(InputDevice* device, int32_t id, std::string_view name, SDL_Joystick* joystick) : InputAnalogue(device, id, name, (EAxis)id), Joystick(joystick) {}
 
             // Inherited via Axis
             virtual int16_t State() const override;
@@ -47,7 +41,7 @@ namespace hsk {
             SDL_Joystick* Joystick;
 
             ButtonJoystick() : InputBinary(), Joystick() {}
-            ButtonJoystick(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button, SDL_Joystick* joystick)
+            ButtonJoystick(InputDevice* device, int32_t id, std::string_view name, EButton button, SDL_Joystick* joystick)
                 : InputBinary(device, id, name, button), Joystick(joystick)
             {
             }
@@ -60,7 +54,7 @@ namespace hsk {
         {
           public:
             ButtonMouse() : InputBinary() {}
-            ButtonMouse(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
+            ButtonMouse(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
 
             // Inherited via InputBinary
             virtual bool State() const override;
@@ -70,33 +64,19 @@ namespace hsk {
         {
           public:
             ButtonKeyboard() : InputBinary() {}
-            ButtonKeyboard(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
+            ButtonKeyboard(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBinary(device, id, name, button) {}
 
             // Inherited via InputBinary
             virtual bool State() const override;
         };
 
-      public:
-        SDL_JoystickGUID Guid;
-        SDL_Joystick*    Joystick;
-        SDL_JoystickID   JoystickId;
+        inline SDL_JoystickGUID    Guid() { return mGuid; }
+        inline SDL_Joystick*       Joystick() { return mJoystick; }
+        inline const SDL_Joystick* Joystick() const { return mJoystick; }
+        inline SDL_JoystickID      JoystickId() { return mJoystickId; }
 
-      protected:  // array pointers for hardware specific inputs
-        ButtonJoystick* mJoystickButtons;
-        AxisJoystick*   mJoystickAxes;
-        ButtonKeyboard* mKeyboardButtons;
-        ButtonMouse*    mMouseButtons;
-
-      protected:
-        std::string mName;
-        EType       mType;
-
-        std::vector<AxisPtr>   mAxes;
-        std::vector<ButtonPtr> mButtons;
-
-      public:
         InputDevice()
-            : Guid(), mName(), mType(EType::Unknown), Joystick(), JoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons()
+            : mGuid(), mName(), mType(EType::Unknown), mJoystick(), mJoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons()
         {
         }
         InputDevice(const InputDevice& other)  = delete;
@@ -116,11 +96,27 @@ namespace hsk {
 
         std::string BuildDebugPrint() const;
 
-        static InputDevice::loanptr InitKeyboard(std::vector<InputDevice::uniqueptr>& out);
-        static InputDevice::loanptr InitMouse(std::vector<InputDevice::uniqueptr>& out);
-        static InputDevice::loanptr InitJoystick(std::vector<InputDevice::uniqueptr>& out, SDL_Joystick* joystick);
+        static InputDevice* InitKeyboard(std::vector<std::unique_ptr<InputDevice>>& out);
+        static InputDevice* InitMouse(std::vector<std::unique_ptr<InputDevice>>& out);
+        static InputDevice* InitJoystick(std::vector<std::unique_ptr<InputDevice>>& out, SDL_Joystick* joystick);
 
         virtual ~InputDevice();
+
+      protected:
+        SDL_JoystickGUID mGuid;
+        SDL_Joystick*    mJoystick;
+        SDL_JoystickID   mJoystickId;
+
+        ButtonJoystick* mJoystickButtons;
+        AxisJoystick*   mJoystickAxes;
+        ButtonKeyboard* mKeyboardButtons;
+        ButtonMouse*    mMouseButtons;
+
+        std::string mName;
+        EType       mType;
+
+        std::vector<AxisPtr>   mAxes;
+        std::vector<ButtonPtr> mButtons;
     };
 
 }  // namespace hsk

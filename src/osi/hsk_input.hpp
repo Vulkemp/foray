@@ -1,49 +1,60 @@
 #pragma once
+#include "hsk_helpers.hpp"
 #include "hsk_osi_declares.hpp"
 
 namespace hsk {
-    /// @brief Represents a single input with a state represented by a signed 16bit integer
-    class InputAnalogue
+    class InputBase
     {
       public:
         /// @brief Device this input is part of
-        loan_ptr<InputDevice> Device;
+        inline InputDevice*       Device() { return mDevice; }
+        inline const InputDevice* Device() const { return mDevice; }
         /// @brief Device-unique Id of the input
-        int32_t Id;
+        inline int32_t Id() const { return mId; }
         /// @brief Human readable name of the input
-        std::string Name;
-        /// @brief Axis id of the input
-        EAxis Axis;
+        inline std::string_view Name() const { return mName; }
 
       protected:
-        InputAnalogue() : Device(), Id(-1), Name(), Axis() {}
-        InputAnalogue(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EAxis axis) : Device(device), Id(id), Name(name), Axis(axis) {}
+        InputDevice* mDevice = {};
+        int32_t      mId     = {};
+        std::string  mName   = {};
 
+        inline InputBase() = default;
+        inline InputBase(InputDevice* device, int32_t id, std::string_view name) : mDevice(device), mId(id), mName(name) {}
+    };
+
+    /// @brief Represents a single input with a state represented by a signed 16bit integer
+    class InputAnalogue : public InputBase
+    {
       public:
+        /// @brief Axis id of the input
+        inline EAxis Axis() const { return mAxis; }
+
         /// @brief Fetches the inputs current state
         virtual int16_t State() const = 0;
+
+      protected:
+        EAxis mAxis = {};
+
+        InputAnalogue() : InputBase(), mAxis() {}
+        InputAnalogue(InputDevice* device, int32_t id, std::string_view name, EAxis axis) : InputBase(device, id, name), mAxis(axis) {}
     };
 
     /// @brief Represents a single input with a state represented by a boolean value
-    class InputBinary
+    class InputBinary : public InputBase
     {
       public:
-        /// @brief Device this input is part of
-        loan_ptr<InputDevice> Device;
-        /// @brief Device-unique Id of the input
-        int32_t Id;
-        /// @brief Human readable name of the input
-        std::string Name;
         /// @brief Button id of the input
-        EButton Button;
+        inline EButton Button() const { return mButton; }
 
-      protected:
-        InputBinary() : Device(), Id(), Name(), Button() {}
-        InputBinary(loan_ptr<InputDevice> device, int32_t id, std::string_view name, EButton button) : Device(device), Id(id), Name(name), Button(button) {}
-
-      public:
         /// @brief Fetches the inputs current state
         virtual bool State() const = 0;
+
+      protected:
+        EButton mButton = {};
+
+        InputBinary() : InputBase(), mButton() {}
+        InputBinary(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBase(device, id, name), mButton(button) {}
     };
 
 }  // namespace hsk

@@ -54,7 +54,7 @@ namespace hsk {
     {
         for(ButtonPtr buttonptr : mButtons)
         {
-            if(buttonptr->Button == button)
+            if(buttonptr->Button() == button)
             {
                 return buttonptr;
             }
@@ -71,7 +71,7 @@ namespace hsk {
             builder << "\t" << mButtons.size() << " Buttons:\n";
             for(ButtonPtr button : mButtons)
             {
-                builder << "\t\t" << button->Name << "\n";
+                builder << "\t\t" << button->Name() << "\n";
             }
         }
         if(mAxes.size() > 0)
@@ -79,17 +79,17 @@ namespace hsk {
             builder << "\t" << mAxes.size() << " Axes:\n";
             for(AxisPtr axis : mAxes)
             {
-                builder << "\t\t" << axis->Name << "\n";
+                builder << "\t\t" << axis->Name() << "\n";
             }
         }
 
         return builder.str();
     }
 
-    InputDevice::loanptr InputDevice::InitKeyboard(std::vector<InputDevice::uniqueptr>& out)
+    InputDevice* InputDevice::InitKeyboard(std::vector<std::unique_ptr<InputDevice>>& out)
     {
-        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
-        loan_ptr<InputDevice>   result(device);
+        std::unique_ptr<InputDevice>& device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice*                  result(device.get());
         result->mName            = "Default Keyboard";
         result->mType            = EType::Keyboard;
         result->mKeyboardButtons = new ButtonKeyboard[240];
@@ -110,13 +110,13 @@ namespace hsk {
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitMouse(std::vector<InputDevice::uniqueptr>& out)
+    InputDevice* InputDevice::InitMouse(std::vector<std::unique_ptr<InputDevice>>& out)
     {
-        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
-        InputDevice::loanptr    result(device);
-        result->mName         = "Default Mouse";
-        result->mType         = EType::Mouse;
-        result->mMouseButtons = new ButtonMouse[5];
+        std::unique_ptr<InputDevice>& device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice*                  result = device.get();
+        result->mName                        = "Default Mouse";
+        result->mType                        = EType::Mouse;
+        result->mMouseButtons                = new ButtonMouse[5];
 
         int     index          = 0;
         EButton mouseButtons[] = {EButton::Mouse_Left, EButton::Mouse_Right, EButton::Mouse_Middle, EButton::Mouse_X1, EButton::Mouse_X2};
@@ -130,15 +130,15 @@ namespace hsk {
         }
         return result;
     }
-    InputDevice::loanptr InputDevice::InitJoystick(std::vector<InputDevice::uniqueptr>& out, SDL_Joystick* joystick)
+    InputDevice* InputDevice::InitJoystick(std::vector<std::unique_ptr<InputDevice>>& out, SDL_Joystick* joystick)
     {
-        InputDevice::uniqueptr& device = out.emplace_back(std::make_unique<InputDevice>());
-        InputDevice::loanptr    result(device);
-        result->mType      = EType::Joystick;
-        result->mName      = SDL_JoystickName(joystick);
-        result->Joystick   = joystick;
-        result->JoystickId = SDL_JoystickInstanceID(joystick);
-        result->Guid       = SDL_JoystickGetGUID(joystick);
+        std::unique_ptr<InputDevice>& device = out.emplace_back(std::make_unique<InputDevice>());
+        InputDevice*                  result = device.get();
+        result->mType                        = EType::Joystick;
+        result->mName                        = SDL_JoystickName(joystick);
+        result->mJoystick                    = joystick;
+        result->mJoystickId                  = SDL_JoystickInstanceID(joystick);
+        result->mGuid                        = SDL_JoystickGetGUID(joystick);
 
         int numAxes    = SDL_JoystickNumAxes(joystick);
         int numBalls   = SDL_JoystickNumBalls(joystick);
@@ -172,22 +172,22 @@ namespace hsk {
 
     InputDevice::~InputDevice()
     {
-        if(Joystick)
+        if(mJoystick)
         {
-            SDL_JoystickClose(Joystick);
+            SDL_JoystickClose(mJoystick);
         }
         delete[] mJoystickAxes;
         delete[] mJoystickButtons;
         delete[] mKeyboardButtons;
         delete[] mMouseButtons;
     }
-    int16_t InputDevice::AxisJoystick::State() const { return SDL_JoystickGetAxis(Joystick, Id); }
-    bool    InputDevice::ButtonJoystick::State() const { return SDL_JoystickGetButton(Joystick, Id) > 0; }
+    int16_t InputDevice::AxisJoystick::State() const { return SDL_JoystickGetAxis(Joystick, mId); }
+    bool    InputDevice::ButtonJoystick::State() const { return SDL_JoystickGetButton(Joystick, mId) > 0; }
     bool    InputDevice::ButtonMouse::State() const
     {
         uint32_t mouseState = SDL_GetMouseState(nullptr, nullptr);
         uint32_t mask;
-        switch(Button)
+        switch(mButton)
         {
             case EButton::Mouse_Left:
                 mask = SDL_BUTTON_LMASK;
@@ -214,10 +214,10 @@ namespace hsk {
     {
         int            num = 0;
         const uint8_t* arr = SDL_GetKeyboardState(&num);
-        if(arr == nullptr || (int)Button >= num)
+        if(arr == nullptr || (int)mButton >= num)
         {
             return false;  // Break out if arr is null or the button encoded in this button object is not a valid keyboard key
         }
-        return arr[(int)Button] != 0;
+        return arr[(int)mButton] != 0;
     }
 }  // namespace hsk

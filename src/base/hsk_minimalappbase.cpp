@@ -1,12 +1,12 @@
 #include "hsk_minimalappbase.hpp"
 
-#include <chrono>
-#include <exception>
-#include <sdl2/SDL.h>
-#include <spdlog/spdlog.h>
-
 #include "../osi/hsk_event.hpp"
 #include "../osi/hsk_window.hpp"
+#include <chrono>
+#include <exception>
+#include <nameof/nameof.hpp>
+#include <sdl2/SDL.h>
+#include <spdlog/spdlog.h>
 
 namespace hsk {
     using clock_t     = std::chrono::steady_clock;
@@ -39,7 +39,7 @@ namespace hsk {
             clock_t clock;
             float   deltaMillis = 0;
             this->State(EState::Running);
-            timespan_t  timePerTick(UpdateTiming.SecondsPerUpdate());
+            timespan_t  timePerTick(mUpdateTiming.SecondsPerUpdate());
             timepoint_t lastTick = clock.now() - std::chrono::duration_cast<clock_t::duration>(timePerTick);
 
             timespan_t balance = timespan_t(0);  // The balance variable is meant to smooth out the inconsistent sleep durations over time
@@ -48,7 +48,7 @@ namespace hsk {
             {
                 BasePollEvents();  // First, poll for new OS events
 
-                timePerTick = timespan_t(UpdateTiming.SecondsPerUpdate());  // Recalculate time per tick, as it may have been changed
+                timePerTick = timespan_t(mUpdateTiming.SecondsPerUpdate());  // Recalculate time per tick, as it may have been changed
 
                 timepoint_t now   = clock.now();
                 timespan_t  delta = now - lastTick;
@@ -59,7 +59,7 @@ namespace hsk {
                     lastTick = now;
                     balance += delta - timePerTick;
 
-                    if(balance.count() > UpdateTiming.SecondsPerUpdate() * 5)
+                    if(balance.count() > mUpdateTiming.SecondsPerUpdate() * 5)
                     {
                         // We don't want to attempt smooth out more than 5 missed cycles
                         balance = timespan_t(0.f);
@@ -95,7 +95,7 @@ namespace hsk {
         return 0;
     }
 
-    void MinimalAppBase::BaseInitSdlSubsystem() { OSI.Init(); }
+    void MinimalAppBase::BaseInitSdlSubsystem() { mOsManager.Init(); }
 
     void MinimalAppBase::BaseInit()
     {
@@ -141,12 +141,12 @@ namespace hsk {
     }
     void MinimalAppBase::BasePollEvents()
     {
-        for(Event::ptr event = OSI.PollEvent(); event != nullptr; event = OSI.PollEvent())
+        for(Event::ptr event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
         {
             OnEvent(event);
-            if(event->Source)
+            if(event->Source())
             {
-                if(event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() == 1)
+                if(event->Type() == Event::EType::WindowCloseRequested && Window::Windows().size() == 1)
                 {
                     State(EState::StopRequested);
                 }
@@ -160,7 +160,14 @@ namespace hsk {
     }
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
-        OSI.Cleanup();
+        mOsManager.Cleanup();
         logger()->flush();
+    }
+
+    void MinimalAppBase::PrintStateChange(EState oldState, EState newState)
+    {
+        {
+            logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
+        }
     }
 }  // namespace hsk

@@ -1,6 +1,5 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include "../hsk_memory.hpp"
 #include "hsk_helpers.hpp"
 #include "hsk_input.hpp"
 #include "hsk_osi_declares.hpp"
@@ -10,6 +9,7 @@ namespace hsk {
     /// @brief Event Base class
     class Event
     {
+
       public:
         using ptr = std::shared_ptr<Event>;
 
@@ -38,19 +38,20 @@ namespace hsk {
             ENUM_MAX
         };
 
-      public:
         /// @brief Source window that recorded the event, if applicable
-        const loan_ptr<const Window> Source;
+        inline Window* const       Source() { return mSource; }
+        inline const Window* const Source() const { return mSource; }
         /// @brief Timestamp when the action was recorded
-        const uint32_t Timestamp;
+        inline uint32_t Timestamp() const { return mTimestamp; }
         /// @brief EType enum for aiding in type casting
-        const EType Type;
+        inline EType Type() const { return mType; }
         /// @brief For custom event type overloads, this value may be set
-        int8_t CustomType;
+        inline int8_t CustomType() const { return mCustomType; }
 
-        inline Event(loan_ptr<const Window> source, const uint32_t timestamp, const EType type) : Source(source), Timestamp(timestamp), Type(type), CustomType(0) {}
-        inline Event(loan_ptr<const Window> source, const uint32_t timestamp, const int8_t customtype)
-            : Source(source), Timestamp(timestamp), Type(EType::Custom), CustomType(customtype)
+
+        inline Event(Window* const source, const uint32_t timestamp, const EType type) : mSource(source), mTimestamp(timestamp), mType(type), mCustomType(0) {}
+        inline Event(Window* const source, const uint32_t timestamp, const int8_t customtype)
+            : mSource(source), mTimestamp(timestamp), mType(EType::Custom), mCustomType(customtype)
         {
         }
 
@@ -58,6 +59,12 @@ namespace hsk {
         inline Event& operator=(const Event& other) = default;
 
         virtual ~Event() {}
+
+      protected:
+        Window* const  mSource;
+        const uint32_t mTimestamp;
+        const EType    mType;
+        int8_t         mCustomType;
     };
 
     class EventInput : public Event
@@ -65,13 +72,15 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventInput>;
 
+      public:
         /// @brief Input Device that the input was read from
-        const loan_ptr<const InputDevice> Device;
+        inline InputDevice* const       Device() { return mDevice; }
+        inline const InputDevice* const Device() const { return mDevice; }
 
-        inline EventInput(loan_ptr<const Window> source, const uint32_t timestamp, const EType type, loan_ptr<const InputDevice> device)
-            : Event(source, timestamp, type), Device(device)
-        {
-        }
+        inline EventInput(Window* const source, const uint32_t timestamp, const EType type, InputDevice* const device) : Event(source, timestamp, type), mDevice(device) {}
+
+      protected:
+        InputDevice* const mDevice;
     };
 
     class EventInputDeviceAvailability : public EventInput
@@ -79,12 +88,16 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventInput>;
 
-        const bool Added;
+      public:
+        inline bool Added() const { return mAdded; }
 
-        inline EventInputDeviceAvailability(const uint32_t timestamp, loan_ptr<const InputDevice> device, const bool added)
-            : EventInput(nullptr, timestamp, Event::EType::InputDeviceAvailability, device), Added(added)
+        inline EventInputDeviceAvailability(const uint32_t timestamp, InputDevice* const device, const bool added)
+            : EventInput(nullptr, timestamp, Event::EType::InputDeviceAvailability, device), mAdded(added)
         {
         }
+
+      protected:
+        const bool mAdded;
     };
 
     class EventInputAnalogue : public EventInput
@@ -92,15 +105,20 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventInputAnalogue>;
 
-        /// @brief id of the axis that was moved
-        const loan_ptr<const InputAnalogue> Axis;
+      public:
+        /// @brief axis that was moved
+        inline const InputAnalogue* const Axis() const { return mAxis; }
         /// @brief Current reading from the axis
-        const int16_t State;
+        inline int16_t State() const { return mState; }
 
-        inline EventInputAnalogue(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputAnalogue> axis, fp32_t current)
-            : EventInput(source, timestamp, EType::InputAnalogue, axis->Device), Axis(axis), State(current)
+        inline EventInputAnalogue(Window* const source, const uint32_t timestamp, InputDevice* device, const InputAnalogue* axis, fp32_t current)
+            : EventInput(source, timestamp, EType::InputAnalogue, device), mAxis(axis), mState(current)
         {
         }
+
+      protected:
+        const InputAnalogue* const mAxis;
+        const int16_t              mState;
     };
 
     class EventInputBinary : public EventInput
@@ -108,15 +126,20 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventInputBinary>;
 
+      public:
         /// @brief The button that was pressed or released
-        const loan_ptr<const InputBinary> Button;
+        inline const InputBinary* const Button() const { return mButton; }
         /// @brief If true, the button was pressed - released otherwise
-        const bool Pressed;
+        inline bool Pressed() const { return mPressed; }
 
-        inline EventInputBinary(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputBinary> button, bool pressed)
-            : EventInput(source, timestamp, EType::InputBinary, button->Device), Button(button), Pressed(pressed)
+        inline EventInputBinary(Window* const source, const uint32_t timestamp, InputDevice* device, const InputBinary* button, bool pressed)
+            : EventInput(source, timestamp, EType::InputBinary, device), mButton(button), mPressed(pressed)
         {
         }
+
+      protected:
+        const InputBinary* const mButton;
+        const bool               mPressed;
     };
 
     class EventInputMouseMoved : public EventInput
@@ -124,13 +147,18 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventInputMouseMoved>;
 
-        fp32_t CurrentX;
-        fp32_t CurrentY;
+      public:
+        inline fp32_t CurrentX() const { return mCurrentX; }
+        inline fp32_t CurrentY() const { return mCurrentY; }
 
-        EventInputMouseMoved(loan_ptr<const Window> source, const uint32_t timestamp, loan_ptr<const InputDevice> device, fp32_t currentx, fp32_t currenty)
-            : EventInput(source, timestamp, EType::InputMouseMoved, device), CurrentX(currentx), CurrentY(currenty)
+        EventInputMouseMoved(Window* const source, const uint32_t timestamp, InputDevice* const device, fp32_t currentx, fp32_t currenty)
+            : EventInput(source, timestamp, EType::InputMouseMoved, device), mCurrentX(currentx), mCurrentY(currenty)
         {
         }
+
+      protected:
+        fp32_t mCurrentX;
+        fp32_t mCurrentY;
     };
 
     class EventWindowResized : public Event
@@ -138,9 +166,13 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventWindowResized>;
 
-        const Extent2D Current;
+      public:
+        inline Extent2D Current() const { return mCurrent; }
 
-        EventWindowResized(loan_ptr<const Window> source, const uint32_t timestamp, Extent2D current) : Event(source, timestamp, EType::WindowResized), Current(current) {}
+        EventWindowResized(Window* const source, const uint32_t timestamp, Extent2D current) : Event(source, timestamp, EType::WindowResized), mCurrent(current) {}
+
+      protected:
+        const Extent2D mCurrent;
     };
 
     class EventWindowFocusChanged : public Event
@@ -148,13 +180,18 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventWindowFocusChanged>;
 
-        const bool MouseFocus;
-        const bool InputFocus;
+      public:
+        inline bool MouseFocus() const { return mMouseFocus; }
+        inline bool InputFocus() const { return mInputFocus; }
 
-        EventWindowFocusChanged(loan_ptr<const Window> source, const uint32_t timestamp, bool mouseFocus, bool inputFocus)
-            : Event(source, timestamp, EType::WindowFocusChanged), MouseFocus(mouseFocus), InputFocus(inputFocus)
+        EventWindowFocusChanged(Window* source, const uint32_t timestamp, bool mouseFocus, bool inputFocus)
+            : Event(source, timestamp, EType::WindowFocusChanged), mMouseFocus(mouseFocus), mInputFocus(inputFocus)
         {
         }
+
+      protected:
+        const bool mMouseFocus;
+        const bool mInputFocus;
     };
 
     class EventWindowCloseRequested : public Event
@@ -162,7 +199,7 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventWindowCloseRequested>;
 
-        EventWindowCloseRequested(loan_ptr<const Window> source, const uint32_t timestamp) : Event(source, timestamp, EType::WindowCloseRequested) {}
+        EventWindowCloseRequested(Window* const source, const uint32_t timestamp) : Event(source, timestamp, EType::WindowCloseRequested) {}
     };
 
     class EventWindowItemDropped : public Event
@@ -170,8 +207,12 @@ namespace hsk {
       public:
         using ptr = std::shared_ptr<EventWindowItemDropped>;
 
-        const char* const m_Path;
+      public:
+        const char* const Path() const { return mPath; }
 
-        EventWindowItemDropped(loan_ptr<const Window> source, const uint32_t timestamp, const char* path) : Event(source, timestamp, EType::WindowItemDropped), m_Path(path) {}
+        EventWindowItemDropped(Window* const source, const uint32_t timestamp, const char* path) : Event(source, timestamp, EType::WindowItemDropped), mPath(path) {}
+
+      protected:
+        const char* const mPath;
     };
 }  // namespace hsk

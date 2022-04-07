@@ -7,9 +7,6 @@
 namespace hsk {
     class AppUpdateTiming
     {
-      protected:
-        float mSecondsPerUpdate = 1.f / 60.f;
-
       public:
         inline void  UpdatesPerSecond(float value) { mSecondsPerUpdate = 1.f / value; }
         inline void  SecondsPerUpdate(float value) { mSecondsPerUpdate = value; }
@@ -18,6 +15,9 @@ namespace hsk {
 
         inline void Set60Fps() { mSecondsPerUpdate = 1.f / 60.f; }
         inline void DisableFpsLock() { mSecondsPerUpdate = 0; }
+
+      protected:
+        float mSecondsPerUpdate = 1.f / 60.f;
     };
 
     /// @brief Application base providing bare minimum of functionality (app lifetime, event handling, vulkan instance management)
@@ -29,7 +29,6 @@ namespace hsk {
 
 #pragma region Lifetime
 
-      public:
         /// @brief Enum representing application lifetime state
         enum class EState
         {
@@ -45,46 +44,23 @@ namespace hsk {
             Finalizing
         };
 
-      public:
-        AppUpdateTiming UpdateTiming;
-        OsManager       OSI;
-
-      protected:
-        EState      mState = EState::Uninitialized;
-        inline void State(EState state)
-        {
-            PrintStateChange(mState, state);
-            mState = state;
-        }
-
-        void PrintStateChange(EState oldState, EState newState) { logger()->info("{} => {}", StateToString(oldState), StateToString(newState)); }
-
-        std::string StateToString(EState state)
-        {
-            switch(state)
-            {
-                case EState::Uninitialized:
-                    return "Uninitialized";
-                case EState::Preparing:
-                    return "Preparing";
-                case EState::Running:
-                    return "Running";
-                case EState::StopRequested:
-                    return "StopRequested";
-                case EState::Finalizing:
-                    return "Finalizing";
-                default:
-                    return "StateUnknown";
-            }
-        }
-
-      public:
         inline EState State() const { return mState; }
 
         /// @brief Runs through the entire lifetime of the app
         int32_t Run();
 
-      protected:  // Base methods (Used by the base for lifetime management. Usually don't need to override those)
+      protected:
+        AppUpdateTiming mUpdateTiming;
+        OsManager       mOsManager;
+        EState          mState = EState::Uninitialized;
+        inline void     State(EState state)
+        {
+            PrintStateChange(mState, state);
+            mState = state;
+        }
+
+        void PrintStateChange(EState oldState, EState newState);
+
         /// @brief Inits the SDL subsystem
         virtual void BaseInitSdlSubsystem();
         /// @brief Inits the applications basic vulkan objects
@@ -96,7 +72,6 @@ namespace hsk {
         /// @brief Destroys the SDL subsystem
         virtual void BaseCleanupSdlSubsystem();
 
-      protected:  // Virtual methods every application should override
         /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
         inline virtual void BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
         /// @brief Override this method to init your application
@@ -116,11 +91,4 @@ namespace hsk {
         bool                 mEnableDefaultValidationLayers{true};
 #pragma endregion
     };
-
-    // /// @brief Application base providing further infrastructure useful for the vast variety of projects (default window, default single virtual device)
-    // class DefaultAppBase : public MinimalAppBase
-    // {
-    // 	DefaultAppBase() : MinimalAppBase() {}
-    // 	virtual ~DefaultAppBase() = default;
-    // }
 }  // namespace hsk

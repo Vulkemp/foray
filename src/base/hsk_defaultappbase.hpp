@@ -10,6 +10,24 @@ namespace hsk {
         DefaultAppBase()          = default;
         virtual ~DefaultAppBase() = default;
 
+        inline hsk::Window&         Window() { return mWindow; }
+        inline VkSurfaceKHR         Surface() { return mSurface; }
+        inline vkb::PhysicalDevice& VkbPhysicalDevice() { return mVkbPhysicalDevice; }
+        inline VkPhysicalDevice     PhysicalDevice() { return mPhysicalDevice; }
+        inline vkb::Device&         VkbDevice() { return mVkbDevice; }
+        inline VkDevice             Device() { return mDevice; }
+        inline vkb::Swapchain&      VkbSwapchain() { return mVkbSwapchain; }
+        inline VkSwapchainKHR       Swapchain() { return mSwapchain; }
+
+        struct QueueInfo
+        {
+            VkQueue  Queue{};
+            uint32_t QueueFamilyIndex{};
+        };
+
+        inline QueueInfo& DefaultQueue() { return mDefaultQueue; }
+        inline QueueInfo& PresentQueue() { return mPresentQueue; }
+
       protected:
         /// @brief Alter physical device selection.
         inline virtual void BeforePhysicalDeviceSelection(vkb::PhysicalDeviceSelector& pds){};
@@ -31,7 +49,7 @@ namespace hsk {
         virtual void BaseCleanupVulkan() override;
 
         /// @brief The main window used for rendering.
-        Window mWindow;
+        hsk::Window mWindow;
 
 #pragma region Vulkan
         VkSurfaceKHR mSurface{};
@@ -53,13 +71,7 @@ namespace hsk {
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    difeatures;
         } mDeviceFeatures = {};
 
-        struct QueueInfo
-        {
-            VkQueue  Queue{};
-            uint32_t QueueFamilyIndex{};
-        };
-
-        /// @brief Assuming the default queue supports graphics, transfer and compute. (TODO: are we sure, we don't need dedicated queues? For example dedicated transfer queues for asynchron transfers)
+        /// @brief Assuming the default queue supports graphics, transfer and compute. (TODO: are we sure, we don't need dedicated queues? For example dedicated transfer queues for asynchronous transfers)
         QueueInfo mDefaultQueue{};
 
         /// @brief Queue that supports presenting to the connected screen.

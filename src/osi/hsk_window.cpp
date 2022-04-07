@@ -181,11 +181,11 @@ namespace hsk {
         }
     }
 
-    std::vector<Window::loanptr>& Window::Windows() { return sWindows; }
+    std::vector<Window*>& Window::Windows() { return sWindows; }
 
-    Window::loanptr Window::FindBySDLId(uint32_t id)
+    Window* Window::FindBySDLId(uint32_t id)
     {
-        Window::loanptr out;
+        Window* out;
 
         for(auto window : sWindows)
         {
@@ -216,11 +216,11 @@ namespace hsk {
     {
         if(mDisplayMode <= EDisplayMode::WindowedResizable)
         {
-            mWindowedSize = event->Current;
+            mWindowedSize = event->Current();
         }
         else
         {
-            mFullScreenSize = event->Current;
+            mFullScreenSize = event->Current();
         }
     }
 

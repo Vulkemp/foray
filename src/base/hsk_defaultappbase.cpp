@@ -24,10 +24,10 @@ namespace hsk {
         BaseInitBuildDevice();
         BaseInitBuildSwapchain();
         BaseInitGetVkQueues();
-        
     }
 
-    void DefaultAppBase::BaseInitSelectPhysicalDevice() {
+    void DefaultAppBase::BaseInitSelectPhysicalDevice()
+    {
         // create physical device selector
         vkb::PhysicalDeviceSelector pds(mVkbInstance, mSurface);
 
@@ -63,7 +63,8 @@ namespace hsk {
         mPhysicalDevice    = mVkbPhysicalDevice.physical_device;
     }
 
-    void DefaultAppBase::BaseInitBuildDevice() {
+    void DefaultAppBase::BaseInitBuildDevice()
+    {
         // create logical device builder
         vkb::DeviceBuilder deviceBuilder{mVkbPhysicalDevice};
 
@@ -115,7 +116,8 @@ namespace hsk {
         mDevice    = mVkbDevice.device;
     }
 
-    void DefaultAppBase::BaseInitBuildSwapchain() {
+    void DefaultAppBase::BaseInitBuildSwapchain()
+    {
         vkb::SwapchainBuilder swapchainBuilder(mVkbDevice, mSurface);
 
         // default swapchain image formats:
@@ -154,7 +156,7 @@ namespace hsk {
             logger()->error("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
             throw std::exception();
         }
-        mDefaultQueue.Queue = defaultQueueReturn.value();
+        mDefaultQueue.Queue            = defaultQueueReturn.value();
         mDefaultQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 
         auto presentQueueReturn = mVkbDevice.get_queue(vkb::QueueType::present);
@@ -163,7 +165,7 @@ namespace hsk {
             logger()->error("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
             throw std::exception();
         }
-        mPresentQueue.Queue = presentQueueReturn.value();
+        mPresentQueue.Queue            = presentQueueReturn.value();
         mPresentQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::present).value();
     }
 

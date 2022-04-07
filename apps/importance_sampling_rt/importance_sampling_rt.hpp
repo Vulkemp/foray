@@ -29,9 +29,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     virtual void OnEvent(std::shared_ptr<hsk::Event> event) override;
 
 
-    inline virtual void Render(float delta) override {
-        drawFrame(); 
-    }
+    inline virtual void Render(float delta) override { drawFrame(); }
 
 
     const uint32_t WIDTH  = 800;
@@ -85,7 +83,6 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     }
 
   private:
-
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
     VkRenderPass     renderPass;
@@ -207,8 +204,8 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void createGraphicsPipeline()
     {
-        auto vertShaderCode = readFile("your_path\\vert.spv");
-        auto fragShaderCode = readFile("your_path\\frag.spv");
+        auto vertShaderCode = readFile("your_path/vert.spv");
+        auto fragShaderCode = readFile("your_path/frag.spv");
 
         VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);

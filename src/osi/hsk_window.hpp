@@ -1,8 +1,8 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include "../hsk_memory.hpp"
 #include "hsk_helpers.hpp"
 #include "hsk_osi_declares.hpp"
+#include <memory>
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_vulkan.h>
 #include <string>
@@ -13,32 +13,12 @@ namespace hsk {
     class Window
     {
       public:
-        using loanptr = loan_ptr<Window>;
-        using ptr     = std::unique_ptr<Window>;
-
         static const int32_t WINDOWPOS_AUTO = INT32_MAX;
 
-      public:
-        inline static std::vector<Window::loanptr> sWindows = std::vector<Window::loanptr>();
+        static std::vector<Window*>& Windows();
 
-        static std::vector<Window::loanptr>& Windows();
+        static Window* FindBySDLId(uint32_t id);
 
-        static Window::loanptr FindBySDLId(uint32_t id);
-
-      protected:
-        SDL_Window* mHandle;
-        uint32_t    mId;
-
-        std::string  mTitle;
-        EDisplayMode mDisplayMode;
-        int32_t      mDisplayId;
-        Extent2D     mFullScreenSize;
-        Extent2D     mWindowedSize;
-        Pos2D        mPosition;
-
-        SDL_threadID mOwningThreadID;
-
-      public:
         Window();
 
         Window(const Window& other)  = delete;
@@ -50,9 +30,9 @@ namespace hsk {
         /// @return true if window exists
         inline bool Exists() const { return mHandle != nullptr; }
         /// @brief Creates the OS level window based on the parameters of the window object
-        void Create();
+        virtual void Create();
         /// @brief Destroys the OS side of the window
-        void Destroy();
+        virtual void Destroy();
 
         /// @brief (Getter) WindowPtr Title
         inline const std::string& Title() const { return mTitle; };
@@ -74,18 +54,32 @@ namespace hsk {
         /// @brief (Getter) Display Mode
         inline EDisplayMode DisplayMode() const { return mDisplayMode; };
 
-        uint32_t SDLId() const;
+        virtual uint32_t SDLId() const;
 
-        VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;
-        std::vector<const char*> GetVkSurfaceExtensions() const;
+        virtual VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;
+        virtual std::vector<const char*> GetVkSurfaceExtensions() const;
 
-        void HandleEvent(std::shared_ptr<Event> event);
+        virtual void HandleEvent(std::shared_ptr<Event> event);
 
       protected:
-        void HandleEvent_Resized(std::shared_ptr<EventWindowResized> event);
-        void HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event);
+        inline static std::vector<Window*> sWindows = std::vector<Window*>();
 
-        void assertThreadIsOwner();
+        SDL_Window* mHandle;
+        uint32_t    mId;
+
+        std::string  mTitle;
+        EDisplayMode mDisplayMode;
+        int32_t      mDisplayId;
+        Extent2D     mFullScreenSize;
+        Extent2D     mWindowedSize;
+        Pos2D        mPosition;
+
+        SDL_threadID mOwningThreadID;
+
+        virtual void HandleEvent_Resized(std::shared_ptr<EventWindowResized> event);
+        virtual void HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event);
+
+        virtual void assertThreadIsOwner();
     };
 
 }  // namespace hsk
