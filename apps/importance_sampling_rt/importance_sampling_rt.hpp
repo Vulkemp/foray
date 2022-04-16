@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <hsk_rtrpf.hpp>
+#include <hsk_env.hpp>
 #include <stdint.h>
 
 class ImportanceSamplingRtProject : public hsk::DefaultAppBase
@@ -199,8 +200,8 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void createGraphicsPipeline()
     {
-        auto vertShaderCode = readFile("your_path/vert.spv");
-        auto fragShaderCode = readFile("your_path/frag.spv");
+        auto vertShaderCode = readFile("shaders/vert.spv");
+        auto fragShaderCode = readFile("shaders/frag.spv");
 
         VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -633,10 +634,12 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     static std::vector<char> readFile(const std::string& filename)
     {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+        std::string fullFileName = hsk::MakeRelativePath(filename);
+        std::ifstream file(fullFileName, std::ios::ate | std::ios::binary);
 
         if(!file.is_open())
         {
+            hsk::logger()->error(fullFileName.c_str());
             throw std::runtime_error("failed to open file!");
         }
 
