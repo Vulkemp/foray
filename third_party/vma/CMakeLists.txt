@@ -4,4 +4,4 @@ include_directories(
 	PUBLIC ${Vulkan_INCLUDE_DIRS}
 )
 
-add_library(vkbootstrap STATIC "VkBootstrap.cpp")
+add_library(vma STATIC "vma.cpp")
