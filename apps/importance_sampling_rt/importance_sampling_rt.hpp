@@ -89,8 +89,6 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     VkPipelineLayout pipelineLayout;
     VkPipeline       graphicsPipeline;
 
-    VkCommandPool commandPool;
-
     VkBuffer       vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer       indexBuffer;
@@ -110,7 +108,6 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         createRenderPass();
         createGraphicsPipeline();
         createFramebuffers();
-        createCommandPool();
         createVertexBuffer();
         createIndexBuffer();
         createCommandBuffers();
@@ -133,8 +130,6 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
             vkDestroySemaphore(mDevice, imageAvailableSemaphores[i], nullptr);
             vkDestroyFence(mDevice, inFlightFences[i], nullptr);
         }
-
-        vkDestroyCommandPool(mDevice, commandPool, nullptr);
     }
 
     void recreateSwapChain()
@@ -161,7 +156,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     void createRenderPass()
     {
         VkAttachmentDescription colorAttachment{};
-        colorAttachment.format         = mVkbSwapchain.image_format;
+        colorAttachment.format         = mSwapchainVkb.image_format;
         colorAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
@@ -325,39 +320,25 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void createFramebuffers()
     {
-        swapChainFramebuffers.resize(mVkbSwapchain.get_image_views().value().size());
+        swapChainFramebuffers.resize(mSwapchainVkb.get_image_views().value().size());
 
         for(size_t i = 0; i < swapChainFramebuffers.size(); i++)
         {
-            VkImageView attachments[] = {mVkbSwapchain.get_image_views().value()[i]};
+            VkImageView attachments[] = {mSwapchainVkb.get_image_views().value()[i]};
 
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass      = renderPass;
             framebufferInfo.attachmentCount = 1;
             framebufferInfo.pAttachments    = attachments;
-            framebufferInfo.width           = mVkbSwapchain.extent.width;
-            framebufferInfo.height          = mVkbSwapchain.extent.height;
+            framebufferInfo.width           = mSwapchainVkb.extent.width;
+            framebufferInfo.height          = mSwapchainVkb.extent.height;
             framebufferInfo.layers          = 1;
 
             if(vkCreateFramebuffer(mDevice, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to create framebuffer!");
             }
-        }
-    }
-
-    void createCommandPool()
-    {
-
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-
-        if(vkCreateCommandPool(mDevice, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create graphics command pool!");
         }
     }
 
@@ -437,7 +418,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool        = commandPool;
+        allocInfo.commandPool        = mCommandPoolDefault;
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer commandBuffer;
@@ -463,7 +444,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         vkQueueSubmit(mDefaultQueue.Queue, 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(mDefaultQueue.Queue);
 
-        vkFreeCommandBuffers(mDevice, commandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(mDevice, mCommandPoolDefault, 1, &commandBuffer);
     }
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -488,7 +469,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool        = commandPool;
+        allocInfo.commandPool        = mCommandPoolDefault;
         allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
@@ -513,7 +494,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         renderPassInfo.renderPass        = renderPass;
         renderPassInfo.framebuffer       = swapChainFramebuffers[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = mVkbSwapchain.extent;
+        renderPassInfo.renderArea.extent = mSwapchainVkb.extent;
 
         VkClearValue clearColor        = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;

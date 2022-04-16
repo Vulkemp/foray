@@ -136,8 +136,8 @@ namespace hsk {
             throw std::exception();
         }
 
-        mVkbInstance = instanceBuildRet.value();
-        mInstance    = mVkbInstance.instance;
+        mInstanceVkb = instanceBuildRet.value();
+        mInstance    = mInstanceVkb.instance;
     }
     void MinimalAppBase::BasePollEvents()
     {
@@ -155,7 +155,7 @@ namespace hsk {
     }
     void MinimalAppBase::BaseCleanupVulkan()
     {
-        vkb::destroy_instance(mVkbInstance);
+        vkb::destroy_instance(mInstanceVkb);
         mInstance = nullptr;
     }
     void MinimalAppBase::BaseCleanupSdlSubsystem()
@@ -166,8 +166,6 @@ namespace hsk {
 
     void MinimalAppBase::PrintStateChange(EState oldState, EState newState)
     {
-        {
-            logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
-        }
+        logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
     }
 }  // namespace hsk

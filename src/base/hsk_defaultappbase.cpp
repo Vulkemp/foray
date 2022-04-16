@@ -24,12 +24,13 @@ namespace hsk {
         BaseInitBuildDevice();
         BaseInitBuildSwapchain();
         BaseInitGetVkQueues();
+        BaseInitCommandPool();
     }
 
     void DefaultAppBase::BaseInitSelectPhysicalDevice()
     {
         // create physical device selector
-        vkb::PhysicalDeviceSelector pds(mVkbInstance, mSurface);
+        vkb::PhysicalDeviceSelector pds(mInstanceVkb, mSurface);
 
         {  // Configure device selector
 
@@ -59,14 +60,14 @@ namespace hsk {
             logger()->error("Physical device creation: {}", physicalDeviceSelectionReturn.error().message());
             throw std::exception();
         }
-        mVkbPhysicalDevice = physicalDeviceSelectionReturn.value();
-        mPhysicalDevice    = mVkbPhysicalDevice.physical_device;
+        mPhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
+        mPhysicalDevice    = mPhysicalDeviceVkb.physical_device;
     }
 
     void DefaultAppBase::BaseInitBuildDevice()
     {
         // create logical device builder
-        vkb::DeviceBuilder deviceBuilder{mVkbPhysicalDevice};
+        vkb::DeviceBuilder deviceBuilder{mPhysicalDeviceVkb};
 
         {  // Configure logical device builder
 
@@ -112,13 +113,13 @@ namespace hsk {
             logger()->error("Device creation: {}", deviceBuilderReturn.error().message());
             throw std::exception();
         }
-        mVkbDevice = deviceBuilderReturn.value();
-        mDevice    = mVkbDevice.device;
+        mDeviceVkb = deviceBuilderReturn.value();
+        mDevice    = mDeviceVkb.device;
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()
     {
-        vkb::SwapchainBuilder swapchainBuilder(mVkbDevice, mSurface);
+        vkb::SwapchainBuilder swapchainBuilder(mDeviceVkb, mSurface);
 
         // default swapchain image formats:
         // color format: VK_FORMAT_B8G8R8A8_SRGB
@@ -143,39 +144,55 @@ namespace hsk {
             throw std::exception();
         }
 
-        mVkbSwapchain = swapchainBuilderReturn.value();
-        mSwapchain    = mVkbSwapchain.swapchain;
+        mSwapchainVkb = swapchainBuilderReturn.value();
+        mSwapchain    = mSwapchainVkb.swapchain;
     }
 
     void DefaultAppBase::BaseInitGetVkQueues()
     {
         // Get the graphics queue with a helper function
-        auto defaultQueueReturn = mVkbDevice.get_queue(vkb::QueueType::graphics);
+        auto defaultQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::graphics);
         if(!defaultQueueReturn)
         {
             logger()->error("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
             throw std::exception();
         }
         mDefaultQueue.Queue            = defaultQueueReturn.value();
-        mDefaultQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+        mDefaultQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
 
-        auto presentQueueReturn = mVkbDevice.get_queue(vkb::QueueType::present);
+        auto presentQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::present);
         if(!presentQueueReturn)
         {
             logger()->error("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
             throw std::exception();
         }
         mPresentQueue.Queue            = presentQueueReturn.value();
-        mPresentQueue.QueueFamilyIndex = mVkbDevice.get_queue_index(vkb::QueueType::present).value();
+        mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
+    }
+
+    void DefaultAppBase::BaseInitCommandPool()
+    {
+        VkCommandPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT: Hint that command buffers are rerecorded with new commands very often (may change memory allocation behavior)
+        // VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT: Allow command buffers to be rerecorded individually, without this flag they all have to be reset together
+        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+        poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
+
+        if (vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create command pool!");
+        }
     }
 
     void DefaultAppBase::BaseCleanupVulkan()
     {
-        vkb::destroy_swapchain(mVkbSwapchain);
+        vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
+
+        vkb::destroy_swapchain(mSwapchainVkb);
         mSwapchain = nullptr;
-        vkb::destroy_device(mVkbDevice);
+        vkb::destroy_device(mDeviceVkb);
         mDevice = nullptr;
-        vkb::destroy_surface(mVkbInstance, mSurface);
+        vkb::destroy_surface(mInstanceVkb, mSurface);
         mSurface = nullptr;
         mWindow.Destroy();
         MinimalAppBase::BaseCleanupVulkan();

@@ -12,11 +12,11 @@ namespace hsk {
 
         inline hsk::Window&         Window() { return mWindow; }
         inline VkSurfaceKHR         Surface() { return mSurface; }
-        inline vkb::PhysicalDevice& VkbPhysicalDevice() { return mVkbPhysicalDevice; }
+        inline vkb::PhysicalDevice& VkbPhysicalDevice() { return mPhysicalDeviceVkb; }
         inline VkPhysicalDevice     PhysicalDevice() { return mPhysicalDevice; }
-        inline vkb::Device&         VkbDevice() { return mVkbDevice; }
+        inline vkb::Device&         VkbDevice() { return mDeviceVkb; }
         inline VkDevice             Device() { return mDevice; }
-        inline vkb::Swapchain&      VkbSwapchain() { return mVkbSwapchain; }
+        inline vkb::Swapchain&      VkbSwapchain() { return mSwapchainVkb; }
         inline VkSwapchainKHR       Swapchain() { return mSwapchain; }
 
         struct QueueInfo
@@ -45,6 +45,7 @@ namespace hsk {
         virtual void BaseInitBuildDevice();
         virtual void BaseInitBuildSwapchain();
         virtual void BaseInitGetVkQueues();
+        virtual void BaseInitCommandPool();
 
         virtual void BaseCleanupVulkan() override;
 
@@ -54,13 +55,13 @@ namespace hsk {
 #pragma region Vulkan
         VkSurfaceKHR mSurface{};
 
-        vkb::PhysicalDevice mVkbPhysicalDevice{};
+        vkb::PhysicalDevice mPhysicalDeviceVkb{};
         VkPhysicalDevice    mPhysicalDevice{};
 
-        vkb::Device mVkbDevice{};
+        vkb::Device mDeviceVkb{};
         VkDevice    mDevice{};
 
-        vkb::Swapchain mVkbSwapchain{};
+        vkb::Swapchain mSwapchainVkb{};
         VkSwapchainKHR mSwapchain{};
 
         struct
@@ -76,6 +77,9 @@ namespace hsk {
 
         /// @brief Queue that supports presenting to the connected screen.
         QueueInfo mPresentQueue{};
+
+        /// @brief Commandpool for the default queue.
+        VkCommandPool mCommandPoolDefault;
 
 #pragma endregion
     };
