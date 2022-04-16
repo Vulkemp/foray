@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.20)
 
 project("rtrpf")
 
@@ -30,8 +30,6 @@ if (WIN32)
         PUBLIC ${Vulkan_LIBRARIES}
         PUBLIC glm_static
         PUBLIC vkbootstrap
-        PUBLIC vma
-        PUBLIC vkglTF
         PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
 else () 
     target_link_libraries(
@@ -39,8 +37,6 @@ else ()
         PUBLIC ${Vulkan_LIBRARIES}
         PUBLIC glm_static
         PUBLIC vkbootstrap
-        PUBLIC vma
-        PUBLIC vkglTF
         PUBLIC -lSDL2
         PUBLIC -ldl
         )
@@ -60,8 +56,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 
 # subdirectories
 
-add_subdirectory("${thirdparty_dir}/vma")
-add_subdirectory("${thirdparty_dir}/vkglTF")
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 
