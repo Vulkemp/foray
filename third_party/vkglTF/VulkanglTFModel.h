@@ -65,10 +65,10 @@ namespace vkglTF {
 
     struct Texture
     {
-        VkDevice              device;
+        VmaAllocator          allocator;
+        VmaAllocation         allocation;
         VkImage               image;
         VkImageLayout         imageLayout;
-        VkDeviceMemory        deviceMemory;
         VkImageView           view;
         uint32_t              width, height;
         uint32_t              mipLevels;
@@ -78,7 +78,7 @@ namespace vkglTF {
         void                  updateDescriptor();
         void                  destroy();
         // Load a texture from a glTF image (stored as vector of chars loaded via stb_image) and generate a full mip chaing for it
-        void fromglTfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler, VkDevice device, VkPhysicalDevice physicalDevice, VkQueue copyQueue);
+        void fromglTfImage(tinygltf::Image& gltfimage, VmaAllocator allocator, TextureSampler textureSampler, VkQueue copyQueue);
     };
 
     struct Material
@@ -138,17 +138,17 @@ namespace vkglTF {
 
     struct Mesh
     {
-        VkDevice                device;
+        VmaAllocator            allocator;
         std::vector<Primitive*> primitives;
         BoundingBox             bb;
         BoundingBox             aabb;
         struct UniformBuffer
         {
-            VkBuffer               buffer;
-            VkDeviceMemory         memory;
-            VkDescriptorBufferInfo descriptor;
-            VkDescriptorSet        descriptorSet;
-            void*                  mapped;
+            VkBuffer               buffer{};
+            VmaAllocation          allocation{};
+            VkDescriptorBufferInfo descriptor{};
+            VkDescriptorSet        descriptorSet{};
+            void*                  mapped{};
         } uniformBuffer;
         struct UniformBlock
         {
@@ -156,7 +156,7 @@ namespace vkglTF {
             glm::mat4 jointMatrix[MAX_NUM_JOINTS]{};
             float     jointcount{0};
         } uniformBlock;
-        Mesh(VkDevice device, glm::mat4 matrix);
+        Mesh(VmaAllocator allocator, glm::mat4 matrix);
         ~Mesh();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };
@@ -227,9 +227,6 @@ namespace vkglTF {
 
     struct Model
     {
-
-        VkDevice device;
-
         struct Vertex
         {
             glm::vec3 pos;
@@ -242,14 +239,14 @@ namespace vkglTF {
 
         struct Vertices
         {
-            VkBuffer       buffer = VK_NULL_HANDLE;
-            VkDeviceMemory memory;
+            VkBuffer      buffer = VK_NULL_HANDLE;
+            VmaAllocation allocation;
         } vertices;
         struct Indices
         {
-            int            count;
-            VkBuffer       buffer = VK_NULL_HANDLE;
-            VkDeviceMemory memory;
+            int           count;
+            VkBuffer      buffer = VK_NULL_HANDLE;
+            VmaAllocation allocation;
         } indices;
 
         glm::mat4 aabb;
@@ -271,8 +268,9 @@ namespace vkglTF {
             glm::vec3 max = glm::vec3(-FLT_MAX);
         } dimensions;
 
-        void                 destroy(VkDevice device);
-        void                 loadNode(vkglTF::Node*          parent,
+        void                 destroy(VmaAllocator allocator);
+        void                 loadNode(VmaAllocator           allocator,
+                                      vkglTF::Node*          parent,
                                       const tinygltf::Node&  node,
                                       uint32_t               nodeIndex,
                                       const tinygltf::Model& model,
@@ -280,13 +278,13 @@ namespace vkglTF {
                                       std::vector<Vertex>&   vertexBuffer,
                                       float                  globalscale);
         void                 loadSkins(tinygltf::Model& gltfModel);
-        void                 loadTextures(tinygltf::Model& gltfModel, VkDevice device, VkQueue transferQueue);
+        void                 loadTextures(tinygltf::Model& gltfModel, VmaAllocator allocator, VkQueue transferQueue);
         VkSamplerAddressMode getVkWrapMode(int32_t wrapMode);
         VkFilter             getVkFilterMode(int32_t filterMode);
         void                 loadTextureSamplers(tinygltf::Model& gltfModel);
         void                 loadMaterials(tinygltf::Model& gltfModel);
         void                 loadAnimations(tinygltf::Model& gltfModel);
-        void                 loadFromFile(std::string filename, VkDevice device, VkQueue transferQueue, float scale = 1.0f);
+        void                 loadFromFile(std::string filename, VmaAllocator allocator, VkQueue transferQueue, float scale = 1.0f);
         void                 drawNode(Node* node, VkCommandBuffer commandBuffer);
         void                 draw(VkCommandBuffer commandBuffer);
         void                 calculateBoundingBox(Node* node, Node* parent);
