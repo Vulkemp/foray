@@ -1,5 +1,6 @@
 #include "hsk_defaultappbase.hpp"
 #include "hsk_logger.hpp"
+#include "vma/vk_mem_alloc.h"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -25,6 +26,7 @@ namespace hsk {
         BaseInitBuildSwapchain();
         BaseInitGetVkQueues();
         BaseInitCommandPool();
+        BaseInitCreateVma();
     }
 
     void DefaultAppBase::BaseInitSelectPhysicalDevice()
@@ -182,6 +184,22 @@ namespace hsk {
         if (vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault) != VK_SUCCESS) {
             throw std::runtime_error("failed to create command pool!");
         }
+    }
+
+    void DefaultAppBase::BaseInitCreateVma()
+    {
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+        
+        VmaAllocatorCreateInfo allocatorCreateInfo = {};
+        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+        allocatorCreateInfo.physicalDevice = mPhysicalDevice;
+        allocatorCreateInfo.device = mDevice;
+        allocatorCreateInfo.instance = mInstance;
+        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+        
+        vmaCreateAllocator(&allocatorCreateInfo, &mAllocator);
     }
 
     void DefaultAppBase::BaseCleanupVulkan()

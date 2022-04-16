@@ -46,6 +46,7 @@ namespace hsk {
         virtual void BaseInitBuildSwapchain();
         virtual void BaseInitGetVkQueues();
         virtual void BaseInitCommandPool();
+        virtual void BaseInitCreateVma();
 
         virtual void BaseCleanupVulkan() override;
 
@@ -80,6 +81,8 @@ namespace hsk {
 
         /// @brief Commandpool for the default queue.
         VkCommandPool mCommandPoolDefault;
+
+        VmaAllocator mAllocator;
 
 #pragma endregion
     };
