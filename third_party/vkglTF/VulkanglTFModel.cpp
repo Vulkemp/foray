@@ -6,16 +6,14 @@
  * This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
  */
 
-#pragma once
-
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_MSC_SECURE_CRT
 
 #include "VulkanglTFModel.h"
-#include <stdexcept>
 #include "vma/vk_mem_alloc.h"
+#include <stdexcept>
 
 #define VK_CHECK_RESULT(val)                                                                                                                                                       \
     if(val != VK_SUCCESS)                                                                                                                                                          \
@@ -27,14 +25,13 @@ namespace vkglTF {
 
     struct deviceInfo
     {
-        VkCommandPool    commandPool{};
+        VkCommandPool commandPool{};
     } deviceInfo;
-    
+
     // Bounding box
     // TODO: currently the allocator holds info on the device, thats why its passed to create/flush command buffers
-    VkCommandBuffer createCommandBuffer(VmaAllocator allocator, VkCommandBufferLevel level, bool begin = false)
+    VkCommandBuffer createCommandBuffer(VkDevice device, VkCommandBufferLevel level, bool begin = false)
     {
-        VkDevice device = allocator->m_hDevice;
         VkCommandBufferAllocateInfo cmdBufAllocateInfo{};
         cmdBufAllocateInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         cmdBufAllocateInfo.commandPool        = deviceInfo.commandPool;
@@ -62,9 +59,8 @@ namespace vkglTF {
         VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffer, &commandBufferBI));
     }
 
-    void flushCommandBuffer(VmaAllocator allocator, VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
+    void flushCommandBuffer(VkDevice device, VkCommandBuffer commandBuffer, VkQueue queue, bool free = true)
     {
-        VkDevice device = allocator->m_hDevice;
         VK_CHECK_RESULT(vkEndCommandBuffer(commandBuffer));
 
         VkSubmitInfo submitInfo{};
@@ -91,7 +87,13 @@ namespace vkglTF {
         }
     }
 
-    VkResult createBuffer(VmaAllocator allocator, VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VmaAllocation* allocation, VkDeviceSize size, VkBuffer* buffer, void* data = nullptr)
+    VkResult createBuffer(VmaAllocator            allocator,
+                          VkBufferUsageFlags      usageFlags,
+                          VmaAllocationCreateInfo allocInfo,
+                          VmaAllocation*          allocation,
+                          VkDeviceSize            size,
+                          VkBuffer*               buffer,
+                          void*                   data = nullptr)
     {
         // Create the buffer handle
         VkBufferCreateInfo bufferCreateInfo{};
@@ -164,16 +166,17 @@ namespace vkglTF {
 
     void Texture::destroy()
     {
-        VkDevice device = allocator->m_hDevice;
         vkDestroyImageView(device, view, nullptr);
         vkDestroyImage(device, image, nullptr);
         vmaDestroyImage(allocator, image, allocation);
         vkDestroySampler(device, sampler, nullptr);
     }
 
-    void Texture::fromglTfImage(tinygltf::Image& gltfimage, VmaAllocator allocator, TextureSampler textureSampler, VkQueue copyQueue)
+    void Texture::fromglTfImage(
+        tinygltf::Image& gltfimage, VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, TextureSampler textureSampler, VkQueue copyQueue)
     {
         this->allocator = allocator;
+        this->device    = device;
 
         unsigned char* buffer       = nullptr;
         VkDeviceSize   bufferSize   = 0;
@@ -211,7 +214,7 @@ namespace vkglTF {
         height    = gltfimage.height;
         mipLevels = static_cast<uint32_t>(floor(log2(std::max(width, height))) + 1.0);
 
-        vkGetPhysicalDeviceFormatProperties(allocator->GetPhysicalDevice(), format, &formatProperties);
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
         assert(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT);
         assert(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT);
 
@@ -244,7 +247,7 @@ namespace vkglTF {
 
         vmaCreateImage(allocator, &imageCreateInfo, &allocInfo, &image, &allocation, nullptr);
 
-        VkCommandBuffer copyCmd = createCommandBuffer(allocator, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = createCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkImageSubresourceRange subresourceRange = {};
         subresourceRange.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -286,11 +289,11 @@ namespace vkglTF {
             vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
         }
 
-        flushCommandBuffer(allocator, copyCmd, copyQueue, true);
+        flushCommandBuffer(device, copyCmd, copyQueue, true);
         vmaDestroyBuffer(allocator, stagingBuffer, stagingAllocation);
 
         // Generate the mip chain (glTF uses jpg and png, so we need to create this manually)
-        VkCommandBuffer blitCmd = createCommandBuffer(allocator, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer blitCmd = createCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         for(uint32_t i = 1; i < mipLevels; i++)
         {
             VkImageBlit imageBlit{};
@@ -357,7 +360,7 @@ namespace vkglTF {
             vkCmdPipelineBarrier(blitCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
         }
 
-        flushCommandBuffer(allocator, blitCmd, copyQueue, true);
+        flushCommandBuffer(device, blitCmd, copyQueue, true);
 
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -374,7 +377,7 @@ namespace vkglTF {
         samplerInfo.maxLod           = (float)mipLevels;
         samplerInfo.maxAnisotropy    = 8.0f;
         samplerInfo.anisotropyEnable = VK_TRUE;
-        VK_CHECK_RESULT(vkCreateSampler(allocator->m_hDevice, &samplerInfo, nullptr, &sampler));
+        VK_CHECK_RESULT(vkCreateSampler(device, &samplerInfo, nullptr, &sampler));
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType                       = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -385,7 +388,7 @@ namespace vkglTF {
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.layerCount = 1;
         viewInfo.subresourceRange.levelCount = mipLevels;
-        VK_CHECK_RESULT(vkCreateImageView(allocator->m_hDevice, &viewInfo, nullptr, &view));
+        VK_CHECK_RESULT(vkCreateImageView(device, &viewInfo, nullptr, &view));
 
         descriptor.sampler     = sampler;
         descriptor.imageView   = view;
@@ -419,7 +422,8 @@ namespace vkglTF {
         allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocInfo.flags                   = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-        VK_CHECK_RESULT(createBuffer(allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, &uniformBuffer.allocation, sizeof(uniformBlock), &uniformBuffer.buffer, &uniformBlock));
+        VK_CHECK_RESULT(
+            createBuffer(allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, &uniformBuffer.allocation, sizeof(uniformBlock), &uniformBuffer.buffer, &uniformBlock));
 
         VK_CHECK_RESULT(vmaMapMemory(allocator, uniformBuffer.allocation, &uniformBuffer.mapped));
         uniformBuffer.descriptor = {uniformBuffer.buffer, 0, sizeof(uniformBlock)};
@@ -501,16 +505,16 @@ namespace vkglTF {
 
     // Model
 
-    void Model::destroy(VmaAllocator allocator)
+    void Model::destroy()
     {
         if(vertices.buffer != VK_NULL_HANDLE)
         {
-            vmaDestroyBuffer(allocator, vertices.buffer, vertices.allocation);
+            vmaDestroyBuffer(context.allocator, vertices.buffer, vertices.allocation);
             vertices.buffer = VK_NULL_HANDLE;
         }
         if(indices.buffer != VK_NULL_HANDLE)
         {
-            vmaDestroyBuffer(allocator, indices.buffer, indices.allocation);
+            vmaDestroyBuffer(context.allocator, indices.buffer, indices.allocation);
             indices.buffer = VK_NULL_HANDLE;
         }
         for(auto texture : textures)
@@ -535,8 +539,7 @@ namespace vkglTF {
         skins.resize(0);
     };
 
-    void Model::loadNode(VmaAllocator           allocator,
-                         vkglTF::Node*          parent,
+    void Model::loadNode(vkglTF::Node*          parent,
                          const tinygltf::Node&  node,
                          uint32_t               nodeIndex,
                          const tinygltf::Model& model,
@@ -580,7 +583,7 @@ namespace vkglTF {
         {
             for(size_t i = 0; i < node.children.size(); i++)
             {
-                loadNode(allocator, newNode, model.nodes[node.children[i]], node.children[i], model, indexBuffer, vertexBuffer, globalscale);
+                loadNode(newNode, model.nodes[node.children[i]], node.children[i], model, indexBuffer, vertexBuffer, globalscale);
             }
         }
 
@@ -588,7 +591,7 @@ namespace vkglTF {
         if(node.mesh > -1)
         {
             const tinygltf::Mesh mesh    = model.meshes[node.mesh];
-            Mesh*                newMesh = new Mesh(allocator, newNode->matrix);
+            Mesh*                newMesh = new Mesh(context.allocator, newNode->matrix);
             for(size_t j = 0; j < mesh.primitives.size(); j++)
             {
                 const tinygltf::Primitive& primitive   = mesh.primitives[j];
@@ -847,7 +850,7 @@ namespace vkglTF {
                 textureSampler = textureSamplers[tex.sampler];
             }
             vkglTF::Texture texture;
-            texture.fromglTfImage(image, allocator, textureSampler, transferQueue);
+            texture.fromglTfImage(image, context.allocator, context.device, context.physicalDevice, textureSampler, transferQueue);
             textures.push_back(texture);
         }
     }
@@ -862,6 +865,8 @@ namespace vkglTF {
                 return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
             case 33648:
                 return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+            default:
+                throw std::runtime_error("Unable to convert wrapMode!");
         }
     }
 
@@ -881,6 +886,8 @@ namespace vkglTF {
                 return VK_FILTER_LINEAR;
             case 9987:
                 return VK_FILTER_LINEAR;
+            default:
+                throw std::runtime_error("Unable to convert filterMode!");
         }
     }
 
@@ -1168,7 +1175,7 @@ namespace vkglTF {
             for(size_t i = 0; i < scene.nodes.size(); i++)
             {
                 const tinygltf::Node node = gltfModel.nodes[scene.nodes[i]];
-                loadNode(allocator, nullptr, node, scene.nodes[i], gltfModel, indexBuffer, vertexBuffer, scale);
+                loadNode(nullptr, node, scene.nodes[i], gltfModel, indexBuffer, vertexBuffer, scale);
             }
             if(gltfModel.animations.size() > 0)
             {
@@ -1215,25 +1222,29 @@ namespace vkglTF {
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         // Create staging buffers
         // Vertex data
-        VK_CHECK_RESULT(createBuffer(allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &vertexStaging.allocation, vertexBufferSize, &vertexStaging.buffer, vertexBuffer.data()));
+        VK_CHECK_RESULT(
+            createBuffer(allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &vertexStaging.allocation, vertexBufferSize, &vertexStaging.buffer, vertexBuffer.data()));
         // Index data
         if(indexBufferSize > 0)
         {
-            VK_CHECK_RESULT(createBuffer(allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &indexStaging.allocation, indexBufferSize, &indexStaging.buffer, indexBuffer.data()));
+            VK_CHECK_RESULT(
+                createBuffer(allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &indexStaging.allocation, indexBufferSize, &indexStaging.buffer, indexBuffer.data()));
         }
 
         // Create device local buffers
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         // Vertex buffer
-        VK_CHECK_RESULT(createBuffer(allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &vertices.allocation, vertexBufferSize, &vertices.buffer));
+        VK_CHECK_RESULT(
+            createBuffer(allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &vertices.allocation, vertexBufferSize, &vertices.buffer));
         // Index buffer
         if(indexBufferSize > 0)
         {
-            VK_CHECK_RESULT(createBuffer(allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &indices.allocation, indexBufferSize, &indices.buffer));
+            VK_CHECK_RESULT(
+                createBuffer(allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &indices.allocation, indexBufferSize, &indices.buffer));
         }
 
         // Copy from staging buffers
-        VkCommandBuffer copyCmd = createCommandBuffer(allocator, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = createCommandBuffer(context.device, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copyRegion = {};
 
@@ -1246,7 +1257,7 @@ namespace vkglTF {
             vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.buffer, 1, &copyRegion);
         }
 
-        flushCommandBuffer(allocator, copyCmd, transferQueue, true);
+        flushCommandBuffer(context.device, copyCmd, transferQueue, true);
 
         vmaDestroyBuffer(allocator, vertexStaging.buffer, vertexStaging.allocation);
         if(indexBufferSize > 0)

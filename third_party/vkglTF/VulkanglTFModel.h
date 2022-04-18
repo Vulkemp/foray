@@ -67,6 +67,7 @@ namespace vkglTF {
     {
         VmaAllocator          allocator;
         VmaAllocation         allocation;
+        VkDevice              device;
         VkImage               image;
         VkImageLayout         imageLayout;
         VkImageView           view;
@@ -78,7 +79,7 @@ namespace vkglTF {
         void                  updateDescriptor();
         void                  destroy();
         // Load a texture from a glTF image (stored as vector of chars loaded via stb_image) and generate a full mip chaing for it
-        void fromglTfImage(tinygltf::Image& gltfimage, VmaAllocator allocator, TextureSampler textureSampler, VkQueue copyQueue);
+        void fromglTfImage(tinygltf::Image& gltfimage, VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, TextureSampler textureSampler, VkQueue copyQueue);
     };
 
     struct Material
@@ -268,9 +269,16 @@ namespace vkglTF {
             glm::vec3 max = glm::vec3(-FLT_MAX);
         } dimensions;
 
-        void                 destroy(VmaAllocator allocator);
-        void                 loadNode(VmaAllocator           allocator,
-                                      vkglTF::Node*          parent,
+        struct Context
+        {
+            VmaAllocator     allocator;
+            VkDevice         device;
+            VkPhysicalDevice physicalDevice;
+            inline bool      valid() const { return allocator && device && physicalDevice; }
+        } context;
+
+        void                 destroy();
+        void                 loadNode(vkglTF::Node*          parent,
                                       const tinygltf::Node&  node,
                                       uint32_t               nodeIndex,
                                       const tinygltf::Model& model,
