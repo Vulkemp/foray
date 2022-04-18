@@ -4,6 +4,12 @@
 #include "hsk_scene.hpp"
 
 namespace hsk {
+    Texture::Texture() {}
+    Texture::Texture(hsk::Scene* scene) : SceneComponent(scene)
+    {
+
+    }
+
     void Texture::InitFromTinyGltfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler)
     {
         Scene::VkContext& context = mOwningScene->Context();

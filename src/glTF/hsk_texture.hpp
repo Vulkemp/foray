@@ -14,19 +14,10 @@ namespace hsk {
         VkSamplerAddressMode AddressModeW;
     };
 
-    class Texture : public NoMoveDefaults
+    /// @brief Represents an image based texture
+    class Texture : public SceneComponent, public NoMoveDefaults
     {
       public:
-        Texture();
-        Texture(Scene* scene);
-
-        inline Texture& OwningScene(hsk::Scene* scene)
-        {
-            mOwningScene = scene;
-            return *this;
-        }
-        inline hsk::Scene*                  OwningScene() { return mOwningScene; }
-        inline const hsk::Scene*            OwningScene() const { return mOwningScene; }
         inline VkImage                      Image() { return mImage; }
         inline const VkImage                Image() const { return mImage; }
         inline VkImageLayout                ImageLayout() { return mImageLayout; }
@@ -38,17 +29,18 @@ namespace hsk {
         inline const VkDescriptorImageInfo& DescriptorImageInfo() const { return mDescriptor; }
 
 
+        Texture();
+        Texture(Scene* scene);
+
         void InitFromTinyGltfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler);
         void Cleanup();
         void UpdateDescriptor();
 
         inline bool IsLoaded() const { return mImage != nullptr; }
 
-
         virtual ~Texture();
 
       protected:
-        hsk::Scene*           mOwningScene = nullptr;
         VmaAllocation         mAllocation  = nullptr;
         VkImage               mImage       = nullptr;
         VkImageLayout         mImageLayout = {};
