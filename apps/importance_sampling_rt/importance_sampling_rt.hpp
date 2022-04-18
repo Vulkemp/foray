@@ -1,5 +1,7 @@
 #pragma once
 
+#include <hsk_exception.hpp>
+
 #include <glm/glm.hpp>
 
 #include <algorithm>
@@ -639,8 +641,8 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
         if(!file.is_open())
         {
-            hsk::logger()->error(fullFileName.c_str());
-            throw std::runtime_error("failed to open file!");
+            // hsk::logger()->error(fullFileName.c_str());
+            throw hsk::Exception("failed to open file {}", fullFileName.c_str());
         }
 
         size_t            fileSize = (size_t)file.tellg();

@@ -59,8 +59,7 @@ namespace hsk {
         auto physicalDeviceSelectionReturn = pds.select();
         if(!physicalDeviceSelectionReturn)
         {
-            logger()->error("Physical device creation: {}", physicalDeviceSelectionReturn.error().message());
-            throw std::exception();
+            throw Exception("Physical device creation: {}", physicalDeviceSelectionReturn.error().message().c_str());
         }
         mPhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
         mPhysicalDevice    = mPhysicalDeviceVkb.physical_device;
@@ -112,8 +111,7 @@ namespace hsk {
         auto deviceBuilderReturn = deviceBuilder.build();
         if(!deviceBuilderReturn)
         {
-            logger()->error("Device creation: {}", deviceBuilderReturn.error().message());
-            throw std::exception();
+            throw Exception("Device creation: {}", deviceBuilderReturn.error().message());
         }
         mDeviceVkb = deviceBuilderReturn.value();
         mDevice    = mDeviceVkb.device;
@@ -142,8 +140,7 @@ namespace hsk {
 
         if(!swapchainBuilderReturn)
         {
-            logger()->error("Swapchain building: {}", swapchainBuilderReturn.error().message());
-            throw std::exception();
+            throw Exception("Swapchain building: {}", swapchainBuilderReturn.error().message());
         }
 
         mSwapchainVkb = swapchainBuilderReturn.value();
@@ -156,8 +153,7 @@ namespace hsk {
         auto defaultQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::graphics);
         if(!defaultQueueReturn)
         {
-            logger()->error("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
-            throw std::exception();
+            throw Exception("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
         }
         mDefaultQueue.Queue            = defaultQueueReturn.value();
         mDefaultQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
@@ -165,8 +161,7 @@ namespace hsk {
         auto presentQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::present);
         if(!presentQueueReturn)
         {
-            logger()->error("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
-            throw std::exception();
+            throw Exception("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
         }
         mPresentQueue.Queue            = presentQueueReturn.value();
         mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
@@ -181,8 +176,9 @@ namespace hsk {
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
         poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
 
-        if (vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create command pool!");
+        VkResult result = vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault);
+        if (result != VK_SUCCESS) {
+            throw Exception("failed to create command pool! VkResult: {}", result);
         }
     }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <stdexcept>
+#include "hsk_exception.hpp"
 #include <stdint.h>
 #include <string>
 
