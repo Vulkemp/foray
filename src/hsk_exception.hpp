@@ -6,9 +6,6 @@ namespace hsk {
 
     class Exception : std::exception
     {
-      protected:
-        std::string mReason = std::string("");
-
       public:
         inline Exception() : mReason("") {}
         inline explicit Exception(std::string_view reason) : mReason(reason) {}
@@ -19,5 +16,17 @@ namespace hsk {
         }
 
         inline virtual const char* what() const noexcept override { return mReason.c_str(); }
+
+        static void Throw();
+        static void Throw(std::string_view reason);
+        template <typename... Args>
+        static void Throw(const char* const format, Args&&... args)
+        {
+            std::string reason = fmt::vformat(format, fmt::make_format_args(std::forward<Args>(args)...));
+            Throw(reason);
+        }
+      protected:
+        std::string mReason = std::string("");
+
     };
 }  // namespace hsk
