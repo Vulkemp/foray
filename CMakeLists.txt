@@ -31,6 +31,7 @@ if (WIN32)
         PUBLIC glm_static
         PUBLIC vkbootstrap
         PUBLIC vma
+        PUBLIC tinygltf
         PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
 else () 
     target_link_libraries(
@@ -39,6 +40,7 @@ else ()
         PUBLIC glm_static
         PUBLIC vkbootstrap
         PUBLIC vma
+        PUBLIC tinygltf
         PUBLIC -lSDL2
         PUBLIC -ldl
         )
@@ -61,6 +63,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 add_subdirectory("${thirdparty_dir}/vma")
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
+add_subdirectory("${thirdparty_dir}/tinygltf")
 
 # applications
 
