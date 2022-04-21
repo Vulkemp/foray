@@ -17,8 +17,9 @@
 #include <stdexcept>
 #include <vector>
 
-#include <hsk_rtrpf.hpp>
+#include <glTF/hsk_glTF.hpp>
 #include <hsk_env.hpp>
+#include <hsk_rtrpf.hpp>
 #include <stdint.h>
 
 class ImportanceSamplingRtProject : public hsk::DefaultAppBase
@@ -108,6 +109,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void initVulkan()
     {
+        loadScene();
         createRenderPass();
         createGraphicsPipeline();
         createFramebuffers();
@@ -154,6 +156,19 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         createRenderPass();
         createGraphicsPipeline();
         createFramebuffers();
+    }
+
+    void loadScene()
+    {
+        std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
+        hsk::Scene  scene;
+        scene.Context().Allocator = mAllocator;
+        scene.Context().Device = mDevice;
+        scene.Context().PhysicalDevice = mPhysicalDevice;
+        scene.Context().TransferCommandPool = mCommandPoolDefault;
+        scene.Context().TransferQueue = mDefaultQueue.Queue;
+
+        scene.loadFromFile(fullFileName);
     }
 
     void createRenderPass()
@@ -636,7 +651,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     static std::vector<char> readFile(const std::string& filename)
     {
-        std::string fullFileName = hsk::MakeRelativePath(filename);
+        std::string   fullFileName = hsk::MakeRelativePath(filename);
         std::ifstream file(fullFileName, std::ios::ate | std::ios::binary);
 
         if(!file.is_open())

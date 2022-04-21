@@ -1,4 +1,4 @@
-#include "hsk_Material.hpp"
+#include "hsk_material.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {

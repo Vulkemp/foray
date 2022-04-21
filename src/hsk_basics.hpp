@@ -2,6 +2,7 @@
 #include "hsk_exception.hpp"
 #include <stdint.h>
 #include <string>
+#include <memory>
 
 namespace hsk {
     using fp32_t = float;

@@ -4,6 +4,44 @@
 #include "hsk_scene.hpp"
 
 namespace hsk {
+
+    VkSamplerAddressMode TextureSampler::getVkWrapMode(int32_t wrapMode)
+    {
+        switch(wrapMode)
+        {
+            case 10497:
+                return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            case 33071:
+                return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            case 33648:
+                return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+            default:
+                throw Exception("TextureSampler::getVkWrapMode: Unable to convert wrapMode {}", wrapMode);
+        }
+    }
+
+    VkFilter TextureSampler::getVkFilterMode(int32_t filterMode)
+    {
+        switch(filterMode)
+        {
+            case 9728:
+                return VK_FILTER_NEAREST;
+            case 9729:
+                return VK_FILTER_LINEAR;
+            case 9984:
+                return VK_FILTER_NEAREST;
+            case 9985:
+                return VK_FILTER_NEAREST;
+            case 9986:
+                return VK_FILTER_LINEAR;
+            case 9987:
+                return VK_FILTER_LINEAR;
+            default:
+                throw Exception("TextureSampler::getVkFilterMode: Unable to convert filterMode {}", filterMode);
+        }
+    }
+
+
     Texture::Texture() {}
     Texture::Texture(hsk::Scene* scene) : SceneComponent(scene)
     {

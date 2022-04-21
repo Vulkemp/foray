@@ -12,6 +12,9 @@ namespace hsk {
         VkSamplerAddressMode AddressModeU;
         VkSamplerAddressMode AddressModeV;
         VkSamplerAddressMode AddressModeW;
+
+        static VkSamplerAddressMode getVkWrapMode(int32_t wrapMode);
+        static VkFilter getVkFilterMode(int32_t filterMode);
     };
 
     /// @brief Represents an image based texture

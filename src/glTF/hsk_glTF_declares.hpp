@@ -6,8 +6,19 @@ namespace hsk {
     class Texture;
     class TextureSampler;
     class Node;
+    struct Material;
+    class Primitive;
+    class Mesh;
+    class BoundingBox;
+    struct Vertex;
+    struct Vertices;
+    struct Indices;
+    class Skin;
+    struct AnimationChannel;
+    struct AnimationSampler;
+    struct Animation;
 
-    class SceneComponent
+    struct SceneComponent
     {
       public:
         inline SceneComponent() {}

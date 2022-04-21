@@ -31,7 +31,6 @@ if (WIN32)
         PUBLIC glm_static
         PUBLIC vkbootstrap
         PUBLIC vma
-        # PUBLIC vkglTF
         PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
 else () 
     target_link_libraries(
@@ -40,7 +39,6 @@ else ()
         PUBLIC glm_static
         PUBLIC vkbootstrap
         PUBLIC vma
-        # PUBLIC vkglTF
         PUBLIC -lSDL2
         PUBLIC -ldl
         )
@@ -54,14 +52,13 @@ include_directories(
 )
 
 target_precompile_headers(${PROJECT_NAME}
-    PRIVATE "src/osi/hsk_osi.hpp")
+    PRIVATE "src/hsk_precompile.hpp")
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 
 # subdirectories
 
 add_subdirectory("${thirdparty_dir}/vma")
-# add_subdirectory("${thirdparty_dir}/vkglTF")
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 

@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 
 namespace hsk {
-    class Material : public SceneComponent, public NoMoveDefaults
+    struct Material : public SceneComponent
     {
       public:
         enum EAlphaMode
@@ -129,6 +129,7 @@ namespace hsk {
 
         TexCoordSets TexCoordIndices;
 
+      protected:
         bool Loaded;
     };
 

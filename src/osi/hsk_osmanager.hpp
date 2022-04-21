@@ -1,4 +1,5 @@
 #pragma once
+#include "../hsk_basics.hpp"
 #include "hsk_osi_declares.hpp"
 #include <sdl2/SDL.h>
 #include <vector>
