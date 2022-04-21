@@ -111,7 +111,7 @@ namespace hsk {
             VmaAllocation allocation;
         } vertexStaging, indexStaging;
 
-        VmaAllocationCreateInfo allocInfo;
+        VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         // Create staging buffers
         // Vertex data
