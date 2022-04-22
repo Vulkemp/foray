@@ -14,3 +14,7 @@ apps/importance_sampling_rt/logs/*
 
 # any dll
 **/*.dll
+
+# temporary symbolic link to glTF-Sample-Models/2.0
+apps/importance_sampling_rt/models/glTF-Sample-Models
+apps/importance_sampling_rt/models/glTF-Sample-Models/*

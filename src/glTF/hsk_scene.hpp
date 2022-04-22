@@ -73,6 +73,8 @@ namespace hsk {
             glm::vec3 max = glm::vec3(-FLT_MAX);
         } dimensions;
 
+        void Draw(VkCommandBuffer cmdbuffer);
+
       protected:
         VkContext                             mContext                = {};
         std::vector<Material>                 mMaterials              = {};
@@ -104,5 +106,6 @@ namespace hsk {
         void calculateBoundingBox(Node* node, Node* parent);
 
         void updateAnimation(uint32_t index, float time);
+        void drawNode(Node* node, VkCommandBuffer commandBuffer);
     };
 }  // namespace hsk

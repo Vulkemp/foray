@@ -369,4 +369,30 @@ namespace hsk {
             throw Exception("Assertion failed: Call executed expecting scene to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"), (isLoaded ? "loaded" : "unloaded"));
         }
     }
+
+    void Scene::Draw(VkCommandBuffer cmdbuffer)
+    {
+        const VkDeviceSize offsets[1] = {0};
+        vkCmdBindVertexBuffers(cmdbuffer, 0, 1, &vertices.Buffer, offsets);
+        vkCmdBindIndexBuffer(cmdbuffer, indices.Buffer, 0, VK_INDEX_TYPE_UINT32);
+        for(auto node : mNodesHierarchy)
+        {
+            drawNode(node, cmdbuffer);
+        }
+    }
+
+    void Scene::drawNode(Node* node, VkCommandBuffer commandBuffer)
+    {
+        if(node->mesh)
+        {
+            for(Primitive* primitive : node->mesh->mPrimitives)
+            {
+                vkCmdDrawIndexed(commandBuffer, primitive->indexCount, 1, primitive->firstIndex, 0, 0);
+            }
+        }
+        for(auto& child : node->children)
+        {
+            drawNode(child, commandBuffer);
+        }
+    }
 }  // namespace hsk

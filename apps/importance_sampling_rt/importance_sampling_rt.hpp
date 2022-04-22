@@ -33,7 +33,9 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     virtual void OnEvent(std::shared_ptr<hsk::Event> event) override;
 
 
-    inline virtual void Render(float delta) override { drawFrame(); }
+    inline virtual void Render(float delta) override { 
+        // drawFrame();
+         }
 
 
     const uint32_t WIDTH  = 800;
@@ -110,13 +112,13 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     void initVulkan()
     {
         loadScene();
-        createRenderPass();
-        createGraphicsPipeline();
-        createFramebuffers();
-        createVertexBuffer();
-        createIndexBuffer();
-        createCommandBuffers();
-        createSyncObjects();
+        // createRenderPass();
+        // createGraphicsPipeline();
+        // createFramebuffers();
+        // createVertexBuffer();
+        // createIndexBuffer();
+        // createCommandBuffers();
+        // createSyncObjects();
     }
 
     void cleanup()
@@ -160,7 +162,7 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void loadScene()
     {
-        std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
+        std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/WaterBottle/glTF/WaterBottle.gltf");
         hsk::Scene  scene;
         scene.Context().Allocator = mAllocator;
         scene.Context().Device = mDevice;

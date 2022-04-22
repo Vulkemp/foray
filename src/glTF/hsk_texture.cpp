@@ -125,7 +125,12 @@ namespace hsk {
         imageCreateInfo.extent        = mExtent;
         imageCreateInfo.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        vmaCreateImage(context.Allocator, &imageCreateInfo, &allocInfo, &mImage, &mAllocation, nullptr);
+        VmaAllocationCreateInfo imageAllocInfo = {};
+        allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        // allocInfo.flags                   = VMA_ALLOCATION_CREATE;
+
+
+        AssertVkResult(vmaCreateImage(context.Allocator, &imageCreateInfo, &imageAllocInfo, &mImage, &mAllocation, nullptr));
 
         VkCommandBuffer copyCmd = createCommandBuffer(context.Device, context.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
