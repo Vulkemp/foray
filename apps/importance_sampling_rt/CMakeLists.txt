@@ -27,7 +27,7 @@ endfunction()
 
 if (WIN32)
     # copy sdl2.dll to executable dir
-    hsk_postbuild_copy(${app} ${sdl2_dll} "${CMAKE_CURRENT_BINARY_DIR}")
+    hsk_postbuild_copy(${app} ${sdl2_dll} "${CMAKE_CURRENT_SOURCE_DIR}")
     target_link_libraries(${app} PUBLIC ${sdl2_libmain})
 endif()
 

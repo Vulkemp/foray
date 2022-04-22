@@ -1,9 +1,16 @@
-# ignore cmake output directory
-
+# ignore cmake output directories
 /build/*
+/out/*
 
-/out
+# Visual studio cache folder
 /.vs
+
+# Visual studio code stuff
 .vscode/settings.json
 .vscode/logs/*
+
+# Logs
 apps/importance_sampling_rt/logs/*
+
+# any dll
+**/*.dll

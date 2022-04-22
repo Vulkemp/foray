@@ -28,7 +28,7 @@
         "name": "Windows Launch Test Program",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}\\out\\build\\x64-Debug\\apps\\importance_sampling_rt\\importancesamplingrt.exe",
+        "program": "${workspaceFolder}\\build\\apps\\importance_sampling_rt\\Debug\\importancesamplingrt.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}/apps/importance_sampling_rt/",
