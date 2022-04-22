@@ -271,130 +271,11 @@ namespace hsk {
 
     void Scene::loadAnimations(const tinygltf::Model& gltfModel)
     {
-        for(const tinygltf::Animation& anim : gltfModel.animations)
+        for(int32_t i = 0; i < gltfModel.animations.size(); i++)
         {
-            Animation animation{};
-            animation.name = anim.name;
-            if(anim.name.empty())
-            {
-                animation.name = std::to_string(mAnimations.size());
-            }
-
-            // Samplers
-            for(auto& samp : anim.samplers)
-            {
-                AnimationSampler sampler{};
-
-                if(samp.interpolation == "LINEAR")
-                {
-                    sampler.interpolation = AnimationSampler::InterpolationType::LINEAR;
-                }
-                if(samp.interpolation == "STEP")
-                {
-                    sampler.interpolation = AnimationSampler::InterpolationType::STEP;
-                }
-                if(samp.interpolation == "CUBICSPLINE")
-                {
-                    sampler.interpolation = AnimationSampler::InterpolationType::CUBICSPLINE;
-                }
-
-                // Read sampler input time values
-                {
-                    const tinygltf::Accessor&   accessor   = gltfModel.accessors[samp.input];
-                    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
-                    const tinygltf::Buffer&     buffer     = gltfModel.buffers[bufferView.buffer];
-
-                    assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-
-                    const void*  dataPtr = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
-                    const float* buf     = static_cast<const float*>(dataPtr);
-                    for(size_t index = 0; index < accessor.count; index++)
-                    {
-                        sampler.inputs.push_back(buf[index]);
-                    }
-
-                    for(auto input : sampler.inputs)
-                    {
-                        if(input < animation.start)
-                        {
-                            animation.start = input;
-                        };
-                        if(input > animation.end)
-                        {
-                            animation.end = input;
-                        }
-                    }
-                }
-
-                // Read sampler output T/R/S values
-                {
-                    const tinygltf::Accessor&   accessor   = gltfModel.accessors[samp.output];
-                    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
-                    const tinygltf::Buffer&     buffer     = gltfModel.buffers[bufferView.buffer];
-
-                    assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-
-                    const void* dataPtr = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
-
-                    switch(accessor.type)
-                    {
-                        case TINYGLTF_TYPE_VEC3: {
-                            const glm::vec3* buf = static_cast<const glm::vec3*>(dataPtr);
-                            for(size_t index = 0; index < accessor.count; index++)
-                            {
-                                sampler.outputsVec4.push_back(glm::vec4(buf[index], 0.0f));
-                            }
-                            break;
-                        }
-                        case TINYGLTF_TYPE_VEC4: {
-                            const glm::vec4* buf = static_cast<const glm::vec4*>(dataPtr);
-                            for(size_t index = 0; index < accessor.count; index++)
-                            {
-                                sampler.outputsVec4.push_back(buf[index]);
-                            }
-                            break;
-                        }
-                        default: {
-                            throw Exception("Unknown accessor type: {}", accessor.type);
-                        }
-                    }
-                }
-
-                animation.samplers.push_back(sampler);
-            }
-
-            // Channels
-            for(auto& source : anim.channels)
-            {
-                AnimationChannel channel{};
-
-                if(source.target_path == "rotation")
-                {
-                    channel.path = AnimationChannel::PathType::ROTATION;
-                }
-                if(source.target_path == "translation")
-                {
-                    channel.path = AnimationChannel::PathType::TRANSLATION;
-                }
-                if(source.target_path == "scale")
-                {
-                    channel.path = AnimationChannel::PathType::SCALE;
-                }
-                if(source.target_path == "weights")
-                {
-                    throw Exception("Weights are not supported");
-                }
-                channel.samplerIndex = source.sampler;
-                channel.node         = GetNodeByIndex(source.target_node);
-                if(!channel.node)
-                {
-                    continue;
-                }
-
-                animation.channels.push_back(channel);
-            }
-
-            mAnimations.push_back(animation);
+            std::unique_ptr<Animation> animation = std::make_unique<Animation>(this);
+            animation->InitFromTinyGltfAnimation(gltfModel, gltfModel.animations[i], i);
+            mAnimations.push_back(std::move(animation));
         }
     }
 
@@ -453,6 +334,32 @@ namespace hsk {
         }
     }
 
+    void Scene::updateAnimation(uint32_t index, float time)
+    {
+        if(mAnimations.empty())
+        {
+            // std::cout << ".glTF does not contain animation." << std::endl;
+            return;
+        }
+        if(index > static_cast<uint32_t>(mAnimations.size()) - 1)
+        {
+            // std::cout << "No animation with index " << index << std::endl;
+            return;
+        }
+        Animation* animation = mAnimations[index].get();
+
+        bool updated = animation->Update(time);
+        if(updated)
+        {
+            for(auto& node : mNodesLinear)
+            {
+                if(node)
+                {
+                    node->update();
+                }
+            }
+        }
+    }
 
     void Scene::AssertSceneloaded(bool loaded)
     {

@@ -1,6 +1,7 @@
 #pragma once
 #include "hsk_glTF_declares.hpp"
 #include <glm/glm.hpp>
+#include <tinygltf/tiny_gltf.h>
 
 namespace hsk {
     struct AnimationChannel
@@ -29,13 +30,20 @@ namespace hsk {
         std::vector<glm::vec4> outputsVec4   = {};
     };
 
-    struct Animation
+    class Animation : public SceneComponent, public NoMoveDefaults
     {
+      public:
         std::string                   name     = {};
         std::vector<AnimationSampler> samplers = {};
         std::vector<AnimationChannel> channels = {};
         float                         start    = std::numeric_limits<float>::max();
         float                         end      = std::numeric_limits<float>::min();
+
+        inline explicit Animation(Scene* scene) : SceneComponent(scene) {}
+
+        void InitFromTinyGltfAnimation(const tinygltf::Model& model, const tinygltf::Animation& animation, int32_t index);
+
+        bool Update(float time);
     };
 
 }  // namespace hsk

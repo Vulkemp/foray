@@ -3,6 +3,7 @@
 #include "hsk_geo.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_material.hpp"
+#include "hsk_node.hpp"
 #include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
 #include <memory>
@@ -10,7 +11,6 @@
 #include <vector>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include "hsk_node.hpp"
 
 namespace hsk {
 
@@ -87,9 +87,9 @@ namespace hsk {
         VertexBuffer vertices = {};
         IndexBuffer  indices  = {};
 
-        std::vector<TextureSampler> mTextureSamplers = {};
-        std::vector<Animation>      mAnimations      = {};
-        std::vector<std::string>    mExtensions      = {};
+        std::vector<TextureSampler>             mTextureSamplers = {};
+        std::vector<std::unique_ptr<Animation>> mAnimations      = {};
+        std::vector<std::string>                mExtensions      = {};
 
         void AssertSceneloaded(bool loaded = true);
 
@@ -102,5 +102,7 @@ namespace hsk {
 
         void calculateSceneDimensions();
         void calculateBoundingBox(Node* node, Node* parent);
+
+        void updateAnimation(uint32_t index, float time);
     };
 }  // namespace hsk

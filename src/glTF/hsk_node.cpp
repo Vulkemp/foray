@@ -95,11 +95,6 @@ namespace hsk {
                 memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
             }
         }
-
-        for(auto& child : children)
-        {
-            child->update();
-        }
     }
 
     Node::~Node() {}
