@@ -4,12 +4,12 @@
 namespace hsk {
     class Scene;
     class Texture;
-    class TextureSampler;
+    struct TextureSampler;
     class Node;
     struct Material;
     class Primitive;
     class Mesh;
-    class BoundingBox;
+    struct BoundingBox;
     struct Vertex;
     struct VertexBuffer;
     struct IndexBuffer;
