@@ -10,15 +10,15 @@
 namespace hsk {
     void Scene::destroy()
     {
-        if(vertices.buffer != VK_NULL_HANDLE)
+        if(vertices.Buffer != VK_NULL_HANDLE)
         {
-            vmaDestroyBuffer(mContext.Allocator, vertices.buffer, vertices.allocation);
-            vertices.buffer = VK_NULL_HANDLE;
+            vmaDestroyBuffer(mContext.Allocator, vertices.Buffer, vertices.Allocation);
+            vertices.Buffer = VK_NULL_HANDLE;
         }
-        if(indices.buffer != VK_NULL_HANDLE)
+        if(indices.Buffer != VK_NULL_HANDLE)
         {
-            vmaDestroyBuffer(mContext.Allocator, indices.buffer, indices.allocation);
-            indices.buffer = VK_NULL_HANDLE;
+            vmaDestroyBuffer(mContext.Allocator, indices.Buffer, indices.Allocation);
+            indices.Buffer = VK_NULL_HANDLE;
         }
 
         // Texture has a destructor which cleans up unmanaged buffers automatically, so this is safe
@@ -101,7 +101,7 @@ namespace hsk {
 
         size_t vertexBufferSize = vertexBuffer.size() * sizeof(Vertex);
         size_t indexBufferSize  = indexBuffer.size() * sizeof(uint32_t);
-        indices.count           = static_cast<uint32_t>(indexBuffer.size());
+        indices.Count           = static_cast<uint32_t>(indexBuffer.size());
 
         assert(vertexBufferSize > 0);
 
@@ -112,7 +112,8 @@ namespace hsk {
         } vertexStaging, indexStaging;
 
         VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         // Create staging buffers
         // Vertex data
 
@@ -126,11 +127,11 @@ namespace hsk {
         // Create device local buffers
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         // Vertex buffer
-        createBuffer(mContext.Allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &vertices.allocation, vertexBufferSize, &vertices.buffer);
+        createBuffer(mContext.Allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &vertices.Allocation, vertexBufferSize, &vertices.Buffer);
         // Index buffer
         if(indexBufferSize > 0)
         {
-            createBuffer(mContext.Allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &indices.allocation, indexBufferSize, &indices.buffer);
+            createBuffer(mContext.Allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &indices.Allocation, indexBufferSize, &indices.Buffer);
         }
 
         // Copy from staging buffers
@@ -139,12 +140,12 @@ namespace hsk {
         VkBufferCopy copyRegion = {};
 
         copyRegion.size = vertexBufferSize;
-        vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertices.buffer, 1, &copyRegion);
+        vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertices.Buffer, 1, &copyRegion);
 
         if(indexBufferSize > 0)
         {
             copyRegion.size = indexBufferSize;
-            vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.buffer, 1, &copyRegion);
+            vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.Buffer, 1, &copyRegion);
         }
 
         flushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
@@ -472,9 +473,9 @@ namespace hsk {
 
         if(node->mesh)
         {
-            if(node->mesh->bb.valid)
+            if(node->mesh->mBoundingBox.valid)
             {
-                node->aabb = node->mesh->bb.getAABB(node->getMatrix());
+                node->aabb = node->mesh->mBoundingBox.getAABB(node->getMatrix());
                 if(node->children.size() == 0)
                 {
                     node->bvh.min   = node->aabb.min;

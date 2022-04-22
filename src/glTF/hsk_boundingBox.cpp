@@ -1,6 +1,8 @@
 #include "hsk_boundingBox.hpp"
 
 namespace hsk {
+    bool BoundingBox::Valid() const { return (max.x - min.x) > 0 && (max.y - min.y) > 0 && (max.z - min.z) > 0; }
+
     BoundingBox::BoundingBox(){};
 
     BoundingBox::BoundingBox(glm::vec3 min, glm::vec3 max) : min(min), max(max){};

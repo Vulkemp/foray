@@ -63,7 +63,6 @@ namespace hsk {
         resolveTinygltfMaterial(material.emissiveTexture, mOwningScene, EmissiveTexture, TexCoordIndices.Emissive);
         resolveTinygltfMaterial(material.normalTexture, mOwningScene, NormalTexture, TexCoordIndices.Normal);
         resolveTinygltfMaterial(material.occlusionTexture, mOwningScene, OcclusionTexture, TexCoordIndices.Occlusion);
-        Loaded = true;
     }
 
 }  // namespace hsk

@@ -7,25 +7,27 @@
 namespace hsk {
     struct Vertex
     {
-        glm::vec3 pos;
-        glm::vec3 normal;
-        glm::vec2 uv0;
-        glm::vec2 uv1;
-        glm::vec4 joint0;
-        glm::vec4 weight0;
+        glm::vec3 Pos;
+        glm::vec3 Normal;
+        glm::vec2 Uv0;
+        glm::vec2 Uv1;
+        glm::vec4 Joint0;
+        glm::vec4 Weight0;
     };
 
-    struct Vertices
+    // TODO: Redo these buffer wrappers
+
+    struct VertexBuffer : public NoMoveDefaults
     {
-        VkBuffer      buffer = VK_NULL_HANDLE;
-        VmaAllocation allocation;
+        VkBuffer      Buffer = VK_NULL_HANDLE;
+        VmaAllocation Allocation = {};
     };
 
-    struct Indices
+    struct IndexBuffer : public NoMoveDefaults
     {
-        int           count;
-        VkBuffer      buffer = VK_NULL_HANDLE;
-        VmaAllocation allocation;
+        int           Count = 0; // TODO: Consider removing member
+        VkBuffer      Buffer = VK_NULL_HANDLE;
+        VmaAllocation Allocation = {};
     };
 
 

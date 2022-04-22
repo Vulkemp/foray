@@ -13,12 +13,12 @@ namespace hsk {
     class Primitive
     {
       public:
-        uint32_t    firstIndex;
-        uint32_t    indexCount;
-        uint32_t    vertexCount;
+        uint32_t    firstIndex = 0;
+        uint32_t    indexCount = 0;
+        uint32_t    vertexCount = 0;
         Material&   material;
-        bool        hasIndices;
-        BoundingBox bb;
+        bool        hasIndices = false;
+        BoundingBox bb = {};
         Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material& material);
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };
@@ -26,9 +26,9 @@ namespace hsk {
     class Mesh : public SceneComponent, public NoMoveDefaults
     {
       public:
-        std::vector<Primitive*> primitives = {};
-        BoundingBox             bb         = {};
-        BoundingBox             aabb       = {};
+        std::vector<Primitive*> mPrimitives             = {};
+        BoundingBox             mBoundingBox            = {};
+        BoundingBox             mAxisAlignedBoundingBox = {};
         struct UniformBuffer
         {
             VkBuffer               buffer        = nullptr;
@@ -42,7 +42,7 @@ namespace hsk {
             glm::mat4 matrix                      = {};
             glm::mat4 jointMatrix[MAX_NUM_JOINTS] = {};
             float     jointcount                  = 0;
-        } uniformBlock;
+        } uniformBlock = {};
 
         Mesh();
         Mesh(Scene* scene);

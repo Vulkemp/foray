@@ -81,8 +81,8 @@ namespace hsk {
 
         std::vector<std::unique_ptr<Skin>> skins;
 
-        Vertices vertices;
-        Indices  indices;
+        VertexBuffer vertices;
+        IndexBuffer  indices;
 
         std::vector<TextureSampler> textureSamplers;
         std::vector<Animation>      animations;

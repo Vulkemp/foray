@@ -134,10 +134,10 @@ namespace hsk {
                 for(size_t v = 0; v < posAccessor.count; v++)
                 {
                     Vertex vert{};
-                    vert.pos    = glm::vec4(glm::make_vec3(&bufferPos[v * posByteStride]), 1.0f);
-                    vert.normal = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
-                    vert.uv0    = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
-                    vert.uv1    = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
+                    vert.Pos    = glm::vec4(glm::make_vec3(&bufferPos[v * posByteStride]), 1.0f);
+                    vert.Normal = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
+                    vert.Uv0    = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
+                    vert.Uv1    = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
 
                     if(hasSkin)
                     {
@@ -145,12 +145,12 @@ namespace hsk {
                         {
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
                                 const uint16_t* buf = static_cast<const uint16_t*>(bufferJoints);
-                                vert.joint0         = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
+                                vert.Joint0         = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
                                 break;
                             }
                             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
                                 const uint8_t* buf = static_cast<const uint8_t*>(bufferJoints);
-                                vert.joint0        = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
+                                vert.Joint0        = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
                                 break;
                             }
                             default:
@@ -159,13 +159,13 @@ namespace hsk {
                     }
                     else
                     {
-                        vert.joint0 = glm::vec4(0.0f);
+                        vert.Joint0 = glm::vec4(0.0f);
                     }
-                    vert.weight0 = hasSkin ? glm::make_vec4(&bufferWeights[v * weightByteStride]) : glm::vec4(0.0f);
+                    vert.Weight0 = hasSkin ? glm::make_vec4(&bufferWeights[v * weightByteStride]) : glm::vec4(0.0f);
                     // Fix for all zero weights
-                    if(glm::length(vert.weight0) == 0.0f)
+                    if(glm::length(vert.Weight0) == 0.0f)
                     {
-                        vert.weight0 = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+                        vert.Weight0 = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
                     }
                     vertexBuffer.push_back(vert);
                 }
@@ -212,33 +212,35 @@ namespace hsk {
             }
             Primitive* newPrimitive = new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? mOwningScene->Materials()[primitive.material] : mOwningScene->Materials().back());
             newPrimitive->setBoundingBox(posMin, posMax);
-            primitives.push_back(newPrimitive);
+            mPrimitives.push_back(newPrimitive);
         }
         // Mesh BB from BBs of primitives
-        for(auto p : primitives)
+        for(auto p : mPrimitives)
         {
-            if(p->bb.valid && !bb.valid)
+            if(p->bb.valid && !mBoundingBox.valid)
             {
-                bb       = p->bb;
-                bb.valid = true;
+                mBoundingBox       = p->bb;
+                mBoundingBox.valid = true;
             }
-            bb.min = glm::min(bb.min, p->bb.min);
-            bb.max = glm::max(bb.max, p->bb.max);
+            mBoundingBox.min = glm::min(mBoundingBox.min, p->bb.min);
+            mBoundingBox.max = glm::max(mBoundingBox.max, p->bb.max);
         }
+
+        vmaUnmapMemory(context.Allocator, uniformBuffer.allocation);
     };
 
     Mesh::~Mesh()
     {
         vmaDestroyBuffer(mOwningScene->Context().Allocator, uniformBuffer.buffer, uniformBuffer.allocation);
-        for(Primitive* p : primitives)
+        for(Primitive* p : mPrimitives)
             delete p;
     }
 
     void Mesh::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
-        bb.min   = min;
-        bb.max   = max;
-        bb.valid = true;
+        mBoundingBox.min   = min;
+        mBoundingBox.max   = max;
+        mBoundingBox.valid = true;
     }
 
 
