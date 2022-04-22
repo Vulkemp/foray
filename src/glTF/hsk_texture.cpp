@@ -5,7 +5,16 @@
 
 namespace hsk {
 
-    VkSamplerAddressMode TextureSampler::getVkWrapMode(int32_t wrapMode)
+    void TextureSampler::InitFromTinyGltfSampler(const tinygltf::Sampler& sampler)
+    {
+        MinFilter    = sTranslateToVkFilterMode(sampler.minFilter);
+        MagFilter    = sTranslateToVkFilterMode(sampler.magFilter);
+        AddressModeU = sTranslateToVkWrapMode(sampler.wrapS);
+        AddressModeV = sTranslateToVkWrapMode(sampler.wrapT);
+        AddressModeW = AddressModeV;
+    }
+
+    VkSamplerAddressMode TextureSampler::sTranslateToVkWrapMode(int32_t wrapMode)
     {
         switch(wrapMode)
         {
@@ -20,7 +29,7 @@ namespace hsk {
         }
     }
 
-    VkFilter TextureSampler::getVkFilterMode(int32_t filterMode)
+    VkFilter TextureSampler::sTranslateToVkFilterMode(int32_t filterMode)
     {
         switch(filterMode)
         {
@@ -43,10 +52,7 @@ namespace hsk {
 
 
     Texture::Texture() {}
-    Texture::Texture(hsk::Scene* scene) : SceneComponent(scene)
-    {
-
-    }
+    Texture::Texture(hsk::Scene* scene) : SceneComponent(scene) {}
 
     void Texture::InitFromTinyGltfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler)
     {
@@ -284,10 +290,10 @@ namespace hsk {
         vkDestroyImage(context.Device, mImage, nullptr);
         vmaDestroyImage(context.Allocator, mImage, mAllocation);
         vkDestroySampler(context.Device, mSampler, nullptr);
-        mImage = nullptr;
-        mImageView = nullptr;
+        mImage      = nullptr;
+        mImageView  = nullptr;
         mAllocation = nullptr;
-        mSampler = nullptr;
+        mSampler    = nullptr;
     }
 
     Texture::~Texture()

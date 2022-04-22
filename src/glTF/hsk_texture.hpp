@@ -7,14 +7,16 @@
 namespace hsk {
     struct TextureSampler
     {
-        VkFilter             MagFilter;
-        VkFilter             MinFilter;
-        VkSamplerAddressMode AddressModeU;
-        VkSamplerAddressMode AddressModeV;
-        VkSamplerAddressMode AddressModeW;
+        VkFilter             MagFilter    = VkFilter::VK_FILTER_LINEAR;
+        VkFilter             MinFilter    = VkFilter::VK_FILTER_LINEAR;
+        VkSamplerAddressMode AddressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        VkSamplerAddressMode AddressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        VkSamplerAddressMode AddressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
-        static VkSamplerAddressMode getVkWrapMode(int32_t wrapMode);
-        static VkFilter getVkFilterMode(int32_t filterMode);
+        void InitFromTinyGltfSampler(const tinygltf::Sampler& sampler);
+
+        static VkSamplerAddressMode sTranslateToVkWrapMode(int32_t wrapMode);
+        static VkFilter             sTranslateToVkFilterMode(int32_t filterMode);
     };
 
     /// @brief Represents an image based texture

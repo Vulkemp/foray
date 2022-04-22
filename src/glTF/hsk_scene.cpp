@@ -1,11 +1,11 @@
 #include "hsk_scene.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../hsk_vmaHelper.hpp"
+#include "hsk_animation.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_node.hpp"
 #include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
-#include "hsk_animation.hpp"
 
 namespace hsk {
     void Scene::destroy()
@@ -25,18 +25,35 @@ namespace hsk {
         mTextures.resize(0);
 
         // Texturesamplers are dumb structs, so this is safe
-        textureSamplers.resize(0);
+        mTextureSamplers.resize(0);
 
-        // TODO: Properly kill nodes
+        // Hierarchy only contains non-owning references. Nodes have proper destructors and linear nodes are std::unique_ptr, so this is safe
+        mNodesHierarchy.resize(0);
+        mNodesLinear.resize(0);
 
         // Materials are dumb structs, so this is safe
         mMaterials.resize(0);
 
-        // TODO: Kill animations
+        // Animations are dumb structs, so this is safe
+        mAnimations.resize(0);
 
-        extensions.resize(0);
+        mExtensions.resize(0);
 
         // TODO: Kill skins
+        mSkins.resize(0);
+    }
+
+    void Scene::LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+    {
+        const tinygltf::Node& gltfnode = gltfModel.nodes[index];
+        std::unique_ptr<Node> node     = std::make_unique<Node>(this);
+        node->InitFromTinyGltfNode(gltfModel, gltfnode, index, indexBuffer, vertexBuffer);
+        mNodesLinear[index] = std::move(node);
+
+        for(int32_t childIndex : gltfnode.children)
+        {
+            LoadNodeRecursive(gltfModel, childIndex, indexBuffer, vertexBuffer);
+        }
     }
 
     void Scene::loadFromFile(std::string filename, float scale)
@@ -66,24 +83,44 @@ namespace hsk {
             loadMaterials(gltfModel);
             // TODO: scene handling with no default scene
             const tinygltf::Scene& scene = gltfModel.scenes[gltfModel.defaultScene > -1 ? gltfModel.defaultScene : 0];
+
+            // Gltf files can contain multiple scenes, which are maintained in one large node array.
+            // Solution here is to always have the entire vector ready so node indices can be resolved efficiently.
+            // our storage vector contains std::unique_ptr, which are small. Most models will only contain one scene.
+            mNodesLinear.resize(gltfModel.nodes.size());
+
+            // We load nodes recursively, as this is the only way to catch all nodes that are part of our scene
             for(size_t i = 0; i < scene.nodes.size(); i++)
             {
-                const tinygltf::Node node = gltfModel.nodes[scene.nodes[i]];
-                loadNode(nullptr, node, scene.nodes[i], gltfModel, indexBuffer, vertexBuffer, scale);
+                LoadNodeRecursive(gltfModel, scene.nodes[i], indexBuffer, vertexBuffer);
             }
+
+            // Setup parents
+            for(auto& node : mNodesLinear)
+            {
+                if(node)
+                {
+                    node->ResolveParent();
+                    if(!node->parent)
+                    {
+                        mNodesHierarchy.push_back(node.get());
+                    }
+                }
+            }
+
             // TODO: Load Animations
-            // if(gltfModel.animations.size() > 0)
-            // {
-            //     loadAnimations(gltfModel);
-            // }
+            if(gltfModel.animations.size() > 0)
+            {
+                loadAnimations(gltfModel);
+            }
             loadSkins(gltfModel);
 
-            for(auto& node : linearNodes)
+            for(auto& node : mNodesLinear)
             {
                 // Assign skins
                 if(node->skinIndex > -1)
                 {
-                    node->skin = skins[node->skinIndex].get();
+                    node->skin = mSkins[node->skinIndex].get();
                 }
                 // Initial pose
                 if(node->mesh)
@@ -97,7 +134,7 @@ namespace hsk {
             throw Exception("Could not load gltf file: {}", error);
         }
 
-        extensions = gltfModel.extensionsUsed;
+        mExtensions = gltfModel.extensionsUsed;
 
         size_t vertexBufferSize = vertexBuffer.size() * sizeof(Vertex);
         size_t indexBufferSize  = indexBuffer.size() * sizeof(uint32_t);
@@ -112,8 +149,8 @@ namespace hsk {
         } vertexStaging, indexStaging;
 
         VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        allocInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         // Create staging buffers
         // Vertex data
 
@@ -156,41 +193,28 @@ namespace hsk {
             vmaDestroyBuffer(mContext.Allocator, indexStaging.buffer, indexStaging.allocation);
         }
 
-        getSceneDimensions();
+        calculateSceneDimensions();
     }
 
-    void Scene::loadTextureSamplers(tinygltf::Model& gltfModel)
+    void Scene::loadTextureSamplers(const tinygltf::Model& gltfModel)
     {
-        for(tinygltf::Sampler smpl : gltfModel.samplers)
+        for(const tinygltf::Sampler& smpl : gltfModel.samplers)
         {
             TextureSampler sampler{};
-            sampler.MinFilter    = TextureSampler::getVkFilterMode(smpl.minFilter);
-            sampler.MagFilter    = TextureSampler::getVkFilterMode(smpl.magFilter);
-            sampler.AddressModeU = TextureSampler::getVkWrapMode(smpl.wrapS);
-            sampler.AddressModeV = TextureSampler::getVkWrapMode(smpl.wrapT);
-            sampler.AddressModeW = sampler.AddressModeV;
-            textureSamplers.push_back(sampler);
+            sampler.InitFromTinyGltfSampler(smpl);
+            mTextureSamplers.push_back(sampler);
         }
     }
 
-    void Scene::loadTextures(tinygltf::Model& gltfModel)
+    void Scene::loadTextures(const tinygltf::Model& gltfModel)
     {
-        for(tinygltf::Texture& tex : gltfModel.textures)
+        for(const tinygltf::Texture& tex : gltfModel.textures)
         {
             tinygltf::Image image = gltfModel.images[tex.source];
             TextureSampler  textureSampler;
-            if(tex.sampler == -1)
+            if(tex.sampler >= 0)
             {
-                // No sampler specified, use a default one
-                textureSampler.MagFilter    = VK_FILTER_LINEAR;
-                textureSampler.MinFilter    = VK_FILTER_LINEAR;
-                textureSampler.AddressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                textureSampler.AddressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                textureSampler.AddressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            }
-            else
-            {
-                textureSampler = textureSamplers[tex.sampler];
+                textureSampler = mTextureSamplers[tex.sampler];
             }
             std::unique_ptr<Texture> texture = std::make_unique<Texture>(this);
             texture->InitFromTinyGltfImage(image, textureSampler);
@@ -198,7 +222,7 @@ namespace hsk {
         }
     }
 
-    void Scene::loadMaterials(tinygltf::Model& gltfModel)
+    void Scene::loadMaterials(const tinygltf::Model& gltfModel)
     {
         for(auto& gltfmat : gltfModel.materials)
         {
@@ -206,72 +230,6 @@ namespace hsk {
             material.InitFromTinyGltfMaterial(gltfmat);
             mMaterials.push_back(material);
         }
-    }
-
-    void Scene::loadNode(Node*                  parent,
-                         const tinygltf::Node&  node,
-                         uint32_t               nodeIndex,
-                         const tinygltf::Model& model,
-                         std::vector<uint32_t>& indexBuffer,
-                         std::vector<Vertex>&   vertexBuffer,
-                         float                  globalscale)
-    {
-        std::unique_ptr<Node> newNode = std::make_unique<Node>();
-        newNode->index                = nodeIndex;
-        newNode->parent               = parent;
-        newNode->name                 = node.name;
-        newNode->skinIndex            = node.skin;
-        newNode->matrix               = glm::mat4(1.0f);
-
-        // Generate local node matrix
-        glm::vec3 translation = glm::vec3(0.0f);
-        if(node.translation.size() == 3)
-        {
-            translation          = glm::make_vec3(node.translation.data());
-            newNode->translation = translation;
-        }
-        glm::mat4 rotation = glm::mat4(1.0f);
-        if(node.rotation.size() == 4)
-        {
-            glm::quat q       = glm::make_quat(node.rotation.data());
-            newNode->rotation = glm::mat4(q);
-        }
-        glm::vec3 scale = glm::vec3(1.0f);
-        if(node.scale.size() == 3)
-        {
-            scale          = glm::make_vec3(node.scale.data());
-            newNode->scale = scale;
-        }
-        if(node.matrix.size() == 16)
-        {
-            newNode->matrix = glm::make_mat4x4(node.matrix.data());
-        };
-
-        // Node with children
-        if(node.children.size() > 0)
-        {
-            for(size_t i = 0; i < node.children.size(); i++)
-            {
-                loadNode(newNode.get(), model.nodes[node.children[i]], node.children[i], model, indexBuffer, vertexBuffer, globalscale);
-            }
-        }
-
-        // Node contains mesh data
-        if(node.mesh > -1)
-        {
-            // TODO: Consider using instancing here!
-            newNode->mesh = std::make_unique<Mesh>(this);
-            newNode->mesh->InitFromTinyGltfMesh(model, model.meshes[node.mesh], indexBuffer, vertexBuffer);
-        }
-        if(parent)
-        {
-            parent->children.push_back(newNode.get());
-        }
-        else
-        {
-            nodes.push_back(newNode.get());
-        }
-        linearNodes.push_back(std::move(newNode));
     }
 
     void Scene::loadSkins(const tinygltf::Model& gltfModel)
@@ -307,19 +265,19 @@ namespace hsk {
                 memcpy(newSkin->inverseBindMatrices.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(glm::mat4));
             }
 
-            skins.push_back(std::move(newSkin));
+            mSkins.push_back(std::move(newSkin));
         }
     }
 
-    void Scene::loadAnimations(tinygltf::Model& gltfModel)
+    void Scene::loadAnimations(const tinygltf::Model& gltfModel)
     {
-        for(tinygltf::Animation& anim : gltfModel.animations)
+        for(const tinygltf::Animation& anim : gltfModel.animations)
         {
             Animation animation{};
             animation.name = anim.name;
             if(anim.name.empty())
             {
-                animation.name = std::to_string(animations.size());
+                animation.name = std::to_string(mAnimations.size());
             }
 
             // Samplers
@@ -436,14 +394,14 @@ namespace hsk {
                 animation.channels.push_back(channel);
             }
 
-            animations.push_back(animation);
+            mAnimations.push_back(animation);
         }
     }
 
-    void Scene::getSceneDimensions()
+    void Scene::calculateSceneDimensions()
     {
         // Calculate binary volume hierarchy for all nodes in the scene
-        for(auto& node : linearNodes)
+        for(auto& node : mNodesLinear)
         {
             calculateBoundingBox(node.get(), nullptr);
         }
@@ -451,7 +409,7 @@ namespace hsk {
         dimensions.min = glm::vec3(FLT_MAX);
         dimensions.max = glm::vec3(-FLT_MAX);
 
-        for(auto& node : linearNodes)
+        for(auto& node : mNodesLinear)
         {
             if(node->bvh.valid)
             {
@@ -461,10 +419,11 @@ namespace hsk {
         }
 
         // Calculate scene aabb
-        aabb       = glm::scale(glm::mat4(1.0f), glm::vec3(dimensions.max[0] - dimensions.min[0], dimensions.max[1] - dimensions.min[1], dimensions.max[2] - dimensions.min[2]));
-        aabb[3][0] = dimensions.min[0];
-        aabb[3][1] = dimensions.min[1];
-        aabb[3][2] = dimensions.min[2];
+        mAxisAlignedBoundingBox =
+            glm::scale(glm::mat4(1.0f), glm::vec3(dimensions.max[0] - dimensions.min[0], dimensions.max[1] - dimensions.min[1], dimensions.max[2] - dimensions.min[2]));
+        mAxisAlignedBoundingBox[3][0] = dimensions.min[0];
+        mAxisAlignedBoundingBox[3][1] = dimensions.min[1];
+        mAxisAlignedBoundingBox[3][2] = dimensions.min[2];
     }
 
     void Scene::calculateBoundingBox(Node* node, Node* parent)

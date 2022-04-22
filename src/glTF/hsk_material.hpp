@@ -28,7 +28,7 @@ namespace hsk {
         Material();
         Material(Scene* scene);
 
-        void InitFromTinyGltfMaterial(tinygltf::Material& material);
+        void InitFromTinyGltfMaterial(const tinygltf::Material& material);
 
         static EAlphaMode ParseTinyGltfAlphaMode(std::string_view raw);
 

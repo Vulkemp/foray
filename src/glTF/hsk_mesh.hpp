@@ -13,12 +13,12 @@ namespace hsk {
     class Primitive
     {
       public:
-        uint32_t    firstIndex = 0;
-        uint32_t    indexCount = 0;
+        uint32_t    firstIndex  = 0;
+        uint32_t    indexCount  = 0;
         uint32_t    vertexCount = 0;
         Material&   material;
         bool        hasIndices = false;
-        BoundingBox bb = {};
+        BoundingBox bb         = {};
         Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material& material);
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };

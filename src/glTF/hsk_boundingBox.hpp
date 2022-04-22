@@ -8,13 +8,12 @@ namespace hsk {
       public:
         bool Valid() const;
 
-        glm::vec3 min;
-        glm::vec3 max;
+        glm::vec3 min   = {};
+        glm::vec3 max   = {};
         bool      valid = false;
         BoundingBox();
         BoundingBox(glm::vec3 min, glm::vec3 max);
         BoundingBox getAABB(glm::mat4 m);
-
     };
 
 

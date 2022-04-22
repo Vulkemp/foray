@@ -1,13 +1,16 @@
 #pragma once
+#include "hsk_animation.hpp"
 #include "hsk_geo.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_material.hpp"
+#include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
 #include <memory>
 #include <tinygltf/tiny_gltf.h>
 #include <vector>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "hsk_node.hpp"
 
 namespace hsk {
 
@@ -16,11 +19,11 @@ namespace hsk {
       public:
         struct VkContext
         {
-            VmaAllocator     Allocator;
-            VkDevice         Device;
-            VkPhysicalDevice PhysicalDevice;
-            VkCommandPool    TransferCommandPool;
-            VkQueue          TransferQueue;
+            VmaAllocator     Allocator           = nullptr;
+            VkDevice         Device              = nullptr;
+            VkPhysicalDevice PhysicalDevice      = nullptr;
+            VkCommandPool    TransferCommandPool = nullptr;
+            VkQueue          TransferQueue       = nullptr;
         };
 
         inline Scene& Context(VkContext& context)
@@ -51,9 +54,9 @@ namespace hsk {
 
         inline Node* GetNodeByIndex(int32_t index)
         {
-            if(index >= 0 && index < linearNodes.size())
+            if(index >= 0 && index < mNodesLinear.size())
             {
-                return linearNodes[index].get();
+                return mNodesLinear[index].get();
             }
             return nullptr;
         }
@@ -71,39 +74,33 @@ namespace hsk {
         } dimensions;
 
       protected:
-        VkContext                             mContext;
-        std::vector<Material>                 mMaterials;
-        std::vector<std::unique_ptr<Texture>> mTextures;
-        glm::mat4                             aabb;
+        VkContext                             mContext                = {};
+        std::vector<Material>                 mMaterials              = {};
+        std::vector<std::unique_ptr<Texture>> mTextures               = {};
+        glm::mat4                             mAxisAlignedBoundingBox = {};
 
-        std::vector<Node*>                 nodes;
-        std::vector<std::unique_ptr<Node>> linearNodes;
+        std::vector<Node*>                 mNodesHierarchy = {};
+        std::vector<std::unique_ptr<Node>> mNodesLinear    = {};
 
-        std::vector<std::unique_ptr<Skin>> skins;
+        std::vector<std::unique_ptr<Skin>> mSkins = {};
 
-        VertexBuffer vertices;
-        IndexBuffer  indices;
+        VertexBuffer vertices = {};
+        IndexBuffer  indices  = {};
 
-        std::vector<TextureSampler> textureSamplers;
-        std::vector<Animation>      animations;
-        std::vector<std::string> extensions;
+        std::vector<TextureSampler> mTextureSamplers = {};
+        std::vector<Animation>      mAnimations      = {};
+        std::vector<std::string>    mExtensions      = {};
 
         void AssertSceneloaded(bool loaded = true);
 
-        void loadTextureSamplers(tinygltf::Model& gltfModel);
-        void loadTextures(tinygltf::Model& gltfModel);
-        void loadMaterials(tinygltf::Model& gltfModel);
-        void loadNode(Node*                  parent,
-                      const tinygltf::Node&  node,
-                      uint32_t               nodeIndex,
-                      const tinygltf::Model& model,
-                      std::vector<uint32_t>& indexBuffer,
-                      std::vector<Vertex>&   vertexBuffer,
-                      float                  globalscale);
+        void loadTextureSamplers(const tinygltf::Model& gltfModel);
+        void loadTextures(const tinygltf::Model& gltfModel);
+        void loadMaterials(const tinygltf::Model& gltfModel);
         void loadSkins(const tinygltf::Model& gltfModel);
-        void loadAnimations(tinygltf::Model& gltfModel);
+        void loadAnimations(const tinygltf::Model& gltfModel);
+        void LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
 
-        void getSceneDimensions();
+        void calculateSceneDimensions();
         void calculateBoundingBox(Node* node, Node* parent);
     };
 }  // namespace hsk

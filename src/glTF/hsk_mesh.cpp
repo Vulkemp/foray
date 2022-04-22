@@ -30,10 +30,9 @@ namespace hsk {
         // this->uniformBlock.matrix = matrix; TODO set node matrix
 
 
-
         VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        allocInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
+        allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
         createBuffer(context.Allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, &uniformBuffer.allocation, sizeof(uniformBlock), &uniformBuffer.buffer, &uniformBlock);
 
@@ -210,7 +209,8 @@ namespace hsk {
                         throw Exception("Index component type {} not supported!", accessor.componentType);
                 }
             }
-            Primitive* newPrimitive = new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? mOwningScene->Materials()[primitive.material] : mOwningScene->Materials().back());
+            Primitive* newPrimitive =
+                new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? mOwningScene->Materials()[primitive.material] : mOwningScene->Materials().back());
             newPrimitive->setBoundingBox(posMin, posMax);
             mPrimitives.push_back(newPrimitive);
         }

@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # declare lib
 
 file(GLOB_RECURSE src "src/*.cpp")
-add_library(${PROJECT_NAME} ${src} )
+add_library(${PROJECT_NAME} STATIC ${src} )
 
 # dependencies
 
@@ -42,7 +42,6 @@ else ()
         PUBLIC vma
         PUBLIC tinygltf
         PUBLIC -lSDL2
-        PUBLIC -ldl
         )
 endif()
 

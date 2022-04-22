@@ -14,20 +14,23 @@ namespace hsk {
         glm::vec3 v0, v1;
 
         glm::vec3 right = glm::vec3(m[0]);
-        v0              = right * this->min.x;
-        v1              = right * this->max.x;
+
+        v0 = right * this->min.x;
+        v1 = right * this->max.x;
         min += glm::min(v0, v1);
         max += glm::max(v0, v1);
 
         glm::vec3 up = glm::vec3(m[1]);
-        v0           = up * this->min.y;
-        v1           = up * this->max.y;
+
+        v0 = up * this->min.y;
+        v1 = up * this->max.y;
         min += glm::min(v0, v1);
         max += glm::max(v0, v1);
 
         glm::vec3 back = glm::vec3(m[2]);
-        v0             = back * this->min.z;
-        v1             = back * this->max.z;
+
+        v0 = back * this->min.z;
+        v1 = back * this->max.z;
         min += glm::min(v0, v1);
         max += glm::max(v0, v1);
 

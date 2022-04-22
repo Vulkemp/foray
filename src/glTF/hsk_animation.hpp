@@ -11,9 +11,9 @@ namespace hsk {
             ROTATION,
             SCALE
         };
-        PathType path;
-        Node*    node;
-        uint32_t samplerIndex;
+        PathType path         = PathType::TRANSLATION;
+        Node*    node         = nullptr;
+        uint32_t samplerIndex = -1;
     };
 
     struct AnimationSampler
@@ -24,18 +24,18 @@ namespace hsk {
             STEP,
             CUBICSPLINE
         };
-        InterpolationType      interpolation;
-        std::vector<float>     inputs;
-        std::vector<glm::vec4> outputsVec4;
+        InterpolationType      interpolation = InterpolationType::LINEAR;
+        std::vector<float>     inputs        = {};
+        std::vector<glm::vec4> outputsVec4   = {};
     };
 
     struct Animation
     {
-        std::string                   name;
-        std::vector<AnimationSampler> samplers;
-        std::vector<AnimationChannel> channels;
-        float                         start = std::numeric_limits<float>::max();
-        float                         end   = std::numeric_limits<float>::min();
+        std::string                   name     = {};
+        std::vector<AnimationSampler> samplers = {};
+        std::vector<AnimationChannel> channels = {};
+        float                         start    = std::numeric_limits<float>::max();
+        float                         end      = std::numeric_limits<float>::min();
     };
 
 }  // namespace hsk

@@ -42,24 +42,24 @@ namespace hsk {
         }
     }
 
-    void Material::InitFromTinyGltfMaterial(tinygltf::Material& material)
+    void Material::InitFromTinyGltfMaterial(const tinygltf::Material& material)
     {
         // base info
-        Name = material.name;
-        AlphaMode        = ParseTinyGltfAlphaMode(material.alphaMode);
-        AlphaCutoff      = material.alphaCutoff;
-        IsDoubleSided    = material.doubleSided;
+        Name          = material.name;
+        AlphaMode     = ParseTinyGltfAlphaMode(material.alphaMode);
+        AlphaCutoff   = material.alphaCutoff;
+        IsDoubleSided = material.doubleSided;
 
         // Pbr Base Info
         BaseColorFactor = glm::vec4(material.pbrMetallicRoughness.baseColorFactor[0], material.pbrMetallicRoughness.baseColorFactor[1],
-                                     material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
+                                    material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
         MetallicFactor  = material.pbrMetallicRoughness.metallicFactor;
         RoughnessFactor = material.pbrMetallicRoughness.roughnessFactor;
         resolveTinygltfMaterial(material.pbrMetallicRoughness.baseColorTexture, mOwningScene, BaseColorTexture, TexCoordIndices.BaseColor);
         resolveTinygltfMaterial(material.pbrMetallicRoughness.metallicRoughnessTexture, mOwningScene, MetallicRoughnessTexture, TexCoordIndices.MetallicRoughness);
 
         // Aux Info
-        EmissiveFactor   = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+        EmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
         resolveTinygltfMaterial(material.emissiveTexture, mOwningScene, EmissiveTexture, TexCoordIndices.Emissive);
         resolveTinygltfMaterial(material.normalTexture, mOwningScene, NormalTexture, TexCoordIndices.Normal);
         resolveTinygltfMaterial(material.occlusionTexture, mOwningScene, OcclusionTexture, TexCoordIndices.Occlusion);
