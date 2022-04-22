@@ -111,7 +111,7 @@ namespace hsk {
         /// @brief Current reading from the axis
         inline int16_t State() const { return mState; }
 
-        inline EventInputAnalogue(Window* const source, const uint32_t timestamp, InputDevice* device, const InputAnalogue* axis, fp32_t current)
+        inline EventInputAnalogue(Window* const source, const uint32_t timestamp, InputDevice* device, const InputAnalogue* axis, int16_t current)
             : EventInput(source, timestamp, EType::InputAnalogue, device), mAxis(axis), mState(current)
         {
         }
