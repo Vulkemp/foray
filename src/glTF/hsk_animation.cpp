@@ -117,7 +117,7 @@ namespace hsk {
                 throw Exception("Weights are not supported");
             }
             channel.samplerIndex = source.sampler;
-            channel.node         = mOwningScene->GetNodeByIndex(source.target_node);
+            channel.node         = Owner()->GetNodeByIndex(source.target_node);
             if(!channel.node)
             {
                 continue;

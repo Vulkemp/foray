@@ -42,7 +42,7 @@ namespace hsk {
         if(gltfnode.mesh > -1)
         {
             // TODO: Consider using instancing here!
-            mesh = std::make_unique<Mesh>(mOwningScene);
+            mesh = std::make_unique<Mesh>(Owner());
             mesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], indexBuffer, vertexBuffer);
         }
     }
@@ -51,7 +51,7 @@ namespace hsk {
     {
         if(parentIndex >= 0)
         {
-            parent = mOwningScene->GetNodeByIndex(parentIndex);
+            parent = Owner()->GetNodeByIndex(parentIndex);
             parent->children.push_back(this);
         }
     }
@@ -73,6 +73,7 @@ namespace hsk {
     {
         if(mesh)
         {
+            mesh->uniformBuffer.Buffer.Map(mesh->uniformBuffer.mapped);
             glm::mat4 m = getMatrix();
             if(skin)
             {
@@ -94,6 +95,7 @@ namespace hsk {
             {
                 memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
             }
+            mesh->uniformBuffer.Buffer.Unmap();
         }
     }
 

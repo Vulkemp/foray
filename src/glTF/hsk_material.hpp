@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "hsk_glTF_declares.hpp"
+#include "hsk_scenecomponent.hpp"
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>

@@ -1,6 +1,6 @@
 #include "hsk_texture.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelper.hpp"
+#include "../hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {
@@ -56,7 +56,6 @@ namespace hsk {
 
     void Texture::InitFromTinyGltfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler)
     {
-        Scene::VkContext& context = mOwningScene->Context();
 
         unsigned char* buffer       = nullptr;
         VkDeviceSize   bufferSize   = 0;
@@ -94,7 +93,7 @@ namespace hsk {
         mExtent.height = gltfimage.height;
         mMipLevels     = static_cast<uint32_t>(floor(log2(std::max(mExtent.width, mExtent.height))) + 1.0);
 
-        vkGetPhysicalDeviceFormatProperties(context.PhysicalDevice, format, &formatProperties);
+        vkGetPhysicalDeviceFormatProperties(Context()->PhysicalDevice, format, &formatProperties);
         assert(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT);
         assert(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT);
 
@@ -109,7 +108,7 @@ namespace hsk {
         VmaAllocation stagingAllocation;
         VkBuffer      stagingBuffer;
 
-        createBuffer(context.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &stagingAllocation, bufferSize, &stagingBuffer, buffer);
+        createBuffer(Context()->Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &stagingAllocation, bufferSize, &stagingBuffer, buffer);
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -126,13 +125,13 @@ namespace hsk {
         imageCreateInfo.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
         VmaAllocationCreateInfo imageAllocInfo = {};
-        allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        allocInfo.usage                        = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         // allocInfo.flags                   = VMA_ALLOCATION_CREATE;
 
 
-        AssertVkResult(vmaCreateImage(context.Allocator, &imageCreateInfo, &imageAllocInfo, &mImage, &mAllocation, nullptr));
+        AssertVkResult(vmaCreateImage(Context()->Allocator, &imageCreateInfo, &imageAllocInfo, &mImage, &mAllocation, nullptr));
 
-        VkCommandBuffer copyCmd = createCommandBuffer(context.Device, context.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = createCommandBuffer(Context()->Device, Context()->TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkImageSubresourceRange subresourceRange = {};
         subresourceRange.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -171,11 +170,11 @@ namespace hsk {
             vkCmdPipelineBarrier(copyCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
         }
 
-        flushCommandBuffer(context.Device, context.TransferCommandPool, copyCmd, context.TransferQueue, true);
-        vmaDestroyBuffer(context.Allocator, stagingBuffer, stagingAllocation);
+        flushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmd, Context()->TransferQueue, true);
+        vmaDestroyBuffer(Context()->Allocator, stagingBuffer, stagingAllocation);
 
         // Generate the mip chain (glTF uses jpg and png, so we need to create this manually)
-        VkCommandBuffer blitCmd = createCommandBuffer(context.Device, context.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer blitCmd = createCommandBuffer(Context()->Device, Context()->TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         for(uint32_t i = 1; i < mMipLevels; i++)
         {
             VkImageBlit imageBlit{};
@@ -242,7 +241,7 @@ namespace hsk {
             vkCmdPipelineBarrier(blitCmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
         }
 
-        flushCommandBuffer(context.Device, context.TransferCommandPool, blitCmd, context.TransferQueue, true);
+        flushCommandBuffer(Context()->Device, Context()->TransferCommandPool, blitCmd, Context()->TransferQueue, true);
 
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -257,9 +256,9 @@ namespace hsk {
         samplerInfo.maxAnisotropy    = 1.0;
         samplerInfo.anisotropyEnable = VK_FALSE;
         samplerInfo.maxLod           = (float)mMipLevels;
-        samplerInfo.maxAnisotropy    = 8.0f;
-        samplerInfo.anisotropyEnable = VK_TRUE;
-        AssertVkResult(vkCreateSampler(mOwningScene->Context().Device, &samplerInfo, nullptr, &mSampler));
+        // samplerInfo.maxAnisotropy    = 8.0f;
+        // samplerInfo.anisotropyEnable = VK_TRUE;
+        AssertVkResult(vkCreateSampler(Context()->Device, &samplerInfo, nullptr, &mSampler));
 
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType                       = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -270,7 +269,7 @@ namespace hsk {
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.layerCount = 1;
         viewInfo.subresourceRange.levelCount = mMipLevels;
-        AssertVkResult(vkCreateImageView(mOwningScene->Context().Device, &viewInfo, nullptr, &mImageView));
+        AssertVkResult(vkCreateImageView(Context()->Device, &viewInfo, nullptr, &mImageView));
 
         mDescriptor.sampler     = mSampler;
         mDescriptor.imageView   = mImageView;
@@ -289,12 +288,9 @@ namespace hsk {
 
     void Texture::Cleanup()
     {
-        Scene::VkContext& context = mOwningScene->Context();
-
-        vkDestroyImageView(context.Device, mImageView, nullptr);
-        vkDestroyImage(context.Device, mImage, nullptr);
-        vmaDestroyImage(context.Allocator, mImage, mAllocation);
-        vkDestroySampler(context.Device, mSampler, nullptr);
+        vkDestroyImageView(Context()->Device, mImageView, nullptr);
+        vmaDestroyImage(Context()->Allocator, mImage, mAllocation);
+        vkDestroySampler(Context()->Device, mSampler, nullptr);
         mImage      = nullptr;
         mImageView  = nullptr;
         mAllocation = nullptr;

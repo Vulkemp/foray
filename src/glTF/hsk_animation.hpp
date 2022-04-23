@@ -1,5 +1,6 @@
 #pragma once
 #include "hsk_glTF_declares.hpp"
+#include "hsk_scenecomponent.hpp"
 #include <glm/glm.hpp>
 #include <tinygltf/tiny_gltf.h>
 

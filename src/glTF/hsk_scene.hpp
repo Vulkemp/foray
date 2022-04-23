@@ -1,9 +1,11 @@
 #pragma once
+#include "../hsk_vmaHelpers.hpp"
 #include "hsk_animation.hpp"
 #include "hsk_geo.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_material.hpp"
 #include "hsk_node.hpp"
+#include "hsk_scenecomponent.hpp"
 #include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
 #include <memory>
@@ -17,22 +19,18 @@ namespace hsk {
     class Scene : public NoMoveDefaults
     {
       public:
-        struct VkContext
+        inline Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
+            : mContext{allocator, device, physicalDevice, transferpool, transferqueue}
         {
-            VmaAllocator     Allocator           = nullptr;
-            VkDevice         Device              = nullptr;
-            VkPhysicalDevice PhysicalDevice      = nullptr;
-            VkCommandPool    TransferCommandPool = nullptr;
-            VkQueue          TransferQueue       = nullptr;
-        };
+        }
 
-        inline Scene& Context(VkContext& context)
+        inline Scene& Context(SceneVkContext& context)
         {
             mContext = context;
             return *this;
         }
-        inline VkContext&       Context() { return mContext; }
-        inline const VkContext& Context() const { return mContext; }
+        inline SceneVkContext&       Context() { return mContext; }
+        inline const SceneVkContext& Context() const { return mContext; }
 
         inline void GetTextures(std::vector<Texture*>& out)
         {
@@ -61,9 +59,9 @@ namespace hsk {
             return nullptr;
         }
 
-        void destroy();
+        void Cleanup();
 
-        void loadFromFile(std::string filename, float scale = 1.f);
+        void LoadFromFile(std::string filename, float scale = 1.f);
 
         inline std::vector<Material>& Materials() { return mMaterials; }
 
@@ -75,8 +73,10 @@ namespace hsk {
 
         void Draw(VkCommandBuffer cmdbuffer);
 
+        virtual ~Scene();
+
       protected:
-        VkContext                             mContext                = {};
+        SceneVkContext                        mContext                = {};
         std::vector<Material>                 mMaterials              = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};
         glm::mat4                             mAxisAlignedBoundingBox = {};
@@ -86,8 +86,8 @@ namespace hsk {
 
         std::vector<std::unique_ptr<Skin>> mSkins = {};
 
-        VertexBuffer vertices = {};
-        IndexBuffer  indices  = {};
+        ManagedBuffer vertices = {};
+        ManagedBuffer indices  = {};
 
         std::vector<TextureSampler>             mTextureSamplers = {};
         std::vector<std::unique_ptr<Animation>> mAnimations      = {};

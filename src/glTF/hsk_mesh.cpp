@@ -1,6 +1,6 @@
 #include "hsk_mesh.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelper.hpp"
+#include "../hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -26,7 +26,6 @@ namespace hsk {
     {
         // TODO: This function is incredibly ugly
 
-        Scene::VkContext& context = mOwningScene->Context();
         // this->uniformBlock.matrix = matrix; TODO set node matrix
 
 
@@ -34,11 +33,11 @@ namespace hsk {
         allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-        createBuffer(context.Allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, &uniformBuffer.allocation, sizeof(uniformBlock), &uniformBuffer.buffer, &uniformBlock);
+        uniformBuffer.Buffer.Init(Context()->Allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, sizeof(uniformBlock), &uniformBlock);
 
-        AssertVkResult(vmaMapMemory(context.Allocator, uniformBuffer.allocation, &uniformBuffer.mapped));
+        // AssertVkResult(vmaMapMemory(Context()->Allocator, uniformBuffer.allocation, &uniformBuffer.mapped));
 
-        uniformBuffer.descriptor = {uniformBuffer.buffer, 0, sizeof(uniformBlock)};
+        uniformBuffer.descriptor = {uniformBuffer.Buffer.Buffer(), 0, sizeof(uniformBlock)};
         for(size_t j = 0; j < mesh.primitives.size(); j++)
         {
             const tinygltf::Primitive& primitive   = mesh.primitives[j];
@@ -209,13 +208,13 @@ namespace hsk {
                         throw Exception("Index component type {} not supported!", accessor.componentType);
                 }
             }
-            Primitive* newPrimitive =
-                new Primitive(indexStart, indexCount, vertexCount, primitive.material > -1 ? mOwningScene->Materials()[primitive.material] : mOwningScene->Materials().back());
+            std::unique_ptr<Primitive> newPrimitive =
+                std::make_unique<Primitive>(indexStart, indexCount, vertexCount, primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->Materials().back());
             newPrimitive->setBoundingBox(posMin, posMax);
-            mPrimitives.push_back(newPrimitive);
+            mPrimitives.push_back(std::move(newPrimitive));
         }
         // Mesh BB from BBs of primitives
-        for(auto p : mPrimitives)
+        for(auto& p : mPrimitives)
         {
             if(p->bb.valid && !mBoundingBox.valid)
             {
@@ -225,16 +224,11 @@ namespace hsk {
             mBoundingBox.min = glm::min(mBoundingBox.min, p->bb.min);
             mBoundingBox.max = glm::max(mBoundingBox.max, p->bb.max);
         }
-
-        vmaUnmapMemory(context.Allocator, uniformBuffer.allocation);
     };
 
-    Mesh::~Mesh()
-    {
-        vmaDestroyBuffer(mOwningScene->Context().Allocator, uniformBuffer.buffer, uniformBuffer.allocation);
-        for(Primitive* p : mPrimitives)
-            delete p;
-    }
+    void Mesh::Cleanup() { uniformBuffer.Buffer.Destroy(); }
+
+    Mesh::~Mesh() { Cleanup(); }
 
     void Mesh::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {

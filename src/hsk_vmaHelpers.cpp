@@ -1,4 +1,5 @@
-#include "hsk_vmaHelper.hpp"
+#include "hsk_vmaHelpers.hpp"
+#include "base/hsk_logger.hpp"
 #include "hsk_vkHelpers.hpp"
 
 namespace hsk {
@@ -59,13 +60,8 @@ namespace hsk {
         }
     }
 
-    void createBuffer(VmaAllocator            allocator,
-                      VkBufferUsageFlags      usageFlags,
-                      VmaAllocationCreateInfo allocInfo,
-                      VmaAllocation*          allocation,
-                      VkDeviceSize            size,
-                      VkBuffer*               buffer,
-                      void*                   data)
+    void createBuffer(
+        VmaAllocator allocator, VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VmaAllocation* allocation, VkDeviceSize size, VkBuffer* buffer, void* data)
     {
         // Create the buffer handle
         VkBufferCreateInfo bufferCreateInfo{};
@@ -95,4 +91,61 @@ namespace hsk {
             vmaUnmapMemory(allocator, *allocation);
         }
     }
+
+    ManagedBuffer& ManagedBuffer::Allocator(VmaAllocator allocator)
+    {
+        AssertLoaded(false, "Allocator (Setter)");
+        mAllocator = allocator;
+        return *this;
+    }
+
+
+    void ManagedBuffer::Init(VmaAllocator allocator, VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VkDeviceSize size, void* data)
+    {
+        mAllocator = allocator;
+        Init(usageFlags, allocInfo, size, data);
+    }
+    void ManagedBuffer::Init(VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VkDeviceSize size, void* data)
+    {
+        createBuffer(mAllocator, usageFlags, allocInfo, &mAllocation, size, &mBuffer, data);
+    }
+
+    void ManagedBuffer::Map(void*& data)
+    {
+        AssertLoaded(true, "Map");
+        AssertVkResult(vmaMapMemory(mAllocator, mAllocation, &data));
+        mIsMapped = true;
+    }
+
+    void ManagedBuffer::Unmap()
+    {
+        if(!mAllocation)
+        {
+            logger()->warn("VmaBuffer::Unmap called on uninitialized buffer!");
+        }
+        vmaUnmapMemory(mAllocator, mAllocation);
+        mIsMapped = false;
+    }
+
+    void ManagedBuffer::Destroy()
+    {
+        if(mIsMapped)
+        {
+            logger()->warn("VmaBuffer::Destroy called before Unmap!");
+            Unmap();
+        }
+        vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
+        mBuffer     = nullptr;
+        mAllocation = nullptr;
+    }
+
+    void ManagedBuffer::AssertLoaded(bool loaded, const char* process)
+    {
+        bool isloaded = (bool)mAllocation;
+        if(loaded != isloaded)
+        {
+            throw Exception("VmaBuffer::{} requires the buffer to be {}!", process, loaded ? "loaded" : "uninitialized");
+        }
+    }
+
 }  // namespace hsk

@@ -162,15 +162,11 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void loadScene()
     {
-        std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/WaterBottle/glTF/WaterBottle.gltf");
-        hsk::Scene  scene;
-        scene.Context().Allocator = mAllocator;
-        scene.Context().Device = mDevice;
-        scene.Context().PhysicalDevice = mPhysicalDevice;
-        scene.Context().TransferCommandPool = mCommandPoolDefault;
-        scene.Context().TransferQueue = mDefaultQueue.Queue;
+        std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
+        // std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/WaterBottle/glTF/WaterBottle.gltf");
+        hsk::Scene  scene(mAllocator, mDevice, mPhysicalDevice, mCommandPoolDefault, mDefaultQueue.Queue);
 
-        scene.loadFromFile(fullFileName);
+        scene.LoadFromFile(fullFileName);
     }
 
     void createRenderPass()

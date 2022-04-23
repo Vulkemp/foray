@@ -55,14 +55,14 @@ namespace hsk {
                                     material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
         MetallicFactor  = material.pbrMetallicRoughness.metallicFactor;
         RoughnessFactor = material.pbrMetallicRoughness.roughnessFactor;
-        resolveTinygltfMaterial(material.pbrMetallicRoughness.baseColorTexture, mOwningScene, BaseColorTexture, TexCoordIndices.BaseColor);
-        resolveTinygltfMaterial(material.pbrMetallicRoughness.metallicRoughnessTexture, mOwningScene, MetallicRoughnessTexture, TexCoordIndices.MetallicRoughness);
+        resolveTinygltfMaterial(material.pbrMetallicRoughness.baseColorTexture, Owner(), BaseColorTexture, TexCoordIndices.BaseColor);
+        resolveTinygltfMaterial(material.pbrMetallicRoughness.metallicRoughnessTexture, Owner(), MetallicRoughnessTexture, TexCoordIndices.MetallicRoughness);
 
         // Aux Info
         EmissiveFactor = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
-        resolveTinygltfMaterial(material.emissiveTexture, mOwningScene, EmissiveTexture, TexCoordIndices.Emissive);
-        resolveTinygltfMaterial(material.normalTexture, mOwningScene, NormalTexture, TexCoordIndices.Normal);
-        resolveTinygltfMaterial(material.occlusionTexture, mOwningScene, OcclusionTexture, TexCoordIndices.Occlusion);
+        resolveTinygltfMaterial(material.emissiveTexture, Owner(), EmissiveTexture, TexCoordIndices.Emissive);
+        resolveTinygltfMaterial(material.normalTexture, Owner(), NormalTexture, TexCoordIndices.Normal);
+        resolveTinygltfMaterial(material.occlusionTexture, Owner(), OcclusionTexture, TexCoordIndices.Occlusion);
     }
 
 }  // namespace hsk

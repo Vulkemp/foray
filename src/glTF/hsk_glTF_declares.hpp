@@ -18,18 +18,4 @@ namespace hsk {
     struct AnimationSampler;
     struct Animation;
 
-    struct SceneComponent
-    {
-      public:
-        inline SceneComponent() {}
-        inline explicit SceneComponent(Scene* scene) : mOwningScene(scene) {}
-        inline virtual ~SceneComponent() {}
-
-        inline void         OwningScene(Scene* scene) { mOwningScene = scene; }
-        inline Scene*       OwningScene() { return mOwningScene; }
-        inline const Scene* OwningScene() const { return mOwningScene; }
-
-      protected:
-        Scene* mOwningScene = nullptr;
-    };
 }  // namespace hsk

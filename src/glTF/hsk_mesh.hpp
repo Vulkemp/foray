@@ -1,7 +1,9 @@
 #pragma once
+#include "../hsk_vmaHelpers.hpp"
 #include "glm/glm.hpp"
 #include "hsk_boundingBox.hpp"
 #include "hsk_glTF_declares.hpp"
+#include "hsk_scenecomponent.hpp"
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
@@ -25,14 +27,15 @@ namespace hsk {
 
     class Mesh : public SceneComponent, public NoMoveDefaults
     {
+        const size_t e = sizeof(Primitive);
+
       public:
-        std::vector<Primitive*> mPrimitives             = {};
-        BoundingBox             mBoundingBox            = {};
-        BoundingBox             mAxisAlignedBoundingBox = {};
+        std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
+        BoundingBox                             mBoundingBox            = {};
+        BoundingBox                             mAxisAlignedBoundingBox = {};
         struct UniformBuffer
         {
-            VkBuffer               buffer        = nullptr;
-            VmaAllocation          allocation    = nullptr;
+            ManagedBuffer          Buffer        = {};
             VkDescriptorBufferInfo descriptor    = {};
             VkDescriptorSet        descriptorSet = nullptr;
             void*                  mapped        = nullptr;
@@ -49,6 +52,7 @@ namespace hsk {
         void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
         ~Mesh();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
+        void Cleanup();
     };
 
 }  // namespace hsk

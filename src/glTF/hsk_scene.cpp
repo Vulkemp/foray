@@ -1,6 +1,6 @@
 #include "hsk_scene.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelper.hpp"
+#include "../hsk_vmaHelpers.hpp"
 #include "hsk_animation.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_node.hpp"
@@ -8,18 +8,10 @@
 #include "hsk_texture.hpp"
 
 namespace hsk {
-    void Scene::destroy()
+    void Scene::Cleanup()
     {
-        if(vertices.Buffer != VK_NULL_HANDLE)
-        {
-            vmaDestroyBuffer(mContext.Allocator, vertices.Buffer, vertices.Allocation);
-            vertices.Buffer = VK_NULL_HANDLE;
-        }
-        if(indices.Buffer != VK_NULL_HANDLE)
-        {
-            vmaDestroyBuffer(mContext.Allocator, indices.Buffer, indices.Allocation);
-            indices.Buffer = VK_NULL_HANDLE;
-        }
+        vertices.Destroy();
+        indices.Destroy();
 
         // Texture has a destructor which cleans up unmanaged buffers automatically, so this is safe
         mTextures.resize(0);
@@ -43,6 +35,8 @@ namespace hsk {
         mSkins.resize(0);
     }
 
+    Scene::~Scene() { Cleanup(); }
+
     void Scene::LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         const tinygltf::Node& gltfnode = gltfModel.nodes[index];
@@ -56,7 +50,7 @@ namespace hsk {
         }
     }
 
-    void Scene::loadFromFile(std::string filename, float scale)
+    void Scene::LoadFromFile(std::string filename, float scale)
     {
         tinygltf::Model    gltfModel;
         tinygltf::TinyGLTF gltfContext;
@@ -138,15 +132,11 @@ namespace hsk {
 
         size_t vertexBufferSize = vertexBuffer.size() * sizeof(Vertex);
         size_t indexBufferSize  = indexBuffer.size() * sizeof(uint32_t);
-        indices.Count           = static_cast<uint32_t>(indexBuffer.size());
+        // indices.Count           = static_cast<uint32_t>(indexBuffer.size());
 
         assert(vertexBufferSize > 0);
 
-        struct StagingBuffer
-        {
-            VkBuffer      buffer;
-            VmaAllocation allocation;
-        } vertexStaging, indexStaging;
+        ManagedBuffer vertexStaging, indexStaging;
 
         VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
@@ -154,21 +144,22 @@ namespace hsk {
         // Create staging buffers
         // Vertex data
 
-        createBuffer(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &vertexStaging.allocation, vertexBufferSize, &vertexStaging.buffer, vertexBuffer.data());
+        vertexStaging.Init(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, vertexBufferSize, vertexBuffer.data());
+        // createBuffer(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &vertexStaging.allocation, vertexBufferSize, &vertexStaging.buffer, vertexBuffer.data());
         // Index data
         if(indexBufferSize > 0)
         {
-            createBuffer(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &indexStaging.allocation, indexBufferSize, &indexStaging.buffer, indexBuffer.data());
+            indexStaging.Init(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, indexBufferSize, indexBuffer.data());
         }
 
         // Create device local buffers
         allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         // Vertex buffer
-        createBuffer(mContext.Allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &vertices.Allocation, vertexBufferSize, &vertices.Buffer);
+        vertices.Init(mContext.Allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, vertexBufferSize);
         // Index buffer
         if(indexBufferSize > 0)
         {
-            createBuffer(mContext.Allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, &indices.Allocation, indexBufferSize, &indices.Buffer);
+            indices.Init(mContext.Allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, indexBufferSize);
         }
 
         // Copy from staging buffers
@@ -177,20 +168,21 @@ namespace hsk {
         VkBufferCopy copyRegion = {};
 
         copyRegion.size = vertexBufferSize;
-        vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, vertices.Buffer, 1, &copyRegion);
+        vkCmdCopyBuffer(copyCmd, vertexStaging.Buffer(), vertices.Buffer(), 1, &copyRegion);
 
         if(indexBufferSize > 0)
         {
             copyRegion.size = indexBufferSize;
-            vkCmdCopyBuffer(copyCmd, indexStaging.buffer, indices.Buffer, 1, &copyRegion);
+            vkCmdCopyBuffer(copyCmd, indexStaging.Buffer(), indices.Buffer(), 1, &copyRegion);
         }
 
         flushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
 
-        vmaDestroyBuffer(mContext.Allocator, vertexStaging.buffer, vertexStaging.allocation);
+        vertexStaging.Destroy();
+
         if(indexBufferSize > 0)
         {
-            vmaDestroyBuffer(mContext.Allocator, indexStaging.buffer, indexStaging.allocation);
+            indexStaging.Destroy();
         }
 
         calculateSceneDimensions();
@@ -372,9 +364,10 @@ namespace hsk {
 
     void Scene::Draw(VkCommandBuffer cmdbuffer)
     {
-        const VkDeviceSize offsets[1] = {0};
-        vkCmdBindVertexBuffers(cmdbuffer, 0, 1, &vertices.Buffer, offsets);
-        vkCmdBindIndexBuffer(cmdbuffer, indices.Buffer, 0, VK_INDEX_TYPE_UINT32);
+        const VkDeviceSize offsets[1]      = {0};
+        VkBuffer           vertexBuffers[] = {vertices.Buffer()};
+        vkCmdBindVertexBuffers(cmdbuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(cmdbuffer, indices.Buffer(), 0, VK_INDEX_TYPE_UINT32);
         for(auto node : mNodesHierarchy)
         {
             drawNode(node, cmdbuffer);
@@ -385,7 +378,7 @@ namespace hsk {
     {
         if(node->mesh)
         {
-            for(Primitive* primitive : node->mesh->mPrimitives)
+            for(auto& primitive : node->mesh->mPrimitives)
             {
                 vkCmdDrawIndexed(commandBuffer, primitive->indexCount, 1, primitive->firstIndex, 0, 0);
             }
