@@ -112,13 +112,13 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     void initVulkan()
     {
         loadScene();
-        // createRenderPass();
-        // createGraphicsPipeline();
-        // createFramebuffers();
-        // createVertexBuffer();
-        // createIndexBuffer();
-        // createCommandBuffers();
-        // createSyncObjects();
+        createRenderPass();
+        createGraphicsPipeline();
+        createFramebuffers();
+        createVertexBuffer();
+        createIndexBuffer();
+        createCommandBuffers();
+        createSyncObjects();
     }
 
     void cleanup()
@@ -162,8 +162,8 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void loadScene()
     {
-        std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
-        // std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/WaterBottle/glTF/WaterBottle.gltf");
+        // std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
+        std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/Sponza/glTF/Sponza.gltf");
         hsk::Scene  scene(mAllocator, mDevice, mPhysicalDevice, mCommandPoolDefault, mDefaultQueue.Queue);
 
         scene.LoadFromFile(fullFileName);

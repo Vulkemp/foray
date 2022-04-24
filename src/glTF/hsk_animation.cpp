@@ -149,12 +149,12 @@ namespace hsk {
                         {
                             case AnimationChannel::EPathType::TRANSLATION: {
                                 glm::vec4 trans                      = glm::mix(sampler.Outputs[i], sampler.Outputs[i + 1], u);
-                                channel.Target->mTransform.Translation = glm::vec3(trans);
+                                channel.Target->GetTransform().Translation = glm::vec3(trans);
                                 break;
                             }
                             case AnimationChannel::EPathType::SCALE: {
                                 glm::vec4 trans                = glm::mix(sampler.Outputs[i], sampler.Outputs[i + 1], u);
-                                channel.Target->mTransform.Scale = glm::vec3(trans);
+                                channel.Target->GetTransform().Scale = glm::vec3(trans);
                                 break;
                             }
                             case AnimationChannel::EPathType::ROTATION: {
@@ -168,7 +168,7 @@ namespace hsk {
                                 q2.y                              = sampler.Outputs[i + 1].y;
                                 q2.z                              = sampler.Outputs[i + 1].z;
                                 q2.w                              = sampler.Outputs[i + 1].w;
-                                channel.Target->mTransform.Rotation = glm::normalize(glm::slerp(q1, q2, u));
+                                channel.Target->GetTransform().Rotation = glm::normalize(glm::slerp(q1, q2, u));
                                 break;
                             }
                         }

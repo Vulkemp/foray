@@ -19,11 +19,11 @@ namespace hsk {
 }  // namespace hsk
 
 #define HSK_PROPERTY_GET(member)                                                                                                                                                   \
-    inline auto& member() { return m##member; }
+    inline auto& Get##member() { return m##member; }
 #define HSK_PROPERTY_CGET(member)                                                                                                                                                  \
-    inline const auto& member() const { return m##member; }
+    inline const auto& Get##member() const { return m##member; }
 #define HSK_PROPERTY_SET(member)                                                                                                                                                   \
-    inline auto& member(const auto& value)                                                                                                                                         \
+    inline auto& Set##member(const auto& value)                                                                                                                                         \
     {                                                                                                                                                                              \
         m##member = value;                                                                                                                                                         \
         return *this;                                                                                                                                                              \
@@ -33,3 +33,4 @@ namespace hsk {
     HSK_PROPERTY_GET(member)                                                                                                                                                       \
     HSK_PROPERTY_CGET(member)                                                                                                                                                      \
     HSK_PROPERTY_SET(member)
+    

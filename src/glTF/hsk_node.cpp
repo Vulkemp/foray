@@ -33,26 +33,26 @@ namespace hsk {
         const tinygltf::Model& model, const tinygltf::Node& gltfnode, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         index     = index;
-        parent    = nullptr;
-        name      = gltfnode.name;
-        skinIndex = gltfnode.skin;
+        mParent    = nullptr;
+        mName      = gltfnode.name;
+        mSkinIndex = gltfnode.skin;
 
 
         // Node contains mesh data
         if(gltfnode.mesh > -1)
         {
             // TODO: Consider using instancing here!
-            mesh = std::make_unique<Mesh>(Owner());
-            mesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], indexBuffer, vertexBuffer);
+            mMesh = std::make_unique<Mesh>(Owner());
+            mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], indexBuffer, vertexBuffer);
         }
     }
 
     void Node::ResolveParent()
     {
-        if(parentIndex >= 0)
+        if(mParentIndex >= 0)
         {
-            parent = Owner()->GetNodeByIndex(parentIndex);
-            parent->children.push_back(this);
+            mParent = Owner()->GetNodeByIndex(mParentIndex);
+            mParent->mChildren.push_back(this);
         }
     }
 
@@ -60,42 +60,21 @@ namespace hsk {
     {
         // TODO: Save us some CPU work by caching local transformation matrices
         glm::mat4 m = mTransform.LocalMatrix();
-        Node*     p = parent;
+        Node*     p = mParent;
         while(p)
         {
             m = p->mTransform.LocalMatrix() * m;
-            p = p->parent;
+            p = p->mParent;
         }
         return m;
     }
 
     void Node::update()
     {
-        if(mesh)
+        if(mMesh)
         {
-            mesh->uniformBuffer.Buffer.Map(mesh->uniformBuffer.mapped);
-            glm::mat4 m = getMatrix();
-            if(skin)
-            {
-                mesh->uniformBlock.matrix = m;
-                // Update join matrices
-                glm::mat4 inverseTransform = glm::inverse(m);
-                size_t    numJoints        = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
-                for(size_t i = 0; i < numJoints; i++)
-                {
-                    Node*     jointNode               = skin->joints[i];
-                    glm::mat4 jointMat                = jointNode->getMatrix() * skin->inverseBindMatrices[i];
-                    jointMat                          = inverseTransform * jointMat;
-                    mesh->uniformBlock.jointMatrix[i] = jointMat;
-                }
-                mesh->uniformBlock.jointcount = (float)numJoints;
-                memcpy(mesh->uniformBuffer.mapped, &mesh->uniformBlock, sizeof(mesh->uniformBlock));
-            }
-            else
-            {
-                memcpy(mesh->uniformBuffer.mapped, &m, sizeof(glm::mat4));
-            }
-            mesh->uniformBuffer.Buffer.Unmap();
+            glm::mat4 mat = getMatrix();
+            mMesh->Update(mat, mSkin);
         }
     }
 

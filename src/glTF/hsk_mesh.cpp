@@ -2,6 +2,8 @@
 #include "../hsk_vkHelpers.hpp"
 #include "../hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
+#include "hsk_skin.hpp"
+#include <glm/ext.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace hsk {
@@ -17,9 +19,9 @@ namespace hsk {
 
     void Primitive::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
-        Bounds.Min()   = min;
-        Bounds.Max()   = max;
-        Bounds.Valid() = true;
+        Bounds.SetMin(min);
+        Bounds.SetMax(max);
+        Bounds.SetValid(true);
     }
 
     void Mesh::InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
@@ -33,11 +35,9 @@ namespace hsk {
         allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-        uniformBuffer.Buffer.Init(Context()->Allocator, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, allocInfo, sizeof(uniformBlock), &uniformBlock);
+        mUbo = std::make_unique<ManagedUbo<UniformBlock>>(Context()->Allocator);
+        mUbo->Init(false);
 
-        // AssertVkResult(vmaMapMemory(Context()->Allocator, uniformBuffer.allocation, &uniformBuffer.mapped));
-
-        uniformBuffer.descriptor = {uniformBuffer.Buffer.Buffer(), 0, sizeof(uniformBlock)};
         for(size_t j = 0; j < mesh.primitives.size(); j++)
         {
             const tinygltf::Primitive& primitive   = mesh.primitives[j];
@@ -209,32 +209,60 @@ namespace hsk {
                 }
             }
             std::unique_ptr<Primitive> newPrimitive =
-                std::make_unique<Primitive>(indexStart, indexCount, vertexCount, &(primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->FallbackMaterial()));
+                std::make_unique<Primitive>(indexStart, indexCount, vertexCount,
+                                            &(primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->GetFallbackMaterial()));
             newPrimitive->setBoundingBox(posMin, posMax);
             mPrimitives.push_back(std::move(newPrimitive));
         }
         // Mesh BB from BBs of primitives
         for(auto& p : mPrimitives)
         {
-            if(p->Bounds.Valid() && !mBoundingBox.Valid())
+            if(p->Bounds.GetValid() && !mBounds.GetValid())
             {
-                mBoundingBox        = p->Bounds;
-                mBoundingBox.Valid() = true;
+                mBounds            = p->Bounds;
+                mBounds.GetValid() = true;
             }
-            mBoundingBox.Min() = glm::min(mBoundingBox.Min(), p->Bounds.Min());
-            mBoundingBox.Max() = glm::max(mBoundingBox.Max(), p->Bounds.Max());
+            mBounds.SetMin(glm::min(mBounds.GetMin(), p->Bounds.GetMin()));
+            mBounds.SetMax(glm::max(mBounds.GetMax(), p->Bounds.GetMax()));
         }
     };
 
-    void Mesh::Cleanup() { uniformBuffer.Buffer.Destroy(); }
+    void Mesh::Cleanup()
+    {
+        if(mUbo)
+        {
+            mUbo->Cleanup();
+        }
+    }
 
     Mesh::~Mesh() { Cleanup(); }
 
     void Mesh::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
-        mBoundingBox.Min()   = min;
-        mBoundingBox.Max()   = max;
-        mBoundingBox.Valid() = true;
+        mBounds.SetMin(min);
+        mBounds.SetMax(max);
+        mBounds.SetValid(true);
+    }
+
+    void Mesh::Update(const glm::mat4& mat, Skin* skin)
+    {
+        Mesh::UniformBlock& ubo = mUbo->GetUbo();
+        ubo.matrix              = mat;
+        if(skin)
+        {
+            // Update join matrices
+            glm::mat4 inverseTransform = glm::inverse(mat);
+            size_t    numJoints        = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
+            for(size_t i = 0; i < numJoints; i++)
+            {
+                Node*     jointNode = skin->joints[i];
+                glm::mat4 jointMat  = jointNode->getMatrix() * skin->inverseBindMatrices[i];
+                jointMat            = inverseTransform * jointMat;
+                ubo.jointMatrix[i]  = jointMat;
+            }
+            ubo.jointcount = (float)numJoints;
+        }
+        mUbo->Update();
     }
 
 

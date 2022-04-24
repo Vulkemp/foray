@@ -1,6 +1,6 @@
 #pragma once
-#include "../hsk_vmaHelpers.hpp"
 #include "../hsk_managedubo.hpp"
+#include "../hsk_vmaHelpers.hpp"
 #include "glm/glm.hpp"
 #include "hsk_boundingBox.hpp"
 #include "hsk_glTF_declares.hpp"
@@ -20,7 +20,7 @@ namespace hsk {
         uint32_t    VertexCount = 0;
         Material*   Mat;
         bool        HasIndices = false;
-        BoundingBox Bounds         = {};
+        BoundingBox Bounds     = {};
         Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material* material);
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };
@@ -28,22 +28,12 @@ namespace hsk {
     class Mesh : public SceneComponent, public NoMoveDefaults
     {
       public:
-        std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
-        BoundingBox                             mBoundingBox            = {};
-        BoundingBox                             mAxisAlignedBoundingBox = {};
-        struct UniformBuffer
-        {
-            ManagedBuffer          Buffer        = {};
-            VkDescriptorBufferInfo descriptor    = {};
-            VkDescriptorSet        descriptorSet = nullptr;
-            void*                  mapped        = nullptr;
-        } uniformBuffer = {};
         struct UniformBlock
         {
             glm::mat4 matrix                      = {};
             glm::mat4 jointMatrix[MAX_NUM_JOINTS] = {};
             float     jointcount                  = 0;
-        } uniformBlock = {};
+        };
 
         Mesh();
         Mesh(Scene* scene);
@@ -51,6 +41,24 @@ namespace hsk {
         ~Mesh();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
         void Cleanup();
+        void Update(const glm::mat4& mat, Skin* skin);
+
+        HSK_PROPERTY_CGET(Primitives)
+        HSK_PROPERTY_ALL(Bounds)
+        HSK_PROPERTY_ALL(AxisAlignedBoundingBox)
+
+        ManagedUbo<UniformBlock>*       Ubo() { return mUbo.get(); }
+        const ManagedUbo<UniformBlock>* Ubo() const { return mUbo.get(); }
+
+        HSK_PROPERTY_CGET(DescriptorSet)
+
+      protected:
+        std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
+        BoundingBox                             mBounds            = {};
+        BoundingBox                             mAxisAlignedBoundingBox = {};
+
+        std::unique_ptr<ManagedUbo<UniformBlock>> mUbo;
+        VkDescriptorSet                           mDescriptorSet;
     };
 
 }  // namespace hsk

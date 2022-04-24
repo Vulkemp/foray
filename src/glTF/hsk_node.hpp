@@ -23,18 +23,17 @@ namespace hsk {
     class Node : public SceneComponent, public NoMoveDefaults
     {
       public:
-        Transform          mTransform  = {};
-        Node*              parent      = nullptr;
-        int32_t            parentIndex = -1;
-        int32_t            index       = -1;
-        std::vector<Node*> children    = {};
-        // glm::mat4             matrix;
-        std::string           name      = {};
-        std::unique_ptr<Mesh> mesh      = {};
-        Skin*                 skin      = nullptr;
-        int32_t               skinIndex = -1;
-        BoundingBox           bvh       = {};
-        BoundingBox           aabb      = {};
+        HSK_PROPERTY_ALL(Transform)
+        HSK_PROPERTY_ALL(Parent)
+        HSK_PROPERTY_ALL(ParentIndex)
+        HSK_PROPERTY_ALL(Index)
+        HSK_PROPERTY_ALL(Children)
+        HSK_PROPERTY_ALL(Name)
+        HSK_PROPERTY_ALL(Mesh)
+        HSK_PROPERTY_ALL(Skin)
+        HSK_PROPERTY_ALL(SkinIndex)
+        HSK_PROPERTY_ALL(Bvh)
+        HSK_PROPERTY_ALL(AxisAlignedBoundingBox)
 
         inline explicit Node(Scene* scene) : SceneComponent(scene) {}
         glm::mat4 getMatrix();
@@ -42,6 +41,19 @@ namespace hsk {
         void InitFromTinyGltfNode(const tinygltf::Model& model, const tinygltf::Node& node, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
         void ResolveParent();
         ~Node();
+
+      protected:
+        Transform          mTransform  = {};
+        Node*              mParent      = nullptr;
+        int32_t            mParentIndex = -1;
+        int32_t            mIndex       = -1;
+        std::vector<Node*> mChildren    = {};
+        std::string           mName      = {};
+        std::unique_ptr<hsk::Mesh> mMesh      = {};
+        Skin*                 mSkin      = nullptr;
+        int32_t               mSkinIndex = -1;
+        BoundingBox           mBvh       = {};
+        BoundingBox           mAxisAlignedBoundingBox      = {};
     };
 
 }  // namespace hsk

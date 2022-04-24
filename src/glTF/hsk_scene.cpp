@@ -103,7 +103,7 @@ namespace hsk {
                 if(node)
                 {
                     node->ResolveParent();
-                    if(!node->parent)
+                    if(!node->GetParent())
                     {
                         mNodesHierarchy.push_back(node.get());
                     }
@@ -120,12 +120,12 @@ namespace hsk {
             for(auto& node : mNodesLinear)
             {
                 // Assign skins
-                if(node->skinIndex > -1)
+                if(node->GetSkinIndex() > -1)
                 {
-                    node->skin = mSkins[node->skinIndex].get();
+                    node->SetSkin(mSkins[node->GetSkinIndex()].get());
                 }
                 // Initial pose
-                if(node->mesh)
+                if(node->GetMesh())
                 {
                     node->update();
                 }
@@ -176,12 +176,12 @@ namespace hsk {
         VkBufferCopy copyRegion = {};
 
         copyRegion.size = vertexBufferSize;
-        vkCmdCopyBuffer(copyCmd, vertexStaging.Buffer(), vertices.Buffer(), 1, &copyRegion);
+        vkCmdCopyBuffer(copyCmd, vertexStaging.GetBuffer(), vertices.GetBuffer(), 1, &copyRegion);
 
         if(indexBufferSize > 0)
         {
             copyRegion.size = indexBufferSize;
-            vkCmdCopyBuffer(copyCmd, indexStaging.Buffer(), indices.Buffer(), 1, &copyRegion);
+            vkCmdCopyBuffer(copyCmd, indexStaging.GetBuffer(), indices.GetBuffer(), 1, &copyRegion);
         }
 
         flushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
@@ -292,10 +292,10 @@ namespace hsk {
 
         for(auto& node : mNodesLinear)
         {
-            if(node->bvh.Valid())
+            if(node->GetBvh().GetValid())
             {
-                dimensions.min = glm::min(dimensions.min, node->bvh.Min());
-                dimensions.max = glm::max(dimensions.max, node->bvh.Max());
+                dimensions.min = glm::min(dimensions.min, node->GetBvh().GetMin());
+                dimensions.max = glm::max(dimensions.max, node->GetBvh().GetMax());
             }
         }
 
@@ -309,26 +309,26 @@ namespace hsk {
 
     void Scene::calculateBoundingBox(Node* node, Node* parent)
     {
-        BoundingBox parentBvh = parent ? parent->bvh : BoundingBox(dimensions.min, dimensions.max);
+        BoundingBox parentBvh = parent ? parent->GetBvh() : BoundingBox(dimensions.min, dimensions.max);
 
-        if(node->mesh)
+        if(node->GetMesh())
         {
-            if(node->mesh->mBoundingBox.Valid())
+            if(node->GetMesh()->GetBounds().GetValid())
             {
-                node->aabb = node->mesh->mBoundingBox.getAABB(node->getMatrix());
-                if(node->children.size() == 0)
+                node->GetAxisAlignedBoundingBox() = node->GetMesh()->GetBounds().getAABB(node->getMatrix());
+                if(node->GetChildren().size() == 0)
                 {
-                    node->bvh.Min()   = node->aabb.Min();
-                    node->bvh.Max()   = node->aabb.Max();
-                    node->bvh.Valid() = true;
+                    node->GetBvh().SetMin(node->GetAxisAlignedBoundingBox().GetMin());
+                    node->GetBvh().SetMax(node->GetAxisAlignedBoundingBox().GetMax());
+                    node->GetBvh().SetValid(true);
                 }
             }
         }
 
-        parentBvh.Min() = glm::min(parentBvh.Min(), node->bvh.Min());
-        parentBvh.Max() = glm::min(parentBvh.Max(), node->bvh.Max());
+        parentBvh.SetMin(glm::min(parentBvh.GetMin(), node->GetBvh().GetMin()));
+        parentBvh.SetMax(glm::min(parentBvh.GetMax(), node->GetBvh().GetMax()));
 
-        for(auto& child : node->children)
+        for(auto& child : node->GetChildren())
         {
             calculateBoundingBox(child, node);
         }
@@ -373,9 +373,9 @@ namespace hsk {
     void Scene::Draw(VkCommandBuffer cmdbuffer)
     {
         const VkDeviceSize offsets[1]      = {0};
-        VkBuffer           vertexBuffers[] = {vertices.Buffer()};
+        VkBuffer           vertexBuffers[] = {vertices.GetBuffer()};
         vkCmdBindVertexBuffers(cmdbuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(cmdbuffer, indices.Buffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(cmdbuffer, indices.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         for(auto node : mNodesHierarchy)
         {
             drawNode(node, cmdbuffer);
@@ -384,14 +384,14 @@ namespace hsk {
 
     void Scene::drawNode(Node* node, VkCommandBuffer commandBuffer)
     {
-        if(node->mesh)
+        if(node->GetMesh())
         {
-            for(auto& primitive : node->mesh->mPrimitives)
+            for(const auto& primitive : node->GetMesh()->GetPrimitives())
             {
                 vkCmdDrawIndexed(commandBuffer, primitive->IndexCount, 1, primitive->FirstIndex, 0, 0);
             }
         }
-        for(auto& child : node->children)
+        for(auto& child : node->GetChildren())
         {
             drawNode(child, commandBuffer);
         }

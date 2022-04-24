@@ -25,8 +25,21 @@ namespace hsk {
             std::string reason = fmt::vformat(format, fmt::make_format_args(std::forward<Args>(args)...));
             Throw(reason);
         }
+
       protected:
         std::string mReason = std::string("");
-
     };
+
 }  // namespace hsk
+
+#define HSK_ASSERT(val, msg)                                                                                                                                                       \
+    if(!(val))                                                                                                                                                                     \
+    {                                                                                                                                                                              \
+        hsk::Exception::Throw(msg);                                                                                                                                                \
+    }
+
+#define HSK_ASSERTV(val, msg, ...)                                                                                                                                                 \
+    if(!(val))                                                                                                                                                                     \
+    {                                                                                                                                                                              \
+        hsk::Exception::Throw(msg, __VA_ARGS__);                                                                                                                                   \
+    }
