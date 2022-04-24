@@ -11,11 +11,9 @@ namespace hsk {
     class Mesh;
     struct BoundingBox;
     struct Vertex;
-    struct VertexBuffer;
-    struct IndexBuffer;
     class Skin;
     struct AnimationChannel;
     struct AnimationSampler;
-    struct Animation;
+    class Animation;
 
 }  // namespace hsk

@@ -8,6 +8,14 @@
 #include "hsk_texture.hpp"
 
 namespace hsk {
+    Scene::Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
+        : mContext{allocator, device, physicalDevice, transferpool, transferqueue}
+    {
+        mFallbackMaterial = {};
+        mFallbackMaterial.BaseColorFactor = glm::vec4(0.7f, 0.f, 0.7f, 1.f);
+    }
+
+
     void Scene::Cleanup()
     {
         vertices.Destroy();
@@ -284,10 +292,10 @@ namespace hsk {
 
         for(auto& node : mNodesLinear)
         {
-            if(node->bvh.valid)
+            if(node->bvh.Valid())
             {
-                dimensions.min = glm::min(dimensions.min, node->bvh.min);
-                dimensions.max = glm::max(dimensions.max, node->bvh.max);
+                dimensions.min = glm::min(dimensions.min, node->bvh.Min());
+                dimensions.max = glm::max(dimensions.max, node->bvh.Max());
             }
         }
 
@@ -305,20 +313,20 @@ namespace hsk {
 
         if(node->mesh)
         {
-            if(node->mesh->mBoundingBox.valid)
+            if(node->mesh->mBoundingBox.Valid())
             {
                 node->aabb = node->mesh->mBoundingBox.getAABB(node->getMatrix());
                 if(node->children.size() == 0)
                 {
-                    node->bvh.min   = node->aabb.min;
-                    node->bvh.max   = node->aabb.max;
-                    node->bvh.valid = true;
+                    node->bvh.Min()   = node->aabb.Min();
+                    node->bvh.Max()   = node->aabb.Max();
+                    node->bvh.Valid() = true;
                 }
             }
         }
 
-        parentBvh.min = glm::min(parentBvh.min, node->bvh.min);
-        parentBvh.max = glm::min(parentBvh.max, node->bvh.max);
+        parentBvh.Min() = glm::min(parentBvh.Min(), node->bvh.Min());
+        parentBvh.Max() = glm::min(parentBvh.Max(), node->bvh.Max());
 
         for(auto& child : node->children)
         {
@@ -380,7 +388,7 @@ namespace hsk {
         {
             for(auto& primitive : node->mesh->mPrimitives)
             {
-                vkCmdDrawIndexed(commandBuffer, primitive->indexCount, 1, primitive->firstIndex, 0, 0);
+                vkCmdDrawIndexed(commandBuffer, primitive->IndexCount, 1, primitive->FirstIndex, 0, 0);
             }
         }
         for(auto& child : node->children)

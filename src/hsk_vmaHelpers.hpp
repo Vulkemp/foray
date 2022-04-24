@@ -39,22 +39,23 @@ namespace hsk {
             }
         }
 
-        inline VmaAllocator       Allocator() { return mAllocator; }
-        inline const VmaAllocator Allocator() const { return mAllocator; }
-        ManagedBuffer&            Allocator(VmaAllocator allocator);
+        HSK_PROPERTY_GET(Allocator);
+        HSK_PROPERTY_CGET(Allocator);
+        ManagedBuffer& Allocator(VmaAllocator allocator);
 
-        inline VkBuffer       Buffer() { return mBuffer; }
-        inline const VkBuffer Buffer() const { return mBuffer; }
-
-        inline VmaAllocation       Allocation() { return mAllocation; }
-        inline const VmaAllocation Allocation() const { return mAllocation; }
+        HSK_PROPERTY_CGET(Buffer);
+        HSK_PROPERTY_CGET(Allocation);
+        HSK_PROPERTY_CGET(IsMapped);
+        HSK_PROPERTY_CGET(DescriptorInfo);
 
       protected:
-        VmaAllocator  mAllocator  = nullptr;
-        VkBuffer      mBuffer     = nullptr;
-        VmaAllocation mAllocation = nullptr;
-        bool          mIsMapped   = false;
+        VmaAllocator           mAllocator      = nullptr;
+        VkBuffer               mBuffer         = nullptr;
+        VmaAllocation          mAllocation     = nullptr;
+        VkDescriptorBufferInfo mDescriptorInfo = {};
+        bool                   mIsMapped       = false;
 
         void AssertLoaded(bool loaded, const char* process);
+        void UpdateDescriptorInfo(VkDeviceSize size);
     };
 }  // namespace hsk

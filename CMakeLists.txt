@@ -6,6 +6,13 @@ project("rtrpf")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Compiler flags
+set(NONSTRICT_FLAGS ${CMAKE_CXX_FLAGS})
+set(STRICT_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+# Enable strict mode for own lib
+SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
+
 # declare lib
 
 file(GLOB_RECURSE src "src/*.cpp")
@@ -59,11 +66,17 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 
 # subdirectories
 
+# Set nonstrict mode for third party stuff
+
+SET(CMAKE_CXX_FLAGS ${NONSTRICT_FLAGS})
+
 add_subdirectory("${thirdparty_dir}/vma")
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 add_subdirectory("${thirdparty_dir}/tinygltf")
 
 # applications
+
+# Set strict mode
 
 add_subdirectory("${apps_dir}/importance_sampling_rt")

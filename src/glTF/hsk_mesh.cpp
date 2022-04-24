@@ -9,17 +9,17 @@ namespace hsk {
 
     Mesh::Mesh(Scene* scene) : SceneComponent(scene) {}
 
-    Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material& material)
-        : firstIndex(firstIndex), indexCount(indexCount), vertexCount(vertexCount), material(material)
+    Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material* material)
+        : FirstIndex(firstIndex), IndexCount(indexCount), VertexCount(vertexCount), Mat(material)
     {
-        hasIndices = indexCount > 0;
+        HasIndices = indexCount > 0;
     };
 
     void Primitive::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
-        bb.min   = min;
-        bb.max   = max;
-        bb.valid = true;
+        Bounds.Min()   = min;
+        Bounds.Max()   = max;
+        Bounds.Valid() = true;
     }
 
     void Mesh::InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
@@ -209,20 +209,20 @@ namespace hsk {
                 }
             }
             std::unique_ptr<Primitive> newPrimitive =
-                std::make_unique<Primitive>(indexStart, indexCount, vertexCount, primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->Materials().back());
+                std::make_unique<Primitive>(indexStart, indexCount, vertexCount, &(primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->FallbackMaterial()));
             newPrimitive->setBoundingBox(posMin, posMax);
             mPrimitives.push_back(std::move(newPrimitive));
         }
         // Mesh BB from BBs of primitives
         for(auto& p : mPrimitives)
         {
-            if(p->bb.valid && !mBoundingBox.valid)
+            if(p->Bounds.Valid() && !mBoundingBox.Valid())
             {
-                mBoundingBox       = p->bb;
-                mBoundingBox.valid = true;
+                mBoundingBox        = p->Bounds;
+                mBoundingBox.Valid() = true;
             }
-            mBoundingBox.min = glm::min(mBoundingBox.min, p->bb.min);
-            mBoundingBox.max = glm::max(mBoundingBox.max, p->bb.max);
+            mBoundingBox.Min() = glm::min(mBoundingBox.Min(), p->Bounds.Min());
+            mBoundingBox.Max() = glm::max(mBoundingBox.Max(), p->Bounds.Max());
         }
     };
 
@@ -232,9 +232,9 @@ namespace hsk {
 
     void Mesh::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
-        mBoundingBox.min   = min;
-        mBoundingBox.max   = max;
-        mBoundingBox.valid = true;
+        mBoundingBox.Min()   = min;
+        mBoundingBox.Max()   = max;
+        mBoundingBox.Valid() = true;
     }
 
 

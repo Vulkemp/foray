@@ -19,10 +19,7 @@ namespace hsk {
     class Scene : public NoMoveDefaults
     {
       public:
-        inline Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
-            : mContext{allocator, device, physicalDevice, transferpool, transferqueue}
-        {
-        }
+        Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue);
 
         inline Scene& Context(SceneVkContext& context)
         {
@@ -75,8 +72,11 @@ namespace hsk {
 
         virtual ~Scene();
 
+        HSK_PROPERTY_ALL(FallbackMaterial)
+
       protected:
         SceneVkContext                        mContext                = {};
+        Material                              mFallbackMaterial        = {};
         std::vector<Material>                 mMaterials              = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};
         glm::mat4                             mAxisAlignedBoundingBox = {};

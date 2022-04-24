@@ -1,8 +1,8 @@
 #pragma once
 #include "hsk_exception.hpp"
+#include <memory>
 #include <stdint.h>
 #include <string>
-#include <memory>
 
 namespace hsk {
     using fp32_t = float;
@@ -17,3 +17,19 @@ namespace hsk {
         NoMoveDefaults& operator=(const NoMoveDefaults& other) = delete;
     };
 }  // namespace hsk
+
+#define HSK_PROPERTY_GET(member)                                                                                                                                                   \
+    inline auto& member() { return m##member; }
+#define HSK_PROPERTY_CGET(member)                                                                                                                                                  \
+    inline const auto& member() const { return m##member; }
+#define HSK_PROPERTY_SET(member)                                                                                                                                                   \
+    inline auto& member(const auto& value)                                                                                                                                         \
+    {                                                                                                                                                                              \
+        m##member = value;                                                                                                                                                         \
+        return *this;                                                                                                                                                              \
+    }
+
+#define HSK_PROPERTY_ALL(member)                                                                                                                                                   \
+    HSK_PROPERTY_GET(member)                                                                                                                                                       \
+    HSK_PROPERTY_CGET(member)                                                                                                                                                      \
+    HSK_PROPERTY_SET(member)

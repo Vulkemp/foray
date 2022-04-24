@@ -6,10 +6,10 @@ namespace hsk {
 
     void Animation::InitFromTinyGltfAnimation(const tinygltf::Model& model, const tinygltf::Animation& anim, int32_t index)
     {
-        name = anim.name;
-        if(name.empty())
+        mName = anim.name;
+        if(mName.empty())
         {
-            name = fmt::format("Animation #{}", index);
+            mName = fmt::format("Animation #{}", index);
         }
 
         // Samplers
@@ -19,15 +19,15 @@ namespace hsk {
 
             if(samp.interpolation == "LINEAR")
             {
-                sampler.interpolation = AnimationSampler::InterpolationType::LINEAR;
+                sampler.Interpolation = AnimationSampler::EInterpolationType::LINEAR;
             }
             if(samp.interpolation == "STEP")
             {
-                sampler.interpolation = AnimationSampler::InterpolationType::STEP;
+                sampler.Interpolation = AnimationSampler::EInterpolationType::STEP;
             }
             if(samp.interpolation == "CUBICSPLINE")
             {
-                sampler.interpolation = AnimationSampler::InterpolationType::CUBICSPLINE;
+                sampler.Interpolation = AnimationSampler::EInterpolationType::CUBICSPLINE;
             }
 
             // Read sampler input time values
@@ -42,18 +42,18 @@ namespace hsk {
                 const float* buf     = static_cast<const float*>(dataPtr);
                 for(size_t index = 0; index < accessor.count; index++)
                 {
-                    sampler.inputs.push_back(buf[index]);
+                    sampler.Inputs.push_back(buf[index]);
                 }
 
-                for(auto input : sampler.inputs)
+                for(auto input : sampler.Inputs)
                 {
-                    if(input < start)
+                    if(input < mStart)
                     {
-                        start = input;
+                        mStart = input;
                     };
-                    if(input > end)
+                    if(input > mEnd)
                     {
-                        end = input;
+                        mEnd = input;
                     }
                 }
             }
@@ -74,7 +74,7 @@ namespace hsk {
                         const glm::vec3* buf = static_cast<const glm::vec3*>(dataPtr);
                         for(size_t index = 0; index < accessor.count; index++)
                         {
-                            sampler.outputsVec4.push_back(glm::vec4(buf[index], 0.0f));
+                            sampler.Outputs.push_back(glm::vec4(buf[index], 0.0f));
                         }
                         break;
                     }
@@ -82,7 +82,7 @@ namespace hsk {
                         const glm::vec4* buf = static_cast<const glm::vec4*>(dataPtr);
                         for(size_t index = 0; index < accessor.count; index++)
                         {
-                            sampler.outputsVec4.push_back(buf[index]);
+                            sampler.Outputs.push_back(buf[index]);
                         }
                         break;
                     }
@@ -92,7 +92,7 @@ namespace hsk {
                 }
             }
 
-            samplers.push_back(sampler);
+            mSamplers.push_back(sampler);
         }
 
         // Channels
@@ -102,73 +102,73 @@ namespace hsk {
 
             if(source.target_path == "rotation")
             {
-                channel.path = AnimationChannel::PathType::ROTATION;
+                channel.Path = AnimationChannel::EPathType::ROTATION;
             }
             if(source.target_path == "translation")
             {
-                channel.path = AnimationChannel::PathType::TRANSLATION;
+                channel.Path = AnimationChannel::EPathType::TRANSLATION;
             }
             if(source.target_path == "scale")
             {
-                channel.path = AnimationChannel::PathType::SCALE;
+                channel.Path = AnimationChannel::EPathType::SCALE;
             }
             if(source.target_path == "weights")
             {
                 throw Exception("Weights are not supported");
             }
-            channel.samplerIndex = source.sampler;
-            channel.node         = Owner()->GetNodeByIndex(source.target_node);
-            if(!channel.node)
+            channel.SamplerIndex = source.sampler;
+            channel.Target         = Owner()->GetNodeByIndex(source.target_node);
+            if(!channel.Target)
             {
                 continue;
             }
 
-            channels.push_back(channel);
+            mChannels.push_back(channel);
         }
     }
 
     bool Animation::Update(float time)
     {
         bool updated = false;
-        for(auto& channel : channels)
+        for(auto& channel : mChannels)
         {
-            AnimationSampler& sampler = samplers[channel.samplerIndex];
-            if(sampler.inputs.size() > sampler.outputsVec4.size())
+            AnimationSampler& sampler = mSamplers[channel.SamplerIndex];
+            if(sampler.Inputs.size() > sampler.Outputs.size())
             {
                 continue;
             }
 
-            for(size_t i = 0; i < sampler.inputs.size() - 1; i++)
+            for(size_t i = 0; i < sampler.Inputs.size() - 1; i++)
             {
-                if((time >= sampler.inputs[i]) && (time <= sampler.inputs[i + 1]))
+                if((time >= sampler.Inputs[i]) && (time <= sampler.Inputs[i + 1]))
                 {
-                    float u = std::max(0.0f, time - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]);
+                    float u = std::max(0.0f, time - sampler.Inputs[i]) / (sampler.Inputs[i + 1] - sampler.Inputs[i]);
                     if(u <= 1.0f)
                     {
-                        switch(channel.path)
+                        switch(channel.Path)
                         {
-                            case AnimationChannel::PathType::TRANSLATION: {
-                                glm::vec4 trans                      = glm::mix(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u);
-                                channel.node->mTransform.Translation = glm::vec3(trans);
+                            case AnimationChannel::EPathType::TRANSLATION: {
+                                glm::vec4 trans                      = glm::mix(sampler.Outputs[i], sampler.Outputs[i + 1], u);
+                                channel.Target->mTransform.Translation = glm::vec3(trans);
                                 break;
                             }
-                            case AnimationChannel::PathType::SCALE: {
-                                glm::vec4 trans                = glm::mix(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u);
-                                channel.node->mTransform.Scale = glm::vec3(trans);
+                            case AnimationChannel::EPathType::SCALE: {
+                                glm::vec4 trans                = glm::mix(sampler.Outputs[i], sampler.Outputs[i + 1], u);
+                                channel.Target->mTransform.Scale = glm::vec3(trans);
                                 break;
                             }
-                            case AnimationChannel::PathType::ROTATION: {
+                            case AnimationChannel::EPathType::ROTATION: {
                                 glm::quat q1;
-                                q1.x = sampler.outputsVec4[i].x;
-                                q1.y = sampler.outputsVec4[i].y;
-                                q1.z = sampler.outputsVec4[i].z;
-                                q1.w = sampler.outputsVec4[i].w;
+                                q1.x = sampler.Outputs[i].x;
+                                q1.y = sampler.Outputs[i].y;
+                                q1.z = sampler.Outputs[i].z;
+                                q1.w = sampler.Outputs[i].w;
                                 glm::quat q2;
-                                q2.x                              = sampler.outputsVec4[i + 1].x;
-                                q2.y                              = sampler.outputsVec4[i + 1].y;
-                                q2.z                              = sampler.outputsVec4[i + 1].z;
-                                q2.w                              = sampler.outputsVec4[i + 1].w;
-                                channel.node->mTransform.Rotation = glm::normalize(glm::slerp(q1, q2, u));
+                                q2.x                              = sampler.Outputs[i + 1].x;
+                                q2.y                              = sampler.Outputs[i + 1].y;
+                                q2.z                              = sampler.Outputs[i + 1].z;
+                                q2.w                              = sampler.Outputs[i + 1].w;
+                                channel.Target->mTransform.Rotation = glm::normalize(glm::slerp(q1, q2, u));
                                 break;
                             }
                         }

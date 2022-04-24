@@ -7,44 +7,51 @@
 namespace hsk {
     struct AnimationChannel
     {
-        enum PathType
+        enum EPathType
         {
             TRANSLATION,
             ROTATION,
             SCALE
         };
-        PathType path         = PathType::TRANSLATION;
-        Node*    node         = nullptr;
-        uint32_t samplerIndex = -1;
+        EPathType Path         = EPathType::TRANSLATION;
+        Node*     Target       = nullptr;
+        uint32_t  SamplerIndex = -1;
     };
 
     struct AnimationSampler
     {
-        enum InterpolationType
+        enum EInterpolationType
         {
             LINEAR,
             STEP,
             CUBICSPLINE
         };
-        InterpolationType      interpolation = InterpolationType::LINEAR;
-        std::vector<float>     inputs        = {};
-        std::vector<glm::vec4> outputsVec4   = {};
+        EInterpolationType     Interpolation = EInterpolationType::LINEAR;
+        std::vector<float>     Inputs        = {};
+        std::vector<glm::vec4> Outputs       = {};
     };
 
     class Animation : public SceneComponent, public NoMoveDefaults
     {
       public:
-        std::string                   name     = {};
-        std::vector<AnimationSampler> samplers = {};
-        std::vector<AnimationChannel> channels = {};
-        float                         start    = std::numeric_limits<float>::max();
-        float                         end      = std::numeric_limits<float>::min();
-
         inline explicit Animation(Scene* scene) : SceneComponent(scene) {}
 
         void InitFromTinyGltfAnimation(const tinygltf::Model& model, const tinygltf::Animation& animation, int32_t index);
 
         bool Update(float time);
+
+        HSK_PROPERTY_ALL(Name)
+        HSK_PROPERTY_ALL(Samplers)
+        HSK_PROPERTY_ALL(Channels)
+        HSK_PROPERTY_ALL(Start)
+        HSK_PROPERTY_ALL(End)
+
+      protected:
+        std::string                   mName     = {};
+        std::vector<AnimationSampler> mSamplers = {};
+        std::vector<AnimationChannel> mChannels = {};
+        float                         mStart    = std::numeric_limits<float>::max();
+        float                         mEnd      = std::numeric_limits<float>::min();
     };
 
 }  // namespace hsk

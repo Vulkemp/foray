@@ -15,20 +15,4 @@ namespace hsk {
         glm::vec4 Weight0 = {};
     };
 
-    // TODO: Redo these buffer wrappers
-
-    struct VertexBuffer : public NoMoveDefaults
-    {
-        VkBuffer      Buffer     = VK_NULL_HANDLE;
-        VmaAllocation Allocation = {};
-    };
-
-    struct IndexBuffer : public NoMoveDefaults
-    {
-        int           Count      = 0;  // TODO: Consider removing member
-        VkBuffer      Buffer     = VK_NULL_HANDLE;
-        VmaAllocation Allocation = {};
-    };
-
-
 }  // namespace hsk

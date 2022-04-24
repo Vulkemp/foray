@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_vmaHelpers.hpp"
+#include "../hsk_managedubo.hpp"
 #include "glm/glm.hpp"
 #include "hsk_boundingBox.hpp"
 #include "hsk_glTF_declares.hpp"
@@ -12,23 +13,20 @@
 #define MAX_NUM_JOINTS 128u
 
 namespace hsk {
-    class Primitive
+    struct Primitive
     {
-      public:
-        uint32_t    firstIndex  = 0;
-        uint32_t    indexCount  = 0;
-        uint32_t    vertexCount = 0;
-        Material&   material;
-        bool        hasIndices = false;
-        BoundingBox bb         = {};
-        Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material& material);
+        uint32_t    FirstIndex  = 0;
+        uint32_t    IndexCount  = 0;
+        uint32_t    VertexCount = 0;
+        Material*   Mat;
+        bool        HasIndices = false;
+        BoundingBox Bounds         = {};
+        Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material* material);
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };
 
     class Mesh : public SceneComponent, public NoMoveDefaults
     {
-        const size_t e = sizeof(Primitive);
-
       public:
         std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
         BoundingBox                             mBoundingBox            = {};

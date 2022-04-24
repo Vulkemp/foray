@@ -63,6 +63,7 @@ namespace hsk {
     void createBuffer(
         VmaAllocator allocator, VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VmaAllocation* allocation, VkDeviceSize size, VkBuffer* buffer, void* data)
     {
+
         // Create the buffer handle
         VkBufferCreateInfo bufferCreateInfo{};
         bufferCreateInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -108,6 +109,7 @@ namespace hsk {
     void ManagedBuffer::Init(VkBufferUsageFlags usageFlags, VmaAllocationCreateInfo allocInfo, VkDeviceSize size, void* data)
     {
         createBuffer(mAllocator, usageFlags, allocInfo, &mAllocation, size, &mBuffer, data);
+        UpdateDescriptorInfo(size);
     }
 
     void ManagedBuffer::Map(void*& data)
@@ -137,6 +139,7 @@ namespace hsk {
         vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
         mBuffer     = nullptr;
         mAllocation = nullptr;
+        UpdateDescriptorInfo(0);
     }
 
     void ManagedBuffer::AssertLoaded(bool loaded, const char* process)
@@ -146,6 +149,14 @@ namespace hsk {
         {
             throw Exception("VmaBuffer::{} requires the buffer to be {}!", process, loaded ? "loaded" : "uninitialized");
         }
+    }
+
+    void ManagedBuffer::UpdateDescriptorInfo(VkDeviceSize size)
+    {
+        mDescriptorInfo = {};
+        mDescriptorInfo.buffer = mBuffer;
+        mDescriptorInfo.offset = 0;
+        mDescriptorInfo.range = size;
     }
 
 }  // namespace hsk
