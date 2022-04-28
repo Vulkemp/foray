@@ -1,7 +1,5 @@
-#pragma once
-
 #include "base/hsk_defaultappbase.hpp"
 #include "base/hsk_logger.hpp"
 #include "base/hsk_minimalappbase.hpp"
 #include "osi/hsk_osi.hpp"
-#include "glTF/hsk_glTF.hpp"
+// #include "glTF/hsk_glTF.hpp"

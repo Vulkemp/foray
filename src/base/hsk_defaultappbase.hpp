@@ -1,6 +1,7 @@
 #pragma once
 #include "../osi/hsk_window.hpp"
 #include "hsk_minimalappbase.hpp"
+#include <vma/vk_mem_alloc.h>
 
 namespace hsk {
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
@@ -46,6 +47,7 @@ namespace hsk {
         virtual void BaseInitBuildSwapchain();
         virtual void BaseInitGetVkQueues();
         virtual void BaseInitCommandPool();
+        virtual void BaseInitCreateVma();
 
         virtual void BaseCleanupVulkan() override;
 
@@ -80,6 +82,8 @@ namespace hsk {
 
         /// @brief Commandpool for the default queue.
         VkCommandPool mCommandPoolDefault;
+
+        VmaAllocator mAllocator;
 
 #pragma endregion
     };

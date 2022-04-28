@@ -28,7 +28,7 @@ namespace hsk {
             this->BaseInit();
             this->Init();
         }
-        catch(const std::exception& e)
+        catch(const Exception& e)
         {
             logger()->error("Exception thrown during initialization: {}", e.what());
             return -1;
@@ -72,7 +72,7 @@ namespace hsk {
                 }
             }
         }
-        catch(const std::exception& e)
+        catch(const Exception& e)
         {
             logger()->error("Exception thrown during runtime: {}", e.what());
             return -1;
@@ -85,7 +85,7 @@ namespace hsk {
             BaseCleanupVulkan();
             BaseCleanupSdlSubsystem();
         }
-        catch(const std::exception& e)
+        catch(const Exception& e)
         {
             logger()->error("Exception thrown during deconstruct: {}", e.what());
             return -1;
@@ -132,7 +132,7 @@ namespace hsk {
 
         if(!instanceBuildRet)
         {
-            logger()->error("Create vkInst failed: {}", instanceBuildRet.error().message());
+            throw Exception("Create vkInst failed: {}", instanceBuildRet.error().message());
             throw std::exception();
         }
 

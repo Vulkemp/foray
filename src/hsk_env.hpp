@@ -3,7 +3,9 @@
 #include <string_view>
 
 namespace hsk{
-    std::string_view CurrentWorkingDirectory();
+
+
+    std::string CurrentWorkingDirectory();
     void UpdateCurrentWorkingDirectory();
 
     std::string MakeRelativePath(std::string_view relative);
