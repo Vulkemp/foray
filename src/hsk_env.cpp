@@ -1,10 +1,15 @@
 #include "hsk_env.hpp"
+#ifdef WIN32
+#include <stringapiset.h>
+#endif
 
 namespace hsk {
 
-// Windows does not support unicode encoded filepaths in UTF8, therefor we need to translate (As all third party libraries use UTF8, we work on paths through UTF8)
 
 #ifdef WIN32
+
+    // Windows does not support unicode encoded filepaths in UTF8, therefor we need to translate (As all third party libraries use UTF8, we work on paths through UTF8)
+
     using str_t     = std::wstring;
     using strview_t = std::wstring_view;
 
@@ -55,14 +60,16 @@ namespace hsk {
             UpdateCurrentWorkingDirectory();
         }
 
+        // cwd.generic_string
+
 #ifdef WIN32
-        std::filesystem::path path   = cwd;
-        std::wstring wstrrelative = UTF8ToWchar(relative);
+        std::filesystem::path path         = cwd;
+        std::wstring          wstrrelative = UTF8ToWchar(relative);
         path /= std::filesystem::path(relative);
         std::wstring cstr = path.c_str();
         return WcharToUTF8(cstr);
 #else
-        std::filesystem::path path   = cwd;
+        std::filesystem::path path = cwd;
         path /= std::filesystem::path(relative);
         return path.c_str();
 #endif

@@ -15,5 +15,6 @@ namespace hsk {
     struct AnimationChannel;
     struct AnimationSampler;
     class Animation;
+    class Camera;
 
 }  // namespace hsk

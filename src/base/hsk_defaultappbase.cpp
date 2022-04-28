@@ -53,7 +53,7 @@ namespace hsk {
         }
 
         // allow user to alter phyiscal device selection
-        BeforePhysicalDeviceSelection(pds);
+        BeforePhysicalDeviceSelection(pds);        
 
         // create phyiscal device
         auto physicalDeviceSelectionReturn = pds.select();

@@ -33,9 +33,23 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     virtual void OnEvent(std::shared_ptr<hsk::Event> event) override;
 
 
-    inline virtual void Render(float delta) override { 
-        // drawFrame();
-         }
+    inline virtual void Render(float delta) override { drawFrame(); }
+
+    inline virtual void BeforePhysicalDeviceSelection(vkb::PhysicalDeviceSelector& pds) override
+    {
+        std::vector<VkPhysicalDevice> devices;
+        uint32_t                      len = 0;
+        vkEnumeratePhysicalDevices(mInstance, &len, nullptr);
+        devices.resize(len);
+        vkEnumeratePhysicalDevices(mInstance, &len, devices.data());
+        hsk::logger()->info("Found {} devices:", devices.size());
+        for(VkPhysicalDevice device : devices)
+        {
+            VkPhysicalDeviceProperties props = {};
+            vkGetPhysicalDeviceProperties(device, &props);
+            hsk::logger()->info("PhysicalDevice {}", props.deviceName);
+        }
+    }
 
 
     const uint32_t WIDTH  = 800;
@@ -76,17 +90,12 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
         }
     };
 
+    std::unique_ptr<hsk::Scene> mScene = nullptr;
+
     const std::vector<Vertex> vertices = {
         {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}}, {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}}, {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}, {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
 
     const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
-
-  public:
-    void run()
-    {
-        initVulkan();
-        cleanup();
-    }
 
   private:
     std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -111,25 +120,34 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
     void initVulkan()
     {
-        loadScene();
+        // loadScene();
         createRenderPass();
         createGraphicsPipeline();
         createFramebuffers();
-        createVertexBuffer();
-        createIndexBuffer();
+        // createVertexBuffer();
+        // createIndexBuffer();
         createCommandBuffers();
         createSyncObjects();
     }
 
-    void cleanup()
+    virtual inline void Cleanup() override
     {
         //cleanupSwapChain();
 
-        vkDestroyBuffer(mDevice, indexBuffer, nullptr);
-        vkFreeMemory(mDevice, indexBufferMemory, nullptr);
+        if(mScene)
+        {
+            mScene->Cleanup();
+            mScene = nullptr;
+        }
 
-        vkDestroyBuffer(mDevice, vertexBuffer, nullptr);
-        vkFreeMemory(mDevice, vertexBufferMemory, nullptr);
+        vkDestroyPipelineLayout(mDevice, pipelineLayout, nullptr);
+        vkDestroyPipeline(mDevice, graphicsPipeline, nullptr);
+        vkDestroyRenderPass(mDevice, renderPass, nullptr);
+
+        for(auto& framebuf : swapChainFramebuffers)
+        {
+            vkDestroyFramebuffer(mDevice, framebuf, nullptr);
+        }
 
         for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
@@ -163,10 +181,11 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
     void loadScene()
     {
         // std::string fullFileName = hsk::MakeRelativePath("models/minimal.gltf");
-        std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/Sponza/glTF/Sponza.gltf");
-        hsk::Scene  scene(mAllocator, mDevice, mPhysicalDevice, mCommandPoolDefault, mDefaultQueue.Queue);
+        // std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/Sponza/glTF/Sponza.gltf");
+        std::string fullFileName = hsk::MakeRelativePath("models/glTF-Sample-Models/Cameras/glTF/Cameras.gltf");
+        mScene                   = std::make_unique<hsk::Scene>(mAllocator, mDevice, mPhysicalDevice, mCommandPoolDefault, mDefaultQueue.Queue);
 
-        scene.LoadFromFile(fullFileName);
+        mScene->LoadFromFile(fullFileName);
     }
 
     void createRenderPass()
@@ -520,13 +539,17 @@ class ImportanceSamplingRtProject : public hsk::DefaultAppBase
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-        VkBuffer     vertexBuffers[] = {vertexBuffer};
-        VkDeviceSize offsets[]       = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        if(mScene)
+        {
+            mScene->Draw(commandBuffer);
+        }
+        // VkBuffer     vertexBuffers[] = {vertexBuffer};
+        // VkDeviceSize offsets[]       = {0};
+        // vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        // vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 

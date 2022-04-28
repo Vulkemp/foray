@@ -11,7 +11,7 @@ namespace hsk {
     Scene::Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
         : mContext{allocator, device, physicalDevice, transferpool, transferqueue}
     {
-        mFallbackMaterial = {};
+        mFallbackMaterial                 = {};
         mFallbackMaterial.BaseColorFactor = glm::vec4(0.7f, 0.f, 0.7f, 1.f);
     }
 
@@ -41,6 +41,7 @@ namespace hsk {
 
         // TODO: Kill skins
         mSkins.resize(0);
+        mCameras.resize(0);
     }
 
     Scene::~Scene() { Cleanup(); }
@@ -129,6 +130,13 @@ namespace hsk {
                 {
                     node->update();
                 }
+            }
+
+            for(const auto& cam : gltfModel.cameras)
+            {
+                std::unique_ptr<Camera> camera = std::make_unique<Camera>(this);
+                camera->InitFromTinyGltfCamera(cam);
+                mCameras.push_back(std::move(camera));
             }
         }
         else
@@ -372,6 +380,10 @@ namespace hsk {
 
     void Scene::Draw(VkCommandBuffer cmdbuffer)
     {
+        if(!vertices.GetAllocation())
+        {
+            return;
+        }
         const VkDeviceSize offsets[1]      = {0};
         VkBuffer           vertexBuffers[] = {vertices.GetBuffer()};
         vkCmdBindVertexBuffers(cmdbuffer, 0, 1, vertexBuffers, offsets);

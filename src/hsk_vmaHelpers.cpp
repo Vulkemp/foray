@@ -136,7 +136,10 @@ namespace hsk {
             logger()->warn("VmaBuffer::Destroy called before Unmap!");
             Unmap();
         }
-        vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
+        if(mAllocator && mAllocation)
+        {
+            vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
+        }
         mBuffer     = nullptr;
         mAllocation = nullptr;
         UpdateDescriptorInfo(0);
@@ -153,10 +156,10 @@ namespace hsk {
 
     void ManagedBuffer::UpdateDescriptorInfo(VkDeviceSize size)
     {
-        mDescriptorInfo = {};
+        mDescriptorInfo        = {};
         mDescriptorInfo.buffer = mBuffer;
         mDescriptorInfo.offset = 0;
-        mDescriptorInfo.range = size;
+        mDescriptorInfo.range  = size;
     }
 
 }  // namespace hsk

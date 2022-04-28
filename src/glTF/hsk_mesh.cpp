@@ -35,7 +35,7 @@ namespace hsk {
         allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-        mUbo = std::make_unique<ManagedUbo<UniformBlock>>(Context()->Allocator);
+        mUbo = std::make_unique<ManagedUbo<UniformBlock>>(Context()->Allocator, true);
         mUbo->Init(false);
 
         for(size_t j = 0; j < mesh.primitives.size(); j++)

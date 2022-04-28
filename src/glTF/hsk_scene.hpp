@@ -13,6 +13,7 @@
 #include <vector>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "hsk_camera.hpp"
 
 namespace hsk {
 
@@ -92,6 +93,7 @@ namespace hsk {
         std::vector<TextureSampler>             mTextureSamplers = {};
         std::vector<std::unique_ptr<Animation>> mAnimations      = {};
         std::vector<std::string>                mExtensions      = {};
+        std::vector<std::unique_ptr<Camera>> mCameras = {};
 
         void AssertSceneloaded(bool loaded = true);
 
