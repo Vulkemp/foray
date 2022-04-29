@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compiler flags
-set(NONSTRICT_FLAGS ${CMAKE_CXX_FLAGS})
+set(BASE_FLAGS "${CMAKE_CXX_FLAGS} -fconcepts-ts")
+set(NONSTRICT_FLAGS ${BASE_FLAGS})
 set(STRICT_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Enable strict mode for own lib
@@ -39,6 +40,7 @@ if (WIN32)
         PUBLIC vkbootstrap
         PUBLIC vma
         PUBLIC tinygltf
+        PUBLIC tinyexr
         PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
 else () 
     target_link_libraries(
@@ -48,6 +50,7 @@ else ()
         PUBLIC vkbootstrap
         PUBLIC vma
         PUBLIC tinygltf
+        PUBLIC tinyexr
         PUBLIC -lSDL2
         )
 endif()
@@ -74,6 +77,7 @@ add_subdirectory("${thirdparty_dir}/vma")
 add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 add_subdirectory("${thirdparty_dir}/tinygltf")
+add_subdirectory("${thirdparty_dir}/tinyexr")
 
 # applications
 

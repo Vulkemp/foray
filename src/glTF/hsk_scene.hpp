@@ -41,7 +41,7 @@ namespace hsk {
 
         inline Texture* GetTextureByIndex(int32_t index)
         {
-            if(index >= 0 && index < mTextures.size())
+            if(index >= 0 && (size_t)index < mTextures.size())
             {
                 return mTextures[index].get();
             }
@@ -50,7 +50,7 @@ namespace hsk {
 
         inline Node* GetNodeByIndex(int32_t index)
         {
-            if(index >= 0 && index < mNodesLinear.size())
+            if(index >= 0 && (size_t)index < mNodesLinear.size())
             {
                 return mNodesLinear[index].get();
             }

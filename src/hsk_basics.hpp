@@ -23,7 +23,8 @@ namespace hsk {
 #define HSK_PROPERTY_CGET(member)                                                                                                                                                  \
     inline const auto& Get##member() const { return m##member; }
 #define HSK_PROPERTY_SET(member)                                                                                                                                                   \
-    inline auto& Set##member(const auto& value)                                                                                                                                         \
+    template <typename TIn>                                                                                                                                                        \
+    inline auto& Set##member(const TIn& value)                                                                                                                                     \
     {                                                                                                                                                                              \
         m##member = value;                                                                                                                                                         \
         return *this;                                                                                                                                                              \
@@ -33,4 +34,3 @@ namespace hsk {
     HSK_PROPERTY_GET(member)                                                                                                                                                       \
     HSK_PROPERTY_CGET(member)                                                                                                                                                      \
     HSK_PROPERTY_SET(member)
-    

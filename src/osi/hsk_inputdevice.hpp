@@ -76,7 +76,7 @@ namespace hsk {
         inline SDL_JoystickID      JoystickId() { return mJoystickId; }
 
         InputDevice()
-            : mGuid(), mName(), mType(EType::Unknown), mJoystick(), mJoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mAxes(), mButtons()
+            : mGuid(), mJoystick(), mJoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mName(), mType(EType::Unknown), mAxes(), mButtons()
         {
         }
         InputDevice(const InputDevice& other)  = delete;
