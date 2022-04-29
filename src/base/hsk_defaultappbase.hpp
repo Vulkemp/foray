@@ -2,6 +2,7 @@
 #include "../osi/hsk_window.hpp"
 #include "hsk_minimalappbase.hpp"
 #include <vma/vk_mem_alloc.h>
+#include "hsk_shadercompiler.hpp"
 
 namespace hsk {
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
@@ -48,11 +49,23 @@ namespace hsk {
         virtual void BaseInitGetVkQueues();
         virtual void BaseInitCommandPool();
         virtual void BaseInitCreateVma();
+        virtual void BaseInitCompileShaders();
 
         virtual void BaseCleanupVulkan() override;
 
         /// @brief The main window used for rendering.
         hsk::Window mWindow;
+
+        /// @brief If true, the app will try to automatically compile any shaders source files into spirv.
+        bool           mCompileShaders = true;
+        /// @brief By default, shader source files are searched in the current working directory "cwd"/shaders.
+        std::string    mShaderSubdir{"/shaders/"};
+        /// @brief If mShaderSourceDirectoryPathFull is set to value, this path will be used as source dir.
+        std::string    mShaderSourceDirectoryPathFull;
+        /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
+        std::string    mShaderOutputDirectoryPathFull;
+        /// @brief The shader compiler. See shader compiler options for further configuration.
+        ShaderCompiler mShaderCompiler;
 
 #pragma region Vulkan
         VkSurfaceKHR mSurface{};
@@ -66,7 +79,7 @@ namespace hsk {
         vkb::Swapchain mSwapchainVkb{};
         VkSwapchainKHR mSwapchain{};
 
-        struct
+        struct DeviceFeatures
         {
             VkPhysicalDeviceBufferDeviceAddressFeatures      bdafeatures;
             VkPhysicalDeviceRayTracingPipelineFeaturesKHR    rtpfeatures;
