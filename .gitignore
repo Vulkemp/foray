@@ -11,6 +11,10 @@
 
 # Logs
 apps/importance_sampling_rt/logs/*
+logs/
+
+# .spirv compiled shader files
+*.spv
 
 # any dll
 **/*.dll
