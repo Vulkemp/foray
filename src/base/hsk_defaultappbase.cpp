@@ -1,10 +1,15 @@
 #include "hsk_defaultappbase.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
+#include "../hsk_env.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
     {
+        logger()->info("Current working directory: {}", CurrentWorkingDirectory());
+        // recompile shaders
+        BaseInitCompileShaders();
+
         // create a window and add its requried instance extensions to the instance builder
         mWindow.Create();
         auto vulkanSurfaceExtensions = mWindow.GetVkSurfaceExtensions();
@@ -196,6 +201,28 @@ namespace hsk {
         allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
         
         vmaCreateAllocator(&allocatorCreateInfo, &mAllocator);
+    }
+
+    void DefaultAppBase::BaseInitCompileShaders()
+    {
+        logger()->info("Compiling shaders...");
+        std::string shaderSourceDirectory = CurrentWorkingDirectory() + mShaderSubdir;
+        std::string shaderOutputDirectory = shaderSourceDirectory;
+        if(mShaderSourceDirectoryPathFull.length() > 0)
+        {
+
+            shaderSourceDirectory = mShaderSourceDirectoryPathFull;
+        }
+
+        if(mShaderOutputDirectoryPathFull.length() > 0)
+        {
+
+            shaderOutputDirectory = mShaderOutputDirectoryPathFull;
+        }
+
+        mShaderCompiler.Init(shaderSourceDirectory, shaderOutputDirectory);
+        mShaderCompiler.CompileAll();
+        logger()->info("Compiling shaders successfully finished!");
     }
 
     void DefaultAppBase::BaseCleanupVulkan()

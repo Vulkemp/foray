@@ -20,6 +20,7 @@
 #include <glTF/hsk_glTF.hpp>
 #include <hsk_env.hpp>
 #include <hsk_rtrpf.hpp>
+#include <hsk_env.hpp>
 #include <stdint.h>
 
 class ImportanceSamplingRtProject : public hsk::DefaultAppBase
