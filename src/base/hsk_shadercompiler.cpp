@@ -69,7 +69,7 @@ namespace hsk {
     // returns false if compilation fails
     bool ShaderCompiler::CallGlslCompiler(const ShaderFileInfo& shaderFileInfo)
     {
-        std::string command("/bin/glslc --target-spv=spv1.5 " + PathToString(shaderFileInfo.mSourcePathFull) + " -o " + PathToString(shaderFileInfo.mOutPathFull));
+        std::string command("/bin/glslc --target-spv=spv1.6 " + PathToString(shaderFileInfo.mSourcePathFull) + " -o " + PathToString(shaderFileInfo.mOutPathFull));
         int         returnvalue = std::system(command.c_str());
         return returnvalue == 0;
     }

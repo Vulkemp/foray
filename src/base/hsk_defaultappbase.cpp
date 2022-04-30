@@ -1,7 +1,7 @@
 #include "hsk_defaultappbase.hpp"
+#include "../hsk_env.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
-#include "../hsk_env.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -18,7 +18,7 @@ namespace hsk {
             mVkbInstanceBuilder.enable_extension(extension);
         }
 
-        mVkbInstanceBuilder.require_api_version(VK_API_VERSION_1_1);
+        mVkbInstanceBuilder.require_api_version(VK_API_VERSION_1_3);
 
         // create instance using instance builder from minimal app base
         MinimalAppBase::BaseInit();
@@ -58,7 +58,7 @@ namespace hsk {
         }
 
         // allow user to alter phyiscal device selection
-        BeforePhysicalDeviceSelection(pds);        
+        BeforePhysicalDeviceSelection(pds);
 
         // create phyiscal device
         auto physicalDeviceSelectionReturn = pds.select();
@@ -178,28 +178,29 @@ namespace hsk {
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT: Hint that command buffers are rerecorded with new commands very often (may change memory allocation behavior)
         // VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT: Allow command buffers to be rerecorded individually, without this flag they all have to be reset together
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+        poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
         poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
 
         VkResult result = vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault);
-        if (result != VK_SUCCESS) {
+        if(result != VK_SUCCESS)
+        {
             throw Exception("failed to create command pool! VkResult: {}", result);
         }
     }
 
     void DefaultAppBase::BaseInitCreateVma()
     {
-        VmaVulkanFunctions vulkanFunctions = {};
+        VmaVulkanFunctions vulkanFunctions    = {};
         vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
-        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
-        
+        vulkanFunctions.vkGetDeviceProcAddr   = &vkGetDeviceProcAddr;
+
         VmaAllocatorCreateInfo allocatorCreateInfo = {};
-        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
-        allocatorCreateInfo.physicalDevice = mPhysicalDevice;
-        allocatorCreateInfo.device = mDevice;
-        allocatorCreateInfo.instance = mInstance;
-        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-        
+        allocatorCreateInfo.vulkanApiVersion       = VK_API_VERSION_1_2;
+        allocatorCreateInfo.physicalDevice         = mPhysicalDevice;
+        allocatorCreateInfo.device                 = mDevice;
+        allocatorCreateInfo.instance               = mInstance;
+        allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
+
         vmaCreateAllocator(&allocatorCreateInfo, &mAllocator);
     }
 
