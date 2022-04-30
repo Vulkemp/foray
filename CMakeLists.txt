@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} STATIC ${src} )
 
 find_package(Vulkan REQUIRED)
 
+set(SDL2_HINT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 include("cmakescripts/locatesdl2.cmake") # Find SDL either by find_package or as a fallback the included version
 
 # manual dependency variables
