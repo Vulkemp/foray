@@ -2,63 +2,45 @@ cmake_minimum_required(VERSION 3.7)
 
 project("rtrpf")
 
-# Use C++ 20 Standard
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Compiler flags
-set(BASE_FLAGS "${CMAKE_CXX_FLAGS}")
-set(NONSTRICT_FLAGS ${BASE_FLAGS})
-set(STRICT_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+# Include Compiler Config (sets c++ 20 and compiler flags)
+include("cmakescripts/compilerconfig.cmake")
 
 # Enable strict mode for own lib
 SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
 
-# declare lib
-
+# Gather sources
 file(GLOB_RECURSE src "src/*.cpp")
+
 add_library(${PROJECT_NAME} STATIC ${src} )
 
 # dependencies
 
 find_package(Vulkan REQUIRED)
 
+include("cmakescripts/locatesdl2.cmake") # Find SDL either by find_package or as a fallback the included version
+
 # manual dependency variables
 
 set(thirdparty_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(thirdparty_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-set(apps_dir "${CMAKE_CURRENT_SOURCE_DIR}/apps")
-set(sdl2_dll "${thirdparty_dir}/sdl2/win/x64/SDL2.dll")
-set(sdl2_libmain "${thirdparty_dir}/sdl2/win/x64/SDL2main.lib")
-# link dependency libs
 
-if (WIN32) 
-    target_link_libraries(
-        ${PROJECT_NAME}
-        PUBLIC ${Vulkan_LIBRARIES}
-        PUBLIC glm_static
-        PUBLIC vkbootstrap
-        PUBLIC vma
-        PUBLIC tinygltf
-        PUBLIC tinyexr
-        PUBLIC "${thirdparty_dir}/sdl2/win/x64/SDL2.lib")
-else () 
-    target_link_libraries(
-        ${PROJECT_NAME}
-        PUBLIC ${Vulkan_LIBRARIES}
-        PUBLIC glm_static
-        PUBLIC vkbootstrap
-        PUBLIC vma
-        PUBLIC tinygltf
-        PUBLIC tinyexr
-        PUBLIC -lSDL2
-        )
-endif()
+# link dependency libs
+target_link_libraries(
+    ${PROJECT_NAME}
+    PUBLIC ${Vulkan_LIBRARIES}
+    PUBLIC glm_static
+    PUBLIC vkbootstrap
+    PUBLIC vma
+    PUBLIC tinygltf
+    PUBLIC tinyexr
+    PUBLIC ${SDL2_LIBRARIES}
+    )
 
 # include directories
 
 include_directories(
 	PUBLIC ${Vulkan_INCLUDE_DIRS}
+    PUBLIC ${SDL2_INCLUDE_DIRS}
     PUBLIC ${thirdparty_include_dir}
 )
 
@@ -78,9 +60,3 @@ add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 add_subdirectory("${thirdparty_dir}/tinygltf")
 add_subdirectory("${thirdparty_dir}/tinyexr")
-
-# applications
-
-# Set strict mode
-
-add_subdirectory("${apps_dir}/importance_sampling_rt")
