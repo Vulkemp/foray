@@ -48,16 +48,16 @@ namespace hsk {
             pds.require_present();
             pds.set_surface(mSurface);
 
-            // Basic minimums for raytracing
-            pds.set_minimum_version(1u, 1u);
-            std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
-                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
-                                                        // dependencies of acceleration structure
-                                                        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-                                                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-                                                        // dependencies of rt pipeline
-                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
-            pds.add_required_extensions(requiredExtensions);
+            //// Basic minimums for raytracing
+            //pds.set_minimum_version(1u, 1u);
+            //std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
+            //                                            VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
+            //                                            // dependencies of acceleration structure
+            //                                            VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+            //                                            VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+            //                                            // dependencies of rt pipeline
+            //                                            VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
+            //pds.add_required_extensions(requiredExtensions);
         }
 
         // allow user to alter phyiscal device selection
