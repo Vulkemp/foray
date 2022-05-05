@@ -53,6 +53,20 @@ namespace hsk {
 
     void UpdateCurrentWorkingDirectory() { cwd = std::filesystem::current_path(); }
 
+    void OverrideCurrentWorkingDirectory(std::string_view path)
+    {
+        std::filesystem::path newcwd;
+
+#ifdef WIN32
+        std::wstring wstrpath = UTF8ToWchar(path);
+        newcwd                  = std::filesystem::path(wstrpath);
+#else
+        newcwd = std::filesystem::path(path);
+#endif
+
+        std::filesystem::current_path(newcwd);
+    }
+
     std::string MakeRelativePath(std::string_view relative)
     {
         if(cwd.empty())
