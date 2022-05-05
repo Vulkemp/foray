@@ -20,7 +20,10 @@ namespace hsk {
     class Scene : public NoMoveDefaults
     {
       public:
+        Scene() = default;
         Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue);
+
+        SceneVkContext* GetVkContext() { return &mContext; }
 
         inline Scene& Context(SceneVkContext& context)
         {
