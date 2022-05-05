@@ -1,5 +1,7 @@
 #include "hsk_defaultappbase.hpp"
 #include "../hsk_env.hpp"
+#include "../hsk_vkHelpers.hpp"
+#include "../hsk_vmaHelpers.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
 
@@ -32,6 +34,7 @@ namespace hsk {
         BaseInitGetVkQueues();
         BaseInitCommandPool();
         BaseInitCreateVma();
+        BaseInitSyncObjects();
     }
 
     void DefaultAppBase::BaseInitSelectPhysicalDevice()
@@ -139,6 +142,7 @@ namespace hsk {
 
         swapchainBuilder.use_default_format_feature_flags();
 
+
         BeforeSwapchainBuilding(swapchainBuilder);
 
         auto swapchainBuilderReturn = swapchainBuilder.build();
@@ -226,9 +230,36 @@ namespace hsk {
         logger()->info("Compiling shaders successfully finished!");
     }
 
+    void DefaultAppBase::BaseInitSyncObjects()
+    {
+        auto images     = mSwapchainVkb.get_images().value();
+        auto imageviews = mSwapchainVkb.get_image_views().value();
+        for(uint32_t i = 0; i < mSwapchainVkb.image_count; i++)
+        {
+            PresentTarget target{};
+            target.Image         = images[i];
+            target.ImageView     = imageviews[i];
+            target.CommandBuffer = createCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+
+            VkSemaphoreCreateInfo semaphoreCI{};
+            semaphoreCI.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Ready));
+            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Finished));
+
+            mPresentTargets.push_back(std::move(target));
+        }
+    }
+
     void DefaultAppBase::BaseCleanupVulkan()
     {
         vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
+        for(auto& target : mPresentTargets)
+        {
+            vkDestroySemaphore(mDevice, target.Ready, nullptr);
+            vkDestroySemaphore(mDevice, target.Finished, nullptr);
+            vkDestroyImageView(mDevice, target.ImageView, nullptr);
+        }
 
         vkb::destroy_swapchain(mSwapchainVkb);
         mSwapchain = nullptr;
@@ -238,5 +269,29 @@ namespace hsk {
         mSurface = nullptr;
         mWindow.Destroy();
         MinimalAppBase::BaseCleanupVulkan();
+    }
+
+    void DefaultAppBase::Render(float delta)
+    {
+        // BasePrepareFrame();
+        // RecordCommandBuffer(CurrentTarget().CommandBuffer);
+        // BaseSubmitFrame();
+    }
+    void DefaultAppBase::BasePrepareFrame()
+    {
+        mPreviousPresentIndex = mCurrentPresentIndex;
+        vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, CurrentTarget().Ready, VK_NULL_HANDLE, &mCurrentPresentIndex);
+        vkResetCommandBuffer(CurrentTarget().CommandBuffer, 0);
+    }
+    void DefaultAppBase::BaseSubmitFrame()
+    {
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        // VkSemaphore          waitSemaphores[] = {imageAvailableSemaphore};
+        // VkPipelineStageFlags waitStages[]     = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        // submitInfo.waitSemaphoreCount         = 1;
+        // submitInfo.pWaitSemaphores            = waitSemaphores;
+        // submitInfo.pWaitDstStageMask          = waitStages;
     }
 }  // namespace hsk
