@@ -232,37 +232,47 @@ namespace hsk {
 
     void DefaultAppBase::BaseInitSyncObjects()
     {
-        auto images     = mSwapchainVkb.get_images().value();
-        auto imageviews = mSwapchainVkb.get_image_views().value();
+        // https://www.asawicki.info/news_1647_vulkan_bits_and_pieces_synchronization_in_a_frame
+
+        VkSemaphoreCreateInfo semaphoreCI{};
+        semaphoreCI.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VkFenceCreateInfo fenceCI{};
+        fenceCI.sType = VkStructureType::VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCI.flags = VkFenceCreateFlagBits::VK_FENCE_CREATE_SIGNALED_BIT;
+
+        // auto images     = mSwapchainVkb.get_images().value();
+        // auto imageviews = mSwapchainVkb.get_image_views().value();
         for(uint32_t i = 0; i < mSwapchainVkb.image_count; i++)
         {
-            PresentTarget target{};
-            target.Image         = images[i];
-            target.ImageView     = imageviews[i];
+            InFlightFrameRenderInfo target{};
+            // target.Image         = images[i];
+            // target.ImageView     = imageviews[i];
             target.CommandBuffer = createCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 
-            VkSemaphoreCreateInfo semaphoreCI{};
-            semaphoreCI.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Ready));
+            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Finished));
 
-            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Ready));
-            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Finished));
+            HSK_ASSERT_VKRESULT(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecuted));
 
-            mPresentTargets.push_back(std::move(target));
+            mFrames.push_back(std::move(target));
         }
     }
 
     void DefaultAppBase::BaseCleanupVulkan()
     {
+        AssertVkResult(vkDeviceWaitIdle(mDevice));
+
         vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
-        for(auto& target : mPresentTargets)
+        for(auto& target : mFrames)
         {
             vkDestroySemaphore(mDevice, target.Ready, nullptr);
             vkDestroySemaphore(mDevice, target.Finished, nullptr);
-            vkDestroyImageView(mDevice, target.ImageView, nullptr);
+            vkDestroyFence(mDevice, target.CommandBufferExecuted, nullptr);
+            // vkDestroyImageView(mDevice, target.ImageView, nullptr);
         }
 
-        vkb::destroy_swapchain(mSwapchainVkb);
-        mSwapchain = nullptr;
+        BaseCleanupSwapchain();
         vkb::destroy_device(mDeviceVkb);
         mDevice = nullptr;
         vkb::destroy_surface(mInstanceVkb, mSurface);
@@ -271,27 +281,103 @@ namespace hsk {
         MinimalAppBase::BaseCleanupVulkan();
     }
 
+    void DefaultAppBase::BaseCleanupSwapchain()
+    {
+        vkb::destroy_swapchain(mSwapchainVkb);
+        mSwapchain = nullptr;
+    }
+
+    void DefaultAppBase::RecreateSwapchain()
+    {
+        vkDeviceWaitIdle(mDevice);
+
+        BaseCleanupSwapchain();
+
+        BaseInitBuildSwapchain();
+
+        OnResized(mSwapchainVkb.extent);
+    }
+
     void DefaultAppBase::Render(float delta)
     {
-        // BasePrepareFrame();
-        // RecordCommandBuffer(CurrentTarget().CommandBuffer);
-        // BaseSubmitFrame();
-    }
-    void DefaultAppBase::BasePrepareFrame()
-    {
-        mPreviousPresentIndex = mCurrentPresentIndex;
-        vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, CurrentTarget().Ready, VK_NULL_HANDLE, &mCurrentPresentIndex);
-        vkResetCommandBuffer(CurrentTarget().CommandBuffer, 0);
-    }
-    void DefaultAppBase::BaseSubmitFrame()
-    {
+        InFlightFrameRenderInfo& currentPresentTarget = mFrames[mCurrentFrameIndex];
+
+        // Make sure that the command buffer we want to use has been presented to the GPU
+        vkWaitForFences(mDevice, 1, &currentPresentTarget.CommandBufferExecuted, VK_TRUE, UINT64_MAX);
+
+        // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
+        uint32_t swapChainImageIndex = 0;
+        VkResult result              = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, currentPresentTarget.Ready, nullptr, &swapChainImageIndex);
+
+        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            // Redo Swapchain
+            RecreateSwapchain();
+            return;
+        }
+        else if(result != VkResult::VK_SUBOPTIMAL_KHR)
+        {
+            AssertVkResult(result);
+        }
+
+        // Reset the fence
+        HSK_ASSERT_VKRESULT(vkResetFences(mDevice, 1, &currentPresentTarget.CommandBufferExecuted));
+
+        // Reset command buffer
+        HSK_ASSERT_VKRESULT(vkResetCommandBuffer(currentPresentTarget.CommandBuffer, 0));
+
+        // Record command buffer
+        RecordCommandBuffer(currentPresentTarget.CommandBuffer);
+
+        // TODO: Make sure the swapchain image is in present mode and has been rendered to, and transferred to the present queue
+
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        // VkSemaphore          waitSemaphores[] = {imageAvailableSemaphore};
-        // VkPipelineStageFlags waitStages[]     = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-        // submitInfo.waitSemaphoreCount         = 1;
-        // submitInfo.pWaitSemaphores            = waitSemaphores;
-        // submitInfo.pWaitDstStageMask          = waitStages;
+        VkSemaphore          waitSemaphores[]   = {currentPresentTarget.Ready};
+        VkSemaphore          signalSemaphores[] = {currentPresentTarget.Finished};
+        VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submitInfo.waitSemaphoreCount           = 1;
+        submitInfo.pWaitSemaphores              = waitSemaphores;
+
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores    = signalSemaphores;
+
+        // Submit all work to the default queue
+        AssertVkResult(vkQueueSubmit(mDefaultQueue.Queue, 1, &submitInfo, currentPresentTarget.CommandBufferExecuted));
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores    = signalSemaphores;
+
+        VkSwapchainKHR swapChains[] = {mSwapchain};
+        presentInfo.swapchainCount  = 1;
+        presentInfo.pSwapchains     = swapChains;
+
+        presentInfo.pImageIndices = &swapChainImageIndex;
+
+        // Present on the present queue
+        result = vkQueuePresentKHR(mPresentQueue.Queue, &presentInfo);
+
+        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
+        {
+            // Redo Swapchain
+            RecreateSwapchain();
+        }
+        else
+        {
+            AssertVkResult(result);
+        }
+
+
+        // Advance frame index
+        mRenderedFrameCount++;
+        mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrames.size();
     }
+    void DefaultAppBase::BasePrepareFrame() {}
+    void DefaultAppBase::BaseSubmitFrame() {}
 }  // namespace hsk

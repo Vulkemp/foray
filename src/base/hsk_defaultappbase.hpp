@@ -27,13 +27,12 @@ namespace hsk {
             uint32_t QueueFamilyIndex{};
         };
 
-        struct PresentTarget
+        struct InFlightFrameRenderInfo
         {
-            VkImage         Image{};
-            VkImageView     ImageView{};
             VkCommandBuffer CommandBuffer{};
             VkSemaphore     Ready{};
             VkSemaphore     Finished{};
+            VkFence         CommandBufferExecuted{};
         };
 
         inline QueueInfo& DefaultQueue() { return mDefaultQueue; }
@@ -61,6 +60,10 @@ namespace hsk {
         virtual void BaseInitCompileShaders();
         virtual void BaseInitSyncObjects();
 
+        virtual void        RecreateSwapchain();
+        inline virtual void OnResized(VkExtent2D size) {}
+
+        virtual void BaseCleanupSwapchain();
         virtual void BaseCleanupVulkan() override;
 
         virtual void Render(float delta) override;
@@ -95,11 +98,9 @@ namespace hsk {
         vkb::Swapchain mSwapchainVkb{};
         VkSwapchainKHR mSwapchain{};
 
-        std::vector<PresentTarget> mPresentTargets{};
-        uint32_t                   mPreviousPresentIndex = -1;
-        uint32_t                   mCurrentPresentIndex  = 0;
-        inline PresentTarget&      PreviousTarget() { return mPresentTargets[mPreviousPresentIndex]; }
-        inline PresentTarget&      CurrentTarget() { return mPresentTargets[mCurrentPresentIndex]; }
+        std::vector<InFlightFrameRenderInfo> mFrames{};
+        uint32_t                             mCurrentFrameIndex  = 0;
+        uint64_t                             mRenderedFrameCount = 0;
 
         struct DeviceFeatures
         {
