@@ -1,4 +1,5 @@
 #include "hsk_env.hpp"
+#include "base/hsk_logger.hpp"
 #ifdef WIN32
 #include <stringapiset.h>
 #endif
@@ -56,6 +57,8 @@ namespace hsk {
     void OverrideCurrentWorkingDirectory(std::string_view path)
     {
         std::filesystem::path newcwd;
+
+        logger()->info("Setting working directory to \"{}\"", path);
 
 #ifdef WIN32
         std::wstring wstrpath = UTF8ToWchar(path);

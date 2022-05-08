@@ -136,11 +136,14 @@ namespace hsk {
 
         // tell vulkan the swapchain images will be used as color attachments
         swapchainBuilder.use_default_image_usage_flags();
+        swapchainBuilder.add_image_usage_flags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
         // use mailbox if possible, else fallback to fifo
         swapchainBuilder.use_default_present_mode_selection();
 
         swapchainBuilder.use_default_format_feature_flags();
+
+        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
 
 
         BeforeSwapchainBuilding(swapchainBuilder);
@@ -154,6 +157,16 @@ namespace hsk {
 
         mSwapchainVkb = swapchainBuilderReturn.value();
         mSwapchain    = mSwapchainVkb.swapchain;
+
+        auto images     = mSwapchainVkb.get_images();
+        auto imageviews = mSwapchainVkb.get_image_views();
+        HSK_ASSERT(images.has_value(), "Failed to acquire swapchain images! Vkb Errorcode: {}")
+        HSK_ASSERT(imageviews.has_value(), "Failed to acquire swapchain image views! Vkb Errorcode: {}")
+        mSwapchainImages.resize(mSwapchainVkb.image_count);
+        for(uint32_t i = 0; i < mSwapchainImages.size(); i++)
+        {
+            mSwapchainImages[i] = SwapchainImage{images.value()[i], imageviews.value()[i]};
+        }
     }
 
     void DefaultAppBase::BaseInitGetVkQueues()
@@ -283,6 +296,12 @@ namespace hsk {
 
     void DefaultAppBase::BaseCleanupSwapchain()
     {
+        for(auto& image : mSwapchainImages)
+        {
+            vkDestroyImageView(mDevice, image.ImageView, nullptr);
+            // vkDestroyImage(mDevice, image.Image, nullptr); Do not destroy images from swapchain
+        }
+        mSwapchainImages.resize(0);
         vkb::destroy_swapchain(mSwapchainVkb);
         mSwapchain = nullptr;
     }
@@ -292,6 +311,11 @@ namespace hsk {
         vkDeviceWaitIdle(mDevice);
 
         BaseCleanupSwapchain();
+
+        if(!mWindow.Exists())
+        {
+            return;
+        }
 
         BaseInitBuildSwapchain();
 
@@ -326,8 +350,53 @@ namespace hsk {
         // Reset command buffer
         HSK_ASSERT_VKRESULT(vkResetCommandBuffer(currentPresentTarget.CommandBuffer, 0));
 
+        VkCommandBufferBeginInfo cmdbufBI{};
+        cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+        vkBeginCommandBuffer(currentPresentTarget.CommandBuffer, &cmdbufBI);
+
         // Record command buffer
         RecordCommandBuffer(currentPresentTarget.CommandBuffer);
+
+        VkImageSubresourceRange range{};
+        range.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+        range.baseMipLevel   = 0;
+        range.levelCount     = VK_REMAINING_MIP_LEVELS;
+        range.baseArrayLayer = 0;
+        range.layerCount     = VK_REMAINING_ARRAY_LAYERS;
+
+        VkImageMemoryBarrier barrier{};
+        barrier.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.srcQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
+        barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
+        barrier.subresourceRange    = range;
+
+        vkCmdPipelineBarrier(currentPresentTarget.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+        VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
+
+        vkCmdClearColorImage(currentPresentTarget.CommandBuffer, mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1,
+                             &range);
+
+        barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+        barrier.oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        barrier.srcQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
+
+        vkCmdPipelineBarrier(currentPresentTarget.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+
+        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(currentPresentTarget.CommandBuffer));
 
         // TODO: Make sure the swapchain image is in present mode and has been rendered to, and transferred to the present queue
 
@@ -336,7 +405,7 @@ namespace hsk {
 
         VkSemaphore          waitSemaphores[]   = {currentPresentTarget.Ready};
         VkSemaphore          signalSemaphores[] = {currentPresentTarget.Finished};
-        VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT};
         submitInfo.waitSemaphoreCount           = 1;
         submitInfo.pWaitSemaphores              = waitSemaphores;
 
@@ -346,7 +415,7 @@ namespace hsk {
         submitInfo.pSignalSemaphores    = signalSemaphores;
 
         // Submit all work to the default queue
-        AssertVkResult(vkQueueSubmit(mDefaultQueue.Queue, 1, &submitInfo, currentPresentTarget.CommandBufferExecuted));
+        AssertVkResult(vkQueueSubmit(mPresentQueue.Queue, 1, &submitInfo, currentPresentTarget.CommandBufferExecuted));
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

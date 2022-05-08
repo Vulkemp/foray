@@ -35,6 +35,12 @@ namespace hsk {
             VkFence         CommandBufferExecuted{};
         };
 
+        struct SwapchainImage
+        {
+            VkImage     Image;
+            VkImageView ImageView;
+        };
+
         inline QueueInfo& DefaultQueue() { return mDefaultQueue; }
         inline QueueInfo& PresentQueue() { return mPresentQueue; }
 
@@ -97,6 +103,7 @@ namespace hsk {
 
         vkb::Swapchain mSwapchainVkb{};
         VkSwapchainKHR mSwapchain{};
+        std::vector<SwapchainImage> mSwapchainImages{};
 
         std::vector<InFlightFrameRenderInfo> mFrames{};
         uint32_t                             mCurrentFrameIndex  = 0;
