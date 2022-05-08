@@ -156,6 +156,7 @@ namespace hsk {
     void MinimalAppBase::BaseCleanupVulkan()
     {
         vkb::destroy_instance(mInstanceVkb);
+        mInstanceVkb = vkb::Instance{};
         mInstance = nullptr;
     }
     void MinimalAppBase::BaseCleanupSdlSubsystem()

@@ -11,6 +11,7 @@ SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
 # Gather sources
 file(GLOB_RECURSE src "src/*.cpp")
 
+option(DISABLE_RT_EXTENSIONS 0)
 add_library(${PROJECT_NAME} STATIC ${src} )
 
 # dependencies
@@ -48,7 +49,12 @@ include_directories(
 target_precompile_headers(${PROJECT_NAME}
     PRIVATE "src/hsk_precompile.hpp")
 
+# Compile Definitions
 target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
+if (DISABLE_RT_EXTENSIONS) 
+    target_compile_definitions(${PROJECT_NAME} PUBLIC DISABLE_RT_EXTENSIONS)
+endif ()
+
 
 # subdirectories
 

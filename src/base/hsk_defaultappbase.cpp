@@ -49,15 +49,17 @@ namespace hsk {
             pds.set_surface(mSurface);
 
             //// Basic minimums for raytracing
-            //pds.set_minimum_version(1u, 1u);
-            //std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
-            //                                            VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
-            //                                            // dependencies of acceleration structure
-            //                                            VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-            //                                            VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-            //                                            // dependencies of rt pipeline
-            //                                            VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
-            //pds.add_required_extensions(requiredExtensions);
+#ifndef DISABLE_RT_EXTENSIONS
+            pds.set_minimum_version(1u, 1u);
+            std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
+                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
+                                                        // dependencies of acceleration structure
+                                                        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+                                                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+                                                        // dependencies of rt pipeline
+                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
+            pds.add_required_extensions(requiredExtensions);
+#endif
         }
 
         // allow user to alter phyiscal device selection
@@ -83,10 +85,11 @@ namespace hsk {
             // Adapted from https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_extended/raytracing_extended.cpp#L136
             // distributed via Apache 2.0 license https://github.com/KhronosGroup/Vulkan-Samples/blob/master/LICENSE
 
-            // This currently causes a segfault, so commented out for the time being
-
             mDeviceFeatures.bdafeatures.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
             mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
+
+#ifndef DISABLE_RT_EXTENSIONS
+
             deviceBuilder.add_pNext(&mDeviceFeatures.bdafeatures);
 
             mDeviceFeatures.rtpfeatures.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
@@ -96,11 +99,13 @@ namespace hsk {
             mDeviceFeatures.asfeatures.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
             mDeviceFeatures.asfeatures.accelerationStructure = VK_TRUE;
             deviceBuilder.add_pNext(&mDeviceFeatures.asfeatures);
+#endif
 
             mDeviceFeatures.difeatures.sType                                     = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
             mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
             deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
 
+            // This currently causes a segfault, so commented out for the time being
 
             // auto &features = mVkbPhysicalDevice.request_extension_features<VkPhysicalDeviceDescriptorIndexingFeaturesEXT>(
             // 	VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT);
@@ -274,7 +279,7 @@ namespace hsk {
 
     void DefaultAppBase::BaseCleanupVulkan()
     {
-        AssertVkResult(vkDeviceWaitIdle(mDevice));
+        HSK_ASSERT_VKRESULT(vkDeviceWaitIdle(mDevice));
 
         vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
         for(auto& target : mFrames)
@@ -282,11 +287,11 @@ namespace hsk {
             vkDestroySemaphore(mDevice, target.Ready, nullptr);
             vkDestroySemaphore(mDevice, target.Finished, nullptr);
             vkDestroyFence(mDevice, target.CommandBufferExecuted, nullptr);
-            // vkDestroyImageView(mDevice, target.ImageView, nullptr);
         }
 
         BaseCleanupSwapchain();
         vkb::destroy_device(mDeviceVkb);
+        mDeviceVkb = vkb::Device{};
         mDevice = nullptr;
         vkb::destroy_surface(mInstanceVkb, mSurface);
         mSurface = nullptr;
@@ -303,12 +308,13 @@ namespace hsk {
         }
         mSwapchainImages.resize(0);
         vkb::destroy_swapchain(mSwapchainVkb);
+        mSwapchainVkb = vkb::Swapchain{};
         mSwapchain = nullptr;
     }
 
     void DefaultAppBase::RecreateSwapchain()
     {
-        vkDeviceWaitIdle(mDevice);
+        HSK_ASSERT_VKRESULT(vkDeviceWaitIdle(mDevice));
 
         BaseCleanupSwapchain();
 
@@ -405,6 +411,7 @@ namespace hsk {
 
         VkSemaphore          waitSemaphores[]   = {currentPresentTarget.Ready};
         VkSemaphore          signalSemaphores[] = {currentPresentTarget.Finished};
+        VkCommandBuffer      commandbuffers[]   = {currentPresentTarget.CommandBuffer};
         VkPipelineStageFlags waitStages[]       = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT};
         submitInfo.waitSemaphoreCount           = 1;
         submitInfo.pWaitSemaphores              = waitSemaphores;
@@ -413,6 +420,9 @@ namespace hsk {
 
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores    = signalSemaphores;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers    = commandbuffers;
 
         // Submit all work to the default queue
         AssertVkResult(vkQueueSubmit(mPresentQueue.Queue, 1, &submitInfo, currentPresentTarget.CommandBufferExecuted));
