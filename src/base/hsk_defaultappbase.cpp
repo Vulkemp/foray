@@ -1,7 +1,7 @@
 #include "hsk_defaultappbase.hpp"
 #include "../hsk_env.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelpers.hpp"
+#include "../memory/hsk_intermediateImage.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
 
@@ -128,6 +128,7 @@ namespace hsk {
         }
         mDeviceVkb = deviceBuilderReturn.value();
         mDevice    = mDeviceVkb.device;
+        mVkContext.Device = mDeviceVkb.device;
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()
@@ -208,6 +209,7 @@ namespace hsk {
         {
             throw Exception("failed to create command pool! VkResult: {}", result);
         }
+        mVkContext.CommandPool = mCommandPoolDefault;
     }
 
     void DefaultAppBase::BaseInitCreateVma()
@@ -224,6 +226,7 @@ namespace hsk {
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
         vmaCreateAllocator(&allocatorCreateInfo, &mAllocator);
+        mVkContext.Allocator = mAllocator;
     }
 
     void DefaultAppBase::BaseInitCompileShaders()
@@ -263,15 +266,15 @@ namespace hsk {
         // auto imageviews = mSwapchainVkb.get_image_views().value();
         for(uint32_t i = 0; i < mSwapchainVkb.image_count; i++)
         {
-            InFlightFrameRenderInfo target{};
+            InFlightFrame target{};
             // target.Image         = images[i];
             // target.ImageView     = imageviews[i];
             target.CommandBuffer = createCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 
-            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Ready));
-            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.Finished));
+            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
+            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
 
-            HSK_ASSERT_VKRESULT(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecuted));
+            HSK_ASSERT_VKRESULT(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
 
             mFrames.push_back(std::move(target));
         }
@@ -284,9 +287,9 @@ namespace hsk {
         vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
         for(auto& target : mFrames)
         {
-            vkDestroySemaphore(mDevice, target.Ready, nullptr);
-            vkDestroySemaphore(mDevice, target.Finished, nullptr);
-            vkDestroyFence(mDevice, target.CommandBufferExecuted, nullptr);
+            vkDestroySemaphore(mDevice, target.ImageAvailableSemaphore, nullptr);
+            vkDestroySemaphore(mDevice, target.RenderFinishedSemaphore, nullptr);
+            vkDestroyFence(mDevice, target.CommandBufferExecutedFence, nullptr);
         }
 
         BaseCleanupSwapchain();
@@ -330,10 +333,10 @@ namespace hsk {
 
     void DefaultAppBase::Render(float delta)
     {
-        InFlightFrameRenderInfo& currentPresentTarget = mFrames[mCurrentFrameIndex];
+        InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
 
         // Make sure that the command buffer we want to use has been presented to the GPU
-        vkWaitForFences(mDevice, 1, &currentPresentTarget.CommandBufferExecuted, VK_TRUE, UINT64_MAX);
+        vkWaitForFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
 
         VkImage primaryOutput    = nullptr;
         VkImage comparisonOutput = nullptr;
@@ -341,7 +344,7 @@ namespace hsk {
         // Record Render Command buffer
 
         FrameRenderInfo renderInfo(primaryOutput, comparisonOutput);
-        renderInfo.SetFrameTime(delta).SetFrameNumber(mRenderedFrameCount).SetFrameObjectsIndex(mCurrentFrameIndex).SetCommandBuffer(currentPresentTarget.CommandBuffer);
+        renderInfo.SetFrameTime(delta).SetFrameNumber(mRenderedFrameCount).SetFrameObjectsIndex(mCurrentFrameIndex).SetCommandBuffer(currentFrame.CommandBuffer);
 
         HSK_ASSERT_VKRESULT(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
 
@@ -356,7 +359,7 @@ namespace hsk {
 
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        VkResult result              = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, currentPresentTarget.Ready, nullptr, &swapChainImageIndex);
+        VkResult result              = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -370,7 +373,7 @@ namespace hsk {
         }
 
         // Reset the fence
-        HSK_ASSERT_VKRESULT(vkResetFences(mDevice, 1, &currentPresentTarget.CommandBufferExecuted));
+        HSK_ASSERT_VKRESULT(vkResetFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence));
 
         // Record Command Buffer
 
@@ -394,15 +397,47 @@ namespace hsk {
         barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
         barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
 
-        vkCmdPipelineBarrier(currentPresentTarget.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             0, 0, nullptr, 0, nullptr, 1, &barrier);
+        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
+                             nullptr, 0, nullptr, 1, &barrier);
 
         // Clear swapchain image
-
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
+        vkCmdClearColorImage(currentFrame.CommandBuffer, mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
 
-        vkCmdClearColorImage(currentPresentTarget.CommandBuffer, mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1,
-                             &range);
+
+        // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
+        barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.oldLayout           = mImageCopySourceForRendering->GetImageLayout();
+        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
+        barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
+
+        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
+                             nullptr, 0, nullptr, 1, &barrier);
+
+        IntermediateImage::LayoutTransitionInfo info;
+        info.CommandBuffer = currentFrame.CommandBuffer;
+        info.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+        info.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+        info.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        mImageCopySourceForRendering->TransitionLayout()
+
+
+        // Copy one of the g-buffer images into the swapchain
+        VkImage       sourceImage  = mImageCopySourceForRendering->GetImage();
+        VkImageLayout sourceLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+        VkImage       targetImage  = mSwapchainImages[swapChainImageIndex].Image;
+        VkImageLayout targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        uint32_t      regionCount  = 1;
+        VkImageCopy   region       = {};  // TODO: Are explicit values necessary??
+        region.srcSubresource      = range;
+        region.dstSubresource      = range;
+        region.extent.width        = mSwapchainVkb.extent.width;
+        region.extent.height       = mSwapchainVkb.extent.height;
+        region.extent.depth        = 1;
+        vkCmdCopyImage(currentFrame.CommandBuffer, sourceImage, sourceLayout, targetImage, targetLayout, regionCount, &region);
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue
         barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -412,18 +447,18 @@ namespace hsk {
         barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
         barrier.dstQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
 
-        vkCmdPipelineBarrier(currentPresentTarget.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0,
+                             0, nullptr, 0, nullptr, 1, &barrier);
 
 
-        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(currentPresentTarget.CommandBuffer));
+        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(currentFrame.CommandBuffer));
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore          readySemaphores[]   = {currentPresentTarget.Ready};
-        VkSemaphore          presentSemaphores[] = {currentPresentTarget.Finished};
-        VkCommandBuffer      commandbuffers[]    = {currentPresentTarget.CommandBuffer};
+        VkSemaphore          readySemaphores[]   = {currentFrame.ImageAvailableSemaphore};
+        VkSemaphore          presentSemaphores[] = {currentFrame.RenderFinishedSemaphore};
+        VkCommandBuffer      commandbuffers[]    = {currentFrame.CommandBuffer};
         VkPipelineStageFlags waitStages[]        = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT};
         submitInfo.waitSemaphoreCount            = 1;
         submitInfo.pWaitSemaphores               = readySemaphores;
@@ -437,7 +472,7 @@ namespace hsk {
         submitInfo.pCommandBuffers    = commandbuffers;
 
         // Submit all work to the default queue
-        AssertVkResult(vkQueueSubmit(mDefaultQueue.Queue, 1, &submitInfo, currentPresentTarget.CommandBufferExecuted));
+        AssertVkResult(vkQueueSubmit(mDefaultQueue.Queue, 1, &submitInfo, currentFrame.CommandBufferExecutedFence));
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

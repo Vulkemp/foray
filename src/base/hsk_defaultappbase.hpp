@@ -1,9 +1,11 @@
 #pragma once
 #include "../osi/hsk_window.hpp"
+#include "hsk_framerenderinfo.hpp"
 #include "hsk_minimalappbase.hpp"
 #include "hsk_shadercompiler.hpp"
+#include "../memory/hsk_intermediateImage.hpp"
 #include <vma/vk_mem_alloc.h>
-#include "hsk_framerenderinfo.hpp"
+#include "hsk_vkcontext.hpp"
 
 namespace hsk {
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
@@ -15,11 +17,11 @@ namespace hsk {
 
         inline hsk::Window&         Window() { return mWindow; }
         inline VkSurfaceKHR         Surface() { return mSurface; }
-        inline vkb::PhysicalDevice& VkbPhysicalDevice() { return mPhysicalDeviceVkb; }
+        inline vkb::PhysicalDevice& PhysicalDeviceVkb() { return mPhysicalDeviceVkb; }
         inline VkPhysicalDevice     PhysicalDevice() { return mPhysicalDevice; }
-        inline vkb::Device&         VkbDevice() { return mDeviceVkb; }
+        inline vkb::Device&         DeviceVkb() { return mDeviceVkb; }
         inline VkDevice             Device() { return mDevice; }
-        inline vkb::Swapchain&      VkbSwapchain() { return mSwapchainVkb; }
+        inline vkb::Swapchain&      SwapchainVkb() { return mSwapchainVkb; }
         inline VkSwapchainKHR       Swapchain() { return mSwapchain; }
 
         struct QueueInfo
@@ -28,12 +30,12 @@ namespace hsk {
             uint32_t QueueFamilyIndex{};
         };
 
-        struct InFlightFrameRenderInfo
+        struct InFlightFrame
         {
             VkCommandBuffer CommandBuffer{};
-            VkSemaphore     Ready{};
-            VkSemaphore     Finished{};
-            VkFence         CommandBufferExecuted{};
+            VkSemaphore     ImageAvailableSemaphore{};
+            VkSemaphore     RenderFinishedSemaphore{};
+            VkFence         CommandBufferExecutedFence{};
         };
 
         struct SwapchainImage
@@ -94,6 +96,9 @@ namespace hsk {
         ShaderCompiler mShaderCompiler;
 
 #pragma region Vulkan
+        /// @brief The applications vulkan context.
+        VkContext    mVkContext;
+
         VkSurfaceKHR mSurface{};
 
         vkb::PhysicalDevice mPhysicalDeviceVkb{};
@@ -102,13 +107,13 @@ namespace hsk {
         vkb::Device mDeviceVkb{};
         VkDevice    mDevice{};
 
-        vkb::Swapchain mSwapchainVkb{};
-        VkSwapchainKHR mSwapchain{};
+        vkb::Swapchain              mSwapchainVkb{};
+        VkSwapchainKHR              mSwapchain{};
         std::vector<SwapchainImage> mSwapchainImages{};
 
-        std::vector<InFlightFrameRenderInfo> mFrames{};
-        uint32_t                             mCurrentFrameIndex  = 0;
-        uint64_t                             mRenderedFrameCount = 0;
+        std::vector<InFlightFrame> mFrames{};
+        uint32_t                   mCurrentFrameIndex  = 0;
+        uint64_t                   mRenderedFrameCount = 0;
 
         struct DeviceFeatures
         {
@@ -125,9 +130,12 @@ namespace hsk {
         QueueInfo mPresentQueue{};
 
         /// @brief Commandpool for the default queue.
-        VkCommandPool mCommandPoolDefault;
+        VkCommandPool mCommandPoolDefault{};
 
-        VmaAllocator mAllocator;
+        VmaAllocator mAllocator{};
+
+        /// @brief Points to the image thats to be copied into the swapchain image during rendering.
+        IntermediateImage* mImageCopySourceForRendering{};
 
 #pragma endregion
     };

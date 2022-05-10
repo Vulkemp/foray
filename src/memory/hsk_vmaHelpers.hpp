@@ -1,5 +1,5 @@
 #pragma once
-#include "hsk_basics.hpp"
+#include "../hsk_basics.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 

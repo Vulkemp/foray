@@ -5,12 +5,12 @@ namespace hsk {
     class GBufferStage : public RasterizedRenderStage
     {
       public:
-        IntermediateBuffer* m_PositionAttachment = nullptr;
-        IntermediateBuffer* m_NormalAttachment   = nullptr;
-        IntermediateBuffer* m_AlbedoAttachment   = nullptr;
-        IntermediateBuffer* m_MotionAttachment   = nullptr;
-        IntermediateBuffer* m_MeshIdAttachment   = nullptr;
-        IntermediateBuffer* m_DepthAttachment    = nullptr;
+        IntermediateImage* m_PositionAttachment = nullptr;
+        IntermediateImage* m_NormalAttachment   = nullptr;
+        IntermediateImage* m_AlbedoAttachment   = nullptr;
+        IntermediateImage* m_MotionAttachment   = nullptr;
+        IntermediateImage* m_MeshIdAttachment   = nullptr;
+        IntermediateImage* m_DepthAttachment    = nullptr;
 
         VkDescriptorSet  mDescriptorSetAttachments = nullptr;
         VkDescriptorSet  mDescriptorSetScene       = nullptr;

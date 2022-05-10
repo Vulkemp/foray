@@ -1,6 +1,6 @@
 #include "hsk_vmaHelpers.hpp"
-#include "base/hsk_logger.hpp"
-#include "hsk_vkHelpers.hpp"
+#include "../base/hsk_logger.hpp"
+#include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
     VkCommandBuffer createCommandBuffer(VkDevice device, VkCommandPool cmdpool, VkCommandBufferLevel level, bool begin)
