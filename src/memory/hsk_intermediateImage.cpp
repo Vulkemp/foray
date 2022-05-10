@@ -7,7 +7,7 @@ namespace hsk {
     void IntermediateImage::Init(const CreateInfo& createInfo)
     {
         mFormat = createInfo.ImageCI.format;
-        vmaCreateImage(mAllocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo);
+        vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo);
 
         VkImageViewCreateInfo imageViewCI{};
         imageViewCI.sType                           = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -21,7 +21,7 @@ namespace hsk {
         imageViewCI.subresourceRange.layerCount     = VK_REMAINING_ARRAY_LAYERS;
         imageViewCI.viewType                        = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
 
-        vkCreateImageView(mDevice, &imageViewCI, nullptr, &mImageView);
+        vkCreateImageView(mContext->Device, &imageViewCI, nullptr, &mImageView);
     }
 
 
@@ -59,14 +59,13 @@ namespace hsk {
         if(transitionInfo.CommandBuffer == nullptr)
         {
             createTemporaryCommandBuffer = true;
-            createCommandBuffer()
+            commandBuffer = createCommandBuffer(mContext->Device, mContext->CommandPool, transitionInfo.CommandBufferLevel, true);
         }
         else
         {
-            commandBuffer = *transitionInfo.CommandBuffer;     
+            commandBuffer = transitionInfo.CommandBuffer;     
         }
         
-
         VkImageMemoryBarrier barrier{};
         barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout                       = mImageLayout;
@@ -78,15 +77,15 @@ namespace hsk {
 
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-        endSingleTimeCommands(commandBuffer);
+        flushCommandBuffer(mContext->Device, mContext->CommandPool, commandBuffer, mContext->QueueGraphics, true);
     }
 
     void IntermediateImage::Destroy()
     {
         if(mAllocation)
         {
-            vkDestroyImageView(mDevice, mImageView, nullptr);
-            vmaDestroyImage(mAllocator, mImage, mAllocation);
+            vkDestroyImageView(mContext->Device, mImageView, nullptr);
+            vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
             mImage      = nullptr;
             mAllocation = nullptr;
             mAllocInfo  = VmaAllocationInfo{};

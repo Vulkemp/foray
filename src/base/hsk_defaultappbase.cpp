@@ -126,8 +126,8 @@ namespace hsk {
         {
             throw Exception("Device creation: {}", deviceBuilderReturn.error().message());
         }
-        mDeviceVkb = deviceBuilderReturn.value();
-        mDevice    = mDeviceVkb.device;
+        mDeviceVkb        = deviceBuilderReturn.value();
+        mDevice           = mDeviceVkb.device;
         mVkContext.Device = mDeviceVkb.device;
     }
 
@@ -417,15 +417,18 @@ namespace hsk {
         vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
                              nullptr, 0, nullptr, 1, &barrier);
 
-        IntermediateImage::LayoutTransitionInfo info;
-        info.CommandBuffer = currentFrame.CommandBuffer;
-        info.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
-        info.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-        info.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        mImageCopySourceForRendering->TransitionLayout()
+        IntermediateImage::LayoutTransitionInfo layoutTransitionInfo;
+        layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
+        layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+        layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+        layoutTransitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
+        layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
+        layoutTransitionInfo.SubresourceRange     = range;
+        mImageCopySourceForRendering->TransitionLayout(layoutTransitionInfo);
 
 
-        // Copy one of the g-buffer images into the swapchain
+        // Copy one of the g-buffer images into the swapchain / TODO: This is not done
         VkImage       sourceImage  = mImageCopySourceForRendering->GetImage();
         VkImageLayout sourceLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
         VkImage       targetImage  = mSwapchainImages[swapChainImageIndex].Image;

@@ -5,7 +5,8 @@
 /// @brief Contains vulkan variables you want to pass around the application.
 struct VkContext
 {
-    VkDevice  Device{};
+    VkDevice      Device{};
     VmaAllocator  Allocator{};
     VkCommandPool CommandPool{};
+    VkQueue       QueueGraphics{};
 };

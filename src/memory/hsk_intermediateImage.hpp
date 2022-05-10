@@ -37,7 +37,7 @@ namespace hsk {
             VkPipelineStageFlags SrcStage{};
             VkPipelineStageFlags DstStage{};
             /// @brief If no command buffer is passed, a single time command buffer will be created to transfer the layout.
-            VkCommandBuffer*        CommandBuffer{nullptr};
+            VkCommandBuffer         CommandBuffer{nullptr};
             uint32_t                SrcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
             uint32_t                DstQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
             VkImageSubresourceRange SubresourceRange{
@@ -47,6 +47,8 @@ namespace hsk {
                 .baseArrayLayer = 0,
                 .layerCount     = 1,
             };
+            /// @brief If the CommandBuffer member is left to nullptr, a single time command buffer is generated with this level.
+            VkCommandBufferLevel CommandBufferLevel{VK_COMMAND_BUFFER_LEVEL_PRIMARY};
         };
 
         /// @brief Simple layout transition.

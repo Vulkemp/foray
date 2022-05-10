@@ -2,6 +2,7 @@
 #include "../hsk_basics.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "../base/hsk_vkcontext.hpp"
 
 namespace hsk {
     VkCommandBuffer createCommandBuffer(VkDevice device, VkCommandPool cmdpool, VkCommandBufferLevel level, bool begin = false);
