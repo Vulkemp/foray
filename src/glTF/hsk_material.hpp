@@ -52,6 +52,8 @@ namespace hsk {
         Texture* OcclusionTexture = nullptr;
 
         TexCoordSets TexCoordIndices;
+        
+        static void BuildDescriptorSetLayoutCI(VkDescriptorSetLayoutCreateInfo& layoutCI, uint32_t bindMetalRoughness = UINT32_MAX, uint32_t bindEmissive = UINT32_MAX, uint32_t bindNormal = UINT32_MAX, uint32_t bindOcclusion = UINT32_MAX);
     };
 
 }  // namespace hsk

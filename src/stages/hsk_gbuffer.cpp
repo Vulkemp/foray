@@ -35,7 +35,7 @@ namespace hsk {
         const uint32_t          ATTACHMENT_COUNT_DEPTH                   = 1;
         const uint32_t          ATTACHMENT_COUNT                         = ATTACHMENT_COUNT_COLOR + ATTACHMENT_COUNT_DEPTH;
         VkAttachmentDescription attachmentDescriptions[ATTACHMENT_COUNT] = {};
-        IntermediateImage*     attachments[] = {m_PositionAttachment, m_NormalAttachment, m_AlbedoAttachment, m_MotionAttachment, m_MeshIdAttachment, m_DepthAttachment};
+        IntermediateImage*      attachments[] = {m_PositionAttachment, m_NormalAttachment, m_AlbedoAttachment, m_MotionAttachment, m_MeshIdAttachment, m_DepthAttachment};
 
         for(uint32_t i = 0; i < ATTACHMENT_COUNT; i++)
         {
@@ -113,12 +113,6 @@ namespace hsk {
         HSK_ASSERT_VKRESULT(vkCreateFramebuffer(mDevice, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
-    void GBufferStage::RecordFrame(const VkCommandBuffer*& out_commandBuffers, uint32_t& out_commandBufferCount)
-    {
-        // out_commandBufferCount = 1;
-        // out_commandBuffers = &renderInfo.GetCommandBuffer();
-    }
-
     void GBufferStage::Destroy()
     {
         vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
@@ -138,11 +132,12 @@ namespace hsk {
         std::vector<VkDescriptorPoolSize> poolSizes =
             std::initializer_list<VkDescriptorPoolSize>{VkDescriptorPoolSize{VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 8},
                                                         VkDescriptorPoolSize{VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8}};
-        InitDescriptorPool(poolSizes, 3);
+                                                        
+        RasterizedRenderStage::InitDescriptorPool(poolSizes, 3);
     }
     void GBufferStage::setupDescriptorSetLayout()
     {
-        // std::vector<VkDescriptorSetLayout> gltfDescriptorSetLayouts           = {vkglTF::descriptorSetLayoutUbo, vkglTF::descriptorSetLayoutImage};
+        // TODO
         // VkPipelineLayoutCreateInfo         pPipelineLayoutCreateInfoOffscreen = vks::initializers::pipelineLayoutCreateInfo(gltfDescriptorSetLayouts.data(), 2);
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mDevice, &pipelineLayoutCI, nullptr, &mPipelineLayout));
@@ -173,21 +168,20 @@ namespace hsk {
         clearValues[5].depthStencil = {1.0f, 0};
 
         VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass            = mRenderpass;
-        renderPassBeginInfo.framebuffer           = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent     = mRenderResolution;
-        renderPassBeginInfo.clearValueCount       = static_cast<uint32_t>(clearValues.size());
-        renderPassBeginInfo.pClearValues          = clearValues.data();
-
-        HSK_ASSERT_VKRESULT(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdBufInfo));
+        renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass        = mRenderpass;
+        renderPassBeginInfo.framebuffer       = mFrameBuffer;
+        renderPassBeginInfo.renderArea.extent = mRenderResolution;
+        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
+        renderPassBeginInfo.pClearValues      = clearValues.data();
 
         vkCmdBeginRenderPass(renderInfo.GetCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkViewport viewport = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
+        // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
+        VkViewport viewport{0.f, 0.f, (float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f};
         vkCmdSetViewport(renderInfo.GetCommandBuffer(), 0, 1, &viewport);
 
-        VkRect2D scissor = vks::initializers::rect2D(mRenderResolution.width, mRenderResolution.height, 0, 0);
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mRenderResolution.width, mRenderResolution.height}};
         vkCmdSetScissor(renderInfo.GetCommandBuffer(), 0, 1, &scissor);
 
         vkCmdBindPipeline(renderInfo.GetCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);

@@ -65,4 +65,17 @@ namespace hsk {
         resolveTinygltfMaterial(material.occlusionTexture, Owner(), OcclusionTexture, TexCoordIndices.Occlusion);
     }
 
+    void Material::BuildDescriptorSetLayoutCI(VkDescriptorSetLayoutCreateInfo& layoutCI, uint32_t bindMetalRoughness, uint32_t bindEmissive, uint32_t bindNormal, uint32_t bindOcclusion)
+    {
+        layoutCI       = {};
+        layoutCI.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        layoutCI.bindingCount;
+        layoutCI.pBindings;
+
+        VkDescriptorSetLayoutBinding              binding{};
+        std::vector<VkDescriptorSetLayoutBinding> bindings{};
+        if (bindMetalRoughness != UINT32_MAX){
+        }
+    }
+
 }  // namespace hsk
