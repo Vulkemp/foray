@@ -3,6 +3,7 @@
 #include "hsk_minimalappbase.hpp"
 #include "hsk_shadercompiler.hpp"
 #include <vma/vk_mem_alloc.h>
+#include "hsk_framerenderinfo.hpp"
 
 namespace hsk {
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
@@ -75,7 +76,7 @@ namespace hsk {
         virtual void Render(float delta) override;
 
         virtual void        BasePrepareFrame();
-        inline virtual void RecordCommandBuffer(VkCommandBuffer cmdBuffer) {}
+        inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}
         virtual void        BaseSubmitFrame();
 
         /// @brief The main window used for rendering.
