@@ -1,5 +1,5 @@
 #pragma once
-#include "../hsk_vmaHelpers.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_animation.hpp"
 #include "hsk_geo.hpp"
 #include "hsk_glTF_declares.hpp"

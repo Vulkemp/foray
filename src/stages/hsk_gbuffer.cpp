@@ -116,7 +116,7 @@ namespace hsk {
     void GBufferStage::RecordFrame(const VkCommandBuffer*& out_commandBuffers, uint32_t& out_commandBufferCount)
     {
         // out_commandBufferCount = 1;
-        // out_commandBuffers = &m_CmdBuffer;
+        // out_commandBuffers = &renderInfo.GetCommandBuffer();
     }
 
     void GBufferStage::Destroy()
@@ -161,7 +161,7 @@ namespace hsk {
         // vkUpdateDescriptorSets(mDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
     }
 
-    void GBufferStage::buildCommandBuffer()
+    void GBufferStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
         // Clear values for all attachments written in the fragment shader
         std::array<VkClearValue, 6> clearValues;
@@ -172,32 +172,33 @@ namespace hsk {
         clearValues[4].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
         clearValues[5].depthStencil = {1.0f, 0};
 
-        VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-        renderPassBeginInfo.renderPass            = m_renderpass;
+        VkRenderPassBeginInfo renderPassBeginInfo{};
+        renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass            = mRenderpass;
         renderPassBeginInfo.framebuffer           = mFrameBuffer;
         renderPassBeginInfo.renderArea.extent     = mRenderResolution;
         renderPassBeginInfo.clearValueCount       = static_cast<uint32_t>(clearValues.size());
         renderPassBeginInfo.pClearValues          = clearValues.data();
 
-        HSK_ASSERT_VKRESULT(vkBeginCommandBuffer(m_CmdBuffer, &cmdBufInfo));
+        HSK_ASSERT_VKRESULT(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdBufInfo));
 
-        vkCmdBeginRenderPass(m_CmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(renderInfo.GetCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         VkViewport viewport = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        vkCmdSetViewport(m_CmdBuffer, 0, 1, &viewport);
+        vkCmdSetViewport(renderInfo.GetCommandBuffer(), 0, 1, &viewport);
 
         VkRect2D scissor = vks::initializers::rect2D(mRenderResolution.width, mRenderResolution.height, 0, 0);
-        vkCmdSetScissor(m_CmdBuffer, 0, 1, &scissor);
+        vkCmdSetScissor(renderInfo.GetCommandBuffer(), 0, 1, &scissor);
 
-        vkCmdBindPipeline(m_CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
+        vkCmdBindPipeline(renderInfo.GetCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
         // Instanced object
-        vkCmdBindDescriptorSets(m_CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSetScene, 0, nullptr);
-        m_Scene->draw(m_CmdBuffer, vkglTF::RenderFlags::BindImages, mPipelineLayout, 1);  // vkglTF::RenderFlags::BindImages
+        vkCmdBindDescriptorSets(renderInfo.GetCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSetScene, 0, nullptr);
+        m_Scene->draw(renderInfo.GetCommandBuffer(), vkglTF::RenderFlags::BindImages, mPipelineLayout, 1);  // vkglTF::RenderFlags::BindImages
 
-        vkCmdEndRenderPass(m_CmdBuffer);
+        vkCmdEndRenderPass(renderInfo.GetCommandBuffer());
 
-        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(m_CmdBuffer));
+        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(renderInfo.GetCommandBuffer()));
     }
 
     void GBufferStage::preparePipeline()

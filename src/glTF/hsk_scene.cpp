@@ -1,6 +1,6 @@
 #include "hsk_scene.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelpers.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_animation.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_node.hpp"

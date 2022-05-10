@@ -1,6 +1,6 @@
 #include "hsk_texture.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../hsk_vmaHelpers.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {

@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_basics.hpp"
+#include <vulkan/vulkan.h>
 
 namespace hsk {
     class FrameRenderInfo

@@ -1,6 +1,6 @@
 #pragma once
 #include "../hsk_managedubo.hpp"
-#include "../hsk_vmaHelpers.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "glm/glm.hpp"
 #include "hsk_boundingBox.hpp"
 #include "hsk_glTF_declares.hpp"

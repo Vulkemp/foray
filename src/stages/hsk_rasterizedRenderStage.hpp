@@ -1,5 +1,5 @@
 #pragma once
-#include "../vulkan/hsk_intermediateBuffer.hpp"
+#include "../memory/hsk_intermediateImage.hpp"
 #include "hsk_renderstage.hpp"
 
 namespace hsk {

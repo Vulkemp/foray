@@ -19,7 +19,7 @@ namespace hsk {
         virtual ~GBufferStage() { Destroy(); }
 
         virtual void Init();
-        virtual void RecordFrame(const VkCommandBuffer*& out_commandBuffers, uint32_t& out_commandBufferCount);
+        virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
       protected:
