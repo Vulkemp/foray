@@ -53,19 +53,20 @@ namespace hsk {
             {
                 const float* bufferPos          = nullptr;
                 const float* bufferNormals      = nullptr;
+                const float* bufferTangents     = nullptr;
                 const float* bufferTexCoordSet0 = nullptr;
                 const float* bufferTexCoordSet1 = nullptr;
-                const void*  bufferJoints       = nullptr;
-                const float* bufferWeights      = nullptr;
+                // const void*  bufferJoints       = nullptr;
+                // const float* bufferWeights      = nullptr;
 
                 int posByteStride;
                 int normByteStride;
+                int tangentByteStride;
                 int uv0ByteStride;
                 int uv1ByteStride;
-                int jointByteStride;
-                int weightByteStride;
-
-                int jointComponentType;
+                // int jointByteStride;
+                // int weightByteStride;
+                // int jointComponentType;
 
                 // Position attribute is required
                 assert(primitive.attributes.find("POSITION") != primitive.attributes.end());
@@ -91,6 +92,15 @@ namespace hsk {
                     normByteStride = normAccessor.ByteStride(normView) ? (normAccessor.ByteStride(normView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(normAccessor);
                 }
 
+                if(primitive.attributes.find("TANGENT") != primitive.attributes.end())
+                {
+                    const tinygltf::Accessor&   tangentAccessor = model.accessors[primitive.attributes.find("TANGENT")->second];
+                    const tinygltf::BufferView& tangentView     = model.bufferViews[tangentAccessor.bufferView];
+                    bufferTangents = reinterpret_cast<const float*>(&(model.buffers[tangentView.buffer].data[tangentAccessor.byteOffset + tangentView.byteOffset]));
+                    tangentByteStride =
+                        tangentAccessor.ByteStride(tangentView) ? (tangentAccessor.ByteStride(tangentView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(tangentAccessor);
+                }
+
                 if(primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end())
                 {
                     const tinygltf::Accessor&   uvAccessor = model.accessors[primitive.attributes.find("TEXCOORD_0")->second];
@@ -106,65 +116,66 @@ namespace hsk {
                     uv1ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
                 }
 
-                // Skinning
-                // Joints
-                if(primitive.attributes.find("JOINTS_0") != primitive.attributes.end())
-                {
-                    const tinygltf::Accessor&   jointAccessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
-                    const tinygltf::BufferView& jointView     = model.bufferViews[jointAccessor.bufferView];
-                    bufferJoints                              = &(model.buffers[jointView.buffer].data[jointAccessor.byteOffset + jointView.byteOffset]);
-                    jointComponentType                        = jointAccessor.componentType;
-                    jointByteStride = jointAccessor.ByteStride(jointView) ? (jointAccessor.ByteStride(jointView) / tinygltf::GetComponentSizeInBytes(jointComponentType)) :
-                                                                            tinygltf_GetTypeSizeInBytes(jointAccessor);
-                }
+                // // Skinning
+                // // Joints
+                // if(primitive.attributes.find("JOINTS_0") != primitive.attributes.end())
+                // {
+                //     const tinygltf::Accessor&   jointAccessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
+                //     const tinygltf::BufferView& jointView     = model.bufferViews[jointAccessor.bufferView];
+                //     bufferJoints                              = &(model.buffers[jointView.buffer].data[jointAccessor.byteOffset + jointView.byteOffset]);
+                //     jointComponentType                        = jointAccessor.componentType;
+                //     jointByteStride = jointAccessor.ByteStride(jointView) ? (jointAccessor.ByteStride(jointView) / tinygltf::GetComponentSizeInBytes(jointComponentType)) :
+                //                                                             tinygltf_GetTypeSizeInBytes(jointAccessor);
+                // }
 
-                if(primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
-                {
-                    const tinygltf::Accessor&   weightAccessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
-                    const tinygltf::BufferView& weightView     = model.bufferViews[weightAccessor.bufferView];
-                    bufferWeights = reinterpret_cast<const float*>(&(model.buffers[weightView.buffer].data[weightAccessor.byteOffset + weightView.byteOffset]));
-                    weightByteStride =
-                        weightAccessor.ByteStride(weightView) ? (weightAccessor.ByteStride(weightView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(weightAccessor);
-                }
+                // if(primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
+                // {
+                //     const tinygltf::Accessor&   weightAccessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
+                //     const tinygltf::BufferView& weightView     = model.bufferViews[weightAccessor.bufferView];
+                //     bufferWeights = reinterpret_cast<const float*>(&(model.buffers[weightView.buffer].data[weightAccessor.byteOffset + weightView.byteOffset]));
+                //     weightByteStride =
+                //         weightAccessor.ByteStride(weightView) ? (weightAccessor.ByteStride(weightView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(weightAccessor);
+                // }
 
-                hasSkin = (bufferJoints && bufferWeights);
+                // hasSkin = (bufferJoints && bufferWeights);
 
                 for(size_t v = 0; v < posAccessor.count; v++)
                 {
                     Vertex vert{};
-                    vert.Pos    = glm::vec4(glm::make_vec3(&bufferPos[v * posByteStride]), 1.0f);
-                    vert.Normal = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
-                    vert.Uv0    = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
-                    vert.Uv1    = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
+                    vert.Pos     = glm::vec4(glm::make_vec3(&bufferPos[v * posByteStride]), 1.0f);
+                    vert.Normal  = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
+                    vert.Tangent = glm::normalize(glm::vec3(bufferTangents ? glm::make_vec3(&bufferTangents[v * tangentByteStride]) : glm::vec3(0.0f)));
+                    vert.Uv0     = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
+                    vert.Uv1     = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
 
-                    if(hasSkin)
-                    {
-                        switch(jointComponentType)
-                        {
-                            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
-                                const uint16_t* buf = static_cast<const uint16_t*>(bufferJoints);
-                                vert.Joint0         = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
-                                break;
-                            }
-                            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
-                                const uint8_t* buf = static_cast<const uint8_t*>(bufferJoints);
-                                vert.Joint0        = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
-                                break;
-                            }
-                            default:
-                                throw Exception("Joint component type {} not supported!", jointComponentType);
-                        }
-                    }
-                    else
-                    {
-                        vert.Joint0 = glm::vec4(0.0f);
-                    }
-                    vert.Weight0 = hasSkin ? glm::make_vec4(&bufferWeights[v * weightByteStride]) : glm::vec4(0.0f);
-                    // Fix for all zero weights
-                    if(glm::length(vert.Weight0) == 0.0f)
-                    {
-                        vert.Weight0 = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-                    }
+                    // if(hasSkin)
+                    // {
+                    //     switch(jointComponentType)
+                    //     {
+                    //         case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
+                    //             const uint16_t* buf = static_cast<const uint16_t*>(bufferJoints);
+                    //             vert.Joint0         = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
+                    //             break;
+                    //         }
+                    //         case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
+                    //             const uint8_t* buf = static_cast<const uint8_t*>(bufferJoints);
+                    //             vert.Joint0        = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
+                    //             break;
+                    //         }
+                    //         default:
+                    //             throw Exception("Joint component type {} not supported!", jointComponentType);
+                    //     }
+                    // }
+                    // else
+                    // {
+                    //     vert.Joint0 = glm::vec4(0.0f);
+                    // }
+                    // vert.Weight0 = hasSkin ? glm::make_vec4(&bufferWeights[v * weightByteStride]) : glm::vec4(0.0f);
+                    // // Fix for all zero weights
+                    // if(glm::length(vert.Weight0) == 0.0f)
+                    // {
+                    //     vert.Weight0 = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+                    // }
                     vertexBuffer.push_back(vert);
                 }
             }
