@@ -1,4 +1,6 @@
 #pragma once
+#include "../glTF/hsk_scene.hpp"
+#include "../base/hsk_vkcontext.hpp"
 #include "hsk_rasterizedRenderStage.hpp"
 
 namespace hsk {
@@ -12,17 +14,19 @@ namespace hsk {
         IntermediateImage* m_MeshIdAttachment   = nullptr;
         IntermediateImage* m_DepthAttachment    = nullptr;
 
-        VkDescriptorSet  mDescriptorSetAttachments = nullptr;
-        VkDescriptorSet  mDescriptorSetScene       = nullptr;
+        VkDescriptorSet mDescriptorSetAttachments = nullptr;
+        VkDescriptorSet mDescriptorSetScene       = nullptr;
 
         GBufferStage();
         virtual ~GBufferStage() { Destroy(); }
 
-        virtual void Init();
+        virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
       protected:
+        const VkContext* mContext;
+        Scene* mScene;
 
         virtual void InitFixedSizeComponents();
         virtual void InitResolutionDependentComponents();
