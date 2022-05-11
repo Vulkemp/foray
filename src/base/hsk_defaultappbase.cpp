@@ -4,6 +4,7 @@
 #include "../memory/hsk_intermediateImage.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
+#include "../memory/hsk_vmaHelpers.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -429,17 +430,22 @@ namespace hsk {
 
 
         // Copy one of the g-buffer images into the swapchain / TODO: This is not done
-        VkImage       sourceImage  = mImageCopySourceForRendering->GetImage();
-        VkImageLayout sourceLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-        VkImage       targetImage  = mSwapchainImages[swapChainImageIndex].Image;
-        VkImageLayout targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        uint32_t      regionCount  = 1;
-        VkImageCopy   region       = {};  // TODO: Are explicit values necessary??
-        region.srcSubresource      = range;
-        region.dstSubresource      = range;
-        region.extent.width        = mSwapchainVkb.extent.width;
-        region.extent.height       = mSwapchainVkb.extent.height;
-        region.extent.depth        = 1;
+        VkImage                  sourceImage  = mImageCopySourceForRendering->GetImage();
+        VkImageLayout            sourceLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+        VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
+        VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        uint32_t                 regionCount  = 1;
+        VkImageSubresourceLayers layers       = {};
+        layers.aspectMask                     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+        layers.mipLevel                       = 0;
+        layers.baseArrayLayer                 = 0;
+        layers.layerCount                     = 1;
+        VkImageCopy region                    = {};
+        region.srcSubresource                 = layers;
+        region.dstSubresource                 = layers;
+        region.extent.width                   = mSwapchainVkb.extent.width;
+        region.extent.height                  = mSwapchainVkb.extent.height;
+        region.extent.depth                   = 1;
         vkCmdCopyImage(currentFrame.CommandBuffer, sourceImage, sourceLayout, targetImage, targetLayout, regionCount, &region);
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue

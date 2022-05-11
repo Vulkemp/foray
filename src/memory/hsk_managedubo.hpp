@@ -1,6 +1,6 @@
 #pragma once
-#include "hsk_basics.hpp"
-#include "memory/hsk_vmaHelpers.hpp"
+#include "../hsk_basics.hpp"
+#include "hsk_vmaHelpers.hpp"
 #include <glm/glm.hpp>
 
 namespace hsk {

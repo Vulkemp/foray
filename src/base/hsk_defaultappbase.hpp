@@ -8,6 +8,7 @@
 #include "hsk_vkcontext.hpp"
 
 namespace hsk {
+
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
     class DefaultAppBase : public MinimalAppBase
     {

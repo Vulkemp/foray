@@ -4,7 +4,7 @@
 namespace hsk {
     void Camera::InitFromTinyGltfCamera(const tinygltf::Camera& camera)
     {
-        mUbo = std::make_unique<ManagedUbo<CameraUboBlock>>(Context()->Allocator, true);
+        mUbo = new ManagedUbo<CameraUboBlock>(Context()->Allocator, true);
         ViewMat() = glm::identity<glm::mat4>();
         if(camera.type == "perspective")
         {
@@ -31,6 +31,10 @@ namespace hsk {
     }
     void Camera::Cleanup(){
         mUbo->Cleanup();
+        if(mUbo != nullptr)
+        {
+            delete mUbo;
+        }
     }
 
 }  // namespace hsk

@@ -1,11 +1,12 @@
 #pragma once
-#include "../hsk_managedubo.hpp"
+#include "../memory/hsk_managedubo.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_scenecomponent.hpp"
 #include <glm/glm.hpp>
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include <memory>
 
 
 namespace hsk {
@@ -32,11 +33,15 @@ namespace hsk {
         HSK_PROPERTY_GET(Ubo)
         HSK_PROPERTY_CGET(Ubo)
 
-        inline glm::mat4& ProjectionMat() { return mUbo->GetUbo().ProjectionMat; }
+        inline glm::mat4& ProjectionMat()
+        {
+            return mUbo->GetUbo().ProjectionMat;
+        }
         inline glm::mat4& ViewMat() { return mUbo->GetUbo().ViewMat; }
 
       protected:
-        std::unique_ptr<ManagedUbo<CameraUboBlock>> mUbo = nullptr;
+
+        ManagedUbo<CameraUboBlock>* mUbo{nullptr}; // TODO: There is some issue with this beeing a unique ptr, investigate later
 
         void InitFromTinyGltfCameraPerspective(const tinygltf::PerspectiveCamera& camera);
         void InitFromTinyGltfCameraOrthographic(const tinygltf::OrthographicCamera& camera);
