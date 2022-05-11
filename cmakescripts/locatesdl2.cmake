@@ -1,5 +1,5 @@
 # Attempt to locate via sdl2-config.cmake which should have been installed together with SDL2
-find_package(SDL2)
+find_package(SDL2 QUIET)
 
 if (UNIX AND NOT DEFINED SDL2_INCLUDE_DIRS)
     # On unix systems, SDL should be installed via package manager

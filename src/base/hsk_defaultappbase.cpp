@@ -21,7 +21,7 @@ namespace hsk {
             mVkbInstanceBuilder.enable_extension(extension);
         }
 
-        mVkbInstanceBuilder.require_api_version(VK_API_VERSION_1_3);
+        mVkbInstanceBuilder.require_api_version(VK_API_VERSION_1_2);
 
         // create instance using instance builder from minimal app base
         MinimalAppBase::BaseInit();
@@ -431,7 +431,7 @@ namespace hsk {
 
         // Copy one of the g-buffer images into the swapchain / TODO: This is not done
         VkImage                  sourceImage  = mImageCopySourceForRendering->GetImage();
-        VkImageLayout            sourceLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+        VkImageLayout            sourceLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
         VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
         VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         uint32_t                 regionCount  = 1;
