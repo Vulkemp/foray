@@ -98,7 +98,7 @@ namespace hsk {
 
 #pragma region Vulkan
         /// @brief The applications vulkan context.
-        VkContext    mVkContext;
+        VkContext    mContext;
 
         VkSurfaceKHR mSurface{};
 
@@ -136,7 +136,7 @@ namespace hsk {
         VmaAllocator mAllocator{};
 
         /// @brief Points to the image thats to be copied into the swapchain image during rendering.
-        IntermediateImage* mImageCopySourceForRendering{};
+        IntermediateImage* mSwapchainCopySourceImage{};
 
 #pragma endregion
     };

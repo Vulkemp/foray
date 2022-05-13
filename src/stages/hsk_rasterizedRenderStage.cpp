@@ -11,7 +11,7 @@ namespace hsk {
         descriptorPoolCI.poolSizeCount = poolSizes.size();
         descriptorPoolCI.pPoolSizes    = poolSizes.data();
 
-        HSK_ASSERT_VKRESULT(vkCreateDescriptorPool(mDevice, &descriptorPoolCI, nullptr, &mDescriptorPool));
+        HSK_ASSERT_VKRESULT(vkCreateDescriptorPool(mContext->Device, &descriptorPoolCI, nullptr, &mDescriptorPool));
 
     }
     void RasterizedRenderStage::Destroy() {

@@ -7,17 +7,17 @@ namespace hsk {
     class GBufferStage : public RasterizedRenderStage
     {
       public:
-        IntermediateImage* m_PositionAttachment = nullptr;
-        IntermediateImage* m_NormalAttachment   = nullptr;
-        IntermediateImage* m_AlbedoAttachment   = nullptr;
-        IntermediateImage* m_MotionAttachment   = nullptr;
-        IntermediateImage* m_MeshIdAttachment   = nullptr;
-        IntermediateImage* m_DepthAttachment    = nullptr;
+        IntermediateImage* mPositionAttachment = nullptr;
+        IntermediateImage* mNormalAttachment   = nullptr;
+        IntermediateImage* mAlbedoAttachment   = nullptr;
+        IntermediateImage* mMotionAttachment   = nullptr;
+        IntermediateImage* mMeshIdAttachment   = nullptr;
+        IntermediateImage* mDepthAttachment    = nullptr;
 
         VkDescriptorSet mDescriptorSetAttachments = nullptr;
         VkDescriptorSet mDescriptorSetScene       = nullptr;
 
-        GBufferStage();
+        GBufferStage() {};
         virtual ~GBufferStage() { Destroy(); }
 
         virtual void Init(const VkContext* context, Scene* scene);
@@ -25,7 +25,6 @@ namespace hsk {
         virtual void Destroy();
 
       protected:
-        const VkContext* mContext;
         Scene* mScene;
 
         virtual void InitFixedSizeComponents();
@@ -37,7 +36,7 @@ namespace hsk {
         void setupDescriptorPool();
         void setupDescriptorSetLayout();
         void setupDescriptorSet();
-        void buildCommandBuffer();
+        void buildCommandBuffer(){};
         void preparePipeline();
     };
 }  // namespace hsk

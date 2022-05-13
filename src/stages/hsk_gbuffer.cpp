@@ -1,9 +1,9 @@
 #include "hsk_gbuffer.hpp"
+#include "../glTF/hsk_geo.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 
 namespace hsk {
-    GBufferStage::GBufferStage() {}
 
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
     void GBufferStage::Init(const VkContext* context, Scene* scene)
@@ -38,7 +38,7 @@ namespace hsk {
         const uint32_t          ATTACHMENT_COUNT_DEPTH                   = 1;
         const uint32_t          ATTACHMENT_COUNT                         = ATTACHMENT_COUNT_COLOR + ATTACHMENT_COUNT_DEPTH;
         VkAttachmentDescription attachmentDescriptions[ATTACHMENT_COUNT] = {};
-        IntermediateImage*      attachments[] = {m_PositionAttachment, m_NormalAttachment, m_AlbedoAttachment, m_MotionAttachment, m_MeshIdAttachment, m_DepthAttachment};
+        IntermediateImage*      attachments[] = {mPositionAttachment, mNormalAttachment, mAlbedoAttachment, mMotionAttachment, mMeshIdAttachment, mDepthAttachment};
 
         for(uint32_t i = 0; i < ATTACHMENT_COUNT; i++)
         {
@@ -99,10 +99,10 @@ namespace hsk {
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
 
-        HSK_ASSERT_VKRESULT(vkCreateRenderPass(mDevice, &renderPassInfo, nullptr, &mRenderpass));
+        HSK_ASSERT_VKRESULT(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
-        VkImageView attachmentViews[ATTACHMENT_COUNT] = {m_PositionAttachment->GetImageView(), m_NormalAttachment->GetImageView(), m_AlbedoAttachment->GetImageView(),
-                                                         m_MotionAttachment->GetImageView(),   m_MeshIdAttachment->GetImageView(), m_DepthAttachment->GetImageView()};
+        VkImageView attachmentViews[ATTACHMENT_COUNT] = {mPositionAttachment->GetImageView(), mNormalAttachment->GetImageView(), mAlbedoAttachment->GetImageView(),
+                                                         mMotionAttachment->GetImageView(),   mMeshIdAttachment->GetImageView(), mDepthAttachment->GetImageView()};
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -110,21 +110,22 @@ namespace hsk {
         fbufCreateInfo.renderPass              = mRenderpass;
         fbufCreateInfo.pAttachments            = attachmentViews;
         fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(ATTACHMENT_COUNT);
-        fbufCreateInfo.width                   = mRenderResolution.width;
-        fbufCreateInfo.height                  = mRenderResolution.height;
+        fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
+        fbufCreateInfo.height                  = mContext->Swapchain.extent.width;
         fbufCreateInfo.layers                  = 1;
-        HSK_ASSERT_VKRESULT(vkCreateFramebuffer(mDevice, &fbufCreateInfo, nullptr, &mFrameBuffer));
+        HSK_ASSERT_VKRESULT(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void GBufferStage::Destroy()
     {
-        vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
-        vkDestroyFramebuffer(mDevice, mFrameBuffer, nullptr);
-        vkDestroyPipeline(mDevice, mPipeline, nullptr);
-        vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
-        vkDestroyDescriptorSetLayout(mDevice, mDescriptorSetLayout, nullptr);
-        vkDestroyRenderPass(mDevice, mRenderpass, nullptr);
-        vkDestroyPipelineCache(mDevice, mPipelineCache, nullptr);
+        VkDevice device = mContext->Device;
+        vkDestroyDescriptorPool(device, mDescriptorPool, nullptr);
+        vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
+        vkDestroyPipeline(device, mPipeline, nullptr);
+        vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
+        vkDestroyDescriptorSetLayout(device, mDescriptorSetLayout, nullptr);
+        vkDestroyRenderPass(device, mRenderpass, nullptr);
+        vkDestroyPipelineCache(device, mPipelineCache, nullptr);
     }
 
 
@@ -143,7 +144,11 @@ namespace hsk {
         // TODO
         // VkPipelineLayoutCreateInfo         pPipelineLayoutCreateInfoOffscreen = vks::initializers::pipelineLayoutCreateInfo(gltfDescriptorSetLayouts.data(), 2);
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-        HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mDevice, &pipelineLayoutCI, nullptr, &mPipelineLayout));
+        pipelineLayoutCI.pushConstantRangeCount = 0;
+        pipelineLayoutCI.setLayoutCount = 1;
+        pipelineLayoutCI.pSetLayouts    = nullptr;
+
+        HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }
 
     void GBufferStage::setupDescriptorSet()
@@ -153,10 +158,10 @@ namespace hsk {
         // Model
         // use descriptor set layout delivered by gltf
         // VkDescriptorSetAllocateInfo allocInfoOffscreen = vks::initializers::descriptorSetAllocateInfo(mDescriptorPool, &vkglTF::descriptorSetLayoutUbo, 1);
-        // HSK_ASSERT_VKRESULT(vkAllocateDescriptorSets(mDevice, &allocInfoOffscreen, &mDescriptorSetScene));
+        // HSK_ASSERT_VKRESULT(vkAllocateDescriptorSets(device, &allocInfoOffscreen, &mDescriptorSetScene));
         // writeDescriptorSets = {// Binding 0: Vertex shader uniform buffer
         //                        m_rtFilterDemo->m_UBO_SceneInfo->writeDescriptorSet(mDescriptorSetScene, 0)};
-        // vkUpdateDescriptorSets(mDevice, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+        // vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
     }
 
     void GBufferStage::RecordFrame(FrameRenderInfo& renderInfo)
@@ -174,7 +179,7 @@ namespace hsk {
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
         renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent = mRenderResolution;
+        renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
         renderPassBeginInfo.pClearValues      = clearValues.data();
 
@@ -182,10 +187,10 @@ namespace hsk {
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        VkViewport viewport{0.f, 0.f, (float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f};
+        VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mRenderResolution.width, mRenderResolution.height}};
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
@@ -203,7 +208,7 @@ namespace hsk {
     {
         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        HSK_ASSERT_VKRESULT(vkCreatePipelineCache(mDevice, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
+        HSK_ASSERT_VKRESULT(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {
             .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -239,8 +244,8 @@ namespace hsk {
         VkPipelineMultisampleStateCreateInfo multisampleState = {.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT};
 
         std::vector<VkDynamicState>          dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
-        VkPipelineDynamicStateCreateInfo     dynamicState        = {.dynamicStateCount = dynamicStateEnables.size(), .pDynamicStates = dynamicStateEnables.data()};
-        VkPipelineVertexInputStateCreateInfo vertexInputState    = {};
+        VkPipelineDynamicStateCreateInfo     dynamicState = {.dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size()), .pDynamicStates = dynamicStateEnables.data()};
+        VkPipelineVertexInputStateCreateInfo vertexInputState = {};
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -256,6 +261,15 @@ namespace hsk {
 
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages = {vertShaderStageInfo, fragShaderStageInfo};
 
+        // vertex layout
+        VertexInputStateBuilder vertexInputStateBuilder;
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Position);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Normal);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Tangent);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv0);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv1);
+        vertexInputStateBuilder.Build();
+
         VkGraphicsPipelineCreateInfo pipelineCI = {};
         pipelineCI.layout                       = mPipelineLayout;
         pipelineCI.renderPass                   = mRenderpass;
@@ -268,24 +282,22 @@ namespace hsk {
         pipelineCI.pDynamicState                = &dynamicState;
         pipelineCI.stageCount                   = shaderStages.size();
         pipelineCI.pStages                      = shaderStages.data();
+        pipelineCI.pVertexInputState            = &vertexInputStateBuilder.InputStateCI;
 
-        pipelineCI.pVertexInputState =
-            vkglTF::Vertex::getPipelineVertexInputState({vkglTF::VertexComponent::Position, vkglTF::VertexComponent::UV, vkglTF::VertexComponent::Color,
-                                                         vkglTF::VertexComponent::Normal, vkglTF::VertexComponent::Tangent, vkglTF::VertexComponent::MeshId});
-        rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
 
+        // TODO: count attachments and do this right
         // Blend attachment states required for all color attachments
         // This is important, as color write mask will otherwise be 0x0 and you
         // won't see anything rendered to the attachment
-        std::array<VkPipelineColorBlendAttachmentState, 5> blendAttachmentStates = {vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-                                                                                    vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-                                                                                    vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-                                                                                    vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-                                                                                    vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE)};
+        //std::array<VkPipelineColorBlendAttachmentState, 5> blendAttachmentStates = {vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
+        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
+        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
+        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
+        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE)};
 
-        colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
-        colorBlendState.pAttachments    = blendAttachmentStates.data();
+        /* colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
+        colorBlendState.pAttachments    = blendAttachmentStates.data();*/
 
-        HSK_ASSERT_VKRESULT(vkCreateGraphicsPipelines(mDevice, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
+        HSK_ASSERT_VKRESULT(vkCreateGraphicsPipelines(mContext->Device, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
     }
 }  // namespace hsk

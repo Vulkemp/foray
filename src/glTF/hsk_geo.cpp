@@ -1,4 +1,5 @@
 #include "hsk_geo.hpp"
+#include "../base/hsk_logger.hpp"
 
 namespace hsk {
 
@@ -53,7 +54,7 @@ namespace hsk {
                     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MeshId)});
                     break;
                 default:
-                    InputAttributes.push_back(VkVertexInputAttributeDescription{});
+                    throw Exception("Failed to add vertex component. This component type has no switch case defined!");
                     break;
             }
         }

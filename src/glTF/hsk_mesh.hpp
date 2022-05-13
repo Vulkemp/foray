@@ -7,6 +7,7 @@
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "hsk_geo.hpp"
 
 // Changing this value here also requires changing it in the vertex shader
 #define MAX_NUM_JOINTS 128u
@@ -55,6 +56,7 @@ namespace hsk {
         std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
         BoundingBox                             mBounds            = {};
         BoundingBox                             mAxisAlignedBoundingBox = {};
+        VertexInputStateBuilder                 mVertexInputStateBuilder{};
 
         std::unique_ptr<ManagedUbo<UniformBlock>> mUbo;
         VkDescriptorSet                           mDescriptorSet;

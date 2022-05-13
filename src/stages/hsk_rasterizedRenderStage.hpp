@@ -5,6 +5,9 @@
 namespace hsk {
     class RasterizedRenderStage : public RenderStage
     {
+      public:
+        RasterizedRenderStage(){};
+
         HSK_PROPERTY_CGET(FrameBuffer)
         HSK_PROPERTY_CGET(DescriptorPool)
         HSK_PROPERTY_CGET(DescriptorSetLayout)
@@ -24,7 +27,7 @@ namespace hsk {
         VkPipelineLayout      mPipelineLayout      = nullptr;
 
         virtual void InitDescriptorPool(const std::vector<VkDescriptorPoolSize>& poolSizes, uint32_t maxSets);
-        virtual void InitDescriptorSetLayout();
+        virtual void InitDescriptorSetLayout(){};
 
         virtual void Destroy() override;
         virtual void DestroyFixedComponents();

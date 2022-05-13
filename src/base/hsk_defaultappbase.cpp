@@ -2,9 +2,9 @@
 #include "../hsk_env.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../memory/hsk_intermediateImage.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
-#include "../memory/hsk_vmaHelpers.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -127,9 +127,9 @@ namespace hsk {
         {
             throw Exception("Device creation: {}", deviceBuilderReturn.error().message());
         }
-        mDeviceVkb        = deviceBuilderReturn.value();
-        mDevice           = mDeviceVkb.device;
-        mVkContext.Device = mDeviceVkb.device;
+        mDeviceVkb      = deviceBuilderReturn.value();
+        mDevice         = mDeviceVkb.device;
+        mContext.Device = mDeviceVkb.device;
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()
@@ -162,8 +162,9 @@ namespace hsk {
             throw Exception("Swapchain building: {}", swapchainBuilderReturn.error().message());
         }
 
-        mSwapchainVkb = swapchainBuilderReturn.value();
-        mSwapchain    = mSwapchainVkb.swapchain;
+        mSwapchainVkb      = swapchainBuilderReturn.value();
+        mSwapchain         = mSwapchainVkb.swapchain;
+        mContext.Swapchain = mSwapchainVkb;
 
         auto images     = mSwapchainVkb.get_images();
         auto imageviews = mSwapchainVkb.get_image_views();
@@ -210,7 +211,7 @@ namespace hsk {
         {
             throw Exception("failed to create command pool! VkResult: {}", result);
         }
-        mVkContext.CommandPool = mCommandPoolDefault;
+        mContext.CommandPool = mCommandPoolDefault;
     }
 
     void DefaultAppBase::BaseInitCreateVma()
@@ -227,7 +228,7 @@ namespace hsk {
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
         vmaCreateAllocator(&allocatorCreateInfo, &mAllocator);
-        mVkContext.Allocator = mAllocator;
+        mContext.Allocator = mAllocator;
     }
 
     void DefaultAppBase::BaseInitCompileShaders()
@@ -409,7 +410,7 @@ namespace hsk {
         // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
         barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
         barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-        barrier.oldLayout           = mImageCopySourceForRendering->GetImageLayout();
+        barrier.oldLayout           = mSwapchainCopySourceImage->GetImageLayout();
         barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
         barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
@@ -426,11 +427,11 @@ namespace hsk {
         layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
         layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
         layoutTransitionInfo.SubresourceRange     = range;
-        mImageCopySourceForRendering->TransitionLayout(layoutTransitionInfo);
+        mSwapchainCopySourceImage->TransitionLayout(layoutTransitionInfo);
 
 
         // Copy one of the g-buffer images into the swapchain / TODO: This is not done
-        VkImage                  sourceImage  = mImageCopySourceForRendering->GetImage();
+        VkImage                  sourceImage  = mSwapchainCopySourceImage->GetImage();
         VkImageLayout            sourceLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
         VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
         VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;

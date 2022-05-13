@@ -1,21 +1,18 @@
 #pragma once
 #include "../base/hsk_framerenderinfo.hpp"
+#include "../base/hsk_vkcontext.hpp"
 #include "../hsk_basics.hpp"
 
 namespace hsk {
-
-
     class RenderStage
     {
       public:
+        RenderStage(){};
         inline virtual void RecordFrame(FrameRenderInfo& renderInfo) {}
-
-        inline virtual void Resize(VkExtent2D size){}
 
         inline virtual void Destroy() {}
 
-        protected:
-        VkDevice mDevice;
-        VkExtent2D mRenderResolution;
+      protected:
+        const VkContext* mContext;
     };
 }  // namespace hsk
