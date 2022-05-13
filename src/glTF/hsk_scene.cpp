@@ -396,8 +396,11 @@ namespace hsk {
 
     void Scene::drawNode(Node* node, VkCommandBuffer commandBuffer)
     {
-        if(node->GetMesh())
+        auto& mesh = node->GetMesh();
+        if(mesh)
         {
+            // TODO: Bind desired descriptor sets
+            //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSets[i], 0, nullptr);
             for(const auto& primitive : node->GetMesh()->GetPrimitives())
             {
                 vkCmdDrawIndexed(commandBuffer, primitive->IndexCount, 1, primitive->FirstIndex, 0, 0);

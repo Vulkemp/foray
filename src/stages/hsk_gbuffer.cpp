@@ -4,20 +4,21 @@
 #include "../utility/hsk_shadermodule.hpp"
 
 namespace hsk {
-
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
     void GBufferStage::Init(const VkContext* context, Scene* scene)
     {
         mContext = context;
         mScene   = scene;
+        // declare all descriptors here
+        mBindingInfos.push_back({1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, mContext->Swapchain.image_count});
         InitFixedSizeComponents();
         InitResolutionDependentComponents();
     }
 
     void GBufferStage::InitFixedSizeComponents()
     {
-        setupDescriptorPool();
-        setupDescriptorSetLayout();
+        SetupDescriptorPool();
+        SetupDescriptorSetLayout();
         preparePipeline();
     }
     void GBufferStage::InitResolutionDependentComponents()
@@ -129,24 +130,45 @@ namespace hsk {
     }
 
 
-    void GBufferStage::setupDescriptorPool()
+    void GBufferStage::SetupDescriptorPool()
     {
-        // type;
-        // descriptorCount;
-        std::vector<VkDescriptorPoolSize> poolSizes =
-            std::initializer_list<VkDescriptorPoolSize>{VkDescriptorPoolSize{VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 8},
-                                                        VkDescriptorPoolSize{VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8}};
+        std::vector<VkDescriptorPoolSize> poolSizes(mBindingInfos.size());
 
-        RasterizedRenderStage::InitDescriptorPool(poolSizes, 3);
+        for(size_t i = 0; i < mBindingInfos.size(); i++)
+        {
+            poolSizes[i].type            = mBindingInfos[i].DescriptorType;
+            poolSizes[i].descriptorCount = mBindingInfos[i].PoolSizeDescriptorCount;
+        }
+
+        RasterizedRenderStage::InitDescriptorPool(poolSizes, mContext->Swapchain.image_count);
     }
-    void GBufferStage::setupDescriptorSetLayout()
+
+    void GBufferStage::SetupDescriptorSetLayout()
     {
-        // TODO
-        // VkPipelineLayoutCreateInfo         pPipelineLayoutCreateInfoOffscreen = vks::initializers::pipelineLayoutCreateInfo(gltfDescriptorSetLayouts.data(), 2);
+        std::vector<VkDescriptorSetLayoutBinding> bindings = std::vector<VkDescriptorSetLayoutBinding>(mBindingInfos.size());
+        VkDescriptorSetLayoutBinding              ubo;
+
+        for(size_t i = 0; i < mBindingInfos.size(); i++)
+        {
+            bindings[i].binding            = i;
+            bindings[i].descriptorCount    = mBindingInfos[i].DescriptorCount;
+            bindings[i].descriptorType     = mBindingInfos[i].DescriptorType;
+            bindings[i].stageFlags         = mBindingInfos[i].ShaderStageFlags;
+            bindings[i].pImmutableSamplers = mBindingInfos[i].pImmutableSamplers;
+        }
+
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = bindings.size();
+        layoutInfo.pBindings    = bindings.data();
+
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
+        pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCI.pushConstantRangeCount = 0;
-        pipelineLayoutCI.setLayoutCount = 1;
-        pipelineLayoutCI.pSetLayouts    = nullptr;
+        pipelineLayoutCI.setLayoutCount         = 1;
+        pipelineLayoutCI.pSetLayouts            = &mDescriptorSetLayout;
+
+        AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device, &layoutInfo, nullptr, &mDescriptorSetLayout));
 
         HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }

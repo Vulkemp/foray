@@ -12,9 +12,12 @@ namespace hsk {
         descriptorPoolCI.pPoolSizes    = poolSizes.data();
 
         HSK_ASSERT_VKRESULT(vkCreateDescriptorPool(mContext->Device, &descriptorPoolCI, nullptr, &mDescriptorPool));
-
     }
     void RasterizedRenderStage::Destroy() {
+        if(mDescriptorPool)
+        {
+            vkDestroyDescriptorPool(mContext->Device, mDescriptorPool, nullptr);
+        }
         DestroyResolutionDependentComponents();
         DestroyFixedComponents();
         RenderStage::Destroy();

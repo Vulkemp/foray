@@ -17,7 +17,7 @@ namespace hsk {
         VkDescriptorSet mDescriptorSetAttachments = nullptr;
         VkDescriptorSet mDescriptorSetScene       = nullptr;
 
-        GBufferStage() {};
+        GBufferStage() = default;
         virtual ~GBufferStage() { Destroy(); }
 
         virtual void Init(const VkContext* context, Scene* scene);
@@ -33,8 +33,8 @@ namespace hsk {
 
         void prepareAttachments();
         void prepareRenderpass();
-        void setupDescriptorPool();
-        void setupDescriptorSetLayout();
+        void SetupDescriptorPool();
+        void SetupDescriptorSetLayout();
         void setupDescriptorSet();
         void buildCommandBuffer(){};
         void preparePipeline();
