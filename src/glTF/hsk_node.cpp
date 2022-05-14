@@ -43,7 +43,7 @@ namespace hsk {
         {
             // TODO: Consider using instancing here!
             mMesh = std::make_unique<Mesh>(Owner());
-            mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], indexBuffer, vertexBuffer);
+            mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], gltfnode.mesh, indexBuffer, vertexBuffer);
         }
     }
 

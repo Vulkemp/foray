@@ -37,7 +37,7 @@ namespace hsk {
 
         Mesh();
         Mesh(Scene* scene);
-        void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
+        void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
         ~Mesh();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
         void Cleanup();

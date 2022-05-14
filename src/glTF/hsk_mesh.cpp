@@ -23,7 +23,7 @@ namespace hsk {
         Bounds.SetValid(true);
     }
 
-    void Mesh::InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+    void Mesh::InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         // TODO: This function is incredibly ugly
 
@@ -138,6 +138,9 @@ namespace hsk {
 
                 // hasSkin = (bufferJoints && bufferWeights);
 
+                uint32_t materialId = (uint32_t)primitive.material;
+                uint32_t meshId = index;
+
                 for(size_t v = 0; v < posAccessor.count; v++)
                 {
                     Vertex vert{};
@@ -146,6 +149,8 @@ namespace hsk {
                     vert.Tangent = glm::normalize(glm::vec3(bufferTangents ? glm::make_vec3(&bufferTangents[v * tangentByteStride]) : glm::vec3(0.0f)));
                     vert.Uv0     = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
                     vert.Uv1     = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
+                    vert.MaterialId = materialId;
+                    vert.MeshId = meshId;
 
                     // if(hasSkin)
                     // {
