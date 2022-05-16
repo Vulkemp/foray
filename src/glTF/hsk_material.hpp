@@ -21,7 +21,7 @@ namespace hsk {
         int16_t   NormalTextureIndex;             // Texture Index for Normal
     };
 
-    struct Material : public SceneComponent
+    struct Material
     {
       public:
         enum EAlphaMode
@@ -30,9 +30,6 @@ namespace hsk {
             Mask,
             Blend
         };
-
-        Material();
-        Material(Scene* scene);
 
         void InitFromTinyGltfMaterial(const tinygltf::Material& material);
 
@@ -62,20 +59,36 @@ namespace hsk {
     // @brief Manages buffer arrays containing material information
     class MaterialBuffer : public NoMoveDefaults, public SceneComponent
     {
-
       public:
+        inline MaterialBuffer() {}
+        inline explicit MaterialBuffer(Scene* scene) : SceneComponent(scene){}
+
         virtual void InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials);
+        virtual void UpdateBuffer();
         virtual void Cleanup();
+
+        HSK_PROPERTY_GET(MaterialDescriptions)
+        HSK_PROPERTY_CGET(MaterialDescriptions)
+        HSK_PROPERTY_GET(BufferArray)
+        HSK_PROPERTY_CGET(BufferArray)
+        HSK_PROPERTY_GET(Buffer)
+        HSK_PROPERTY_CGET(Buffer)
+        HSK_PROPERTY_GET(BufferSize)
+        HSK_PROPERTY_CGET(BufferSize)
+        HSK_PROPERTY_GET(BufferCapacity)
+        HSK_PROPERTY_CGET(BufferCapacity)
 
       protected:
         std::vector<Material>             mMaterialDescriptions = {};
         std::vector<MaterialBufferObject> mBufferArray          = {};
         ManagedBuffer                     mBuffer            = {};
         VkDeviceSize                      mBufferSize           = {};
+        VkDeviceSize                      mBufferCapacity           = {};
 
-        virtual void CreateBuffer(VkDeviceSize size);
-        virtual void UpdateBuffer();
+        virtual void CreateBuffer();
         virtual void DestroyBuffer();
+
+        virtual void WriteDescriptorSet(VkDescriptorSet set, uint32_t binding);
     };
 
 }  // namespace hsk

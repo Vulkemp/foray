@@ -9,7 +9,7 @@
 
 namespace hsk {
     Scene::Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
-        : mContext{allocator, device, physicalDevice, transferpool, transferqueue}
+        : mContext{allocator, device, physicalDevice, transferpool, transferqueue}, mMaterials(this)
     {
         mFallbackMaterial                 = {};
         mFallbackMaterial.BaseColorFactor = glm::vec4(0.7f, 0.f, 0.7f, 1.f);
@@ -32,7 +32,7 @@ namespace hsk {
         mNodesLinear.resize(0);
 
         // Materials are dumb structs, so this is safe
-        mMaterials.resize(0);
+        mMaterials.Cleanup();
 
         // Animations are dumb structs, so this is safe
         mAnimations.resize(0);
@@ -233,12 +233,8 @@ namespace hsk {
 
     void Scene::loadMaterials(const tinygltf::Model& gltfModel)
     {
-        for(auto& gltfmat : gltfModel.materials)
-        {
-            Material material(this);
-            material.InitFromTinyGltfMaterial(gltfmat);
-            mMaterials.push_back(material);
-        }
+        // mMaterials.Context() = this->Context();
+        mMaterials.InitFromTinyGltfMaterials(gltfModel.materials);
     }
 
     void Scene::loadSkins(const tinygltf::Model& gltfModel)

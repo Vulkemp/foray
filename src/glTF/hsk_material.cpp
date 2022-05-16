@@ -4,9 +4,6 @@
 
 namespace hsk {
 
-    Material::Material() {}
-    Material::Material(Scene* scene) : SceneComponent(scene) {}
-
     Material::EAlphaMode Material::ParseTinyGltfAlphaMode(std::string_view raw)
     {
         // see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_material_alphamode
@@ -81,39 +78,46 @@ namespace hsk {
 
         UpdateBuffer();
     }
-    void MaterialBuffer::Cleanup() { DestroyBuffer(); }
-    void MaterialBuffer::CreateBuffer(VkDeviceSize size)
+    void MaterialBuffer::Cleanup()
+    {
+        DestroyBuffer();
+        mMaterialDescriptions.clear();
+        mBufferArray.clear();
+        mBufferSize     = 0;
+        mBufferCapacity = 0;
+    }
+    void MaterialBuffer::CreateBuffer()
     {
         VmaAllocationCreateInfo allocInfo{};
         allocInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        mBuffer.Init(Context()->Allocator, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, allocInfo, size);
-        mBufferSize = size;
+        mBuffer.Init(Context()->Allocator, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, allocInfo, mBufferCapacity);
     }
     void MaterialBuffer::UpdateBuffer()
     {
         size_t bufferObjectSize = sizeof(MaterialBufferObject);
-        size_t bufferSize       = bufferObjectSize * mBufferArray.size();
+        mBufferSize             = static_cast<VkDeviceSize>(bufferObjectSize * mBufferArray.size());
 
-        if(static_cast<VkDeviceSize>(bufferSize) > mBufferSize)
+        if(mBufferSize > mBufferCapacity)
         {
+            mBufferCapacity = mBufferSize + (mBufferSize / 4);
             DestroyBuffer();
-            CreateBuffer(bufferSize + (bufferSize / 4));
+            CreateBuffer();
         }
 
         // Get a staging buffer setup, init with buffer array data
 
-        ManagedBuffer stagingBuffer(Context()->Allocator);
+        ManagedBuffer           stagingBuffer(Context()->Allocator);
         VmaAllocationCreateInfo allocInfo = {};
         allocInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
         allocInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        stagingBuffer.Init(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, bufferSize, mBufferArray.data());
+        stagingBuffer.Init(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, mBufferSize, mBufferArray.data());
 
         // copy to GPU buffer
 
         VkCommandBuffer copyCmdBuf = createCommandBuffer(Context()->Device, Context()->TransferCommandPool, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copyRegion = {};
-        copyRegion.size = bufferSize;
+        copyRegion.size         = mBufferSize;
         vkCmdCopyBuffer(copyCmdBuf, stagingBuffer.GetBuffer(), mBuffer.GetBuffer(), 1, &copyRegion);
 
         flushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmdBuf, Context()->TransferQueue);
@@ -121,5 +125,22 @@ namespace hsk {
         stagingBuffer.Destroy();
     }
     void MaterialBuffer::DestroyBuffer() { mBuffer.Destroy(); }
+    void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)
+    {
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer                 = mBuffer.GetBuffer();
+        bufferInfo.offset                 = 0;
+        bufferInfo.range                  = mBufferSize;
+
+        VkWriteDescriptorSet writeOpInfo = {};
+        writeOpInfo.sType                = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeOpInfo.dstSet               = set;
+        writeOpInfo.dstBinding           = binding;
+        writeOpInfo.descriptorCount      = 1;
+        writeOpInfo.descriptorType       = VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        writeOpInfo.pBufferInfo          = &bufferInfo;
+
+        vkUpdateDescriptorSets(Context()->Device, 1, &writeOpInfo, 0, nullptr);
+    }
 
 }  // namespace hsk

@@ -7,6 +7,7 @@ namespace hsk {
     struct TextureSampler;
     class Node;
     struct Material;
+    class MaterialBuffer;
     class Primitive;
     class Mesh;
     struct BoundingBox;

@@ -20,7 +20,7 @@ namespace hsk {
     class Scene : public NoMoveDefaults
     {
       public:
-        Scene() = default;
+        Scene() : mMaterials(this) {}
         Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue);
 
         SceneVkContext* GetVkContext() { return &mContext; }
@@ -58,7 +58,7 @@ namespace hsk {
         void LoadFromFile(std::string filename, float scale = 1.f);
         void AssertSceneloaded(bool loaded = true);
 
-        inline std::vector<Material>& Materials() { return mMaterials; }
+        inline std::vector<Material>& Materials() { return mMaterials.GetMaterialDescriptions(); }
 
         struct Dimensions
         {
@@ -75,7 +75,7 @@ namespace hsk {
       protected:
         SceneVkContext                        mContext                = {};
         Material                              mFallbackMaterial       = {};
-        std::vector<Material>                 mMaterials              = {};
+        MaterialBuffer                        mMaterials              = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};
         glm::mat4                             mAxisAlignedBoundingBox = {};
 
