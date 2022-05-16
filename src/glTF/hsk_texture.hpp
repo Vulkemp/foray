@@ -25,15 +25,20 @@ namespace hsk {
     class Texture : public SceneComponent, public NoMoveDefaults
     {
       public:
-        inline VkImage                      Image() { return mImage; }
-        inline const VkImage                Image() const { return mImage; }
-        inline VkImageLayout                ImageLayout() { return mImageLayout; }
-        inline const VkImageLayout          ImageLayout() const { return mImageLayout; }
-        inline VkImageView                  ImageView() { return mImageView; }
-        inline const VkImageView            ImageView() const { return mImageView; }
-        inline VkExtent3D                   Extent() const { return mExtent; }
-        inline uint32_t                     MipLevels() const { return mMipLevels; }
-        inline const VkDescriptorImageInfo& DescriptorImageInfo() const { return mDescriptor; }
+        HSK_PROPERTY_GET(Image);
+        HSK_PROPERTY_GET(ImageLayout);
+        HSK_PROPERTY_GET(ImageView);
+        HSK_PROPERTY_GET(Extent);
+        HSK_PROPERTY_GET(MipLevels);
+        HSK_PROPERTY_GET(Descriptor);
+        HSK_PROPERTY_GET(Sampler);
+        HSK_PROPERTY_CGET(Image);
+        HSK_PROPERTY_CGET(ImageLayout);
+        HSK_PROPERTY_CGET(ImageView);
+        HSK_PROPERTY_CGET(Extent);
+        HSK_PROPERTY_CGET(MipLevels);
+        HSK_PROPERTY_CGET(Descriptor);
+        HSK_PROPERTY_CGET(Sampler);
 
 
         Texture();
@@ -48,6 +53,7 @@ namespace hsk {
         virtual ~Texture();
 
       protected:
+        int32_t               mIndex       = 0;
         VmaAllocation         mAllocation  = nullptr;
         VkImage               mImage       = nullptr;
         VkImageLayout         mImageLayout = {};

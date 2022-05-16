@@ -107,13 +107,13 @@ namespace hsk {
                     bufferTexCoordSet0                     = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
                     uv0ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
                 }
-                if(primitive.attributes.find("TEXCOORD_1") != primitive.attributes.end())
-                {
-                    const tinygltf::Accessor&   uvAccessor = model.accessors[primitive.attributes.find("TEXCOORD_1")->second];
-                    const tinygltf::BufferView& uvView     = model.bufferViews[uvAccessor.bufferView];
-                    bufferTexCoordSet1                     = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
-                    uv1ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
-                }
+                // if(primitive.attributes.find("TEXCOORD_1") != primitive.attributes.end())
+                // {
+                //     const tinygltf::Accessor&   uvAccessor = model.accessors[primitive.attributes.find("TEXCOORD_1")->second];
+                //     const tinygltf::BufferView& uvView     = model.bufferViews[uvAccessor.bufferView];
+                //     bufferTexCoordSet1                     = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
+                //     uv1ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
+                // }
 
                 // // Skinning
                 // // Joints
@@ -138,19 +138,18 @@ namespace hsk {
 
                 // hasSkin = (bufferJoints && bufferWeights);
 
-                uint32_t materialId = (uint32_t)primitive.material;
-                uint32_t meshId = index;
+                uint32_t materialIndex = (uint32_t)primitive.material;
+                uint32_t meshId     = index;
 
                 for(size_t v = 0; v < posAccessor.count; v++)
                 {
                     Vertex vert{};
-                    vert.Pos     = glm::vec4(glm::make_vec3(&bufferPos[v * posByteStride]), 1.0f);
-                    vert.Normal  = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
-                    vert.Tangent = glm::normalize(glm::vec3(bufferTangents ? glm::make_vec3(&bufferTangents[v * tangentByteStride]) : glm::vec3(0.0f)));
-                    vert.Uv0     = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec3(0.0f);
-                    vert.Uv1     = bufferTexCoordSet1 ? glm::make_vec2(&bufferTexCoordSet1[v * uv1ByteStride]) : glm::vec3(0.0f);
-                    vert.MaterialId = materialId;
-                    vert.MeshId = meshId;
+                    vert.Pos           = glm::vec3(glm::make_vec3(&bufferPos[v * posByteStride]));
+                    vert.Normal        = glm::normalize(glm::vec3(bufferNormals ? glm::make_vec3(&bufferNormals[v * normByteStride]) : glm::vec3(0.0f)));
+                    vert.Tangent       = glm::normalize(glm::vec3(bufferTangents ? glm::make_vec3(&bufferTangents[v * tangentByteStride]) : glm::vec3(0.0f)));
+                    vert.Uv            = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec2(0.0f);
+                    vert.MaterialIndex = materialIndex;
+                    vert.MeshId        = meshId;
 
                     // if(hasSkin)
                     // {

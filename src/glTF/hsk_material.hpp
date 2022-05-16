@@ -1,4 +1,5 @@
 #pragma once
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "glm/glm.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_scenecomponent.hpp"
@@ -7,6 +8,19 @@
 #include <vulkan/vulkan.h>
 
 namespace hsk {
+    struct alignas(16) MaterialBufferObject  // 46 Bytes, aligns to 48
+    {
+        glm::vec4 BaseColorFactor;                // Base Color / Albedo Factor
+        fp32_t    MetallicFactor;                 // Metallic Factor
+        glm::vec3 EmissiveFactor;                 // Emissive Factor
+        fp32_t    RoughnessFactor;                // Roughness Factor
+        int16_t   BaseColorTextureIndex;          // Texture Index for BaseColor
+        int16_t   MetallicRoughnessTextureIndex;  // Texture Index for MetallicRoughness
+        int16_t   EmissiveTextureIndex;           // Texture Index for Emissive
+        int16_t   OcclusionTextureIndex;          // Texture Index for Occlusion
+        int16_t   NormalTextureIndex;             // Texture Index for Normal
+    };
+
     struct Material : public SceneComponent
     {
       public:
@@ -15,15 +29,6 @@ namespace hsk {
             Opaque,
             Mask,
             Blend
-        };
-
-        struct TexCoordSets
-        {
-            uint8_t BaseColor         = 0;
-            uint8_t MetallicRoughness = 0;
-            uint8_t Normal            = 0;
-            uint8_t Occlusion         = 0;
-            uint8_t Emissive          = 0;
         };
 
         Material();
@@ -36,24 +41,41 @@ namespace hsk {
         std::string Name = {};
 
         EAlphaMode AlphaMode     = EAlphaMode::Opaque;
-        double     AlphaCutoff   = 0.5;
+        fp32_t     AlphaCutoff   = 0.5;
         bool       IsDoubleSided = false;
 
         glm::vec4 BaseColorFactor          = {1, 1, 1, 1};
-        Texture*  BaseColorTexture         = nullptr;
-        double    MetallicFactor           = 1;
-        double    RoughnessFactor          = 1;
-        Texture*  MetallicRoughnessTexture = nullptr;
+        int32_t   BaseColorTexture         = -1;
+        fp32_t    MetallicFactor           = 1;
+        fp32_t    RoughnessFactor          = 1;
+        int32_t   MetallicRoughnessTexture = -1;
 
         glm::vec3 EmissiveFactor  = glm::vec3(1.0f);
-        Texture*  EmissiveTexture = nullptr;
+        int32_t   EmissiveTexture = -1;
 
-        Texture* NormalTexture    = nullptr;
-        Texture* OcclusionTexture = nullptr;
+        int32_t NormalTexture    = -1;
+        int32_t OcclusionTexture = -1;
 
-        TexCoordSets TexCoordIndices;
-        
-        static void BuildDescriptorSetLayoutCI(VkDescriptorSetLayoutCreateInfo& layoutCI, uint32_t bindMetalRoughness = UINT32_MAX, uint32_t bindEmissive = UINT32_MAX, uint32_t bindNormal = UINT32_MAX, uint32_t bindOcclusion = UINT32_MAX);
+        MaterialBufferObject MakeBufferObject();
+    };
+
+    // @brief Manages buffer arrays containing material information
+    class MaterialBuffer : public NoMoveDefaults, public SceneComponent
+    {
+
+      public:
+        virtual void InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials);
+        virtual void Cleanup();
+
+      protected:
+        std::vector<Material>             mMaterialDescriptions = {};
+        std::vector<MaterialBufferObject> mBufferArray          = {};
+        ManagedBuffer                     mBuffer            = {};
+        VkDeviceSize                      mBufferSize           = {};
+
+        virtual void CreateBuffer(VkDeviceSize size);
+        virtual void UpdateBuffer();
+        virtual void DestroyBuffer();
     };
 
 }  // namespace hsk

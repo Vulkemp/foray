@@ -11,11 +11,8 @@ namespace hsk {
         Position,
         Normal,
         Tangent,
-        Uv0,
-        Uv1,
-        // Joint0,
-        // Weight0,
-        MaterialId,
+        Uv,
+        MaterialIndex,
         MeshId
     };
 
@@ -35,21 +32,18 @@ namespace hsk {
         std::vector<VkVertexInputBindingDescription>   InputBindings{};
         VkPipelineVertexInputStateCreateInfo           InputStateCI{};
 
-        VertexInputStateBuilder& AddVertexComponentBinding(VertexComponent component, uint32_t location = UINT32_MAX);
-        void Build();
+        VertexInputStateBuilder& AddVertexComponentBinding(VertexComponent component, std::optional<uint32_t> location);
+        void                     Build();
     };
 
     struct Vertex
     {
-        glm::vec3 Pos     = {};
-        glm::vec3 Normal  = {};
-        glm::vec3 Tangent = {};
-        glm::vec2 Uv0     = {};
-        glm::vec2 Uv1     = {};
-        // glm::vec4 Joint0     = {};
-        // glm::vec4 Weight0    = {};
-        uint32_t MaterialId = {};
-        uint32_t MeshId     = {};
+        glm::vec3 Pos           = {};
+        glm::vec3 Normal        = {};
+        glm::vec3 Tangent       = {};
+        glm::vec2 Uv            = {};
+        uint16_t  MaterialIndex = {};
+        uint16_t  MeshId        = {};
     };
 
 }  // namespace hsk

@@ -358,7 +358,6 @@ namespace hsk {
 
         RecordCommandBuffer(renderInfo);
 
-
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
         VkResult result              = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
@@ -406,48 +405,50 @@ namespace hsk {
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
         vkCmdClearColorImage(currentFrame.CommandBuffer, mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
 
+        if(mSwapchainCopySourceImage)
+        {
+            // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
+            barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+            barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.oldLayout           = mSwapchainCopySourceImage->GetImageLayout();
+            barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
+            barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
+            barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
 
-        // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
-        barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
-        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-        barrier.oldLayout           = mSwapchainCopySourceImage->GetImageLayout();
-        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-        barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-        barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
+            vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
+                                 nullptr, 0, nullptr, 1, &barrier);
 
-        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
-                             nullptr, 0, nullptr, 1, &barrier);
-
-        IntermediateImage::LayoutTransitionInfo layoutTransitionInfo;
-        layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
-        layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
-        layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-        layoutTransitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
-        layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
-        layoutTransitionInfo.SubresourceRange     = range;
-        mSwapchainCopySourceImage->TransitionLayout(layoutTransitionInfo);
+            IntermediateImage::LayoutTransitionInfo layoutTransitionInfo;
+            layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
+            layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+            layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+            layoutTransitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
+            layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
+            layoutTransitionInfo.SubresourceRange     = range;
+            mSwapchainCopySourceImage->TransitionLayout(layoutTransitionInfo);
 
 
-        // Copy one of the g-buffer images into the swapchain / TODO: This is not done
-        VkImage                  sourceImage  = mSwapchainCopySourceImage->GetImage();
-        VkImageLayout            sourceLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
-        VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
-        VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        uint32_t                 regionCount  = 1;
-        VkImageSubresourceLayers layers       = {};
-        layers.aspectMask                     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-        layers.mipLevel                       = 0;
-        layers.baseArrayLayer                 = 0;
-        layers.layerCount                     = 1;
-        VkImageCopy region                    = {};
-        region.srcSubresource                 = layers;
-        region.dstSubresource                 = layers;
-        region.extent.width                   = mSwapchainVkb.extent.width;
-        region.extent.height                  = mSwapchainVkb.extent.height;
-        region.extent.depth                   = 1;
-        vkCmdCopyImage(currentFrame.CommandBuffer, sourceImage, sourceLayout, targetImage, targetLayout, regionCount, &region);
+            // Copy one of the g-buffer images into the swapchain / TODO: This is not done
+            VkImage                  sourceImage  = mSwapchainCopySourceImage->GetImage();
+            VkImageLayout            sourceLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
+            VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
+            VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            uint32_t                 regionCount  = 1;
+            VkImageSubresourceLayers layers       = {};
+            layers.aspectMask                     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+            layers.mipLevel                       = 0;
+            layers.baseArrayLayer                 = 0;
+            layers.layerCount                     = 1;
+            VkImageCopy region                    = {};
+            region.srcSubresource                 = layers;
+            region.dstSubresource                 = layers;
+            region.extent.width                   = mSwapchainVkb.extent.width;
+            region.extent.height                  = mSwapchainVkb.extent.height;
+            region.extent.depth                   = 1;
+            vkCmdCopyImage(currentFrame.CommandBuffer, sourceImage, sourceLayout, targetImage, targetLayout, regionCount, &region);
+        }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue
         barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;

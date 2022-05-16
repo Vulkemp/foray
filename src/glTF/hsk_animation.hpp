@@ -15,7 +15,7 @@ namespace hsk {
         };
         EPathType Path         = EPathType::TRANSLATION;
         Node*     Target       = nullptr;
-        uint32_t  SamplerIndex = -1;
+        int32_t  SamplerIndex = -1;
     };
 
     struct AnimationSampler

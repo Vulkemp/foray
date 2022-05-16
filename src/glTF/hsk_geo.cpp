@@ -3,14 +3,14 @@
 
 namespace hsk {
 
-    VertexInputStateBuilder& VertexInputStateBuilder::AddVertexComponentBinding(VertexComponent component, uint32_t location)
+    VertexInputStateBuilder& VertexInputStateBuilder::AddVertexComponentBinding(VertexComponent component, std::optional<uint32_t> location)
     {
-        if(location == UINT32_MAX)
+        if(!location.has_value())
         {
-            location = NextLocation;
+            location.value() = NextLocation;
             NextLocation++;
         }
-        Components.push_back(VertexComponentBinding{component, location});
+        Components.push_back(VertexComponentBinding{component, location.value()});
         return *this;
     }
 
@@ -35,20 +35,11 @@ namespace hsk {
                 case VertexComponent::Tangent:
                     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Tangent)});
                     break;
-                case VertexComponent::Uv0:
-                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Uv0)});
+                case VertexComponent::Uv:
+                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Uv)});
                     break;
-                case VertexComponent::Uv1:
-                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Uv1)});
-                    break;
-                // case VertexComponent::Joint0:
-                //     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Joint0)});
-                //     break;
-                // case VertexComponent::Weight0:
-                //     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Weight0)});
-                //     break;
-                case VertexComponent::MaterialId:
-                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MaterialId)});
+                case VertexComponent::MaterialIndex:
+                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MaterialIndex)});
                     break;
                 case VertexComponent::MeshId:
                     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MeshId)});
