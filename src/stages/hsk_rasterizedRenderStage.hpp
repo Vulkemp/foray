@@ -30,15 +30,10 @@ namespace hsk {
         std::vector<BindingInfo> mBindingInfos;
 
         VkFramebuffer         mFrameBuffer         = nullptr;
-        VkDescriptorPool      mDescriptorPool      = nullptr;
-        VkDescriptorSetLayout mDescriptorSetLayout = nullptr;
         VkPipelineCache       mPipelineCache       = nullptr;
         VkRenderPass          mRenderpass          = nullptr;
         VkPipeline            mPipeline            = nullptr;
         VkPipelineLayout      mPipelineLayout      = nullptr;
-
-        virtual void InitDescriptorPool(const std::vector<VkDescriptorPoolSize>& poolSizes, uint32_t maxSets);
-        virtual void InitDescriptorSetLayout(){};
 
         virtual void Destroy() override;
         virtual void DestroyFixedComponents();

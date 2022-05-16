@@ -202,6 +202,7 @@ namespace hsk {
         }
 
         calculateSceneDimensions();
+        mSceneLoaded = true;
     }
 
     void Scene::loadTextureSamplers(const tinygltf::Model& gltfModel)
@@ -371,10 +372,10 @@ namespace hsk {
 
     void Scene::AssertSceneloaded(bool loaded)
     {
-        bool isLoaded = false;
-        if(loaded != isLoaded)
+        if(loaded != mSceneLoaded)
         {
-            throw Exception("Assertion failed: Call executed expecting scene to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"), (isLoaded ? "loaded" : "unloaded"));
+            throw Exception("Scene expected to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"),
+                            (mSceneLoaded ? "loaded" : "unloaded"));
         }
     }
 

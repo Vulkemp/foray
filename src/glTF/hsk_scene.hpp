@@ -1,6 +1,7 @@
 #pragma once
 #include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_animation.hpp"
+#include "hsk_camera.hpp"
 #include "hsk_geo.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_material.hpp"
@@ -13,7 +14,6 @@
 #include <vector>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include "hsk_camera.hpp"
 
 namespace hsk {
 
@@ -33,14 +33,7 @@ namespace hsk {
         inline SceneVkContext&       Context() { return mContext; }
         inline const SceneVkContext& Context() const { return mContext; }
 
-        inline void GetTextures(std::vector<Texture*>& out)
-        {
-            out.reserve(mTextures.size());
-            for(auto& tex : mTextures)
-            {
-                out.push_back(tex.get());
-            }
-        }
+        inline std::vector<std::unique_ptr<Texture>>& GetTextures() { return mTextures; }
 
         inline Texture* GetTextureByIndex(int32_t index)
         {
@@ -63,6 +56,7 @@ namespace hsk {
         void Cleanup();
 
         void LoadFromFile(std::string filename, float scale = 1.f);
+        void AssertSceneloaded(bool loaded = true);
 
         inline std::vector<Material>& Materials() { return mMaterials; }
 
@@ -80,7 +74,7 @@ namespace hsk {
 
       protected:
         SceneVkContext                        mContext                = {};
-        Material                              mFallbackMaterial        = {};
+        Material                              mFallbackMaterial       = {};
         std::vector<Material>                 mMaterials              = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};
         glm::mat4                             mAxisAlignedBoundingBox = {};
@@ -96,9 +90,9 @@ namespace hsk {
         std::vector<TextureSampler>             mTextureSamplers = {};
         std::vector<std::unique_ptr<Animation>> mAnimations      = {};
         std::vector<std::string>                mExtensions      = {};
-        std::vector<std::unique_ptr<Camera>> mCameras = {};
+        std::vector<std::unique_ptr<Camera>>    mCameras         = {};
 
-        void AssertSceneloaded(bool loaded = true);
+        bool mSceneLoaded{false};
 
         void loadTextureSamplers(const tinygltf::Model& gltfModel);
         void loadTextures(const tinygltf::Model& gltfModel);

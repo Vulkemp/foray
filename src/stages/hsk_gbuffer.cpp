@@ -9,8 +9,36 @@ namespace hsk {
     {
         mContext = context;
         mScene   = scene;
+
+        mScene->AssertSceneloaded(true);
         // declare all descriptors here
-        mBindingInfos.push_back({1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, mContext->Swapchain.image_count});
+
+        BindingInfo sceneVertexBinding = {
+            .DescriptorCount         = 1,
+            .DescriptorType          = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .ShaderStageFlags        = VK_SHADER_STAGE_VERTEX_BIT,
+            .PoolSizeDescriptorCount = mContext->Swapchain.image_count,
+        };
+
+        auto        numTextures         = mScene->GetTextures().size();
+        BindingInfo sceneTextureBinding = {
+            .DescriptorCount         = numTextures,
+            .DescriptorType          = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .ShaderStageFlags        = VK_SHADER_STAGE_ALL,
+            .PoolSizeDescriptorCount = mContext->Swapchain.image_count,
+        };
+
+        auto        numTextures         = mScene->GetTextures().size();
+        BindingInfo sceneTextureBinding = {
+            .DescriptorCount         = numTextures,
+            .DescriptorType          = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .ShaderStageFlags        = VK_SHADER_STAGE_ALL,
+            .PoolSizeDescriptorCount = mContext->Swapchain.image_count,
+        };
+
+        mBindingInfos.push_back(sceneVertexBinding);
+        mBindingInfos.push_back(sceneTextureBinding);
+
         InitFixedSizeComponents();
         InitResolutionDependentComponents();
     }
@@ -176,6 +204,9 @@ namespace hsk {
     void GBufferStage::setupDescriptorSet()
     {
         std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+
+        auto   textures    = mScene->GetTextures();
+        size_t numTextures = textures.size();
 
         // Model
         // use descriptor set layout delivered by gltf
