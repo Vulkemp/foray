@@ -7,7 +7,7 @@ namespace hsk {
         mDescriptorLocations.push_back({set, binding, descriptorSetInfo});
     }
 
-    VkDescriptorSetLayout DescriptorSet::Create(const VkContext* context, uint32_t maxSets)
+    VkDescriptorSetLayout DescriptorSet::Create(const VkContext* context, uint32_t numSets)
     {
 
         VkDescriptorSetLayoutBinding uboLayoutBinding{};
@@ -48,18 +48,57 @@ namespace hsk {
 
             VkDescriptorPoolSize poolSize{};
             poolSize.type = descriptorLocation.DescriptorInfos->DescriptorSetLayoutBinding.descriptorType;
-            poolSize.descriptorCount = descriptorLocation.DescriptorInfos->DescriptorSetLayoutBinding.descriptorCount;
+            poolSize.descriptorCount = descriptorLocation.DescriptorInfos->NumberOfDescriptors;
+                                           
 
             // prepare pool size
             poolSizes.push_back(poolSize);
         }
 
+        // --------------------------------------------------------------------------------------------
+        // allocate descriptor pool
+
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = poolSizes.size();
         poolInfo.pPoolSizes    = poolSizes.data();
-        poolInfo.maxSets       = static_cast<uint32_t>(maxSets);
+        poolInfo.maxSets       = static_cast<uint32_t>(numSets);
 
         AssertVkResult(vkCreateDescriptorPool(context->Device, &poolInfo, nullptr, &mDescriptorPool));
+
+        // --------------------------------------------------------------------------------------------
+        // allocate descriptor sets
+        std::vector<VkDescriptorSetLayout> layouts(numSets, mDescriptorSetLayout);
+        VkDescriptorSetAllocateInfo        descriptorSetAllocInfo{};
+        descriptorSetAllocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetAllocInfo.descriptorPool     = mDescriptorPool;
+        descriptorSetAllocInfo.descriptorSetCount = static_cast<uint32_t>(numSets);
+        descriptorSetAllocInfo.pSetLayouts        = layouts.data();
+
+        mDescriptorSets.resize(numSets);
+        AssertVkResult(vkAllocateDescriptorSets(context->Device, &descriptorSetAllocInfo, mDescriptorSets.data()));
+
+
+        // TODO: figure out how desciptor set updates work ..
+        for(size_t i = 0; i < numSwapchainImages; i++)
+        {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = mCameraUbos[i];
+            bufferInfo.offset = 0;
+            bufferInfo.range  = sizeof(CameraUbo);
+
+            VkWriteDescriptorSet descriptorWrite{};
+            descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite.dstSet           = mDescriptorSets[i];
+            descriptorWrite.dstBinding       = 0;
+            descriptorWrite.dstArrayElement  = 0;
+            descriptorWrite.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrite.descriptorCount  = 1;
+            descriptorWrite.pBufferInfo      = &bufferInfo;
+            descriptorWrite.pImageInfo       = nullptr;  // Optional
+            descriptorWrite.pTexelBufferView = nullptr;  // Optional
+            vkUpdateDescriptorSets(context->Device, 1, &descriptorWrite, 0, nullptr);
+        }
+
     }
 }  // namespace hsk
