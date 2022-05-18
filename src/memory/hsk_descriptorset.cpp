@@ -110,5 +110,6 @@ namespace hsk {
             }
         }
         vkUpdateDescriptorSets(context->Device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+        return mDescriptorSetLayout;
     }
 }  // namespace hsk
