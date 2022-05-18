@@ -17,10 +17,10 @@ namespace hsk {
 
             VkDescriptorSetLayoutBinding layoutBinding{};
             layoutBinding.binding = descriptorLocation.Binding;
-            layoutBinding.descriptorCount = descriptorLocation.DescriptorInfo->DescriptorCount;
-            layoutBinding.descriptorType = descriptorLocation.DescriptorInfo->DescriptorType;
-            layoutBinding.pImmutableSamplers = descriptorLocation.DescriptorInfo->pImmutableSamplers;
-            layoutBinding.stageFlags = descriptorLocation.DescriptorInfo->ShaderStageFlags;
+            layoutBinding.descriptorCount = descriptorLocation.Descriptor->DescriptorCount;
+            layoutBinding.descriptorType = descriptorLocation.Descriptor->DescriptorType;
+            layoutBinding.pImmutableSamplers = descriptorLocation.Descriptor->pImmutableSamplers;
+            layoutBinding.stageFlags = descriptorLocation.Descriptor->ShaderStageFlags;
 
             layoutBindings.push_back(layoutBinding);
         }
@@ -41,8 +41,8 @@ namespace hsk {
         for(auto& descriptorLocation : mDescriptorLocations)
         {
             VkDescriptorPoolSize poolSize{};
-            poolSize.type            = descriptorLocation.DescriptorInfo->DescriptorType;
-            poolSize.descriptorCount = descriptorLocation.DescriptorInfo->DescriptorCount * numSets;
+            poolSize.type            = descriptorLocation.Descriptor->DescriptorType;
+            poolSize.descriptorCount = descriptorLocation.Descriptor->DescriptorCount * numSets;
 
             // prepare pool size
             poolSizes.push_back(poolSize);
@@ -83,29 +83,29 @@ namespace hsk {
                 descriptorWrite.dstSet           = mDescriptorSets[setIndex];
                 descriptorWrite.dstBinding       = descriptorLocation.Binding;
                 descriptorWrite.dstArrayElement  = 0; // This offsets into descriptorLocation.DescriptorInfo->BufferInfos/ImageInfos, which always starts at 0.
-                descriptorWrite.descriptorType   = descriptorLocation.DescriptorInfo->DescriptorType;
+                descriptorWrite.descriptorType   = descriptorLocation.Descriptor->DescriptorType;
                 descriptorWrite.descriptorCount  = 0;
                 descriptorWrite.pBufferInfo      = nullptr;
                 descriptorWrite.pImageInfo       = nullptr;
                 descriptorWrite.pTexelBufferView = nullptr; // TODO: whats a TexelBufferView?
 
-                uint32_t numBufferInfos = descriptorLocation.DescriptorInfo->BufferInfos.size();
-                if (descriptorLocation.DescriptorInfo->BufferInfos.size() > 0) {
+                uint32_t numBufferInfos = descriptorLocation.Descriptor->BufferInfos.size();
+                if (descriptorLocation.Descriptor->BufferInfos.size() > 0) {
                     
                     // if only one buffer info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index = numBufferInfos > 1 ? setIndex : 0;
-                    descriptorWrite.descriptorCount = descriptorLocation.DescriptorInfo->BufferInfos[index].size();
-                    descriptorWrite.pBufferInfo = descriptorLocation.DescriptorInfo->BufferInfos[index].data();
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->BufferInfos[index].size();
+                    descriptorWrite.pBufferInfo = descriptorLocation.Descriptor->BufferInfos[index].data();
                     continue;
                 }
 
-                uint32_t numImageInfos = descriptorLocation.DescriptorInfo->ImageInfos.size();
+                uint32_t numImageInfos = descriptorLocation.Descriptor->ImageInfos.size();
                 if(numImageInfos > 0)
                 {
                     // if only one image info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index                  = numImageInfos > 1 ? setIndex : 0;
-                    descriptorWrite.descriptorCount = descriptorLocation.DescriptorInfo->BufferInfos[index].size();
-                    descriptorWrite.pImageInfo     = descriptorLocation.DescriptorInfo->ImageInfos[index].data();
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->BufferInfos[index].size();
+                    descriptorWrite.pImageInfo     = descriptorLocation.Descriptor->ImageInfos[index].data();
                 }
             }
         }

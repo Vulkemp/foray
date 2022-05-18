@@ -9,8 +9,6 @@ namespace hsk {
         RasterizedRenderStage(){};
 
         HSK_PROPERTY_CGET(FrameBuffer)
-        HSK_PROPERTY_CGET(DescriptorPool)
-        HSK_PROPERTY_CGET(DescriptorSetLayout)
         HSK_PROPERTY_CGET(PipelineCache)
         HSK_PROPERTY_CGET(Renderpass)
         HSK_PROPERTY_CGET(Pipeline)

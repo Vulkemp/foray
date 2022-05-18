@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include <optional>
 
 namespace hsk {
 
@@ -32,7 +33,7 @@ namespace hsk {
         std::vector<VkVertexInputBindingDescription>   InputBindings{};
         VkPipelineVertexInputStateCreateInfo           InputStateCI{};
 
-        VertexInputStateBuilder& AddVertexComponentBinding(VertexComponent component, std::optional<uint32_t> location);
+        VertexInputStateBuilder& AddVertexComponentBinding(VertexComponent component, std::optional<uint32_t> location = {});
         void                     Build();
     };
 

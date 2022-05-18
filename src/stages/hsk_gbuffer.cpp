@@ -20,15 +20,7 @@ namespace hsk {
             .PoolSizeDescriptorCount = mContext->Swapchain.image_count,
         };
 
-        auto        numTextures         = mScene->GetTextures().size();
-        BindingInfo sceneTextureBinding = {
-            .DescriptorCount         = numTextures,
-            .DescriptorType          = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .ShaderStageFlags        = VK_SHADER_STAGE_ALL,
-            .PoolSizeDescriptorCount = mContext->Swapchain.image_count,
-        };
-
-        auto        numTextures         = mScene->GetTextures().size();
+        uint32_t    numTextures         = static_cast<uint32_t>(mScene->GetTextures().size());
         BindingInfo sceneTextureBinding = {
             .DescriptorCount         = numTextures,
             .DescriptorType          = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
@@ -148,11 +140,9 @@ namespace hsk {
     void GBufferStage::Destroy()
     {
         VkDevice device = mContext->Device;
-        vkDestroyDescriptorPool(device, mDescriptorPool, nullptr);
         vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
         vkDestroyPipeline(device, mPipeline, nullptr);
         vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-        vkDestroyDescriptorSetLayout(device, mDescriptorSetLayout, nullptr);
         vkDestroyRenderPass(device, mRenderpass, nullptr);
         vkDestroyPipelineCache(device, mPipelineCache, nullptr);
     }
@@ -168,7 +158,7 @@ namespace hsk {
             poolSizes[i].descriptorCount = mBindingInfos[i].PoolSizeDescriptorCount;
         }
 
-        RasterizedRenderStage::InitDescriptorPool(poolSizes, mContext->Swapchain.image_count);
+        // RasterizedRenderStage::InitDescriptorPool(poolSizes, mContext->Swapchain.image_count);
     }
 
     void GBufferStage::SetupDescriptorSetLayout()
@@ -194,9 +184,9 @@ namespace hsk {
         pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCI.pushConstantRangeCount = 0;
         pipelineLayoutCI.setLayoutCount         = 1;
-        pipelineLayoutCI.pSetLayouts            = &mDescriptorSetLayout;
+        // pipelineLayoutCI.pSetLayouts            = &mDescriptorSetLayout; TODO descriptor set layout
 
-        AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device, &layoutInfo, nullptr, &mDescriptorSetLayout));
+        // AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device, &layoutInfo, nullptr, &mDescriptorSetLayout));
 
         HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }
@@ -205,7 +195,7 @@ namespace hsk {
     {
         std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
-        auto   textures    = mScene->GetTextures();
+        auto&  textures    = mScene->GetTextures();
         size_t numTextures = textures.size();
 
         // Model
@@ -276,8 +266,8 @@ namespace hsk {
 
         VkPipelineColorBlendAttachmentState blendAttachmentState = {.blendEnable = false};
         VkPipelineColorBlendStateCreateInfo colorBlendState      = {
-            .attachmentCount = 1,
-            .pAttachments    = &blendAttachmentState,
+                 .attachmentCount = 1,
+                 .pAttachments    = &blendAttachmentState,
         };
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState = {
@@ -319,8 +309,8 @@ namespace hsk {
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Position);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Normal);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv0);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv1);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
         vertexInputStateBuilder.Build();
 
         VkGraphicsPipelineCreateInfo pipelineCI = {};

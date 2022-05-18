@@ -63,7 +63,7 @@ namespace hsk {
         struct DescriptorLocation
         {
             uint32_t                        Binding;
-            std::shared_ptr<DescriptorInfo> DescriptorInfo;
+            std::shared_ptr<DescriptorInfo> Descriptor;
         };
         std::vector<DescriptorLocation> mDescriptorLocations;
 
