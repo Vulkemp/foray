@@ -45,7 +45,7 @@ namespace hsk {
                     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MeshId)});
                     break;
                 default:
-                    throw Exception("Failed to add vertex component. This component type has no switch case defined!");
+                    Exception::Throw("Failed to add vertex component. This component type has no switch case defined!");
                     break;
             }
         }

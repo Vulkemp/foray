@@ -68,10 +68,9 @@ namespace hsk {
 
         // create phyiscal device
         auto physicalDeviceSelectionReturn = pds.select();
-        if(!physicalDeviceSelectionReturn)
-        {
-            throw Exception("Physical device creation: {}", physicalDeviceSelectionReturn.error().message().c_str());
-        }
+        HSK_ASSERTFMT(physicalDeviceSelectionReturn, "Physical device creation: {}",
+                  physicalDeviceSelectionReturn.error().message().c_str())
+
         mPhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
         mPhysicalDevice    = mPhysicalDeviceVkb.physical_device;
     }
@@ -123,10 +122,7 @@ namespace hsk {
 
         // automatically propagate needed data from instance & physical device
         auto deviceBuilderReturn = deviceBuilder.build();
-        if(!deviceBuilderReturn)
-        {
-            throw Exception("Device creation: {}", deviceBuilderReturn.error().message());
-        }
+        HSK_ASSERTFMT(deviceBuilderReturn, "Device creation: {}", deviceBuilderReturn.error().message())
         mDeviceVkb      = deviceBuilderReturn.value();
         mDevice         = mDeviceVkb.device;
         mContext.Device = mDeviceVkb.device;
@@ -157,10 +153,7 @@ namespace hsk {
 
         auto swapchainBuilderReturn = swapchainBuilder.build();
 
-        if(!swapchainBuilderReturn)
-        {
-            throw Exception("Swapchain building: {}", swapchainBuilderReturn.error().message());
-        }
+        HSK_ASSERTFMT(swapchainBuilderReturn, "Swapchain building: {}", swapchainBuilderReturn.error().message())
 
         mSwapchainVkb      = swapchainBuilderReturn.value();
         mSwapchain         = mSwapchainVkb.swapchain;
@@ -168,8 +161,8 @@ namespace hsk {
 
         auto images     = mSwapchainVkb.get_images();
         auto imageviews = mSwapchainVkb.get_image_views();
-        HSK_ASSERT(images.has_value(), "Failed to acquire swapchain images! Vkb Errorcode: {}")
-        HSK_ASSERT(imageviews.has_value(), "Failed to acquire swapchain image views! Vkb Errorcode: {}")
+        Assert(images.has_value(), "Failed to acquire swapchain images!");
+        Assert(imageviews.has_value(), "Failed to acquire swapchain image views!");
         mSwapchainImages.resize(mSwapchainVkb.image_count);
         for(uint32_t i = 0; i < mSwapchainImages.size(); i++)
         {
@@ -181,18 +174,13 @@ namespace hsk {
     {
         // Get the graphics queue with a helper function
         auto defaultQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::graphics);
-        if(!defaultQueueReturn)
-        {
-            throw Exception("Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message());
-        }
+        HSK_ASSERTFMT(defaultQueueReturn,"Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message())
+
         mDefaultQueue.Queue            = defaultQueueReturn.value();
         mDefaultQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
 
         auto presentQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::present);
-        if(!presentQueueReturn)
-        {
-            throw Exception("Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message());
-        }
+        HSK_ASSERTFMT(presentQueueReturn, "Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message())
         mPresentQueue.Queue            = presentQueueReturn.value();
         mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
     }
@@ -206,11 +194,7 @@ namespace hsk {
         poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
         poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
 
-        VkResult result = vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault);
-        if(result != VK_SUCCESS)
-        {
-            throw Exception("failed to create command pool! VkResult: {}", result);
-        }
+        AssertVkResult(vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault));
         mContext.CommandPool = mCommandPoolDefault;
     }
 
@@ -273,10 +257,10 @@ namespace hsk {
             // target.ImageView     = imageviews[i];
             target.CommandBuffer = createCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 
-            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
-            HSK_ASSERT_VKRESULT(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
+            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
+            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
 
-            HSK_ASSERT_VKRESULT(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
+            AssertVkResult(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
 
             mFrames.push_back(std::move(target));
         }
@@ -284,7 +268,7 @@ namespace hsk {
 
     void DefaultAppBase::BaseCleanupVulkan()
     {
-        HSK_ASSERT_VKRESULT(vkDeviceWaitIdle(mDevice));
+        AssertVkResult(vkDeviceWaitIdle(mDevice));
 
         vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
         for(auto& target : mFrames)
@@ -319,7 +303,7 @@ namespace hsk {
 
     void DefaultAppBase::RecreateSwapchain()
     {
-        HSK_ASSERT_VKRESULT(vkDeviceWaitIdle(mDevice));
+        AssertVkResult(vkDeviceWaitIdle(mDevice));
 
         BaseCleanupSwapchain();
 
@@ -348,13 +332,13 @@ namespace hsk {
         FrameRenderInfo renderInfo(primaryOutput, comparisonOutput);
         renderInfo.SetFrameTime(delta).SetFrameNumber(mRenderedFrameCount).SetFrameObjectsIndex(mCurrentFrameIndex).SetCommandBuffer(currentFrame.CommandBuffer);
 
-        HSK_ASSERT_VKRESULT(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
+        AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
 
         VkCommandBufferBeginInfo cmdbufBI{};
         cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-        HSK_ASSERT_VKRESULT(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
+        AssertVkResult(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
 
         RecordCommandBuffer(renderInfo);
 
@@ -374,7 +358,7 @@ namespace hsk {
         }
 
         // Reset the fence
-        HSK_ASSERT_VKRESULT(vkResetFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence));
+        AssertVkResult(vkResetFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence));
 
         // Record Command Buffer
 
@@ -462,7 +446,7 @@ namespace hsk {
                              0, nullptr, 0, nullptr, 1, &barrier);
 
 
-        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(currentFrame.CommandBuffer));
+        AssertVkResult(vkEndCommandBuffer(currentFrame.CommandBuffer));
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

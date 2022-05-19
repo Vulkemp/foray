@@ -10,7 +10,7 @@ namespace hsk {
     {
         if(sInstance != nullptr)
         {
-            throw Exception("OsManager manages static SDL state. For this reason only one object of its type may exist!");
+            Exception::Throw("OsManager manages static SDL state. For this reason only one object of its type may exist!");
         }
         sInstance = this;
     }
@@ -206,7 +206,7 @@ namespace hsk {
         const InputBinary* input = mMouse->FindButton(button);
         if(!input)
         {
-            throw Exception("unable to find button {} from event on mouse!", NAMEOF_ENUM(button));
+            HSK_THROWFMT("unable to find button {} from event on mouse!", NAMEOF_ENUM(button))
         }
         std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
         return result;
@@ -224,7 +224,7 @@ namespace hsk {
         const InputBinary* input = mKeyboard->FindButton(button);
         if(!input)
         {
-            throw Exception("unable to find button {} from event on keyboard!", NAMEOF_ENUM(button));
+            HSK_THROWFMT("unable to find button {} from event on keyboard!", NAMEOF_ENUM(button))
         }
         std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
         return result;
@@ -263,7 +263,7 @@ namespace hsk {
         }
         if(!input)
         {
-            throw Exception("unable to find a device from event!");
+            Exception::Throw("unable to find a device from event!");
         }
         return std::make_shared<EventInputAnalogue>(window, ev.timestamp, sourceDevice, input, ev.value);
     }
@@ -290,7 +290,7 @@ namespace hsk {
         }
         if(!input)
         {
-            throw Exception("unable to find button {} from event on a device!", NAMEOF_ENUM(button));
+            HSK_THROWFMT("unable to find button {} from event on a device!", NAMEOF_ENUM(button))
         }
         return std::make_shared<EventInputBinary>(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
     }

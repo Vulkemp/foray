@@ -166,7 +166,7 @@ namespace hsk {
                     //             break;
                     //         }
                     //         default:
-                    //             throw Exception("Joint component type {} not supported!", jointComponentType);
+                    //             HSK_THROWFMT("Joint component type {} not supported!", jointComponentType);
                     //     }
                     // }
                     // else
@@ -219,7 +219,7 @@ namespace hsk {
                         break;
                     }
                     default:
-                        throw Exception("Index component type {} not supported!", accessor.componentType);
+                        HSK_THROWFMT("Index component type {} not supported!", accessor.componentType);
                 }
             }
             std::unique_ptr<Primitive> newPrimitive =

@@ -71,7 +71,7 @@ namespace hsk {
     template <typename T_UBO>
     void ManagedUbo<T_UBO>::Init(bool update)
     {
-		HSK_ASSERT(mBuffer.GetAllocator(), "ManagedUbo<>: Allocator needs to be set for Ubo to work!");
+		Assert(mBuffer.GetAllocator(), "ManagedUbo<>: Allocator needs to be set for Ubo to work!");
 
         VmaAllocationCreateInfo info = {};
         info.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;

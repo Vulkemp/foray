@@ -141,7 +141,7 @@ namespace hsk {
         }
         else
         {
-            throw Exception("Could not load gltf file: {}", error);
+            HSK_THROWFMT("Could not load gltf file: {}", error);
         }
 
         mExtensions = gltfModel.extensionsUsed;
@@ -370,7 +370,7 @@ namespace hsk {
     {
         if(loaded != mSceneLoaded)
         {
-            throw Exception("Scene expected to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"),
+            HSK_THROWFMT("Scene expected to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"),
                             (mSceneLoaded ? "loaded" : "unloaded"));
         }
     }

@@ -87,7 +87,7 @@ namespace hsk {
                         break;
                     }
                     default: {
-                        throw Exception("Unknown accessor type: {}", accessor.type);
+                        HSK_THROWFMT("Unknown accessor type: {}", accessor.type)
                     }
                 }
             }
@@ -114,7 +114,7 @@ namespace hsk {
             }
             if(source.target_path == "weights")
             {
-                throw Exception("Weights are not supported");
+                Exception("Weights are not supported");
             }
             channel.SamplerIndex = source.sampler;
             channel.Target         = Owner()->GetNodeByIndex(source.target_node);

@@ -46,7 +46,7 @@ namespace hsk {
         }
         else
         {
-            throw Exception("No simple translation for this layout available!");
+            Exception::Throw("No simple translation for this layout available!");
         }
         TransitionLayout(transitionInfo);
     }

@@ -177,7 +177,7 @@ namespace hsk {
         auto threadId = SDL_ThreadID();
         if(threadId != mOwningThreadID)
         {
-            throw Exception("Attempted altering a window from a thread which is not the owner!");
+            Exception::Throw("Attempted altering a window from a thread which is not the owner!");
         }
     }
 

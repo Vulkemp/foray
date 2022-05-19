@@ -120,7 +120,7 @@ namespace hsk {
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
 
-        HSK_ASSERT_VKRESULT(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
+        AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
         VkImageView attachmentViews[ATTACHMENT_COUNT] = {mPositionAttachment->GetImageView(), mNormalAttachment->GetImageView(), mAlbedoAttachment->GetImageView(),
                                                          mMotionAttachment->GetImageView(),   mMeshIdAttachment->GetImageView(), mDepthAttachment->GetImageView()};
@@ -134,7 +134,7 @@ namespace hsk {
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
         fbufCreateInfo.height                  = mContext->Swapchain.extent.width;
         fbufCreateInfo.layers                  = 1;
-        HSK_ASSERT_VKRESULT(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
+        AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void GBufferStage::Destroy()
@@ -186,9 +186,7 @@ namespace hsk {
         pipelineLayoutCI.setLayoutCount         = 1;
         // pipelineLayoutCI.pSetLayouts            = &mDescriptorSetLayout; TODO descriptor set layout
 
-        // AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device, &layoutInfo, nullptr, &mDescriptorSetLayout));
-
-        HSK_ASSERT_VKRESULT(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
+        AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }
 
     void GBufferStage::setupDescriptorSet()
@@ -201,7 +199,7 @@ namespace hsk {
         // Model
         // use descriptor set layout delivered by gltf
         // VkDescriptorSetAllocateInfo allocInfoOffscreen = vks::initializers::descriptorSetAllocateInfo(mDescriptorPool, &vkglTF::descriptorSetLayoutUbo, 1);
-        // HSK_ASSERT_VKRESULT(vkAllocateDescriptorSets(device, &allocInfoOffscreen, &mDescriptorSetScene));
+        // AssertVkResult(vkAllocateDescriptorSets(device, &allocInfoOffscreen, &mDescriptorSetScene));
         // writeDescriptorSets = {// Binding 0: Vertex shader uniform buffer
         //                        m_rtFilterDemo->m_UBO_SceneInfo->writeDescriptorSet(mDescriptorSetScene, 0)};
         // vkUpdateDescriptorSets(device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
@@ -244,14 +242,14 @@ namespace hsk {
 
         vkCmdEndRenderPass(commandBuffer);
 
-        HSK_ASSERT_VKRESULT(vkEndCommandBuffer(commandBuffer));
+        AssertVkResult(vkEndCommandBuffer(commandBuffer));
     }
 
     void GBufferStage::preparePipeline()
     {
         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        HSK_ASSERT_VKRESULT(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
+        AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {
             .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
@@ -341,6 +339,6 @@ namespace hsk {
         /* colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
         colorBlendState.pAttachments    = blendAttachmentStates.data();*/
 
-        HSK_ASSERT_VKRESULT(vkCreateGraphicsPipelines(mContext->Device, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
+        AssertVkResult(vkCreateGraphicsPipelines(mContext->Device, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
     }
 }  // namespace hsk

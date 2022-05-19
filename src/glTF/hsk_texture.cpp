@@ -25,7 +25,7 @@ namespace hsk {
             case 33648:
                 return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
             default:
-                throw Exception("TextureSampler::getVkWrapMode: Unable to convert wrapMode {}", wrapMode);
+                HSK_THROWFMT("TextureSampler::getVkWrapMode: Unable to convert wrapMode {}", wrapMode);
         }
     }
 
@@ -46,7 +46,7 @@ namespace hsk {
             case 9987:
                 return VK_FILTER_LINEAR;
             default:
-                throw Exception("TextureSampler::getVkFilterMode: Unable to convert filterMode {}", filterMode);
+                HSK_THROWFMT("TextureSampler::getVkFilterMode: Unable to convert filterMode {}", filterMode)
         }
     }
 

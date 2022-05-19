@@ -21,7 +21,8 @@ namespace hsk {
         }
         else
         {
-            throw Exception("Unable to parse alpha mode {}", raw);
+            HSK_THROWFMT("Unable to parse alpha mode {}", raw)
+            
         }
     }
 

@@ -7,21 +7,11 @@ namespace hsk {
 
     std::string_view PrintVkResult(VkResult result);
 
-    inline void AssertVkResult(VkResult result)
+    inline void AssertVkResult(VkResult result, const std::source_location location = std::source_location::current())
     {
         if(result != VK_SUCCESS)
         {
-            Exception::Throw("VkResult Assertion Failed: VkResult::{}", PrintVkResult(result));
+            Exception::Throw(location, "VkResult Assertion Failed: VkResult::{}", PrintVkResult(result));
         }
     }
-
-#define HSK_ASSERT_VKRESULT(action)                                                                                                                                                \
-    {                                                                                                                                                                              \
-        VkResult result = (action);                                                                                                                                                \
-        if(result != VK_SUCCESS)                                                                                                                                                   \
-        {                                                                                                                                                                          \
-            hsk::Exception::Throw("VkResult Assertion Failed: VkResult::{}, call \"{}\"", hsk::PrintVkResult(result), #action);                                                    \
-        }                                                                                                                                                                          \
-    }
-
 }  // namespace hsk

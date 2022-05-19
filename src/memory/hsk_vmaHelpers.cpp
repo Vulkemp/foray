@@ -150,7 +150,7 @@ namespace hsk {
         bool isloaded = (bool)mAllocation;
         if(loaded != isloaded)
         {
-            throw Exception("VmaBuffer::{} requires the buffer to be {}!", process, loaded ? "loaded" : "uninitialized");
+            HSK_THROWFMT("ManagedBuffer::{} requires the buffer to be {}!", process, loaded ? "loaded" : "uninitialized")
         }
     }
 
