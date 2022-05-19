@@ -78,7 +78,7 @@ namespace hsk {
     }
 
 /// @brief Macro for throwing an exception with formatted error message argument
-/// @remark Why is this not a function? Many use cases would cause errors if format arguments were evaluated in a case where assertion passes. A macro circumvents this problem.
+/// @remark Why is this not a function? Variadic functions don't mesh with default arguments (used to catch source location). A macro can circumvent this (albeit not very gracefully)
 #define HSK_THROWFMT(fmt, ...)                                                                                                                                                     \
     {                                                                                                                                                                              \
         const std::source_location __hsk_location = std::source_location::current();                                                                                                     \
