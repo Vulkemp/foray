@@ -71,10 +71,10 @@ namespace hsk {
         mBufferArray.clear();
         for(int32_t i = 0; i < materials.size(); i++)
         {
-            Material description = {};
-            description.InitFromTinyGltfMaterial(materials[i]);
-            mMaterialDescriptions.push_back(description);
-            mBufferArray.push_back(description.MakeBufferObject());
+            Material material = {};
+            material.InitFromTinyGltfMaterial(materials[i]);
+            mMaterialDescriptions.push_back(material);
+            mBufferArray.push_back(material.MakeBufferObject());
         }
 
         UpdateBuffer();

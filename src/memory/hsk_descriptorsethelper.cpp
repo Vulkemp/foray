@@ -1,10 +1,10 @@
-#include "hsk_descriptorset.hpp"
+#include "hsk_descriptorsethelper.hpp"
 #include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
-    void DescriptorSet::SetDescriptorInfoAt(uint32_t binding, std::shared_ptr<DescriptorInfo> descriptorSetInfo) { mDescriptorLocations.push_back({binding, descriptorSetInfo}); }
+    void DescriptorSetHelper::SetDescriptorInfoAt(uint32_t binding, std::shared_ptr<DescriptorInfo> descriptorSetInfo) { mDescriptorLocations.push_back({binding, descriptorSetInfo}); }
 
-    VkDescriptorSetLayout DescriptorSet::Create(const VkContext* context, uint32_t numSets)
+    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, uint32_t numSets)
     {
         // --------------------------------------------------------------------------------------------
         // create the descriptor set layout based on the given bindings

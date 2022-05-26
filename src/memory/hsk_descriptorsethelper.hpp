@@ -27,7 +27,7 @@ namespace hsk {
     /// You can feed an object of this class with DescriptorInfos.
     /// Each descriptor info describes to which binding it should be attached & to how many sets how many descriptors should be attached.
     /// The descriptor pool will allocate the sets and allocate a descriptor for each.
-    class DescriptorSet
+    class DescriptorSetHelper
     {
       public:
         //

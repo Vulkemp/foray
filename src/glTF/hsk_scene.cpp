@@ -16,6 +16,56 @@ namespace hsk {
     }
 
 
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTextureDescriptorInfo()
+    {
+
+        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
+        descriptorInfo->pImmutableSamplers = nullptr;
+        descriptorInfo->DescriptorCount    = mTextures.size();
+        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+        size_t numSets = 1;
+        descriptorInfo->ImageInfos.resize(numSets);
+
+        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
+        {
+            descriptorInfo->ImageInfos[setIndex].reserve(mTextures.size());
+            for(size_t i = 0; i < mTextures.size(); i++)
+            {
+                descriptorInfo->ImageInfos[setIndex][i].imageLayout = mTextures[i]->GetImageLayout();
+                descriptorInfo->ImageInfos[setIndex][i].imageView   = mTextures[i]->GetImageView();
+                descriptorInfo->ImageInfos[setIndex][i].sampler =
+                    mTextures[i]->GetSampler();  // TODO: whats difference between a sampler of this texture object and the mTextureSamplers - which one should be used??
+            }
+        }
+    }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetMaterialUboArrayDescriptorInfo()
+    {
+        size_t numMaterials = mMaterials.GetBufferArray().size();
+
+        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
+        descriptorInfo->pImmutableSamplers = nullptr;
+        descriptorInfo->DescriptorCount    = numMaterials;
+        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+        size_t numSets = 1;
+        descriptorInfo->BufferInfos.resize(numSets);
+
+        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
+        {
+            descriptorInfo->BufferInfos[setIndex].reserve(numMaterials);
+            for(size_t i = 0; i < mTextures.size(); i++)
+            {
+                descriptorInfo->BufferInfos[setIndex][i].buffer = mMaterials.GetBuffer().GetBuffer();
+                descriptorInfo->BufferInfos[setIndex][i].offset = sizeof(MaterialBufferObject) * i;
+                descriptorInfo->BufferInfos[setIndex][i].range  = sizeof(MaterialBufferObject);
+            }
+        }
+    }
+
     void Scene::Cleanup()
     {
         vertices.Destroy();
@@ -370,8 +420,7 @@ namespace hsk {
     {
         if(loaded != mSceneLoaded)
         {
-            HSK_THROWFMT("Scene expected to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"),
-                            (mSceneLoaded ? "loaded" : "unloaded"));
+            HSK_THROWFMT("Scene expected to be {}, but scene was {}!", (loaded ? "loaded" : "unloaded"), (mSceneLoaded ? "loaded" : "unloaded"));
         }
     }
 

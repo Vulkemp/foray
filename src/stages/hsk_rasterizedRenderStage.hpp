@@ -16,17 +16,6 @@ namespace hsk {
 
       protected:
 
-        struct BindingInfo
-        {
-            uint32_t           DescriptorCount{};  // How many descriptors are referenced at the same time, usually 1.
-            VkDescriptorType   DescriptorType{};
-            VkShaderStageFlags ShaderStageFlags{};
-            uint32_t           PoolSizeDescriptorCount{};  // How many descriptors of this exist in total, for example 3 ubos for 3 swapchain images, etc.
-            VkSampler*         pImmutableSamplers{nullptr};
-        };
-
-        std::vector<BindingInfo> mBindingInfos;
-
         VkFramebuffer         mFrameBuffer         = nullptr;
         VkPipelineCache       mPipelineCache       = nullptr;
         VkRenderPass          mRenderpass          = nullptr;

@@ -15,6 +15,8 @@
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
+#include "../memory/hsk_descriptorsethelper.hpp"
+
 namespace hsk {
 
     class Scene : public NoMoveDefaults
@@ -52,6 +54,9 @@ namespace hsk {
             }
             return nullptr;
         }
+
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTextureDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetMaterialUboArrayDescriptorInfo();
 
         void Cleanup();
 
