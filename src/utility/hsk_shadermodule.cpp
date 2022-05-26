@@ -12,8 +12,11 @@ namespace hsk {
         auto          mAbsoluteSpirvPath = MakeRelativePath(relativeSpirvPath);
         std::ifstream is(mAbsoluteSpirvPath.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
 
-        HSK_ASSERTFMT(is.is_open(), "Could not open shader file: {}", mAbsoluteSpirvPath)
-        
+        if(!is.is_open())
+        {
+            throw Exception("Could not open shader file: {}", mAbsoluteSpirvPath);
+        }
+
         size_t size = is.tellg();
         is.seekg(0, std::ios::beg);
         char* shaderCode = new char[size];

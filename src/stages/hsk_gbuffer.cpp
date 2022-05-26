@@ -267,13 +267,13 @@ namespace hsk {
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = ShaderModule(mContext, "TODO path_to_shader");
+        vertShaderStageInfo.module = ShaderModule(mContext, "hsk_rt_rpf/src/shaders/gbuffer_stage.vert");
         vertShaderStageInfo.pName  = "main";
 
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = ShaderModule(mContext, "TODO path_to_shader");
+        fragShaderStageInfo.module = ShaderModule(mContext, "hsk_rt_rpf/src/shaders/gbuffer_stage.frag");
         fragShaderStageInfo.pName  = "main";
 
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages = {vertShaderStageInfo, fragShaderStageInfo};

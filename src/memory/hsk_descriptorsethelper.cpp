@@ -104,7 +104,7 @@ namespace hsk {
                 {
                     // if only one image info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index                  = numImageInfos > 1 ? setIndex : 0;
-                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->BufferInfos[index].size();
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->ImageInfos[index].size();
                     descriptorWrite.pImageInfo     = descriptorLocation.Descriptor->ImageInfos[index].data();
                 }
             }

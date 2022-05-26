@@ -30,7 +30,7 @@ namespace hsk {
 
         for(size_t setIndex = 0; setIndex < numSets; setIndex++)
         {
-            descriptorInfo->ImageInfos[setIndex].reserve(mTextures.size());
+            descriptorInfo->ImageInfos[setIndex].resize(mTextures.size());
             for(size_t i = 0; i < mTextures.size(); i++)
             {
                 descriptorInfo->ImageInfos[setIndex][i].imageLayout = mTextures[i]->GetImageLayout();
@@ -39,11 +39,12 @@ namespace hsk {
                     mTextures[i]->GetSampler();  // TODO: whats difference between a sampler of this texture object and the mTextureSamplers - which one should be used??
             }
         }
+        return descriptorInfo;
     }
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetMaterialUboArrayDescriptorInfo()
     {
-        size_t numMaterials = mMaterials.GetBufferArray().size();
+        size_t numMaterials = 1; // we load the complete ubo buffer as a single ubo buffer.
 
         auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -56,14 +57,15 @@ namespace hsk {
 
         for(size_t setIndex = 0; setIndex < numSets; setIndex++)
         {
-            descriptorInfo->BufferInfos[setIndex].reserve(numMaterials);
-            for(size_t i = 0; i < mTextures.size(); i++)
+            descriptorInfo->BufferInfos[setIndex].resize(numMaterials);
+            for(size_t i = 0; i < numMaterials; i++)
             {
                 descriptorInfo->BufferInfos[setIndex][i].buffer = mMaterials.GetBuffer().GetBuffer();
-                descriptorInfo->BufferInfos[setIndex][i].offset = sizeof(MaterialBufferObject) * i;
-                descriptorInfo->BufferInfos[setIndex][i].range  = sizeof(MaterialBufferObject);
+                descriptorInfo->BufferInfos[setIndex][i].offset = 0;
+                descriptorInfo->BufferInfos[setIndex][i].range  = mMaterials.GetBufferSize();
             }
         }
+        return descriptorInfo;
     }
 
     void Scene::Cleanup()
