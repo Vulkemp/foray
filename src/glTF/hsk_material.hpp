@@ -8,17 +8,16 @@
 #include <vulkan/vulkan.h>
 
 namespace hsk {
-    struct alignas(16) MaterialBufferObject  // 46 Bytes, aligns to 48
+    struct alignas(16) MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
     {
         glm::vec4 BaseColorFactor;                // Base Color / Albedo Factor
         fp32_t    MetallicFactor;                 // Metallic Factor
         glm::vec3 EmissiveFactor;                 // Emissive Factor
         fp32_t    RoughnessFactor;                // Roughness Factor
-        int16_t   BaseColorTextureIndex;          // Texture Index for BaseColor
-        int16_t   MetallicRoughnessTextureIndex;  // Texture Index for MetallicRoughness
-        int16_t   EmissiveTextureIndex;           // Texture Index for Emissive
-        int16_t   OcclusionTextureIndex;          // Texture Index for Occlusion
-        int16_t   NormalTextureIndex;             // Texture Index for Normal
+        int32_t   BaseColorTextureIndex;          // Texture Index for BaseColor
+        int32_t   MetallicRoughnessTextureIndex;  // Texture Index for MetallicRoughness
+        int32_t   EmissiveTextureIndex;           // Texture Index for Emissive
+        int32_t   NormalTextureIndex;             // Texture Index for Normal
     };
 
     struct Material
@@ -51,7 +50,6 @@ namespace hsk {
         int32_t   EmissiveTexture = -1;
 
         int32_t NormalTexture    = -1;
-        int32_t OcclusionTexture = -1;
 
         MaterialBufferObject MakeBufferObject();
     };

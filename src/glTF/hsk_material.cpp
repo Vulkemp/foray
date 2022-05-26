@@ -47,7 +47,6 @@ namespace hsk {
         EmissiveFactor   = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
         EmissiveTexture  = material.emissiveTexture.index;
         NormalTexture    = material.normalTexture.index;
-        OcclusionTexture = material.occlusionTexture.index;
     }
 
     MaterialBufferObject Material::MakeBufferObject()
@@ -60,7 +59,6 @@ namespace hsk {
         result.BaseColorTextureIndex         = BaseColorTexture;
         result.MetallicRoughnessTextureIndex = MetallicRoughnessTexture;
         result.EmissiveTextureIndex          = EmissiveTexture;
-        result.OcclusionTextureIndex         = OcclusionTexture;
         result.NormalTextureIndex            = NormalTexture;
         return result;
     }

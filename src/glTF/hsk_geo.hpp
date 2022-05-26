@@ -1,9 +1,9 @@
 #pragma once
 #include "hsk_glTF_declares.hpp"
 #include <glm/glm.hpp>
+#include <optional>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include <optional>
 
 namespace hsk {
 
@@ -43,8 +43,8 @@ namespace hsk {
         glm::vec3 Normal        = {};
         glm::vec3 Tangent       = {};
         glm::vec2 Uv            = {};
-        uint16_t  MaterialIndex = {};
-        uint16_t  MeshId        = {};
+        int32_t   MaterialIndex = {};
+        int32_t   MeshId        = {};
     };
 
 }  // namespace hsk
