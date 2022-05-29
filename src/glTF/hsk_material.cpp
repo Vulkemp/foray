@@ -1,5 +1,6 @@
 #include "hsk_material.hpp"
 #include "../memory/hsk_vmaHelpers.hpp"
+#include "../memory/hsk_managedbuffer.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {
@@ -87,9 +88,12 @@ namespace hsk {
     }
     void MaterialBuffer::CreateBuffer()
     {
-        VmaAllocationCreateInfo allocInfo{};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        mBuffer.Init(Context()->Allocator, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, mBufferCapacity);
+        ManagedBuffer::ManagedBufferCreateInfo createInfo;
+        createInfo.Context = Context();
+        createInfo.AllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        createInfo.BufferCreateInfo.usage     = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        createInfo.BufferCreateInfo.size      = mBufferCapacity;
+        mBuffer.Create(createInfo);
     }
     void MaterialBuffer::UpdateBuffer()
     {
@@ -103,25 +107,8 @@ namespace hsk {
             CreateBuffer();
         }
 
-        // Get a staging buffer setup, init with buffer array data
-
-        ManagedBuffer           stagingBuffer(Context()->Allocator);
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        allocInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        stagingBuffer.Init(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, mBufferSize, mBufferArray.data());
-
-        // copy to GPU buffer
-
-        VkCommandBuffer copyCmdBuf = CreateCommandBuffer(Context()->Device, Context()->TransferCommandPool, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-        VkBufferCopy copyRegion = {};
-        copyRegion.size         = mBufferSize;
-        vkCmdCopyBuffer(copyCmdBuf, stagingBuffer.GetBuffer(), mBuffer.GetBuffer(), 1, &copyRegion);
-
-        FlushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmdBuf, Context()->TransferQueue);
-
-        stagingBuffer.Destroy();
+        // use staging buffer, write buffer array data
+        mBuffer.WriteDataDeviceLocal(mBufferArray.data(), mBufferSize);
     }
     void MaterialBuffer::DestroyBuffer() { mBuffer.Destroy(); }
     void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)

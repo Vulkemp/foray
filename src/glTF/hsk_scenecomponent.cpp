@@ -5,6 +5,5 @@ namespace hsk {
 
     SceneComponent::SceneComponent(Scene* scene) : mScene(scene) {}
 
-    SceneVkContext*       SceneComponent::Context() { return &(mScene->Context()); }
-    const SceneVkContext* SceneComponent::Context() const { return &(mScene->Context()); }
+    const VkContext* SceneComponent::Context() { return mScene->Context(); }
 }  // namespace hsk

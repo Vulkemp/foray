@@ -25,15 +25,12 @@ namespace hsk {
         Scene() : mMaterials(this) {}
         Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue);
 
-        SceneVkContext* GetVkContext() { return &mContext; }
-
-        inline Scene& Context(SceneVkContext& context)
+        inline Scene& Context(const VkContext* context)
         {
             mContext = context;
             return *this;
         }
-        inline SceneVkContext&       Context() { return mContext; }
-        inline const SceneVkContext& Context() const { return mContext; }
+        inline const VkContext* Context() const { return mContext; }
 
         inline std::vector<std::unique_ptr<Texture>>& GetTextures() { return mTextures; }
 
@@ -78,7 +75,7 @@ namespace hsk {
         HSK_PROPERTY_ALL(FallbackMaterial)
 
       protected:
-        SceneVkContext                        mContext                = {};
+        const VkContext*                      mContext                = {};
         Material                              mFallbackMaterial       = {};
         MaterialBuffer                        mMaterials              = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};

@@ -52,7 +52,12 @@ namespace hsk {
         createInfo.BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         createInfo.BufferCreateInfo.size  = mAllocationInfo.size;  // size of staging buffer can only be as big as the allocation
         createInfo.BufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+        createInfo.AllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        createInfo.AllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
         stagingBuffer.Create(createInfo);
+
 
         SingleTimeCommandBuffer singleTimeCmdBuf;
         VkCommandBuffer         commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -74,5 +79,7 @@ namespace hsk {
         mDescriptorInfo.offset = 0;
         mDescriptorInfo.range  = size;
     }
+
+ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }
 
 }  // namespace hsk

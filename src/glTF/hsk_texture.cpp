@@ -1,6 +1,5 @@
 #include "hsk_texture.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {
@@ -106,7 +105,7 @@ namespace hsk {
         allocInfo.flags                   = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
         VmaAllocation stagingAllocation;
-        VkBuffer      stagingBuffer;
+        VkBuffer      stagingBuffer; // TODO: Images should become the capability to allow staged writing themselfes. see IntermediateImage::WriteDeviceLocalData
 
         CreateBuffer(Context()->Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &stagingAllocation, bufferSize, &stagingBuffer, buffer);
 

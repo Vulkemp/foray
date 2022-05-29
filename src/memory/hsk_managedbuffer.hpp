@@ -12,11 +12,12 @@ namespace hsk {
             const VkContext*        Context;
             VmaAllocationCreateInfo AllocationCreateInfo;
             VkBufferCreateInfo      BufferCreateInfo;
+
+            ManagedBufferCreateInfo();
         };
 
       public:
         ManagedBuffer() = default;
-        virtual ~ManagedBuffer() { Destroy(); }
 
         void Create(ManagedBufferCreateInfo& createInfo);
         void Destroy();
@@ -37,6 +38,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Buffer);
         HSK_PROPERTY_CGET(IsMapped);
         HSK_PROPERTY_CGET(DescriptorInfo);
+        HSK_PROPERTY_CGET(Allocation);
 
       protected:
         const VkContext*       mContext{};

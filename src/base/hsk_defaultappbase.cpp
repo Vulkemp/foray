@@ -73,6 +73,7 @@ namespace hsk {
 
         mPhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
         mPhysicalDevice    = mPhysicalDeviceVkb.physical_device;
+        mContext.PhysicalDevice = mPhysicalDevice;
     }
 
     void DefaultAppBase::BaseInitBuildDevice()
@@ -183,6 +184,8 @@ namespace hsk {
         HSK_ASSERTFMT(presentQueueReturn, "Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message())
         mPresentQueue.Queue            = presentQueueReturn.value();
         mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
+
+        mContext.TransferQueue = mDefaultQueue.Queue; // TODO: FIX ME: use a dedicated transfer queue in some cases?
     }
 
     void DefaultAppBase::BaseInitCommandPool()
@@ -196,6 +199,8 @@ namespace hsk {
 
         AssertVkResult(vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault));
         mContext.CommandPool = mCommandPoolDefault;
+
+        mContext.TransferCommandPool = mCommandPoolDefault; // TODO: FIX ME: dedicated transfer command pool in some cases?
     }
 
     void DefaultAppBase::BaseInitCreateVma()
