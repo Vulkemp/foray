@@ -8,6 +8,8 @@
 #include <sdl2/SDL.h>
 #include <spdlog/spdlog.h>
 
+//#define HSK_CATCH_EXCEPTIONS
+
 namespace hsk {
     using clock_t     = std::chrono::steady_clock;
     using timepoint_t = std::chrono::steady_clock::time_point;
@@ -20,22 +22,29 @@ namespace hsk {
             return -1;
         }
 
+#ifdef HSK_CATCH_EXCEPTIONS
         try
         {
+#endif
             this->State(EState::Preparing);
             this->BaseInitSdlSubsystem();
             this->BeforeInstanceCreate(mVkbInstanceBuilder);
             this->BaseInit();
             this->Init();
+#ifdef HSK_CATCH_EXCEPTIONS
         }
+
         catch(const std::exception& e)
         {
             logger()->error("Exception thrown during initialization: {}", e.what());
             return -1;
         }
+#endif
 
+#ifdef HSK_CATCH_EXCEPTIONS
         try
         {
+#endif
             clock_t clock;
             float   deltaMillis = 0;
             this->State(EState::Running);
@@ -71,25 +80,31 @@ namespace hsk {
                     SDL_Delay(0);
                 }
             }
+#ifdef HSK_CATCH_EXCEPTIONS
         }
         catch(const std::exception& e)
         {
             logger()->error("Exception thrown during runtime: {}", e.what());
             return -1;
         }
+#endif
 
+#ifdef HSK_CATCH_EXCEPTIONS
         try
         {
+#endif
             this->State(EState::Finalizing);
             Cleanup();
             BaseCleanupVulkan();
             BaseCleanupSdlSubsystem();
+#ifdef HSK_CATCH_EXCEPTIONS
         }
         catch(const std::exception& e)
         {
             logger()->error("Exception thrown during deconstruct: {}", e.what());
             return -1;
         }
+#endif
 
         this->State(EState::Uninitialized);
         return 0;
@@ -107,16 +122,17 @@ namespace hsk {
             switch(messageSeverity)
             {
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                    logger()->info("[{}: {}] {}", severity, type, pCallbackData->pMessage);
+                    logger()->info("{}", severity, type, pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                    logger()->info("[{}: {}] {}", severity, type, pCallbackData->pMessage);
+                    logger()->info("{}", severity, type, pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                    logger()->warn("[{}: {}] {}", severity, type, pCallbackData->pMessage);
+                    logger()->warn("{}", severity, type, pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                    logger()->error("[{}: {}] {}", severity, type, pCallbackData->pMessage);
+                    logger()->error("{}", pCallbackData->pMessage);
+                    throw Exception("{}", pCallbackData->pMessage);
                     break;
             }
             return VK_FALSE;
@@ -153,7 +169,7 @@ namespace hsk {
     {
         vkb::destroy_instance(mInstanceVkb);
         mInstanceVkb = vkb::Instance{};
-        mInstance = nullptr;
+        mInstance    = nullptr;
     }
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
@@ -161,8 +177,5 @@ namespace hsk {
         logger()->flush();
     }
 
-    void MinimalAppBase::PrintStateChange(EState oldState, EState newState)
-    {
-        logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
-    }
+    void MinimalAppBase::PrintStateChange(EState oldState, EState newState) { logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState)); }
 }  // namespace hsk
