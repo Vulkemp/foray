@@ -31,12 +31,10 @@ namespace hsk {
         virtual void InitResolutionDependentComponents();
         virtual void DestroyResolutionDependentComponents();
 
-        void prepareAttachments();
-        void prepareRenderpass();
-        void SetupDescriptorPool();
-        void SetupDescriptorSetLayout();
-        void setupDescriptorSet();
-        void buildCommandBuffer(){};
-        void preparePipeline();
+        void PrepareAttachments();
+        void PrepareRenderpass();
+        void SetupDescriptors();
+        void BuildCommandBuffer(){};
+        void PreparePipeline();
     };
 }  // namespace hsk

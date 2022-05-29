@@ -231,7 +231,7 @@ namespace hsk {
         }
 
         // Copy from staging buffers
-        VkCommandBuffer copyCmd = createCommandBuffer(mContext.Device, mContext.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmd = CreateCommandBuffer(mContext.Device, mContext.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copyRegion = {};
 
@@ -244,7 +244,7 @@ namespace hsk {
             vkCmdCopyBuffer(copyCmd, indexStaging.GetBuffer(), indices.GetBuffer(), 1, &copyRegion);
         }
 
-        flushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
+        FlushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
 
         vertexStaging.Destroy();
 

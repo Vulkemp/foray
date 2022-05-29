@@ -1,5 +1,5 @@
 #include "hsk_intermediateImage.hpp"
-#include "hsk_vmaHelpers.hpp"
+#include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
     IntermediateImage::CreateInfo::CreateInfo() { ImageCI.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO; }
@@ -59,7 +59,7 @@ namespace hsk {
         if(transitionInfo.CommandBuffer == nullptr)
         {
             createTemporaryCommandBuffer = true;
-            commandBuffer = createCommandBuffer(mContext->Device, mContext->CommandPool, transitionInfo.CommandBufferLevel, true);
+            commandBuffer = CreateCommandBuffer(mContext->Device, mContext->CommandPool, transitionInfo.CommandBufferLevel, true);
         }
         else
         {
@@ -77,7 +77,18 @@ namespace hsk {
 
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-        flushCommandBuffer(mContext->Device, mContext->CommandPool, commandBuffer, mContext->QueueGraphics, true);
+        FlushCommandBuffer(mContext->Device, mContext->CommandPool, commandBuffer, mContext->QueueGraphics, true);
+    }
+
+    void IntermediateImage::WriteDeviceLocalData(void* data, size_t size) 
+    {
+        // create staging buffer
+        
+        // transform image layout to write dst
+        
+        // write memory
+
+        // reverse image layout
     }
 
     void IntermediateImage::Destroy()

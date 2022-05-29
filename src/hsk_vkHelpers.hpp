@@ -14,4 +14,10 @@ namespace hsk {
             Exception::Throw(location, "VkResult Assertion Failed: VkResult::{}", PrintVkResult(result));
         }
     }
+
+    VkCommandBuffer CreateCommandBuffer(VkDevice device, VkCommandPool cmdpool, VkCommandBufferLevel level, bool begin = false);
+
+    void BeginCommandBuffer(VkCommandBuffer commandBuffer);
+
+    void FlushCommandBuffer(VkDevice device, VkCommandPool cmdpool, VkCommandBuffer commandBuffer, VkQueue queue, bool free = true);
 }  // namespace hsk

@@ -256,7 +256,7 @@ namespace hsk {
             InFlightFrame target{};
             // target.Image         = images[i];
             // target.ImageView     = imageviews[i];
-            target.CommandBuffer = createCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+            target.CommandBuffer = CreateCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 
             AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
             AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));

@@ -113,13 +113,13 @@ namespace hsk {
 
         // copy to GPU buffer
 
-        VkCommandBuffer copyCmdBuf = createCommandBuffer(Context()->Device, Context()->TransferCommandPool, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        VkCommandBuffer copyCmdBuf = CreateCommandBuffer(Context()->Device, Context()->TransferCommandPool, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copyRegion = {};
         copyRegion.size         = mBufferSize;
         vkCmdCopyBuffer(copyCmdBuf, stagingBuffer.GetBuffer(), mBuffer.GetBuffer(), 1, &copyRegion);
 
-        flushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmdBuf, Context()->TransferQueue);
+        FlushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmdBuf, Context()->TransferQueue);
 
         stagingBuffer.Destroy();
     }

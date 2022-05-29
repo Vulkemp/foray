@@ -57,6 +57,7 @@ namespace hsk {
         /// @brief Detailed layout transition.
         virtual void TransitionLayout(LayoutTransitionInfo& transitionInfo);
 
+        void WriteDeviceLocalData(void* data, size_t size);
 
         virtual void Destroy();
 
