@@ -232,7 +232,8 @@ namespace hsk {
             shaderOutputDirectory = mShaderOutputDirectoryPathFull;
         }
 
-        mShaderCompiler.Init(shaderSourceDirectory, shaderOutputDirectory);
+        mShaderCompiler.AddSourceDirectory(CurrentWorkingDirectory() + "/../hsk_rt_rpf/src/shaders");
+        mShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
         mShaderCompiler.CompileAll();
         logger()->info("Compiling shaders successfully finished!");
     }
