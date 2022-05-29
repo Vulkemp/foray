@@ -10,29 +10,24 @@ namespace hsk {
     {
         mContext                         = context;
         auto          mAbsoluteSpirvPath = MakeRelativePath(relativeSpirvPath);
-        std::ifstream is(mAbsoluteSpirvPath.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
+        std::ifstream file(mAbsoluteSpirvPath.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
 
-        if(!is.is_open())
+        if(!file.is_open())
         {
             throw Exception("Could not open shader file: {}", mAbsoluteSpirvPath);
         }
 
-        size_t size = is.tellg();
-        is.seekg(0, std::ios::beg);
-        char* shaderCode = new char[size];
-        is.read(shaderCode, size);
-        is.close();
-
-        assert(size > 0);
+        size_t fileSize = (size_t)file.tellg();
+        std::vector<char> buffer(fileSize);
+        file.seekg(0);
+        file.read(buffer.data(), static_cast<std::streamsize>(fileSize));
+        file.close();
 
         VkShaderModuleCreateInfo moduleCreateInfo{};
         moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        moduleCreateInfo.codeSize = size;
-        moduleCreateInfo.pCode    = (uint32_t*)shaderCode;
-
+        moduleCreateInfo.codeSize = buffer.size();
+        moduleCreateInfo.pCode    = (uint32_t*)buffer.data();
         vkCreateShaderModule(context->Device, &moduleCreateInfo, NULL, &mShaderModule);
-
-        delete[] shaderCode;
     }
 
 

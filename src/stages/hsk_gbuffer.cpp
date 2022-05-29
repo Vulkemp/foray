@@ -142,15 +142,15 @@ namespace hsk {
             bindings[i].pImmutableSamplers = mBindingInfos[i].pImmutableSamplers;
         }*/
 
-       /* VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        /* VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = bindings.size();
         layoutInfo.pBindings    = bindings.data();*/
 
-        
+
         mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetTextureDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetMaterialUboArrayDescriptorInfo());
-        uint32_t numSets     = 1;
+        uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
@@ -165,7 +165,6 @@ namespace hsk {
     void GBufferStage::setupDescriptorSet()
     {
 
-       
 
         std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
@@ -228,29 +227,35 @@ namespace hsk {
         AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {
+            .sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
             .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
             .primitiveRestartEnable = false,
         };
 
         VkPipelineRasterizationStateCreateInfo rasterizationState = {
+            .sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
             .polygonMode = VK_POLYGON_MODE_FILL,
             .cullMode    = VK_CULL_MODE_BACK_BIT,
             .frontFace   = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+            .lineWidth   = 1.0f,
         };
 
         VkPipelineColorBlendAttachmentState blendAttachmentState = {.blendEnable = false};
         VkPipelineColorBlendStateCreateInfo colorBlendState      = {
-                 .attachmentCount = 1,
-                 .pAttachments    = &blendAttachmentState,
+            .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+            .attachmentCount = 1,
+            .pAttachments    = &blendAttachmentState,
         };
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState = {
+            .sType            = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
             .depthTestEnable  = true,
             .depthWriteEnable = true,
             .depthCompareOp   = VK_COMPARE_OP_LESS_OR_EQUAL,
         };
 
         VkPipelineViewportStateCreateInfo viewportState = {
+            .sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
             .viewportCount = 1,
             .pViewports    = nullptr,
             .scissorCount  = 1,
@@ -258,22 +263,29 @@ namespace hsk {
         };
 
 
-        VkPipelineMultisampleStateCreateInfo multisampleState = {.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT};
+        VkPipelineMultisampleStateCreateInfo multisampleState = {.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO, .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT};
 
-        std::vector<VkDynamicState>          dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
-        VkPipelineDynamicStateCreateInfo     dynamicState = {.dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size()), .pDynamicStates = dynamicStateEnables.data()};
+        std::vector<VkDynamicState> dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+
+
+        VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+                                                                   .dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size()),
+                                                                   .pDynamicStates    = dynamicStateEnables.data()};
+
         VkPipelineVertexInputStateCreateInfo vertexInputState = {};
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = ShaderModule(mContext, "hsk_rt_rpf/src/shaders/gbuffer_stage.vert");
+        auto vertShaderModule      = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.vert.spv");
+        vertShaderStageInfo.module = vertShaderModule;
         vertShaderStageInfo.pName  = "main";
 
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = ShaderModule(mContext, "hsk_rt_rpf/src/shaders/gbuffer_stage.frag");
+        auto fragShaderModule      = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.frag.spv");
+        fragShaderStageInfo.module = fragShaderModule;
         fragShaderStageInfo.pName  = "main";
 
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages = {vertShaderStageInfo, fragShaderStageInfo};
@@ -288,15 +300,16 @@ namespace hsk {
         vertexInputStateBuilder.Build();
 
         VkGraphicsPipelineCreateInfo pipelineCI = {};
+        pipelineCI.sType                        = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineCI.layout                       = mPipelineLayout;
-        pipelineCI.renderPass                   = mRenderpass;
+        pipelineCI.renderPass                   = mRenderpass; // TODO: create renderpass
         pipelineCI.pInputAssemblyState          = &inputAssemblyState;
         pipelineCI.pRasterizationState          = &rasterizationState;
         pipelineCI.pColorBlendState             = &colorBlendState;
         pipelineCI.pMultisampleState            = &multisampleState;
         pipelineCI.pViewportState               = &viewportState;
         pipelineCI.pDepthStencilState           = &depthStencilState;
-        pipelineCI.pDynamicState                = &dynamicState;
+        pipelineCI.pDynamicState                = &dynamicStateCreateInfo;
         pipelineCI.stageCount                   = shaderStages.size();
         pipelineCI.pStages                      = shaderStages.data();
         pipelineCI.pVertexInputState            = &vertexInputStateBuilder.InputStateCI;

@@ -7,7 +7,7 @@ namespace hsk {
     {
         if(!location.has_value())
         {
-            location.value() = NextLocation;
+            location = NextLocation;
             NextLocation++;
         }
         Components.push_back(VertexComponentBinding{component, location.value()});

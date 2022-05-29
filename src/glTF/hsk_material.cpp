@@ -88,8 +88,8 @@ namespace hsk {
     void MaterialBuffer::CreateBuffer()
     {
         VmaAllocationCreateInfo allocInfo{};
-        allocInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        mBuffer.Init(Context()->Allocator, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, allocInfo, mBufferCapacity);
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        mBuffer.Init(Context()->Allocator, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, mBufferCapacity);
     }
     void MaterialBuffer::UpdateBuffer()
     {
