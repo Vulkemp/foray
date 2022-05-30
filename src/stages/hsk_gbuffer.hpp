@@ -25,6 +25,9 @@ namespace hsk {
         virtual void Destroy();
 
       protected:
+        const uint32_t mAttachmentCountColor = 5;
+        const uint32_t mAttachmentCountDepth = 1;
+
         Scene* mScene;
 
         virtual void InitFixedSizeComponents();

@@ -54,13 +54,13 @@ namespace hsk {
     void GBufferStage::PrepareRenderpass()
     {
         // Formatting attachment data into VkAttachmentDescription structs
-        const uint32_t          ATTACHMENT_COUNT_COLOR                   = 5;
-        const uint32_t          ATTACHMENT_COUNT_DEPTH                   = 1;
-        const uint32_t          ATTACHMENT_COUNT                         = ATTACHMENT_COUNT_COLOR + ATTACHMENT_COUNT_DEPTH;
-        VkAttachmentDescription attachmentDescriptions[ATTACHMENT_COUNT] = {};
-        ManagedImage*           attachments[] = {&mPositionAttachment, &mNormalAttachment, &mAlbedoAttachment, &mMotionAttachment, &mMeshIdAttachment, &mDepthAttachment};
 
-        for(uint32_t i = 0; i < ATTACHMENT_COUNT; i++)
+        std::vector<VkAttachmentDescription> attachmentDescriptions = {};
+        const uint32_t                       attachmentCount        = mAttachmentCountColor + mAttachmentCountDepth;
+        attachmentDescriptions.resize(attachmentCount);
+        ManagedImage* attachments[] = {&mPositionAttachment, &mNormalAttachment, &mAlbedoAttachment, &mMotionAttachment, &mMeshIdAttachment, &mDepthAttachment};
+
+        for(uint32_t i = 0; i < attachmentCount; i++)
         {
             attachmentDescriptions[i].samples        = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
             attachmentDescriptions[i].loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -73,26 +73,28 @@ namespace hsk {
         }
 
         // The depth attachment needs a different layout
-        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachmentDescriptions[mAttachmentCountColor].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachmentDescriptions[mAttachmentCountColor].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         // Preparing attachment reference structs
-        VkAttachmentReference attachmentReferences_Color[ATTACHMENT_COUNT_COLOR] = {};
-        for(uint32_t i = 0; i < ATTACHMENT_COUNT_COLOR; i++)
+        std::vector<VkAttachmentReference> attachmentReferences_Color = {};
+        attachmentReferences_Color.resize(mAttachmentCountColor);
+        for(uint32_t i = 0; i < mAttachmentCountColor; i++)
         {
             // Assign incremental ids
             attachmentReferences_Color[i] = VkAttachmentReference{i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
         }
 
         // the depth attachment gets the final id (one higher than the highest color attachment id)
-        VkAttachmentReference attachmentReference_Depth = {ATTACHMENT_COUNT_COLOR, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        VkAttachmentReference attachmentReference_Depth = {mAttachmentCountColor, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
         // Subpass description
         VkSubpassDescription subpass    = {};
         subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = ATTACHMENT_COUNT_COLOR;
-        subpass.pColorAttachments       = attachmentReferences_Color;
+        subpass.colorAttachmentCount    = mAttachmentCountColor;
+        subpass.pColorAttachments       = attachmentReferences_Color.data();
         subpass.pDepthStencilAttachment = &attachmentReference_Depth;
+
 
         VkSubpassDependency subPassDependencies[2] = {};
         subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
@@ -113,8 +115,8 @@ namespace hsk {
 
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.pAttachments           = attachmentDescriptions;
-        renderPassInfo.attachmentCount        = static_cast<uint32_t>(ATTACHMENT_COUNT);
+        renderPassInfo.pAttachments           = attachmentDescriptions.data();
+        renderPassInfo.attachmentCount        = static_cast<uint32_t>(attachmentCount);
         renderPassInfo.subpassCount           = 1;
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
@@ -122,15 +124,15 @@ namespace hsk {
 
         AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
-        VkImageView attachmentViews[ATTACHMENT_COUNT] = {mPositionAttachment.GetImageView(), mNormalAttachment.GetImageView(), mAlbedoAttachment.GetImageView(),
-                                                         mMotionAttachment.GetImageView(),   mMeshIdAttachment.GetImageView(), mDepthAttachment.GetImageView()};
+        std::vector<VkImageView> attachmentViews = {mPositionAttachment.GetImageView(), mNormalAttachment.GetImageView(), mAlbedoAttachment.GetImageView(),
+                                                    mMotionAttachment.GetImageView(),   mMeshIdAttachment.GetImageView(), mDepthAttachment.GetImageView()};
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         fbufCreateInfo.pNext                   = NULL;
         fbufCreateInfo.renderPass              = mRenderpass;
-        fbufCreateInfo.pAttachments            = attachmentViews;
-        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(ATTACHMENT_COUNT);
+        fbufCreateInfo.pAttachments            = attachmentViews.data();
+        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentCount);
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
         fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
         fbufCreateInfo.layers                  = 1;
@@ -223,11 +225,21 @@ namespace hsk {
             .lineWidth   = 1.0f,
         };
 
-        VkPipelineColorBlendAttachmentState blendAttachmentState = {.blendEnable = false};
-        VkPipelineColorBlendStateCreateInfo colorBlendState      = {
+
+        // Blend attachment states required for all color attachments
+        // This is important, as color write mask will otherwise be 0x0 and you
+        // won't see anything rendered to the attachment
+        std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = {};
+        blendAttachmentStates.resize(mAttachmentCountColor);
+        for(int i = 0; i < mAttachmentCountColor; i++)
+        {
+            blendAttachmentStates[i].blendEnable = false;
+        }
+
+        VkPipelineColorBlendStateCreateInfo colorBlendState = {
             .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-            .attachmentCount = 1,
-            .pAttachments    = &blendAttachmentState,
+            .attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size()),
+            .pAttachments    = blendAttachmentStates.data(),
         };
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState = {
@@ -296,20 +308,6 @@ namespace hsk {
         pipelineCI.stageCount                   = shaderStages.size();
         pipelineCI.pStages                      = shaderStages.data();
         pipelineCI.pVertexInputState            = &vertexInputStateBuilder.InputStateCI;
-
-
-        // TODO: count attachments and do this right
-        // Blend attachment states required for all color attachments
-        // This is important, as color write mask will otherwise be 0x0 and you
-        // won't see anything rendered to the attachment
-        //std::array<VkPipelineColorBlendAttachmentState, 5> blendAttachmentStates = {vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE),
-        //                                                                            vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE)};
-
-        /* colorBlendState.attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size());
-        colorBlendState.pAttachments    = blendAttachmentStates.data();*/
 
         AssertVkResult(vkCreateGraphicsPipelines(mContext->Device, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
     }

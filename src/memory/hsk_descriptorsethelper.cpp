@@ -96,6 +96,7 @@ namespace hsk {
                     uint32_t index = numBufferInfos > 1 ? setIndex : 0;
                     descriptorWrite.descriptorCount = descriptorLocation.Descriptor->BufferInfos[index].size();
                     descriptorWrite.pBufferInfo = descriptorLocation.Descriptor->BufferInfos[index].data();
+                    descriptorWrites.push_back(descriptorWrite);
                     continue;
                 }
 
@@ -107,9 +108,10 @@ namespace hsk {
                     descriptorWrite.descriptorCount = descriptorLocation.Descriptor->ImageInfos[index].size();
                     descriptorWrite.pImageInfo     = descriptorLocation.Descriptor->ImageInfos[index].data();
                 }
+                descriptorWrites.push_back(descriptorWrite);
             }
         }
-        vkUpdateDescriptorSets(context->Device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(context->Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         return mDescriptorSetLayout;
     }
 }  // namespace hsk
