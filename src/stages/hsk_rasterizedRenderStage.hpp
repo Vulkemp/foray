@@ -1,5 +1,5 @@
 #pragma once
-#include "../memory/hsk_intermediateImage.hpp"
+#include "../memory/hsk_managedimage.hpp"
 #include "hsk_renderstage.hpp"
 
 namespace hsk {

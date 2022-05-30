@@ -5,26 +5,22 @@
 #include "../base/hsk_vkcontext.hpp"
 
 namespace hsk {
-    class IntermediateImage : public NoMoveDefaults
+    class ManagedImage : public NoMoveDefaults
     {
       public:
-        inline IntermediateImage() {}
-        inline ~IntermediateImage() { Destroy(); }
+        inline ManagedImage() {}
+        inline ~ManagedImage() { Destroy(); }
 
         struct CreateInfo
         {
             VkImageCreateInfo       ImageCI{};
+            VkImageViewCreateInfo   ImageViewCI{};
             VmaAllocationCreateInfo AllocCI{};
 
             CreateInfo();
         };
 
-        inline virtual void Init(const VkContext* context, const CreateInfo& createInfo)
-        {
-            mContext = context;
-            Init(createInfo);
-        }
-        virtual void Init(const CreateInfo& createInfo);
+        virtual void Create(const VkContext* context, const CreateInfo& createInfo);
 
 
         /// @brief When doing a layout transition, specify the transition parameters.
@@ -67,6 +63,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Allocation)
         HSK_PROPERTY_CGET(AllocInfo)
         HSK_PROPERTY_CGET(Format)
+        HSK_PROPERTY_CGET(Extent3D)
 
       protected:
         const VkContext*  mContext{};
@@ -76,5 +73,6 @@ namespace hsk {
         VkFormat          mFormat{};
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocInfo{};
+        VkExtent3D        mExtent3D{};
     };
 }  // namespace hsk

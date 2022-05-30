@@ -1,6 +1,7 @@
 #include "hsk_managedbuffer.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
+#include "hsk_vmaHelpers.hpp"
 
 namespace hsk {
 
@@ -26,6 +27,14 @@ namespace hsk {
         mIsMapped = false;
     }
 
+    void ManagedBuffer::MapAndWrite(void* data, size_t size)
+    {
+        void* mappedPtr;
+        AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &data));
+        memcpy(mappedPtr, data, size);
+        vmaUnmapMemory(mContext->Allocator, mAllocation);
+    }
+
     void ManagedBuffer::Destroy()
     {
         if(mIsMapped)
@@ -42,34 +51,23 @@ namespace hsk {
         UpdateDescriptorInfo(0);
     }
 
-    void ManagedBuffer::WriteDataDeviceLocal(void* data, size_t size, size_t offset)
+    void ManagedBuffer::WriteDataDeviceLocal(void* data, size_t size, size_t offsetDstBuffer)
     {
-        Assert(size + offset < mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
+        Assert(size + offsetDstBuffer < mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
         ManagedBuffer           stagingBuffer;
-        ManagedBufferCreateInfo createInfo;
-        createInfo.Context                = mContext;
-        createInfo.BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        createInfo.BufferCreateInfo.size  = mAllocationInfo.size;  // size of staging buffer can only be as big as the allocation
-        createInfo.BufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-        createInfo.AllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        createInfo.AllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-
-        stagingBuffer.Create(createInfo);
-
+        VmaHelpers::CreateStagingBuffer(&stagingBuffer, mContext, data, size);
 
         SingleTimeCommandBuffer singleTimeCmdBuf;
         VkCommandBuffer         commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copy{};
-        copy.srcOffset = offset;
-        copy.dstOffset = offset;
+        copy.srcOffset = 0;
+        copy.dstOffset = offsetDstBuffer;
         copy.size      = size;
 
         vkCmdCopyBuffer(commandBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
         singleTimeCmdBuf.Flush();
-
     }
 
     void ManagedBuffer::UpdateDescriptorInfo(VkDeviceSize size)

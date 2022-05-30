@@ -40,7 +40,7 @@ namespace hsk {
         const uint32_t          ATTACHMENT_COUNT_DEPTH                   = 1;
         const uint32_t          ATTACHMENT_COUNT                         = ATTACHMENT_COUNT_COLOR + ATTACHMENT_COUNT_DEPTH;
         VkAttachmentDescription attachmentDescriptions[ATTACHMENT_COUNT] = {};
-        IntermediateImage*      attachments[] = {mPositionAttachment, mNormalAttachment, mAlbedoAttachment, mMotionAttachment, mMeshIdAttachment, mDepthAttachment};
+        ManagedImage*      attachments[] = {mPositionAttachment, mNormalAttachment, mAlbedoAttachment, mMotionAttachment, mMeshIdAttachment, mDepthAttachment};
 
         for(uint32_t i = 0; i < ATTACHMENT_COUNT; i++)
         {

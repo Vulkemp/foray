@@ -27,6 +27,12 @@ namespace hsk {
         void Map(void*& data);
         void Unmap();
 
+        /// @brief Attempts to 
+        /// - map the buffer
+        /// - write data given in data ptr with given size
+        /// - unmap buffer
+        void MapAndWrite(void* data, size_t size);
+
         inline virtual ~ManagedBuffer()
         {
             if(mAllocation)

@@ -105,7 +105,7 @@ namespace hsk {
         allocInfo.flags                   = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
         VmaAllocation stagingAllocation;
-        VkBuffer      stagingBuffer; // TODO: Images should become the capability to allow staged writing themselfes. see IntermediateImage::WriteDeviceLocalData
+        VkBuffer      stagingBuffer; // TODO: Images should become the capability to allow staged writing themselfes. see ManagedImage::WriteDeviceLocalData
 
         CreateBuffer(Context()->Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &stagingAllocation, bufferSize, &stagingBuffer, buffer);
 

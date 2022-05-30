@@ -3,7 +3,7 @@
 #include "hsk_framerenderinfo.hpp"
 #include "hsk_minimalappbase.hpp"
 #include "hsk_shadercompiler.hpp"
-#include "../memory/hsk_intermediateImage.hpp"
+#include "../memory/hsk_managedimage.hpp"
 #include <vma/vk_mem_alloc.h>
 #include "hsk_vkcontext.hpp"
 
@@ -136,7 +136,7 @@ namespace hsk {
         VmaAllocator mAllocator{};
 
         /// @brief Points to the image thats to be copied into the swapchain image during rendering.
-        IntermediateImage* mSwapchainCopySourceImage{};
+        ManagedImage* mSwapchainCopySourceImage{};
 
 #pragma endregion
     };

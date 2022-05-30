@@ -1,7 +1,7 @@
 #include "hsk_defaultappbase.hpp"
 #include "../hsk_env.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../memory/hsk_intermediateImage.hpp"
+#include "../memory/hsk_managedimage.hpp"
 #include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
@@ -409,7 +409,7 @@ namespace hsk {
             vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
                                  nullptr, 0, nullptr, 1, &barrier);
 
-            IntermediateImage::LayoutTransitionInfo layoutTransitionInfo;
+            ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
             layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
             layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
             layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
