@@ -9,6 +9,7 @@ namespace hsk {
 #include <windows.h>
     // https://stackoverflow.com/questions/15435994/how-do-i-open-an-exe-from-another-c-exe
     inline SPV_STR PathToString(const fs::path& path) { return path.wstring(); }
+#endif
 
     void ShaderCompiler::AddSourceDirectory(const std::string& sourceDirectory)
     {
@@ -30,6 +31,7 @@ namespace hsk {
 #endif  // _WIN32
     }
 
+#ifdef _WIN32
     // calls the glslc.exe on windows and passes the shader file path
     // returns false if the compilation failed
     bool ShaderCompiler::CallGlslCompiler(const ShaderFileInfo& shaderFileInfo)
@@ -89,7 +91,7 @@ namespace hsk {
     // returns false if compilation fails
     bool ShaderCompiler::CallGlslCompiler(const ShaderFileInfo& shaderFileInfo)
     {
-        std::string command("/bin/glslc --target-spv=spv1.6 " + PathToString(shaderFileInfo.mSourcePathFull) + " -o " + PathToString(shaderFileInfo.mOutPathFull));
+        std::string command("/bin/glslc --target-spv=spv1.5 " + PathToString(shaderFileInfo.mSourcePathFull) + " -o " + PathToString(shaderFileInfo.mOutPathFull));
         int         returnvalue = std::system(command.c_str());
         return returnvalue == 0;
     }

@@ -38,7 +38,7 @@ namespace hsk {
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-        VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 0};
+        VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 1};
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
 
@@ -132,7 +132,7 @@ namespace hsk {
         fbufCreateInfo.pAttachments            = attachmentViews;
         fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(ATTACHMENT_COUNT);
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
-        fbufCreateInfo.height                  = mContext->Swapchain.extent.width;
+        fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
         fbufCreateInfo.layers                  = 1;
         AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
