@@ -151,8 +151,8 @@ namespace hsk {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetTextureDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetMaterialUboArrayDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetMaterialUboArrayDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetTextureDescriptorInfo());
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 

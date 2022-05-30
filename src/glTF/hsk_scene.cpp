@@ -43,7 +43,7 @@ namespace hsk {
         descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
         descriptorInfo->pImmutableSamplers = nullptr;
         descriptorInfo->DescriptorCount    = numMaterials;
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 
         size_t numSets = 1;
         descriptorInfo->BufferInfos.resize(numSets);
