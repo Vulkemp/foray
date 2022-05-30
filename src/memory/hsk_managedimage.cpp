@@ -78,17 +78,14 @@ namespace hsk {
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     }
 
-    void ManagedImage::WriteDeviceLocalData(void* data, size_t size)
+    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
         VmaHelpers::CreateStagingBuffer(&stagingBuffer, mContext, data, size);
 
         // transform image layout to write dst
-        auto                 oldLayout = mImageLayout;
-        LayoutTransitionInfo transitionInfo{};
-        transitionInfo.NewImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        TransitionLayout(transitionInfo);
+        TransitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         // specify copy region
         VkBufferImageCopy region{};
@@ -102,13 +99,14 @@ namespace hsk {
         region.imageOffset = {0, 0, 0};
         region.imageExtent = mExtent3D;
 
-        // copy
+        // copy staging buffer data into device local memory
         SingleTimeCommandBuffer singleTimeCmdBuf;
         singleTimeCmdBuf.Create(mContext);
         vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
         singleTimeCmdBuf.Flush(true);
 
-        // reverse image layout
+        // reset image layout
+        TransitionLayout(layoutAfterWrite);
 
     }
 
