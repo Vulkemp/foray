@@ -122,13 +122,13 @@ namespace hsk {
             switch(messageSeverity)
             {
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                    logger()->info("{}", severity, type, pCallbackData->pMessage);
+                    logger()->info("{}", pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                    logger()->info("{}", severity, type, pCallbackData->pMessage);
+                    logger()->info("{}", pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                    logger()->warn("{}", severity, type, pCallbackData->pMessage);
+                    logger()->warn("{}", pCallbackData->pMessage);
                     break;
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                     logger()->error("{}", pCallbackData->pMessage);
