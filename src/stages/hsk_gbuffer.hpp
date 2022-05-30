@@ -1,18 +1,18 @@
 #pragma once
-#include "../glTF/hsk_scene.hpp"
 #include "../base/hsk_vkcontext.hpp"
+#include "../glTF/hsk_scene.hpp"
 #include "hsk_rasterizedRenderStage.hpp"
 
 namespace hsk {
     class GBufferStage : public RasterizedRenderStage
     {
       public:
-        ManagedImage* mPositionAttachment = nullptr;
-        ManagedImage* mNormalAttachment   = nullptr;
-        ManagedImage* mAlbedoAttachment   = nullptr;
-        ManagedImage* mMotionAttachment   = nullptr;
-        ManagedImage* mMeshIdAttachment   = nullptr;
-        ManagedImage* mDepthAttachment    = nullptr;
+        ManagedImage mPositionAttachment;
+        ManagedImage mNormalAttachment;
+        ManagedImage mAlbedoAttachment;
+        ManagedImage mMotionAttachment;
+        ManagedImage mMeshIdAttachment;
+        ManagedImage mDepthAttachment;
 
         VkDescriptorSet mDescriptorSetAttachments = nullptr;
         VkDescriptorSet mDescriptorSetScene       = nullptr;

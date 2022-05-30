@@ -9,8 +9,8 @@ namespace hsk {
       public:
         struct ManagedBufferCreateInfo
         {
-            VmaAllocationCreateInfo AllocationCreateInfo;
-            VkBufferCreateInfo      BufferCreateInfo;
+            VmaAllocationCreateInfo AllocationCreateInfo{};
+            VkBufferCreateInfo      BufferCreateInfo{};
 
             ManagedBufferCreateInfo();
         };

@@ -11,7 +11,7 @@ namespace hsk {
         ImageViewCI.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     }
 
-    void ManagedImage::Create(const VkContext* context, const CreateInfo& createInfo)
+    void ManagedImage::Create(const VkContext* context, CreateInfo& createInfo)
     {
         mContext = context;
 
@@ -19,9 +19,47 @@ namespace hsk {
         mFormat   = createInfo.ImageCI.format;
         mExtent3D = createInfo.ImageCI.extent;
 
-        // create image and view
-        vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo);
-        vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView);
+        // create image
+        AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
+
+        // update image in image view create info
+        createInfo.ImageViewCI.image = mImage;
+        AssertVkResult(vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView));
+    }
+
+    void ManagedImage::Create(const VkContext*         context,
+                              VmaMemoryUsage           memoryUsage,
+                              VmaAllocationCreateFlags flags,
+                              VkExtent3D               extent,
+                              VkImageUsageFlags        usage,
+                              VkFormat                 format,
+                              VkImageLayout            initialLayout,
+        VkImageAspectFlags aspectMask)
+    {
+        CreateInfo createInfo;
+        createInfo.AllocCI.flags = flags;
+        createInfo.AllocCI.usage = memoryUsage;
+
+        createInfo.ImageCI.imageType     = VK_IMAGE_TYPE_2D;
+        createInfo.ImageCI.format        = format;
+        createInfo.ImageCI.extent        = extent;
+        createInfo.ImageCI.mipLevels     = 1;
+        createInfo.ImageCI.arrayLayers   = 1;
+        createInfo.ImageCI.samples       = VK_SAMPLE_COUNT_1_BIT;
+        createInfo.ImageCI.tiling        = VK_IMAGE_TILING_OPTIMAL;
+        createInfo.ImageCI.usage         = usage;
+        createInfo.ImageCI.initialLayout = initialLayout;
+
+        createInfo.ImageViewCI.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.ImageViewCI.format                          = format;
+        createInfo.ImageViewCI.subresourceRange                = {};
+        createInfo.ImageViewCI.subresourceRange.aspectMask     = aspectMask;
+        createInfo.ImageViewCI.subresourceRange.baseMipLevel   = 0;
+        createInfo.ImageViewCI.subresourceRange.levelCount     = 1;
+        createInfo.ImageViewCI.subresourceRange.baseArrayLayer = 0;
+        createInfo.ImageViewCI.subresourceRange.layerCount     = 1;
+
+        Create(context, createInfo);
     }
 
 
@@ -82,7 +120,7 @@ namespace hsk {
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
-        VmaHelpers::CreateStagingBuffer(&stagingBuffer, mContext, data, size);
+        stagingBuffer.CreateForStaging(mContext, size, data);
 
         // transform image layout to write dst
         TransitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);

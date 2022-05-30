@@ -186,6 +186,7 @@ namespace hsk {
         mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
 
         mContext.TransferQueue = mDefaultQueue.Queue; // TODO: FIX ME: use a dedicated transfer queue in some cases?
+        mContext.QueueGraphics = mDefaultQueue.Queue;
     }
 
     void DefaultAppBase::BaseInitCommandPool()

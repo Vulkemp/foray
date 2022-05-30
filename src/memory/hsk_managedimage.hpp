@@ -20,8 +20,16 @@ namespace hsk {
             CreateInfo();
         };
 
-        virtual void Create(const VkContext* context, const CreateInfo& createInfo);
+        virtual void Create(const VkContext* context, CreateInfo& createInfo);
 
+        virtual void Create(const VkContext*         context,
+                              VmaMemoryUsage           memoryUsage,
+                              VmaAllocationCreateFlags flags,
+                              VkExtent3D               extent,
+                              VkImageUsageFlags        usage,
+                              VkFormat                 format,
+                              VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                              VkImageAspectFlags       aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
 
         /// @brief When doing a layout transition, specify the transition parameters.
         struct LayoutTransitionInfo

@@ -48,7 +48,7 @@ namespace hsk {
         AssertVkResult(vkCreateFence(mContext->Device, &fenceInfo, nullptr, &fence));
 
         // Submit to the queue
-        AssertVkResult(vkQueueSubmit(mContext->QueueGraphics, 1, &submitInfo, fence)); // TODO: Use graphics queue for all command buffer submits??? seems wrong.
+        AssertVkResult(vkQueueSubmit(mContext->TransferQueue, 1, &submitInfo, fence)); // TODO: Use graphics queue for all command buffer submits??? seems wrong.
         // Wait for the fence to signal that command buffer has finished executing
         AssertVkResult(vkWaitForFences(mContext->Device, 1, &fence, VK_TRUE, 100000000000));
 

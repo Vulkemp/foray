@@ -15,7 +15,6 @@ namespace hsk {
 
         InitResolutionDependentComponents();
         InitFixedSizeComponents();
-       
     }
 
     void GBufferStage::InitFixedSizeComponents()
@@ -31,7 +30,26 @@ namespace hsk {
     }
     void GBufferStage::DestroyResolutionDependentComponents() {}
 
-    void GBufferStage::PrepareAttachments() {}
+    void GBufferStage::PrepareAttachments()
+    {
+        static const VkFormat colorFormat    = VK_FORMAT_R16G16B16A16_SFLOAT;
+        static const VkFormat geometryFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+
+        static const VkImageUsageFlags imageUsageFlags =
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 0};
+        VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        VmaAllocationCreateFlags allocationCreateFlags = 0;
+
+        mPositionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
+        mNormalAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
+        mAlbedoAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
+        mMotionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
+        mMeshIdAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT);
+        mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT);
+    }
 
     void GBufferStage::PrepareRenderpass()
     {
@@ -40,7 +58,7 @@ namespace hsk {
         const uint32_t          ATTACHMENT_COUNT_DEPTH                   = 1;
         const uint32_t          ATTACHMENT_COUNT                         = ATTACHMENT_COUNT_COLOR + ATTACHMENT_COUNT_DEPTH;
         VkAttachmentDescription attachmentDescriptions[ATTACHMENT_COUNT] = {};
-        ManagedImage*      attachments[] = {mPositionAttachment, mNormalAttachment, mAlbedoAttachment, mMotionAttachment, mMeshIdAttachment, mDepthAttachment};
+        ManagedImage*           attachments[] = {&mPositionAttachment, &mNormalAttachment, &mAlbedoAttachment, &mMotionAttachment, &mMeshIdAttachment, &mDepthAttachment};
 
         for(uint32_t i = 0; i < ATTACHMENT_COUNT; i++)
         {
@@ -53,20 +71,21 @@ namespace hsk {
             attachmentDescriptions[i].finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
             attachmentDescriptions[i].format         = attachments[i]->GetFormat();
         }
-        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].finalLayout =
-            VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;  // The depth attachment needs a different layout
-        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
+
+        // The depth attachment needs a different layout
+        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachmentDescriptions[ATTACHMENT_COUNT_COLOR].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         // Preparing attachment reference structs
         VkAttachmentReference attachmentReferences_Color[ATTACHMENT_COUNT_COLOR] = {};
         for(uint32_t i = 0; i < ATTACHMENT_COUNT_COLOR; i++)
         {
-            attachmentReferences_Color[i] = VkAttachmentReference{i, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};  // Assign incremental ids
+            // Assign incremental ids
+            attachmentReferences_Color[i] = VkAttachmentReference{i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
         }
 
-        VkAttachmentReference attachmentReference_Depth = {
-            ATTACHMENT_COUNT_COLOR,
-            VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};  // the depth attachment gets the final id (one higher than the highest color attachment id)
+        // the depth attachment gets the final id (one higher than the highest color attachment id)
+        VkAttachmentReference attachmentReference_Depth = {ATTACHMENT_COUNT_COLOR, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
         // Subpass description
         VkSubpassDescription subpass    = {};
@@ -103,8 +122,8 @@ namespace hsk {
 
         AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
-        VkImageView attachmentViews[ATTACHMENT_COUNT] = {mPositionAttachment->GetImageView(), mNormalAttachment->GetImageView(), mAlbedoAttachment->GetImageView(),
-                                                         mMotionAttachment->GetImageView(),   mMeshIdAttachment->GetImageView(), mDepthAttachment->GetImageView()};
+        VkImageView attachmentViews[ATTACHMENT_COUNT] = {mPositionAttachment.GetImageView(), mNormalAttachment.GetImageView(), mAlbedoAttachment.GetImageView(),
+                                                         mMotionAttachment.GetImageView(),   mMeshIdAttachment.GetImageView(), mDepthAttachment.GetImageView()};
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -266,7 +285,7 @@ namespace hsk {
         VkGraphicsPipelineCreateInfo pipelineCI = {};
         pipelineCI.sType                        = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineCI.layout                       = mPipelineLayout;
-        pipelineCI.renderPass                   = mRenderpass; // TODO: create renderpass
+        pipelineCI.renderPass                   = mRenderpass;
         pipelineCI.pInputAssemblyState          = &inputAssemblyState;
         pipelineCI.pRasterizationState          = &rasterizationState;
         pipelineCI.pColorBlendState             = &colorBlendState;

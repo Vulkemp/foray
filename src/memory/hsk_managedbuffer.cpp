@@ -52,8 +52,8 @@ namespace hsk {
 
     void ManagedBuffer::MapAndWrite(void* data)
     {
-        void* mappedPtr;
-        AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &data));
+        void* mappedPtr = nullptr;
+        AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &mappedPtr));
         memcpy(mappedPtr, data, (size_t)mAllocationInfo.size);
         vmaUnmapMemory(mContext->Allocator, mAllocation);
     }
@@ -65,7 +65,7 @@ namespace hsk {
             logger()->warn("ManagedBuffer::Destroy called before Unmap!");
             Unmap();
         }
-        if(mContext->Allocator && mAllocation)
+        if(mContext && mContext->Allocator && mAllocation)
         {
             vmaDestroyBuffer(mContext->Allocator, mBuffer, mAllocation);
         }

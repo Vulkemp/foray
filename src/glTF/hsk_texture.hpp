@@ -40,8 +40,6 @@ namespace hsk {
         HSK_PROPERTY_CGET(Descriptor);
         HSK_PROPERTY_CGET(Sampler);
 
-
-        Texture();
         Texture(Scene* scene);
 
         void InitFromTinyGltfImage(tinygltf::Image& gltfimage, TextureSampler textureSampler);
