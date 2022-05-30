@@ -5,9 +5,32 @@
 
 namespace hsk {
 
-    void ManagedBuffer::Create(ManagedBufferCreateInfo& createInfo)
+    void ManagedBuffer::Create(const VkContext* context, ManagedBufferCreateInfo& createInfo)
     {
-        mContext = createInfo.Context;
+        mContext = context;
+        vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
+    }
+
+    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, void* data)
+    {
+        Create(context, VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
+                         VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+
+        if(data)
+        {
+            MapAndWrite(data);
+        }
+    }
+
+    void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags)
+    {
+        mContext = context;
+        ManagedBufferCreateInfo createInfo;
+        createInfo.BufferCreateInfo.size      = size;
+        createInfo.BufferCreateInfo.usage     = usage;
+        createInfo.AllocationCreateInfo.usage = memoryUsage;
+        createInfo.AllocationCreateInfo.flags = flags;
+
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
     }
 
@@ -27,11 +50,11 @@ namespace hsk {
         mIsMapped = false;
     }
 
-    void ManagedBuffer::MapAndWrite(void* data, size_t size)
+    void ManagedBuffer::MapAndWrite(void* data)
     {
         void* mappedPtr;
         AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &data));
-        memcpy(mappedPtr, data, size);
+        memcpy(mappedPtr, data, (size_t)mAllocationInfo.size);
         vmaUnmapMemory(mContext->Allocator, mAllocation);
     }
 
@@ -39,7 +62,7 @@ namespace hsk {
     {
         if(mIsMapped)
         {
-            logger()->warn("VmaBuffer::Destroy called before Unmap!");
+            logger()->warn("ManagedBuffer::Destroy called before Unmap!");
             Unmap();
         }
         if(mContext->Allocator && mAllocation)
@@ -51,12 +74,12 @@ namespace hsk {
         UpdateDescriptorInfo(0);
     }
 
-    void ManagedBuffer::WriteDataDeviceLocal(void* data, size_t size, size_t offsetDstBuffer)
+    void ManagedBuffer::WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
         Assert(size + offsetDstBuffer < mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
-        ManagedBuffer           stagingBuffer;
-        VmaHelpers::CreateStagingBuffer(&stagingBuffer, mContext, data, size);
+        ManagedBuffer stagingBuffer;
+        stagingBuffer.CreateForStaging(mContext, size, data);
 
         SingleTimeCommandBuffer singleTimeCmdBuf;
         VkCommandBuffer         commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -78,6 +101,6 @@ namespace hsk {
         mDescriptorInfo.range  = size;
     }
 
-ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }
+    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }
 
 }  // namespace hsk

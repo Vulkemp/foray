@@ -9,7 +9,6 @@ namespace hsk {
       public:
         struct ManagedBufferCreateInfo
         {
-            const VkContext*        Context;
             VmaAllocationCreateInfo AllocationCreateInfo;
             VkBufferCreateInfo      BufferCreateInfo;
 
@@ -19,10 +18,15 @@ namespace hsk {
       public:
         ManagedBuffer() = default;
 
-        void Create(ManagedBufferCreateInfo& createInfo);
+        void Create(const VkContext* context, ManagedBufferCreateInfo& createInfo);
+        /// @brief Creates the buffer with VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT. If data is set, also maps writes and unmaps
+        void CreateForStaging(const VkContext* context, VkDeviceSize size, void* data = nullptr);
+        /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
+        void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {});
+        
         void Destroy();
 
-        void WriteDataDeviceLocal(void* data, size_t size, size_t offset = 0);
+        void WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offset = 0);
 
         void Map(void*& data);
         void Unmap();
@@ -31,7 +35,7 @@ namespace hsk {
         /// - map the buffer
         /// - write data given in data ptr with given size
         /// - unmap buffer
-        void MapAndWrite(void* data, size_t size);
+        void MapAndWrite(void* data);
 
         inline virtual ~ManagedBuffer()
         {

@@ -13,10 +13,6 @@ namespace hsk {
     class VmaHelpers
     {
       public:
-        /// @brief Creates a buffer that that can be mapped and serves as a memory transfer source
-        /// @param outManagedBuffer - 
-        /// @param context - The vk context.
-        static void CreateStagingBuffer(ManagedBuffer* outManagedBuffer, const VkContext* context, void* data, size_t size);
 
         void CreateDeviceLocalBuffer();
     };
