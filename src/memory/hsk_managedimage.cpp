@@ -1,8 +1,8 @@
 #include "hsk_managedimage.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_managedbuffer.hpp"
-#include "hsk_vmaHelpers.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
+#include "hsk_vmaHelpers.hpp"
 
 namespace hsk {
     ManagedImage::CreateInfo::CreateInfo()
@@ -16,7 +16,7 @@ namespace hsk {
         mContext = context;
 
         // extract import image infos
-        mFormat = createInfo.ImageCI.format;
+        mFormat   = createInfo.ImageCI.format;
         mExtent3D = createInfo.ImageCI.extent;
 
         // create image and view
@@ -78,7 +78,7 @@ namespace hsk {
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     }
 
-    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite)
+    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
@@ -87,27 +87,30 @@ namespace hsk {
         // transform image layout to write dst
         TransitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-        // specify copy region
-        VkBufferImageCopy region{};
-        region.bufferOffset      = 0;
-        region.bufferRowLength   = 0;
-        region.bufferImageHeight = 0;
-        region.imageSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-        region.imageSubresource.mipLevel       = 0;
-        region.imageSubresource.baseArrayLayer = 0;
-        region.imageSubresource.layerCount     = 1;
-        region.imageOffset = {0, 0, 0};
-        region.imageExtent = mExtent3D;
-
         // copy staging buffer data into device local memory
         SingleTimeCommandBuffer singleTimeCmdBuf;
         singleTimeCmdBuf.Create(mContext);
-        vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
         singleTimeCmdBuf.Flush(true);
 
         // reset image layout
         TransitionLayout(layoutAfterWrite);
+    }
 
+    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
+    {
+        // specify default copy region
+        VkBufferImageCopy region{};
+        region.bufferOffset                    = 0;
+        region.bufferRowLength                 = 0;
+        region.bufferImageHeight               = 0;
+        region.imageSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel       = 0;
+        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.layerCount     = 1;
+        region.imageOffset                     = {0, 0, 0};
+        region.imageExtent                     = mExtent3D;
+        WriteDeviceLocalData(data, size, layoutAfterWrite, region);
     }
 
     void ManagedImage::Destroy()

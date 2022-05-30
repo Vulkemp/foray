@@ -54,10 +54,14 @@ namespace hsk {
         virtual void TransitionLayout(LayoutTransitionInfo& transitionInfo);
 
         /// @brief Creates a staging buffer, writes staging buffer, transitions image layout to transfer destination optimal,
-        /// copies
-        /// @param data 
-        /// @param size 
-        /// @param layoutAfterWrite 
+        /// copies staging buffer to device local memory, transforms layout back to layoutAfterWrite parameter.
+        /// The functions assumes you are writing the complete image, with n
+        /// @param data - The data to write,
+        /// @param size - Size of the image
+        /// @param layoutAfterWrite - The layout that the image is transitioned to after it has been written.
+        /// @param imageCopy - Specify how exactly the image is copied.
+        void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
+
         void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         virtual void Destroy();
