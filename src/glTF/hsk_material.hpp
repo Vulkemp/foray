@@ -1,5 +1,5 @@
 #pragma once
-#include "../memory/hsk_vmaHelpers.hpp"
+#include "../memory/hsk_managedbuffer.hpp"
 #include "glm/glm.hpp"
 #include "hsk_glTF_declares.hpp"
 #include "hsk_scenecomponent.hpp"

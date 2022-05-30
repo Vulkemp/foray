@@ -7,11 +7,11 @@ namespace hsk {
     class UboInterface
     {
       public:
-        virtual void   Init(bool update = false) = 0;
-        virtual void   Update()                  = 0;
-        virtual void   Cleanup()                 = 0;
-        virtual size_t SizeOfUbo() const         = 0;
-        virtual void*  UboData()                 = 0;
+        virtual void   Init(const VkContext* context, bool update = false) = 0;
+        virtual void   Update()                                      = 0;
+        virtual void   Cleanup()                                     = 0;
+        virtual size_t SizeOfUbo() const                             = 0;
+        virtual void*  UboData()                                     = 0;
 
         virtual void                 BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const = 0;
         virtual VkWriteDescriptorSet BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const                             = 0;
@@ -37,8 +37,8 @@ namespace hsk {
       public:
         using Ptr = std::shared_ptr<ManagedUbo<T_UBO>>;
 
-		inline ManagedUbo();
-        explicit inline ManagedUbo(VmaAllocator allocator, bool mapPersistent = false);
+        inline ManagedUbo();
+        explicit inline ManagedUbo(bool mapPersistent = false);
         ~ManagedUbo();
 
         HSK_PROPERTY_ALL(Ubo)
@@ -46,19 +46,18 @@ namespace hsk {
         HSK_PROPERTY_CGET(Buffer)
         HSK_PROPERTY_CGET(MapPersistent)
 
-        inline virtual void   Init(bool update = false) override;
+        inline virtual void   Init(const VkContext* context, bool update = false) override;
         inline virtual void   Update() override;
         inline virtual void   Cleanup() override;
         inline virtual size_t SizeOfUbo() const override;
-        inline virtual void* UboData() override { return &mUbo; }
+        inline virtual void*  UboData() override { return &mUbo; }
 
         inline virtual void                 BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const override;
         inline virtual VkWriteDescriptorSet BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const override;
     };
 
     template <typename T_UBO>
-    ManagedUbo<T_UBO>::ManagedUbo(VmaAllocator allocator, bool mapPersistent)
-        : mBuffer(allocator), mUbo(), mMapPersistent(mapPersistent)
+    ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mBuffer(), mUbo(), mMapPersistent(mapPersistent)
     {
     }
 
@@ -69,15 +68,20 @@ namespace hsk {
     }
 
     template <typename T_UBO>
-    void ManagedUbo<T_UBO>::Init(bool update)
+    void ManagedUbo<T_UBO>::Init(const VkContext* context, bool update)
     {
-		Assert(mBuffer.GetAllocator(), "ManagedUbo<>: Allocator needs to be set for Ubo to work!");
 
-        VmaAllocationCreateInfo info = {};
-        info.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        info.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        ManagedBuffer::ManagedBufferCreateInfo bufferCI;
+        
+        bufferCI.AllocationCreateInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        bufferCI.AllocationCreateInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
-        mBuffer.Init(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, info, sizeof(mUbo));
+        bufferCI.BufferCreateInfo.size               = sizeof(T_UBO);
+        bufferCI.BufferCreateInfo.usage              = VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        bufferCI.BufferCreateInfo.sharingMode        = VK_SHARING_MODE_EXCLUSIVE;
+
+
+        mBuffer.Create(bufferCI);
 
         if(update)
         {

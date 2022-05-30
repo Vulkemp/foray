@@ -4,7 +4,8 @@
 namespace hsk {
     void Camera::InitFromTinyGltfCamera(const tinygltf::Camera& camera)
     {
-        mUbo = new ManagedUbo<CameraUboBlock>(Context()->Allocator, true);
+        mUbo = new ManagedUbo<CameraUboBlock>(true);
+        mUbo->Init(Context());
         ViewMat() = glm::identity<glm::mat4>();
         if(camera.type == "perspective")
         {
