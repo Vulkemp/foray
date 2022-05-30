@@ -62,6 +62,8 @@ namespace hsk {
         /// @param imageCopy - Specify how exactly the image is copied.
         void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
 
+        /// @brief See other overload for description. Omits image copy region and assumes a set of default values to write a simple
+        /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         virtual void Destroy();

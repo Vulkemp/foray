@@ -97,7 +97,7 @@ namespace hsk {
         TransitionLayout(layoutAfterWrite);
     }
 
-    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
+    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
         // specify default copy region
         VkBufferImageCopy region{};
