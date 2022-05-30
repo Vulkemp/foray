@@ -36,9 +36,8 @@ layout (location = 0) out vec4 outPosition;			// Fragment position in world spca
 layout (location = 1) out vec4 outNormal;			// Fragment normal in world space
 layout (location = 2) out vec4 outAlbedo;			// Fragment raw albedo
 layout (location = 3) out vec2 outMotion;			// Fragment screenspace motion delta
-layout (location = 4) out int outMaterialIndex; 	// Material Index
-layout (location = 5) out int outMeshId;			// Fragment mesh id
-
+//layout (location = 4) out int outMaterialIndex; 	// Material Index
+layout (location = 4) out int outMeshId;			// Fragment mesh id
 
 
 void main() 

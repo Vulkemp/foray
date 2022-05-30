@@ -2,7 +2,7 @@
 #define MATERIALBUFFER_GLSL
 
 #define MATERIAL_BUFFER_COUNT 4096
-#define TEXTURE_BUFFER_COUNT 4096
+#define TEXTURE_BUFFER_COUNT 3
 
 struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
 {
