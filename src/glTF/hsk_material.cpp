@@ -1,6 +1,6 @@
 #include "hsk_material.hpp"
-#include "../memory/hsk_vmaHelpers.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
+#include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_scene.hpp"
 
 namespace hsk {
@@ -23,7 +23,6 @@ namespace hsk {
         else
         {
             HSK_THROWFMT("Unable to parse alpha mode {}", raw)
-            
         }
     }
 
@@ -45,9 +44,9 @@ namespace hsk {
         MetallicRoughnessTexture = material.pbrMetallicRoughness.metallicRoughnessTexture.index;
 
         // Aux Info
-        EmissiveFactor   = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
-        EmissiveTexture  = material.emissiveTexture.index;
-        NormalTexture    = material.normalTexture.index;
+        EmissiveFactor  = glm::vec3(material.emissiveFactor[0], material.emissiveFactor[1], material.emissiveFactor[2]);
+        EmissiveTexture = material.emissiveTexture.index;
+        NormalTexture   = material.normalTexture.index;
     }
 
     MaterialBufferObject Material::MakeBufferObject()
@@ -89,11 +88,7 @@ namespace hsk {
     void MaterialBuffer::CreateBuffer()
     {
         ManagedBuffer::ManagedBufferCreateInfo createInfo;
-        createInfo.Context = Context();
-        createInfo.AllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        createInfo.BufferCreateInfo.usage     = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        createInfo.BufferCreateInfo.size      = mBufferCapacity;
-        mBuffer.Create(createInfo);
+        mBuffer.Create(Context(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, mBufferCapacity, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     }
     void MaterialBuffer::UpdateBuffer()
     {

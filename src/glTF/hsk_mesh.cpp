@@ -224,7 +224,7 @@ namespace hsk {
             }
             std::unique_ptr<Primitive> newPrimitive =
                 std::make_unique<Primitive>(indexStart, indexCount, vertexCount,
-                                            &(primitive.material > -1 ? Owner()->Materials()[primitive.material] : Owner()->GetFallbackMaterial()));
+                                            primitive.material > -1 ? &(Owner()->Materials()[primitive.material]) : nullptr);
             newPrimitive->setBoundingBox(posMin, posMax);
             mPrimitives.push_back(std::move(newPrimitive));
         }

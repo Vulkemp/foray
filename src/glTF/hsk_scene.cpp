@@ -8,13 +8,6 @@
 #include "hsk_texture.hpp"
 
 namespace hsk {
-    Scene::Scene(VmaAllocator allocator, VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool transferpool, VkQueue transferqueue)
-        : mContext{allocator, device, physicalDevice, transferpool, transferqueue}, mMaterials(this)
-    {
-        mFallbackMaterial                 = {};
-        mFallbackMaterial.BaseColorFactor = glm::vec4(0.7f, 0.f, 0.7f, 1.f);
-    }
-
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTextureDescriptorInfo()
     {
@@ -44,7 +37,7 @@ namespace hsk {
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetMaterialUboArrayDescriptorInfo()
     {
-        size_t numMaterials = 1; // we load the complete ubo buffer as a single ubo buffer.
+        size_t numMaterials = 1;  // we load the complete ubo buffer as a single ubo buffer.
 
         auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -202,55 +195,19 @@ namespace hsk {
         size_t indexBufferSize  = indexBuffer.size() * sizeof(uint32_t);
         // indices.Count           = static_cast<uint32_t>(indexBuffer.size());
 
-        assert(vertexBufferSize > 0);
+        Assert(vertexBufferSize > 0);
 
-        ManagedBuffer vertexStaging, indexStaging;
 
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        allocInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        // Create staging buffers
-        // Vertex data
+        // Create Vertex and Index buffer (and stage + transfer data to device)
 
-        vertexStaging.Init(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, vertexBufferSize, vertexBuffer.data());
-        // createBuffer(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &vertexStaging.allocation, vertexBufferSize, &vertexStaging.buffer, vertexBuffer.data());
-        // Index data
-        if(indexBufferSize > 0)
-        {
-            indexStaging.Init(mContext.Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, indexBufferSize, indexBuffer.data());
-        }
+        vertices.Create(mContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, vertexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        vertices.WriteDataDeviceLocal(vertexBuffer.data(), vertexBufferSize);
 
-        // Create device local buffers
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        // Vertex buffer
-        vertices.Init(mContext.Allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, vertexBufferSize);
         // Index buffer
         if(indexBufferSize > 0)
         {
-            indices.Init(mContext.Allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, allocInfo, indexBufferSize);
-        }
-
-        // Copy from staging buffers
-        VkCommandBuffer copyCmd = CreateCommandBuffer(mContext.Device, mContext.TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-
-        VkBufferCopy copyRegion = {};
-
-        copyRegion.size = vertexBufferSize;
-        vkCmdCopyBuffer(copyCmd, vertexStaging.GetBuffer(), vertices.GetBuffer(), 1, &copyRegion);
-
-        if(indexBufferSize > 0)
-        {
-            copyRegion.size = indexBufferSize;
-            vkCmdCopyBuffer(copyCmd, indexStaging.GetBuffer(), indices.GetBuffer(), 1, &copyRegion);
-        }
-
-        FlushCommandBuffer(mContext.Device, mContext.TransferCommandPool, copyCmd, mContext.TransferQueue, true);
-
-        vertexStaging.Destroy();
-
-        if(indexBufferSize > 0)
-        {
-            indexStaging.Destroy();
+            indices.Create(mContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT| VK_BUFFER_USAGE_TRANSFER_DST_BIT, indexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            indices.WriteDataDeviceLocal(indexBuffer.data(), indexBufferSize);
         }
 
         calculateSceneDimensions();

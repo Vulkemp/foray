@@ -105,9 +105,10 @@ namespace hsk {
         allocInfo.flags                   = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
         VmaAllocation stagingAllocation;
-        VkBuffer      stagingBuffer; // TODO: Images should become the capability to allow staged writing themselfes. see ManagedImage::WriteDeviceLocalData
+        // VkBuffer      stagingBuffer; // TODO: Images should become the capability to allow staged writing themselfes. see ManagedImage::WriteDeviceLocalData
 
-        CreateBuffer(Context()->Allocator, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, allocInfo, &stagingAllocation, bufferSize, &stagingBuffer, buffer);
+        ManagedBuffer stagingBuffer;
+        stagingBuffer.CreateForStaging(Context(), bufferSize, buffer);
 
         VkImageCreateInfo imageCreateInfo{};
         imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -155,7 +156,7 @@ namespace hsk {
         bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
         bufferCopyRegion.imageSubresource.layerCount     = 1;
         bufferCopyRegion.imageExtent                     = mExtent;
-        vkCmdCopyBufferToImage(copyCmd, stagingBuffer, mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferCopyRegion);
+        vkCmdCopyBufferToImage(copyCmd, stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferCopyRegion);
 
         {
             VkImageMemoryBarrier imageMemoryBarrier{};
@@ -170,7 +171,6 @@ namespace hsk {
         }
 
         FlushCommandBuffer(Context()->Device, Context()->TransferCommandPool, copyCmd, Context()->TransferQueue, true);
-        vmaDestroyBuffer(Context()->Allocator, stagingBuffer, stagingAllocation);
 
         // Generate the mip chain (glTF uses jpg and png, so we need to create this manually)
         VkCommandBuffer blitCmd = CreateCommandBuffer(Context()->Device, Context()->TransferCommandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);

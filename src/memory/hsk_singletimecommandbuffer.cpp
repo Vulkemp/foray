@@ -3,7 +3,7 @@
 
 namespace hsk {
 
-    VkCommandBuffer SingleTimeCommandBuffer::Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl, bool begin = false)
+    VkCommandBuffer SingleTimeCommandBuffer::Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
     {
         mContext = context;
         VkCommandBufferAllocateInfo cmdBufAllocateInfo{};

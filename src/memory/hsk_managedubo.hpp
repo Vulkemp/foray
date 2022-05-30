@@ -72,7 +72,7 @@ namespace hsk {
     {
 
         ManagedBuffer::ManagedBufferCreateInfo bufferCI;
-        
+
         bufferCI.AllocationCreateInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         bufferCI.AllocationCreateInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
@@ -81,7 +81,7 @@ namespace hsk {
         bufferCI.BufferCreateInfo.sharingMode        = VK_SHARING_MODE_EXCLUSIVE;
 
 
-        mBuffer.Create(bufferCI);
+        mBuffer.Create(context, bufferCI);
 
         if(update)
         {
