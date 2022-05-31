@@ -2,6 +2,7 @@
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_KHR_vulkan_glsl: enable
 
+/*
 #define BIND_MATERIAL_BUFFER 0
 #define BIND_TEXTURES_BUFFER 1
 // #include "materialbuffer.glsl"
@@ -21,7 +22,22 @@ layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER ) readonly buff
 #endif // SET_TEXTURES_BUFFER
 layout(set = SET_TEXTURES_BUFFER, binding = BIND_TEXTURES_BUFFER ) uniform sampler2D Textures[TEXTURE_BUFFER_COUNT];
 #endif // BIND_TEXTURES_BUFFER
+*/
 
+// TEMP
+struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
+{
+    vec4  BaseColorFactor;                // Base Color / Albedo Factor
+    float MetallicFactor;                 // Metallic Factor
+    vec3  EmissiveFactor;                 // Emissive Factor
+    float RoughnessFactor;                // Roughness Factor
+    int   BaseColorTextureIndex;          // Texture Index for BaseColor
+    int   MetallicRoughnessTextureIndex;  // Texture Index for MetallicRoughness
+    int   EmissiveTextureIndex;           // Texture Index for Emissive
+    int   NormalTextureIndex;             // Texture Index for Normal
+};
+layout(set = 0, binding = 0 ) readonly buffer MaterialBuffer { MaterialBufferObject Array[1]; } Materials;
+layout(set = 0, binding = 1 ) uniform sampler2D Textures[3];
 
 layout (location = 0) in vec3 inWorldPos;			// Vertex position in world space
 layout (location = 1) in vec4 inDevicePos;			// Vertex position in normalized device space (current frame)
@@ -42,6 +58,13 @@ layout (location = 4) out int outMeshId;			// Fragment mesh id
 
 void main() 
 {
+	// TEMP
+	outPosition = vec4(inWorldPos, 1.0);
+	outNormal = vec4(inWorldPos, 1.0);
+	outAlbedo = vec4(inWorldPos, 1.0);
+	outMotion = vec2(1.0, 1.0);
+	outMeshId = inMeshId;
+/*
 	outPosition = vec4(inWorldPos, 1.0);
 
 	// Calculate normal in tangent space
@@ -72,5 +95,6 @@ void main()
    	outMotion = (old_screenPos-screenPos) * 0.5;
 
 	outMeshId = inMeshId;
+	*/
 }
 
