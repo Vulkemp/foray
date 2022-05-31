@@ -9,12 +9,20 @@ namespace hsk {
     {
         mContext = context;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
+        if(mName.length() > 0)
+        {
+            logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
+                           reinterpret_cast<uint64_t>(mBuffer));
+        }
     }
 
     void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, void* data)
     {
+        // if (mName.length() == 0){
+        //     mName = fmt::format("Staging Buffer {0:x}", reinterpret_cast<uint64_t>(data));
+        // }
         Create(context, VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
-                         VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+               VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 
         if(data)
         {
@@ -32,6 +40,11 @@ namespace hsk {
         createInfo.AllocationCreateInfo.flags = flags;
 
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
+        if(mName.length() > 0)
+        {
+            logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
+                           reinterpret_cast<uint64_t>(mBuffer));
+        }
     }
 
     void ManagedBuffer::Map(void*& data)
@@ -68,6 +81,11 @@ namespace hsk {
         if(mContext && mContext->Allocator && mAllocation)
         {
             vmaDestroyBuffer(mContext->Allocator, mBuffer, mAllocation);
+            if(mName.length() > 0)
+            {
+                logger()->debug("ManagedBuffer: Destroy \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
+                               reinterpret_cast<uint64_t>(mBuffer));
+            }
         }
         mBuffer     = nullptr;
         mAllocation = nullptr;

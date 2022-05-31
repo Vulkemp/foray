@@ -45,7 +45,7 @@ namespace hsk {
         // if res = result false, image format with given usage flags is not supported.
         //VkImageFormatProperties props{};
         //auto res = vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, VK_FORMAT_R8G8B8A8_SRGB, VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
-                                                 //imageUsageFlags, 0, &props);
+        //imageUsageFlags, 0, &props);
 
         mPositionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
         mNormalAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
@@ -147,11 +147,37 @@ namespace hsk {
     void GBufferStage::Destroy()
     {
         VkDevice device = mContext->Device;
-        vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-        vkDestroyPipeline(device, mPipeline, nullptr);
-        vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-        vkDestroyRenderPass(device, mRenderpass, nullptr);
-        vkDestroyPipelineCache(device, mPipelineCache, nullptr);
+        mPositionAttachment.Destroy();
+        mNormalAttachment.Destroy();
+        mAlbedoAttachment.Destroy();
+        mMotionAttachment.Destroy();
+        mMeshIdAttachment.Destroy();
+        mDepthAttachment.Destroy();
+        if(mFrameBuffer)
+        {
+            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
+            mFrameBuffer = nullptr;
+        }
+        if(mPipeline)
+        {
+            vkDestroyPipeline(device, mPipeline, nullptr);
+            mPipeline = nullptr;
+        }
+        if(mPipelineLayout)
+        {
+            vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
+            mPipelineLayout = nullptr;
+        }
+        if(mRenderpass)
+        {
+            vkDestroyRenderPass(device, mRenderpass, nullptr);
+            mRenderpass = nullptr;
+        }
+        if(mPipelineCache)
+        {
+            vkDestroyPipelineCache(device, mPipelineCache, nullptr);
+            mPipelineCache = nullptr;
+        }
     }
 
     void GBufferStage::SetupDescriptors()

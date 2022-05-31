@@ -246,6 +246,7 @@ namespace hsk {
         if(mUbo)
         {
             mUbo->Cleanup();
+            mUbo = nullptr;
         }
     }
 

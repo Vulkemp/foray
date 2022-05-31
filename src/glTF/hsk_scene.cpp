@@ -200,12 +200,14 @@ namespace hsk {
 
         // Create Vertex and Index buffer (and stage + transfer data to device)
 
+        vertices.SetName("Vertices");
         vertices.Create(mContext, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, vertexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         vertices.WriteDataDeviceLocal(vertexBuffer.data(), vertexBufferSize);
 
         // Index buffer
         if(indexBufferSize > 0)
         {
+            indices.SetName("Indices");
             indices.Create(mContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT| VK_BUFFER_USAGE_TRANSFER_DST_BIT, indexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             indices.WriteDataDeviceLocal(indexBuffer.data(), indexBufferSize);
         }

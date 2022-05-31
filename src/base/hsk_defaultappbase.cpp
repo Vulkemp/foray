@@ -286,12 +286,14 @@ namespace hsk {
         }
 
         BaseCleanupSwapchain();
+        vmaDestroyAllocator(mAllocator);
         vkb::destroy_device(mDeviceVkb);
         mDeviceVkb = vkb::Device{};
         mDevice    = nullptr;
         vkb::destroy_surface(mInstanceVkb, mSurface);
         mSurface = nullptr;
         mWindow.Destroy();
+        mAllocator = nullptr;
         MinimalAppBase::BaseCleanupVulkan();
     }
 

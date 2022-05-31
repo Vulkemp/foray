@@ -23,7 +23,7 @@ namespace hsk {
         void CreateForStaging(const VkContext* context, VkDeviceSize size, void* data = nullptr);
         /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
         void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {});
-        
+
         void Destroy();
 
         void WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offset = 0);
@@ -31,7 +31,7 @@ namespace hsk {
         void Map(void*& data);
         void Unmap();
 
-        /// @brief Attempts to 
+        /// @brief Attempts to
         /// - map the buffer
         /// - write data given in data ptr with given size
         /// - unmap buffer
@@ -49,9 +49,11 @@ namespace hsk {
         HSK_PROPERTY_CGET(IsMapped);
         HSK_PROPERTY_CGET(DescriptorInfo);
         HSK_PROPERTY_CGET(Allocation);
+        HSK_PROPERTY_ALL(Name);
 
       protected:
         const VkContext*       mContext{};
+        std::string            mName{};
         VkBuffer               mBuffer{};
         VmaAllocation          mAllocation{};
         VmaAllocationInfo      mAllocationInfo{};
