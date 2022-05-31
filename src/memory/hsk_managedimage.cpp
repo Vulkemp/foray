@@ -112,6 +112,8 @@ namespace hsk {
         barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;
         barrier.image               = mImage;
         barrier.subresourceRange    = transitionInfo.SubresourceRange;
+        barrier.srcAccessMask       = transitionInfo.BarrierSrcAccessMask;
+        barrier.dstAccessMask       = transitionInfo.BarrierDstAccessMask;
 
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     }

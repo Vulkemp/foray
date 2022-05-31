@@ -42,6 +42,11 @@ namespace hsk {
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
 
+        // if res = result false, image format with given usage flags is not supported.
+        //VkImageFormatProperties props{};
+        //auto res = vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, VK_FORMAT_R8G8B8A8_SRGB, VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
+                                                 //imageUsageFlags, 0, &props);
+
         mPositionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
         mNormalAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
         mAlbedoAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
@@ -291,7 +296,8 @@ namespace hsk {
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Normal);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Tangent);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MaterialIndex);
+        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MeshId);
         vertexInputStateBuilder.Build();
 
         VkGraphicsPipelineCreateInfo pipelineCI = {};

@@ -399,7 +399,7 @@ namespace hsk {
         if(mSwapchainCopySourceImage)
         {
             // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
-            barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+            /*barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
             barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
             barrier.oldLayout           = mSwapchainCopySourceImage->GetImageLayout();
             barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
@@ -408,7 +408,7 @@ namespace hsk {
             barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
 
             vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
-                                 nullptr, 0, nullptr, 1, &barrier);
+                                 nullptr, 0, nullptr, 1, &barrier);*/
 
             ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
             layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
@@ -418,6 +418,8 @@ namespace hsk {
             layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.SubresourceRange     = range;
+            layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; // TODO: these are wrong most likely
+            layoutTransitionInfo.DstStage             = VK_PIPELINE_STAGE_TRANSFER_BIT;
             mSwapchainCopySourceImage->TransitionLayout(layoutTransitionInfo);
 
 
