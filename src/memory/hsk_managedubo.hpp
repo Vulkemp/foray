@@ -29,7 +29,7 @@ namespace hsk {
     class ManagedUbo : public UboInterface, public NoMoveDefaults
     {
       protected:
-        ManagedBuffer mBuffer        = {};
+        ManagedBuffer mManagedBuffer        = {};
         T_UBO         mUbo           = {};
         void*         mMapped        = nullptr;
         const bool    mMapPersistent = false;
@@ -42,8 +42,8 @@ namespace hsk {
         ~ManagedUbo();
 
         HSK_PROPERTY_ALL(Ubo)
-        HSK_PROPERTY_GET(Buffer)
-        HSK_PROPERTY_CGET(Buffer)
+        HSK_PROPERTY_GET(ManagedBuffer)
+        HSK_PROPERTY_CGET(ManagedBuffer)
         HSK_PROPERTY_CGET(MapPersistent)
 
         inline virtual void   Init(const VkContext* context, bool update = false) override;
@@ -57,7 +57,7 @@ namespace hsk {
     };
 
     template <typename T_UBO>
-    ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mBuffer(), mUbo(), mMapPersistent(mapPersistent)
+    ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mManagedBuffer(), mUbo(), mMapPersistent(mapPersistent)
     {
     }
 
@@ -81,7 +81,7 @@ namespace hsk {
         bufferCI.BufferCreateInfo.sharingMode        = VK_SHARING_MODE_EXCLUSIVE;
 
 
-        mBuffer.Create(context, bufferCI);
+        mManagedBuffer.Create(context, bufferCI);
 
         if(update)
         {
@@ -89,7 +89,7 @@ namespace hsk {
         }
         if(mMapPersistent)
         {
-            mBuffer.Map(mMapped);
+            mManagedBuffer.Map(mMapped);
         }
     }
 
@@ -98,23 +98,23 @@ namespace hsk {
     {
         if(!mMapPersistent)
         {
-            mBuffer.Map(mMapped);
+            mManagedBuffer.Map(mMapped);
         }
         memcpy(mMapped, &mUbo, sizeof(mUbo));
         if(!mMapPersistent)
         {
-            mBuffer.Unmap();
+            mManagedBuffer.Unmap();
         }
     }
 
     template <typename T_UBO>
     inline void ManagedUbo<T_UBO>::Cleanup()
     {
-        if(mBuffer.GetAllocation() && mMapPersistent)
+        if(mManagedBuffer.GetAllocation() && mMapPersistent)
         {
-            mBuffer.Unmap();
+            mManagedBuffer.Unmap();
         }
-        mBuffer.Destroy();
+        mManagedBuffer.Destroy();
     }
     template <typename T_UBO>
     inline size_t ManagedUbo<T_UBO>::SizeOfUbo() const
@@ -128,7 +128,7 @@ namespace hsk {
         dest.dstSet          = descriptorSet;
         dest.descriptorType  = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         dest.dstBinding      = binding;
-        dest.pBufferInfo     = &mBuffer.GetDescriptorInfo();
+        dest.pBufferInfo     = &mManagedBuffer.GetDescriptorInfo();
         dest.descriptorCount = 1;
     }
     template <typename T_UBO>

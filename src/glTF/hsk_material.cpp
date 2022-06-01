@@ -37,7 +37,7 @@ namespace hsk {
 
         // Pbr Base Info
         BaseColorFactor          = glm::vec4(material.pbrMetallicRoughness.baseColorFactor[0], material.pbrMetallicRoughness.baseColorFactor[1],
-                                             material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
+                                    material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
         MetallicFactor           = material.pbrMetallicRoughness.metallicFactor;
         RoughnessFactor          = material.pbrMetallicRoughness.roughnessFactor;
         BaseColorTexture         = material.pbrMetallicRoughness.baseColorTexture.index;
@@ -88,9 +88,9 @@ namespace hsk {
     void MaterialBuffer::CreateBuffer()
     {
         ManagedBuffer::ManagedBufferCreateInfo createInfo;
-        mBuffer.SetName("MaterialBuffer");
-        mBuffer.Create(Context(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, mBufferCapacity,
-                       VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        mManagedBuffer.SetName("MaterialBuffer");
+        mManagedBuffer.Create(Context(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, mBufferCapacity,
+                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     }
     void MaterialBuffer::UpdateBuffer()
     {
@@ -105,13 +105,13 @@ namespace hsk {
         }
 
         // use staging buffer, write buffer array data
-        mBuffer.WriteDataDeviceLocal(mBufferArray.data(), mBufferSize);
+        mManagedBuffer.WriteDataDeviceLocal(mBufferArray.data(), mBufferSize);
     }
-    void MaterialBuffer::DestroyBuffer() { mBuffer.Destroy(); }
+    void MaterialBuffer::DestroyBuffer() { mManagedBuffer.Destroy(); }
     void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)
     {
         VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer                 = mBuffer.GetBuffer();
+        bufferInfo.buffer                 = mManagedBuffer.GetBuffer();
         bufferInfo.offset                 = 0;
         bufferInfo.range                  = mBufferSize;
 

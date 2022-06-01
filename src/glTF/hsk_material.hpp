@@ -49,7 +49,7 @@ namespace hsk {
         glm::vec3 EmissiveFactor  = glm::vec3(1.0f);
         int32_t   EmissiveTexture = -1;
 
-        int32_t NormalTexture    = -1;
+        int32_t NormalTexture = -1;
 
         MaterialBufferObject MakeBufferObject();
     };
@@ -59,7 +59,7 @@ namespace hsk {
     {
       public:
         inline MaterialBuffer() {}
-        inline explicit MaterialBuffer(Scene* scene) : SceneComponent(scene){}
+        inline explicit MaterialBuffer(Scene* scene) : SceneComponent(scene) {}
 
         virtual void InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials);
         virtual void UpdateBuffer();
@@ -69,8 +69,8 @@ namespace hsk {
         HSK_PROPERTY_CGET(MaterialDescriptions)
         HSK_PROPERTY_GET(BufferArray)
         HSK_PROPERTY_CGET(BufferArray)
-        HSK_PROPERTY_GET(Buffer)
-        HSK_PROPERTY_CGET(Buffer)
+        HSK_PROPERTY_GET(ManagedBuffer)
+        HSK_PROPERTY_CGET(ManagedBuffer)
         HSK_PROPERTY_GET(BufferSize)
         HSK_PROPERTY_CGET(BufferSize)
         HSK_PROPERTY_GET(BufferCapacity)
@@ -79,9 +79,9 @@ namespace hsk {
       protected:
         std::vector<Material>             mMaterialDescriptions = {};
         std::vector<MaterialBufferObject> mBufferArray          = {};
-        ManagedBuffer                     mBuffer            = {};
+        ManagedBuffer                     mManagedBuffer        = {};
         VkDeviceSize                      mBufferSize           = {};
-        VkDeviceSize                      mBufferCapacity           = {};
+        VkDeviceSize                      mBufferCapacity       = {};
 
         virtual void CreateBuffer();
         virtual void DestroyBuffer();
