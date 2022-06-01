@@ -54,6 +54,8 @@ namespace hsk {
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTextureDescriptorInfo();
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetMaterialUboArrayDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTransformationMatrixArrayDescriptorInfo();
+        void                                                 CreateTransformationMatrixArray();
 
         void Cleanup();
 
@@ -71,6 +73,8 @@ namespace hsk {
         void Draw(VkCommandBuffer cmdbuffer);
 
         virtual ~Scene();
+
+        HSK_PROPERTY_GET(Cameras);
 
       protected:
         const VkContext*                      mContext                = {};
@@ -105,5 +109,9 @@ namespace hsk {
 
         void updateAnimation(uint32_t index, float time);
         void drawNode(Node* node, VkCommandBuffer commandBuffer);
+
+        /// @brief Matrix array holds a transformation matrix for each node.
+        std::vector<glm::mat4> mTransformationMatrixArray;
+        ManagedBuffer          mTransformationMatrixArrayManagedBuffer;
     };
 }  // namespace hsk

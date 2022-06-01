@@ -16,6 +16,16 @@ layout (location = 5) out vec2 outUV;					// UV coordinates
 layout (location = 6) flat out int outMaterialIndex;	// Material Index
 layout (location = 7) flat out int outMeshId;			// Mesh Id
 
+struct Mx
+{
+	mat4 TransformMat;
+};
+
+layout(set = 0, binding = 2 ) buffer TransformationMatrices
+{
+	Mx matrices[];
+};
+
 void main() 
 {
 	mat4 ProjMat;
@@ -27,7 +37,8 @@ void main()
 
 	// Get transformations out of the way
 	outWorldPos = inPos;
-	outDevicePos = ProjMat * ViewMat * vec4(inPos, 1.f);
+	//outDevicePos = ProjMat * ViewMat * vec4(inPos, 1.f);
+	outDevicePos = vec4(inPos, 1.f) + vec4(0.0,0.1,0.0,0);
 	gl_Position = outDevicePos;
 	outOldDevicePos = ProjMatPrev * ViewMatPrev * vec4(inPos, 1.f);
 

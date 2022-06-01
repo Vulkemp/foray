@@ -87,6 +87,7 @@ namespace hsk {
 
             mDeviceFeatures.bdafeatures.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
             mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
+           
 
 #ifndef DISABLE_RT_EXTENSIONS
 
@@ -103,6 +104,7 @@ namespace hsk {
 
             mDeviceFeatures.difeatures.sType                                     = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
             mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+            mDeviceFeatures.difeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
             deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
 
             // This currently causes a segfault, so commented out for the time being

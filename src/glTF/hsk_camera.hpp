@@ -7,6 +7,7 @@
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 #include <memory>
+#include "../memory/hsk_descriptorsethelper.hpp"
 
 
 namespace hsk {
@@ -38,6 +39,11 @@ namespace hsk {
             return mUbo->GetUbo().ProjectionMat;
         }
         inline glm::mat4& ViewMat() { return mUbo->GetUbo().ViewMat; }
+
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo();
+
+        void InitDefaultViewMatrix();
+        void InitDefaultProjectionMatrix();
 
       protected:
 

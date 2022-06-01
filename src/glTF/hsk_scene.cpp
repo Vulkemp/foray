@@ -53,9 +53,35 @@ namespace hsk {
             descriptorInfo->BufferInfos[setIndex].resize(numMaterials);
             for(size_t i = 0; i < numMaterials; i++)
             {
-                descriptorInfo->BufferInfos[setIndex][i].buffer = mMaterials.GetBuffer().GetBuffer();
+                descriptorInfo->BufferInfos[setIndex][i].buffer = mMaterials.GetManagedBuffer().GetBuffer();
                 descriptorInfo->BufferInfos[setIndex][i].offset = 0;
                 descriptorInfo->BufferInfos[setIndex][i].range  = mMaterials.GetBufferSize();
+            }
+        }
+        return descriptorInfo;
+    }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTransformationMatrixArrayDescriptorInfo()
+    {
+        size_t numMatrices = mTransformationMatrixArray.size();  // we load the complete ubo buffer as a single ubo buffer.
+
+        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_VERTEX_BIT;
+        descriptorInfo->pImmutableSamplers = nullptr;
+        descriptorInfo->DescriptorCount    = numMatrices;
+        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+        size_t numSets = 1;
+        descriptorInfo->BufferInfos.resize(numSets);
+
+        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
+        {
+            descriptorInfo->BufferInfos[setIndex].resize(numMatrices);
+            for(size_t i = 0; i < numMatrices; i++)
+            {
+                descriptorInfo->BufferInfos[setIndex][i].buffer = mTransformationMatrixArrayManagedBuffer.GetBuffer();
+                descriptorInfo->BufferInfos[setIndex][i].offset = i * sizeof(glm::mat4);
+                descriptorInfo->BufferInfos[setIndex][i].range  = sizeof(glm::mat4);
             }
         }
         return descriptorInfo;
@@ -348,6 +374,33 @@ namespace hsk {
         {
             calculateBoundingBox(child, node);
         }
+    }
+
+    void Scene::CreateTransformationMatrixArray() {
+
+        // TODO: first optimazation would be to resize the vector before traversing all nodes.
+        // Secondly, it would be better if all Matrices would be stored in one big array and the Node
+        // only stores a pointer into that array. Like this no copy has to be performed.
+        // Different approach: A node stores its own matrix and an index, into where in the vulkan buffer it has to update its memory.
+        // Need support for memory flushes of a region.
+        // Appr3. Use dynamic descriptor binds.
+
+        // for static scenes, this is fine.
+        auto matrixArrayPtr = &mTransformationMatrixArray;
+        std::function<void(Node*)> traverseNode   = [&traverseNode, matrixArrayPtr](Node* node) {
+            matrixArrayPtr->push_back(node->getMatrix());
+            for(auto& child : node->GetChildren())
+            {
+                traverseNode(child);
+            }
+        };
+        traverseNode(mNodesHierarchy.at(0));
+
+        VkDeviceSize deviceSize = mTransformationMatrixArray.size() * sizeof(glm::mat4);
+        mTransformationMatrixArrayManagedBuffer.Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, deviceSize,
+                                                       VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+
+        mTransformationMatrixArrayManagedBuffer.MapAndWrite(mTransformationMatrixArray.data());
     }
 
     void Scene::updateAnimation(uint32_t index, float time)

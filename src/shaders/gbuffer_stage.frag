@@ -37,7 +37,7 @@ struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be 
     int   NormalTextureIndex;             // Texture Index for Normal
 };
 layout(set = 0, binding = 0 ) readonly buffer MaterialBuffer { MaterialBufferObject Array[1]; } Materials;
-layout(set = 0, binding = 1 ) uniform sampler2D Textures[3];
+layout(set = 0, binding = 1 ) uniform sampler2D Textures[];
 
 layout (location = 0) in vec3 inWorldPos;			// Vertex position in world space
 layout (location = 1) in vec4 inDevicePos;			// Vertex position in normalized device space (current frame)
@@ -59,10 +59,10 @@ layout (location = 4) out int outMeshId;			// Fragment mesh id
 void main() 
 {
 	// TEMP
-	outPosition = vec4(inWorldPos, 1.0);
-	outNormal = vec4(inWorldPos, 1.0);
-	outAlbedo = vec4(inWorldPos, 1.0);
-	outMotion = vec2(1.0, 1.0);
+	outPosition = vec4(1,1,1.0f, 1.0);
+	outNormal = vec4(1,1,1.0f, 1.0);
+	outAlbedo = vec4(1,1,1.0f, 1.0);
+	outMotion = vec2(0.5, 1.0);
 	outMeshId = inMeshId;
 /*
 	outPosition = vec4(inWorldPos, 1.0);

@@ -185,6 +185,20 @@ namespace hsk {
     {
         mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetMaterialUboArrayDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetTextureDescriptorInfo());
+
+        //if(mScene->GetCameras().size() != 0)
+        //{
+
+        //    mDescriptorSet.SetDescriptorInfoAt(2, [0] -> GetUboDescriptorInfo());  // Assumes only one camera & always the first
+        //}
+        //else
+        //{
+        //    auto camera = new Camera(mScene);
+        //}
+
+        mScene->CreateTransformationMatrixArray(); // TODO: this shouldnt happen here & needs a refacture either way
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetTransformationMatrixArrayDescriptorInfo());
+
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 
@@ -252,7 +266,7 @@ namespace hsk {
         VkPipelineRasterizationStateCreateInfo rasterizationState = {
             .sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
             .polygonMode = VK_POLYGON_MODE_FILL,
-            .cullMode    = VK_CULL_MODE_BACK_BIT,
+            .cullMode    = VK_CULL_MODE_NONE,
             .frontFace   = VK_FRONT_FACE_COUNTER_CLOCKWISE,
             .lineWidth   = 1.0f,
         };
