@@ -429,9 +429,9 @@ namespace hsk {
             layers.aspectMask               = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
             layers.mipLevel                 = 0;
             layers.baseArrayLayer           = 0;
-            layers.layerCount               = VK_REMAINING_ARRAY_LAYERS;
+            layers.layerCount               = 1;
 
-            VkImageBlit2 blitRegion   = {.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_BLIT_2};
+            VkImageBlit blitRegion   = {};
             blitRegion.srcSubresource = layers;
             blitRegion.srcOffsets[0]  = {};
             blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
@@ -439,15 +439,18 @@ namespace hsk {
             blitRegion.dstOffsets[0]  = {};
             blitRegion.dstOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
 
-            VkBlitImageInfo2 blitInfo = {.sType = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2};
-            blitInfo.srcImage         = mSwapchainCopySourceImage->GetImage();
-            blitInfo.srcImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            blitInfo.dstImage         = mSwapchainImages[swapChainImageIndex].Image;
-            blitInfo.dstImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            blitInfo.regionCount      = 1;
-            blitInfo.pRegions         = &blitRegion;
-            blitInfo.filter           = VkFilter::VK_FILTER_NEAREST;
-            vkCmdBlitImage2(currentFrame.CommandBuffer, &blitInfo);
+            // VkBlitImageInfo2 blitInfo = {.sType = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2_KHR};
+            // blitInfo.srcImage         = mSwapchainCopySourceImage->GetImage();
+            // blitInfo.srcImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            // blitInfo.dstImage         = mSwapchainImages[swapChainImageIndex].Image;
+            // blitInfo.dstImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            // blitInfo.regionCount      = 1;
+            // blitInfo.pRegions         = &blitRegion;
+            // blitInfo.filter           = VkFilter::VK_FILTER_NEAREST;
+            vkCmdBlitImage(currentFrame.CommandBuffer, 
+            mSwapchainCopySourceImage->GetImage(), 
+            VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mSwapchainImages[swapChainImageIndex].Image, 
+            VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
         }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue
