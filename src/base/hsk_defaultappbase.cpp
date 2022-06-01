@@ -68,11 +68,10 @@ namespace hsk {
 
         // create phyiscal device
         auto physicalDeviceSelectionReturn = pds.select();
-        HSK_ASSERTFMT(physicalDeviceSelectionReturn, "Physical device creation: {}",
-                  physicalDeviceSelectionReturn.error().message().c_str())
+        HSK_ASSERTFMT(physicalDeviceSelectionReturn, "Physical device creation: {}", physicalDeviceSelectionReturn.error().message().c_str())
 
-        mPhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
-        mPhysicalDevice    = mPhysicalDeviceVkb.physical_device;
+        mPhysicalDeviceVkb      = physicalDeviceSelectionReturn.value();
+        mPhysicalDevice         = mPhysicalDeviceVkb.physical_device;
         mContext.PhysicalDevice = mPhysicalDevice;
     }
 
@@ -175,7 +174,7 @@ namespace hsk {
     {
         // Get the graphics queue with a helper function
         auto defaultQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::graphics);
-        HSK_ASSERTFMT(defaultQueueReturn,"Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message())
+        HSK_ASSERTFMT(defaultQueueReturn, "Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message())
 
         mDefaultQueue.Queue            = defaultQueueReturn.value();
         mDefaultQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
@@ -185,7 +184,7 @@ namespace hsk {
         mPresentQueue.Queue            = presentQueueReturn.value();
         mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
 
-        mContext.TransferQueue = mDefaultQueue.Queue; // TODO: FIX ME: use a dedicated transfer queue in some cases?
+        mContext.TransferQueue = mDefaultQueue.Queue;  // TODO: FIX ME: use a dedicated transfer queue in some cases?
         mContext.QueueGraphics = mDefaultQueue.Queue;
     }
 
@@ -201,7 +200,7 @@ namespace hsk {
         AssertVkResult(vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault));
         mContext.CommandPool = mCommandPoolDefault;
 
-        mContext.TransferCommandPool = mCommandPoolDefault; // TODO: FIX ME: dedicated transfer command pool in some cases?
+        mContext.TransferCommandPool = mCommandPoolDefault;  // TODO: FIX ME: dedicated transfer command pool in some cases?
     }
 
     void DefaultAppBase::BaseInitCreateVma()
@@ -420,29 +419,35 @@ namespace hsk {
             layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.SubresourceRange     = range;
-            layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; // TODO: these are wrong most likely
+            layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;  // TODO: these are wrong most likely
             layoutTransitionInfo.DstStage             = VK_PIPELINE_STAGE_TRANSFER_BIT;
             mSwapchainCopySourceImage->TransitionLayout(layoutTransitionInfo);
 
 
             // Copy one of the g-buffer images into the swapchain / TODO: This is not done
-            VkImage                  sourceImage  = mSwapchainCopySourceImage->GetImage();
-            VkImageLayout            sourceLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL_KHR;
-            VkImage                  targetImage  = mSwapchainImages[swapChainImageIndex].Image;
-            VkImageLayout            targetLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            uint32_t                 regionCount  = 1;
-            VkImageSubresourceLayers layers       = {};
-            layers.aspectMask                     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-            layers.mipLevel                       = 0;
-            layers.baseArrayLayer                 = 0;
-            layers.layerCount                     = 1;
-            VkImageCopy region                    = {};
-            region.srcSubresource                 = layers;
-            region.dstSubresource                 = layers;
-            region.extent.width                   = mSwapchainVkb.extent.width;
-            region.extent.height                  = mSwapchainVkb.extent.height;
-            region.extent.depth                   = 1;
-            vkCmdCopyImage(currentFrame.CommandBuffer, sourceImage, sourceLayout, targetImage, targetLayout, regionCount, &region);
+            VkImageSubresourceLayers layers = {};
+            layers.aspectMask               = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+            layers.mipLevel                 = 0;
+            layers.baseArrayLayer           = 0;
+            layers.layerCount               = VK_REMAINING_ARRAY_LAYERS;
+
+            VkImageBlit2 blitRegion   = {.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_BLIT_2};
+            blitRegion.srcSubresource = layers;
+            blitRegion.srcOffsets[0]  = {};
+            blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
+            blitRegion.dstSubresource = layers;
+            blitRegion.dstOffsets[0]  = {};
+            blitRegion.dstOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
+
+            VkBlitImageInfo2 blitInfo = {.sType = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2};
+            blitInfo.srcImage         = mSwapchainCopySourceImage->GetImage();
+            blitInfo.srcImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            blitInfo.dstImage         = mSwapchainImages[swapChainImageIndex].Image;
+            blitInfo.dstImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            blitInfo.regionCount      = 1;
+            blitInfo.pRegions         = &blitRegion;
+            blitInfo.filter           = VkFilter::VK_FILTER_NEAREST;
+            vkCmdBlitImage2(currentFrame.CommandBuffer, &blitInfo);
         }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue

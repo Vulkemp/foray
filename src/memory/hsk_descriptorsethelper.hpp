@@ -60,6 +60,8 @@ namespace hsk {
 
         void Cleanup();
 
+        HSK_PROPERTY_CGET(DescriptorSets)
+
       protected:
         struct DescriptorLocation
         {

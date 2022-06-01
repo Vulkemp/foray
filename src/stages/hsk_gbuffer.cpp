@@ -201,11 +201,11 @@ namespace hsk {
     {
         // Clear values for all attachments written in the fragment shader
         std::array<VkClearValue, 6> clearValues;
-        clearValues[0].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        clearValues[1].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        clearValues[2].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        clearValues[3].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        clearValues[4].color        = {{0.0f, 0.0f, 0.0f, 0.0f}};
+        clearValues[0].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[1].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[2].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[3].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[4].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
         clearValues[5].depthStencil = {1.0f, 0};
 
         VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -228,13 +228,13 @@ namespace hsk {
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
+        const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
+
         // Instanced object
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSetScene, 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, descriptorsets.size(), descriptorsets.data(), 0, nullptr);
         mScene->Draw(commandBuffer);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);
-
-        AssertVkResult(vkEndCommandBuffer(commandBuffer));
     }
 
     void GBufferStage::PreparePipeline()
