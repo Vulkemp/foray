@@ -2,10 +2,14 @@
 #include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
-    void DescriptorSetHelper::SetDescriptorInfoAt(uint32_t binding, std::shared_ptr<DescriptorInfo> descriptorSetInfo) { mDescriptorLocations.push_back({binding, descriptorSetInfo}); }
+    void DescriptorSetHelper::SetDescriptorInfoAt(uint32_t binding, std::shared_ptr<DescriptorInfo> descriptorSetInfo)
+    {
+        mDescriptorLocations.push_back({binding, descriptorSetInfo});
+    }
 
     VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, uint32_t numSets)
     {
+        mContext = context;
         // --------------------------------------------------------------------------------------------
         // create the descriptor set layout based on the given bindings
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -16,11 +20,11 @@ namespace hsk {
             auto& descriptorLocation = mDescriptorLocations[i];
 
             VkDescriptorSetLayoutBinding layoutBinding{};
-            layoutBinding.binding = descriptorLocation.Binding;
-            layoutBinding.descriptorCount = descriptorLocation.Descriptor->DescriptorCount;
-            layoutBinding.descriptorType = descriptorLocation.Descriptor->DescriptorType;
+            layoutBinding.binding            = descriptorLocation.Binding;
+            layoutBinding.descriptorCount    = descriptorLocation.Descriptor->DescriptorCount;
+            layoutBinding.descriptorType     = descriptorLocation.Descriptor->DescriptorType;
             layoutBinding.pImmutableSamplers = descriptorLocation.Descriptor->pImmutableSamplers;
-            layoutBinding.stageFlags = descriptorLocation.Descriptor->ShaderStageFlags;
+            layoutBinding.stageFlags         = descriptorLocation.Descriptor->ShaderStageFlags;
 
             layoutBindings.push_back(layoutBinding);
         }
@@ -82,20 +86,21 @@ namespace hsk {
                 descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 descriptorWrite.dstSet           = mDescriptorSets[setIndex];
                 descriptorWrite.dstBinding       = descriptorLocation.Binding;
-                descriptorWrite.dstArrayElement  = 0; // This offsets into descriptorLocation.DescriptorInfo->BufferInfos/ImageInfos, which always starts at 0.
+                descriptorWrite.dstArrayElement  = 0;  // This offsets into descriptorLocation.DescriptorInfo->BufferInfos/ImageInfos, which always starts at 0.
                 descriptorWrite.descriptorType   = descriptorLocation.Descriptor->DescriptorType;
                 descriptorWrite.descriptorCount  = 0;
                 descriptorWrite.pBufferInfo      = nullptr;
                 descriptorWrite.pImageInfo       = nullptr;
-                descriptorWrite.pTexelBufferView = nullptr; // TODO: whats a TexelBufferView?
+                descriptorWrite.pTexelBufferView = nullptr;  // TODO: whats a TexelBufferView?
 
                 uint32_t numBufferInfos = descriptorLocation.Descriptor->BufferInfos.size();
-                if (descriptorLocation.Descriptor->BufferInfos.size() > 0) {
-                    
+                if(descriptorLocation.Descriptor->BufferInfos.size() > 0)
+                {
+
                     // if only one buffer info specified, use the first(0) for all descriptor sets, otherwise use set index i
-                    uint32_t index = numBufferInfos > 1 ? setIndex : 0;
+                    uint32_t index                  = numBufferInfos > 1 ? setIndex : 0;
                     descriptorWrite.descriptorCount = descriptorLocation.Descriptor->BufferInfos[index].size();
-                    descriptorWrite.pBufferInfo = descriptorLocation.Descriptor->BufferInfos[index].data();
+                    descriptorWrite.pBufferInfo     = descriptorLocation.Descriptor->BufferInfos[index].data();
                     descriptorWrites.push_back(descriptorWrite);
                     continue;
                 }
@@ -106,12 +111,24 @@ namespace hsk {
                     // if only one image info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index                  = numImageInfos > 1 ? setIndex : 0;
                     descriptorWrite.descriptorCount = descriptorLocation.Descriptor->ImageInfos[index].size();
-                    descriptorWrite.pImageInfo     = descriptorLocation.Descriptor->ImageInfos[index].data();
+                    descriptorWrite.pImageInfo      = descriptorLocation.Descriptor->ImageInfos[index].data();
                 }
                 descriptorWrites.push_back(descriptorWrite);
             }
         }
         vkUpdateDescriptorSets(context->Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         return mDescriptorSetLayout;
+    }
+
+    void DescriptorSetHelper::Cleanup() {
+        if (mDescriptorSetLayout){
+            vkDestroyDescriptorSetLayout(mContext->Device, mDescriptorSetLayout, nullptr);
+            mDescriptorSetLayout = nullptr;
+        }
+        if (mDescriptorPool) {
+            vkDestroyDescriptorPool(mContext->Device, mDescriptorPool, nullptr);
+            mDescriptorPool = nullptr;
+        }
+        mDescriptorSets.resize(0);
     }
 }  // namespace hsk

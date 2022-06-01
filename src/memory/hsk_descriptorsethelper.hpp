@@ -58,6 +58,7 @@ namespace hsk {
         /// @return
         VkDescriptorSetLayout Create(const VkContext* context, uint32_t numSets);
 
+        void Cleanup();
 
       protected:
         struct DescriptorLocation

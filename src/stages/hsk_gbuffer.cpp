@@ -178,6 +178,7 @@ namespace hsk {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
             mPipelineCache = nullptr;
         }
+        mDescriptorSet.Cleanup();
     }
 
     void GBufferStage::SetupDescriptors()
