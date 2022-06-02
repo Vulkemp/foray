@@ -13,6 +13,7 @@
 #include <vector>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "hsk_scenetransformstate.hpp"
 
 #include "../memory/hsk_descriptorsethelper.hpp"
 
@@ -21,8 +22,8 @@ namespace hsk {
     class Scene : public NoMoveDefaults
     {
       public:
-        inline Scene() : mMaterials(this) {}
-        inline explicit Scene(const VkContext* context) : mMaterials(this), mContext(context) {}
+        inline Scene() : mMaterials(this), mTransformState(this) {}
+        inline explicit Scene(const VkContext* context) : mMaterials(this), mContext(context), mTransformState(this) {}
 
         inline Scene& Context(const VkContext* context)
         {
@@ -77,6 +78,7 @@ namespace hsk {
       protected:
         const VkContext*                      mContext                = {};
         MaterialBuffer                        mMaterials              = {};
+        SceneTransformState                   mTransformState         = {};
         std::vector<std::unique_ptr<Texture>> mTextures               = {};
         glm::mat4                             mAxisAlignedBoundingBox = {};
 

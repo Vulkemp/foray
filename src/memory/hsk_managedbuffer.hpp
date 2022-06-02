@@ -47,9 +47,10 @@ namespace hsk {
 
         HSK_PROPERTY_CGET(Buffer);
         HSK_PROPERTY_CGET(IsMapped);
-        HSK_PROPERTY_CGET(DescriptorInfo);
         HSK_PROPERTY_CGET(Allocation);
         HSK_PROPERTY_ALL(Name);
+
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
 
       protected:
         const VkContext*       mContext{};
@@ -57,10 +58,8 @@ namespace hsk {
         VkBuffer               mBuffer{};
         VmaAllocation          mAllocation{};
         VmaAllocationInfo      mAllocationInfo{};
-        VkDescriptorBufferInfo mDescriptorInfo = {};
+        VkDeviceSize           mSize           = {};
         bool                   mIsMapped       = false;
-
-        void UpdateDescriptorInfo(VkDeviceSize size);
     };
 
 }  // namespace hsk

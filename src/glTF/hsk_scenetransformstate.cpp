@@ -3,6 +3,7 @@
 namespace hsk {
     void SceneTransformState::InitOrUpdate(std::optional<BufferSection> section)
     {
+        mBuffer.SetContext(Context());
         mBuffer.InitOrUpdate(section);
     }
 

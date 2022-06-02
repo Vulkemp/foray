@@ -7,6 +7,13 @@ namespace hsk {
     {
         VkDeviceSize offset = 0;
         VkDeviceSize count  = 0;
+
+        inline BufferSection Merge(const BufferSection& other)
+        {
+            VkDeviceSize start = std::min(offset, other.offset);
+            VkDeviceSize end   = std::max(offset + count, other.offset + other.count);
+            return BufferSection{.offset = start, .count = end - start};
+        }
     };
 
     template <typename TClass>
@@ -24,9 +31,12 @@ namespace hsk {
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_GET(Vector)
         HSK_PROPERTY_CGET(Vector)
+        HSK_PROPERTY_GET(DeviceBuffer)
         HSK_PROPERTY_CGET(DeviceBuffer)
         HSK_PROPERTY_CGET(DeviceCount)
         HSK_PROPERTY_CGET(DeviceCapacity)
+
+        inline VkDeviceSize GetDeviceSize() { return mDeviceCapacity * sizeof(TClass); }
 
       protected:
         inline void CreateBuffer(VkDeviceSize capacity);
@@ -69,15 +79,17 @@ namespace hsk {
     {
         mDeviceCapacity = capacity;
 
-        mDeviceBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, mDeviceCapacity,
+        VkDeviceSize bufferSize = mDeviceCapacity * sizeof(TClass);
+
+        mDeviceBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     }
     template <typename TClass>
     void ManagedVectorBuffer<TClass>::UploadToBuffer(BufferSection section)
     {
-        TClass* uploadData   = mVector.data() + section.offset;
-        VkDeviceSize         deviceSize   = section.count * sizeof(TClass);
-        VkDeviceSize         deviceOffset = section.offset * sizeof(TClass);
+        TClass*      uploadData   = mVector.data() + section.offset;
+        VkDeviceSize deviceSize   = section.count * sizeof(TClass);
+        VkDeviceSize deviceOffset = section.offset * sizeof(TClass);
 
         mDeviceBuffer.WriteDataDeviceLocal(uploadData, deviceSize, deviceOffset);
     }

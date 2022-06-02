@@ -37,7 +37,7 @@ namespace hsk {
 
         // Pbr Base Info
         BaseColorFactor          = glm::vec4(material.pbrMetallicRoughness.baseColorFactor[0], material.pbrMetallicRoughness.baseColorFactor[1],
-                                    material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
+                                             material.pbrMetallicRoughness.baseColorFactor[2], material.pbrMetallicRoughness.baseColorFactor[3]);
         MetallicFactor           = material.pbrMetallicRoughness.metallicFactor;
         RoughnessFactor          = material.pbrMetallicRoughness.roughnessFactor;
         BaseColorTexture         = material.pbrMetallicRoughness.baseColorTexture.index;
@@ -66,53 +66,36 @@ namespace hsk {
     void MaterialBuffer::InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials)
     {
         mMaterialDescriptions.clear();
-        mBufferArray.clear();
+        mDeviceBuffer.GetVector().clear();
         for(int32_t i = 0; i < materials.size(); i++)
         {
             Material material = {};
             material.InitFromTinyGltfMaterial(materials[i]);
             mMaterialDescriptions.push_back(material);
-            mBufferArray.push_back(material.MakeBufferObject());
+            mDeviceBuffer.GetVector().push_back(material.MakeBufferObject());
         }
 
         UpdateBuffer();
     }
     void MaterialBuffer::Cleanup()
     {
-        DestroyBuffer();
+        mDeviceBuffer.Cleanup();
         mMaterialDescriptions.clear();
-        mBufferArray.clear();
-        mBufferSize     = 0;
-        mBufferCapacity = 0;
-    }
-    void MaterialBuffer::CreateBuffer()
-    {
-        mManagedBuffer.SetName("MaterialBuffer");
-        mManagedBuffer.Create(Context(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, mBufferCapacity,
-                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        mDeviceBuffer.GetVector().clear();
     }
     void MaterialBuffer::UpdateBuffer()
     {
-        size_t bufferObjectSize = sizeof(MaterialBufferObject);
-        mBufferSize             = static_cast<VkDeviceSize>(bufferObjectSize * mBufferArray.size());
+        mDeviceBuffer.SetContext(Context());
+        mDeviceBuffer.GetDeviceBuffer().SetName("MaterialBuffer");
 
-        if(mBufferSize > mBufferCapacity)
-        {
-            mBufferCapacity = mBufferSize + (mBufferSize / 4);
-            DestroyBuffer();
-            CreateBuffer();
-        }
-
-        // use staging buffer, write buffer array data
-        mManagedBuffer.WriteDataDeviceLocal(mBufferArray.data(), mBufferSize);
+        mDeviceBuffer.InitOrUpdate();
     }
-    void MaterialBuffer::DestroyBuffer() { mManagedBuffer.Destroy(); }
     void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)
     {
         VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer                 = mManagedBuffer.GetBuffer();
+        bufferInfo.buffer                 = mDeviceBuffer.GetDeviceBuffer().GetBuffer();
         bufferInfo.offset                 = 0;
-        bufferInfo.range                  = mBufferSize;
+        bufferInfo.range                  = mDeviceBuffer.GetDeviceSize();
 
         VkWriteDescriptorSet writeOpInfo = {};
         writeOpInfo.sType                = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

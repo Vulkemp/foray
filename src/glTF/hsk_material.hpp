@@ -1,5 +1,5 @@
 #pragma once
-#include "../memory/hsk_managedbuffer.hpp"
+#include "../memory/hsk_managedvectorbuffer.hpp"
 #include "glm/glm.hpp"
 #include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
@@ -55,7 +55,7 @@ namespace hsk {
     };
 
     // @brief Manages buffer arrays containing material information
-    class MaterialBuffer : public NoMoveDefaults, public SceneComponent
+    class MaterialBuffer : public SceneComponent, public NoMoveDefaults
     {
       public:
         inline MaterialBuffer() {}
@@ -67,24 +67,17 @@ namespace hsk {
 
         HSK_PROPERTY_GET(MaterialDescriptions)
         HSK_PROPERTY_CGET(MaterialDescriptions)
-        HSK_PROPERTY_GET(BufferArray)
-        HSK_PROPERTY_CGET(BufferArray)
-        HSK_PROPERTY_GET(ManagedBuffer)
-        HSK_PROPERTY_CGET(ManagedBuffer)
-        HSK_PROPERTY_GET(BufferSize)
-        HSK_PROPERTY_CGET(BufferSize)
-        HSK_PROPERTY_GET(BufferCapacity)
-        HSK_PROPERTY_CGET(BufferCapacity)
+        HSK_PROPERTY_GET(DeviceBuffer)
+        HSK_PROPERTY_CGET(DeviceBuffer)
+
+        inline const VkBuffer GetVkBuffer() { return mDeviceBuffer.GetDeviceBuffer().GetBuffer(); }
+        inline VkDeviceSize   GetDeviceSize() { return mDeviceBuffer.GetDeviceSize(); }
+
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mDeviceBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
 
       protected:
-        std::vector<Material>             mMaterialDescriptions = {};
-        std::vector<MaterialBufferObject> mBufferArray          = {};
-        ManagedBuffer                     mManagedBuffer        = {};
-        VkDeviceSize                      mBufferSize           = {};
-        VkDeviceSize                      mBufferCapacity       = {};
-
-        virtual void CreateBuffer();
-        virtual void DestroyBuffer();
+        std::vector<Material>                     mMaterialDescriptions = {};
+        ManagedVectorBuffer<MaterialBufferObject> mDeviceBuffer         = {};
 
         virtual void WriteDescriptorSet(VkDescriptorSet set, uint32_t binding);
     };

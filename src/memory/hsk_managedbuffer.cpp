@@ -8,6 +8,7 @@ namespace hsk {
     void ManagedBuffer::Create(const VkContext* context, ManagedBufferCreateInfo& createInfo)
     {
         mContext = context;
+        mSize = createInfo.BufferCreateInfo.size;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
         if(mName.length() > 0)
         {
@@ -33,6 +34,7 @@ namespace hsk {
     void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags)
     {
         mContext = context;
+        mSize = size;
         ManagedBufferCreateInfo createInfo;
         createInfo.BufferCreateInfo.size      = size;
         createInfo.BufferCreateInfo.usage     = usage;
@@ -89,7 +91,7 @@ namespace hsk {
         }
         mBuffer     = nullptr;
         mAllocation = nullptr;
-        UpdateDescriptorInfo(0);
+        mSize = 0;
     }
 
     void ManagedBuffer::WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
@@ -109,14 +111,6 @@ namespace hsk {
 
         vkCmdCopyBuffer(commandBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
         singleTimeCmdBuf.Flush();
-    }
-
-    void ManagedBuffer::UpdateDescriptorInfo(VkDeviceSize size)
-    {
-        mDescriptorInfo        = {};
-        mDescriptorInfo.buffer = mBuffer;
-        mDescriptorInfo.offset = 0;
-        mDescriptorInfo.range  = size;
     }
 
     ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }

@@ -53,9 +53,7 @@ namespace hsk {
             descriptorInfo->BufferInfos[setIndex].resize(numMaterials);
             for(size_t i = 0; i < numMaterials; i++)
             {
-                descriptorInfo->BufferInfos[setIndex][i].buffer = mMaterials.GetManagedBuffer().GetBuffer();
-                descriptorInfo->BufferInfos[setIndex][i].offset = 0;
-                descriptorInfo->BufferInfos[setIndex][i].range  = mMaterials.GetBufferSize();
+                descriptorInfo->BufferInfos[setIndex][i] = mMaterials.GetVkDescriptorBufferInfo();
             }
         }
         return descriptorInfo;

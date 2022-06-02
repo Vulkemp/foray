@@ -187,6 +187,7 @@ namespace hsk {
     void MeshInstance::Update(const glm::mat4& mat)
     {
         // Todo: update model matrix in SceneTransformState Vector
+        
     }
 
     void MeshInstance::Draw(SceneDrawInfo& drawInfo)

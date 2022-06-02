@@ -18,6 +18,7 @@ namespace hsk {
     class SceneTransformState : public SceneComponent, public NoMoveDefaults
     {
       public:
+        inline SceneTransformState() {}
         inline explicit SceneTransformState(Scene* scene) : SceneComponent(scene), NoMoveDefaults() {}
 
         void        InitOrUpdate(std::optional<BufferSection> section = {});
