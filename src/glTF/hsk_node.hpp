@@ -1,6 +1,6 @@
 #pragma once
-#include "hsk_boundingBox.hpp"
-#include "hsk_glTF_declares.hpp"
+#include "hsk_boundingbox.hpp"
+#include "hsk_gltf_declares.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_scenecomponent.hpp"
 #include <glm/ext.hpp>
@@ -30,8 +30,6 @@ namespace hsk {
         HSK_PROPERTY_ALL(Children)
         HSK_PROPERTY_ALL(Name)
         HSK_PROPERTY_ALL(Mesh)
-        HSK_PROPERTY_ALL(Skin)
-        HSK_PROPERTY_ALL(SkinIndex)
         HSK_PROPERTY_ALL(Bvh)
         HSK_PROPERTY_ALL(AxisAlignedBoundingBox)
 
@@ -42,6 +40,8 @@ namespace hsk {
         void ResolveParent();
         ~Node();
 
+        void Draw(SceneDrawInfo& drawInfo);
+
       protected:
         Transform          mTransform  = {};
         Node*              mParent      = nullptr;
@@ -49,9 +49,7 @@ namespace hsk {
         int32_t            mIndex       = -1;
         std::vector<Node*> mChildren    = {};
         std::string           mName      = {};
-        std::unique_ptr<hsk::Mesh> mMesh      = {};
-        Skin*                 mSkin      = nullptr;
-        int32_t               mSkinIndex = -1;
+        std::unique_ptr<hsk::MeshInstance> mMesh      = {};
         BoundingBox           mBvh       = {};
         BoundingBox           mAxisAlignedBoundingBox      = {};
     };

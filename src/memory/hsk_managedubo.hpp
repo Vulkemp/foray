@@ -8,10 +8,10 @@ namespace hsk {
     {
       public:
         virtual void   Init(const VkContext* context, bool update = false) = 0;
-        virtual void   Update()                                      = 0;
-        virtual void   Cleanup()                                     = 0;
-        virtual size_t SizeOfUbo() const                             = 0;
-        virtual void*  UboData()                                     = 0;
+        virtual void   Update()                                            = 0;
+        virtual void   Cleanup()                                           = 0;
+        virtual size_t SizeOfUbo() const                                   = 0;
+        virtual void*  UboData()                                           = 0;
 
         virtual void                 BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const = 0;
         virtual VkWriteDescriptorSet BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const                             = 0;
@@ -29,7 +29,7 @@ namespace hsk {
     class ManagedUbo : public UboInterface, public NoMoveDefaults
     {
       protected:
-        ManagedBuffer mManagedBuffer        = {};
+        ManagedBuffer mManagedBuffer = {};
         T_UBO         mUbo           = {};
         void*         mMapped        = nullptr;
         const bool    mMapPersistent = false;
@@ -57,6 +57,36 @@ namespace hsk {
     };
 
     template <typename T_UBO>
+    class ManagedVectorUbo : public UboInterface, public NoMoveDefaults
+    {
+      protected:
+        ManagedBuffer      mManagedBuffer = {};
+        uint32_t           mCapacity      = {};
+        std::vector<T_UBO> mUbo           = {};
+        void*              mMapped        = nullptr;
+        const bool         mMapPersistent = false;
+
+      public:
+        inline ManagedVectorUbo();
+        explicit inline ManagedVectorUbo(bool mapPersistent = false);
+        ~ManagedVectorUbo();
+
+        HSK_PROPERTY_ALL(Ubo)
+        HSK_PROPERTY_GET(ManagedBuffer)
+        HSK_PROPERTY_CGET(ManagedBuffer)
+        HSK_PROPERTY_CGET(MapPersistent)
+
+        inline virtual void   Init(const VkContext* context, uint32_t capacity, bool update = false) override;
+        inline virtual void   Update() override;
+        inline virtual void   Cleanup() override;
+        inline virtual size_t SizeOfUbo() const override;
+        inline virtual void*  UboData() override { return &mUbo; }
+
+        inline virtual void                 BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const override;
+        inline virtual VkWriteDescriptorSet BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const override;
+    };
+
+    template <typename T_UBO>
     ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mManagedBuffer(), mUbo(), mMapPersistent(mapPersistent)
     {
     }
@@ -73,12 +103,12 @@ namespace hsk {
 
         ManagedBuffer::ManagedBufferCreateInfo bufferCI;
 
-        bufferCI.AllocationCreateInfo.usage                   = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        bufferCI.AllocationCreateInfo.flags                   = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        bufferCI.AllocationCreateInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        bufferCI.AllocationCreateInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
-        bufferCI.BufferCreateInfo.size               = sizeof(T_UBO);
-        bufferCI.BufferCreateInfo.usage              = VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-        bufferCI.BufferCreateInfo.sharingMode        = VK_SHARING_MODE_EXCLUSIVE;
+        bufferCI.BufferCreateInfo.size        = sizeof(T_UBO);
+        bufferCI.BufferCreateInfo.usage       = VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        bufferCI.BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 
         mManagedBuffer.Create(context, bufferCI);

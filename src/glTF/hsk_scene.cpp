@@ -4,8 +4,8 @@
 #include "hsk_animation.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_node.hpp"
-#include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
+#include "hsk_scenedrawinfo.hpp"
 
 namespace hsk {
 
@@ -61,32 +61,6 @@ namespace hsk {
         return descriptorInfo;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTransformationMatrixArrayDescriptorInfo()
-    {
-        size_t numMatrices = mTransformationMatrixArray.size();  // we load the complete ubo buffer as a single ubo buffer.
-
-        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_VERTEX_BIT;
-        descriptorInfo->pImmutableSamplers = nullptr;
-        descriptorInfo->DescriptorCount    = numMatrices;
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-        size_t numSets = 1;
-        descriptorInfo->BufferInfos.resize(numSets);
-
-        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
-        {
-            descriptorInfo->BufferInfos[setIndex].resize(numMatrices);
-            for(size_t i = 0; i < numMatrices; i++)
-            {
-                descriptorInfo->BufferInfos[setIndex][i].buffer = mTransformationMatrixArrayManagedBuffer.GetBuffer();
-                descriptorInfo->BufferInfos[setIndex][i].offset = i * sizeof(glm::mat4);
-                descriptorInfo->BufferInfos[setIndex][i].range  = sizeof(glm::mat4);
-            }
-        }
-        return descriptorInfo;
-    }
-
     void Scene::Cleanup()
     {
         vertices.Destroy();
@@ -111,7 +85,6 @@ namespace hsk {
         mExtensions.resize(0);
 
         // TODO: Kill skins
-        mSkins.resize(0);
         mCameras.resize(0);
     }
 
@@ -187,15 +160,9 @@ namespace hsk {
             {
                 loadAnimations(gltfModel);
             }
-            loadSkins(gltfModel);
 
             for(auto& node : mNodesLinear)
             {
-                // Assign skins
-                if(node->GetSkinIndex() > -1)
-                {
-                    node->SetSkin(mSkins[node->GetSkinIndex()].get());
-                }
                 // Initial pose
                 if(node->GetMesh())
                 {
@@ -234,7 +201,7 @@ namespace hsk {
         if(indexBufferSize > 0)
         {
             indices.SetName("Indices");
-            indices.Create(mContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT| VK_BUFFER_USAGE_TRANSFER_DST_BIT, indexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            indices.Create(mContext, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, indexBufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             indices.WriteDataDeviceLocal(indexBuffer.data(), indexBufferSize);
         }
 
@@ -272,43 +239,6 @@ namespace hsk {
     {
         // mMaterials.Context() = this->Context();
         mMaterials.InitFromTinyGltfMaterials(gltfModel.materials);
-    }
-
-    void Scene::loadSkins(const tinygltf::Model& gltfModel)
-    {
-        for(const tinygltf::Skin& source : gltfModel.skins)
-        {
-            std::unique_ptr<Skin> newSkin = std::make_unique<Skin>();
-            newSkin->name                 = source.name;
-
-            // Find skeleton root node
-            if(source.skeleton > -1)
-            {
-                newSkin->skeletonRoot = GetNodeByIndex(source.skeleton);
-            }
-
-            // Find joint nodes
-            for(int jointIndex : source.joints)
-            {
-                Node* node = GetNodeByIndex(jointIndex);
-                if(node)
-                {
-                    newSkin->joints.push_back(node);
-                }
-            }
-
-            // Get inverse bind matrices from buffer
-            if(source.inverseBindMatrices > -1)
-            {
-                const tinygltf::Accessor&   accessor   = gltfModel.accessors[source.inverseBindMatrices];
-                const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
-                const tinygltf::Buffer&     buffer     = gltfModel.buffers[bufferView.buffer];
-                newSkin->inverseBindMatrices.resize(accessor.count);
-                memcpy(newSkin->inverseBindMatrices.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(glm::mat4));
-            }
-
-            mSkins.push_back(std::move(newSkin));
-        }
     }
 
     void Scene::loadAnimations(const tinygltf::Model& gltfModel)
@@ -376,33 +306,6 @@ namespace hsk {
         }
     }
 
-    void Scene::CreateTransformationMatrixArray() {
-
-        // TODO: first optimazation would be to resize the vector before traversing all nodes.
-        // Secondly, it would be better if all Matrices would be stored in one big array and the Node
-        // only stores a pointer into that array. Like this no copy has to be performed.
-        // Different approach: A node stores its own matrix and an index, into where in the vulkan buffer it has to update its memory.
-        // Need support for memory flushes of a region.
-        // Appr3. Use dynamic descriptor binds.
-
-        // for static scenes, this is fine.
-        auto matrixArrayPtr = &mTransformationMatrixArray;
-        std::function<void(Node*)> traverseNode   = [&traverseNode, matrixArrayPtr](Node* node) {
-            matrixArrayPtr->push_back(node->getMatrix());
-            for(auto& child : node->GetChildren())
-            {
-                traverseNode(child);
-            }
-        };
-        traverseNode(mNodesHierarchy.at(0));
-
-        VkDeviceSize deviceSize = mTransformationMatrixArray.size() * sizeof(glm::mat4);
-        mTransformationMatrixArrayManagedBuffer.Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, deviceSize,
-                                                       VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-
-        mTransformationMatrixArrayManagedBuffer.MapAndWrite(mTransformationMatrixArray.data());
-    }
-
     void Scene::updateAnimation(uint32_t index, float time)
     {
         if(mAnimations.empty())
@@ -438,7 +341,7 @@ namespace hsk {
         }
     }
 
-    void Scene::Draw(VkCommandBuffer cmdbuffer)
+    void Scene::Draw(SceneDrawInfo& drawInfo)
     {
         if(!vertices.GetAllocation())
         {
@@ -446,11 +349,11 @@ namespace hsk {
         }
         const VkDeviceSize offsets[1]      = {0};
         VkBuffer           vertexBuffers[] = {vertices.GetBuffer()};
-        vkCmdBindVertexBuffers(cmdbuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(cmdbuffer, indices.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindVertexBuffers(drawInfo.CmdBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(drawInfo.CmdBuffer, indices.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
         for(auto node : mNodesHierarchy)
         {
-            drawNode(node, cmdbuffer);
+            node->Draw(drawInfo);
         }
     }
 

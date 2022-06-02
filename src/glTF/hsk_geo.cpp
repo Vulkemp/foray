@@ -41,9 +41,6 @@ namespace hsk {
                 case VertexComponent::MaterialIndex:
                     InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MaterialIndex)});
                     break;
-                case VertexComponent::MeshId:
-                    InputAttributes.push_back(VkVertexInputAttributeDescription{component.Location, Binding, VK_FORMAT_R32_SINT, offsetof(Vertex, MeshId)});
-                    break;
                 default:
                     Exception::Throw("Failed to add vertex component. This component type has no switch case defined!");
                     break;

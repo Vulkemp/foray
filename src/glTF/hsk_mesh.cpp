@@ -1,14 +1,14 @@
 #include "hsk_mesh.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_scene.hpp"
-#include "hsk_skin.hpp"
+#include "hsk_scenedrawinfo.hpp"
 #include <glm/ext.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace hsk {
-    Mesh::Mesh() {}
+    MeshInstance::MeshInstance() {}
 
-    Mesh::Mesh(Scene* scene) : SceneComponent(scene) {}
+    MeshInstance::MeshInstance(Scene* scene) : SceneComponent(scene) {}
 
     Primitive::Primitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount, Material* material)
         : FirstIndex(firstIndex), IndexCount(indexCount), VertexCount(vertexCount), Mat(material)
@@ -23,19 +23,12 @@ namespace hsk {
         Bounds.SetValid(true);
     }
 
-    void Mesh::InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+    void MeshInstance::InitFromTinyGltfMesh(
+        const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         // TODO: This function is incredibly ugly
 
-        // this->uniformBlock.matrix = matrix; TODO set node matrix
-
-
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage                   = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        allocInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_MAPPED_BIT;
-
-        mUbo = std::make_unique<ManagedUbo<UniformBlock>>(true);
-        mUbo->Init(Context(), false);
+        mPushConstant.MeshId = (int32_t)index;
 
         for(size_t j = 0; j < mesh.primitives.size(); j++)
         {
@@ -107,39 +100,8 @@ namespace hsk {
                     bufferTexCoordSet0                     = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
                     uv0ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
                 }
-                // if(primitive.attributes.find("TEXCOORD_1") != primitive.attributes.end())
-                // {
-                //     const tinygltf::Accessor&   uvAccessor = model.accessors[primitive.attributes.find("TEXCOORD_1")->second];
-                //     const tinygltf::BufferView& uvView     = model.bufferViews[uvAccessor.bufferView];
-                //     bufferTexCoordSet1                     = reinterpret_cast<const float*>(&(model.buffers[uvView.buffer].data[uvAccessor.byteOffset + uvView.byteOffset]));
-                //     uv1ByteStride = uvAccessor.ByteStride(uvView) ? (uvAccessor.ByteStride(uvView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(uvAccessor);
-                // }
-
-                // // Skinning
-                // // Joints
-                // if(primitive.attributes.find("JOINTS_0") != primitive.attributes.end())
-                // {
-                //     const tinygltf::Accessor&   jointAccessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
-                //     const tinygltf::BufferView& jointView     = model.bufferViews[jointAccessor.bufferView];
-                //     bufferJoints                              = &(model.buffers[jointView.buffer].data[jointAccessor.byteOffset + jointView.byteOffset]);
-                //     jointComponentType                        = jointAccessor.componentType;
-                //     jointByteStride = jointAccessor.ByteStride(jointView) ? (jointAccessor.ByteStride(jointView) / tinygltf::GetComponentSizeInBytes(jointComponentType)) :
-                //                                                             tinygltf_GetTypeSizeInBytes(jointAccessor);
-                // }
-
-                // if(primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end())
-                // {
-                //     const tinygltf::Accessor&   weightAccessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
-                //     const tinygltf::BufferView& weightView     = model.bufferViews[weightAccessor.bufferView];
-                //     bufferWeights = reinterpret_cast<const float*>(&(model.buffers[weightView.buffer].data[weightAccessor.byteOffset + weightView.byteOffset]));
-                //     weightByteStride =
-                //         weightAccessor.ByteStride(weightView) ? (weightAccessor.ByteStride(weightView) / sizeof(float)) : tinygltf_GetTypeSizeInBytes(weightAccessor);
-                // }
-
-                // hasSkin = (bufferJoints && bufferWeights);
 
                 uint32_t materialIndex = (uint32_t)primitive.material;
-                uint32_t meshId     = index;
 
                 for(size_t v = 0; v < posAccessor.count; v++)
                 {
@@ -149,36 +111,7 @@ namespace hsk {
                     vert.Tangent       = glm::normalize(glm::vec3(bufferTangents ? glm::make_vec3(&bufferTangents[v * tangentByteStride]) : glm::vec3(0.0f)));
                     vert.Uv            = bufferTexCoordSet0 ? glm::make_vec2(&bufferTexCoordSet0[v * uv0ByteStride]) : glm::vec2(0.0f);
                     vert.MaterialIndex = materialIndex;
-                    vert.MeshId        = meshId;
 
-                    // if(hasSkin)
-                    // {
-                    //     switch(jointComponentType)
-                    //     {
-                    //         case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
-                    //             const uint16_t* buf = static_cast<const uint16_t*>(bufferJoints);
-                    //             vert.Joint0         = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
-                    //             break;
-                    //         }
-                    //         case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
-                    //             const uint8_t* buf = static_cast<const uint8_t*>(bufferJoints);
-                    //             vert.Joint0        = glm::vec4(glm::make_vec4(&buf[v * jointByteStride]));
-                    //             break;
-                    //         }
-                    //         default:
-                    //             HSK_THROWFMT("Joint component type {} not supported!", jointComponentType);
-                    //     }
-                    // }
-                    // else
-                    // {
-                    //     vert.Joint0 = glm::vec4(0.0f);
-                    // }
-                    // vert.Weight0 = hasSkin ? glm::make_vec4(&bufferWeights[v * weightByteStride]) : glm::vec4(0.0f);
-                    // // Fix for all zero weights
-                    // if(glm::length(vert.Weight0) == 0.0f)
-                    // {
-                    //     vert.Weight0 = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-                    // }
                     vertexBuffer.push_back(vert);
                 }
             }
@@ -223,8 +156,7 @@ namespace hsk {
                 }
             }
             std::unique_ptr<Primitive> newPrimitive =
-                std::make_unique<Primitive>(indexStart, indexCount, vertexCount,
-                                            primitive.material > -1 ? &(Owner()->Materials()[primitive.material]) : nullptr);
+                std::make_unique<Primitive>(indexStart, indexCount, vertexCount, primitive.material > -1 ? &(Owner()->Materials()[primitive.material]) : nullptr);
             newPrimitive->setBoundingBox(posMin, posMax);
             mPrimitives.push_back(std::move(newPrimitive));
         }
@@ -241,44 +173,29 @@ namespace hsk {
         }
     };
 
-    void Mesh::Cleanup()
-    {
-        if(mUbo)
-        {
-            mUbo->Cleanup();
-            mUbo = nullptr;
-        }
-    }
+    void MeshInstance::Cleanup() {}
 
-    Mesh::~Mesh() { Cleanup(); }
+    MeshInstance::~MeshInstance() { Cleanup(); }
 
-    void Mesh::setBoundingBox(glm::vec3 min, glm::vec3 max)
+    void MeshInstance::setBoundingBox(glm::vec3 min, glm::vec3 max)
     {
         mBounds.SetMin(min);
         mBounds.SetMax(max);
         mBounds.SetValid(true);
     }
 
-    void Mesh::Update(const glm::mat4& mat, Skin* skin)
+    void MeshInstance::Update(const glm::mat4& mat)
     {
-        Mesh::UniformBlock& ubo = mUbo->GetUbo();
-        ubo.matrix              = mat;
-        if(skin)
-        {
-            // Update join matrices
-            glm::mat4 inverseTransform = glm::inverse(mat);
-            size_t    numJoints        = std::min((uint32_t)skin->joints.size(), MAX_NUM_JOINTS);
-            for(size_t i = 0; i < numJoints; i++)
-            {
-                Node*     jointNode = skin->joints[i];
-                glm::mat4 jointMat  = jointNode->getMatrix() * skin->inverseBindMatrices[i];
-                jointMat            = inverseTransform * jointMat;
-                ubo.jointMatrix[i]  = jointMat;
-            }
-            ubo.jointcount = (float)numJoints;
-        }
-        mUbo->Update();
+        // Todo: update model matrix in SceneTransformState Vector
     }
 
+    void MeshInstance::Draw(SceneDrawInfo& drawInfo)
+    {
+        vkCmdPushConstants(drawInfo.CmdBuffer, drawInfo.PipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstant), &mPushConstant);
+        for(const auto& primitive : mPrimitives)
+        {
+            vkCmdDrawIndexed(drawInfo.CmdBuffer, primitive->IndexCount, 1, primitive->FirstIndex, 0, 0);
+        }
+    }
 
 }  // namespace hsk

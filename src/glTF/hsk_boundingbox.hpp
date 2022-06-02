@@ -1,5 +1,5 @@
 #pragma once
-#include "hsk_glTF_declares.hpp"
+#include "hsk_gltf_declares.hpp"
 #include <glm/glm.hpp>
 
 namespace hsk {

@@ -14,9 +14,6 @@ namespace hsk {
         ManagedImage mMeshIdAttachment;
         ManagedImage mDepthAttachment;
 
-        VkDescriptorSet mDescriptorSetAttachments = nullptr;
-        VkDescriptorSet mDescriptorSetScene       = nullptr;
-
         GBufferStage() = default;
         virtual ~GBufferStage() { Destroy(); }
 

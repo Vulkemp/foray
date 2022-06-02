@@ -1,13 +1,13 @@
 #pragma once
 #include "../memory/hsk_managedubo.hpp"
 #include "glm/glm.hpp"
-#include "hsk_boundingBox.hpp"
-#include "hsk_glTF_declares.hpp"
+#include "hsk_boundingbox.hpp"
+#include "hsk_geo.hpp"
+#include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include "hsk_geo.hpp"
 
 // Changing this value here also requires changing it in the vertex shader
 #define MAX_NUM_JOINTS 128u
@@ -25,41 +25,34 @@ namespace hsk {
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
     };
 
-    class Mesh : public SceneComponent, public NoMoveDefaults
+    class MeshInstance : public SceneComponent, public NoMoveDefaults
     {
       public:
-        struct UniformBlock
+        struct PushConstant
         {
-            glm::mat4 matrix                      = {};
-            glm::mat4 jointMatrix[MAX_NUM_JOINTS] = {};
-            float     jointcount                  = 0;
+            int32_t MeshId{};
         };
 
-        Mesh();
-        Mesh(Scene* scene);
+        MeshInstance();
+        MeshInstance(Scene* scene);
         void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
-        ~Mesh();
+        ~MeshInstance();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
         void Cleanup();
-        void Update(const glm::mat4& mat, Skin* skin);
+        void Update(const glm::mat4& mat);
+
+        void Draw(SceneDrawInfo& commandBuffer);
 
         HSK_PROPERTY_CGET(Primitives)
         HSK_PROPERTY_ALL(Bounds)
         HSK_PROPERTY_ALL(AxisAlignedBoundingBox)
 
-        ManagedUbo<UniformBlock>*       Ubo() { return mUbo.get(); }
-        const ManagedUbo<UniformBlock>* Ubo() const { return mUbo.get(); }
-
-        HSK_PROPERTY_CGET(DescriptorSet)
-
       protected:
         std::vector<std::unique_ptr<Primitive>> mPrimitives             = {};
-        BoundingBox                             mBounds            = {};
+        BoundingBox                             mBounds                 = {};
         BoundingBox                             mAxisAlignedBoundingBox = {};
         VertexInputStateBuilder                 mVertexInputStateBuilder{};
-
-        std::unique_ptr<ManagedUbo<UniformBlock>> mUbo;
-        VkDescriptorSet                           mDescriptorSet;
+        PushConstant                            mPushConstant{};
     };
 
 }  // namespace hsk

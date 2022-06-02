@@ -106,7 +106,7 @@ namespace hsk {
 
         VkImageMemoryBarrier barrier{};
         barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.oldLayout           = mImageLayout;
+        barrier.oldLayout           = transitionInfo.OldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED ? transitionInfo.OldImageLayout : mImageLayout;
         barrier.newLayout           = transitionInfo.NewImageLayout;
         barrier.srcQueueFamilyIndex = transitionInfo.SrcQueueFamilyIndex;
         barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;

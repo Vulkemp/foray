@@ -1,5 +1,6 @@
 #include "hsk_gbuffer.hpp"
 #include "../glTF/hsk_geo.hpp"
+#include "../glTF/hsk_scenedrawinfo.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 
@@ -196,15 +197,16 @@ namespace hsk {
         //    auto camera = new Camera(mScene);
         //}
 
-        mScene->CreateTransformationMatrixArray(); // TODO: this shouldnt happen here & needs a refacture either way
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetTransformationMatrixArrayDescriptorInfo());
-
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 
+        std::vector<VkPushConstantRange> pushConstantRanges(
+            {{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, .offset = 0, .size = sizeof(MeshInstance::PushConstant)}});
+
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCI.pushConstantRangeCount = 0;
+        pipelineLayoutCI.pushConstantRangeCount = pushConstantRanges.size();
+        pipelineLayoutCI.pPushConstantRanges    = pushConstantRanges.data();
         pipelineLayoutCI.setLayoutCount         = 1;
         pipelineLayoutCI.pSetLayouts            = &descriptorSetLayout;
 
@@ -246,7 +248,8 @@ namespace hsk {
 
         // Instanced object
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, descriptorsets.size(), descriptorsets.data(), 0, nullptr);
-        mScene->Draw(commandBuffer);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+        SceneDrawInfo drawInfo{.CmdBuffer = commandBuffer, .PipelineLayout = mPipelineLayout};
+        mScene->Draw(drawInfo);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);
     }
@@ -279,9 +282,8 @@ namespace hsk {
         blendAttachmentStates.resize(mAttachmentCountColor);
         for(int i = 0; i < mAttachmentCountColor; i++)
         {
-            blendAttachmentStates[i].blendEnable = false;
+            blendAttachmentStates[i].blendEnable    = false;
             blendAttachmentStates[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-            
         }
 
         VkPipelineColorBlendStateCreateInfo colorBlendState = {
@@ -292,7 +294,7 @@ namespace hsk {
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState = {
             .sType            = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-            .depthTestEnable  = true,
+            .depthTestEnable  = false,
             .depthWriteEnable = true,
             .depthCompareOp   = VK_COMPARE_OP_LESS_OR_EQUAL,
         };
@@ -340,7 +342,6 @@ namespace hsk {
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Tangent);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MaterialIndex);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MeshId);
         vertexInputStateBuilder.Build();
 
         VkGraphicsPipelineCreateInfo pipelineCI = {};

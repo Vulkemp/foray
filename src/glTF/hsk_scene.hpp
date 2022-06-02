@@ -3,11 +3,10 @@
 #include "hsk_animation.hpp"
 #include "hsk_camera.hpp"
 #include "hsk_geo.hpp"
-#include "hsk_glTF_declares.hpp"
+#include "hsk_gltf_declares.hpp"
 #include "hsk_material.hpp"
 #include "hsk_node.hpp"
 #include "hsk_scenecomponent.hpp"
-#include "hsk_skin.hpp"
 #include "hsk_texture.hpp"
 #include <memory>
 #include <tinygltf/tiny_gltf.h>
@@ -54,8 +53,6 @@ namespace hsk {
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTextureDescriptorInfo();
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetMaterialUboArrayDescriptorInfo();
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTransformationMatrixArrayDescriptorInfo();
-        void                                                 CreateTransformationMatrixArray();
 
         void Cleanup();
 
@@ -70,7 +67,8 @@ namespace hsk {
             glm::vec3 max = glm::vec3(-FLT_MAX);
         } dimensions;
 
-        void Draw(VkCommandBuffer cmdbuffer);
+
+        void Draw(SceneDrawInfo& drawInfo);
 
         virtual ~Scene();
 
@@ -85,8 +83,6 @@ namespace hsk {
         std::vector<Node*>                 mNodesHierarchy = {};
         std::vector<std::unique_ptr<Node>> mNodesLinear    = {};
 
-        std::vector<std::unique_ptr<Skin>> mSkins = {};
-
         ManagedBuffer vertices = {};
         ManagedBuffer indices  = {};
 
@@ -100,7 +96,6 @@ namespace hsk {
         void loadTextureSamplers(const tinygltf::Model& gltfModel);
         void loadTextures(const tinygltf::Model& gltfModel);
         void loadMaterials(const tinygltf::Model& gltfModel);
-        void loadSkins(const tinygltf::Model& gltfModel);
         void loadAnimations(const tinygltf::Model& gltfModel);
         void LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
 
@@ -109,9 +104,5 @@ namespace hsk {
 
         void updateAnimation(uint32_t index, float time);
         void drawNode(Node* node, VkCommandBuffer commandBuffer);
-
-        /// @brief Matrix array holds a transformation matrix for each node.
-        std::vector<glm::mat4> mTransformationMatrixArray;
-        ManagedBuffer          mTransformationMatrixArrayManagedBuffer;
     };
 }  // namespace hsk

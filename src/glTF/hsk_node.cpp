@@ -1,7 +1,7 @@
 #include "hsk_node.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_scene.hpp"
-#include "hsk_skin.hpp"
+#include "hsk_scenedrawinfo.hpp"
 
 namespace hsk {
     glm::mat4 Transform::LocalMatrix() { return glm::translate(glm::mat4(1.0f), Translation) * glm::mat4(Rotation) * glm::scale(glm::mat4(1.0f), Scale) * Matrix; }
@@ -32,17 +32,15 @@ namespace hsk {
     void Node::InitFromTinyGltfNode(
         const tinygltf::Model& model, const tinygltf::Node& gltfnode, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
-        index     = index;
-        mParent    = nullptr;
-        mName      = gltfnode.name;
-        mSkinIndex = gltfnode.skin;
-
+        index   = index;
+        mParent = nullptr;
+        mName   = gltfnode.name;
 
         // Node contains mesh data
         if(gltfnode.mesh > -1)
         {
             // TODO: Consider using instancing here!
-            mMesh = std::make_unique<Mesh>(Owner());
+            mMesh = std::make_unique<MeshInstance>(Owner());
             mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], gltfnode.mesh, indexBuffer, vertexBuffer);
         }
     }
@@ -74,11 +72,17 @@ namespace hsk {
         if(mMesh)
         {
             glm::mat4 mat = getMatrix();
-            mMesh->Update(mat, mSkin);
+            mMesh->Update(mat);
         }
     }
 
     Node::~Node() {}
+
+    void Node::Draw(SceneDrawInfo& drawInfo) {
+        if (mMesh){
+            mMesh->Draw(drawInfo);
+        }
+    }
 
 
 }  // namespace hsk

@@ -3,16 +3,16 @@
 
 namespace hsk {
     class Scene;
+    class SceneDrawInfo;
     class Texture;
     struct TextureSampler;
     class Node;
     struct Material;
     class MaterialBuffer;
     class Primitive;
-    class Mesh;
+    class MeshInstance;
     struct BoundingBox;
     struct Vertex;
-    class Skin;
     struct AnimationChannel;
     struct AnimationSampler;
     class Animation;

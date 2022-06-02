@@ -1,5 +1,5 @@
 #pragma once
-#include "hsk_glTF_declares.hpp"
+#include "hsk_gltf_declares.hpp"
 #include <glm/glm.hpp>
 #include <optional>
 #include <vma/vk_mem_alloc.h>
@@ -14,7 +14,6 @@ namespace hsk {
         Tangent,
         Uv,
         MaterialIndex,
-        MeshId
     };
 
     struct VertexComponentBinding
@@ -44,7 +43,6 @@ namespace hsk {
         glm::vec3 Tangent       = {};
         glm::vec2 Uv            = {};
         int32_t   MaterialIndex = {};
-        int32_t   MeshId        = {};
     };
 
 }  // namespace hsk

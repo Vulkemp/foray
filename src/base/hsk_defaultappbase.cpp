@@ -87,7 +87,7 @@ namespace hsk {
 
             mDeviceFeatures.bdafeatures.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
             mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
-           
+
 
 #ifndef DISABLE_RT_EXTENSIONS
 
@@ -401,23 +401,12 @@ namespace hsk {
 
         if(mSwapchainCopySourceImage)
         {
-            // Barrier : Convert GBuffer image layout into TRANSFER SOURCE optimal
-            /*barrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
-            barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
-            barrier.oldLayout           = mSwapchainCopySourceImage->GetImageLayout();
-            barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            barrier.srcQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-            barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-            barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
-
-            vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
-                                 nullptr, 0, nullptr, 1, &barrier);*/
-
             ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
             layoutTransitionInfo.CommandBuffer        = currentFrame.CommandBuffer;
             layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
             layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
             layoutTransitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
             layoutTransitionInfo.SrcQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.DstQueueFamilyIndex  = mDefaultQueue.QueueFamilyIndex;
             layoutTransitionInfo.SubresourceRange     = range;
@@ -433,7 +422,7 @@ namespace hsk {
             layers.baseArrayLayer           = 0;
             layers.layerCount               = 1;
 
-            VkImageBlit blitRegion   = {};
+            VkImageBlit blitRegion    = {};
             blitRegion.srcSubresource = layers;
             blitRegion.srcOffsets[0]  = {};
             blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
@@ -441,18 +430,8 @@ namespace hsk {
             blitRegion.dstOffsets[0]  = {};
             blitRegion.dstOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
 
-            // VkBlitImageInfo2 blitInfo = {.sType = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2_KHR};
-            // blitInfo.srcImage         = mSwapchainCopySourceImage->GetImage();
-            // blitInfo.srcImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            // blitInfo.dstImage         = mSwapchainImages[swapChainImageIndex].Image;
-            // blitInfo.dstImageLayout   = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            // blitInfo.regionCount      = 1;
-            // blitInfo.pRegions         = &blitRegion;
-            // blitInfo.filter           = VkFilter::VK_FILTER_NEAREST;
-            vkCmdBlitImage(currentFrame.CommandBuffer, 
-            mSwapchainCopySourceImage->GetImage(), 
-            VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mSwapchainImages[swapChainImageIndex].Image, 
-            VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
+            vkCmdBlitImage(currentFrame.CommandBuffer, mSwapchainCopySourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                           mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
         }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue

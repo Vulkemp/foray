@@ -1,4 +1,4 @@
-#include "hsk_boundingBox.hpp"
+#include "hsk_boundingbox.hpp"
 
 namespace hsk {
 

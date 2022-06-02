@@ -36,6 +36,7 @@ namespace hsk {
         {
             /// @brief New image layout is mandatory!
             VkImageLayout        NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
+            VkImageLayout        OldImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
             VkAccessFlags        BarrierSrcAccessMask{0};
             VkAccessFlags        BarrierDstAccessMask{0};
             VkPipelineStageFlags SrcStage{};

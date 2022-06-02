@@ -46,7 +46,6 @@ layout (location = 3) in vec3 inNormal; 			// Normal in world space
 layout (location = 4) in vec3 inTangent;			// Tangent in world space
 layout (location = 5) in vec2 inUV;					// UV coordinates
 layout (location = 6) flat in int inMaterialIndex;	// Material Index
-layout (location = 7) flat in int inMeshId;			// Mesh Id
 
 layout (location = 0) out vec4 outPosition;			// Fragment position in world spcae
 layout (location = 1) out vec4 outNormal;			// Fragment normal in world space
@@ -56,6 +55,10 @@ layout (location = 3) out vec2 outMotion;			// Fragment screenspace motion delta
 layout (location = 4) out int outMeshId;			// Fragment mesh id
 
 
+#define BIND_INSTANCE_PUSHC
+#include "gltf_pushc.glsl"
+
+
 void main() 
 {
 	// TEMP
@@ -63,7 +66,7 @@ void main()
 	outNormal = vec4(1,1,1.0f, 1.0);
 	outAlbedo = vec4(1,1,1.0f, 1.0);
 	outMotion = vec2(0.5, 1.0);
-	outMeshId = inMeshId;
+	outMeshId = PushConstant.MeshId;
 /*
 	outPosition = vec4(inWorldPos, 1.0);
 
