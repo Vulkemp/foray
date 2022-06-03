@@ -24,10 +24,11 @@ namespace hsk {
     }
 
     void MeshInstance::InitFromTinyGltfMesh(
-        const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+        const tinygltf::Model& model, const tinygltf::Mesh& mesh, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         // TODO: This function is incredibly ugly
 
+        mIndex = index;
         mPushConstant.MeshId = (int32_t)index;
 
         for(size_t j = 0; j < mesh.primitives.size(); j++)
@@ -187,7 +188,10 @@ namespace hsk {
     void MeshInstance::Update(const glm::mat4& mat)
     {
         // Todo: update model matrix in SceneTransformState Vector
-        
+        auto& sceneTransformState = mScene->GetTransformState();
+        auto& modelTransformState = sceneTransformState.Vector()[mIndex];
+        modelTransformState.PreviousModelMatrix = modelTransformState.ModelMatrix;
+        modelTransformState.ModelMatrix = mat;
     }
 
     void MeshInstance::Draw(SceneDrawInfo& drawInfo)

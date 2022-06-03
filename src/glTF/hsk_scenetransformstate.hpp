@@ -10,8 +10,8 @@ namespace hsk {
 
     struct alignas(16) ModelTransformState
     {
-        glm::mat4 ModelMatrix;
-        glm::mat4 PreviousModelMatrix;
+        glm::mat4 ModelMatrix         = glm::mat4(1.f);
+        glm::mat4 PreviousModelMatrix = glm::mat4(1.f);
     };
 
 
@@ -27,6 +27,8 @@ namespace hsk {
         inline virtual ~SceneTransformState() { Cleanup(); }
 
         inline std::vector<ModelTransformState>& Vector() { return mBuffer.GetVector(); }
+
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
 
       protected:
         void CreateBuffer(VkDeviceSize capacity);

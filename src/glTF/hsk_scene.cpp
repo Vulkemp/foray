@@ -4,8 +4,8 @@
 #include "hsk_animation.hpp"
 #include "hsk_mesh.hpp"
 #include "hsk_node.hpp"
-#include "hsk_texture.hpp"
 #include "hsk_scenedrawinfo.hpp"
+#include "hsk_texture.hpp"
 
 namespace hsk {
 
@@ -59,6 +59,18 @@ namespace hsk {
         return descriptorInfo;
     }
 
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTransformStateDescriptorInfo()
+    {
+        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_VERTEX_BIT;
+        descriptorInfo->pImmutableSamplers = nullptr;
+        descriptorInfo->DescriptorCount    = 1;
+        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+
+        descriptorInfo->BufferInfos.push_back({mTransformState.GetVkDescriptorBufferInfo()});
+        return descriptorInfo;
+    }
+
     void Scene::Cleanup()
     {
         vertices.Destroy();
@@ -84,20 +96,23 @@ namespace hsk {
 
         // TODO: Kill skins
         mCameras.resize(0);
+
+        mTransformState.Cleanup();
     }
 
     Scene::~Scene() { Cleanup(); }
 
-    void Scene::LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+    void Scene::LoadNodeRecursive(
+        const tinygltf::Model& gltfModel, int32_t index, uint32_t& meshInstanceCount, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         const tinygltf::Node& gltfnode = gltfModel.nodes[index];
         std::unique_ptr<Node> node     = std::make_unique<Node>(this);
-        node->InitFromTinyGltfNode(gltfModel, gltfnode, index, indexBuffer, vertexBuffer);
+        node->InitFromTinyGltfNode(gltfModel, gltfnode, index, meshInstanceCount, indexBuffer, vertexBuffer);
         mNodesLinear[index] = std::move(node);
 
         for(int32_t childIndex : gltfnode.children)
         {
-            LoadNodeRecursive(gltfModel, childIndex, indexBuffer, vertexBuffer);
+            LoadNodeRecursive(gltfModel, childIndex, meshInstanceCount, indexBuffer, vertexBuffer);
         }
     }
 
@@ -123,6 +138,10 @@ namespace hsk {
 
         if(fileLoaded)
         {
+            bool addDefaultCamera = gltfModel.cameras.size() == 0;
+            if (addDefaultCamera) {
+                
+            }
             loadTextureSamplers(gltfModel);
             loadTextures(gltfModel);
             loadMaterials(gltfModel);
@@ -134,11 +153,16 @@ namespace hsk {
             // our storage vector contains std::unique_ptr, which are small. Most models will only contain one scene.
             mNodesLinear.resize(gltfModel.nodes.size());
 
+            uint32_t meshInstanceCount = 0;
+
             // We load nodes recursively, as this is the only way to catch all nodes that are part of our scene
             for(size_t i = 0; i < scene.nodes.size(); i++)
             {
-                LoadNodeRecursive(gltfModel, scene.nodes[i], indexBuffer, vertexBuffer);
+                LoadNodeRecursive(gltfModel, scene.nodes[i], meshInstanceCount, indexBuffer, vertexBuffer);
             }
+
+            mTransformState.Vector().resize(meshInstanceCount);
+            mTransformState.InitOrUpdate();
 
             // Setup parents
             for(auto& node : mNodesLinear)

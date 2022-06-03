@@ -4,8 +4,6 @@
 namespace hsk {
     void Camera::InitFromTinyGltfCamera(const tinygltf::Camera& camera)
     {
-        mUbo = new ManagedUbo<CameraUboBlock>(true);
-        mUbo->Init(Context());
         ViewMat() = glm::identity<glm::mat4>();
         if(camera.type == "perspective")
         {
@@ -15,6 +13,7 @@ namespace hsk {
         {
             InitFromTinyGltfCameraOrthographic(camera.orthographic);
         }
+        mUbo.Init(Context(), true);
     }
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo()
@@ -35,9 +34,7 @@ namespace hsk {
             descriptorInfo->BufferInfos[setIndex].resize(numUbos);
             for(size_t i = 0; i < numUbos; i++)
             {
-                descriptorInfo->BufferInfos[setIndex][i].buffer = mUbo->GetManagedBuffer().GetBuffer();
-                descriptorInfo->BufferInfos[setIndex][i].offset = 0;
-                descriptorInfo->BufferInfos[setIndex][i].range  = sizeof(mUbo->GetUbo());
+                descriptorInfo->BufferInfos[setIndex][i] = mUbo.GetManagedBuffer().GetVkDescriptorBufferInfo();
             }
         }
         return descriptorInfo;
@@ -48,10 +45,10 @@ namespace hsk {
         glm::vec3 cameraEye    = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 cameraCenter = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 cameraUp     = glm::vec3(0.0f, 1.0f, 0.0f);
-        mUbo->GetUbo().ViewMat = glm::lookAt(cameraEye, cameraCenter, cameraUp);
+        mUbo.GetUbo().ViewMat  = glm::lookAt(cameraEye, cameraCenter, cameraUp);
     }
 
-    void Camera::InitDefaultProjectionMatrix() { mUbo->GetUbo().ProjectionMat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); }
+    void Camera::InitDefaultProjectionMatrix() { mUbo.GetUbo().ProjectionMat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); }
 
     void Camera::InitFromTinyGltfCameraPerspective(const tinygltf::PerspectiveCamera& camera)
     {
@@ -62,14 +59,7 @@ namespace hsk {
         ProjectionMat() = glm::orthoLH(-camera.xmag, camera.xmag, -camera.ymag, camera.ymag, camera.znear, camera.zfar);
     }
 
-    void Camera::Update() { mUbo->Update(); }
-    void Camera::Cleanup()
-    {
-        mUbo->Cleanup();
-        if(mUbo != nullptr)
-        {
-            delete mUbo;
-        }
-    }
+    void Camera::Update() { mUbo.Update(); }
+    void Camera::Cleanup() { mUbo.Cleanup(); }
 
 }  // namespace hsk

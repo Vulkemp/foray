@@ -21,7 +21,7 @@ namespace hsk {
     class Camera : public hsk::SceneComponent
     {
       public:
-        inline explicit Camera(hsk::Scene* scene) : SceneComponent(scene) {}
+        inline explicit Camera(hsk::Scene* scene) : SceneComponent(scene), mUbo(true) {}
 
         void InitFromTinyGltfCamera(const tinygltf::Camera& camera);
 
@@ -36,9 +36,9 @@ namespace hsk {
 
         inline glm::mat4& ProjectionMat()
         {
-            return mUbo->GetUbo().ProjectionMat;
+            return mUbo.GetUbo().ProjectionMat;
         }
-        inline glm::mat4& ViewMat() { return mUbo->GetUbo().ViewMat; }
+        inline glm::mat4& ViewMat() { return mUbo.GetUbo().ViewMat; }
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo();
 
@@ -47,7 +47,7 @@ namespace hsk {
 
       protected:
 
-        ManagedUbo<CameraUboBlock>* mUbo{nullptr}; // TODO: There is some issue with this beeing a unique ptr, investigate later
+        ManagedUbo<CameraUboBlock> mUbo;
 
         void InitFromTinyGltfCameraPerspective(const tinygltf::PerspectiveCamera& camera);
         void InitFromTinyGltfCameraOrthographic(const tinygltf::OrthographicCamera& camera);

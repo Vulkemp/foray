@@ -36,7 +36,7 @@ namespace hsk {
         inline explicit Node(Scene* scene) : SceneComponent(scene) {}
         glm::mat4 getMatrix();
         void      update();
-        void InitFromTinyGltfNode(const tinygltf::Model& model, const tinygltf::Node& node, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
+        void InitFromTinyGltfNode(const tinygltf::Model& model, const tinygltf::Node& node, int32_t index, uint32_t& meshInstanceCount, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
         void ResolveParent();
         ~Node();
 

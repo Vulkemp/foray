@@ -54,6 +54,7 @@ namespace hsk {
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTextureDescriptorInfo();
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetMaterialUboArrayDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTransformStateDescriptorInfo();
 
         void Cleanup();
 
@@ -74,6 +75,7 @@ namespace hsk {
         virtual ~Scene();
 
         HSK_PROPERTY_GET(Cameras);
+        HSK_PROPERTY_GET(TransformState);
 
       protected:
         const VkContext*                      mContext                = {};
@@ -99,7 +101,7 @@ namespace hsk {
         void loadTextures(const tinygltf::Model& gltfModel);
         void loadMaterials(const tinygltf::Model& gltfModel);
         void loadAnimations(const tinygltf::Model& gltfModel);
-        void LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
+        void LoadNodeRecursive(const tinygltf::Model& gltfModel, int32_t index, uint32_t& meshInstanceCount, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
 
         void calculateSceneDimensions();
         void calculateBoundingBox(Node* node, Node* parent);

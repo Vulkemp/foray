@@ -35,7 +35,7 @@ namespace hsk {
 
         MeshInstance();
         MeshInstance(Scene* scene);
-        void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, uint32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
+        void InitFromTinyGltfMesh(const tinygltf::Model& model, const tinygltf::Mesh& mesh, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
         ~MeshInstance();
         void setBoundingBox(glm::vec3 min, glm::vec3 max);
         void Cleanup();
@@ -53,6 +53,7 @@ namespace hsk {
         BoundingBox                             mAxisAlignedBoundingBox = {};
         VertexInputStateBuilder                 mVertexInputStateBuilder{};
         PushConstant                            mPushConstant{};
+        int32_t                                 mIndex = 0;
     };
 
 }  // namespace hsk

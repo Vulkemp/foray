@@ -30,7 +30,7 @@ namespace hsk {
     }
 
     void Node::InitFromTinyGltfNode(
-        const tinygltf::Model& model, const tinygltf::Node& gltfnode, int32_t index, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
+        const tinygltf::Model& model, const tinygltf::Node& gltfnode, int32_t index, uint32_t& meshInstanceCount, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer)
     {
         index   = index;
         mParent = nullptr;
@@ -41,7 +41,8 @@ namespace hsk {
         {
             // TODO: Consider using instancing here!
             mMesh = std::make_unique<MeshInstance>(Owner());
-            mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], gltfnode.mesh, indexBuffer, vertexBuffer);
+            mMesh->InitFromTinyGltfMesh(model, model.meshes[gltfnode.mesh], meshInstanceCount, indexBuffer, vertexBuffer);
+            meshInstanceCount++;
         }
     }
 

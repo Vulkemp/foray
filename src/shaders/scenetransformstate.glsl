@@ -11,4 +11,8 @@ struct ModelTransformState
 
 layout (set = SET_SCENE_TRANSFORM_STATE, binding = BIND_SCENE_TRANSFORM_STATE) readonly buffer SceneTransformStateBuffer{ ModelTransformState Array[]; } SceneTransformState;
 
+ModelTransformState GetTransformState(in int meshInstanceIndex) {
+    return SceneTransformState.Array[meshInstanceIndex];
+}
+
 #endif

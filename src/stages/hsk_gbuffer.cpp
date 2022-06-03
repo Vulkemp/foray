@@ -186,6 +186,7 @@ namespace hsk {
     {
         mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetMaterialUboArrayDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetTextureDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetTransformStateDescriptorInfo());
 
         //if(mScene->GetCameras().size() != 0)
         //{

@@ -19,22 +19,23 @@ layout (location = 6) flat out int outMaterialIndex;	// Material Index
 #define BIND_INSTANCE_PUSHC
 #include "gltf_pushc.glsl"
 
-#define BIND_SCENE_TRANSFORM_STATE 0
+#define BIND_SCENE_TRANSFORM_STATE 2
 #include "scenetransformstate.glsl"
 
 void main() 
 {
+	ModelTransformState transformState = GetTransformState(PushConstant.MeshId);
 	mat4 ProjMat;
 	mat4 ViewMat;
-	mat4 ModelMat;
+	mat4 ModelMat = transformState.ModelMatrix;
 	mat4 ProjMatPrev;
 	mat4 ViewMatPrev;
-	mat4 ModelMatPrev; // Todo use PushConstant.MeshId to get matrices
+	mat4 ModelMatPrev = transformState.PreviousModelMatrix;
 
 	// Get transformations out of the way
 	outWorldPos = inPos;
 	//outDevicePos = ProjMat * ViewMat * PushConstant.ModelMatrix * vec4(inPos, 1.f);
-	outDevicePos = vec4(inPos, 1.f) * vec4(vec3(15.0),1.0);
+	outDevicePos = ModelMat * vec4(inPos, 1.f) * vec4(vec3(15.0),1.0);
 	gl_Position = outDevicePos;
 	outOldDevicePos = ProjMatPrev * ViewMatPrev * ModelMatPrev * vec4(inPos, 1.f);
 
