@@ -71,6 +71,11 @@ namespace hsk {
         return descriptorInfo;
     }
 
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetCameraDescriptorInfo()
+    {
+        return mCameras.size() ? mCameras.front()->GetUboDescriptorInfo() : nullptr;
+    }
+
     void Scene::Cleanup()
     {
         vertices.Destroy();
@@ -140,7 +145,8 @@ namespace hsk {
         {
             bool addDefaultCamera = gltfModel.cameras.size() == 0;
             if (addDefaultCamera) {
-                
+                mCameras.push_back(std::move(std::make_unique<Camera>(this)));
+                mCameras.back()->InitDefault();
             }
             loadTextureSamplers(gltfModel);
             loadTextures(gltfModel);
@@ -159,6 +165,14 @@ namespace hsk {
             for(size_t i = 0; i < scene.nodes.size(); i++)
             {
                 LoadNodeRecursive(gltfModel, scene.nodes[i], meshInstanceCount, indexBuffer, vertexBuffer);
+            }
+
+            if (addDefaultCamera){
+                mNodesLinear.resize(mNodesLinear.size() + 1);
+                mNodesLinear.back() = std::make_unique<Node>(this);
+                Node* cameraNode = mNodesLinear.back().get();
+                mNodesHierarchy.push_back(cameraNode);
+                cameraNode->SetCamera(mCameras.front().get());
             }
 
             mTransformState.Vector().resize(meshInstanceCount);

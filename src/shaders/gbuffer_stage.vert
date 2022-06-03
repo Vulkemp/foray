@@ -22,14 +22,17 @@ layout (location = 6) flat out int outMaterialIndex;	// Material Index
 #define BIND_SCENE_TRANSFORM_STATE 2
 #include "scenetransformstate.glsl"
 
+#define BIND_CAMERA_UBO 3
+#include "camera.glsl"
+
 void main() 
 {
 	ModelTransformState transformState = GetTransformState(PushConstant.MeshId);
-	mat4 ProjMat;
-	mat4 ViewMat;
+	mat4 ProjMat = Camera.ProjectionMatrix;
+	mat4 ViewMat = Camera.ViewMatrix;
 	mat4 ModelMat = transformState.ModelMatrix;
-	mat4 ProjMatPrev;
-	mat4 ViewMatPrev;
+	mat4 ProjMatPrev = Camera.PreviousProjectionMatrix;
+	mat4 ViewMatPrev = Camera.PreviousViewMatrix;
 	mat4 ModelMatPrev = transformState.PreviousModelMatrix;
 
 	// Get transformations out of the way

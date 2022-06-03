@@ -32,26 +32,33 @@ namespace hsk {
         HSK_PROPERTY_ALL(Mesh)
         HSK_PROPERTY_ALL(Bvh)
         HSK_PROPERTY_ALL(AxisAlignedBoundingBox)
+        HSK_PROPERTY_ALL(Camera)
 
         inline explicit Node(Scene* scene) : SceneComponent(scene) {}
         glm::mat4 getMatrix();
         void      update();
-        void InitFromTinyGltfNode(const tinygltf::Model& model, const tinygltf::Node& node, int32_t index, uint32_t& meshInstanceCount, std::vector<uint32_t>& indexBuffer, std::vector<Vertex>& vertexBuffer);
-        void ResolveParent();
+        void      InitFromTinyGltfNode(const tinygltf::Model& model,
+                                       const tinygltf::Node&  node,
+                                       int32_t                index,
+                                       uint32_t&              meshInstanceCount,
+                                       std::vector<uint32_t>& indexBuffer,
+                                       std::vector<Vertex>&   vertexBuffer);
+        void      ResolveParent();
         ~Node();
 
         void Draw(SceneDrawInfo& drawInfo);
 
       protected:
-        Transform          mTransform  = {};
-        Node*              mParent      = nullptr;
-        int32_t            mParentIndex = -1;
-        int32_t            mIndex       = -1;
-        std::vector<Node*> mChildren    = {};
-        std::string           mName      = {};
-        std::unique_ptr<hsk::MeshInstance> mMesh      = {};
-        BoundingBox           mBvh       = {};
-        BoundingBox           mAxisAlignedBoundingBox      = {};
+        Transform                          mTransform              = {};
+        Node*                              mParent                 = nullptr;
+        int32_t                            mParentIndex            = -1;
+        int32_t                            mIndex                  = -1;
+        std::vector<Node*>                 mChildren               = {};
+        std::string                        mName                   = {};
+        std::unique_ptr<hsk::MeshInstance> mMesh                   = {};
+        Camera*                            mCamera                 = nullptr;
+        BoundingBox                        mBvh                    = {};
+        BoundingBox                        mAxisAlignedBoundingBox = {};
     };
 
 }  // namespace hsk

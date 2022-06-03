@@ -80,13 +80,13 @@ namespace hsk {
 
         mManagedBuffer.Create(context, bufferCI);
 
-        if(update)
-        {
-            Update();
-        }
         if(mMapPersistent)
         {
             mManagedBuffer.Map(mMapped);
+        }
+        if(update)
+        {
+            Update();
         }
     }
 

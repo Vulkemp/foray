@@ -31,8 +31,8 @@ namespace hsk {
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_GET(Vector)
         HSK_PROPERTY_CGET(Vector)
-        HSK_PROPERTY_GET(DeviceBuffer)
-        HSK_PROPERTY_CGET(DeviceBuffer)
+        HSK_PROPERTY_GET(DeviceLocalBuffer)
+        HSK_PROPERTY_CGET(DeviceLocalBuffer)
         HSK_PROPERTY_CGET(DeviceCount)
         HSK_PROPERTY_CGET(DeviceCapacity)
 
@@ -44,7 +44,7 @@ namespace hsk {
 
         const VkContext*    mContext        = nullptr;
         std::vector<TClass> mVector         = {};
-        ManagedBuffer       mDeviceBuffer   = {};
+        ManagedBuffer       mDeviceLocalBuffer   = {};
         VkDeviceSize        mDeviceCount    = 0;
         VkDeviceSize        mDeviceCapacity = 0;
     };
@@ -81,7 +81,7 @@ namespace hsk {
 
         VkDeviceSize bufferSize = mDeviceCapacity * sizeof(TClass);
 
-        mDeviceBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
+        mDeviceLocalBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
     }
     template <typename TClass>
@@ -91,11 +91,11 @@ namespace hsk {
         VkDeviceSize deviceSize   = section.count * sizeof(TClass);
         VkDeviceSize deviceOffset = section.offset * sizeof(TClass);
 
-        mDeviceBuffer.WriteDataDeviceLocal(uploadData, deviceSize, deviceOffset);
+        mDeviceLocalBuffer.WriteDataDeviceLocal(uploadData, deviceSize, deviceOffset);
     }
     template <typename TClass>
     void ManagedVectorBuffer<TClass>::Cleanup()
     {
-        mDeviceBuffer.Destroy();
+        mDeviceLocalBuffer.Destroy();
     }
 }  // namespace hsk

@@ -16,6 +16,12 @@ namespace hsk {
         mUbo.Init(Context(), true);
     }
 
+    void Camera::InitDefault() {
+        InitDefaultViewMatrix();
+        InitDefaultProjectionMatrix();
+        mUbo.Init(Context(), true);
+    }
+
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo()
     {
         size_t numUbos = 1;  // we load the complete ubo buffer as a single ubo buffer.
@@ -45,10 +51,10 @@ namespace hsk {
         glm::vec3 cameraEye    = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 cameraCenter = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 cameraUp     = glm::vec3(0.0f, 1.0f, 0.0f);
-        mUbo.GetUbo().ViewMat  = glm::lookAt(cameraEye, cameraCenter, cameraUp);
+        mUbo.GetUbo().ViewMatrix  = glm::lookAt(cameraEye, cameraCenter, cameraUp);
     }
 
-    void Camera::InitDefaultProjectionMatrix() { mUbo.GetUbo().ProjectionMat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); }
+    void Camera::InitDefaultProjectionMatrix() { mUbo.GetUbo().ProjectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); }
 
     void Camera::InitFromTinyGltfCameraPerspective(const tinygltf::PerspectiveCamera& camera)
     {

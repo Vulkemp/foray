@@ -14,8 +14,10 @@ namespace hsk {
 
     struct CameraUboBlock
     {
-        glm::mat4 ProjectionMat = {};
-        glm::mat4 ViewMat = {};
+        glm::mat4 ProjectionMatrix = {};
+        glm::mat4 ViewMatrix = {};
+        glm::mat4 PreviousProjectionMatrix = {};
+        glm::mat4 PreviousViewMatrix = {};
     };
 
     class Camera : public hsk::SceneComponent
@@ -24,6 +26,7 @@ namespace hsk {
         inline explicit Camera(hsk::Scene* scene) : SceneComponent(scene), mUbo(true) {}
 
         void InitFromTinyGltfCamera(const tinygltf::Camera& camera);
+        void InitDefault();
 
         void Update();
 
@@ -36,9 +39,9 @@ namespace hsk {
 
         inline glm::mat4& ProjectionMat()
         {
-            return mUbo.GetUbo().ProjectionMat;
+            return mUbo.GetUbo().ProjectionMatrix;
         }
-        inline glm::mat4& ViewMat() { return mUbo.GetUbo().ViewMat; }
+        inline glm::mat4& ViewMat() { return mUbo.GetUbo().ViewMatrix; }
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo();
 

@@ -28,7 +28,7 @@ namespace hsk {
 
         inline std::vector<ModelTransformState>& Vector() { return mBuffer.GetVector(); }
 
-        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetDeviceLocalBuffer().GetVkDescriptorBufferInfo(); }
 
       protected:
         void CreateBuffer(VkDeviceSize capacity);

@@ -55,6 +55,7 @@ namespace hsk {
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTextureDescriptorInfo();
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetMaterialUboArrayDescriptorInfo();
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetTransformStateDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetCameraDescriptorInfo();
 
         void Cleanup();
 

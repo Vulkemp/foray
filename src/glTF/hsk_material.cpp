@@ -66,36 +66,36 @@ namespace hsk {
     void MaterialBuffer::InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials)
     {
         mMaterialDescriptions.clear();
-        mDeviceBuffer.GetVector().clear();
+        mBuffer.GetVector().clear();
         for(int32_t i = 0; i < materials.size(); i++)
         {
             Material material = {};
             material.InitFromTinyGltfMaterial(materials[i]);
             mMaterialDescriptions.push_back(material);
-            mDeviceBuffer.GetVector().push_back(material.MakeBufferObject());
+            mBuffer.GetVector().push_back(material.MakeBufferObject());
         }
 
         UpdateBuffer();
     }
     void MaterialBuffer::Cleanup()
     {
-        mDeviceBuffer.Cleanup();
+        mBuffer.Cleanup();
         mMaterialDescriptions.clear();
-        mDeviceBuffer.GetVector().clear();
+        mBuffer.GetVector().clear();
     }
     void MaterialBuffer::UpdateBuffer()
     {
-        mDeviceBuffer.SetContext(Context());
-        mDeviceBuffer.GetDeviceBuffer().SetName("MaterialBuffer");
+        mBuffer.SetContext(Context());
+        mBuffer.GetDeviceLocalBuffer().SetName("MaterialBuffer");
 
-        mDeviceBuffer.InitOrUpdate();
+        mBuffer.InitOrUpdate();
     }
     void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)
     {
         VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer                 = mDeviceBuffer.GetDeviceBuffer().GetBuffer();
+        bufferInfo.buffer                 = mBuffer.GetDeviceLocalBuffer().GetBuffer();
         bufferInfo.offset                 = 0;
-        bufferInfo.range                  = mDeviceBuffer.GetDeviceSize();
+        bufferInfo.range                  = mBuffer.GetDeviceSize();
 
         VkWriteDescriptorSet writeOpInfo = {};
         writeOpInfo.sType                = VkStructureType::VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

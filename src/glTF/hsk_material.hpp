@@ -67,17 +67,14 @@ namespace hsk {
 
         HSK_PROPERTY_GET(MaterialDescriptions)
         HSK_PROPERTY_CGET(MaterialDescriptions)
-        HSK_PROPERTY_GET(DeviceBuffer)
-        HSK_PROPERTY_CGET(DeviceBuffer)
+        HSK_PROPERTY_GET(Buffer)
+        HSK_PROPERTY_CGET(Buffer)
 
-        inline const VkBuffer GetVkBuffer() { return mDeviceBuffer.GetDeviceBuffer().GetBuffer(); }
-        inline VkDeviceSize   GetDeviceSize() { return mDeviceBuffer.GetDeviceSize(); }
-
-        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mDeviceBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetDeviceLocalBuffer().GetVkDescriptorBufferInfo(); }
 
       protected:
         std::vector<Material>                     mMaterialDescriptions = {};
-        ManagedVectorBuffer<MaterialBufferObject> mDeviceBuffer         = {};
+        ManagedVectorBuffer<MaterialBufferObject> mBuffer               = {};
 
         virtual void WriteDescriptorSet(VkDescriptorSet set, uint32_t binding);
     };
