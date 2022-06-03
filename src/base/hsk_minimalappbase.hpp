@@ -78,6 +78,8 @@ namespace hsk {
         inline virtual void Init() {}
         /// @brief Override this method to render your application
         inline virtual void Render(float delta) {}
+         /// @brief Override to update logic. Delta describes time passed since last update.
+         inline virtual void Update(float delta) {}
         /// @brief Override this method to react to events
         inline virtual void OnEvent(std::shared_ptr<Event> event) {}
         /// @brief Override this method to cleanup your application

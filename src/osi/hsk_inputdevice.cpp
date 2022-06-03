@@ -50,9 +50,9 @@ namespace hsk {
         return DefinedButtons;
     }
 
-    const InputDevice::ButtonPtr InputDevice::FindButton(EButton button) const
+    const InputBinary* InputDevice::FindButton(EButton button) const
     {
-        for(ButtonPtr buttonptr : mButtons)
+        for(InputBinary* buttonptr : mButtons)
         {
             if(buttonptr->Button() == button)
             {
@@ -69,7 +69,7 @@ namespace hsk {
         if(mButtons.size() > 0)
         {
             builder << "\t" << mButtons.size() << " Buttons:\n";
-            for(ButtonPtr button : mButtons)
+            for(auto button : mButtons)
             {
                 builder << "\t\t" << button->Name() << "\n";
             }

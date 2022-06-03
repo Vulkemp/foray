@@ -21,7 +21,6 @@ namespace hsk {
         };
 
         using AxisPtr   = const InputAnalogue*;
-        using ButtonPtr = const InputBinary*;
 
         class AxisJoystick : public InputAnalogue
         {
@@ -84,7 +83,7 @@ namespace hsk {
         InputDevice& operator=(const InputDevice& other) = delete;
 
         const std::vector<AxisPtr>&   Axes() const { return mAxes; }
-        const std::vector<ButtonPtr>& Buttons() const { return mButtons; }
+        const std::vector<InputBinary*>& Buttons() const { return mButtons; }
 
         const std::string& Name() const { return mName; }
         EType              Type() const { return mType; }
@@ -92,7 +91,7 @@ namespace hsk {
         /// @brief Finds a button object based on the corresponding enum value.
         /// InputBinary objects are valid until the input device is deleted, so storing the object for later use is a good idea.
         /// @return nullptr if not found, a valid button object
-        const ButtonPtr FindButton(EButton button) const;
+        const InputBinary* FindButton(EButton button) const;
 
         std::string BuildDebugPrint() const;
 
@@ -116,7 +115,7 @@ namespace hsk {
         EType       mType;
 
         std::vector<AxisPtr>   mAxes;
-        std::vector<ButtonPtr> mButtons;
+        std::vector<InputBinary*> mButtons;
     };
 
 }  // namespace hsk

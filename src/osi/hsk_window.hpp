@@ -54,6 +54,8 @@ namespace hsk {
         /// @brief (Getter) Display Mode
         inline EDisplayMode DisplayMode() const { return mDisplayMode; };
 
+        SDL_Window* GetSdlWindowHandle() { return mHandle; }
+
         virtual uint32_t SDLId() const;
 
         virtual VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;

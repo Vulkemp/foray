@@ -54,7 +54,7 @@ namespace hsk {
         mUbo.GetUbo().ViewMatrix  = glm::lookAt(cameraEye, cameraCenter, cameraUp);
     }
 
-    void Camera::InitDefaultProjectionMatrix() { mUbo.GetUbo().ProjectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); }
+    void Camera::InitDefaultProjectionMatrix() { mUbo.GetUbo().ProjectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 10000.0f); }
 
     void Camera::InitFromTinyGltfCameraPerspective(const tinygltf::PerspectiveCamera& camera)
     {

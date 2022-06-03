@@ -73,6 +73,7 @@ namespace hsk {
                         // We don't want to attempt smooth out more than 5 missed cycles
                         balance = timespan_t(0.f);
                     }
+                    Update(delta.count());
                     Render(delta.count());
                 }
                 else

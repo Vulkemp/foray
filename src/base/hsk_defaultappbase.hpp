@@ -6,6 +6,7 @@
 #include "../memory/hsk_managedimage.hpp"
 #include <vma/vk_mem_alloc.h>
 #include "hsk_vkcontext.hpp"
+#include "../utility/hsk_freeflightcameracontroller.hpp"
 
 namespace hsk {
 
@@ -95,6 +96,8 @@ namespace hsk {
         std::string mShaderOutputDirectoryPathFull;
         /// @brief The shader compiler. See shader compiler options for further configuration.
         ShaderCompiler mShaderCompiler;
+        /// @brief The default camera controller.
+        FreeFlightCameraController mFreeFlightCameraController;
 
 #pragma region Vulkan
         /// @brief The applications vulkan context.
