@@ -29,10 +29,10 @@ namespace hsk {
         bool mCameraActive{true};
         bool mReactOnMouseMoveEvents{false};
 
-        glm::vec3 mCameraPos    = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 mCameraPos    = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 mCameraFront  = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 mCameraUp     = glm::vec3(0.0f, 1.0f, 0.0f);
-        float     mCameraSpeed  = 0.002f;
+        float     mCameraSpeed  = 3.0f;
         float     mInvertYAxis = -1;
 
         glm::mat4  mViewMatrix;

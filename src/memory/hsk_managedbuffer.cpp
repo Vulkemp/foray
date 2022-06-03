@@ -96,7 +96,7 @@ namespace hsk {
 
     void ManagedBuffer::WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
-        Assert(size + offsetDstBuffer < mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
+        Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data);

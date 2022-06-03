@@ -38,7 +38,7 @@ void main()
 	// Get transformations out of the way
 	outWorldPos = inPos;
 	//outDevicePos = ProjMat * ViewMat * PushConstant.ModelMatrix * vec4(inPos, 1.f);
-	outDevicePos = ProjMat * ViewMat * ModelMat * vec4(inPos, 1.f) * vec4(vec3(15.0),1.0);
+	outDevicePos = ProjMat * ViewMat * ModelMat * vec4(inPos, 1.f);
 	gl_Position = outDevicePos;
 	outOldDevicePos = ProjMatPrev * ViewMatPrev * ModelMatPrev * vec4(inPos, 1.f);
 

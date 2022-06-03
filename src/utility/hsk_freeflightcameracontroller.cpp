@@ -14,13 +14,6 @@ namespace hsk {
         mInputBinaryKeyA = osManager->Keyboard()->FindButton(EButton::Keyboard_A);
         mInputBinaryKeyS = osManager->Keyboard()->FindButton(EButton::Keyboard_S);
         mInputBinaryKeyD = osManager->Keyboard()->FindButton(EButton::Keyboard_D);
-
-        // add buttons that require pressed state tracking
-        /*std::vector<EButton> buttons = {EButton::Keyboard_W, EButton::Keyboard_A, EButton::Keyboard_S, EButton::Keyboard_D};
-        for(auto button : buttons)
-        {
-            mButtonsPressedMap[button] = false;
-        }*/
     }
     void FreeFlightCameraController::OnEvent(std::shared_ptr<Event> event)
     {
@@ -55,6 +48,8 @@ namespace hsk {
         if(mInputBinaryKeyD->State())
             mCameraPos += glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
         
+        auto aspectRatio         = mContext->Swapchain.extent.width / static_cast<float>(mContext->Swapchain.extent.height);
+        mCamera->ProjectionMat() = glm::perspective(glm::radians(45.0f), aspectRatio, 0.01f, 5000.0f);
         mCamera->ViewMat() = glm::lookAt(mCameraPos, mCameraPos + mCameraFront, mCameraUp);
         mCamera->Update();
     }
@@ -63,7 +58,6 @@ namespace hsk {
     {
         auto pressed    = event->Pressed();
         auto buttonType = event->Button()->Button();
-        //mButtonsPressedMap[buttonType] = pressed; // del
         if(buttonType == EButton::Keyboard_Space && pressed)
         {
             mReactOnMouseMoveEvents = !mReactOnMouseMoveEvents;
@@ -77,15 +71,23 @@ namespace hsk {
         {
             return;
         }
+        if(mIgnoreNextMouseEvent)
+        {
+            mIgnoreNextMouseEvent = false;
+            return;
+        }
 
         float xpos = event->CurrentX();
         float ypos = event->CurrentY();
+        
 
         float centerX = mContext->Swapchain.extent.width / 2;
         float centerY = mContext->Swapchain.extent.height / 2;
 
         float xoffset = xpos - centerX;
         float yoffset = centerY - ypos;
+
+        logger()->info("current x,y {}/{} offset {}/{}", xpos, ypos, xoffset, yoffset);
 
         if(mFirstMoveAfterUnlock)
         {
@@ -97,7 +99,9 @@ namespace hsk {
 
         // lock cursor to screen center
         auto window = Window::Windows()[0]->GetSdlWindowHandle();  // TODO only assume one window?
+        mIgnoreNextMouseEvent = true;
         SDL_WarpMouseInWindow(window, centerX, centerY);
+        
 
         xoffset *= mSensitivity;
         yoffset *= mSensitivity;
