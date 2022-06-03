@@ -49,7 +49,7 @@ namespace hsk {
             mCameraPos += glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
         
         auto aspectRatio         = mContext->Swapchain.extent.width / static_cast<float>(mContext->Swapchain.extent.height);
-        mCamera->ProjectionMat() = glm::perspective(glm::radians(45.0f), aspectRatio, 0.01f, 5000.0f);
+        mCamera->ProjectionMat() = glm::perspective(glm::radians(45.0f), aspectRatio, 1.0f, 5000.0f);
         mCamera->ViewMat() = glm::lookAt(mCameraPos, mCameraPos + mCameraFront, mCameraUp);
         mCamera->Update();
     }

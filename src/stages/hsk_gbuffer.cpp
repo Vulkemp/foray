@@ -202,8 +202,9 @@ namespace hsk {
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 
-        std::vector<VkPushConstantRange> pushConstantRanges(
-            {{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, .offset = 0, .size = sizeof(MeshInstance::PushConstant)}});
+        std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
+                                                              .offset     = 0,
+                                                              .size       = sizeof(MeshInstance::PushConstant)}});
 
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -295,10 +296,14 @@ namespace hsk {
         };
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState = {
-            .sType            = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-            .depthTestEnable  = false,
-            .depthWriteEnable = true,
-            .depthCompareOp   = VK_COMPARE_OP_LESS_OR_EQUAL,
+            .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+            .depthTestEnable       = true,
+            .depthWriteEnable      = true,
+            .depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL,
+            .depthBoundsTestEnable = false,
+            .stencilTestEnable     = false,
+            .minDepthBounds        = 0,
+            .maxDepthBounds        = 10000,
         };
 
         VkPipelineViewportStateCreateInfo viewportState = {
