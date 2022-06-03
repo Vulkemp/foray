@@ -116,6 +116,9 @@ namespace hsk {
         barrier.dstAccessMask       = transitionInfo.BarrierDstAccessMask;
 
         vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+        // update image layout
+        mImageLayout = barrier.newLayout;
     }
 
     void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
