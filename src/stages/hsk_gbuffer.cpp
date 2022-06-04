@@ -12,24 +12,43 @@ namespace hsk {
         mScene   = scene;
 
         mScene->AssertSceneloaded(true);
-        // declare all descriptors here
 
-        InitResolutionDependentComponents();
-        InitFixedSizeComponents();
+        CreateResolutionDependentComponents();
+        CreateFixedSizeComponents();
     }
 
-    void GBufferStage::InitFixedSizeComponents()
+    void GBufferStage::CreateFixedSizeComponents()
     {
         SetupDescriptors();
         PreparePipeline();
     }
-    void GBufferStage::InitResolutionDependentComponents()
+
+    void GBufferStage::CreateResolutionDependentComponents()
     {
         PrepareAttachments();
         PrepareRenderpass();
         BuildCommandBuffer();
     }
-    void GBufferStage::DestroyResolutionDependentComponents() {}
+
+    void GBufferStage::DestroyResolutionDependentComponents()
+    {
+        VkDevice device = mContext->Device;
+        for(auto& colorAttachment : mColorAttachments)
+        {
+            colorAttachment->Destroy();
+        }
+        mDepthAttachment.Destroy();
+        if(mFrameBuffer)
+        {
+            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
+            mFrameBuffer = nullptr;
+        }
+        if(mRenderpass)
+        {
+            vkDestroyRenderPass(device, mRenderpass, nullptr);
+            mRenderpass = nullptr;
+        }
+    }
 
     void GBufferStage::PrepareAttachments()
     {
@@ -42,65 +61,72 @@ namespace hsk {
         VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 1};
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
+        VkImageLayout            intialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
-        // if res = result false, image format with given usage flags is not supported.
-        //VkImageFormatProperties props{};
-        //auto res = vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, VK_FORMAT_R8G8B8A8_SRGB, VkImageType::VK_IMAGE_TYPE_2D, VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
-        //imageUsageFlags, 0, &props);
+        mColorAttachments.clear();
+        mColorAttachments.reserve(5);
+        mColorAttachments.push_back(std::make_unique<ManagedImage>());
+        mColorAttachments.push_back(std::make_unique<ManagedImage>());
+        mColorAttachments.push_back(std::make_unique<ManagedImage>());
+        mColorAttachments.push_back(std::make_unique<ManagedImage>());
+        mColorAttachments.push_back(std::make_unique<ManagedImage>());
 
-        mPositionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
-        mNormalAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
-        mAlbedoAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
-        mMotionAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat);
-        mMeshIdAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT);
+        mColorAttachments[0]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, "Position");
+        mColorAttachments[1]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, "Normal");
+        mColorAttachments[2]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, "Albedo");
+        mColorAttachments[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, "Motion");
+        mColorAttachments[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, "MeshId");
+
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
                                 VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 
     void GBufferStage::PrepareRenderpass()
     {
-        // Formatting attachment data into VkAttachmentDescription structs
+        // size + 1 for depth attachment description
+        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size() + 1);
+        std::vector<VkAttachmentReference>   colorAttachmentReferences(mColorAttachments.size());
+        std::vector<VkImageView>             attachmentViews(attachmentDescriptions.size());
 
-        std::vector<VkAttachmentDescription> attachmentDescriptions = {};
-        const uint32_t                       attachmentCount        = mAttachmentCountColor + mAttachmentCountDepth;
-        attachmentDescriptions.resize(attachmentCount);
-        ManagedImage* attachments[] = {&mPositionAttachment, &mNormalAttachment, &mAlbedoAttachment, &mMotionAttachment, &mMeshIdAttachment, &mDepthAttachment};
-
-        for(uint32_t i = 0; i < attachmentCount; i++)
+        for(uint32_t i = 0; i < mColorAttachments.size(); i++)
         {
-            attachmentDescriptions[i].samples        = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
-            attachmentDescriptions[i].loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachmentDescriptions[i].storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE;
-            attachmentDescriptions[i].stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachmentDescriptions[i].stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            attachmentDescriptions[i].finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
-            attachmentDescriptions[i].format         = attachments[i]->GetFormat();
+            auto& colorAttachment                    = mColorAttachments[i];
+            attachmentDescriptions[i].samples        = colorAttachment->GetSampleCount();
+            attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+            attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
+            attachmentDescriptions[i].format         = colorAttachment->GetFormat();
+
+            colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
+            attachmentViews[i]           = colorAttachment->GetImageView();
         }
 
-        // The depth attachment needs a different layout
-        attachmentDescriptions[mAttachmentCountColor].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        attachmentDescriptions[mAttachmentCountColor].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-        // Preparing attachment reference structs
-        std::vector<VkAttachmentReference> attachmentReferences_Color = {};
-        attachmentReferences_Color.resize(mAttachmentCountColor);
-        for(uint32_t i = 0; i < mAttachmentCountColor; i++)
-        {
-            // Assign incremental ids
-            attachmentReferences_Color[i] = VkAttachmentReference{i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-        }
+        // prepare depth attachment
+        VkAttachmentDescription depthAttachmentDescription{};
+        depthAttachmentDescription.samples        = mDepthAttachment.GetSampleCount();
+        depthAttachmentDescription.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachmentDescription.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+        depthAttachmentDescription.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+        depthAttachmentDescription.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachmentDescription.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.format         = mDepthAttachment.GetFormat();
 
         // the depth attachment gets the final id (one higher than the highest color attachment id)
-        VkAttachmentReference attachmentReference_Depth = {mAttachmentCountColor, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        VkAttachmentReference depthAttachmentReference   = {colorAttachmentReferences.size(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        attachmentDescriptions[mColorAttachments.size()] = depthAttachmentDescription;
+        attachmentViews[mColorAttachments.size()]        = mDepthAttachment.GetImageView();
 
         // Subpass description
         VkSubpassDescription subpass    = {};
         subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = mAttachmentCountColor;
-        subpass.pColorAttachments       = attachmentReferences_Color.data();
-        subpass.pDepthStencilAttachment = &attachmentReference_Depth;
-
+        subpass.colorAttachmentCount    = colorAttachmentReferences.size();
+        subpass.pColorAttachments       = colorAttachmentReferences.data();
+        subpass.pDepthStencilAttachment = &depthAttachmentReference;
 
         VkSubpassDependency subPassDependencies[2] = {};
         subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
@@ -122,23 +148,19 @@ namespace hsk {
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.pAttachments           = attachmentDescriptions.data();
-        renderPassInfo.attachmentCount        = static_cast<uint32_t>(attachmentCount);
+        renderPassInfo.attachmentCount        = static_cast<uint32_t>(attachmentDescriptions.size());
         renderPassInfo.subpassCount           = 1;
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-
         AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
-
-        std::vector<VkImageView> attachmentViews = {mPositionAttachment.GetImageView(), mNormalAttachment.GetImageView(), mAlbedoAttachment.GetImageView(),
-                                                    mMotionAttachment.GetImageView(),   mMeshIdAttachment.GetImageView(), mDepthAttachment.GetImageView()};
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         fbufCreateInfo.pNext                   = NULL;
         fbufCreateInfo.renderPass              = mRenderpass;
         fbufCreateInfo.pAttachments            = attachmentViews.data();
-        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentCount);
+        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentViews.size());
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
         fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
         fbufCreateInfo.layers                  = 1;
@@ -147,18 +169,8 @@ namespace hsk {
 
     void GBufferStage::Destroy()
     {
+        DestroyResolutionDependentComponents();
         VkDevice device = mContext->Device;
-        mPositionAttachment.Destroy();
-        mNormalAttachment.Destroy();
-        mAlbedoAttachment.Destroy();
-        mMotionAttachment.Destroy();
-        mMeshIdAttachment.Destroy();
-        mDepthAttachment.Destroy();
-        if(mFrameBuffer)
-        {
-            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
         if(mPipeline)
         {
             vkDestroyPipeline(device, mPipeline, nullptr);
@@ -168,11 +180,6 @@ namespace hsk {
         {
             vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
-        }
-        if(mRenderpass)
-        {
-            vkDestroyRenderPass(device, mRenderpass, nullptr);
-            mRenderpass = nullptr;
         }
         if(mPipelineCache)
         {
@@ -188,16 +195,6 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetTextureDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetTransformStateDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetCameraDescriptorInfo());
-
-        //if(mScene->GetCameras().size() != 0)
-        //{
-
-        //    mDescriptorSet.SetDescriptorInfoAt(2, [0] -> GetUboDescriptorInfo());  // Assumes only one camera & always the first
-        //}
-        //else
-        //{
-        //    auto camera = new Camera(mScene);
-        //}
 
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
@@ -257,6 +254,12 @@ namespace hsk {
         vkCmdEndRenderPass(commandBuffer);
     }
 
+    void GBufferStage::OnResized(VkExtent2D& extent)
+    {
+        DestroyResolutionDependentComponents();
+        CreateResolutionDependentComponents();
+    }
+
     void GBufferStage::PreparePipeline()
     {
         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
@@ -282,8 +285,8 @@ namespace hsk {
         // This is important, as color write mask will otherwise be 0x0 and you
         // won't see anything rendered to the attachment
         std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = {};
-        blendAttachmentStates.resize(mAttachmentCountColor);
-        for(int i = 0; i < mAttachmentCountColor; i++)
+        blendAttachmentStates.resize(mColorAttachments.size());
+        for(int i = 0; i < mColorAttachments.size(); i++)
         {
             blendAttachmentStates[i].blendEnable    = false;
             blendAttachmentStates[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;

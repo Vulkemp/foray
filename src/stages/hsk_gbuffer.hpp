@@ -7,13 +7,6 @@ namespace hsk {
     class GBufferStage : public RasterizedRenderStage
     {
       public:
-        ManagedImage mPositionAttachment;
-        ManagedImage mNormalAttachment;
-        ManagedImage mAlbedoAttachment;
-        ManagedImage mMotionAttachment;
-        ManagedImage mMeshIdAttachment;
-        ManagedImage mDepthAttachment;
-
         GBufferStage() = default;
         virtual ~GBufferStage() { Destroy(); }
 
@@ -21,14 +14,13 @@ namespace hsk {
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
-      protected:
-        const uint32_t mAttachmentCountColor = 5;
-        const uint32_t mAttachmentCountDepth = 1;
+        virtual void OnResized(VkExtent2D& extent);
 
+      protected:
         Scene* mScene;
 
-        virtual void InitFixedSizeComponents();
-        virtual void InitResolutionDependentComponents();
+        virtual void CreateFixedSizeComponents();
+        virtual void CreateResolutionDependentComponents();
         virtual void DestroyResolutionDependentComponents();
 
         void PrepareAttachments();

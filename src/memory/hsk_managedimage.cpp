@@ -19,12 +19,13 @@ namespace hsk {
             mCreateInfo = createInfo;
         }
         mContext = context;
-        SetupDebugInfo(createInfo);
 
         // extract import image infos
         mName     = createInfo.Name;
         mFormat   = createInfo.ImageCI.format;
         mExtent3D = createInfo.ImageCI.extent;
+
+        CheckImageFormatSupport(createInfo);
 
         // create image
         AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
@@ -32,9 +33,13 @@ namespace hsk {
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
         AssertVkResult(vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView));
+
+        // attach debug information to iamge
+        SetupDebugInfo(createInfo);
     }
 
-    void ManagedImage::Recreate() { 
+    void ManagedImage::Recreate()
+    {
         Assert(mContext != nullptr, "Attempted to recreate image before initial creation!");
         Create(mContext, mCreateInfo);
     }
@@ -46,7 +51,8 @@ namespace hsk {
                               VkImageUsageFlags        usage,
                               VkFormat                 format,
                               VkImageLayout            initialLayout,
-        VkImageAspectFlags aspectMask)
+                              VkImageAspectFlags       aspectMask,
+                              std::string              name)
     {
         CreateInfo createInfo;
         createInfo.AllocCI.flags = flags;
@@ -70,6 +76,8 @@ namespace hsk {
         createInfo.ImageViewCI.subresourceRange.levelCount     = 1;
         createInfo.ImageViewCI.subresourceRange.baseArrayLayer = 0;
         createInfo.ImageViewCI.subresourceRange.layerCount     = 1;
+
+        createInfo.Name = name;
 
         Create(context, createInfo);
     }
@@ -179,15 +187,28 @@ namespace hsk {
             mAllocInfo  = VmaAllocationInfo{};
         }
     }
+
     void ManagedImage::SetupDebugInfo(CreateInfo& createInfo)
     {
-        // count total allocations
-        sAllocationUniqueId++;
-
         if(mContext->DebugEnabled)
         {
-            createInfo.Name += "_AllocationNr_" + std::to_string(sAllocationUniqueId);
-            mContext->DispatchTable.setDebugUtilsObjectNameEXT(nullptr);
+            // Set a name on the image
+            const VkDebugUtilsObjectNameInfoEXT imageNameInfo = {
+                VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,  // sType
+                NULL,                                                // pNext
+                VK_OBJECT_TYPE_IMAGE,                                // objectType
+                (uint64_t)mImage,                                    // objectHandle
+            };
+
+            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&imageNameInfo);
         }
+    }
+
+    void ManagedImage::CheckImageFormatSupport(CreateInfo& createInfo)
+    {
+        VkImageFormatProperties props{};
+        // check if image format together with required flags and usage is supported.
+        AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
+                                                                createInfo.ImageCI.usage, createInfo.ImageCI.flags, &props));
     }
 }  // namespace hsk

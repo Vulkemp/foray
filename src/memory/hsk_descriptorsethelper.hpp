@@ -54,13 +54,14 @@ namespace hsk {
 
         /// @brief Creates the descriptor pool, a descriptorset layout and writes the buffer data.
         /// @param context
-        /// @param numSets
-        /// @return
-        VkDescriptorSetLayout Create(const VkContext* context, uint32_t numSets);
+        /// @param numSets - If num sets is -1, the number of sets will be automatically determined by all given descriptor infos,
+        /// @return The descriptor set layout of the created descriptor sets.
+        VkDescriptorSetLayout Create(const VkContext* context, int32_t numSets = -1);
 
         void Cleanup();
 
         HSK_PROPERTY_CGET(DescriptorSets)
+        HSK_PROPERTY_CGET(DescriptorSetLayout)
 
       protected:
         struct DescriptorLocation
@@ -74,6 +75,7 @@ namespace hsk {
         VkDescriptorPool             mDescriptorPool{};
         VkDescriptorSetLayout        mDescriptorSetLayout{};
         std::vector<VkDescriptorSet> mDescriptorSets;
+        size_t                       mHighestSetCount{1};
     };
 
 }  // namespace hsk

@@ -5,10 +5,15 @@ namespace hsk {
     void DescriptorSetHelper::SetDescriptorInfoAt(uint32_t binding, std::shared_ptr<DescriptorInfo> descriptorSetInfo)
     {
         mDescriptorLocations.push_back({binding, descriptorSetInfo});
+        mHighestSetCount = std::max(mHighestSetCount, descriptorSetInfo->BufferInfos.size());
+        mHighestSetCount = std::max(mHighestSetCount, descriptorSetInfo->ImageInfos.size());
     }
 
-    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, uint32_t numSets)
+    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, int32_t numSets)
     {
+        // auto detect set count if necessary
+        numSets = numSets != -1 ? numSets : mHighestSetCount;
+
         mContext = context;
         // --------------------------------------------------------------------------------------------
         // create the descriptor set layout based on the given bindings
@@ -120,12 +125,15 @@ namespace hsk {
         return mDescriptorSetLayout;
     }
 
-    void DescriptorSetHelper::Cleanup() {
-        if (mDescriptorSetLayout){
+    void DescriptorSetHelper::Cleanup()
+    {
+        if(mDescriptorSetLayout)
+        {
             vkDestroyDescriptorSetLayout(mContext->Device, mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = nullptr;
         }
-        if (mDescriptorPool) {
+        if(mDescriptorPool)
+        {
             vkDestroyDescriptorPool(mContext->Device, mDescriptorPool, nullptr);
             mDescriptorPool = nullptr;
         }

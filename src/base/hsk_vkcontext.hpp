@@ -14,6 +14,6 @@ struct VkContext
     vkb::Swapchain     Swapchain{};
     VkCommandPool      TransferCommandPool = nullptr;
     VkQueue            TransferQueue       = nullptr;
-    bool&              DebugEnabled;
+    bool               DebugEnabled;
     vkb::DispatchTable DispatchTable;
 };

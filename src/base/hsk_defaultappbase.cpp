@@ -9,6 +9,8 @@
 namespace hsk {
     void DefaultAppBase::BaseInit()
     {
+        mContext.DebugEnabled = mDebugEnabled;
+
         logger()->info("Current working directory: {}", CurrentWorkingDirectory());
         // recompile shaders
         BaseInitCompileShaders();
@@ -128,6 +130,7 @@ namespace hsk {
         mDeviceVkb      = deviceBuilderReturn.value();
         mDevice         = mDeviceVkb.device;
         mContext.Device = mDeviceVkb.device;
+        mContext.DispatchTable = mDeviceVkb.make_table();
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()

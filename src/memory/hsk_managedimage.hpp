@@ -1,8 +1,8 @@
 #pragma once
+#include "../base/hsk_vkcontext.hpp"
 #include "../hsk_basics.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include "../base/hsk_vkcontext.hpp"
 
 namespace hsk {
     class ManagedImage : public NoMoveDefaults
@@ -11,14 +11,12 @@ namespace hsk {
         inline ManagedImage() {}
         inline ~ManagedImage() { Destroy(); }
 
-        inline static uint32_t sAllocationUniqueId = 0;
-
         struct CreateInfo
         {
             VkImageCreateInfo       ImageCI{};
             VkImageViewCreateInfo   ImageViewCI{};
             VmaAllocationCreateInfo AllocCI{};
-            std::string             Name{"Unnamed image"};
+            std::string             Name{"UnnamedImage"};
 
             CreateInfo();
         };
@@ -29,13 +27,14 @@ namespace hsk {
         virtual void Recreate();
 
         virtual void Create(const VkContext*         context,
-                              VmaMemoryUsage           memoryUsage,
-                              VmaAllocationCreateFlags flags,
-                              VkExtent3D               extent,
-                              VkImageUsageFlags        usage,
-                              VkFormat                 format,
-                              VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                              VkImageAspectFlags       aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+                            VmaMemoryUsage           memoryUsage,
+                            VmaAllocationCreateFlags flags,
+                            VkExtent3D               extent,
+                            VkImageUsageFlags        usage,
+                            VkFormat                 format,
+                            VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                            VkImageAspectFlags       aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT,
+                            std::string              name          = "UnnamedImage");
 
         /// @brief When doing a layout transition, specify the transition parameters.
         struct LayoutTransitionInfo
@@ -92,6 +91,8 @@ namespace hsk {
         HSK_PROPERTY_CGET(Extent3D)
         HSK_PROPERTY_ALL(Name)
 
+            VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
+
       protected:
         const VkContext*  mContext{};
         CreateInfo        mCreateInfo;
@@ -105,6 +106,6 @@ namespace hsk {
         std::string       mName{};
 
         void SetupDebugInfo(CreateInfo& createInfo);
-
+        void CheckImageFormatSupport(CreateInfo& createInfo);
     };
 }  // namespace hsk
