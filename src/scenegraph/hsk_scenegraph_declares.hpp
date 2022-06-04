@@ -6,4 +6,6 @@ namespace hsk {
     class NNode;
     class NScene;
     class NTransform;
+    class NMeshInstance;
+    class NPrimitive;
 }  // namespace hsk

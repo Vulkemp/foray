@@ -2,6 +2,30 @@
 #include "hsk_node.hpp"
 
 namespace hsk {
+    NScene::NScene() : mGlobals(&mGlobalRootRegistry) {}
+
+    void NScene::Update(const FrameUpdateInfo& updateInfo)
+    {
+        this->InvokeUpdate(updateInfo);
+        mGlobalRootRegistry.InvokeUpdate(updateInfo);
+    }
+    void NScene::Draw(const FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
+    {
+        // Process before draw callbacks
+        this->InvokeBeforeDraw(renderInfo);
+        mGlobalRootRegistry.InvokeBeforeDraw(renderInfo);
+
+        // Process draw callbacks
+        SceneDrawInfo drawInfo(renderInfo, pipelineLayout);
+        this->InvokeDraw(drawInfo);
+        mGlobalRootRegistry.InvokeDraw(drawInfo);
+    }
+
+    void NScene::HandleEvent(std::shared_ptr<Event>& event) {
+        this->InvokeOnEvent(event);
+        mGlobalRootRegistry.InvokeOnEvent(event);
+    }
+
     NNode* NScene::MakeNode(NNode* parent)
     {
         auto nodeManagedPtr = std::make_unique<NNode>(this, parent);
@@ -13,4 +37,6 @@ namespace hsk {
         }
         return node;
     }
+
+
 }  // namespace hsk

@@ -10,10 +10,10 @@ namespace hsk {
       public:
         friend Registry;
 
-        virtual void Update(const FrameUpdateInfo& updateInfo);
-        virtual void BeforeDraw(const FrameRenderInfo& renderInfo);
-        virtual void Draw(const FrameRenderInfo& renderInfo);
-        virtual void OnEvent(std::shared_ptr<Event> event);
+        virtual void InvokeUpdate(const FrameUpdateInfo& updateInfo);
+        virtual void InvokeBeforeDraw(const FrameRenderInfo& renderInfo);
+        virtual void InvokeDraw(SceneDrawInfo& renderInfo);
+        virtual void InvokeOnEvent(std::shared_ptr<Event> event);
 
       protected:
         template <typename TCallback, typename TArg = TCallback::TArg>
@@ -40,11 +40,13 @@ namespace hsk {
             callback->Invoke(arg);
         }
     }
+
     template <typename TCallback, typename TArg>
     void RootRegistry::CallbackVector<TCallback, TArg>::Add(TCallback* callback)
     {
         Listeners.push_back(callback);
     }
+
     template <typename TCallback, typename TArg>
     bool RootRegistry::CallbackVector<TCallback, TArg>::Remove(TCallback* callback)
     {

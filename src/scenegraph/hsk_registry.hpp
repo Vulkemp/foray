@@ -2,7 +2,7 @@
 #include "../hsk_basics.hpp"
 #include "../hsk_exception.hpp"
 #include "hsk_component.hpp"
-#include "hsk_rootregistry.hpp"
+// #include "hsk_rootregistry.hpp"
 #include <vector>
 
 namespace hsk {
