@@ -340,7 +340,7 @@ namespace hsk {
         // Record Render Command buffer
 
         FrameRenderInfo renderInfo(primaryOutput, comparisonOutput);
-        renderInfo.SetFrameTime(delta).SetFrameNumber(mRenderedFrameCount).SetFrameObjectsIndex(mCurrentFrameIndex).SetCommandBuffer(currentFrame.CommandBuffer);
+        renderInfo.SetCommandBuffer(currentFrame.CommandBuffer).SetFrameObjectsIndex(mCurrentFrameIndex).SetFrameNumber(mRenderedFrameCount).SetFrameTime(delta);
 
         AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
 

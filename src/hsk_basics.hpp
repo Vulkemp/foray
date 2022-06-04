@@ -16,6 +16,12 @@ namespace hsk {
         NoMoveDefaults(const NoMoveDefaults&& other) = delete;
         NoMoveDefaults& operator=(const NoMoveDefaults& other) = delete;
     };
+
+    class Polymorphic
+    {
+      protected:
+        virtual void __makeMePolymorphic() {}
+    };
 }  // namespace hsk
 
 #define HSK_PROPERTY_GET(member)                                                                                                                                                   \
