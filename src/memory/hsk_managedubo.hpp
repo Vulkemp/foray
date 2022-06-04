@@ -1,7 +1,7 @@
 #pragma once
 #include "../hsk_basics.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 
 namespace hsk {
     class UboInterface

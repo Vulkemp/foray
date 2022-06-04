@@ -1,7 +1,4 @@
 #include "hsk_freeflightcameracontroller.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "../osi/hsk_window.hpp"
 
 namespace hsk {
@@ -38,7 +35,7 @@ namespace hsk {
     void FreeFlightCameraController::Update(float delta)
     {
         float deltaTime = 1.0f;
-        float speed = mCameraSpeed * deltaTime;
+        float speed     = mCameraSpeed * deltaTime;
         if(mInputBinaryKeyW->State())
             mCameraPos += speed * mCameraFront;
         if(mInputBinaryKeyS->State())
@@ -47,10 +44,11 @@ namespace hsk {
             mCameraPos -= glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
         if(mInputBinaryKeyD->State())
             mCameraPos += glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
-        
+
         auto aspectRatio         = mContext->Swapchain.extent.width / static_cast<float>(mContext->Swapchain.extent.height);
         mCamera->ProjectionMat() = glm::perspective(glm::radians(45.0f), aspectRatio, 1.0f, 5000.0f);
-        mCamera->ViewMat() = glm::lookAt(mCameraPos, mCameraPos + mCameraFront, mCameraUp);
+
+        CalculateViewMat();
         mCamera->Update();
     }
 
@@ -65,8 +63,9 @@ namespace hsk {
         }
     }
 
-    void FreeFlightCameraController::ProcessMouseMovedEvent(std::shared_ptr<EventInputMouseMoved> event) {
-        
+    void FreeFlightCameraController::ProcessMouseMovedEvent(std::shared_ptr<EventInputMouseMoved> event)
+    {
+
         if(!mReactOnMouseMoveEvents)
         {
             return;
@@ -79,7 +78,7 @@ namespace hsk {
 
         float xpos = event->CurrentX();
         float ypos = event->CurrentY();
-        
+
 
         float centerX = mContext->Swapchain.extent.width / 2;
         float centerY = mContext->Swapchain.extent.height / 2;
@@ -98,10 +97,10 @@ namespace hsk {
         }
 
         // lock cursor to screen center
-        auto window = Window::Windows()[0]->GetSdlWindowHandle();  // TODO only assume one window?
+        auto window           = Window::Windows()[0]->GetSdlWindowHandle();  // TODO only assume one window?
         mIgnoreNextMouseEvent = true;
         SDL_WarpMouseInWindow(window, centerX, centerY);
-        
+
 
         xoffset *= mSensitivity;
         yoffset *= mSensitivity;
@@ -121,6 +120,12 @@ namespace hsk {
         front.z      = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
         mCameraFront = glm::normalize(front);
 
-        mCamera->ViewMat() = glm::lookAt(mCameraPos, mCameraPos + mCameraFront, mCameraUp);
+        CalculateViewMat();
     }
+    void FreeFlightCameraController::CalculateViewMat()
+    {
+        mCamera->ViewMat() = glm::lookAt(mCameraPos, mCameraPos + mCameraFront, mCameraUp);
+        mCamera->ViewMat()[1] *= -1;
+    }
+
 }  // namespace hsk

@@ -1,6 +1,6 @@
 #pragma once
 #include "hsk_gltf_declares.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 #include <optional>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>

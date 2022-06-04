@@ -3,7 +3,7 @@
 #include "../memory/hsk_managedvectorbuffer.hpp"
 #include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 #include <optional>
 
 namespace hsk {

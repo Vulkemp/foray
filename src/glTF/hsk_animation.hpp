@@ -1,7 +1,7 @@
 #pragma once
 #include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 #include <tinygltf/tiny_gltf.h>
 
 namespace hsk {

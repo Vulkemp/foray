@@ -28,7 +28,7 @@ namespace hsk {
 
         bool mIgnoreNextMouseEvent{false};
 
-        
+        void CalculateViewMat();
 
     };
 }  // namespace hsk

@@ -2,7 +2,7 @@
 #include "../memory/hsk_managedubo.hpp"
 #include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 #include <tinygltf/tiny_gltf.h>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>

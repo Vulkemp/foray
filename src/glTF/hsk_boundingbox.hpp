@@ -1,6 +1,6 @@
 #pragma once
 #include "hsk_gltf_declares.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 
 namespace hsk {
     struct BoundingBox

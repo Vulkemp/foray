@@ -1,7 +1,7 @@
 #pragma once
 #include "../glTF/hsk_camera.hpp"
 #include "../osi/hsk_event.hpp"
-#include <glm/glm.hpp>
+#include "../hsk_glm.hpp"
 #include "../base/hsk_vkcontext.hpp"
 
 namespace hsk {
