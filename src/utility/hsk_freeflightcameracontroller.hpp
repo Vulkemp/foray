@@ -25,6 +25,8 @@ namespace hsk {
         const InputBinary* mInputBinaryKeyA;
         const InputBinary* mInputBinaryKeyS;
         const InputBinary* mInputBinaryKeyD;
+        const InputBinary* mInputBinaryKeyQ;
+        const InputBinary* mInputBinaryKeyE;
 
         bool mIgnoreNextMouseEvent{false};
 

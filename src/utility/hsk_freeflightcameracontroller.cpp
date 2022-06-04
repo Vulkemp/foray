@@ -11,6 +11,8 @@ namespace hsk {
         mInputBinaryKeyA = osManager->Keyboard()->FindButton(EButton::Keyboard_A);
         mInputBinaryKeyS = osManager->Keyboard()->FindButton(EButton::Keyboard_S);
         mInputBinaryKeyD = osManager->Keyboard()->FindButton(EButton::Keyboard_D);
+        mInputBinaryKeyQ = osManager->Keyboard()->FindButton(EButton::Keyboard_Q);
+        mInputBinaryKeyE = osManager->Keyboard()->FindButton(EButton::Keyboard_E);
     }
     void FreeFlightCameraController::OnEvent(std::shared_ptr<Event> event)
     {
@@ -44,6 +46,10 @@ namespace hsk {
             mCameraPos -= glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
         if(mInputBinaryKeyD->State())
             mCameraPos += glm::normalize(glm::cross(mCameraFront, mCameraUp)) * speed;
+        if(mInputBinaryKeyQ->State())
+            mCameraPos -= speed * mCameraUp;
+        if(mInputBinaryKeyE->State())
+            mCameraPos += speed * mCameraUp;
 
         auto aspectRatio         = mContext->Swapchain.extent.width / static_cast<float>(mContext->Swapchain.extent.height);
         mCamera->ProjectionMat() = glm::perspective(glm::radians(45.0f), aspectRatio, 1.0f, 5000.0f);
