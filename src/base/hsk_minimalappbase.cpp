@@ -115,34 +115,36 @@ namespace hsk {
 
     void MinimalAppBase::BaseInit()
     {
-        // print validation layer messages with the logger
-        mVkbInstanceBuilder.set_debug_callback([](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                                  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) -> VkBool32 {
-            auto severity = vkb::to_string_message_severity(messageSeverity);
-            auto type     = vkb::to_string_message_type(messageType);
-            switch(messageSeverity)
-            {
-                case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                    logger()->info("{}", pCallbackData->pMessage);
-                    break;
-                case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                    logger()->info("{}", pCallbackData->pMessage);
-                    break;
-                case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                    logger()->warn("{}", pCallbackData->pMessage);
-                    break;
-                case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                    logger()->error("{}", pCallbackData->pMessage);
-                    throw Exception("{}", pCallbackData->pMessage);
-                    break;
-            }
-            return VK_FALSE;
-        });
-
-        if(mEnableDefaultValidationLayers)
+        if(mDebugEnabled)
         {
-            mVkbInstanceBuilder.enable_layer("VK_LAYER_KHRONOS_validation");
-            mVkbInstanceBuilder.enable_validation_layers();
+            // print validation layer messages with the logger
+            mVkbInstanceBuilder.set_debug_callback([](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) -> VkBool32 {
+                auto severity = vkb::to_string_message_severity(messageSeverity);
+                auto type     = vkb::to_string_message_type(messageType);
+                switch(messageSeverity)
+                {
+                    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+                        logger()->info("{}", pCallbackData->pMessage);
+                        break;
+                    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+                        logger()->info("{}", pCallbackData->pMessage);
+                        break;
+                    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+                        logger()->warn("{}", pCallbackData->pMessage);
+                        break;
+                    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+                        logger()->error("{}", pCallbackData->pMessage);
+                        throw Exception("{}", pCallbackData->pMessage);
+                        break;
+                }
+                return VK_FALSE;
+            });
+
+            if(mEnableDefaultValidationLayers)
+            {
+                mVkbInstanceBuilder.enable_validation_layers();
+            }
         }
 
         auto instanceBuildRet = mVkbInstanceBuilder.build();

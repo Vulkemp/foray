@@ -11,11 +11,18 @@ namespace hsk {
         ImageViewCI.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     }
 
-    void ManagedImage::Create(const VkContext* context, CreateInfo& createInfo)
+    void ManagedImage::Create(const VkContext* context, CreateInfo createInfo)
     {
+        if(mContext == nullptr)
+        {
+            // store create info during first creation
+            mCreateInfo = createInfo;
+        }
         mContext = context;
+        SetupDebugInfo(createInfo);
 
         // extract import image infos
+        mName     = createInfo.Name;
         mFormat   = createInfo.ImageCI.format;
         mExtent3D = createInfo.ImageCI.extent;
 
@@ -25,6 +32,11 @@ namespace hsk {
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
         AssertVkResult(vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView));
+    }
+
+    void ManagedImage::Recreate() { 
+        Assert(mContext != nullptr, "Attempted to recreate image before initial creation!");
+        Create(mContext, mCreateInfo);
     }
 
     void ManagedImage::Create(const VkContext*         context,
@@ -165,6 +177,17 @@ namespace hsk {
             mImage      = nullptr;
             mAllocation = nullptr;
             mAllocInfo  = VmaAllocationInfo{};
+        }
+    }
+    void ManagedImage::SetupDebugInfo(CreateInfo& createInfo)
+    {
+        // count total allocations
+        sAllocationUniqueId++;
+
+        if(mContext->DebugEnabled)
+        {
+            createInfo.Name += "_AllocationNr_" + std::to_string(sAllocationUniqueId);
+            mContext->DispatchTable.setDebugUtilsObjectNameEXT(nullptr);
         }
     }
 }  // namespace hsk

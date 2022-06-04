@@ -6,12 +6,14 @@
 /// @brief Contains vulkan variables you want to pass around the application.
 struct VkContext
 {
-    VkPhysicalDevice PhysicalDevice;
-    VkDevice         Device{};
-    VmaAllocator     Allocator{};
-    VkCommandPool    CommandPool{};
-    VkQueue          QueueGraphics{};
-    vkb::Swapchain   Swapchain{};
-    VkCommandPool    TransferCommandPool = nullptr;
-    VkQueue          TransferQueue       = nullptr;
+    VkPhysicalDevice   PhysicalDevice;
+    VkDevice           Device{};
+    VmaAllocator       Allocator{};
+    VkCommandPool      CommandPool{};
+    VkQueue            QueueGraphics{};
+    vkb::Swapchain     Swapchain{};
+    VkCommandPool      TransferCommandPool = nullptr;
+    VkQueue            TransferQueue       = nullptr;
+    bool&              DebugEnabled;
+    vkb::DispatchTable DispatchTable;
 };

@@ -11,16 +11,22 @@ namespace hsk {
         inline ManagedImage() {}
         inline ~ManagedImage() { Destroy(); }
 
+        inline static uint32_t sAllocationUniqueId = 0;
+
         struct CreateInfo
         {
             VkImageCreateInfo       ImageCI{};
             VkImageViewCreateInfo   ImageViewCI{};
             VmaAllocationCreateInfo AllocCI{};
+            std::string             Name{"Unnamed image"};
 
             CreateInfo();
         };
 
-        virtual void Create(const VkContext* context, CreateInfo& createInfo);
+        virtual void Create(const VkContext* context, CreateInfo createInfo);
+
+        /// @brief Uses stored create info to recreate vulkan image.
+        virtual void Recreate();
 
         virtual void Create(const VkContext*         context,
                               VmaMemoryUsage           memoryUsage,
@@ -84,9 +90,11 @@ namespace hsk {
         HSK_PROPERTY_CGET(AllocInfo)
         HSK_PROPERTY_CGET(Format)
         HSK_PROPERTY_CGET(Extent3D)
+        HSK_PROPERTY_ALL(Name)
 
       protected:
         const VkContext*  mContext{};
+        CreateInfo        mCreateInfo;
         VkImage           mImage{};
         VkImageView       mImageView{};
         VkImageLayout     mImageLayout{};
@@ -94,5 +102,9 @@ namespace hsk {
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocInfo{};
         VkExtent3D        mExtent3D{};
+        std::string       mName{};
+
+        void SetupDebugInfo(CreateInfo& createInfo);
+
     };
 }  // namespace hsk

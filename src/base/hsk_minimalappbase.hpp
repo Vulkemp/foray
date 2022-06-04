@@ -90,6 +90,7 @@ namespace hsk {
         vkb::InstanceBuilder mVkbInstanceBuilder{};
         vkb::Instance        mInstanceVkb{};
         VkInstance           mInstance{};
+        bool                 mDebugEnabled{true};
         bool                 mEnableDefaultValidationLayers{true};
 #pragma endregion
     };
