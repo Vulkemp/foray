@@ -15,6 +15,14 @@ namespace hsk {
 
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
+
+        // Clear values for all attachments written in the fragment shader
+        mClearValues.resize(mColorAttachments.size() + 1);
+        for(size_t i = 0; i < mColorAttachments.size(); i++)
+        {
+            mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        }
+        mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
     }
 
     void GBufferStage::CreateFixedSizeComponents()
@@ -215,22 +223,13 @@ namespace hsk {
 
     void GBufferStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
-        // Clear values for all attachments written in the fragment shader
-        std::array<VkClearValue, 6> clearValues;
-        clearValues[0].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        clearValues[1].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        clearValues[2].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        clearValues[3].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        clearValues[4].color        = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        clearValues[5].depthStencil = {1.0f, 0};
-
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
         renderPassBeginInfo.framebuffer       = mFrameBuffer;
         renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
-        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
-        renderPassBeginInfo.pClearValues      = clearValues.data();
+        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
+        renderPassBeginInfo.pClearValues      = mClearValues.data();
 
         VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);

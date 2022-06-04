@@ -25,6 +25,7 @@ namespace hsk {
 
       protected:
         Scene* mScene;
+        std::vector<VkClearValue> mClearValues;
 
         virtual void CreateFixedSizeComponents();
         virtual void CreateResolutionDependentComponents();
