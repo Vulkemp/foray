@@ -16,6 +16,13 @@ namespace hsk {
 
         virtual void OnResized(VkExtent2D& extent);
 
+        inline static constexpr std::string_view WorldspacePosition = "Position";
+        inline static constexpr std::string_view WorldspaceNormal   = "Normal";
+        inline static constexpr std::string_view Albedo             = "Albedo";
+        inline static constexpr std::string_view MotionVector       = "Motion";
+        inline static constexpr std::string_view MeshInstanceIndex  = "MeshId";
+        inline static constexpr std::string_view MaterialIndex      = "MaterialId";
+
       protected:
         Scene* mScene;
 

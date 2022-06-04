@@ -52,7 +52,7 @@ namespace hsk {
                               VkFormat                 format,
                               VkImageLayout            initialLayout,
                               VkImageAspectFlags       aspectMask,
-                              std::string              name)
+                              std::string_view         name)
     {
         CreateInfo createInfo;
         createInfo.AllocCI.flags = flags;

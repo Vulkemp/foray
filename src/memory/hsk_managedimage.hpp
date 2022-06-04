@@ -34,7 +34,7 @@ namespace hsk {
                             VkFormat                 format,
                             VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
                             VkImageAspectFlags       aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT,
-                            std::string              name          = "UnnamedImage");
+                            std::string_view         name          = "UnnamedImage");
 
         /// @brief When doing a layout transition, specify the transition parameters.
         struct LayoutTransitionInfo
@@ -91,7 +91,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Extent3D)
         HSK_PROPERTY_ALL(Name)
 
-            VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
+        VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 
       protected:
         const VkContext*  mContext{};

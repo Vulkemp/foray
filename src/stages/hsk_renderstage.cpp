@@ -1,7 +1,7 @@
 #include "hsk_renderstage.hpp"
 
 namespace hsk {
-    ManagedImage* RenderStage::GetColorAttachmentByName(std::string name)
+    ManagedImage* RenderStage::GetColorAttachmentByName(const std::string_view name)
     {
         for(auto& attachment : mColorAttachments)
         {

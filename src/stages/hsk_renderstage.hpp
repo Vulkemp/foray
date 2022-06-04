@@ -18,7 +18,7 @@ namespace hsk {
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         inline std::vector<std::unique_ptr<ManagedImage>>& GetColorAttachments() { return mColorAttachments; }
         inline ManagedImage&                               GetDepthAttachment() { return mDepthAttachment; }
-        ManagedImage*                                      GetColorAttachmentByName(std::string name);
+        ManagedImage*                                      GetColorAttachmentByName(const std::string_view name);
 
 
       protected:
