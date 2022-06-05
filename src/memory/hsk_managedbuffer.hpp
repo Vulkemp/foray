@@ -48,7 +48,9 @@ namespace hsk {
         HSK_PROPERTY_CGET(Buffer);
         HSK_PROPERTY_CGET(IsMapped);
         HSK_PROPERTY_CGET(Allocation);
-        HSK_PROPERTY_ALL(Name);
+        HSK_PROPERTY_CGET(Name);
+
+        ManagedBuffer& SetName(std::string_view name);
 
         inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
 

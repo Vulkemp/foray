@@ -20,8 +20,11 @@ namespace hsk {
     class ManagedVectorBuffer : public NoMoveDefaults
     {
       public:
-        inline ManagedVectorBuffer() {}
-        inline explicit ManagedVectorBuffer(const VkContext* context) : mContext(context) {}
+        const bool DeviceLocal;
+
+        inline ManagedVectorBuffer() : DeviceLocal(false) {}
+        inline explicit ManagedVectorBuffer(const VkContext* context) : DeviceLocal(false), mContext(context) {}
+        inline explicit ManagedVectorBuffer(const VkContext* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
 
         void InitOrUpdate(std::optional<BufferSection> section = {});
         void Cleanup();
@@ -31,8 +34,8 @@ namespace hsk {
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_GET(Vector)
         HSK_PROPERTY_CGET(Vector)
-        HSK_PROPERTY_GET(DeviceLocalBuffer)
-        HSK_PROPERTY_CGET(DeviceLocalBuffer)
+        HSK_PROPERTY_GET(Buffer)
+        HSK_PROPERTY_CGET(Buffer)
         HSK_PROPERTY_CGET(DeviceCount)
         HSK_PROPERTY_CGET(DeviceCapacity)
 
@@ -44,9 +47,10 @@ namespace hsk {
 
         const VkContext*    mContext        = nullptr;
         std::vector<TClass> mVector         = {};
-        ManagedBuffer       mDeviceLocalBuffer   = {};
+        ManagedBuffer       mBuffer         = {};
         VkDeviceSize        mDeviceCount    = 0;
         VkDeviceSize        mDeviceCapacity = 0;
+        void*               mHostMemoryMap  = nullptr;
     };
 
     template <typename TClass>
@@ -81,21 +85,42 @@ namespace hsk {
 
         VkDeviceSize bufferSize = mDeviceCapacity * sizeof(TClass);
 
-        mDeviceLocalBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
-                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        mBuffer.Create(mContext, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
+                       DeviceLocal ? VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE : VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
+                       DeviceLocal ? 0 : VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+        if(!DeviceLocal)
+        {
+            mBuffer.Map(mHostMemoryMap);
+        }
     }
     template <typename TClass>
     void ManagedVectorBuffer<TClass>::UploadToBuffer(BufferSection section)
     {
-        TClass*      uploadData   = mVector.data() + section.offset;
-        VkDeviceSize deviceSize   = section.count * sizeof(TClass);
-        VkDeviceSize deviceOffset = section.offset * sizeof(TClass);
+        TClass* uploadData = mVector.data() + section.offset;
 
-        mDeviceLocalBuffer.WriteDataDeviceLocal(uploadData, deviceSize, deviceOffset);
+        if(DeviceLocal)
+        {
+            VkDeviceSize deviceSize   = section.count * sizeof(TClass);
+            VkDeviceSize deviceOffset = section.offset * sizeof(TClass);
+            mBuffer.WriteDataDeviceLocal(uploadData, deviceSize, deviceOffset);
+        }
+        else
+        {
+            size_t memorySize   = section.count * sizeof(TClass);
+            size_t memoryOffset = section.offset * sizeof(TClass);
+
+            uint8_t* memoryDestination = reinterpret_cast<uint8_t*>(mHostMemoryMap) + memoryOffset;
+
+            memcpy(reinterpret_cast<void*>(memoryDestination), uploadData, memorySize);
+        }
     }
     template <typename TClass>
     void ManagedVectorBuffer<TClass>::Cleanup()
     {
-        mDeviceLocalBuffer.Destroy();
+        if(!DeviceLocal && mBuffer.GetIsMapped())
+        {
+            mBuffer.Unmap();
+        }
+        mBuffer.Destroy();
     }
 }  // namespace hsk

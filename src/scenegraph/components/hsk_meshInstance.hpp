@@ -3,17 +3,22 @@
 #include <glm/glm.hpp>
 
 namespace hsk {
+    /// @brief Reference into a vertex or index buffer which combine into a valid draw call
     struct NPrimitive
     {
-        uint32_t FirstIndex  = 0;
-        uint32_t IndexCount  = 0;
-        uint32_t VertexCount = 0;
+        enum class EType
+        {
+            Vertex,
+            Index
+        };
+        EType    Type  = {};
+        uint32_t First = 0;
+        uint32_t Count = 0;
 
         inline NPrimitive() {}
-        inline NPrimitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount);
+        inline NPrimitive(EType type, uint32_t first, uint32_t count);
 
-        bool        IsValid() const { return (IndexCount + VertexCount) > 0; }
-        bool        HasIndices() const { return IndexCount > 0; }
+        bool        IsValid() const { return Count > 0; }
         inline void Draw(VkCommandBuffer commandBuffer);
     };
 
@@ -30,19 +35,19 @@ namespace hsk {
         std::vector<NPrimitive> mPrimitives = {};
     };
 
-    inline NPrimitive::NPrimitive(uint32_t firstIndex, uint32_t indexCount, uint32_t vertexCount) : FirstIndex(firstIndex), IndexCount(indexCount), VertexCount(vertexCount) {}
+    inline NPrimitive::NPrimitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), Count(count) {}
 
     inline void NPrimitive::Draw(VkCommandBuffer commandBuffer)
     {
         if(IsValid())
         {
-            if(HasIndices())
+            if(Type == EType::Index)
             {
-                vkCmdDrawIndexed(commandBuffer, IndexCount, 1, FirstIndex, 0, 0);
+                vkCmdDrawIndexed(commandBuffer, Count, 1, First, 0, 0);
             }
             else
             {
-                vkCmdDraw(commandBuffer, VertexCount, 1, 0, 0);
+                vkCmdDraw(commandBuffer, Count, 1, First, 0);
             }
         }
     }

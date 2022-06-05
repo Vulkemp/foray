@@ -58,8 +58,8 @@ namespace hsk {
     class MaterialBuffer : public SceneComponent, public NoMoveDefaults
     {
       public:
-        inline MaterialBuffer() {}
-        inline explicit MaterialBuffer(Scene* scene) : SceneComponent(scene) {}
+        inline MaterialBuffer() : mBuffer(nullptr, true) {}
+        inline explicit MaterialBuffer(Scene* scene) : SceneComponent(scene), mBuffer(Context(), true) {}
 
         virtual void InitFromTinyGltfMaterials(const std::vector<tinygltf::Material>& materials);
         virtual void UpdateBuffer();
@@ -70,7 +70,7 @@ namespace hsk {
         HSK_PROPERTY_GET(Buffer)
         HSK_PROPERTY_CGET(Buffer)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetDeviceLocalBuffer().GetVkDescriptorBufferInfo(); }
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return mBuffer.GetBuffer().GetVkDescriptorBufferInfo(); }
 
       protected:
         std::vector<Material>                     mMaterialDescriptions = {};

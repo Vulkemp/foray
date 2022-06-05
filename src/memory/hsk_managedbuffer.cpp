@@ -8,12 +8,13 @@ namespace hsk {
     void ManagedBuffer::Create(const VkContext* context, ManagedBufferCreateInfo& createInfo)
     {
         mContext = context;
-        mSize = createInfo.BufferCreateInfo.size;
+        mSize    = createInfo.BufferCreateInfo.size;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
         if(mName.length() > 0)
         {
+            vmaSetAllocationName(mContext->Allocator, mAllocation, mName.c_str());
             logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
-                           reinterpret_cast<uint64_t>(mBuffer));
+                            reinterpret_cast<uint64_t>(mBuffer));
         }
     }
 
@@ -33,20 +34,13 @@ namespace hsk {
 
     void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags)
     {
-        mContext = context;
-        mSize = size;
         ManagedBufferCreateInfo createInfo;
         createInfo.BufferCreateInfo.size      = size;
         createInfo.BufferCreateInfo.usage     = usage;
         createInfo.AllocationCreateInfo.usage = memoryUsage;
         createInfo.AllocationCreateInfo.flags = flags;
 
-        vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
-        if(mName.length() > 0)
-        {
-            logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
-                           reinterpret_cast<uint64_t>(mBuffer));
-        }
+        Create(context, createInfo);
     }
 
     void ManagedBuffer::Map(void*& data)
@@ -73,6 +67,15 @@ namespace hsk {
         vmaUnmapMemory(mContext->Allocator, mAllocation);
     }
 
+    ManagedBuffer& ManagedBuffer::SetName(std::string_view name)
+    {
+        mName = name;
+        if(mAllocation)
+        {
+            vmaSetAllocationName(mContext->Allocator, mAllocation, mName.c_str());
+        }
+    }
+
     void ManagedBuffer::Destroy()
     {
         if(mIsMapped)
@@ -86,12 +89,12 @@ namespace hsk {
             if(mName.length() > 0)
             {
                 logger()->debug("ManagedBuffer: Destroy \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
-                               reinterpret_cast<uint64_t>(mBuffer));
+                                reinterpret_cast<uint64_t>(mBuffer));
             }
         }
         mBuffer     = nullptr;
         mAllocation = nullptr;
-        mSize = 0;
+        mSize       = 0;
     }
 
     void ManagedBuffer::WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)

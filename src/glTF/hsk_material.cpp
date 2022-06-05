@@ -86,14 +86,14 @@ namespace hsk {
     void MaterialBuffer::UpdateBuffer()
     {
         mBuffer.SetContext(Context());
-        mBuffer.GetDeviceLocalBuffer().SetName("MaterialBuffer");
+        mBuffer.GetBuffer().SetName("MaterialBuffer");
 
         mBuffer.InitOrUpdate();
     }
     void MaterialBuffer::WriteDescriptorSet(VkDescriptorSet set, uint32_t binding)
     {
         VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer                 = mBuffer.GetDeviceLocalBuffer().GetBuffer();
+        bufferInfo.buffer                 = mBuffer.GetBuffer().GetBuffer();
         bufferInfo.offset                 = 0;
         bufferInfo.range                  = mBuffer.GetDeviceSize();
 

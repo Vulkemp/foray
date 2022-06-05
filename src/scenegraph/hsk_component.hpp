@@ -51,6 +51,7 @@ namespace hsk {
 
         NNode*  GetNode();
         NScene* GetScene();
+        Registry* GetGlobals();
 
       private:
         Registry* mRegistry = nullptr;

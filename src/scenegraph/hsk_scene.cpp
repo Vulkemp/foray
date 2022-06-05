@@ -1,8 +1,14 @@
 #include "hsk_scene.hpp"
+#include "globalcomponents/hsk_materialbuffer.hpp"
+#include "globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "hsk_node.hpp"
 
 namespace hsk {
-    NScene::NScene() : mGlobals(&mGlobalRootRegistry) {}
+    NScene::NScene(const VkContext* context) : mContext(context), mGlobals(&mGlobalRootRegistry)
+    {
+        mGlobals.MakeComponent<NMaterialBuffer>(mContext);
+        mGlobals.MakeComponent<SceneTransformBuffer>(mContext);
+    }
 
     void NScene::Update(const FrameUpdateInfo& updateInfo)
     {
@@ -21,7 +27,8 @@ namespace hsk {
         mGlobalRootRegistry.InvokeDraw(drawInfo);
     }
 
-    void NScene::HandleEvent(std::shared_ptr<Event>& event) {
+    void NScene::HandleEvent(std::shared_ptr<Event>& event)
+    {
         this->InvokeOnEvent(event);
         mGlobalRootRegistry.InvokeOnEvent(event);
     }
@@ -36,6 +43,16 @@ namespace hsk {
             mRootNodes.push_back(node);
         }
         return node;
+    }
+
+    void NScene::Cleanup()
+    {
+        // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
+        mRootNodes.clear();
+        mNodeBuffer.clear();
+
+        // Clear global components
+        mGlobals.Cleanup();
     }
 
 
