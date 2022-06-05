@@ -7,7 +7,6 @@
 
 namespace hsk {
     /// @brief Manages a type identified list of components
-    /// @remark Only one component per type may be registered
     /// @remark This class manages lifetime of the attached components
     class Registry : public NoMoveDefaults
     {
@@ -31,25 +30,40 @@ namespace hsk {
         template <typename TComponent>
         inline bool HasComponent() const;
 
-        /// @brief 
+        /// @brief Gets first component that can be cast to TComponent type
         template <typename TComponent>
         inline TComponent* GetComponent();
 
+        /// @brief Gets first component that can be cast to TComponent type
         template <typename TComponent>
         inline const TComponent* GetComponent() const;
 
+        /// @brief Appends all components which can be cast to TComponent type to the out vector
+        template <typename TComponent>
+        inline int32_t GetComponents(std::vector<TComponent*>& out);
+
+        /// @brief Appends all components which can be cast to TComponent type to the out vector
+        template <typename TComponent>
+        inline int32_t GetComponents(std::vector<const TComponent*>& out) const;
+
+        /// @brief Removes and finalizes a component
         inline bool RemoveDeleteComponent(Component* component);
 
+        /// @brief Finalizes all attached components
         virtual void Cleanup();
 
         inline virtual ~Registry() {}
 
+        /// @brief The root registry manages global callbacks invokable on the components
         HSK_PROPERTY_GET(RootRegistry)
+        /// @brief The root registry manages global callbacks invokable on the components
         HSK_PROPERTY_CGET(RootRegistry)
 
         inline Registry& SetRootRegistry(RootRegistry* rootRegistry);
 
+        /// @brief All components attached to the registry
         HSK_PROPERTY_GET(Components)
+        /// @brief All components attached to the registry
         HSK_PROPERTY_CGET(Components)
 
       protected:
@@ -64,9 +78,9 @@ namespace hsk {
     };
 
     template <typename TComponent, typename... Args>
-    inline TComponent* Registry::MakeComponent(Args&&... args){
+    inline TComponent* Registry::MakeComponent(Args&&... args)
+    {
         Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
-        Assert(!HasComponent<TComponent>(), "Registry::AddComponent: Already has component of same type attached!");
 
         TComponent* value = new TComponent(std::forward<Args>(args)...);
         Register(value);
@@ -78,7 +92,6 @@ namespace hsk {
     {
         Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
         Assert(component, "Registry::AddComponent: Parameter component is nullptr!");
-        Assert(!HasComponent<TComponent>(), "Registry::AddComponent: Already has component of same type attached!");
         Assert(!component->GetRegistry(), "Registry::AddComponent: Component is already attached to other registry!");
 
         Register(component);
@@ -89,7 +102,6 @@ namespace hsk {
     {
         Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
         Assert(component, "Registry::AddComponent: Parameter component is nullptr!");
-        Assert(!HasComponent<TComponent>(), "Registry::AddComponent: Already has component of same type attached!");
         if(component->GetRegistry())
         {
             Registry* registry = component->GetRegistry();
@@ -133,6 +145,38 @@ namespace hsk {
         return nullptr;
     }
 
+    template <typename TComponent>
+    inline int32_t Registry::GetComponents(std::vector<TComponent*>& out)
+    {
+        int32_t writes = 0;
+        for(Component* component : mComponents)
+        {
+            auto cast = dynamic_cast<TComponent*>(component);
+            if(cast)
+            {
+                out.push_back(cast);
+                writes++;
+            }
+        }
+        return writes;
+    }
+
+    template <typename TComponent>
+    inline int32_t Registry::GetComponents(std::vector<const TComponent*>& out) const
+    {
+        int32_t writes = 0;
+        for(const Component* component : mComponents)
+        {
+            auto cast = dynamic_cast<const TComponent*>(component);
+            if(cast)
+            {
+                out.push_back(cast);
+                writes++;
+            }
+        }
+        return writes;
+    }
+
     inline bool Registry::RemoveDeleteComponent(Component* component)
     {
         Assert(component, "Registry::RemoveDeleteComponent: Parameter component is nullptr!");
@@ -144,7 +188,8 @@ namespace hsk {
         return false;
     }
 
-    inline Registry& Registry::SetRootRegistry(RootRegistry* rootRegistry){
+    inline Registry& Registry::SetRootRegistry(RootRegistry* rootRegistry)
+    {
         Assert(mComponents.size() == 0, "Registry::SetRootRegistry: Cannot transfer root registry with components. Finalize first!");
         mRootRegistry = rootRegistry;
         return *this;

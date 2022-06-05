@@ -35,7 +35,10 @@ namespace hsk {
         AssertVkResult(vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView));
 
         // attach debug information to iamge
-        SetupDebugInfo(createInfo);
+        if(mName.size() && mContext->DebugEnabled)
+        {
+            UpdateDebugNames();
+        }
     }
 
     void ManagedImage::Recreate()
@@ -188,22 +191,6 @@ namespace hsk {
         }
     }
 
-    void ManagedImage::SetupDebugInfo(CreateInfo& createInfo)
-    {
-        if(mContext->DebugEnabled)
-        {
-            // Set a name on the image
-            const VkDebugUtilsObjectNameInfoEXT imageNameInfo = {
-                VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,  // sType
-                NULL,                                                // pNext
-                VK_OBJECT_TYPE_IMAGE,                                // objectType
-                (uint64_t)mImage,                                    // objectHandle
-            };
-
-            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&imageNameInfo);
-        }
-    }
-
     void ManagedImage::CheckImageFormatSupport(CreateInfo& createInfo)
     {
         VkImageFormatProperties props{};
@@ -211,4 +198,28 @@ namespace hsk {
         AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
                                                                 createInfo.ImageCI.usage, createInfo.ImageCI.flags, &props));
     }
+
+    ManagedImage& ManagedImage::SetName(std::string_view name)
+    {
+        mName = name;
+        if(mAllocation && mContext->DebugEnabled)
+        {
+            UpdateDebugNames();
+        }
+        return *this;
+    }
+
+    void ManagedImage::UpdateDebugNames()
+    {
+        std::string debugName = fmt::format("Image Managed \"{}\" ({: f} KiB)", mName, ((double)mAllocInfo.size) / 1024.0);
+        vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
+        VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+                                               .pNext        = nullptr,
+                                               .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE,
+                                               .objectHandle = reinterpret_cast<uint64_t>(mImage),
+                                               .pObjectName  = debugName.c_str()};
+        mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+    }
+
+
 }  // namespace hsk

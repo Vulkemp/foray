@@ -62,6 +62,8 @@ namespace hsk {
         VmaAllocationInfo      mAllocationInfo{};
         VkDeviceSize           mSize           = {};
         bool                   mIsMapped       = false;
+
+        void UpdateDebugNames();
     };
 
 }  // namespace hsk

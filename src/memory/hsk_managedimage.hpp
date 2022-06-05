@@ -89,7 +89,10 @@ namespace hsk {
         HSK_PROPERTY_CGET(AllocInfo)
         HSK_PROPERTY_CGET(Format)
         HSK_PROPERTY_CGET(Extent3D)
-        HSK_PROPERTY_ALL(Name)
+        HSK_PROPERTY_GET(Name)
+        HSK_PROPERTY_CGET(Name)
+
+        ManagedImage& SetName(std::string_view name);
 
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 
@@ -105,7 +108,7 @@ namespace hsk {
         VkExtent3D        mExtent3D{};
         std::string       mName{};
 
-        void SetupDebugInfo(CreateInfo& createInfo);
         void CheckImageFormatSupport(CreateInfo& createInfo);
+        void UpdateDebugNames();
     };
 }  // namespace hsk

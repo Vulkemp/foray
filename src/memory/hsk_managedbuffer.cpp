@@ -2,6 +2,7 @@
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
+#include <spdlog/fmt/fmt.h>
 
 namespace hsk {
 
@@ -10,9 +11,9 @@ namespace hsk {
         mContext = context;
         mSize    = createInfo.BufferCreateInfo.size;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
-        if(mName.length() > 0)
+        if(mName.length() > 0 && mContext->DebugEnabled)
         {
-            vmaSetAllocationName(mContext->Allocator, mAllocation, mName.c_str());
+            UpdateDebugNames();
             logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
                             reinterpret_cast<uint64_t>(mBuffer));
         }
@@ -70,10 +71,23 @@ namespace hsk {
     ManagedBuffer& ManagedBuffer::SetName(std::string_view name)
     {
         mName = name;
-        if(mAllocation)
+        if(mAllocation && mContext->DebugEnabled)
         {
-            vmaSetAllocationName(mContext->Allocator, mAllocation, mName.c_str());
+            UpdateDebugNames();
         }
+        return *this;
+    }
+
+    void ManagedBuffer::UpdateDebugNames()
+    {
+        std::string debugName = fmt::format("Buffer Managed \"{}\" ({: f} KiB)", mName, ((double)mSize) / 1024.0);
+        vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
+        VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+                                               .pNext        = nullptr,
+                                               .objectType   = VkObjectType::VK_OBJECT_TYPE_BUFFER,
+                                               .objectHandle = reinterpret_cast<uint64_t>(mBuffer),
+                                               .pObjectName  = debugName.c_str()};
+        mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
     void ManagedBuffer::Destroy()

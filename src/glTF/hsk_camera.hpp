@@ -23,7 +23,9 @@ namespace hsk {
     class Camera : public hsk::SceneComponent
     {
       public:
-        inline explicit Camera(hsk::Scene* scene) : SceneComponent(scene), mUbo(true) {}
+        inline explicit Camera(hsk::Scene* scene) : SceneComponent(scene), mUbo(true) {
+          mUbo.GetManagedBuffer().SetName("Camera Ubo");
+        }
 
         void InitFromTinyGltfCamera(const tinygltf::Camera& camera);
         void InitDefault();

@@ -4,18 +4,9 @@
 #include "hsk_scene.hpp"
 
 namespace hsk {
-    NNode*    Component::GetNode() { return dynamic_cast<NNode*>(mRegistry); }
-    NScene*   Component::GetScene() { return dynamic_cast<NScene*>(mRegistry->GetRootRegistry()); }
-    Registry* Component::GetGlobals()
-    {
-        auto scene = GetScene();
-        if(scene)
-        {
-            return &(scene->GetGlobals());
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
+    NNode*    NodeComponent::GetNode() { return dynamic_cast<NNode*>(mRegistry); }
+    NScene*   NodeComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry->GetRootRegistry()); }
+    Registry* NodeComponent::GetGlobals() { return dynamic_cast<Registry*>(mRegistry->GetRootRegistry()); }
+    NScene*   GlobalComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry); }
+    Registry* GlobalComponent::GetGlobals() { return mRegistry; }
 }  // namespace hsk

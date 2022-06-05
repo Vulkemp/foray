@@ -145,6 +145,7 @@ namespace hsk {
             {
                 mVkbInstanceBuilder.enable_validation_layers();
             }
+
         }
 
         auto instanceBuildRet = mVkbInstanceBuilder.build();

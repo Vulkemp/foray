@@ -4,10 +4,10 @@
 #include "hsk_node.hpp"
 
 namespace hsk {
-    NScene::NScene(const VkContext* context) : mContext(context), mGlobals(&mGlobalRootRegistry)
+    NScene::NScene(const VkContext* context) : Registry(&mGlobalRootRegistry), mContext(context)
     {
-        mGlobals.MakeComponent<NMaterialBuffer>(mContext);
-        mGlobals.MakeComponent<SceneTransformBuffer>(mContext);
+        MakeComponent<NMaterialBuffer>(mContext);
+        MakeComponent<SceneTransformBuffer>(mContext);
     }
 
     void NScene::Update(const FrameUpdateInfo& updateInfo)
@@ -52,7 +52,7 @@ namespace hsk {
         mNodeBuffer.clear();
 
         // Clear global components
-        mGlobals.Cleanup();
+        Registry::Cleanup();
     }
 
 

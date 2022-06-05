@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 
 namespace hsk {
-    class NTransform : public Component
+    class NTransform : public NodeComponent
     {
       public:
         inline NTransform() {}

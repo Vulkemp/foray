@@ -11,7 +11,7 @@ namespace hsk {
         glm::mat4 PreviousModelMatrix = glm::mat4(1.f);
     };
 
-
+    /// @brief Stores all current and previous' frame model matrices for use by the GPU
     class SceneTransformBuffer : public Component, public Component::BeforeDrawCallback
     {
       public:

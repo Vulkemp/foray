@@ -7,7 +7,11 @@
 
 namespace hsk {
 
-    class NScene : public RootRegistry
+    /// @brief Provides registries and methods as the anchor of a component based scene.
+    /// @remark Manages and owns all nodes
+    /// @remark Inherits Registry, and functions as the component registry for all global components
+    /// @remark Inherits RootRegistry for managing callbacks used by node components, and as a way for nodes to link back to the global instance
+    class NScene : public Registry, public RootRegistry
     {
       public:
         explicit NScene(const VkContext* context);
@@ -16,14 +20,15 @@ namespace hsk {
         /// @brief Generates a new node and attaches it to the parent if it is set, root otherwise
         NNode* MakeNode(NNode* parent = nullptr);
 
+        /// @brief Advance scene state by invoking all NodeComponent update callbacks, followed by GlobalComponent update callbacks
         void Update(const FrameUpdateInfo& updateInfo);
+        /// @brief Draw the scene by first invoking all BeforeDraw callbacks (NodeComponent, then GlobalComponent), followed by Draw callbacks (NodeComponent, then GlobalComponent).
         void Draw(const FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
+        /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
         void HandleEvent(std::shared_ptr<Event>& event);
 
-        /// @brief Registry of Global Components. Global Components' callbacks are invoked after all node-attached components
-        HSK_PROPERTY_GET(Globals)
-
-        void Cleanup();
+        /// Cleans up all memory, GPU structures, etc...
+        virtual void Cleanup();
 
         inline virtual ~NScene() { Cleanup(); }
 
@@ -36,7 +41,6 @@ namespace hsk {
         /// @brief All nodes directly attached to the root
         std::vector<NNode*> mRootNodes;
 
-        Registry     mGlobals;
         RootRegistry mGlobalRootRegistry;
     };
 }  // namespace hsk

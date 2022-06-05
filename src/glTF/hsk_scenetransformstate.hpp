@@ -1,9 +1,9 @@
 #pragma once
 #include "../hsk_basics.hpp"
+#include "../hsk_glm.hpp"
 #include "../memory/hsk_managedvectorbuffer.hpp"
 #include "hsk_gltf_declares.hpp"
 #include "hsk_scenecomponent.hpp"
-#include "../hsk_glm.hpp"
 #include <optional>
 
 namespace hsk {
@@ -18,8 +18,8 @@ namespace hsk {
     class SceneTransformState : public SceneComponent, public NoMoveDefaults
     {
       public:
-        inline SceneTransformState() {}
-        inline explicit SceneTransformState(Scene* scene) : SceneComponent(scene), NoMoveDefaults() {}
+        inline SceneTransformState() { mBuffer.GetBuffer().SetName("SceneTransform Buffer"); }
+        inline explicit SceneTransformState(Scene* scene) : SceneComponent(scene), NoMoveDefaults() { mBuffer.GetBuffer().SetName("SceneTransform Buffer"); }
 
         void        InitOrUpdate(std::optional<BufferSection> section = {});
         inline void Cleanup() { mBuffer.Cleanup(); }
