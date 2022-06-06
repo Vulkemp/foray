@@ -34,6 +34,8 @@ namespace hsk {
         inline virtual ~NScene() { Cleanup(); }
 
         HSK_PROPERTY_ALL(Context)
+        HSK_PROPERTY_ALL(NodeBuffer)
+        HSK_PROPERTY_ALL(RootNodes)
 
       protected:
         const VkContext* mContext;

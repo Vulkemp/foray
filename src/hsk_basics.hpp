@@ -11,9 +11,9 @@ namespace hsk {
     class NoMoveDefaults
     {
       public:
-        inline NoMoveDefaults() {}
+        inline NoMoveDefaults()                      = default;
         NoMoveDefaults(const NoMoveDefaults& other)  = delete;
-        NoMoveDefaults(const NoMoveDefaults&& other) = delete;
+        NoMoveDefaults(NoMoveDefaults&& other) = default;
         NoMoveDefaults& operator=(const NoMoveDefaults& other) = delete;
     };
 

@@ -13,13 +13,13 @@ namespace hsk {
         if(vertices.size())
         {
             VkDeviceSize bufferSize = vertices.size() * sizeof(NVertex);
-            mVertices.Create(GetScene()->GetContext(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mVertices.Create(GetContext(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mVertices.WriteDataDeviceLocal(vertices.data(), bufferSize);
         }
         if(indices.size())
         {
             VkDeviceSize bufferSize = indices.size() * sizeof(uint32_t);
-            mIndices.Create(GetScene()->GetContext(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mIndices.Create(GetContext(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mIndices.WriteDataDeviceLocal(indices.data(), bufferSize);
         }
     }
