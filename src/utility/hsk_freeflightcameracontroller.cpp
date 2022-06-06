@@ -66,6 +66,21 @@ namespace hsk {
         {
             mReactOnMouseMoveEvents = !mReactOnMouseMoveEvents;
             mFirstMoveAfterUnlock   = true;
+            SDL_ShowCursor(!mReactOnMouseMoveEvents);
+        }
+        else if(buttonType == EButton::Keyboard_LShift)
+        {
+            static bool accelerated = false;
+            if(!accelerated && pressed)
+            {
+                accelerated = true;
+                mCameraSpeed *= 3;
+            }
+            else if(accelerated && !pressed)
+            {
+                accelerated = false;
+                mCameraSpeed /= 3;
+            }
         }
     }
 

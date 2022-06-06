@@ -1,7 +1,7 @@
 #include "hsk_osmanager.hpp"
 #include "hsk_osi.hpp"
-#include <sdl2/SDL.h>
 #include <nameof/nameof.hpp>
+#include <sdl2/SDL.h>
 
 namespace hsk {
 #pragma region lifetime
@@ -232,12 +232,14 @@ namespace hsk {
 
     Event::ptr OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
     {
-        SDL_MouseMotionEvent mevent   = sdl_event.motion;
-        Window*              window   = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
-        fp32_t               currentx = mevent.x;
-        fp32_t               currenty = mevent.y;
+        SDL_MouseMotionEvent mevent    = sdl_event.motion;
+        Window*              window    = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
+        fp32_t               currentx  = mevent.x;
+        fp32_t               currenty  = mevent.y;
+        fp32_t               relativeX = mevent.xrel;
+        fp32_t               relativeY = mevent.yrel;
 
-        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, nullptr, currentx, currenty);
+        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, nullptr, currentx, currenty, relativeX, relativeY);
         return result;
     }
 

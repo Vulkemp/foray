@@ -150,15 +150,19 @@ namespace hsk {
       public:
         inline fp32_t CurrentX() const { return mCurrentX; }
         inline fp32_t CurrentY() const { return mCurrentY; }
+        inline fp32_t RelativeX() const { return mRelativeX; }
+        inline fp32_t RelativeY() const { return mRelativeY; }
 
-        EventInputMouseMoved(Window* const source, const uint32_t timestamp, InputDevice* const device, fp32_t currentx, fp32_t currenty)
-            : EventInput(source, timestamp, EType::InputMouseMoved, device), mCurrentX(currentx), mCurrentY(currenty)
+        EventInputMouseMoved(Window* const source, const uint32_t timestamp, InputDevice* const device, fp32_t currentx, fp32_t currenty, fp32_t relativeX, fp32_t relativeY)
+            : EventInput(source, timestamp, EType::InputMouseMoved, device), mCurrentX(currentx), mCurrentY(currenty), mRelativeX(relativeX), mRelativeY(relativeY)
         {
         }
 
       protected:
         fp32_t mCurrentX;
         fp32_t mCurrentY;
+        fp32_t mRelativeX;
+        fp32_t mRelativeY;
     };
 
     class EventWindowResized : public Event
