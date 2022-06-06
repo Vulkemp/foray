@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_component.hpp"
+#include "../../memory/hsk_managedimage.hpp"
 
 namespace hsk {
     class TextureStore : public Component
@@ -14,6 +15,6 @@ namespace hsk {
         HSK_PROPERTY_GET(Textures)
 
       protected:
-        std::vector<ManagedImage> mTextures;
+        std::vector<std::unique_ptr<ManagedImage>> mTextures;
     };
 }  // namespace hsk

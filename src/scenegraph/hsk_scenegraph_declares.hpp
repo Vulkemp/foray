@@ -8,4 +8,8 @@ namespace hsk {
     class NTransform;
     class NMeshInstance;
     class NPrimitive;
+    class GeometryStore;
+    class NMaterialBuffer;
+    class SceneTransformBuffer;
+    class TextureStore;
 }  // namespace hsk
