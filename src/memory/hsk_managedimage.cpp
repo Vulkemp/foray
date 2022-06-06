@@ -3,6 +3,7 @@
 #include "hsk_managedbuffer.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
+#include "../utility/hsk_fmtutilities.hpp"
 
 namespace hsk {
     ManagedImage::CreateInfo::CreateInfo()
@@ -211,7 +212,7 @@ namespace hsk {
 
     void ManagedImage::UpdateDebugNames()
     {
-        std::string debugName = fmt::format("Image Managed \"{}\" ({: f} KiB)", mName, ((double)mAllocInfo.size) / 1024.0);
+        std::string debugName = fmt::format("Image Managed \"{}\" ({})", mName, PrintSize(mAllocInfo.size));
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
                                                .pNext        = nullptr,

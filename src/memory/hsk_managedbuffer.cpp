@@ -2,6 +2,7 @@
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
+#include "../utility/hsk_fmtutilities.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace hsk {
@@ -80,7 +81,7 @@ namespace hsk {
 
     void ManagedBuffer::UpdateDebugNames()
     {
-        std::string debugName = fmt::format("Buffer Managed \"{}\" ({: f} KiB)", mName, ((double)mSize) / 1024.0);
+        std::string debugName = fmt::format("Buffer Managed \"{}\" ({})", mName, PrintSize(mSize));
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
                                                .pNext        = nullptr,
