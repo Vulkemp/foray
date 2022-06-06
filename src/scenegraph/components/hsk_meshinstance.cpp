@@ -1,22 +1,29 @@
-#include "hsk_meshInstance.hpp"
+#include "hsk_meshinstance.hpp"
+#include "../globalcomponents/hsk_geometrystore.hpp"
+#include "../globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "../hsk_node.hpp"
 #include "hsk_transform.hpp"
-#include "../globalcomponents/hsk_scenetransformbuffer.hpp"
 
 namespace hsk {
     void NMeshInstance::BeforeDraw(const FrameRenderInfo& renderInfo)
     {
         // Push Transform to SceneTransformState
-        auto transform = GetNode()->GetTransform();
+        auto transform       = GetNode()->GetTransform();
         auto transformBuffer = GetGlobals()->GetComponent<SceneTransformBuffer>();
-        transformBuffer->UpdateSceneTransform(mIndex, transform->GetGlobalMatrix());
+        transformBuffer->UpdateSceneTransform(mInstanceIndex, transform->GetGlobalMatrix());
     }
     void NMeshInstance::Draw(SceneDrawInfo& drawInfo)
     {
-        drawInfo.CmdPushConstant(mIndex);
-        for(auto& primitive : mPrimitives)
+        Mesh*          mesh;
+        GeometryStore* geoStore = GetGlobals()->GetComponent<GeometryStore>();
+        if(geoStore && mMeshIndex >= 0 && mMeshIndex < geoStore->GetMeshes().size())
         {
-            primitive.Draw(drawInfo.RenderInfo.GetCommandBuffer());
+            mesh = geoStore->GetMeshes()[mMeshIndex].get();
+        }
+        if(mesh)
+        {
+            drawInfo.CmdPushConstant(mInstanceIndex);
+            mesh->CmdDraw(drawInfo.RenderInfo.GetCommandBuffer(), drawInfo.CurrentlyBoundGeoBuffers);
         }
     }
 }  // namespace hsk

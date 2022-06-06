@@ -2,43 +2,99 @@
 #include "../../memory/hsk_managedbuffer.hpp"
 #include "../hsk_component.hpp"
 #include "../hsk_geo.hpp"
+#include <set>
 
 namespace hsk {
 
+    /// @brief Reference into a vertex or index buffer which combine into a valid draw call
+    struct NPrimitive
+    {
+        enum class EType
+        {
+            Vertex,
+            Index
+        };
+        EType    Type  = {};
+        uint32_t First = 0;
+        uint32_t Count = 0;
 
-    class GeometryStore : public GlobalComponent, public Component::BeforeDrawCallback
+        inline NPrimitive() {}
+        inline NPrimitive(EType type, uint32_t first, uint32_t count);
+
+        bool        IsValid() const { return Count > 0; }
+        inline void CmdDraw(VkCommandBuffer commandBuffer);
+    };
+
+    class Mesh
     {
       public:
-        GeometryStore();
+        inline Mesh() {}
+        inline Mesh(GeometryBufferSet* buffer) : mBuffer(buffer) {}
 
-        void Init(const std::vector<NVertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
+        virtual void CmdDraw(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet);
 
-        inline bool CmdBindBuffers(VkCommandBuffer commandBuffer);
+        HSK_PROPERTY_ALL(Buffer)
+        HSK_PROPERTY_ALL(Primitives)
 
-        virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
+      protected:
+        GeometryBufferSet*      mBuffer;
+        std::vector<NPrimitive> mPrimitives;
+    };
 
-        void Cleanup();
+    class GeometryBufferSet
+    {
+      public:
+        GeometryBufferSet();
 
-        virtual ~GeometryStore() { Cleanup(); }
+        HSK_PROPERTY_ALL(Indices)
+        HSK_PROPERTY_ALL(Vertices)
+
+        void Init(const VkContext* context, const std::vector<NVertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
+
+        virtual bool CmdBindBuffers(VkCommandBuffer commandBuffer);
+
+        inline virtual ~GeometryBufferSet()
+        {
+            mIndices.Destroy();
+            mVertices.Destroy();
+        }
 
       protected:
         ManagedBuffer mIndices;
         ManagedBuffer mVertices;
     };
 
-    bool GeometryStore::CmdBindBuffers(VkCommandBuffer commandBuffer)
+    class GeometryStore : public GlobalComponent
     {
-        if(mVertices.GetAllocation())
+      public:
+        GeometryStore();
+
+        void Cleanup();
+
+        virtual ~GeometryStore() { Cleanup(); }
+
+        HSK_PROPERTY_ALL(BufferSets)
+        HSK_PROPERTY_ALL(Meshes)
+
+      protected:
+        std::vector<std::unique_ptr<GeometryBufferSet>> mBufferSets;
+        std::vector<std::unique_ptr<Mesh>>              mMeshes;
+    };
+
+    inline NPrimitive::NPrimitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), Count(count) {}
+
+    inline void NPrimitive::CmdDraw(VkCommandBuffer commandBuffer)
+    {
+        if(IsValid())
         {
-            const VkDeviceSize offsets[1]      = {0};
-            VkBuffer           vertexBuffers[] = {mVertices.GetBuffer()};
-            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-            if(mIndices.GetAllocation())
+            if(Type == EType::Index)
             {
-                vkCmdBindIndexBuffer(commandBuffer, mIndices.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdDrawIndexed(commandBuffer, Count, 1, First, 0, 0);
             }
-            return true;
+            else
+            {
+                vkCmdDraw(commandBuffer, Count, 1, First, 0);
+            }
         }
-        return false;
     }
 }  // namespace hsk

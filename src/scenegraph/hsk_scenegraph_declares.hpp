@@ -12,4 +12,5 @@ namespace hsk {
     class NMaterialBuffer;
     class SceneTransformBuffer;
     class TextureStore;
+    class GeometryBufferSet;
 }  // namespace hsk

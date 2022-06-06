@@ -1,4 +1,5 @@
 #pragma once
+#include "hsk_scenegraph_declares.hpp"
 #include "../base/hsk_framerenderinfo.hpp"
 #include "../hsk_basics.hpp"
 #include <vulkan/vulkan.h>
@@ -27,8 +28,9 @@ namespace hsk {
     {
       public:
         const hsk::FrameRenderInfo RenderInfo;
-        const VkPipelineLayout     PipelineLayout    = nullptr;
-        DrawPushConstant           PushConstantState = {};
+        const VkPipelineLayout     PipelineLayout           = nullptr;
+        DrawPushConstant           PushConstantState        = {};
+        GeometryBufferSet*         CurrentlyBoundGeoBuffers = nullptr;
 
         inline SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
 
