@@ -12,7 +12,7 @@ namespace hsk {
     };
 
     /// @brief Stores all current and previous' frame model matrices for use by the GPU
-    class SceneTransformBuffer : public Component, public Component::BeforeDrawCallback
+    class SceneTransformBuffer : public GlobalComponent, public Component::BeforeDrawCallback
     {
       public:
         explicit SceneTransformBuffer(const VkContext* context);

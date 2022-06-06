@@ -6,7 +6,7 @@
 namespace hsk {
 
     /// @brief Manages a device local storage buffer providing material information for rendering
-    class NMaterialBuffer : public Component
+    class NMaterialBuffer : public GlobalComponent
     {
       public:
         explicit NMaterialBuffer(const VkContext* context);

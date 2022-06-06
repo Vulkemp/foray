@@ -3,7 +3,7 @@
 
 namespace hsk {
 
-    struct CameraUboBlock
+    struct NCameraUboBlock
     {
         glm::mat4 ProjectionMatrix         = {};
         glm::mat4 ViewMatrix               = {};
@@ -50,7 +50,7 @@ namespace hsk {
         glm::vec3 mEyePosition = glm::vec3(0.f, 0.f, -1.f);
         glm::vec3 mLookatPosition = glm::vec3(0.f, 0.f, 0.f);
         glm::vec3 mUpDirection = glm::vec3(0.f, 1.f, 0.f);
-        ManagedUbo<CameraUboBlock> mUbo;
+        ManagedUbo<NCameraUboBlock> mUbo;
     };
 
     inline float NCamera::CalculateAspect(const VkExtent2D extent){
