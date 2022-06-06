@@ -20,7 +20,7 @@ namespace hsk {
         }
     }
 
-    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, void* data)
+    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, const void* data)
     {
         // if (mName.length() == 0){
         //     mName = fmt::format("Staging Buffer {0:x}", reinterpret_cast<uint64_t>(data));
@@ -61,7 +61,7 @@ namespace hsk {
         mIsMapped = false;
     }
 
-    void ManagedBuffer::MapAndWrite(void* data)
+    void ManagedBuffer::MapAndWrite(const void* data)
     {
         void* mappedPtr = nullptr;
         AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &mappedPtr));
@@ -112,7 +112,7 @@ namespace hsk {
         mSize       = 0;
     }
 
-    void ManagedBuffer::WriteDataDeviceLocal(void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
+    void ManagedBuffer::WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
         Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 

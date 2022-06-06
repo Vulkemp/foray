@@ -10,5 +10,7 @@ namespace hsk {
     class TextureStore : public Component
     {
       public:
+      protected:
+        std::vector<ManagedImage> mTextures;
     };
 }  // namespace hsk

@@ -1,4 +1,5 @@
 #include "hsk_scene.hpp"
+#include "globalcomponents/hsk_geometrystore.hpp"
 #include "globalcomponents/hsk_materialbuffer.hpp"
 #include "globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "hsk_node.hpp"
@@ -8,6 +9,7 @@ namespace hsk {
     {
         MakeComponent<NMaterialBuffer>(mContext);
         MakeComponent<SceneTransformBuffer>(mContext);
+        MakeComponent<GeometryStore>();
     }
 
     void NScene::Update(const FrameUpdateInfo& updateInfo)

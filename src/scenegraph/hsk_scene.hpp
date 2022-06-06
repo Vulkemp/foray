@@ -4,6 +4,7 @@
 #include "hsk_rootregistry.hpp"
 #include "hsk_scenedrawing.hpp"
 #include "hsk_scenegraph_declares.hpp"
+#include "hsk_node.hpp"
 
 namespace hsk {
 
@@ -31,6 +32,8 @@ namespace hsk {
         virtual void Cleanup();
 
         inline virtual ~NScene() { Cleanup(); }
+
+        HSK_PROPERTY_ALL(Context)
 
       protected:
         const VkContext* mContext;
