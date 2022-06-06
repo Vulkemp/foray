@@ -24,25 +24,9 @@ namespace hsk {
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo()
     {
-        size_t numUbos = 1;  // we load the complete ubo buffer as a single ubo buffer.
-
         auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_VERTEX_BIT;
-        descriptorInfo->pImmutableSamplers = nullptr;
-        descriptorInfo->DescriptorCount    = 1;
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-        size_t numSets = 1;
-        descriptorInfo->BufferInfos.resize(numSets);
-
-        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
-        {
-            descriptorInfo->BufferInfos[setIndex].resize(numUbos);
-            for(size_t i = 0; i < numUbos; i++)
-            {
-                descriptorInfo->BufferInfos[setIndex][i] = mUbo.GetManagedBuffer().GetVkDescriptorBufferInfo();
-            }
-        }
+        std::vector<VkDescriptorBufferInfo> bufferInfos    = {mUbo.GetManagedBuffer().GetVkDescriptorBufferInfo()};
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, bufferInfos);
         return descriptorInfo;
     }
 

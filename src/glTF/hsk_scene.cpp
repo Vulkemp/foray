@@ -11,70 +11,38 @@ namespace hsk {
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTextureDescriptorInfo()
     {
+        auto                               descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        std::vector<VkDescriptorImageInfo> imageInfos;
 
-        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
-        descriptorInfo->pImmutableSamplers = nullptr;
-        descriptorInfo->DescriptorCount    = mTextures.size();
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-
-        size_t numSets = 1;
-        descriptorInfo->ImageInfos.resize(numSets);
-
-        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
+        imageInfos.resize(mTextures.size());
+        for(size_t i = 0; i < mTextures.size(); i++)
         {
-            descriptorInfo->ImageInfos[setIndex].resize(mTextures.size());
-            for(size_t i = 0; i < mTextures.size(); i++)
-            {
-                descriptorInfo->ImageInfos[setIndex][i].imageLayout = mTextures[i]->GetImageLayout();
-                descriptorInfo->ImageInfos[setIndex][i].imageView   = mTextures[i]->GetImageView();
-                descriptorInfo->ImageInfos[setIndex][i].sampler =
-                    mTextures[i]->GetSampler();  // TODO: whats difference between a sampler of this texture object and the mTextureSamplers - which one should be used??
-            }
+            imageInfos[i].imageLayout = mTextures[i]->GetImageLayout();
+            imageInfos[i].imageView   = mTextures[i]->GetImageView();
+            imageInfos[i].sampler     = mTextures[i]->GetSampler();
         }
+
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, imageInfos);
         return descriptorInfo;
     }
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetMaterialUboArrayDescriptorInfo()
     {
-        size_t numMaterials = 1;  // we load the complete ubo buffer as a single ubo buffer.
-
-        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_FRAGMENT_BIT;
-        descriptorInfo->pImmutableSamplers = nullptr;
-        descriptorInfo->DescriptorCount    = numMaterials;
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-        size_t numSets = 1;
-        descriptorInfo->BufferInfos.resize(numSets);
-
-        for(size_t setIndex = 0; setIndex < numSets; setIndex++)
-        {
-            descriptorInfo->BufferInfos[setIndex].resize(numMaterials);
-            for(size_t i = 0; i < numMaterials; i++)
-            {
-                descriptorInfo->BufferInfos[setIndex][i] = mMaterials.GetVkDescriptorBufferInfo();
-            }
-        }
+        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        std::vector<VkDescriptorBufferInfo> bufferInfos    = {mMaterials.GetVkDescriptorBufferInfo()};
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, bufferInfos);
         return descriptorInfo;
     }
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetTransformStateDescriptorInfo()
     {
-        auto descriptorInfo                = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->ShaderStageFlags   = VK_SHADER_STAGE_VERTEX_BIT;
-        descriptorInfo->pImmutableSamplers = nullptr;
-        descriptorInfo->DescriptorCount    = 1;
-        descriptorInfo->DescriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-        descriptorInfo->BufferInfos.push_back({mTransformState.GetVkDescriptorBufferInfo()});
+        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        std::vector<VkDescriptorBufferInfo> bufferInfos    = {mTransformState.GetVkDescriptorBufferInfo()};
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, bufferInfos);
         return descriptorInfo;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetCameraDescriptorInfo()
-    {
-        return mCameras.size() ? mCameras.front()->GetUboDescriptorInfo() : nullptr;
-    }
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Scene::GetCameraDescriptorInfo() { return mCameras.size() ? mCameras.front()->GetUboDescriptorInfo() : nullptr; }
 
     void Scene::Cleanup()
     {
@@ -144,7 +112,8 @@ namespace hsk {
         if(fileLoaded)
         {
             bool addDefaultCamera = gltfModel.cameras.size() == 0;
-            if (addDefaultCamera) {
+            if(addDefaultCamera)
+            {
                 mCameras.push_back(std::move(std::make_unique<Camera>(this)));
                 mCameras.back()->InitDefault();
             }
@@ -167,10 +136,11 @@ namespace hsk {
                 LoadNodeRecursive(gltfModel, scene.nodes[i], meshInstanceCount, indexBuffer, vertexBuffer);
             }
 
-            if (addDefaultCamera){
+            if(addDefaultCamera)
+            {
                 mNodesLinear.resize(mNodesLinear.size() + 1);
                 mNodesLinear.back() = std::make_unique<Node>(this);
-                Node* cameraNode = mNodesLinear.back().get();
+                Node* cameraNode    = mNodesLinear.back().get();
                 mNodesHierarchy.push_back(cameraNode);
                 cameraNode->SetCamera(mCameras.front().get());
             }
