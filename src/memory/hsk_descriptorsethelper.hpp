@@ -34,6 +34,7 @@ namespace hsk {
         class DescriptorInfo
         {
           public:
+            void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags);
             void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>& bufferInfosFirstSet);
             void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>& imageInfosFirstSet);
 

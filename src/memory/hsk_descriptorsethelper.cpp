@@ -141,6 +141,11 @@ namespace hsk {
     }
 
 
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags) {
+        mDescriptorType   = type;
+        mShaderStageFlags = shaderStageFlags;
+    }
+
     void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>& bufferInfosFirstSet)
     {
         mDescriptorType   = type;
@@ -162,7 +167,7 @@ namespace hsk {
         size_t countDescriptorInfos = bufferInfos.size();
         if(mDescriptorCount > 0)
         {
-            Assert(mDescriptorCount == countDescriptorInfos,
+            Assert(mDescriptorCount != countDescriptorInfos,
                    "Cannot add buffer infos with a different amount of descriptor handles! All buffer info vectors need to be of the same size!");
         }
         else
@@ -179,7 +184,7 @@ namespace hsk {
         size_t countDescriptorInfos = imageInfos.size();
         if(mDescriptorCount > 0)
         {
-            Assert(mDescriptorCount == countDescriptorInfos,
+            Assert(mDescriptorCount != countDescriptorInfos,
                    "Cannot add image infos with a different amount of descriptor handles! All image info vectors need to be of the same size!");
         }
         else
