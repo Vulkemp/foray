@@ -5,12 +5,7 @@
 namespace hsk {
     NTransform* NNode::GetTransform()
     {
-        NTransform* transform = GetComponent<NTransform>();
-        if(!transform)
-        {
-            transform = MakeComponent<NTransform>();
-        }
-        return transform;
+        return GetComponent<NTransform>();
     }
 
     NNode::NNode(NScene* scene, NNode* parent) : Registry(scene), mParent(parent)

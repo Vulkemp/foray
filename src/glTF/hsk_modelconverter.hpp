@@ -26,8 +26,8 @@ namespace hsk {
 
         std::vector<NVertex>  mVertexBuffer;
         std::vector<uint32_t> mIndexBuffer;
-        std::set<int32_t> mMeshesUsed;
-        std::map<NMeshInstance*, int32_t> mMeshMappings;
+
+        int32_t mNextMeshInstanceIndex;
 
         // Result structures
 

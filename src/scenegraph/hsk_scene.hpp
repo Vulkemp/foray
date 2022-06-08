@@ -15,8 +15,9 @@ namespace hsk {
     class NScene : public Registry, public RootRegistry
     {
       public:
-        explicit NScene(const VkContext* context);
+        friend NNode;
 
+        explicit NScene(const VkContext* context);
 
         /// @brief Generates a new node and attaches it to the parent if it is set, root otherwise
         NNode* MakeNode(NNode* parent = nullptr);

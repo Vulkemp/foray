@@ -11,6 +11,8 @@ namespace hsk {
         virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
         virtual void Draw(SceneDrawInfo& drawInfo) override;
 
+        HSK_PROPERTY_ALL(InstanceIndex)
+        HSK_PROPERTY_ALL(MeshIndex)
       protected:
         int32_t                 mInstanceIndex = 0;
         int32_t                 mMeshIndex     = 0;

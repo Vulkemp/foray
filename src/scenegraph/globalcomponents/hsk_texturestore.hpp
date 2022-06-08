@@ -3,7 +3,7 @@
 #include "../../memory/hsk_managedimage.hpp"
 
 namespace hsk {
-    class TextureStore : public Component
+    class TextureStore : public GlobalComponent
     {
       public:
 

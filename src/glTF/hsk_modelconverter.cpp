@@ -1,7 +1,7 @@
 #include "hsk_modelconverter.hpp"
 #include "../base/hsk_vkcontext.hpp"
-#include "../scenegraph/components/hsk_transform.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
+#include "../scenegraph/components/hsk_transform.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
@@ -86,26 +86,27 @@ namespace hsk {
         {
             return;
         }
+        auto& gltfNode  = mGltfModel.nodes[currentIndex];
+        bufferUniquePtr = std::make_unique<NNode>(mScene, parent);
+        auto node       = bufferUniquePtr.get();
         if(!parent)
         {
-            auto& gltfNode  = mGltfModel.nodes[currentIndex];
-            bufferUniquePtr = std::make_unique<NNode>(mScene, parent);
-            auto node       = bufferUniquePtr.get();
+            mScene->GetRootNodes().push_back(node);
+        }
 
-            InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
+        InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
 
-            if(gltfNode.mesh >= 0)
-            {
-                // Defer mesh access until later (to avoid duplicate entries in vertex/index buffer)
-                mMeshesUsed.emplace(gltfNode.mesh);
-                auto meshInstance           = node->MakeComponent<NMeshInstance>();
-                mMeshMappings[meshInstance] = gltfNode.mesh;
-            }
+        if(gltfNode.mesh >= 0)
+        {
+            auto meshInstance = node->MakeComponent<NMeshInstance>();
+            meshInstance->SetMeshIndex(gltfNode.mesh);
+            meshInstance->SetInstanceIndex(mNextMeshInstanceIndex);
+            mNextMeshInstanceIndex++;
+        }
 
-            for(int32_t childIndex : gltfNode.children)
-            {
-                RecursivelyTranslateNodes(childIndex, node);
-            }
+        for(int32_t childIndex : gltfNode.children)
+        {
+            RecursivelyTranslateNodes(childIndex, node);
         }
     }
 
