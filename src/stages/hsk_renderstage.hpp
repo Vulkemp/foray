@@ -13,7 +13,7 @@ namespace hsk {
         inline virtual void RecordFrame(FrameRenderInfo& renderInfo) {}
         inline virtual void Destroy() {}
 
-        virtual void OnResized(VkExtent2D& extent){};
+        virtual void OnResized(const VkExtent2D& extent){};
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         inline std::vector<std::unique_ptr<ManagedImage>>& GetColorAttachments() { return mColorAttachments; }

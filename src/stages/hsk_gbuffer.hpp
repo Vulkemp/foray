@@ -14,7 +14,7 @@ namespace hsk {
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
-        virtual void OnResized(VkExtent2D& extent);
+        virtual void OnResized(const VkExtent2D& extent);
 
         inline static constexpr std::string_view WorldspacePosition = "Position";
         inline static constexpr std::string_view WorldspaceNormal   = "Normal";

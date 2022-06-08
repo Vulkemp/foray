@@ -253,7 +253,7 @@ namespace hsk {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void GBufferStage::OnResized(VkExtent2D& extent)
+    void GBufferStage::OnResized(const VkExtent2D& extent)
     {
         DestroyResolutionDependentComponents();
         CreateResolutionDependentComponents();
