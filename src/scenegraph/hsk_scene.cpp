@@ -8,6 +8,11 @@
 namespace hsk {
     NScene::NScene(const VkContext* context) : Registry(&mGlobalRootRegistry), mContext(context)
     {
+        InitDefaultGlobals();
+    }
+
+    void NScene::InitDefaultGlobals()
+    {
         MakeComponent<NMaterialBuffer>(mContext);
         MakeComponent<SceneTransformBuffer>(mContext);
         MakeComponent<GeometryStore>();
@@ -49,7 +54,7 @@ namespace hsk {
         return node;
     }
 
-    void NScene::Cleanup()
+    void NScene::Cleanup(bool reinitialize)
     {
         // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
         mRootNodes.clear();
@@ -57,6 +62,10 @@ namespace hsk {
 
         // Clear global components
         Registry::Cleanup();
+        if(reinitialize)
+        {
+            InitDefaultGlobals();
+        }
     }
 
 

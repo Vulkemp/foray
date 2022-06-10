@@ -1,12 +1,13 @@
 #pragma once
 namespace hsk {
     class Registry;
-    class RootRegistry;
+    class CallbackDispatcher;
     class Component;
     class NNode;
     class NScene;
     class NTransform;
     class NMeshInstance;
+    class Mesh;
     class NPrimitive;
     class GeometryStore;
     class NMaterialBuffer;

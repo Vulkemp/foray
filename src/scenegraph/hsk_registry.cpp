@@ -1,5 +1,5 @@
 #include "hsk_registry.hpp"
-#include "hsk_rootregistry.hpp"
+#include "hsk_callbackdispatcher.hpp"
 
 namespace hsk {
 
@@ -30,22 +30,22 @@ namespace hsk {
         Component::DrawCallback* drawable = dynamic_cast<Component::DrawCallback*>(component);
         if(drawable)
         {
-            mRootRegistry->mDraw.Add(drawable);
+            mCallbackDispatcher->mDraw.Add(drawable);
         }
         Component::UpdateCallback* updatable = dynamic_cast<Component::UpdateCallback*>(component);
         if(updatable)
         {
-            mRootRegistry->mUpdate.Add(updatable);
+            mCallbackDispatcher->mUpdate.Add(updatable);
         }
         Component::OnEventCallback* receiver = dynamic_cast<Component::OnEventCallback*>(component);
         if(receiver)
         {
-            mRootRegistry->mOnEvent.Add(receiver);
+            mCallbackDispatcher->mOnEvent.Add(receiver);
         }
         Component::BeforeDrawCallback* beforedraw = dynamic_cast<Component::BeforeDrawCallback*>(component);
         if(beforedraw)
         {
-            mRootRegistry->mBeforeDraw.Add(beforedraw);
+            mCallbackDispatcher->mBeforeDraw.Add(beforedraw);
         }
     }
     void Registry::UnregisterFromRoot(Component* component)
@@ -53,22 +53,22 @@ namespace hsk {
         Component::DrawCallback* drawable = dynamic_cast<Component::DrawCallback*>(component);
         if(drawable)
         {
-            mRootRegistry->mDraw.Remove(drawable);
+            mCallbackDispatcher->mDraw.Remove(drawable);
         }
         Component::UpdateCallback* updatable = dynamic_cast<Component::UpdateCallback*>(component);
         if(updatable)
         {
-            mRootRegistry->mUpdate.Remove(updatable);
+            mCallbackDispatcher->mUpdate.Remove(updatable);
         }
         Component::OnEventCallback* receiver = dynamic_cast<Component::OnEventCallback*>(component);
         if(receiver)
         {
-            mRootRegistry->mOnEvent.Remove(receiver);
+            mCallbackDispatcher->mOnEvent.Remove(receiver);
         }
         Component::BeforeDrawCallback* beforedraw = dynamic_cast<Component::BeforeDrawCallback*>(component);
         if(beforedraw)
         {
-            mRootRegistry->mBeforeDraw.Remove(beforedraw);
+            mCallbackDispatcher->mBeforeDraw.Remove(beforedraw);
         }
     }
 

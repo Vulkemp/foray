@@ -1,9 +1,9 @@
 #include "hsk_managedimage.hpp"
 #include "../hsk_vkHelpers.hpp"
+#include "../utility/hsk_fmtutilities.hpp"
 #include "hsk_managedbuffer.hpp"
 #include "hsk_singletimecommandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
-#include "../utility/hsk_fmtutilities.hpp"
 
 namespace hsk {
     ManagedImage::CreateInfo::CreateInfo()
@@ -130,7 +130,7 @@ namespace hsk {
 
         VkImageMemoryBarrier barrier{};
         barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.oldLayout           = transitionInfo.OldImageLayout != VK_IMAGE_LAYOUT_UNDEFINED ? transitionInfo.OldImageLayout : mImageLayout;
+        barrier.oldLayout           = transitionInfo.OldImageLayout.has_value() ? transitionInfo.OldImageLayout.value() : mImageLayout;
         barrier.newLayout           = transitionInfo.NewImageLayout;
         barrier.srcQueueFamilyIndex = transitionInfo.SrcQueueFamilyIndex;
         barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;
@@ -145,26 +145,47 @@ namespace hsk {
         mImageLayout = barrier.newLayout;
     }
 
-    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
+    void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data);
 
-        // transform image layout to write dst
-        TransitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-        // copy staging buffer data into device local memory
         SingleTimeCommandBuffer singleTimeCmdBuf;
         singleTimeCmdBuf.Create(mContext);
-        vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
-        singleTimeCmdBuf.Flush(true);
+        singleTimeCmdBuf.Begin();
 
-        // reset image layout
-        TransitionLayout(layoutAfterWrite);
+        // transform image layout to write dst
+        LayoutTransitionInfo transitionInfo;
+        transitionInfo.CommandBuffer        = singleTimeCmdBuf.GetCommandBuffer();
+        transitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        transitionInfo.BarrierSrcAccessMask = 0;
+        transitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        transitionInfo.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        transitionInfo.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+        TransitionLayout(transitionInfo);
+
+        // copy staging buffer data into device local memory
+        vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
+
+        if (layoutAfterWrite)
+        {
+            // reset image layout
+            transitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            transitionInfo.NewImageLayout       = layoutAfterWrite;
+            transitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+            transitionInfo.BarrierDstAccessMask = 0;
+            transitionInfo.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
+            transitionInfo.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
+            TransitionLayout(transitionInfo);
+        }
+
+        singleTimeCmdBuf.Flush(true);
     }
 
-    void ManagedImage::WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite)
+    void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
         // specify default copy region
         VkBufferImageCopy region{};

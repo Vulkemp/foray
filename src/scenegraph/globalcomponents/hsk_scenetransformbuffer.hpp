@@ -23,6 +23,8 @@ namespace hsk {
 
         virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
 
+        inline virtual std::vector<NModelTransformState>& GetVector() { return mBuffer.GetVector(); }
+
       protected:
         std::vector<bool>                         mTouchedTransforms;
         ManagedVectorBuffer<NModelTransformState> mBuffer;

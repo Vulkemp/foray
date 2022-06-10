@@ -3,6 +3,7 @@
 #include "../hsk_basics.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include <optional>
 
 namespace hsk {
     class ManagedImage : public NoMoveDefaults
@@ -40,12 +41,12 @@ namespace hsk {
         struct LayoutTransitionInfo
         {
             /// @brief New image layout is mandatory!
-            VkImageLayout        NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
-            VkImageLayout        OldImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
-            VkAccessFlags        BarrierSrcAccessMask{0};
-            VkAccessFlags        BarrierDstAccessMask{0};
-            VkPipelineStageFlags SrcStage{};
-            VkPipelineStageFlags DstStage{};
+            VkImageLayout                NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
+            std::optional<VkImageLayout> OldImageLayout{};
+            VkAccessFlags                BarrierSrcAccessMask{0};
+            VkAccessFlags                BarrierDstAccessMask{0};
+            VkPipelineStageFlags         SrcStage{};
+            VkPipelineStageFlags         DstStage{};
             /// @brief If no command buffer is passed, a single time command buffer will be created to transfer the layout.
             VkCommandBuffer         CommandBuffer{nullptr};
             uint32_t                SrcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
@@ -74,11 +75,11 @@ namespace hsk {
         /// @param size - Size of the image
         /// @param layoutAfterWrite - The layout that the image is transitioned to after it has been written.
         /// @param imageCopy - Specify how exactly the image is copied.
-        void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
+        void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
 
         /// @brief See other overload for description. Omits image copy region and assumes a set of default values to write a simple
         /// image (no mimap, no layers) completely.
-        void WriteDeviceLocalData(void* data, size_t size, VkImageLayout layoutAfterWrite);
+        void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         virtual void Destroy();
 

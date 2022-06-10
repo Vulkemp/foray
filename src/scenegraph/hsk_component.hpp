@@ -53,14 +53,23 @@ namespace hsk {
             inline void         Invoke(TArg event) { OnEvent(event); }
         };
 
+        class OnResizedCallback : public Polymorphic
+        {
+          public:
+            using TArg = VkExtent2D;
+            /// @brief Invoked when the primary render resolution changes
+            inline virtual void OnResized(TArg extent) = 0;
+            inline void         Invoke(TArg event) { OnResized(event); }
+        };
+
         /// @brief Destructor. Provide virtual constructors in inheriting classes, to make sure they get finalized correctly.
         inline virtual ~Component() {}
 
         HSK_PROPERTY_CGET(Registry)
         HSK_PROPERTY_GET(Registry)
 
-        virtual NScene* GetScene() = 0;
-        virtual Registry* GetGlobals() = 0;
+        virtual NScene*          GetScene()   = 0;
+        virtual Registry*        GetGlobals() = 0;
         virtual const VkContext* GetContext() = 0;
 
       protected:
@@ -72,15 +81,16 @@ namespace hsk {
       public:
         /// @brief Node this component is attached to. Casts mRegistry to Node.
         NNode* GetNode();
-        /// @brief Scene this component is a part of. Casts mRegistry->mRootRegistry to Scene
+        /// @brief Scene this component is a part of. Casts mRegistry->mCallbackDispatcher to Scene
         virtual NScene* GetScene() override;
-        /// @brief Global component registry. Casts mRegistry->mRootRegistry to Scene and returns Scene->GetGlobals()
+        /// @brief Global component registry. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetGlobals()
         virtual Registry* GetGlobals() override;
-        /// @brief Vulkan Context. Casts mRegistry->mRootRegistry to Scene and returns Scene->GetContext()
+        /// @brief Vulkan Context. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetContext()
         virtual const VkContext* GetContext() override;
     };
 
-    class GlobalComponent : public Component {
+    class GlobalComponent : public Component
+    {
       public:
         /// @brief Scene this component is a part of. Casts mRegistry to Scene
         virtual NScene* GetScene() override;

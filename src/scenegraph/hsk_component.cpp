@@ -5,8 +5,8 @@
 
 namespace hsk {
     NNode*           NodeComponent::GetNode() { return dynamic_cast<NNode*>(mRegistry); }
-    NScene*          NodeComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry->GetRootRegistry()); }
-    Registry*        NodeComponent::GetGlobals() { return dynamic_cast<Registry*>(mRegistry->GetRootRegistry()); }
+    NScene*          NodeComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry->GetCallbackDispatcher()); }
+    Registry*        NodeComponent::GetGlobals() { return dynamic_cast<Registry*>(mRegistry->GetCallbackDispatcher()); }
     const VkContext* NodeComponent::GetContext()
     {
         auto scene = GetScene();

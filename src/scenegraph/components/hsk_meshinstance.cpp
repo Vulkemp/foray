@@ -14,16 +14,10 @@ namespace hsk {
     }
     void NMeshInstance::Draw(SceneDrawInfo& drawInfo)
     {
-        Mesh*          mesh;
-        GeometryStore* geoStore = GetGlobals()->GetComponent<GeometryStore>();
-        if(geoStore && mMeshIndex >= 0 && mMeshIndex < geoStore->GetMeshes().size())
-        {
-            mesh = geoStore->GetMeshes()[mMeshIndex].get();
-        }
-        if(mesh)
+        if(mMesh)
         {
             drawInfo.CmdPushConstant(mInstanceIndex);
-            mesh->CmdDraw(drawInfo.RenderInfo.GetCommandBuffer(), drawInfo.CurrentlyBoundGeoBuffers);
+            mMesh->CmdDraw(drawInfo.RenderInfo.GetCommandBuffer(), drawInfo.CurrentlyBoundGeoBuffers);
         }
     }
 }  // namespace hsk

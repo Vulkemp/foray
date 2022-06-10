@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_component.hpp"
+#include "../hsk_scenegraph_declares.hpp"
 #include <glm/glm.hpp>
 
 namespace hsk {
@@ -12,9 +13,9 @@ namespace hsk {
         virtual void Draw(SceneDrawInfo& drawInfo) override;
 
         HSK_PROPERTY_ALL(InstanceIndex)
-        HSK_PROPERTY_ALL(MeshIndex)
+        HSK_PROPERTY_ALL(Mesh)
       protected:
-        int32_t                 mInstanceIndex = 0;
-        int32_t                 mMeshIndex     = 0;
+        int32_t mInstanceIndex = 0;
+        Mesh*   mMesh          = nullptr;
     };
 }  // namespace hsk

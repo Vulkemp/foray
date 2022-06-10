@@ -3,6 +3,9 @@
 #include "../../osi/hsk_event.hpp"
 #include "../hsk_scene.hpp"
 
+#undef near
+#undef far
+
 namespace hsk {
     NCamera::NCamera() : mUbo(true) { mUbo.GetManagedBuffer().SetName("CameraUbo"); }
 

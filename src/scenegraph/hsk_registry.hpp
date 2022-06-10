@@ -12,7 +12,7 @@ namespace hsk {
     {
       public:
         inline Registry() {}
-        inline Registry(RootRegistry* root) : mRootRegistry(root) {}
+        inline Registry(CallbackDispatcher* root) : mCallbackDispatcher(root) {}
 
         /// @brief Instantiates a new componente
         template <typename TComponent, typename... Args>
@@ -55,11 +55,11 @@ namespace hsk {
         inline virtual ~Registry() {}
 
         /// @brief The root registry manages global callbacks invokable on the components
-        HSK_PROPERTY_GET(RootRegistry)
+        HSK_PROPERTY_GET(CallbackDispatcher)
         /// @brief The root registry manages global callbacks invokable on the components
-        HSK_PROPERTY_CGET(RootRegistry)
+        HSK_PROPERTY_CGET(CallbackDispatcher)
 
-        inline Registry& SetRootRegistry(RootRegistry* rootRegistry);
+        inline Registry& SetCallbackDispatcher(CallbackDispatcher* rootRegistry);
 
         /// @brief All components attached to the registry
         HSK_PROPERTY_GET(Components)
@@ -67,8 +67,8 @@ namespace hsk {
         HSK_PROPERTY_CGET(Components)
 
       protected:
-        RootRegistry*           mRootRegistry = nullptr;
-        std::vector<Component*> mComponents   = {};
+        CallbackDispatcher*     mCallbackDispatcher = nullptr;
+        std::vector<Component*> mComponents         = {};
 
         void Register(Component* component);
         bool Unregister(Component* component);
@@ -80,7 +80,7 @@ namespace hsk {
     template <typename TComponent, typename... Args>
     inline TComponent* Registry::MakeComponent(Args&&... args)
     {
-        Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
+        Assert(mCallbackDispatcher, "Registry::AddComponent: No Root Registry defined!");
 
         TComponent* value = new TComponent(std::forward<Args>(args)...);
         Register(value);
@@ -90,7 +90,7 @@ namespace hsk {
     template <typename TComponent>
     inline void Registry::AddComponent(TComponent* component)
     {
-        Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
+        Assert(mCallbackDispatcher, "Registry::AddComponent: No Root Registry defined!");
         Assert(component, "Registry::AddComponent: Parameter component is nullptr!");
         Assert(!component->GetRegistry(), "Registry::AddComponent: Component is already attached to other registry!");
 
@@ -100,7 +100,7 @@ namespace hsk {
     template <typename TComponent>
     inline void Registry::MoveComponent(TComponent* component)
     {
-        Assert(mRootRegistry, "Registry::AddComponent: No Root Registry defined!");
+        Assert(mCallbackDispatcher, "Registry::AddComponent: No Root Registry defined!");
         Assert(component, "Registry::AddComponent: Parameter component is nullptr!");
         if(component->GetRegistry())
         {
@@ -180,7 +180,7 @@ namespace hsk {
     inline bool Registry::RemoveDeleteComponent(Component* component)
     {
         Assert(component, "Registry::RemoveDeleteComponent: Parameter component is nullptr!");
-        Assert(mRootRegistry, "Registry::RemoveDeleteComponent: No Root Registry defined!");
+        Assert(mCallbackDispatcher, "Registry::RemoveDeleteComponent: No Root Registry defined!");
         Assert(Unregister(component), "Registry::RemoveDeleteComponent: Component not registered!");
 
         delete component;
@@ -188,10 +188,10 @@ namespace hsk {
         return false;
     }
 
-    inline Registry& Registry::SetRootRegistry(RootRegistry* rootRegistry)
+    inline Registry& Registry::SetCallbackDispatcher(CallbackDispatcher* rootRegistry)
     {
-        Assert(mComponents.size() == 0, "Registry::SetRootRegistry: Cannot transfer root registry with components. Finalize first!");
-        mRootRegistry = rootRegistry;
+        Assert(mComponents.size() == 0, "Registry::SetCallbackDispatcher: Cannot transfer root registry with components. Finalize first!");
+        mCallbackDispatcher = rootRegistry;
         return *this;
     }
 }  // namespace hsk

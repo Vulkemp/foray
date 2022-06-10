@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace hsk {
-    class RootRegistry
+    class CallbackDispatcher
     {
       public:
         friend Registry;
@@ -14,6 +14,7 @@ namespace hsk {
         virtual void InvokeBeforeDraw(const FrameRenderInfo& renderInfo);
         virtual void InvokeDraw(SceneDrawInfo& renderInfo);
         virtual void InvokeOnEvent(std::shared_ptr<Event> event);
+        virtual void InvokeOnResized(VkExtent2D event);
 
       protected:
         template <typename TCallback, typename TArg = TCallback::TArg>
@@ -30,10 +31,11 @@ namespace hsk {
         CallbackVector<Component::UpdateCallback>     mUpdate     = {};
         CallbackVector<Component::DrawCallback>       mDraw       = {};
         CallbackVector<Component::BeforeDrawCallback> mBeforeDraw = {};
+        CallbackVector<Component::OnResizedCallback>  mOnResized  = {};
     };
 
     template <typename TCallback, typename TArg>
-    void RootRegistry::CallbackVector<TCallback, TArg>::Invoke(TArg arg)
+    void CallbackDispatcher::CallbackVector<TCallback, TArg>::Invoke(TArg arg)
     {
         for(auto callback : Listeners)
         {
@@ -42,13 +44,13 @@ namespace hsk {
     }
 
     template <typename TCallback, typename TArg>
-    void RootRegistry::CallbackVector<TCallback, TArg>::Add(TCallback* callback)
+    void CallbackDispatcher::CallbackVector<TCallback, TArg>::Add(TCallback* callback)
     {
         Listeners.push_back(callback);
     }
 
     template <typename TCallback, typename TArg>
-    bool RootRegistry::CallbackVector<TCallback, TArg>::Remove(TCallback* callback)
+    bool CallbackDispatcher::CallbackVector<TCallback, TArg>::Remove(TCallback* callback)
     {
         auto iter = std::find(Listeners.cbegin(), Listeners.cend(), callback);
         if(iter != Listeners.cend())

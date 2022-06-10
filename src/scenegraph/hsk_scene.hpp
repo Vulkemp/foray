@@ -1,7 +1,7 @@
 #pragma once
 #include "../osi/hsk_osi_declares.hpp"
 #include "hsk_registry.hpp"
-#include "hsk_rootregistry.hpp"
+#include "hsk_callbackdispatcher.hpp"
 #include "hsk_scenedrawing.hpp"
 #include "hsk_scenegraph_declares.hpp"
 #include "hsk_node.hpp"
@@ -11,8 +11,8 @@ namespace hsk {
     /// @brief Provides registries and methods as the anchor of a component based scene.
     /// @remark Manages and owns all nodes
     /// @remark Inherits Registry, and functions as the component registry for all global components
-    /// @remark Inherits RootRegistry for managing callbacks used by node components, and as a way for nodes to link back to the global instance
-    class NScene : public Registry, public RootRegistry
+    /// @remark Inherits CallbackDispatcher for managing callbacks used by node components, and as a way for nodes to link back to the global instance
+    class NScene : public Registry, public CallbackDispatcher
     {
       public:
         friend NNode;
@@ -30,7 +30,7 @@ namespace hsk {
         void HandleEvent(std::shared_ptr<Event>& event);
 
         /// Cleans up all memory, GPU structures, etc...
-        virtual void Cleanup();
+        virtual void Cleanup(bool reinitialize = false);
 
         inline virtual ~NScene() { Cleanup(); }
 
@@ -47,6 +47,8 @@ namespace hsk {
         /// @brief All nodes directly attached to the root
         std::vector<NNode*> mRootNodes;
 
-        RootRegistry mGlobalRootRegistry;
+        CallbackDispatcher mGlobalRootRegistry;
+
+        void InitDefaultGlobals();
     };
 }  // namespace hsk
