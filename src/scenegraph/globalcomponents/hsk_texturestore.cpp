@@ -78,4 +78,22 @@ namespace hsk {
         mSamplers[hash] = sampler;
         return sampler;
     }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> TextureStore::MakeDescriptorInfo(VkShaderStageFlags shaderStage)
+    {
+        auto                               descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        std::vector<VkDescriptorImageInfo> imageInfos;
+
+        imageInfos.resize(mTextures.size());
+        for(size_t i = 0; i < mTextures.size(); i++)
+        {
+            imageInfos[i].imageLayout = mTextures[i].Image->GetImageLayout();
+            imageInfos[i].imageView   = mTextures[i].Image->GetImageView();
+            imageInfos[i].sampler     = mTextures[i].Sampler;
+        }
+
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, imageInfos);
+        return descriptorInfo;
+    }
+
 }  // namespace hsk

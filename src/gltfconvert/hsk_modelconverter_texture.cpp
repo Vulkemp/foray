@@ -9,11 +9,11 @@ namespace hsk {
         std::vector<uint8_t> rgbaConvertBuffer{};
         for(int32_t i = 0; i < mGltfModel.textures.size(); i++)
         {
-            const auto&        gltfTexture = mGltfModel.textures[i];
-            const auto&        gltfImage   = mGltfModel.images[gltfTexture.source];
+            const auto& gltfTexture = mGltfModel.textures[i];
+            const auto& gltfImage   = mGltfModel.images[gltfTexture.source];
             mTextures.GetTextures().push_back(SampledTexture{.Image = std::make_unique<ManagedImage>(), .Sampler = nullptr});
-            SampledTexture&     sampledTexture = mTextures.GetTextures().back();
-            mIndexBindings.Textures[i] = sampledTexture.Image.get();
+            SampledTexture& sampledTexture = mTextures.GetTextures().back();
+            mIndexBindings.Textures[i]     = sampledTexture.Image.get();
 
             const unsigned char* buffer     = nullptr;
             VkDeviceSize         bufferSize = 0;
@@ -125,6 +125,31 @@ namespace hsk {
                 layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 layoutTransition.BarrierDstAccessMask = 0;
 
+                sampledTexture.Image->TransitionLayout(layoutTransition);
+            }
+
+            {
+                // Image layouts currently on mip level n: 0: TRANSFER_SRC, 1...n: TRANSFER_DST
+
+                // transition mip levels 1..n
+                VkImageSubresourceRange mipSubRange = {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 1, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS};
+                ManagedImage::LayoutTransitionInfo layoutTransition;
+                layoutTransition.CommandBuffer        = cmdBuf.GetCommandBuffer();
+                layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+                layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                layoutTransition.BarrierDstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+                layoutTransition.SubresourceRange     = mipSubRange;
+                layoutTransition.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+                layoutTransition.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+                sampledTexture.Image->TransitionLayout(layoutTransition);
+
+                // transition mip level 0
+                mipSubRange.baseMipLevel = 0;
+                mipSubRange.levelCount = 1;
+                layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
                 sampledTexture.Image->TransitionLayout(layoutTransition);
             }
 

@@ -22,6 +22,8 @@ namespace hsk {
 
         VkSampler GetOrCreateSampler(const VkSamplerCreateInfo& samplerCI);
 
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+
       protected:
         std::vector<SampledTexture> mTextures;
         std::map<size_t, VkSampler> mSamplers;
