@@ -8,6 +8,7 @@ namespace hsk {
         mBuffer.GetVector().resize(size);
         mTouchedTransforms.resize(size);
     }
+
     void SceneTransformBuffer::UpdateSceneTransform(int32_t meshInstanceIndex, const glm::mat4& modelMatrix)
     {
         auto& transformVector = mBuffer.GetVector();
@@ -20,6 +21,14 @@ namespace hsk {
         modelTransform.ModelMatrix         = modelMatrix;
 
         mTouchedTransforms[meshInstanceIndex] = true;
+    }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> SceneTransformBuffer::MakeDescriptorInfo()
+    {
+        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        std::vector<VkDescriptorBufferInfo> bufferInfos    = {mBuffer.GetBuffer().GetVkDescriptorBufferInfo()};
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, bufferInfos);
+        return descriptorInfo;
     }
 
     void SceneTransformBuffer::BeforeDraw(const FrameRenderInfo& renderInfo)

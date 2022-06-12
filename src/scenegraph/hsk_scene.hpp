@@ -1,10 +1,10 @@
 #pragma once
 #include "../osi/hsk_osi_declares.hpp"
-#include "hsk_registry.hpp"
 #include "hsk_callbackdispatcher.hpp"
+#include "hsk_node.hpp"
+#include "hsk_registry.hpp"
 #include "hsk_scenedrawing.hpp"
 #include "hsk_scenegraph_declares.hpp"
-#include "hsk_node.hpp"
 
 namespace hsk {
 
@@ -38,6 +38,9 @@ namespace hsk {
         HSK_PROPERTY_ALL(NodeBuffer)
         HSK_PROPERTY_ALL(RootNodes)
 
+        template <typename TComponent>
+        int32_t FindNodesWithComponent(std::vector<NNode*>& outnodes);
+
       protected:
         const VkContext* mContext;
         /// @brief Buffer holding ownership of all nodes
@@ -51,4 +54,21 @@ namespace hsk {
 
         void InitDefaultGlobals();
     };
+
+    template <typename TComponent>
+    int32_t NScene::FindNodesWithComponent(std::vector<NNode*>& outnodes)
+    {
+        int32_t found = 0;
+        for(NNode* rootnode : mRootNodes)
+        {
+            if(rootnode->HasComponent<TComponent>())
+            {
+                found++;
+                outnodes.push_back(rootnode);
+            }
+            found += rootnode->FindChildrenWithComponent<TComponent>(outnodes);
+        }
+        return found;
+    }
+
 }  // namespace hsk

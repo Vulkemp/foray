@@ -17,6 +17,8 @@ namespace hsk {
         void UpdateDeviceLocal();
         void Cleanup();
 
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo();
+
         inline virtual ~NMaterialBuffer() { Cleanup(); }
 
       protected:

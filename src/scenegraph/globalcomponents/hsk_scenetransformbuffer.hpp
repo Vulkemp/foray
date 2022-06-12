@@ -25,6 +25,8 @@ namespace hsk {
 
         inline virtual std::vector<NModelTransformState>& GetVector() { return mBuffer.GetVector(); }
 
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo();
+
       protected:
         std::vector<bool>                         mTouchedTransforms;
         ManagedVectorBuffer<NModelTransformState> mBuffer;
