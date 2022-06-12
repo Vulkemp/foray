@@ -67,5 +67,7 @@ namespace hsk {
         void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<NPrimitive>& outprimitives);
 
         void LoadTextures();
+        void TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
+
     };
 }  // namespace hsk

@@ -11,10 +11,9 @@ namespace hsk {
         {
             const auto&        gltfTexture = mGltfModel.textures[i];
             const auto&        gltfImage   = mGltfModel.images[gltfTexture.source];
-            auto               texturePtr  = std::make_unique<ManagedImage>();
-            hsk::ManagedImage* texture     = texturePtr.get();
-            mTextures.GetTextures().push_back(std::move(texturePtr));
-            mIndexBindings.Textures[i] = texture;
+            mTextures.GetTextures().push_back(SampledTexture{.Image = std::make_unique<ManagedImage>(), .Sampler = nullptr});
+            SampledTexture&     sampledTexture = mTextures.GetTextures().back();
+            mIndexBindings.Textures[i] = sampledTexture.Image.get();
 
             const unsigned char* buffer     = nullptr;
             VkDeviceSize         bufferSize = 0;
@@ -79,8 +78,8 @@ namespace hsk {
                 imageCI.Name = fmt::format("Texture #{}", i);
             }
 
-            texture->Create(mContext, imageCI);
-            texture->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            sampledTexture.Image->Create(mContext, imageCI);
+            sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
             SingleTimeCommandBuffer cmdBuf;
             cmdBuf.Create(mContext, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -88,9 +87,9 @@ namespace hsk {
             for(int32_t i = 0; i < mipLevelCount - 1; i++)
             {
                 uint32_t sourceMipLevel = (uint32_t)i;
-                uint32_t destMipLevel = sourceMipLevel + 1;
+                uint32_t destMipLevel   = sourceMipLevel + 1;
 
-                // Step #1 Transition 
+                // Step #1 Transition
                 VkImageSubresourceRange mipSubRange = {};
                 mipSubRange.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
                 mipSubRange.baseMipLevel            = destMipLevel;
@@ -107,18 +106,18 @@ namespace hsk {
                 layoutTransition.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
                 layoutTransition.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
-                texture->TransitionLayout(layoutTransition);
+                sampledTexture.Image->TransitionLayout(layoutTransition);
 
                 VkOffset3D  srcArea{.x = (int32_t)extent.width >> i, .y = (int32_t)extent.height >> i, .z = 1};
                 VkOffset3D  dstArea{.x = (int32_t)extent.width >> i + 1, .y = (int32_t)extent.height >> i + 1, .z = 1};
                 VkImageBlit blit{
-                    .srcSubresource = VkImageSubresourceLayers{
-                        .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i, .baseArrayLayer = 0, .layerCount = 1},
+                    .srcSubresource =
+                        VkImageSubresourceLayers{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i, .baseArrayLayer = 0, .layerCount = 1},
                     .dstSubresource = VkImageSubresourceLayers{
                         .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i + 1, .baseArrayLayer = 0, .layerCount = 1}};
                 blit.srcOffsets[1] = srcArea;
                 blit.dstOffsets[1] = dstArea;
-                vkCmdBlitImage(cmdBuf.GetCommandBuffer(), texture->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture->GetImage(),
+                vkCmdBlitImage(cmdBuf.GetCommandBuffer(), sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, sampledTexture.Image->GetImage(),
                                VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
 
                 layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -126,11 +125,53 @@ namespace hsk {
                 layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 layoutTransition.BarrierDstAccessMask = 0;
 
-                texture->TransitionLayout(layoutTransition);
+                sampledTexture.Image->TransitionLayout(layoutTransition);
             }
 
             cmdBuf.Flush(true);
-        }  // namespace hsk
+
+            VkSamplerCreateInfo samplerCI{.sType = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
+            TranslateSampler(mGltfModel.samplers[gltfTexture.sampler], samplerCI);
+
+            sampledTexture.Sampler = mTextures.GetOrCreateSampler(samplerCI);
+        }
+    }
+
+    void ModelConverter::TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI)
+    {
+        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-sampler
+        std::map<int, VkFilter>             filterMap({{9728, VkFilter::VK_FILTER_NEAREST}, {9729, VkFilter::VK_FILTER_LINEAR}});
+        std::map<int, VkSamplerAddressMode> addressMap({{33071, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE},
+                                                        {33648, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT},
+                                                        {10497, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT}});
+        {  // Magfilter
+            auto find = filterMap.find(tinygltfSampler.magFilter);
+            if(find != filterMap.end())
+            {
+                outsamplerCI.magFilter = find->second;
+            }
+        }
+        {  // Minfilter
+            auto find = filterMap.find(tinygltfSampler.minFilter);
+            if(find != filterMap.end())
+            {
+                outsamplerCI.minFilter = find->second;
+            }
+        }
+        {  // AddressMode U
+            auto find = addressMap.find(tinygltfSampler.wrapS);
+            if(find != addressMap.end())
+            {
+                outsamplerCI.addressModeU = find->second;
+            }
+        }
+        {  // AddressMode V
+            auto find = addressMap.find(tinygltfSampler.wrapT);
+            if(find != addressMap.end())
+            {
+                outsamplerCI.addressModeV = find->second;
+            }
+        }
     }
 
 }  // namespace hsk
