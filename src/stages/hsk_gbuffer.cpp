@@ -2,7 +2,9 @@
 #include "../glTF/hsk_geo.hpp"
 #include "../glTF/hsk_scenedrawinfo.hpp"
 #include "../hsk_vkHelpers.hpp"
+#include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
+#include "../utility/hsk_shaderstagecreateinfos.hpp"
 
 namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
@@ -265,84 +267,11 @@ namespace hsk {
         pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
         AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
-        VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {
-            .sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-            .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-            .primitiveRestartEnable = false,
-        };
-
-        VkPipelineRasterizationStateCreateInfo rasterizationState = {
-            .sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-            .polygonMode = VK_POLYGON_MODE_FILL,
-            .cullMode    = VK_CULL_MODE_NONE,
-            .frontFace   = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-            .lineWidth   = 1.0f,
-        };
-
-
-        // Blend attachment states required for all color attachments
-        // This is important, as color write mask will otherwise be 0x0 and you
-        // won't see anything rendered to the attachment
-        std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = {};
-        blendAttachmentStates.resize(mColorAttachments.size());
-        for(int i = 0; i < mColorAttachments.size(); i++)
-        {
-            blendAttachmentStates[i].blendEnable    = false;
-            blendAttachmentStates[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        }
-
-        VkPipelineColorBlendStateCreateInfo colorBlendState = {
-            .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-            .attachmentCount = static_cast<uint32_t>(blendAttachmentStates.size()),
-            .pAttachments    = blendAttachmentStates.data(),
-        };
-
-        VkPipelineDepthStencilStateCreateInfo depthStencilState = {
-            .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-            .depthTestEnable       = true,
-            .depthWriteEnable      = true,
-            .depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL,
-            .depthBoundsTestEnable = false,
-            .stencilTestEnable     = false,
-            .minDepthBounds        = 0,
-            .maxDepthBounds        = 10000,
-        };
-
-        VkPipelineViewportStateCreateInfo viewportState = {
-            .sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-            .viewportCount = 1,
-            .pViewports    = nullptr,
-            .scissorCount  = 1,
-            .pScissors     = nullptr,
-        };
-
-
-        VkPipelineMultisampleStateCreateInfo multisampleState = {.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO, .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT};
-
-        std::vector<VkDynamicState> dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
-
-
-        VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-                                                                   .dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size()),
-                                                                   .pDynamicStates    = dynamicStateEnables.data()};
-
-        VkPipelineVertexInputStateCreateInfo vertexInputState = {};
-
-        VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-        vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-        auto vertShaderModule      = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.vert.spv");
-        vertShaderStageInfo.module = vertShaderModule;
-        vertShaderStageInfo.pName  = "main";
-
-        VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-        fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-        auto fragShaderModule      = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.frag.spv");
-        fragShaderStageInfo.module = fragShaderModule;
-        fragShaderStageInfo.pName  = "main";
-
-        std::vector<VkPipelineShaderStageCreateInfo> shaderStages = {vertShaderStageInfo, fragShaderStageInfo};
+        // shader stages
+        auto                   vertShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.vert.spv");
+        auto                   fragShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.frag.spv");
+        ShaderStageCreateInfos shaderStageCreateInfos;
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
 
         // vertex layout
         VertexInputStateBuilder vertexInputStateBuilder;
@@ -353,21 +282,19 @@ namespace hsk {
         vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MaterialIndex);
         vertexInputStateBuilder.Build();
 
-        VkGraphicsPipelineCreateInfo pipelineCI = {};
-        pipelineCI.sType                        = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineCI.layout                       = mPipelineLayout;
-        pipelineCI.renderPass                   = mRenderpass;
-        pipelineCI.pInputAssemblyState          = &inputAssemblyState;
-        pipelineCI.pRasterizationState          = &rasterizationState;
-        pipelineCI.pColorBlendState             = &colorBlendState;
-        pipelineCI.pMultisampleState            = &multisampleState;
-        pipelineCI.pViewportState               = &viewportState;
-        pipelineCI.pDepthStencilState           = &depthStencilState;
-        pipelineCI.pDynamicState                = &dynamicStateCreateInfo;
-        pipelineCI.stageCount                   = shaderStages.size();
-        pipelineCI.pStages                      = shaderStages.data();
-        pipelineCI.pVertexInputState            = &vertexInputStateBuilder.InputStateCI;
-
-        AssertVkResult(vkCreateGraphicsPipelines(mContext->Device, mPipelineCache, 1, &pipelineCI, nullptr, &mPipeline));
+        // clang-format off
+        mPipeline = PipelineBuilder()
+            .SetContext(mContext)
+            // Blend attachment states required for all color attachments
+            // This is important, as color write mask will otherwise be 0x0 and you
+            // won't see anything rendered to the attachment
+            .SetColorAttachmentBlendCount(mColorAttachments.size())
+            .SetPipelineLayout(mPipelineLayout)
+            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
+            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
+            .SetPipelineCache(mPipelineCache)
+            .SetRenderPass(mRenderpass)
+            .Build();
+        // clang-format on
     }
 }  // namespace hsk
