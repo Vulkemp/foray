@@ -13,7 +13,6 @@ namespace hsk {
             const auto& gltfImage   = mGltfModel.images[gltfTexture.source];
             mTextures.GetTextures().push_back(SampledTexture{.Image = std::make_unique<ManagedImage>(), .Sampler = nullptr});
             SampledTexture& sampledTexture = mTextures.GetTextures().back();
-            mIndexBindings.Textures[i]     = sampledTexture.Image.get();
 
             const unsigned char* buffer     = nullptr;
             VkDeviceSize         bufferSize = 0;

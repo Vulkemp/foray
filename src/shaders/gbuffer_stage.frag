@@ -3,28 +3,6 @@
 #extension GL_KHR_vulkan_glsl: enable
 #extension GL_EXT_nonuniform_qualifier : enable
 
-/*
-#define BIND_MATERIAL_BUFFER 0
-#define BIND_TEXTURES_BUFFER 1
-// #include "materialbuffer.glsl"
-
-#include "gltf.glsl"
-
-#ifdef BIND_MATERIAL_BUFFER
-#ifndef SET_MATERIAL_BUFFER
-#define SET_MATERIAL_BUFFER 0
-#endif // SET_MATERIAL_BUFFER
-layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER ) readonly buffer MaterialBuffer { MaterialBufferObject Array[MATERIAL_BUFFER_COUNT]; } Materials;
-#endif // BIND_MATERIAL_BUFFER
-
-#ifdef BIND_TEXTURES_BUFFER
-#ifndef SET_TEXTURES_BUFFER
-#define SET_TEXTURES_BUFFER 0
-#endif // SET_TEXTURES_BUFFER
-layout(set = SET_TEXTURES_BUFFER, binding = BIND_TEXTURES_BUFFER ) uniform sampler2D Textures[TEXTURE_BUFFER_COUNT];
-#endif // BIND_TEXTURES_BUFFER
-*/
-
 layout (location = 0) in vec3 inWorldPos;			// Vertex position in world space
 layout (location = 1) in vec4 inDevicePos;			// Vertex position in normalized device space (current frame)
 layout (location = 2) in vec4 inOldDevicePos;		// Vertex position in normalized device space (previous frame)

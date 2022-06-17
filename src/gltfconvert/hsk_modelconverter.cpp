@@ -56,8 +56,8 @@ namespace hsk {
         mIndexBindings.MaterialBufferOffset = mMaterialBuffer.GetVector().size();
         mMaterialBuffer.GetVector().resize(mIndexBindings.MaterialBufferOffset + mGltfModel.materials.size());
 
+        mIndexBindings.TextureBufferOffset = mTextures.GetTextures().size();
         mTextures.GetTextures().reserve(mGltfModel.textures.size());
-        mIndexBindings.Textures.resize(mGltfModel.textures.size());
 
         mGeo.GetMeshes().reserve(mGltfModel.meshes.size());
         mIndexBindings.Meshes.resize(mGltfModel.meshes.size());
@@ -74,6 +74,7 @@ namespace hsk {
 
         BuildGeometryBuffer();
         LoadTextures();
+        LoadMaterials();
 
         // Discover and load
         for(int32_t nodeIndex : mGltfScene->nodes)

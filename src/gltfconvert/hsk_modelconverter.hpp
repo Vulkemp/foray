@@ -32,13 +32,13 @@ namespace hsk {
         struct IndexBindings
         {
             /// @brief Offset for translating gltfModel node index -> scene node buffer index
-            int32_t                    NodeBufferOffset;
+            int32_t NodeBufferOffset;
             /// @brief Offset for translating gltfModel material index -> scene material buffer index
-            int32_t                    MaterialBufferOffset;
+            int32_t MaterialBufferOffset;
             /// @brief Vector mapping gltfModel mesh index to Mesh*
-            std::vector<Mesh*>         Meshes;
+            std::vector<Mesh*> Meshes;
             /// @brief Vector mapping gltfModel texture index to ManagedImage*
-            std::vector<ManagedImage*> Textures;
+            int32_t TextureBufferOffset;
         } mIndexBindings = {};
 
 
@@ -68,7 +68,8 @@ namespace hsk {
 
         void LoadTextures();
         void TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
-        void InitialUpdate();
+        void LoadMaterials();
 
+        void InitialUpdate();
     };
 }  // namespace hsk
