@@ -7,7 +7,10 @@
 #undef far
 
 namespace hsk {
-    NCamera::NCamera() : mUbo(true) { mUbo.GetManagedBuffer().SetName("CameraUbo"); }
+    NCamera::NCamera() : mUbo(true)
+    {
+        mUbo.GetManagedBuffer().SetName("CameraUbo");
+    }
 
     void NCamera::InitDefault()
     {
@@ -26,7 +29,10 @@ namespace hsk {
         return descriptorInfo;
     }
 
-    void NCamera::SetViewMatrix() { mUbo.GetUbo().ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection); }
+    void NCamera::SetViewMatrix()
+    {
+        mUbo.GetUbo().ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
+    }
 
     void NCamera::SetProjectionMatrix()
     {
@@ -66,17 +72,19 @@ namespace hsk {
         SetProjectionMatrix();
     }
 
-    void NCamera::BeforeDraw(const FrameRenderInfo& renderInfo) { mUbo.Update(); }
-    void NCamera::OnEvent(std::shared_ptr<Event>& event)
+    void NCamera::BeforeDraw(const FrameRenderInfo& renderInfo)
     {
-        auto windowResized = std::dynamic_pointer_cast<EventWindowResized>(event);
-        if(windowResized)
-        {
-            mAspect = (float)windowResized->Current().Width / (float)windowResized->Current().Height;
-            SetProjectionMatrix();
-        }
+        mUbo.Update();
+    }
+    void NCamera::OnResized(VkExtent2D extent)
+    {
+        mAspect = CalculateAspect(extent);
+        SetProjectionMatrix();
     }
 
-    void NCamera::Cleanup() { mUbo.Cleanup(); }
+    void NCamera::Cleanup()
+    {
+        mUbo.Cleanup();
+    }
 
 }  // namespace hsk

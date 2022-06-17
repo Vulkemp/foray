@@ -11,7 +11,7 @@ namespace hsk {
         glm::mat4 PreviousViewMatrix       = {};
     };
 
-    class NCamera : public NodeComponent, public Component::BeforeDrawCallback, public Component::OnEventCallback
+    class NCamera : public NodeComponent, public Component::BeforeDrawCallback, public Component::OnResizedCallback
     {
       public:
         NCamera();
@@ -39,12 +39,20 @@ namespace hsk {
         void SetProjectionMatrix(float verticalFov, float aspect, float near, float far);
 
         virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
-        virtual void OnEvent(std::shared_ptr<Event>& event) override;
+        virtual void OnResized(VkExtent2D extent) override;
 
         inline static float CalculateAspect(const VkExtent2D extent);
+
+        HSK_PROPERTY_GET(EyePosition)
+        HSK_PROPERTY_CGET(EyePosition)
+        HSK_PROPERTY_GET(LookatPosition)
+        HSK_PROPERTY_CGET(LookatPosition)
+        HSK_PROPERTY_GET(UpDirection)
+        HSK_PROPERTY_CGET(UpDirection)
+
       protected:
         float mVerticalFov = 0;
-        float mAspect = 0;
+        float mAspect = 0.f;
         float mNear = 0;
         float mFar = 0;
         glm::vec3 mEyePosition = glm::vec3(0.f, 0.f, -1.f);
