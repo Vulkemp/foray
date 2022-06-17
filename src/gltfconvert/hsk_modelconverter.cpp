@@ -81,16 +81,13 @@ namespace hsk {
             RecursivelyTranslateNodes(nodeIndex, nullptr);
         }
 
-        for(auto node : mScene->GetRootNodes())
-        {
-            node->GetTransform()->RecalculateGlobalMatrix(nullptr);
-        }
+        InitialUpdate();
     }
 
     void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, NNode* parent)
     {
         int32_t nodeBufferIndex = mIndexBindings.NodeBufferOffset + currentIndex;
-        auto& bufferUniquePtr = mScene->GetNodeBuffer()[nodeBufferIndex];
+        auto&   bufferUniquePtr = mScene->GetNodeBuffer()[nodeBufferIndex];
         if(bufferUniquePtr)
         {
             return;
@@ -179,5 +176,16 @@ namespace hsk {
                 transformScale[i]    = (float)scale[i];
             }
         }
+    }
+
+    void ModelConverter::InitialUpdate()
+    {
+        for(auto node : mScene->GetRootNodes())
+        {
+            node->GetTransform()->RecalculateGlobalMatrix(nullptr);
+        }
+
+        mMaterialBuffer.UpdateDeviceLocal();
+        mTransformBuffer.Resize(mNextMeshInstanceIndex);
     }
 }  // namespace hsk

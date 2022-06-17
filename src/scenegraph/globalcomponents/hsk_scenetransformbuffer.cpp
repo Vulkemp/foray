@@ -7,6 +7,7 @@ namespace hsk {
     {
         mBuffer.GetVector().resize(size);
         mTouchedTransforms.resize(size);
+        mBuffer.InitOrUpdate();
     }
 
     void SceneTransformBuffer::UpdateSceneTransform(int32_t meshInstanceIndex, const glm::mat4& modelMatrix)

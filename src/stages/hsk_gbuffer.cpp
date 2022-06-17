@@ -1,19 +1,22 @@
 #include "hsk_gbuffer.hpp"
-#include "../glTF/hsk_geo.hpp"
-#include "../glTF/hsk_scenedrawinfo.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
+#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
+#include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
+#include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
+#include "../scenegraph/components/hsk_meshinstance.hpp"
+#include "../scenegraph/components/hsk_camera.hpp"
+
 
 namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(const VkContext* context, Scene* scene)
+    void GBufferStage::Init(const VkContext* context, NScene* scene)
     {
         mContext = context;
         mScene   = scene;
-
-        mScene->AssertSceneloaded(true);
 
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
@@ -201,17 +204,19 @@ namespace hsk {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetMaterialUboArrayDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetTextureDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetTransformStateDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetCameraDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<NMaterialBuffer>()->MakeDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<SceneTransformBuffer>()->MakeDescriptorInfo());
+        std::vector<NNode*> nodes;
+        mScene->FindNodesWithComponent<NCamera>(nodes);
+        mDescriptorSet.SetDescriptorInfoAt(3, nodes.front()->GetComponent<NCamera>()->GetUboDescriptorInfo());
 
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
 
         std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
                                                               .offset     = 0,
-                                                              .size       = sizeof(MeshInstance::PushConstant)}});
+                                                              .size       = sizeof(DrawPushConstant)}});
 
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -249,8 +254,7 @@ namespace hsk {
 
         // Instanced object
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, descriptorsets.size(), descriptorsets.data(), 0, nullptr);
-        SceneDrawInfo drawInfo{.CmdBuffer = commandBuffer, .PipelineLayout = mPipelineLayout};
-        mScene->Draw(drawInfo);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+        mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);
     }

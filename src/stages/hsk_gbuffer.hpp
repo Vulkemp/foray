@@ -1,6 +1,6 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
-#include "../glTF/hsk_scene.hpp"
+#include "../scenegraph/hsk_scene.hpp"
 #include "hsk_rasterizedRenderStage.hpp"
 
 namespace hsk {
@@ -10,7 +10,7 @@ namespace hsk {
         GBufferStage() = default;
         virtual ~GBufferStage() { Destroy(); }
 
-        virtual void Init(const VkContext* context, Scene* scene);
+        virtual void Init(const VkContext* context, NScene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
@@ -24,7 +24,7 @@ namespace hsk {
         inline static constexpr std::string_view MaterialIndex      = "MaterialId";
 
       protected:
-        Scene* mScene;
+        NScene* mScene;
         std::vector<VkClearValue> mClearValues;
 
         virtual void CreateFixedSizeComponents();

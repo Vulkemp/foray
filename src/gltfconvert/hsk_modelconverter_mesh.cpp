@@ -22,6 +22,8 @@ namespace hsk{
         {
             mesh->SetBuffer(geoBufferSet);
         }
+
+        geoBufferSet->Init(mContext, mVertexBuffer, mIndexBuffer);
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<NPrimitive>& outprimitives)

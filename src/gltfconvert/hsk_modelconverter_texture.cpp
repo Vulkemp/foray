@@ -89,7 +89,7 @@ namespace hsk {
                 uint32_t sourceMipLevel = (uint32_t)i;
                 uint32_t destMipLevel   = sourceMipLevel + 1;
 
-                // Step #1 Transition
+                // Step #1 Transition dest miplevel to transfer dst optimal
                 VkImageSubresourceRange mipSubRange = {};
                 mipSubRange.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
                 mipSubRange.baseMipLevel            = destMipLevel;
@@ -120,6 +120,7 @@ namespace hsk {
                 vkCmdBlitImage(cmdBuf.GetCommandBuffer(), sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, sampledTexture.Image->GetImage(),
                                VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
 
+                // Step #3 Transition dest miplevel to transfer src optimal
                 layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
                 layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
@@ -129,34 +130,35 @@ namespace hsk {
             }
 
             {
-                // Image layouts currently on mip level n: 0: TRANSFER_SRC, 1...n: TRANSFER_DST
+                // All mip levels are transfer src optimal after mip creation, fix it
 
-                // transition mip levels 1..n
                 VkImageSubresourceRange mipSubRange = {
-                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 1, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS};
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 0, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS};
                 ManagedImage::LayoutTransitionInfo layoutTransition;
                 layoutTransition.CommandBuffer        = cmdBuf.GetCommandBuffer();
-                layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-                layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
                 layoutTransition.BarrierDstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
                 layoutTransition.SubresourceRange     = mipSubRange;
                 layoutTransition.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
                 layoutTransition.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
                 sampledTexture.Image->TransitionLayout(layoutTransition);
-
-                // transition mip level 0
-                mipSubRange.baseMipLevel = 0;
-                mipSubRange.levelCount = 1;
-                layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                sampledTexture.Image->TransitionLayout(layoutTransition);
             }
 
             cmdBuf.Flush(true);
 
-            VkSamplerCreateInfo samplerCI{.sType = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
-            TranslateSampler(mGltfModel.samplers[gltfTexture.sampler], samplerCI);
+            VkSamplerCreateInfo samplerCI{.sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                                          .magFilter    = VkFilter::VK_FILTER_LINEAR,
+                                          .minFilter    = VkFilter::VK_FILTER_LINEAR,
+                                          .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                          .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                          .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT};
+            if(gltfTexture.sampler >= 0)
+            {
+                TranslateSampler(mGltfModel.samplers[gltfTexture.sampler], samplerCI);
+            }
 
             sampledTexture.Sampler = mTextures.GetOrCreateSampler(samplerCI);
         }
