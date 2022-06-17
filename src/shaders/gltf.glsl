@@ -4,8 +4,8 @@
 struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
 {
     vec4  BaseColorFactor;                // Base Color / Albedo Factor
-    float MetallicFactor;                 // Metallic Factor
     vec3  EmissiveFactor;                 // Emissive Factor
+    float MetallicFactor;                 // Metallic Factor
     float RoughnessFactor;                // Roughness Factor
     int   BaseColorTextureIndex;          // Texture Index for BaseColor
     int   MetallicRoughnessTextureIndex;  // Texture Index for MetallicRoughness
