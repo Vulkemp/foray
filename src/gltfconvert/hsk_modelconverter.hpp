@@ -10,7 +10,7 @@ namespace hsk {
     class ModelConverter : public NoMoveDefaults
     {
       public:
-        explicit ModelConverter(NScene* scene);
+        explicit ModelConverter(Scene* scene);
 
         void LoadGltfModel(std::string utf8Path, const VkContext* context = nullptr, std::function<int32_t(tinygltf::Model)> sceneSelect = nullptr);
 
@@ -46,18 +46,18 @@ namespace hsk {
 
         // Result structures
 
-        NScene* mScene = nullptr;
+        Scene* mScene = nullptr;
 
-        NMaterialBuffer&      mMaterialBuffer;
+        MaterialBuffer&      mMaterialBuffer;
         GeometryStore&        mGeo;
         TextureStore&         mTextures;
         SceneTransformBuffer& mTransformBuffer;
 
-        void RecursivelyTranslateNodes(int32_t currentIndex, NNode* parent = nullptr);
+        void RecursivelyTranslateNodes(int32_t currentIndex, Node* parent = nullptr);
 
         // void LoadMesh
 
-        void InitTransformFromGltf(NTransform*                transform,
+        void InitTransformFromGltf(Transform*                transform,
                                    const std::vector<double>& matrix,
                                    const std::vector<double>& translation,
                                    const std::vector<double>& rotation,
@@ -65,7 +65,7 @@ namespace hsk {
                                    bool markStatic);
 
         void BuildGeometryBuffer();
-        void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<NPrimitive>& outprimitives);
+        void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives);
 
         void LoadTextures();
         void TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);

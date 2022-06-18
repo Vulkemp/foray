@@ -51,7 +51,7 @@ namespace hsk {
 
     void FreeCameraController::Update(const FrameUpdateInfo& updateInfo)
     {
-        NCamera* camera = GetNode()->GetComponent<NCamera>();
+        Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)
         {
             return;
@@ -97,7 +97,7 @@ namespace hsk {
 
     void FreeCameraController::ProcessMouseMovedEvent(std::shared_ptr<EventInputMouseMoved>& event)
     {
-        NCamera* camera = GetNode()->GetComponent<NCamera>();
+        Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)
         {
             return;

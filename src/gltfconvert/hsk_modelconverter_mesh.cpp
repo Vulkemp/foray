@@ -7,7 +7,7 @@ namespace hsk {
         for(int32_t i = 0; i < mGltfModel.meshes.size(); i++)
         {
             auto&                   gltfMesh = mGltfModel.meshes[i];
-            std::vector<NPrimitive> primitives;
+            std::vector<Primitive> primitives;
             PushGltfMeshToBuffers(gltfMesh, primitives);
             auto mesh = std::make_unique<Mesh>();
             mesh->SetPrimitives(primitives);
@@ -26,7 +26,7 @@ namespace hsk {
         geoBufferSet->Init(mContext, mVertexBuffer, mIndexBuffer);
     }
 
-    void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<NPrimitive>& outprimitives)
+    void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives)
     {
         outprimitives.resize(mesh.primitives.size());
 
@@ -153,11 +153,11 @@ namespace hsk {
                         HSK_THROWFMT("Index component type {} not supported!", accessor.componentType);
                 }
 
-                primitive = NPrimitive(NPrimitive::EType::Index, indexStart, indexCount);
+                primitive = Primitive(Primitive::EType::Index, indexStart, indexCount);
             }
             else
             {
-                primitive = NPrimitive(NPrimitive::EType::Vertex, vertexStart, vertexCount);
+                primitive = Primitive(Primitive::EType::Vertex, vertexStart, vertexCount);
             }
         }
     }

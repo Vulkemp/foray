@@ -9,9 +9,9 @@
 #include "../hsk_glm.hpp"
 
 namespace hsk {
-    ModelConverter::ModelConverter(NScene* scene)
+    ModelConverter::ModelConverter(Scene* scene)
         : mScene(scene)
-        , mMaterialBuffer(*(scene->GetComponent<NMaterialBuffer>()))
+        , mMaterialBuffer(*(scene->GetComponent<MaterialBuffer>()))
         , mGeo(*(scene->GetComponent<GeometryStore>()))
         , mTextures(*(scene->GetComponent<TextureStore>()))
         , mTransformBuffer(*(scene->GetComponent<SceneTransformBuffer>()))
@@ -84,7 +84,7 @@ namespace hsk {
         InitialUpdate();
     }
 
-    void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, NNode* parent)
+    void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, Node* parent)
     {
         int32_t nodeBufferIndex = mIndexBindings.NodeBufferOffset + currentIndex;
         auto&   bufferUniquePtr = mScene->GetNodeBuffer()[nodeBufferIndex];
@@ -93,7 +93,7 @@ namespace hsk {
             return;
         }
         auto& gltfNode  = mGltfModel.nodes[currentIndex];
-        bufferUniquePtr = std::make_unique<NNode>(mScene, parent);
+        bufferUniquePtr = std::make_unique<Node>(mScene, parent);
         auto node       = bufferUniquePtr.get();
         if(!parent)
         {
@@ -106,7 +106,7 @@ namespace hsk {
 
         if(gltfNode.mesh >= 0)
         {
-            auto meshInstance = node->MakeComponent<NMeshInstance>();
+            auto meshInstance = node->MakeComponent<MeshInstance>();
             meshInstance->SetMesh(mIndexBindings.Meshes[gltfNode.mesh]);
             meshInstance->SetInstanceIndex(mNextMeshInstanceIndex);
             mNextMeshInstanceIndex++;
@@ -118,7 +118,7 @@ namespace hsk {
         }
     }
 
-    void ModelConverter::InitTransformFromGltf(NTransform*                transform,
+    void ModelConverter::InitTransformFromGltf(Transform*                transform,
                                                const std::vector<double>& matrix,
                                                const std::vector<double>& translation,
                                                const std::vector<double>& rotation,

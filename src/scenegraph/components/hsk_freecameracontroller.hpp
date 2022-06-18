@@ -2,6 +2,7 @@
 #include "../../hsk_glm.hpp"
 #include "../../osi/hsk_event.hpp"
 #include "../hsk_component.hpp"
+#include <map>
 
 namespace hsk {
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback

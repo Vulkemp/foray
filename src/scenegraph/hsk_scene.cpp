@@ -6,25 +6,25 @@
 #include "hsk_node.hpp"
 
 namespace hsk {
-    NScene::NScene(const VkContext* context) : Registry(&mGlobalRootRegistry), mContext(context)
+    Scene::Scene(const VkContext* context) : Registry(&mGlobalRootRegistry), mContext(context)
     {
         InitDefaultGlobals();
     }
 
-    void NScene::InitDefaultGlobals()
+    void Scene::InitDefaultGlobals()
     {
-        MakeComponent<NMaterialBuffer>(mContext);
+        MakeComponent<MaterialBuffer>(mContext);
         MakeComponent<SceneTransformBuffer>(mContext);
         MakeComponent<GeometryStore>();
         MakeComponent<TextureStore>();
     }
 
-    void NScene::Update(const FrameUpdateInfo& updateInfo)
+    void Scene::Update(const FrameUpdateInfo& updateInfo)
     {
         this->InvokeUpdate(updateInfo);
         mGlobalRootRegistry.InvokeUpdate(updateInfo);
     }
-    void NScene::Draw(const FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
+    void Scene::Draw(const FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
     {
         // Process before draw callbacks
         this->InvokeBeforeDraw(renderInfo);
@@ -36,15 +36,15 @@ namespace hsk {
         mGlobalRootRegistry.InvokeDraw(drawInfo);
     }
 
-    void NScene::HandleEvent(std::shared_ptr<Event>& event)
+    void Scene::HandleEvent(std::shared_ptr<Event>& event)
     {
         this->InvokeOnEvent(event);
         mGlobalRootRegistry.InvokeOnEvent(event);
     }
 
-    NNode* NScene::MakeNode(NNode* parent)
+    Node* Scene::MakeNode(Node* parent)
     {
-        auto nodeManagedPtr = std::make_unique<NNode>(this, parent);
+        auto nodeManagedPtr = std::make_unique<Node>(this, parent);
         auto node           = nodeManagedPtr.get();
         mNodeBuffer.push_back(std::move(nodeManagedPtr));
         if(!parent)
@@ -54,7 +54,7 @@ namespace hsk {
         return node;
     }
 
-    void NScene::Cleanup(bool reinitialize)
+    void Scene::Cleanup(bool reinitialize)
     {
         // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
         mRootNodes.clear();

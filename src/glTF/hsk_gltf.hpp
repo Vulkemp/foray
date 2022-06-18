@@ -1,8 +1,0 @@
-#include "hsk_animation.hpp"
-#include "hsk_boundingbox.hpp"
-#include "hsk_geo.hpp"
-#include "hsk_material.hpp"
-#include "hsk_mesh.hpp"
-#include "hsk_node.hpp"
-#include "hsk_scene.hpp"
-#include "hsk_texture.hpp"

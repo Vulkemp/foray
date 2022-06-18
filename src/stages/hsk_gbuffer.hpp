@@ -10,7 +10,7 @@ namespace hsk {
         GBufferStage() = default;
         virtual ~GBufferStage() { Destroy(); }
 
-        virtual void Init(const VkContext* context, NScene* scene);
+        virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
@@ -24,7 +24,7 @@ namespace hsk {
         inline static constexpr std::string_view MaterialIndex      = "MaterialId";
 
       protected:
-        NScene* mScene;
+        Scene* mScene;
         std::vector<VkClearValue> mClearValues;
 
         virtual void CreateFixedSizeComponents();

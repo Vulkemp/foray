@@ -13,7 +13,7 @@
 
 namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(const VkContext* context, NScene* scene)
+    void GBufferStage::Init(const VkContext* context, Scene* scene)
     {
         mContext = context;
         mScene   = scene;
@@ -204,12 +204,12 @@ namespace hsk {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<NMaterialBuffer>()->MakeDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->MakeDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<SceneTransformBuffer>()->MakeDescriptorInfo());
-        std::vector<NNode*> nodes;
-        mScene->FindNodesWithComponent<NCamera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(3, nodes.front()->GetComponent<NCamera>()->GetUboDescriptorInfo());
+        std::vector<Node*> nodes;
+        mScene->FindNodesWithComponent<Camera>(nodes);
+        mDescriptorSet.SetDescriptorInfoAt(3, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfo());
 
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
@@ -278,12 +278,12 @@ namespace hsk {
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
 
         // vertex layout
-        VertexInputStateBuilder vertexInputStateBuilder;
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Position);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Normal);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::Uv);
-        vertexInputStateBuilder.AddVertexComponentBinding(VertexComponent::MaterialIndex);
+        NVertexInputStateBuilder vertexInputStateBuilder;
+        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Position);
+        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Normal);
+        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Tangent);
+        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Uv);
+        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::MaterialIndex);
         vertexInputStateBuilder.Build();
 
         // clang-format off

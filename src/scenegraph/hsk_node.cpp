@@ -3,14 +3,14 @@
 #include "hsk_scene.hpp"
 
 namespace hsk {
-    NTransform* NNode::GetTransform()
+    Transform* Node::GetTransform()
     {
-        return GetComponent<NTransform>();
+        return GetComponent<Transform>();
     }
 
-    NNode::NNode(NScene* scene, NNode* parent) : Registry(scene), mParent(parent)
+    Node::Node(Scene* scene, Node* parent) : Registry(scene), mParent(parent)
     {
-        MakeComponent<NTransform>();
+        MakeComponent<Transform>();
         if(parent)
         {
             parent->GetChildren().push_back(this);

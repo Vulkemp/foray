@@ -2,31 +2,31 @@
 #include "hsk_registry.hpp"
 
 namespace hsk {
-    class NNode : public Registry
+    class Node : public Registry
     {
       public:
-        NNode(NScene* scene, NNode* parent = nullptr);
+        Node(Scene* scene, Node* parent = nullptr);
 
         HSK_PROPERTY_ALL(Parent);
         HSK_PROPERTY_ALL(Children);
 
-        NTransform* GetTransform();
+        Transform* GetTransform();
 
         template <typename TComponent>
-        inline int32_t FindChildrenWithComponent(std::vector<NNode*> outnodes);
+        inline int32_t FindChildrenWithComponent(std::vector<Node*> outnodes);
 
-        inline virtual ~NNode(){}
+        inline virtual ~Node(){}
 
       protected:
-        NNode*              mParent   = nullptr;
-        std::vector<NNode*> mChildren = {};
+        Node*              mParent   = nullptr;
+        std::vector<Node*> mChildren = {};
     };
 
 
     template <typename TComponent>
-    inline int32_t NNode::FindChildrenWithComponent(std::vector<NNode*> outnodes){
+    inline int32_t Node::FindChildrenWithComponent(std::vector<Node*> outnodes){
       int32_t found = 0;
-      for (NNode* child : mChildren){
+      for (Node* child : mChildren){
         if (child->HasComponent<TComponent>()){
           found++;
           outnodes.push_back(child);

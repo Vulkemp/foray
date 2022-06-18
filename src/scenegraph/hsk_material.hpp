@@ -3,7 +3,7 @@
 #include "hsk_scenegraph_declares.hpp"
 
 namespace hsk {
-    struct alignas(16) NMaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
+    struct alignas(16) MaterialBufferEntry  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
     {
         glm::vec4 BaseColorFactor;                // Base Color / Albedo Factor
         glm::vec3 EmissiveFactor;                 // Emissive Factor

@@ -7,19 +7,19 @@
 #undef far
 
 namespace hsk {
-    NCamera::NCamera() : mUbo(true)
+    Camera::Camera() : mUbo(true)
     {
         mUbo.GetManagedBuffer().SetName("CameraUbo");
     }
 
-    void NCamera::InitDefault()
+    void Camera::InitDefault()
     {
         SetViewMatrix();
         SetProjectionMatrix();
         mUbo.Init(GetScene()->GetContext(), true);
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> NCamera::GetUboDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo()
     {
         size_t numUbos = 1;  // we load the complete ubo buffer as a single ubo buffer.
 
@@ -29,12 +29,12 @@ namespace hsk {
         return descriptorInfo;
     }
 
-    void NCamera::SetViewMatrix()
+    void Camera::SetViewMatrix()
     {
         mUbo.GetUbo().ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
     }
 
-    void NCamera::SetProjectionMatrix()
+    void Camera::SetProjectionMatrix()
     {
         if(mVerticalFov == 0.f)
         {
@@ -56,14 +56,14 @@ namespace hsk {
         mUbo.GetUbo().ProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
     }
 
-    void NCamera::SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up)
+    void Camera::SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up)
     {
         mEyePosition    = eye;
         mLookatPosition = lookat;
         mUpDirection    = up;
         SetViewMatrix();
     }
-    void NCamera::SetProjectionMatrix(float verticalFov, float aspect, float near, float far)
+    void Camera::SetProjectionMatrix(float verticalFov, float aspect, float near, float far)
     {
         mVerticalFov = verticalFov;
         mAspect      = aspect;
@@ -72,17 +72,17 @@ namespace hsk {
         SetProjectionMatrix();
     }
 
-    void NCamera::BeforeDraw(const FrameRenderInfo& renderInfo)
+    void Camera::BeforeDraw(const FrameRenderInfo& renderInfo)
     {
         mUbo.Update();
     }
-    void NCamera::OnResized(VkExtent2D extent)
+    void Camera::OnResized(VkExtent2D extent)
     {
         mAspect = CalculateAspect(extent);
         SetProjectionMatrix();
     }
 
-    void NCamera::Cleanup()
+    void Camera::Cleanup()
     {
         mUbo.Cleanup();
     }

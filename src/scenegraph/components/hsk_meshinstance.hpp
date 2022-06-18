@@ -4,10 +4,10 @@
 #include "../../hsk_glm.hpp"
 
 namespace hsk {
-    class NMeshInstance : public NodeComponent, public Component::BeforeDrawCallback, public Component::DrawCallback
+    class MeshInstance : public NodeComponent, public Component::BeforeDrawCallback, public Component::DrawCallback
     {
       public:
-        inline virtual ~NMeshInstance() {}
+        inline virtual ~MeshInstance() {}
 
         virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
         virtual void Draw(SceneDrawInfo& drawInfo) override;

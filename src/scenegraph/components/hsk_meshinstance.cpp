@@ -5,14 +5,14 @@
 #include "hsk_transform.hpp"
 
 namespace hsk {
-    void NMeshInstance::BeforeDraw(const FrameRenderInfo& renderInfo)
+    void MeshInstance::BeforeDraw(const FrameRenderInfo& renderInfo)
     {
         // Push Transform to SceneTransformState
         auto transform       = GetNode()->GetTransform();
         auto transformBuffer = GetGlobals()->GetComponent<SceneTransformBuffer>();
         transformBuffer->UpdateSceneTransform(mInstanceIndex, transform->GetGlobalMatrix());
     }
-    void NMeshInstance::Draw(SceneDrawInfo& drawInfo)
+    void MeshInstance::Draw(SceneDrawInfo& drawInfo)
     {
         if(mMesh)
         {

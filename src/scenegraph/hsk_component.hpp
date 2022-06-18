@@ -68,7 +68,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Registry)
         HSK_PROPERTY_GET(Registry)
 
-        virtual NScene*          GetScene()   = 0;
+        virtual Scene*          GetScene()   = 0;
         virtual Registry*        GetGlobals() = 0;
         virtual const VkContext* GetContext() = 0;
 
@@ -80,9 +80,9 @@ namespace hsk {
     {
       public:
         /// @brief Node this component is attached to. Casts mRegistry to Node.
-        NNode* GetNode();
+        Node* GetNode();
         /// @brief Scene this component is a part of. Casts mRegistry->mCallbackDispatcher to Scene
-        virtual NScene* GetScene() override;
+        virtual Scene* GetScene() override;
         /// @brief Global component registry. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetGlobals()
         virtual Registry* GetGlobals() override;
         /// @brief Vulkan Context. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetContext()
@@ -93,7 +93,7 @@ namespace hsk {
     {
       public:
         /// @brief Scene this component is a part of. Casts mRegistry to Scene
-        virtual NScene* GetScene() override;
+        virtual Scene* GetScene() override;
         /// @brief Global component registry. Returns mRegistry
         virtual Registry* GetGlobals() override;
         /// @brief Vulkan Context. Casts mRegistry to Scene and returns Scene->GetContext()

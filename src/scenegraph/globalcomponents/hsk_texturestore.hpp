@@ -1,6 +1,8 @@
 #pragma once
 #include "../../memory/hsk_managedimage.hpp"
 #include "../hsk_component.hpp"
+#include "../../memory/hsk_descriptorsethelper.hpp"
+#include <map>
 
 namespace hsk {
     class SampledTexture

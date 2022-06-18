@@ -2,10 +2,11 @@
 #include "../../memory/hsk_managedvectorbuffer.hpp"
 #include "../hsk_component.hpp"
 #include "../../hsk_glm.hpp"
+#include "../../memory/hsk_descriptorsethelper.hpp"
 
 namespace hsk {
 
-    struct alignas(16) NModelTransformState
+    struct alignas(16) MeshInstanceTransformState
     {
         glm::mat4 ModelMatrix         = glm::mat4(1.f);
         glm::mat4 PreviousModelMatrix = glm::mat4(1.f);
@@ -23,12 +24,12 @@ namespace hsk {
 
         virtual void BeforeDraw(const FrameRenderInfo& renderInfo) override;
 
-        inline virtual std::vector<NModelTransformState>& GetVector() { return mBuffer.GetVector(); }
+        inline virtual std::vector<MeshInstanceTransformState>& GetVector() { return mBuffer.GetVector(); }
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo();
 
       protected:
         std::vector<bool>                         mTouchedTransforms;
-        ManagedVectorBuffer<NModelTransformState> mBuffer;
+        ManagedVectorBuffer<MeshInstanceTransformState> mBuffer;
     };
 }  // namespace hsk

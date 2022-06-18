@@ -4,8 +4,8 @@
 #include "hsk_scene.hpp"
 
 namespace hsk {
-    NNode*           NodeComponent::GetNode() { return dynamic_cast<NNode*>(mRegistry); }
-    NScene*          NodeComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry->GetCallbackDispatcher()); }
+    Node*           NodeComponent::GetNode() { return dynamic_cast<Node*>(mRegistry); }
+    Scene*          NodeComponent::GetScene() { return dynamic_cast<Scene*>(mRegistry->GetCallbackDispatcher()); }
     Registry*        NodeComponent::GetGlobals() { return dynamic_cast<Registry*>(mRegistry->GetCallbackDispatcher()); }
     const VkContext* NodeComponent::GetContext()
     {
@@ -16,7 +16,7 @@ namespace hsk {
         }
         return nullptr;
     }
-    NScene*          GlobalComponent::GetScene() { return dynamic_cast<NScene*>(mRegistry); }
+    Scene*          GlobalComponent::GetScene() { return dynamic_cast<Scene*>(mRegistry); }
     Registry*        GlobalComponent::GetGlobals() { return mRegistry; }
     const VkContext* GlobalComponent::GetContext()
     {

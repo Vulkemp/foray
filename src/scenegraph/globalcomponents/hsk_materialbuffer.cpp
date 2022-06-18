@@ -1,11 +1,11 @@
 #include "hsk_materialbuffer.hpp"
 
 namespace hsk {
-    NMaterialBuffer::NMaterialBuffer(const VkContext* context) : mBuffer(context, false) { mBuffer.GetBuffer().SetName("MaterialBuffer"); }
-    void NMaterialBuffer::UpdateDeviceLocal() { mBuffer.InitOrUpdate(); }
-    void NMaterialBuffer::Cleanup() { mBuffer.Cleanup(); }
+    MaterialBuffer::MaterialBuffer(const VkContext* context) : mBuffer(context, false) { mBuffer.GetBuffer().SetName("MaterialBuffer"); }
+    void MaterialBuffer::UpdateDeviceLocal() { mBuffer.InitOrUpdate(); }
+    void MaterialBuffer::Cleanup() { mBuffer.Cleanup(); }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> NMaterialBuffer::MakeDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MaterialBuffer::MakeDescriptorInfo()
     {
         auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         std::vector<VkDescriptorBufferInfo> bufferInfos    = {mBuffer.GetBuffer().GetVkDescriptorBufferInfo()};

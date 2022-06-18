@@ -1,9 +1,12 @@
 #pragma once
 #include "../hsk_component.hpp"
+#include "../../memory/hsk_managedubo.hpp"
+#include "../../hsk_glm.hpp"
+#include "../../memory/hsk_descriptorsethelper.hpp"
 
 namespace hsk {
 
-    struct NCameraUboBlock
+    struct CameraUboBlock
     {
         glm::mat4 ProjectionMatrix         = {};
         glm::mat4 ViewMatrix               = {};
@@ -11,10 +14,10 @@ namespace hsk {
         glm::mat4 PreviousViewMatrix       = {};
     };
 
-    class NCamera : public NodeComponent, public Component::BeforeDrawCallback, public Component::OnResizedCallback
+    class Camera : public NodeComponent, public Component::BeforeDrawCallback, public Component::OnResizedCallback
     {
       public:
-        NCamera();
+        Camera();
 
         void InitDefault();
 
@@ -22,7 +25,7 @@ namespace hsk {
 
         void Cleanup();
 
-        inline virtual ~NCamera() { Cleanup(); }
+        inline virtual ~Camera() { Cleanup(); }
 
         HSK_PROPERTY_GET(Ubo)
         HSK_PROPERTY_CGET(Ubo)
@@ -58,10 +61,10 @@ namespace hsk {
         glm::vec3 mEyePosition = glm::vec3(0.f, 0.f, -1.f);
         glm::vec3 mLookatPosition = glm::vec3(0.f, 0.f, 0.f);
         glm::vec3 mUpDirection = glm::vec3(0.f, 1.f, 0.f);
-        ManagedUbo<NCameraUboBlock> mUbo;
+        ManagedUbo<CameraUboBlock> mUbo;
     };
 
-    inline float NCamera::CalculateAspect(const VkExtent2D extent){
+    inline float Camera::CalculateAspect(const VkExtent2D extent){
         return (float)extent.width / (float)extent.height;
     }
 }  // namespace hsk

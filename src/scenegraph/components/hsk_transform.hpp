@@ -3,10 +3,10 @@
 #include "../../hsk_glm.hpp"
 
 namespace hsk {
-    class NTransform : public NodeComponent
+    class Transform : public NodeComponent
     {
       public:
-        inline NTransform() {}
+        inline Transform() {}
 
         HSK_PROPERTY_ALL(Translation)
         HSK_PROPERTY_ALL(Rotation)
@@ -16,7 +16,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(GlobalMatrix)
 
         void RecalculateLocalMatrix();
-        void RecalculateGlobalMatrix(NTransform* parentTransform);
+        void RecalculateGlobalMatrix(Transform* parentTransform);
 
       protected:
         glm::vec3 mTranslation  = {};

@@ -3,7 +3,7 @@
 #include "../hsk_basics.hpp"
 #include <vector>
 #include <vulkan/vulkan.h>
-#include "../glTF/hsk_geo.hpp"
+#include "../scenegraph/hsk_geo.hpp"
 
 namespace hsk {
 
@@ -47,7 +47,7 @@ namespace hsk {
         VkBool32                                          mDepthTestEnable{VK_TRUE};
         VkBool32                                          mDepthWriteEnable{VK_TRUE};
         VkSampleCountFlags                                mSampleCountFlags{0};
-        VertexInputStateBuilder*                          mVertexInputStateBuilder{};
+        NVertexInputStateBuilder*                          mVertexInputStateBuilder{};
         VkPipelineCache                                   mPipelineCache{};
         uint32_t                                          mColorAttachmentBlendCount{0};
     };

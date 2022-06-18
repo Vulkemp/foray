@@ -7,7 +7,7 @@
 namespace hsk {
 
     /// @brief Reference into a vertex or index buffer which combine into a valid draw call
-    struct NPrimitive
+    struct Primitive
     {
         enum class EType
         {
@@ -18,8 +18,8 @@ namespace hsk {
         uint32_t First = 0;
         uint32_t Count = 0;
 
-        inline NPrimitive() {}
-        inline NPrimitive(EType type, uint32_t first, uint32_t count);
+        inline Primitive() {}
+        inline Primitive(EType type, uint32_t first, uint32_t count);
 
         bool        IsValid() const { return Count > 0; }
         inline void CmdDraw(VkCommandBuffer commandBuffer);
@@ -38,7 +38,7 @@ namespace hsk {
 
       protected:
         GeometryBufferSet*      mBuffer;
-        std::vector<NPrimitive> mPrimitives;
+        std::vector<Primitive> mPrimitives;
     };
 
     class GeometryBufferSet
@@ -81,9 +81,9 @@ namespace hsk {
         std::vector<std::unique_ptr<Mesh>>              mMeshes;
     };
 
-    inline NPrimitive::NPrimitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), Count(count) {}
+    inline Primitive::Primitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), Count(count) {}
 
-    inline void NPrimitive::CmdDraw(VkCommandBuffer commandBuffer)
+    inline void Primitive::CmdDraw(VkCommandBuffer commandBuffer)
     {
         if(IsValid())
         {

@@ -2,16 +2,17 @@
 #include "../../memory/hsk_managedvectorbuffer.hpp"
 #include "../hsk_component.hpp"
 #include "../hsk_material.hpp"
+#include "../../memory/hsk_descriptorsethelper.hpp"
 
 namespace hsk {
 
     /// @brief Manages a device local storage buffer providing material information for rendering
-    class NMaterialBuffer : public GlobalComponent
+    class MaterialBuffer : public GlobalComponent
     {
       public:
-        explicit NMaterialBuffer(const VkContext* context);
+        explicit MaterialBuffer(const VkContext* context);
 
-        std::vector<NMaterialBufferObject>& GetVector() { return mBuffer.GetVector(); }
+        std::vector<MaterialBufferEntry>& GetVector() { return mBuffer.GetVector(); }
 
         /// @brief Apply changes made to the cpu local buffer to the device local buffer
         void UpdateDeviceLocal();
@@ -19,9 +20,9 @@ namespace hsk {
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo();
 
-        inline virtual ~NMaterialBuffer() { Cleanup(); }
+        inline virtual ~MaterialBuffer() { Cleanup(); }
 
       protected:
-        ManagedVectorBuffer<NMaterialBufferObject> mBuffer = {};
+        ManagedVectorBuffer<MaterialBufferEntry> mBuffer = {};
     };
 }  // namespace hsk
