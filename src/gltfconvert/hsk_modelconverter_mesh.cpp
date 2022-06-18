@@ -1,7 +1,7 @@
-#include "hsk_modelconverter.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "hsk_modelconverter.hpp"
 
-namespace hsk{
+namespace hsk {
     void ModelConverter::BuildGeometryBuffer()
     {
         for(int32_t i = 0; i < mGltfModel.meshes.size(); i++)
@@ -30,11 +30,11 @@ namespace hsk{
     {
         outprimitives.resize(mesh.primitives.size());
 
-        uint32_t vertexStart = static_cast<uint32_t>(mVertexBuffer.size());
-        uint32_t indexStart  = static_cast<uint32_t>(mIndexBuffer.size());
-
         for(int32_t i = 0; i < mesh.primitives.size(); i++)
         {
+            uint32_t vertexStart = static_cast<uint32_t>(mVertexBuffer.size());
+            uint32_t indexStart  = static_cast<uint32_t>(mIndexBuffer.size());
+
             auto& gltfPrimitive = mesh.primitives[i];
             auto& primitive     = outprimitives[i];
 
@@ -115,7 +115,7 @@ namespace hsk{
 
             if(gltfPrimitive.indices >= 0)
             {
-                auto& accessor   = mGltfModel.accessors[gltfPrimitive.indices];
+                auto& accessor   = mGltfModel.accessors[gltfPrimitive.indices > -1 ? gltfPrimitive.indices : 0];
                 auto& bufferView = mGltfModel.bufferViews[accessor.bufferView];
                 auto& buffer     = mGltfModel.buffers[bufferView.buffer];
 
@@ -161,4 +161,4 @@ namespace hsk{
             }
         }
     }
-}
+}  // namespace hsk
