@@ -6,8 +6,7 @@
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include <glm/ext.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../hsk_glm.hpp"
 
 namespace hsk {
     ModelConverter::ModelConverter(NScene* scene)
@@ -101,7 +100,9 @@ namespace hsk {
             mScene->GetRootNodes().push_back(node);
         }
 
-        InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
+        bool markStatic = true;
+
+        InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale, markStatic);
 
         if(gltfNode.mesh >= 0)
         {
@@ -117,8 +118,12 @@ namespace hsk {
         }
     }
 
-    void ModelConverter::InitTransformFromGltf(
-        NTransform* transform, const std::vector<double>& matrix, const std::vector<double>& translation, const std::vector<double>& rotation, const std::vector<double>& scale)
+    void ModelConverter::InitTransformFromGltf(NTransform*                transform,
+                                               const std::vector<double>& matrix,
+                                               const std::vector<double>& translation,
+                                               const std::vector<double>& rotation,
+                                               const std::vector<double>& scale,
+                                               bool                       markStatic)
     {
         if(matrix.size() > 0)
         {
@@ -128,16 +133,14 @@ namespace hsk {
             {
                 // This happens because the recursive matrix recalculation step would immediately overwrite the transform matrix!
                 logger()->warn("Node has transform matrix specified, but no transform components. Ignoring matrix!");
-                return;
             }
 
             // GLM and gltf::node.matrix both are column major, so this is valid:
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_matrix
 
+            auto& transformMatrix = transform->GetLocalMatrix();
             for(int32_t i = 0; i < 16; i++)
             {
-
-                auto& transformMatrix         = transform->GetLocalMatrix();
                 transformMatrix[i / 4][i % 4] = (float)matrix[i];
             }
         }
@@ -147,10 +150,10 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_translation
 
+            auto& transformTranslation = transform->GetTranslation();
             for(int32_t i = 0; i < 3; i++)
             {
-                auto& transformTranslation = transform->GetTranslation();
-                transformTranslation[i]    = (float)translation[i];
+                transformTranslation[i] = (float)translation[i];
             }
         }
         if(rotation.size() > 0)
@@ -159,10 +162,10 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_rotation
 
+            auto& transformRotation = transform->GetRotation();
             for(int32_t i = 0; i < 4; i++)
             {
-                auto& transformRotation = transform->GetRotation();
-                transformRotation[i]    = (float)rotation[i];
+                transformRotation[i] = (float)rotation[i];
             }
         }
         if(scale.size() > 0)
@@ -171,12 +174,13 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_scale
 
+            auto& transformScale = transform->GetScale();
             for(int32_t i = 0; i < 3; i++)
             {
-                auto& transformScale = transform->GetScale();
-                transformScale[i]    = (float)scale[i];
+                transformScale[i] = (float)scale[i];
             }
         }
+        transform->SetStatic(markStatic);
     }
 
     void ModelConverter::InitialUpdate()

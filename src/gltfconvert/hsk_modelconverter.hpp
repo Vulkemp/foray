@@ -61,7 +61,8 @@ namespace hsk {
                                    const std::vector<double>& matrix,
                                    const std::vector<double>& translation,
                                    const std::vector<double>& rotation,
-                                   const std::vector<double>& scale);
+                                   const std::vector<double>& scale,
+                                   bool markStatic);
 
         void BuildGeometryBuffer();
         void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<NPrimitive>& outprimitives);

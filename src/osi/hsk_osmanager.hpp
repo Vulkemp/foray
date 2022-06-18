@@ -51,6 +51,7 @@ namespace hsk {
         virtual std::shared_ptr<Event> TranslateEvent_MouseButton(const SDL_Event& sdl_event);
         virtual std::shared_ptr<Event> TranslateEvent_Keyboard(const SDL_Event& sdl_event);
         virtual std::shared_ptr<Event> TranslateEvent_MouseMoved(const SDL_Event& sdl_event);
+        virtual std::shared_ptr<Event> TranslateEvent_MouseScroll(const SDL_Event& sdl_event);
         virtual std::shared_ptr<Event> TranslateEvent_JoyAxis(const SDL_Event& sdl_event);
         virtual std::shared_ptr<Event> TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event);
         virtual std::shared_ptr<Event> TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event);

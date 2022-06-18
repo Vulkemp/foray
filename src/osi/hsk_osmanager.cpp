@@ -15,7 +15,10 @@ namespace hsk {
         sInstance = this;
     }
 
-    OsManager::~OsManager() { sInstance = nullptr; }
+    OsManager::~OsManager()
+    {
+        sInstance = nullptr;
+    }
 
     void OsManager::Init()
     {
@@ -118,7 +121,7 @@ namespace hsk {
                 result = TranslateEvent_MouseButton(sdl_event);
                 break;
             case SDL_MOUSEWHEEL:  // Todo: Handle Mousewheel
-                // Neither true Analogue nor Binary -> Requires additional event structure
+                result = TranslateEvent_MouseScroll(sdl_event);
                 break;
             case SDL_WINDOWEVENT:
                 // Multiple WindowPtr Events
@@ -130,17 +133,11 @@ namespace hsk {
                         case SDL_WINDOWEVENT_CLOSE:
                             result = TranslateEvent_WindowClosed(window, wevent.timestamp);
                             break;
-                        case SDL_WINDOWEVENT_RESIZED:  // Ignored since size_changed is called either way
-                        case SDL_WINDOWEVENT_SHOWN:
-                        case SDL_WINDOWEVENT_HIDDEN:
-                        case SDL_WINDOWEVENT_EXPOSED:
-                        case SDL_WINDOWEVENT_MOVED:
                         case SDL_WINDOWEVENT_SIZE_CHANGED:
                             result = TranslateEvent_WindowResized(window, wevent);
                             break;
-                        case SDL_WINDOWEVENT_MINIMIZED:
-                        case SDL_WINDOWEVENT_MAXIMIZED:
                         case SDL_WINDOWEVENT_RESTORED:
+                            break;
                         case SDL_WINDOWEVENT_ENTER:
                             result = TranslateEvent_WindowFocus(window, wevent, true, true);
                             break;
@@ -153,6 +150,13 @@ namespace hsk {
                         case SDL_WINDOWEVENT_FOCUS_LOST:
                             result = TranslateEvent_WindowFocus(window, wevent, false, false);
                             break;
+                        case SDL_WINDOWEVENT_MINIMIZED:
+                        case SDL_WINDOWEVENT_MAXIMIZED:
+                        case SDL_WINDOWEVENT_RESIZED:  // Ignored since size_changed is called either way
+                        case SDL_WINDOWEVENT_SHOWN:
+                        case SDL_WINDOWEVENT_HIDDEN:
+                        case SDL_WINDOWEVENT_EXPOSED:
+                        case SDL_WINDOWEVENT_MOVED:
                         case SDL_WINDOWEVENT_TAKE_FOCUS:
                         case SDL_WINDOWEVENT_HIT_TEST:
                             break;
@@ -239,7 +243,18 @@ namespace hsk {
         fp32_t               relativeX = mevent.xrel;
         fp32_t               relativeY = mevent.yrel;
 
-        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, nullptr, currentx, currenty, relativeX, relativeY);
+        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
+        return result;
+    }
+
+    Event::ptr OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
+    {
+        SDL_MouseWheelEvent mevent  = sdl_event.wheel;
+        Window*             window  = GetWindowPtr<SDL_MouseWheelEvent>(mevent);
+        fp32_t              offsetx = mevent.x;
+        fp32_t              offsety = mevent.y;
+
+        std::shared_ptr<EventInputDirectional> result = std::make_shared<EventInputDirectional>(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
         return result;
     }
 
@@ -316,7 +331,10 @@ namespace hsk {
 #pragma endregion
 #pragma region window
 
-    Event::ptr OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp) { return std::make_shared<EventWindowCloseRequested>(window, timestamp); }
+    Event::ptr OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
+    {
+        return std::make_shared<EventWindowCloseRequested>(window, timestamp);
+    }
 
     Event::ptr OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
     {

@@ -57,4 +57,17 @@ namespace hsk {
         InputBinary(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBase(device, id, name), mButton(button) {}
     };
 
+    /// @brief Represents a stateless directional input
+    class InputDirectional : public InputBase
+    {
+      public:
+        HSK_PROPERTY_CGET(Directional)
+
+      protected:
+        EDirectional mDirectional;
+        InputDirectional() : InputBase(), mDirectional() {}
+        InputDirectional(InputDevice* device, int32_t id, std::string_view name, EDirectional directional) : InputBase(device, id, name), mDirectional(directional) {}
+
+    };
+
 }  // namespace hsk

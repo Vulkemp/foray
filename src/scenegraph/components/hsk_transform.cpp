@@ -2,7 +2,11 @@
 #include "../hsk_node.hpp"
 
 namespace hsk {
-    void NTransform::RecalculateLocalMatrix() { mLocalMatrix = glm::translate(glm::mat4(1.0f), mTranslation) * glm::mat4(mRotation) * glm::scale(glm::mat4(1.0f), mScale); }
+    void NTransform::RecalculateLocalMatrix()
+    {
+        if(!mStatic)
+            mLocalMatrix = glm::translate(glm::mat4(1.0f), mTranslation) * glm::mat4(mRotation) * glm::scale(glm::mat4(1.0f), mScale);
+    }
     void NTransform::RecalculateGlobalMatrix(NTransform* parentTransform)
     {
         auto node = GetNode();

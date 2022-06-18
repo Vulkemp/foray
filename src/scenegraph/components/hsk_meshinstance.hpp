@@ -1,7 +1,7 @@
 #pragma once
 #include "../hsk_component.hpp"
 #include "../hsk_scenegraph_declares.hpp"
-#include <glm/glm.hpp>
+#include "../../hsk_glm.hpp"
 
 namespace hsk {
     class NMeshInstance : public NodeComponent, public Component::BeforeDrawCallback, public Component::DrawCallback

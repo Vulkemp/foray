@@ -21,6 +21,8 @@ namespace hsk {
             InputAnalogue,
             /// @brief Binary inputs, ex. buttons, keys
             InputBinary,
+            /// @brief Directional stateless inputs, ex. scroll wheel, joystick hatswitches, etc.
+            InputDirectional,
             /// @brief Mouse position input type
             InputMouseMoved,
             /// @brief WindowPtr resized
@@ -55,7 +57,7 @@ namespace hsk {
         {
         }
 
-        inline Event(const Event& other) = default;
+        inline Event(const Event& other)            = default;
         inline Event& operator=(const Event& other) = default;
 
         virtual ~Event() {}
@@ -140,6 +142,27 @@ namespace hsk {
       protected:
         const InputBinary* const mButton;
         const bool               mPressed;
+    };
+
+    class EventInputDirectional : public EventInput
+    {
+      public:
+        /// @brief The button that was pressed or released
+        inline const InputDirectional* const InputSource() const { return mInputSource; }
+        /// @brief The offset in X direction
+        inline int32_t                       OffsetX() const { return mOffsetX; }
+        /// @brief The offset in Y direction
+        inline int32_t                       OffsetY() const { return mOffsetY; }
+
+        inline EventInputDirectional(Window* const source, const uint32_t timestamp, InputDevice* device, const InputDirectional* inputsource, int32_t offsetX, int32_t offsetY)
+            : EventInput(source, timestamp, EType::InputBinary, device), mInputSource(inputsource), mOffsetX(offsetX), mOffsetY(offsetY)
+        {
+        }
+
+      protected:
+        const InputDirectional* const mInputSource;
+        const int32_t                 mOffsetX;
+        const int32_t                 mOffsetY;
     };
 
     class EventInputMouseMoved : public EventInput

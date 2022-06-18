@@ -20,7 +20,7 @@ namespace hsk {
             Joystick
         };
 
-        using AxisPtr   = const InputAnalogue*;
+        using AxisPtr = const InputAnalogue*;
 
         class AxisJoystick : public InputAnalogue
         {
@@ -69,6 +69,13 @@ namespace hsk {
             virtual bool State() const override;
         };
 
+        class DirectionalMouseScroll : public InputDirectional
+        {
+          public:
+            inline DirectionalMouseScroll() : InputDirectional() {}
+            inline DirectionalMouseScroll(InputDevice* device, int32_t id, std::string_view name, EDirectional directional) : InputDirectional(device, id, name, directional) {}
+        };
+
         inline SDL_JoystickGUID    Guid() { return mGuid; }
         inline SDL_Joystick*       Joystick() { return mJoystick; }
         inline const SDL_Joystick* Joystick() const { return mJoystick; }
@@ -78,12 +85,13 @@ namespace hsk {
             : mGuid(), mJoystick(), mJoystickId(-1), mJoystickButtons(), mJoystickAxes(), mKeyboardButtons(), mMouseButtons(), mName(), mType(EType::Unknown), mAxes(), mButtons()
         {
         }
-        InputDevice(const InputDevice& other)  = delete;
-        InputDevice(const InputDevice&& other) = delete;
+        InputDevice(const InputDevice& other)            = delete;
+        InputDevice(const InputDevice&& other)           = delete;
         InputDevice& operator=(const InputDevice& other) = delete;
 
-        const std::vector<AxisPtr>&   Axes() const { return mAxes; }
-        const std::vector<InputBinary*>& Buttons() const { return mButtons; }
+        const std::vector<AxisPtr>&           Axes() const { return mAxes; }
+        const std::vector<InputBinary*>&      Buttons() const { return mButtons; }
+        const std::vector<InputDirectional*>& Directionals() const { return mDirectionals; }
 
         const std::string& Name() const { return mName; }
         EType              Type() const { return mType; }
@@ -106,16 +114,18 @@ namespace hsk {
         SDL_Joystick*    mJoystick;
         SDL_JoystickID   mJoystickId;
 
-        ButtonJoystick* mJoystickButtons;
-        AxisJoystick*   mJoystickAxes;
-        ButtonKeyboard* mKeyboardButtons;
-        ButtonMouse*    mMouseButtons;
+        ButtonJoystick*        mJoystickButtons;
+        AxisJoystick*          mJoystickAxes;
+        ButtonKeyboard*        mKeyboardButtons;
+        ButtonMouse*           mMouseButtons;
+        DirectionalMouseScroll mMouseScroll;
 
         std::string mName;
         EType       mType;
 
-        std::vector<AxisPtr>   mAxes;
-        std::vector<InputBinary*> mButtons;
+        std::vector<AxisPtr>           mAxes;
+        std::vector<InputBinary*>      mButtons;
+        std::vector<InputDirectional*> mDirectionals;
     };
 
 }  // namespace hsk

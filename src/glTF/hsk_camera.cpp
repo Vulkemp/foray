@@ -1,5 +1,5 @@
 #include "hsk_camera.hpp"
-#include <glm/gtc/matrix_transform.hpp>
+#include "../hsk_glm.hpp"
 
 namespace hsk {
     void Camera::InitFromTinyGltfCamera(const tinygltf::Camera& camera)

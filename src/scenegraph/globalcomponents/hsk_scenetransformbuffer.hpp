@@ -1,7 +1,7 @@
 #pragma once
 #include "../../memory/hsk_managedvectorbuffer.hpp"
 #include "../hsk_component.hpp"
-#include <glm/glm.hpp>
+#include "../../hsk_glm.hpp"
 
 namespace hsk {
 

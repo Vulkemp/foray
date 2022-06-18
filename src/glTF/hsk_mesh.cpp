@@ -2,8 +2,7 @@
 #include "../hsk_vkHelpers.hpp"
 #include "hsk_scene.hpp"
 #include "hsk_scenedrawinfo.hpp"
-#include <glm/ext.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../hsk_glm.hpp"
 
 namespace hsk {
     MeshInstance::MeshInstance() {}

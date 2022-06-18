@@ -1,7 +1,6 @@
 #pragma once
 #include "../hsk_component.hpp"
-#include <glm/ext.hpp>
-#include <glm/glm.hpp>
+#include "../../hsk_glm.hpp"
 
 namespace hsk {
     class NTransform : public NodeComponent
@@ -13,6 +12,7 @@ namespace hsk {
         HSK_PROPERTY_ALL(Rotation)
         HSK_PROPERTY_ALL(Scale)
         HSK_PROPERTY_ALL(LocalMatrix)
+        HSK_PROPERTY_ALL(Static)
         HSK_PROPERTY_CGET(GlobalMatrix)
 
         void RecalculateLocalMatrix();
@@ -24,5 +24,6 @@ namespace hsk {
         glm::vec3 mScale        = glm::vec3(1.f);
         glm::mat4 mLocalMatrix  = glm::mat4(1.f);
         glm::mat4 mGlobalMatrix = glm::mat4(1.f);
+        bool      mStatic       = false;
     };
 }  // namespace hsk

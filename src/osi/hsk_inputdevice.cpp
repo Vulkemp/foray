@@ -118,6 +118,9 @@ namespace hsk {
         result->mType                        = EType::Mouse;
         result->mMouseButtons                = new ButtonMouse[5];
 
+        result->mMouseScroll = DirectionalMouseScroll(result, 0, NAMEOF_ENUM(EDirectional::Mouse_Scroll), EDirectional::Mouse_Scroll);
+        result->mDirectionals.push_back(&(result->mMouseScroll));
+
         int     index          = 0;
         EButton mouseButtons[] = {EButton::Mouse_Left, EButton::Mouse_Right, EButton::Mouse_Middle, EButton::Mouse_X1, EButton::Mouse_X2};
 

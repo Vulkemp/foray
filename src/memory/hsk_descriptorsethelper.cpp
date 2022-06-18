@@ -53,8 +53,11 @@ namespace hsk {
             poolSize.type            = descriptorLocation.Descriptor->mDescriptorType;
             poolSize.descriptorCount = descriptorLocation.Descriptor->mDescriptorCount * numSets;
 
-            // prepare pool size
-            poolSizes.push_back(poolSize);
+            if(poolSize.descriptorCount)
+            {
+                // prepare pool size
+                poolSizes.push_back(poolSize);
+            }
         }
 
         VkDescriptorPoolCreateInfo poolInfo{};
@@ -118,7 +121,10 @@ namespace hsk {
                     descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mImageInfos[index].size();
                     descriptorWrite.pImageInfo      = descriptorLocation.Descriptor->mImageInfos[index].data();
                 }
-                descriptorWrites.push_back(descriptorWrite);
+                if(descriptorWrite.descriptorCount)
+                {
+                    descriptorWrites.push_back(descriptorWrite);
+                }
             }
         }
         vkUpdateDescriptorSets(context->Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
@@ -141,7 +147,8 @@ namespace hsk {
     }
 
 
-    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags) {
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags)
+    {
         mDescriptorType   = type;
         mShaderStageFlags = shaderStageFlags;
     }

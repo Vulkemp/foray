@@ -359,6 +359,22 @@ namespace hsk {
         ENUM_MAX
     };
 
+    /// @brief Enum for identification of stateless directional inputs
+    enum class EDirectional : uint16_t
+    {
+        Mouse_Scroll,
+        Joystick_Hat0,
+        Joystick_Hat1,
+        Joystick_Hat2,
+        Joystick_Hat3,
+        Joystick_Hat4,
+        Joystick_Hat5,
+        Joystick_Hat6,
+        Joystick_Hat7,
+        Joystick_Hat8,
+        Joystick_Hat9,
+    };
+
     /// @brief Supported modes of window display
     enum class EDisplayMode
     {
