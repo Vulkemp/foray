@@ -68,9 +68,9 @@ namespace hsk {
         if(mInputStates.PitchDown)
             mPitch += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
         if(mInputStates.YawLeft)
-            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
-        if(mInputStates.YawRight)
             mYaw += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
+        if(mInputStates.YawRight)
+            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
 
         mPitch = std::clamp(mPitch, -89.f, 89.f);
 
@@ -82,13 +82,13 @@ namespace hsk {
         if(mInputStates.Backward)
             pos += -1.f * speed * lookDir;
         if(mInputStates.StrafeLeft)
-            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir));
-        if(mInputStates.StrafeRight)
             pos += speed * glm::normalize(glm::cross(lookDir, upDir));
+        if(mInputStates.StrafeRight)
+            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir));
         if(mInputStates.StrafeUp)
-            pos += -1.f * speed * upDir;
+            pos += -speed * upDir;
         if(mInputStates.StrafeDown)
-            pos += speed * upDir;
+            pos += 1.f * speed * upDir;
 
 
         lookAt = pos + lookDir;
@@ -106,7 +106,7 @@ namespace hsk {
         float xoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeX();
         float yoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeY();
 
-        mYaw += xoffset;
+        mYaw += xoffset * -1.f;
         mPitch += yoffset * (mInvertYAxis ? -1.f : 1.f);
 
         // make sure that when pitch is out of bounds, screen doesn't get flipped

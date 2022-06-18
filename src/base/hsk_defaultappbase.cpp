@@ -430,8 +430,8 @@ namespace hsk {
             blitRegion.srcOffsets[0]  = {};
             blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
             blitRegion.dstSubresource = layers;
-            blitRegion.dstOffsets[0]  = {};
-            blitRegion.dstOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
+            blitRegion.dstOffsets[1]  = {.z = 1};
+            blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 0};
 
             vkCmdBlitImage(currentFrame.CommandBuffer, mSwapchainCopySourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                            mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
