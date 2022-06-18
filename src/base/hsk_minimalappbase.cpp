@@ -74,7 +74,10 @@ namespace hsk {
                         balance = timespan_t(0.f);
                     }
                     Update(delta.count());
-                    Render(delta.count());
+                    if(this->State() == EState::Running)
+                    {
+                        Render(delta.count());
+                    }
                 }
                 else
                 {
@@ -111,7 +114,10 @@ namespace hsk {
         return 0;
     }
 
-    void MinimalAppBase::BaseInitSdlSubsystem() { mOsManager.Init(); }
+    void MinimalAppBase::BaseInitSdlSubsystem()
+    {
+        mOsManager.Init();
+    }
 
     void MinimalAppBase::BaseInit()
     {
@@ -145,7 +151,6 @@ namespace hsk {
             {
                 mVkbInstanceBuilder.enable_validation_layers();
             }
-
         }
 
         auto instanceBuildRet = mVkbInstanceBuilder.build();
@@ -181,5 +186,8 @@ namespace hsk {
         logger()->flush();
     }
 
-    void MinimalAppBase::PrintStateChange(EState oldState, EState newState) { logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState)); }
+    void MinimalAppBase::PrintStateChange(EState oldState, EState newState)
+    {
+        logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
+    }
 }  // namespace hsk

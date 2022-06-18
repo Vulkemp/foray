@@ -15,6 +15,8 @@ namespace hsk {
         template <typename TComponent>
         inline int32_t FindChildrenWithComponent(std::vector<NNode*> outnodes);
 
+        inline virtual ~NNode(){}
+
       protected:
         NNode*              mParent   = nullptr;
         std::vector<NNode*> mChildren = {};

@@ -52,7 +52,7 @@ namespace hsk {
         /// @brief Finalizes all attached components
         virtual void Cleanup();
 
-        inline virtual ~Registry() {}
+        inline virtual ~Registry() { Cleanup(); }
 
         /// @brief The root registry manages global callbacks invokable on the components
         HSK_PROPERTY_GET(CallbackDispatcher)
