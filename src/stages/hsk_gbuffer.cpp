@@ -48,9 +48,9 @@ namespace hsk {
         VkDevice device = mContext->Device;
         for(auto& colorAttachment : mColorAttachments)
         {
-            colorAttachment->Destroy();
+            colorAttachment->Cleanup();
         }
-        mDepthAttachment.Destroy();
+        mDepthAttachment.Cleanup();
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);

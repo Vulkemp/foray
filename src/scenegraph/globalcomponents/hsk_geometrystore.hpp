@@ -55,8 +55,8 @@ namespace hsk {
 
         inline virtual ~GeometryBufferSet()
         {
-            mIndices.Destroy();
-            mVertices.Destroy();
+            mIndices.Cleanup();
+            mVertices.Cleanup();
         }
 
       protected:

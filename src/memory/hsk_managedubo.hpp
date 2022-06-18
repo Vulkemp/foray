@@ -1,15 +1,14 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include "../memory/hsk_managedbuffer.hpp"
 #include "../hsk_glm.hpp"
+#include "../memory/hsk_managedbuffer.hpp"
 
 namespace hsk {
-    class UboInterface
+    class UboInterface : public DeviceResourceBase
     {
       public:
         virtual void   Init(const VkContext* context, bool update = false) = 0;
         virtual void   Update()                                            = 0;
-        virtual void   Cleanup()                                           = 0;
         virtual size_t SizeOfUbo() const                                   = 0;
         virtual void*  UboData()                                           = 0;
 
@@ -26,7 +25,7 @@ namespace hsk {
     };
 
     template <typename T_UBO>
-    class ManagedUbo : public UboInterface, public NoMoveDefaults
+    class ManagedUbo : public UboInterface
     {
       protected:
         ManagedBuffer mManagedBuffer = {};
@@ -49,8 +48,12 @@ namespace hsk {
         inline virtual void   Init(const VkContext* context, bool update = false) override;
         inline virtual void   Update() override;
         inline virtual void   Cleanup() override;
+        inline virtual bool Exists() const override {return mManagedBuffer.Exists();}
         inline virtual size_t SizeOfUbo() const override;
         inline virtual void*  UboData() override { return &mUbo; }
+
+        inline virtual std::string_view   GetName() const { return mManagedBuffer.GetName(); }
+        inline virtual ManagedUbo<T_UBO>& SetName(std::string_view name);
     };
 
     template <typename T_UBO>
@@ -111,28 +114,19 @@ namespace hsk {
         {
             mManagedBuffer.Unmap();
         }
-        mManagedBuffer.Destroy();
+        mManagedBuffer.Cleanup();
     }
     template <typename T_UBO>
     inline size_t ManagedUbo<T_UBO>::SizeOfUbo() const
     {
         return sizeof(T_UBO);
     }
-    // template <typename T_UBO>
-    // inline void ManagedUbo<T_UBO>::BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const
-    // {
-    //     dest.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    //     dest.dstSet          = descriptorSet;
-    //     dest.descriptorType  = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    //     dest.dstBinding      = binding;
-    //     dest.pBufferInfo     = &mManagedBuffer.GetVkDescriptorBufferInfo();
-    //     dest.descriptorCount = 1;
-    // }
-    // template <typename T_UBO>
-    // inline VkWriteDescriptorSet ManagedUbo<T_UBO>::BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const
-    // {
-    //     VkWriteDescriptorSet result{};
-    //     BuildWriteDescriptorSet(descriptorSet, binding, result);
-    //     return result;
-    // }
+
+    template <typename T_UBO>
+    inline ManagedUbo<T_UBO>& ManagedUbo<T_UBO>::SetName(std::string_view name)
+    {
+        mManagedBuffer.SetName(name);
+        return *this;
+    }
+
 }  // namespace hsk

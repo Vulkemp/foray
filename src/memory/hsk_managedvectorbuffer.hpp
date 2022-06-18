@@ -17,7 +17,7 @@ namespace hsk {
     };
 
     template <typename TClass>
-    class ManagedVectorBuffer : public NoMoveDefaults
+    class ManagedVectorBuffer : public DeviceResourceBase
     {
       public:
         const bool DeviceLocal;
@@ -26,8 +26,12 @@ namespace hsk {
         inline explicit ManagedVectorBuffer(const VkContext* context) : DeviceLocal(false), mContext(context) {}
         inline explicit ManagedVectorBuffer(const VkContext* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
 
-        void InitOrUpdate(std::optional<BufferSection> section = {});
-        void Cleanup();
+        void         InitOrUpdate(std::optional<BufferSection> section = {});
+        virtual void Cleanup() override;
+        virtual bool Exists() const override { return mBuffer.Exists(); }
+
+        inline virtual std::string_view   GetName() const { return mBuffer.GetName(); }
+        inline virtual ManagedVectorBuffer<TClass>& SetName(std::string_view name);
 
         inline virtual ~ManagedVectorBuffer() { Cleanup(); }
 
@@ -121,6 +125,14 @@ namespace hsk {
         {
             mBuffer.Unmap();
         }
-        mBuffer.Destroy();
+        mBuffer.Cleanup();
     }
+
+    template <typename TClass>
+    inline ManagedVectorBuffer<TClass>& ManagedVectorBuffer<TClass>::SetName(std::string_view name)
+    {
+        mBuffer.SetName(name);
+        return *this;
+    }
+
 }  // namespace hsk

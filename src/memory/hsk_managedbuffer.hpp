@@ -1,16 +1,18 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
+#include "../utility/hsk_deviceresource.hpp"
 #include <vulkan/vulkan.h>
 
 namespace hsk {
 
-    class ManagedBuffer : public NoMoveDefaults
+    class ManagedBuffer : public DeviceResourceBase
     {
       public:
         struct ManagedBufferCreateInfo
         {
             VmaAllocationCreateInfo AllocationCreateInfo{};
             VkBufferCreateInfo      BufferCreateInfo{};
+            std::string             Name{};
 
             ManagedBufferCreateInfo();
         };
@@ -24,7 +26,9 @@ namespace hsk {
         /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
         void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {});
 
-        void Destroy();
+        virtual void Cleanup();
+
+        virtual bool Exists() const { return mAllocation; }
 
         void WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
 
@@ -41,7 +45,7 @@ namespace hsk {
         {
             if(mAllocation)
             {
-                Destroy();
+                Cleanup();
             }
         }
 
@@ -55,13 +59,13 @@ namespace hsk {
         inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
 
       protected:
-        const VkContext*       mContext{};
-        std::string            mName{};
-        VkBuffer               mBuffer{};
-        VmaAllocation          mAllocation{};
-        VmaAllocationInfo      mAllocationInfo{};
-        VkDeviceSize           mSize           = {};
-        bool                   mIsMapped       = false;
+        const VkContext*  mContext{};
+        std::string       mName{};
+        VkBuffer          mBuffer{};
+        VmaAllocation     mAllocation{};
+        VmaAllocationInfo mAllocationInfo{};
+        VkDeviceSize      mSize     = {};
+        bool              mIsMapped = false;
 
         void UpdateDebugNames();
     };

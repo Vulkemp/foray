@@ -4,8 +4,7 @@
 namespace hsk {
     void Transform::RecalculateLocalMatrix()
     {
-        if(!mStatic)
-            mLocalMatrix = glm::translate(glm::mat4(1.0f), mTranslation) * glm::mat4(mRotation) * glm::scale(glm::mat4(1.0f), mScale);
+        mLocalMatrix = glm::translate(glm::mat4(1.0f), mTranslation) * glm::mat4(mRotation) * glm::scale(glm::mat4(1.0f), mScale);
     }
     void Transform::RecalculateGlobalMatrix(Transform* parentTransform)
     {
@@ -15,7 +14,8 @@ namespace hsk {
             return;
         }
 
-        RecalculateLocalMatrix();
+        if(!mStatic)
+            RecalculateLocalMatrix();
 
         glm::mat4 parentGlobalMatrix(1);
         if(!parentTransform)

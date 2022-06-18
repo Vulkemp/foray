@@ -8,6 +8,9 @@ namespace hsk {
         {
             auto&                   gltfMesh = mGltfModel.meshes[i];
             std::vector<Primitive> primitives;
+            
+            logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
+
             PushGltfMeshToBuffers(gltfMesh, primitives);
             auto mesh = std::make_unique<Mesh>();
             mesh->SetPrimitives(primitives);

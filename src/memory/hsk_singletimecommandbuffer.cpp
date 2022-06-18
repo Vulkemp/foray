@@ -14,6 +14,12 @@ namespace hsk {
 
         AssertVkResult(vkAllocateCommandBuffers(context->Device, &cmdBufAllocateInfo, &mCommandBuffer));
 
+        // Create fence to ensure that the command buffer has finished executing
+        VkFenceCreateInfo fenceInfo{};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        VkFence fence;
+        AssertVkResult(vkCreateFence(mContext->Device, &fenceInfo, nullptr, &mFence));
+
         // If requested, also start recording for the new command buffer
         if(begin)
         {
@@ -32,7 +38,7 @@ namespace hsk {
         AssertVkResult(vkBeginCommandBuffer(mCommandBuffer, &commandBufferBI));
     }
 
-    void SingleTimeCommandBuffer::Flush(bool free)
+    void SingleTimeCommandBuffer::Submit(bool fireAndForget)
     {
         AssertVkResult(vkEndCommandBuffer(mCommandBuffer));
 
@@ -41,22 +47,43 @@ namespace hsk {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers    = &mCommandBuffer;
 
-        // Create fence to ensure that the command buffer has finished executing
-        VkFenceCreateInfo fenceInfo{};
-        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        VkFence fence;
-        AssertVkResult(vkCreateFence(mContext->Device, &fenceInfo, nullptr, &fence));
-
         // Submit to the queue
-        AssertVkResult(vkQueueSubmit(mContext->TransferQueue, 1, &submitInfo, fence)); // TODO: Use graphics queue for all command buffer submits??? seems wrong.
+        AssertVkResult(vkQueueSubmit(mContext->TransferQueue, 1, &submitInfo, mFence));  // TODO: Use graphics queue for all command buffer submits??? seems wrong.
+        if(!fireAndForget)
+        {
+            // Wait for the fence to signal that command buffer has finished executing
+            AssertVkResult(vkWaitForFences(mContext->Device, 1, &mFence, VK_TRUE, 100000000000));
+            AssertVkResult(vkResetFences(mContext->Device, 1, &mFence));
+        }
+    }
+
+    void SingleTimeCommandBuffer::FlushAndReset()
+    {
+        Submit();
+        AssertVkResult(vkResetCommandBuffer(mCommandBuffer, 0));
+    }
+
+    void SingleTimeCommandBuffer::WaitForCompletion()
+    {
+        if(!mFence || !mCommandBuffer)
+        {
+            return;
+        }
         // Wait for the fence to signal that command buffer has finished executing
-        AssertVkResult(vkWaitForFences(mContext->Device, 1, &fence, VK_TRUE, 100000000000));
-
-        vkDestroyFence(mContext->Device, fence, nullptr);
-
-        if(free)
+        AssertVkResult(vkWaitForFences(mContext->Device, 1, &mFence, VK_TRUE, 100000000000));
+        AssertVkResult(vkResetFences(mContext->Device, 1, &mFence));
+    }
+    void SingleTimeCommandBuffer::Cleanup()
+    {
+        if(mCommandBuffer)
         {
             vkFreeCommandBuffers(mContext->Device, mContext->CommandPool, 1, &mCommandBuffer);
+            mCommandBuffer = nullptr;
+        }
+        if(mFence)
+        {
+            vkDestroyFence(mContext->Device, mFence, nullptr);
+            mFence = nullptr;
         }
     }
 

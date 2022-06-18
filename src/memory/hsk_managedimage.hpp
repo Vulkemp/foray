@@ -1,16 +1,17 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
 #include "../hsk_basics.hpp"
+#include "../utility/hsk_deviceresource.hpp"
+#include <optional>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include <optional>
 
 namespace hsk {
-    class ManagedImage : public NoMoveDefaults
+    class ManagedImage : public DeviceResourceBase
     {
       public:
         inline ManagedImage() {}
-        inline ~ManagedImage() { Destroy(); }
+        inline virtual ~ManagedImage() { Cleanup(); }
 
         struct CreateInfo
         {
@@ -81,7 +82,8 @@ namespace hsk {
         /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
-        virtual void Destroy();
+        virtual void Cleanup();
+        virtual bool Exists() const override { return mAllocation; }
 
         HSK_PROPERTY_CGET(Image)
         HSK_PROPERTY_CGET(ImageView)
@@ -106,6 +108,7 @@ namespace hsk {
         VkFormat          mFormat{};
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocInfo{};
+        VkDeviceSize      mSize{};
         VkExtent3D        mExtent3D{};
         std::string       mName{};
 

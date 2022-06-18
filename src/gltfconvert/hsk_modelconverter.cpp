@@ -1,12 +1,12 @@
 #include "hsk_modelconverter.hpp"
 #include "../base/hsk_vkcontext.hpp"
+#include "../hsk_glm.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include "../hsk_glm.hpp"
 
 namespace hsk {
     ModelConverter::ModelConverter(Scene* scene)
@@ -32,6 +32,9 @@ namespace hsk {
             binary = (utf8Path.substr(extpos + 1, utf8Path.length() - extpos) == "glb");
         }
 
+        logger()->info("Model Load: Loading tinygltf model ...");
+
+
         bool fileLoaded = binary ? gltfContext.LoadBinaryFromFile(&mGltfModel, &error, &warning, utf8Path.c_str()) :
                                    gltfContext.LoadASCIIFromFile(&mGltfModel, &error, &warning, utf8Path.c_str());
 
@@ -49,6 +52,8 @@ namespace hsk {
             Exception::Throw("Failed to load file");
         }
 
+        logger()->info("Model Load: Preparing scene buffers ...");
+
         mIndexBindings.NodeBufferOffset = mScene->GetNodeBuffer().size();
         mScene->GetNodeBuffer().resize(mIndexBindings.NodeBufferOffset + mGltfModel.nodes.size());
 
@@ -62,6 +67,7 @@ namespace hsk {
         mIndexBindings.Meshes.resize(mGltfModel.meshes.size());
         mNextMeshInstanceIndex = mTransformBuffer.GetVector().size();
 
+
         if(sceneSelect)
         {
             mGltfScene = &(mGltfModel.scenes[sceneSelect(mGltfModel)]);
@@ -71,9 +77,19 @@ namespace hsk {
             mGltfScene = &(mGltfModel.scenes[mGltfModel.defaultScene]);
         }
 
+        logger()->info("Model Load: Building vertex and index buffers ...");
+
         BuildGeometryBuffer();
+
+        logger()->info("Model Load: Uploading textures ...");
+
         LoadTextures();
+
+        logger()->info("Model Load: Uploading materials ...");
+
         LoadMaterials();
+
+        logger()->info("Model Load: Initialising scene state ...");
 
         // Discover and load
         for(int32_t nodeIndex : mGltfScene->nodes)
@@ -82,6 +98,8 @@ namespace hsk {
         }
 
         InitialUpdate();
+
+        logger()->info("Model Load: Done");
     }
 
     void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, Node* parent)
@@ -118,7 +136,7 @@ namespace hsk {
         }
     }
 
-    void ModelConverter::InitTransformFromGltf(Transform*                transform,
+    void ModelConverter::InitTransformFromGltf(Transform*                 transform,
                                                const std::vector<double>& matrix,
                                                const std::vector<double>& translation,
                                                const std::vector<double>& rotation,
@@ -132,7 +150,7 @@ namespace hsk {
             if(translation.size() == 0 && rotation.size() == 0 && scale.size() == 0)
             {
                 // This happens because the recursive matrix recalculation step would immediately overwrite the transform matrix!
-                logger()->warn("Node has transform matrix specified, but no transform components. Ignoring matrix!");
+                logger()->warn("Node has transform matrix specified, but no transform components. This will prevent writes to local matrix!");
             }
 
             // GLM and gltf::node.matrix both are column major, so this is valid:
@@ -180,7 +198,10 @@ namespace hsk {
                 transformScale[i] = (float)scale[i];
             }
         }
-        transform->SetStatic(markStatic);
+        if(!translation.size() && !scale.size() && !rotation.size())
+        {
+            transform->SetStatic(true);
+        }
     }
 
     void ModelConverter::InitialUpdate()

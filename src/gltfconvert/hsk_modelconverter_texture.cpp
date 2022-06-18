@@ -11,6 +11,20 @@ namespace hsk {
         {
             const auto& gltfTexture = mGltfModel.textures[i];
             const auto& gltfImage   = mGltfModel.images[gltfTexture.source];
+
+            std::string textureName;
+            textureName = gltfTexture.name;
+            if(!textureName.size())
+            {
+                textureName = gltfImage.name;
+            }
+            if(!textureName.size())
+            {
+                textureName = fmt::format("Texture #{}", i);
+            }
+
+            logger()->debug("Model Load: Processing texture #{} \"{}\"", i, textureName);
+
             mTextures.GetTextures().push_back(SampledTexture{.Image = std::make_unique<ManagedImage>(), .Sampler = nullptr});
             SampledTexture& sampledTexture = mTextures.GetTextures().back();
 
@@ -66,16 +80,7 @@ namespace hsk {
             imageCI.ImageViewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             imageCI.ImageViewCI.subresourceRange.layerCount = 1;
             imageCI.ImageViewCI.subresourceRange.levelCount = mipLevelCount;
-
-            imageCI.Name = gltfTexture.name;
-            if(!imageCI.Name.size())
-            {
-                imageCI.Name = gltfImage.name;
-            }
-            if(!imageCI.Name.size())
-            {
-                imageCI.Name = fmt::format("Texture #{}", i);
-            }
+            imageCI.Name = textureName;
 
             sampledTexture.Image->Create(mContext, imageCI);
             sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -146,7 +151,7 @@ namespace hsk {
                 sampledTexture.Image->TransitionLayout(layoutTransition);
             }
 
-            cmdBuf.Flush(true);
+            cmdBuf.Submit();
 
             VkSamplerCreateInfo samplerCI{.sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                                           .magFilter    = VkFilter::VK_FILTER_LINEAR,

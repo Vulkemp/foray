@@ -12,6 +12,9 @@ namespace hsk {
         mContext = context;
         mSize    = createInfo.BufferCreateInfo.size;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
+        if (createInfo.Name.size()){
+            mName = createInfo.Name;
+        }
         if(mName.length() > 0 && mContext->DebugEnabled)
         {
             UpdateDebugNames();
@@ -91,11 +94,11 @@ namespace hsk {
         mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
-    void ManagedBuffer::Destroy()
+    void ManagedBuffer::Cleanup()
     {
         if(mIsMapped)
         {
-            logger()->warn("ManagedBuffer::Destroy called before Unmap!");
+            logger()->warn("ManagedBuffer::Cleanup called before Unmap!");
             Unmap();
         }
         if(mContext && mContext->Allocator && mAllocation)
@@ -103,7 +106,7 @@ namespace hsk {
             vmaDestroyBuffer(mContext->Allocator, mBuffer, mAllocation);
             if(mName.length() > 0)
             {
-                logger()->debug("ManagedBuffer: Destroy \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
+                logger()->debug("ManagedBuffer: Cleanup \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
                                 reinterpret_cast<uint64_t>(mBuffer));
             }
         }
@@ -128,7 +131,7 @@ namespace hsk {
         copy.size      = size;
 
         vkCmdCopyBuffer(commandBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
-        singleTimeCmdBuf.Flush();
+        singleTimeCmdBuf.Submit();
     }
 
     ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }

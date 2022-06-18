@@ -30,6 +30,7 @@ namespace hsk {
 
         // create image
         AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
+        mSize = mAllocInfo.size;
 
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
@@ -182,7 +183,7 @@ namespace hsk {
             TransitionLayout(transitionInfo);
         }
 
-        singleTimeCmdBuf.Flush(true);
+        singleTimeCmdBuf.Submit();
     }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)
@@ -201,7 +202,7 @@ namespace hsk {
         WriteDeviceLocalData(data, size, layoutAfterWrite, region);
     }
 
-    void ManagedImage::Destroy()
+    void ManagedImage::Cleanup()
     {
         if(mAllocation)
         {
@@ -233,7 +234,7 @@ namespace hsk {
 
     void ManagedImage::UpdateDebugNames()
     {
-        std::string debugName = fmt::format("Image Managed \"{}\" ({})", mName, PrintSize(mAllocInfo.size));
+        std::string debugName = fmt::format("Image Managed \"{}\" ({})", mName, PrintSize(mSize));
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
                                                .pNext        = nullptr,
