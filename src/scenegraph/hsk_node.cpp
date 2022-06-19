@@ -11,9 +11,5 @@ namespace hsk {
     Node::Node(Scene* scene, Node* parent) : Registry(scene), mParent(parent)
     {
         MakeComponent<Transform>();
-        if(parent)
-        {
-            parent->GetChildren().push_back(this);
-        }
     }
 }  // namespace hsk

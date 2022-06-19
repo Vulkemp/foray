@@ -19,7 +19,7 @@ namespace hsk {
         }
 
         mGeo.GetBufferSets().push_back(std::make_unique<GeometryBufferSet>());
-        auto geoBufferSet = mGeo.GetBufferSets().front().get();
+        auto geoBufferSet = mGeo.GetBufferSets().back().get();
 
         for(auto& mesh : mIndexBindings.Meshes)
         {
@@ -113,7 +113,7 @@ namespace hsk {
                                                 .Normal        = lGetNormal ? lGetNormal(vertexIndex) : glm::vec3(0.f, 1.f, 0.f),
                                                 .Tangent       = lGetTangent ? lGetTangent(vertexIndex) : glm::vec3(0.f, 0.f, 1.f),
                                                 .Uv            = lGetUv ? lGetUv(vertexIndex) : glm::vec2(),
-                                                .MaterialIndex = gltfPrimitive.material});
+                                                .MaterialIndex = gltfPrimitive.material + mIndexBindings.MaterialBufferOffset});
             }
 
             if(gltfPrimitive.indices >= 0)

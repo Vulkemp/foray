@@ -51,6 +51,9 @@ namespace hsk {
         {
             mRootNodes.push_back(node);
         }
+        else{
+            parent->GetChildren().push_back(node);
+        }
         return node;
     }
 

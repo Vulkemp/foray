@@ -54,8 +54,8 @@ namespace hsk {
 
         logger()->info("Model Load: Preparing scene buffers ...");
 
-        mIndexBindings.NodeBufferOffset = mScene->GetNodeBuffer().size();
-        mScene->GetNodeBuffer().resize(mIndexBindings.NodeBufferOffset + mGltfModel.nodes.size());
+        mScene->GetNodeBuffer().reserve(mGltfModel.nodes.size());
+        mIndexBindings.Nodes.resize(mGltfModel.nodes.size());
 
         mIndexBindings.MaterialBufferOffset = mMaterialBuffer.GetVector().size();
         mMaterialBuffer.GetVector().resize(mIndexBindings.MaterialBufferOffset + mGltfModel.materials.size());
@@ -104,23 +104,21 @@ namespace hsk {
 
     void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, Node* parent)
     {
-        int32_t nodeBufferIndex = mIndexBindings.NodeBufferOffset + currentIndex;
-        auto&   bufferUniquePtr = mScene->GetNodeBuffer()[nodeBufferIndex];
-        if(bufferUniquePtr)
-        {
+        Node*& node = mIndexBindings.Nodes[currentIndex];
+
+        if (node){
             return;
         }
+
         auto& gltfNode  = mGltfModel.nodes[currentIndex];
-        bufferUniquePtr = std::make_unique<Node>(mScene, parent);
-        auto node       = bufferUniquePtr.get();
+        node = mScene->MakeNode(parent);
+
         if(!parent)
         {
             mScene->GetRootNodes().push_back(node);
         }
 
-        bool markStatic = true;
-
-        InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale, markStatic);
+        InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
 
         if(gltfNode.mesh >= 0)
         {
@@ -140,8 +138,7 @@ namespace hsk {
                                                const std::vector<double>& matrix,
                                                const std::vector<double>& translation,
                                                const std::vector<double>& rotation,
-                                               const std::vector<double>& scale,
-                                               bool                       markStatic)
+                                               const std::vector<double>& scale)
     {
         if(matrix.size() > 0)
         {
@@ -200,6 +197,7 @@ namespace hsk {
         }
         if(!translation.size() && !scale.size() && !rotation.size())
         {
+            // Set it static so that the local transform never is updated
             transform->SetStatic(true);
         }
     }

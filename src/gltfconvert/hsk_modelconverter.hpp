@@ -29,10 +29,11 @@ namespace hsk {
         std::vector<NVertex>  mVertexBuffer = {};
         std::vector<uint32_t> mIndexBuffer  = {};
 
+        /// @brief Variables which determine how to map gltf-model indices to scene indices/pointers
         struct IndexBindings
         {
             /// @brief Offset for translating gltfModel node index -> scene node buffer index
-            int32_t NodeBufferOffset;
+            std::vector<Node*> Nodes;
             /// @brief Offset for translating gltfModel material index -> scene material buffer index
             int32_t MaterialBufferOffset;
             /// @brief Vector mapping gltfModel mesh index to Mesh*
@@ -61,8 +62,7 @@ namespace hsk {
                                    const std::vector<double>& matrix,
                                    const std::vector<double>& translation,
                                    const std::vector<double>& rotation,
-                                   const std::vector<double>& scale,
-                                   bool markStatic);
+                                   const std::vector<double>& scale);
 
         void BuildGeometryBuffer();
         void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives);
