@@ -65,6 +65,10 @@ namespace hsk {
 #endif
         }
 
+        VkPhysicalDeviceFeatures deviceFeatures{};
+        deviceFeatures.samplerAnisotropy = VK_TRUE;
+        pds.set_required_features(deviceFeatures);
+
         // allow user to alter phyiscal device selection
         BeforePhysicalDeviceSelection(pds);
 
@@ -108,6 +112,7 @@ namespace hsk {
             mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
             mDeviceFeatures.difeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
             deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
+            
 
             // This currently causes a segfault, so commented out for the time being
 

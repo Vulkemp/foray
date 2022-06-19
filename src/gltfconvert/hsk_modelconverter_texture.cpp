@@ -80,7 +80,7 @@ namespace hsk {
             imageCI.ImageViewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             imageCI.ImageViewCI.subresourceRange.layerCount = 1;
             imageCI.ImageViewCI.subresourceRange.levelCount = mipLevelCount;
-            imageCI.Name = textureName;
+            imageCI.Name                                    = textureName;
 
             sampledTexture.Image->Create(mContext, imageCI);
             sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -153,12 +153,21 @@ namespace hsk {
 
             cmdBuf.Submit();
 
-            VkSamplerCreateInfo samplerCI{.sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-                                          .magFilter    = VkFilter::VK_FILTER_LINEAR,
-                                          .minFilter    = VkFilter::VK_FILTER_LINEAR,
-                                          .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT};
+            VkSamplerCreateInfo samplerCI
+            {
+                .sType = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO, .magFilter = VkFilter::VK_FILTER_LINEAR, .minFilter = VkFilter::VK_FILTER_LINEAR,
+                .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT, .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT, 
+                .mipLodBias = 0.5f,
+                .anisotropyEnable = VK_TRUE,
+                .maxAnisotropy = 4,
+                .compareEnable = VK_FALSE,
+                .compareOp = {},
+                .minLod = 0,
+                .maxLod = VK_LOD_CLAMP_NONE,
+                .borderColor = {},
+                .unnormalizedCoordinates = VK_FALSE
+            };
             if(gltfTexture.sampler >= 0)
             {
                 TranslateSampler(mGltfModel.samplers[gltfTexture.sampler], samplerCI);

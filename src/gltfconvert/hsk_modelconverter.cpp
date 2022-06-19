@@ -99,6 +99,8 @@ namespace hsk {
 
         InitialUpdate();
 
+        Reset();
+
         logger()->info("Model Load: Done");
     }
 
@@ -211,5 +213,14 @@ namespace hsk {
 
         mMaterialBuffer.UpdateDeviceLocal();
         mTransformBuffer.Resize(mNextMeshInstanceIndex);
+    }
+
+    void ModelConverter::Reset(){
+        mGltfScene = nullptr;
+        mGltfModel = tinygltf::Model();
+        mIndexBindings = {};
+        mNextMeshInstanceIndex = 0;
+        mVertexBuffer.clear();
+        mIndexBuffer.clear();
     }
 }  // namespace hsk

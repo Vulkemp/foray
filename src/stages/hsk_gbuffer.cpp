@@ -278,7 +278,7 @@ namespace hsk {
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
 
         // vertex layout
-        NVertexInputStateBuilder vertexInputStateBuilder;
+        VertexInputStateBuilder vertexInputStateBuilder;
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Position);
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Normal);
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Tangent);

@@ -26,7 +26,7 @@ namespace hsk {
 
         // Temporary structures
 
-        std::vector<NVertex>  mVertexBuffer = {};
+        std::vector<Vertex>  mVertexBuffer = {};
         std::vector<uint32_t> mIndexBuffer  = {};
 
         /// @brief Variables which determine how to map gltf-model indices to scene indices/pointers
@@ -72,5 +72,7 @@ namespace hsk {
         void LoadMaterials();
 
         void InitialUpdate();
+
+        void Reset();
     };
 }  // namespace hsk

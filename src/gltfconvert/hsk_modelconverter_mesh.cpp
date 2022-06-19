@@ -109,7 +109,7 @@ namespace hsk {
 
             for(int32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
             {
-                mVertexBuffer.push_back(NVertex{.Pos           = lGetPosition ? lGetPosition(vertexIndex) : glm::vec3(),
+                mVertexBuffer.push_back(Vertex{.Pos           = lGetPosition ? lGetPosition(vertexIndex) : glm::vec3(),
                                                 .Normal        = lGetNormal ? lGetNormal(vertexIndex) : glm::vec3(0.f, 1.f, 0.f),
                                                 .Tangent       = lGetTangent ? lGetTangent(vertexIndex) : glm::vec3(0.f, 0.f, 1.f),
                                                 .Uv            = lGetUv ? lGetUv(vertexIndex) : glm::vec2(),

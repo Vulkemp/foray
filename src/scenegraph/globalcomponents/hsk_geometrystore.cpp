@@ -43,11 +43,11 @@ namespace hsk {
 
     GeometryStore::GeometryStore() {}
 
-    void GeometryBufferSet::Init(const VkContext* context, const std::vector<NVertex>& vertices, const std::vector<uint32_t>& indices)
+    void GeometryBufferSet::Init(const VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
         if(vertices.size())
         {
-            VkDeviceSize bufferSize = vertices.size() * sizeof(NVertex);
+            VkDeviceSize bufferSize = vertices.size() * sizeof(Vertex);
             mVertices.Create(context, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mVertices.WriteDataDeviceLocal(vertices.data(), bufferSize);
         }

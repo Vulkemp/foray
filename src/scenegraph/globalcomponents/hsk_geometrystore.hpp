@@ -49,7 +49,7 @@ namespace hsk {
         HSK_PROPERTY_ALL(Indices)
         HSK_PROPERTY_ALL(Vertices)
 
-        void Init(const VkContext* context, const std::vector<NVertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
+        void Init(const VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
 
         virtual bool CmdBindBuffers(VkCommandBuffer commandBuffer);
 
