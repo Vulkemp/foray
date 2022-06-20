@@ -1,4 +1,4 @@
-#include "../memory/hsk_singletimecommandbuffer.hpp"
+#include "../memory/hsk_commandbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
 #include "hsk_modelconverter.hpp"
 #include <spdlog/fmt/fmt.h>
@@ -85,7 +85,7 @@ namespace hsk {
             sampledTexture.Image->Create(mContext, imageCI);
             sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-            SingleTimeCommandBuffer cmdBuf;
+            CommandBuffer cmdBuf;
             cmdBuf.Create(mContext, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
             for(int32_t i = 0; i < mipLevelCount - 1; i++)

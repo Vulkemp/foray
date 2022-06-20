@@ -24,18 +24,12 @@ namespace hsk {
         HSK_PROPERTY_ALL(FrameObjectsIndex)
         HSK_PROPERTY_ALL(CommandBuffer)
 
-        FrameRenderInfo(VkImage& primaryOutput, VkImage& comparisonOutput) : FrameUpdateInfo(), mPrimaryOutputImage(primaryOutput), mComparisonOutputImage(comparisonOutput) {}
-
-        FrameRenderInfo& SetPrimaryOutput(VkImage image) { mPrimaryOutputImage = image; return *this; }
-        FrameRenderInfo& SetComparisonOutput(VkImage image) { mComparisonOutputImage = image; return *this; }
+        FrameRenderInfo() : FrameUpdateInfo() {}
 
       protected:
         /// @brief Index of in-flight frame synchronisation objects this frame is using
         uint32_t mFrameObjectsIndex = 0;
         /// @brief Render command buffer (do not initialize, reset or finalize it!)
         VkCommandBuffer mCommandBuffer = nullptr;
-
-        VkImage& mPrimaryOutputImage;
-        VkImage& mComparisonOutputImage;
     };
 }  // namespace hsk

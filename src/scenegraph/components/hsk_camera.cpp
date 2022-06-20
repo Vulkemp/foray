@@ -31,7 +31,9 @@ namespace hsk {
 
     void Camera::SetViewMatrix()
     {
-        mUbo.GetUbo().ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
+        auto& ubo = mUbo.GetUbo();
+        ubo.ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
+        ubo.ProjectionViewMatrix = ubo.ProjectionMatrix * ubo.ViewMatrix;
     }
 
     void Camera::SetProjectionMatrix()
@@ -53,7 +55,9 @@ namespace hsk {
         {
             mFar = 10000.f;
         }
-        mUbo.GetUbo().ProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
+        auto& ubo = mUbo.GetUbo();
+        ubo.ProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
+        ubo.ProjectionViewMatrix = ubo.ProjectionMatrix * ubo.ViewMatrix;
     }
 
     void Camera::SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up)

@@ -1,6 +1,6 @@
 #include "hsk_managedbuffer.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "hsk_singletimecommandbuffer.hpp"
+#include "hsk_commandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
 #include "../utility/hsk_fmtutilities.hpp"
 #include <spdlog/fmt/fmt.h>
@@ -122,7 +122,7 @@ namespace hsk {
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data);
 
-        SingleTimeCommandBuffer singleTimeCmdBuf;
+        CommandBuffer singleTimeCmdBuf;
         VkCommandBuffer         commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copy{};

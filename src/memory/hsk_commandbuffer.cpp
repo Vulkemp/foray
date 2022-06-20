@@ -1,9 +1,9 @@
-#include "hsk_singletimecommandbuffer.hpp"
+#include "hsk_commandbuffer.hpp"
 #include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
 
-    VkCommandBuffer SingleTimeCommandBuffer::Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+    VkCommandBuffer CommandBuffer::Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
     {
         mContext = context;
         VkCommandBufferAllocateInfo cmdBufAllocateInfo{};
@@ -31,14 +31,14 @@ namespace hsk {
         return mCommandBuffer;
     }
 
-    void SingleTimeCommandBuffer::Begin()
+    void CommandBuffer::Begin()
     {
         VkCommandBufferBeginInfo commandBufferBI{};
         commandBufferBI.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         AssertVkResult(vkBeginCommandBuffer(mCommandBuffer, &commandBufferBI));
     }
 
-    void SingleTimeCommandBuffer::Submit(bool fireAndForget)
+    void CommandBuffer::Submit(bool fireAndForget)
     {
         AssertVkResult(vkEndCommandBuffer(mCommandBuffer));
 
@@ -57,13 +57,13 @@ namespace hsk {
         }
     }
 
-    void SingleTimeCommandBuffer::FlushAndReset()
+    void CommandBuffer::FlushAndReset()
     {
         Submit();
         AssertVkResult(vkResetCommandBuffer(mCommandBuffer, 0));
     }
 
-    void SingleTimeCommandBuffer::WaitForCompletion()
+    void CommandBuffer::WaitForCompletion()
     {
         if(!mFence || !mCommandBuffer)
         {
@@ -73,7 +73,7 @@ namespace hsk {
         AssertVkResult(vkWaitForFences(mContext->Device, 1, &mFence, VK_TRUE, 100000000000));
         AssertVkResult(vkResetFences(mContext->Device, 1, &mFence));
     }
-    void SingleTimeCommandBuffer::Cleanup()
+    void CommandBuffer::Cleanup()
     {
         if(mCommandBuffer)
         {

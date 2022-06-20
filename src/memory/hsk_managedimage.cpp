@@ -2,7 +2,7 @@
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_fmtutilities.hpp"
 #include "hsk_managedbuffer.hpp"
-#include "hsk_singletimecommandbuffer.hpp"
+#include "hsk_commandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
 
 namespace hsk {
@@ -152,7 +152,7 @@ namespace hsk {
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data);
 
-        SingleTimeCommandBuffer singleTimeCmdBuf;
+        CommandBuffer singleTimeCmdBuf;
         singleTimeCmdBuf.Create(mContext);
         singleTimeCmdBuf.Begin();
 

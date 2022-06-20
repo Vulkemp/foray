@@ -36,11 +36,10 @@ void main()
 	mat4 ModelMatPrev = transformState.PreviousModelMatrix;
 
 	// Get transformations out of the way
-	outWorldPos = inPos;
-	//outDevicePos = ProjMat * ViewMat * PushConstant.ModelMatrix * vec4(inPos, 1.f);
-	outDevicePos = ProjMat * ViewMat * ModelMat * vec4(inPos, 1.f);
+	outWorldPos = (ModelMat * vec4(inPos, 1.f)).xyz;
+	outDevicePos = Camera.ProjectionViewMatrix * ModelMat * vec4(inPos, 1.f);
 	gl_Position = outDevicePos;
-	outOldDevicePos = ProjMatPrev * ViewMatPrev * ModelMatPrev * vec4(inPos, 1.f);
+	outOldDevicePos = Camera.PreviousProjectionViewMatrix * ModelMatPrev * vec4(inPos, 1.f);
 
 	outUV = inUV;
 

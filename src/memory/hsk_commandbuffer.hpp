@@ -5,11 +5,11 @@
 
 namespace hsk {
 
-    class SingleTimeCommandBuffer : public DeviceResourceBase
+    class CommandBuffer : public DeviceResourceBase
     {
       public:
-        SingleTimeCommandBuffer() = default;
-        inline virtual ~SingleTimeCommandBuffer() { Cleanup(); }
+        CommandBuffer() = default;
+        inline virtual ~CommandBuffer() { Cleanup(); }
 
         VkCommandBuffer Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
         void            Begin();

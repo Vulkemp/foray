@@ -16,8 +16,8 @@ namespace hsk {
         BaseInitCompileShaders();
 
         // create a window and add its requried instance extensions to the instance builder
-        mWindow.Create();
-        auto vulkanSurfaceExtensions = mWindow.GetVkSurfaceExtensions();
+        mDisplayConfig.Window.Create();
+        auto vulkanSurfaceExtensions = mDisplayConfig.Window.GetVkSurfaceExtensions();
         for(const char* extension : vulkanSurfaceExtensions)
         {
             mVkbInstanceBuilder.enable_extension(extension);
@@ -29,7 +29,7 @@ namespace hsk {
         MinimalAppBase::BaseInit();
 
         // get vulkan surface handle with created instance
-        mSurface = mWindow.GetSurfaceKHR(mInstance);
+        mDisplayConfig.Surface = mDisplayConfig.Window.GetSurfaceKHR(mInstance);
 
         BaseInitSelectPhysicalDevice();
         BaseInitBuildDevice();
@@ -43,13 +43,13 @@ namespace hsk {
     void DefaultAppBase::BaseInitSelectPhysicalDevice()
     {
         // create physical device selector
-        vkb::PhysicalDeviceSelector pds(mInstanceVkb, mSurface);
+        vkb::PhysicalDeviceSelector pds(mInstanceVkb, mDisplayConfig.Surface);
 
         {  // Configure device selector
 
             // Require capability to present to the current windows surface
             pds.require_present();
-            pds.set_surface(mSurface);
+            pds.set_surface(mDisplayConfig.Surface);
 
             //// Basic minimums for raytracing
 #ifndef DISABLE_RT_EXTENSIONS
@@ -76,15 +76,15 @@ namespace hsk {
         auto physicalDeviceSelectionReturn = pds.select();
         HSK_ASSERTFMT(physicalDeviceSelectionReturn, "Physical device creation: {}", physicalDeviceSelectionReturn.error().message().c_str())
 
-        mPhysicalDeviceVkb      = physicalDeviceSelectionReturn.value();
-        mPhysicalDevice         = mPhysicalDeviceVkb.physical_device;
-        mContext.PhysicalDevice = mPhysicalDevice;
+        mDeviceConfig.PhysicalDeviceVkb      = physicalDeviceSelectionReturn.value();
+        mDeviceConfig.PhysicalDevice         = mDeviceConfig.PhysicalDeviceVkb.physical_device;
+        mContext.PhysicalDevice = mDeviceConfig.PhysicalDevice;
     }
 
     void DefaultAppBase::BaseInitBuildDevice()
     {
         // create logical device builder
-        vkb::DeviceBuilder deviceBuilder{mPhysicalDeviceVkb};
+        vkb::DeviceBuilder deviceBuilder{mDeviceConfig.PhysicalDeviceVkb};
 
         {  // Configure logical device builder
 
@@ -132,15 +132,15 @@ namespace hsk {
         // automatically propagate needed data from instance & physical device
         auto deviceBuilderReturn = deviceBuilder.build();
         HSK_ASSERTFMT(deviceBuilderReturn, "Device creation: {}", deviceBuilderReturn.error().message())
-        mDeviceVkb      = deviceBuilderReturn.value();
-        mDevice         = mDeviceVkb.device;
-        mContext.Device = mDeviceVkb.device;
-        mContext.DispatchTable = mDeviceVkb.make_table();
+        mDeviceConfig.DeviceVkb      = deviceBuilderReturn.value();
+        mDeviceConfig.Device         = mDeviceConfig.DeviceVkb.device;
+        mContext.Device = mDeviceConfig.DeviceVkb.device;
+        mContext.DispatchTable = mDeviceConfig.DeviceVkb.make_table();
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()
     {
-        vkb::SwapchainBuilder swapchainBuilder(mDeviceVkb, mSurface);
+        vkb::SwapchainBuilder swapchainBuilder(mDeviceConfig.DeviceVkb, mDisplayConfig.Surface);
 
         // default swapchain image formats:
         // color format: VK_FORMAT_B8G8R8A8_SRGB
@@ -165,34 +165,34 @@ namespace hsk {
 
         HSK_ASSERTFMT(swapchainBuilderReturn, "Swapchain building: {}", swapchainBuilderReturn.error().message())
 
-        mSwapchainVkb      = swapchainBuilderReturn.value();
-        mSwapchain         = mSwapchainVkb.swapchain;
-        mContext.Swapchain = mSwapchainVkb;
+        mDisplayConfig.SwapchainVkb      = swapchainBuilderReturn.value();
+        mDisplayConfig.Swapchain         = mDisplayConfig.SwapchainVkb.swapchain;
+        mContext.Swapchain = mDisplayConfig.SwapchainVkb;
 
-        auto images     = mSwapchainVkb.get_images();
-        auto imageviews = mSwapchainVkb.get_image_views();
+        auto images     = mDisplayConfig.SwapchainVkb.get_images();
+        auto imageviews = mDisplayConfig.SwapchainVkb.get_image_views();
         Assert(images.has_value(), "Failed to acquire swapchain images!");
         Assert(imageviews.has_value(), "Failed to acquire swapchain image views!");
-        mSwapchainImages.resize(mSwapchainVkb.image_count);
-        for(uint32_t i = 0; i < mSwapchainImages.size(); i++)
+        mDisplayConfig.SwapchainImages.resize(mDisplayConfig.SwapchainVkb.image_count);
+        for(uint32_t i = 0; i < mDisplayConfig.SwapchainImages.size(); i++)
         {
-            mSwapchainImages[i] = SwapchainImage{images.value()[i], imageviews.value()[i]};
+            mDisplayConfig.SwapchainImages[i] = SwapchainImage{images.value()[i], imageviews.value()[i]};
         }
     }
 
     void DefaultAppBase::BaseInitGetVkQueues()
     {
         // Get the graphics queue with a helper function
-        auto defaultQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::graphics);
+        auto defaultQueueReturn = mDeviceConfig.DeviceVkb.get_queue(vkb::QueueType::graphics);
         HSK_ASSERTFMT(defaultQueueReturn, "Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message())
 
         mDefaultQueue.Queue            = defaultQueueReturn.value();
-        mDefaultQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
+        mDefaultQueue.QueueFamilyIndex = mDeviceConfig.DeviceVkb.get_queue_index(vkb::QueueType::graphics).value();
 
-        auto presentQueueReturn = mDeviceVkb.get_queue(vkb::QueueType::present);
+        auto presentQueueReturn = mDeviceConfig.DeviceVkb.get_queue(vkb::QueueType::present);
         HSK_ASSERTFMT(presentQueueReturn, "Failed to get graphics queue. Error: {} ", presentQueueReturn.error().message())
         mPresentQueue.Queue            = presentQueueReturn.value();
-        mPresentQueue.QueueFamilyIndex = mDeviceVkb.get_queue_index(vkb::QueueType::present).value();
+        mPresentQueue.QueueFamilyIndex = mDeviceConfig.DeviceVkb.get_queue_index(vkb::QueueType::present).value();
 
         mContext.TransferQueue = mDefaultQueue.Queue;  // TODO: FIX ME: use a dedicated transfer queue in some cases?
         mContext.QueueGraphics = mDefaultQueue.Queue;
@@ -207,7 +207,7 @@ namespace hsk {
         poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
         poolInfo.queueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
 
-        AssertVkResult(vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPoolDefault));
+        AssertVkResult(vkCreateCommandPool(mDeviceConfig.Device, &poolInfo, nullptr, &mCommandPoolDefault));
         mContext.CommandPool = mCommandPoolDefault;
 
         mContext.TransferCommandPool = mCommandPoolDefault;  // TODO: FIX ME: dedicated transfer command pool in some cases?
@@ -221,8 +221,8 @@ namespace hsk {
 
         VmaAllocatorCreateInfo allocatorCreateInfo = {};
         allocatorCreateInfo.vulkanApiVersion       = VK_API_VERSION_1_2;
-        allocatorCreateInfo.physicalDevice         = mPhysicalDevice;
-        allocatorCreateInfo.device                 = mDevice;
+        allocatorCreateInfo.physicalDevice         = mDeviceConfig.PhysicalDevice;
+        allocatorCreateInfo.device                 = mDeviceConfig.Device;
         allocatorCreateInfo.instance               = mInstance;
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
@@ -232,24 +232,27 @@ namespace hsk {
 
     void DefaultAppBase::BaseInitCompileShaders()
     {
+        if (!mShaderCompilerConfig.EnableShaderCompiler){
+            return;
+        }
         logger()->info("Compiling shaders...");
-        std::string shaderSourceDirectory = CurrentWorkingDirectory() + mShaderSubdir;
+        std::string shaderSourceDirectory = CurrentWorkingDirectory() + mShaderCompilerConfig.ShaderSubdir;
         std::string shaderOutputDirectory = shaderSourceDirectory;
-        if(mShaderSourceDirectoryPathFull.length() > 0)
+        if(mShaderCompilerConfig.ShaderSourceDirectoryPathFull.length() > 0)
         {
 
-            shaderSourceDirectory = mShaderSourceDirectoryPathFull;
+            shaderSourceDirectory = mShaderCompilerConfig.ShaderSourceDirectoryPathFull;
         }
 
-        if(mShaderOutputDirectoryPathFull.length() > 0)
+        if(mShaderCompilerConfig.ShaderOutputDirectoryPathFull.length() > 0)
         {
 
-            shaderOutputDirectory = mShaderOutputDirectoryPathFull;
+            shaderOutputDirectory = mShaderCompilerConfig.ShaderOutputDirectoryPathFull;
         }
 
-        mShaderCompiler.AddSourceDirectory(CurrentWorkingDirectory() + "/../hsk_rt_rpf/src/shaders");
-        mShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
-        mShaderCompiler.CompileAll();
+        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(CurrentWorkingDirectory() + "/../hsk_rt_rpf/src/shaders");
+        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
+        mShaderCompilerConfig.ShaderCompiler.CompileAll();
         logger()->info("Compiling shaders successfully finished!");
     }
 
@@ -266,17 +269,17 @@ namespace hsk {
 
         // auto images     = mSwapchainVkb.get_images().value();
         // auto imageviews = mSwapchainVkb.get_image_views().value();
-        for(uint32_t i = 0; i < mSwapchainVkb.image_count; i++)
+        for(uint32_t i = 0; i < 1; i++)
         {
             InFlightFrame target{};
             // target.Image         = images[i];
             // target.ImageView     = imageviews[i];
-            target.CommandBuffer = CreateCommandBuffer(mDevice, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
+            target.CommandBuffer = CreateCommandBuffer(mDeviceConfig.Device, mCommandPoolDefault, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
 
-            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
-            AssertVkResult(vkCreateSemaphore(mDevice, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
+            AssertVkResult(vkCreateSemaphore(mDeviceConfig.Device, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
+            AssertVkResult(vkCreateSemaphore(mDeviceConfig.Device, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
 
-            AssertVkResult(vkCreateFence(mDevice, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
+            AssertVkResult(vkCreateFence(mDeviceConfig.Device, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
 
             mFrames.push_back(std::move(target));
         }
@@ -284,55 +287,55 @@ namespace hsk {
 
     void DefaultAppBase::BaseCleanupVulkan()
     {
-        AssertVkResult(vkDeviceWaitIdle(mDevice));
+        AssertVkResult(vkDeviceWaitIdle(mDeviceConfig.Device));
 
-        vkDestroyCommandPool(mDevice, mCommandPoolDefault, nullptr);
+        vkDestroyCommandPool(mDeviceConfig.Device, mCommandPoolDefault, nullptr);
         for(auto& target : mFrames)
         {
-            vkDestroySemaphore(mDevice, target.ImageAvailableSemaphore, nullptr);
-            vkDestroySemaphore(mDevice, target.RenderFinishedSemaphore, nullptr);
-            vkDestroyFence(mDevice, target.CommandBufferExecutedFence, nullptr);
+            vkDestroySemaphore(mDeviceConfig.Device, target.ImageAvailableSemaphore, nullptr);
+            vkDestroySemaphore(mDeviceConfig.Device, target.RenderFinishedSemaphore, nullptr);
+            vkDestroyFence(mDeviceConfig.Device, target.CommandBufferExecutedFence, nullptr);
         }
 
         BaseCleanupSwapchain();
         vmaDestroyAllocator(mAllocator);
-        vkb::destroy_device(mDeviceVkb);
-        mDeviceVkb = vkb::Device{};
-        mDevice    = nullptr;
-        vkb::destroy_surface(mInstanceVkb, mSurface);
-        mSurface = nullptr;
-        mWindow.Destroy();
+        vkb::destroy_device(mDeviceConfig.DeviceVkb);
+        mDeviceConfig.DeviceVkb = vkb::Device{};
+        mDeviceConfig.Device    = nullptr;
+        vkb::destroy_surface(mInstanceVkb, mDisplayConfig.Surface);
+        mDisplayConfig.Surface = nullptr;
+        mDisplayConfig.Window.Destroy();
         mAllocator = nullptr;
         MinimalAppBase::BaseCleanupVulkan();
     }
 
     void DefaultAppBase::BaseCleanupSwapchain()
     {
-        for(auto& image : mSwapchainImages)
+        for(auto& image : mDisplayConfig.SwapchainImages)
         {
-            vkDestroyImageView(mDevice, image.ImageView, nullptr);
+            vkDestroyImageView(mDeviceConfig.Device, image.ImageView, nullptr);
             // vkDestroyImage(mDevice, image.Image, nullptr); Do not destroy images from swapchain
         }
-        mSwapchainImages.resize(0);
-        vkb::destroy_swapchain(mSwapchainVkb);
-        mSwapchainVkb = vkb::Swapchain{};
-        mSwapchain    = nullptr;
+        mDisplayConfig.SwapchainImages.resize(0);
+        vkb::destroy_swapchain(mDisplayConfig.SwapchainVkb);
+        mDisplayConfig.SwapchainVkb = vkb::Swapchain{};
+        mDisplayConfig.Swapchain    = nullptr;
     }
 
     void DefaultAppBase::RecreateSwapchain()
     {
-        AssertVkResult(vkDeviceWaitIdle(mDevice));
+        AssertVkResult(vkDeviceWaitIdle(mDeviceConfig.Device));
 
         BaseCleanupSwapchain();
 
-        if(!mWindow.Exists())
+        if(!mDisplayConfig.Window.Exists())
         {
             return;
         }
 
         BaseInitBuildSwapchain();
 
-        OnResized(mSwapchainVkb.extent);
+        OnResized(mDisplayConfig.SwapchainVkb.extent);
     }
 
     void DefaultAppBase::Render(float delta)
@@ -340,14 +343,14 @@ namespace hsk {
         InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
 
         // Make sure that the command buffer we want to use has been presented to the GPU
-        vkWaitForFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
+        vkWaitForFences(mDeviceConfig.Device, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
 
         VkImage primaryOutput    = nullptr;
         VkImage comparisonOutput = nullptr;
 
         // Record Render Command buffer
 
-        FrameRenderInfo renderInfo(primaryOutput, comparisonOutput);
+        FrameRenderInfo renderInfo;
         renderInfo.SetCommandBuffer(currentFrame.CommandBuffer).SetFrameObjectsIndex(mCurrentFrameIndex).SetFrameNumber(mRenderedFrameCount).SetFrameTime(delta);
 
         AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
@@ -362,7 +365,7 @@ namespace hsk {
 
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        VkResult result              = vkAcquireNextImageKHR(mDevice, mSwapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+        VkResult result              = vkAcquireNextImageKHR(mDeviceConfig.Device, mDisplayConfig.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -376,7 +379,7 @@ namespace hsk {
         }
 
         // Reset the fence
-        AssertVkResult(vkResetFences(mDevice, 1, &currentFrame.CommandBufferExecutedFence));
+        AssertVkResult(vkResetFences(mDeviceConfig.Device, 1, &currentFrame.CommandBufferExecutedFence));
 
         // Record Command Buffer
 
@@ -398,14 +401,14 @@ namespace hsk {
         barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         barrier.srcQueueFamilyIndex = mPresentQueue.QueueFamilyIndex;
         barrier.dstQueueFamilyIndex = mDefaultQueue.QueueFamilyIndex;
-        barrier.image               = mSwapchainImages[swapChainImageIndex].Image;
+        barrier.image               = mDisplayConfig.SwapchainImages[swapChainImageIndex].Image;
 
         vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
                              nullptr, 0, nullptr, 1, &barrier);
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
-        vkCmdClearColorImage(currentFrame.CommandBuffer, mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
+        vkCmdClearColorImage(currentFrame.CommandBuffer, mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
 
         if(mSwapchainCopySourceImage)
         {
@@ -433,13 +436,13 @@ namespace hsk {
             VkImageBlit blitRegion    = {};
             blitRegion.srcSubresource = layers;
             blitRegion.srcOffsets[0]  = {};
-            blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 1};
+            blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mDisplayConfig.SwapchainVkb.extent.width, .y = (int32_t)mDisplayConfig.SwapchainVkb.extent.height, .z = 1};
             blitRegion.dstSubresource = layers;
             blitRegion.dstOffsets[1]  = {.z = 1};
-            blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mSwapchainVkb.extent.width, .y = (int32_t)mSwapchainVkb.extent.height, .z = 0};
+            blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mDisplayConfig.SwapchainVkb.extent.width, .y = (int32_t)mDisplayConfig.SwapchainVkb.extent.height, .z = 0};
 
             vkCmdBlitImage(currentFrame.CommandBuffer, mSwapchainCopySourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                           mSwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
+                           mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
         }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue
@@ -483,7 +486,7 @@ namespace hsk {
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores    = presentSemaphores;
 
-        VkSwapchainKHR swapChains[] = {mSwapchain};
+        VkSwapchainKHR swapChains[] = {mDisplayConfig.Swapchain};
         presentInfo.swapchainCount  = 1;
         presentInfo.pSwapchains     = swapChains;
 

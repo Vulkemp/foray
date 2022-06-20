@@ -1,11 +1,11 @@
 #pragma once
+#include "../memory/hsk_managedimage.hpp"
 #include "../osi/hsk_window.hpp"
 #include "hsk_framerenderinfo.hpp"
 #include "hsk_minimalappbase.hpp"
 #include "hsk_shadercompiler.hpp"
-#include "../memory/hsk_managedimage.hpp"
-#include <vma/vk_mem_alloc.h>
 #include "hsk_vkcontext.hpp"
+#include <vma/vk_mem_alloc.h>
 
 namespace hsk {
 
@@ -16,14 +16,6 @@ namespace hsk {
         DefaultAppBase()          = default;
         virtual ~DefaultAppBase() = default;
 
-        inline hsk::Window&         Window() { return mWindow; }
-        inline VkSurfaceKHR         Surface() { return mSurface; }
-        inline vkb::PhysicalDevice& PhysicalDeviceVkb() { return mPhysicalDeviceVkb; }
-        inline VkPhysicalDevice     PhysicalDevice() { return mPhysicalDevice; }
-        inline vkb::Device&         DeviceVkb() { return mDeviceVkb; }
-        inline VkDevice             Device() { return mDevice; }
-        inline vkb::Swapchain&      SwapchainVkb() { return mSwapchainVkb; }
-        inline VkSwapchainKHR       Swapchain() { return mSwapchain; }
 
         struct QueueInfo
         {
@@ -82,35 +74,42 @@ namespace hsk {
         inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}
         virtual void        BaseSubmitFrame();
 
-        /// @brief The main window used for rendering.
-        hsk::Window mWindow;
+        struct DisplayConfig
+        {
+            hsk::Window                 Window       = {};
+            VkSurfaceKHR                Surface      = {};
+            vkb::Swapchain              SwapchainVkb = {};
+            VkSwapchainKHR              Swapchain  = {};
+            std::vector<SwapchainImage> SwapchainImages{};
+        } mDisplayConfig;
 
-        /// @brief If true, the app will try to automatically compile any shaders source files into spirv.
-        bool mCompileShaders = true;
-        /// @brief By default, shader source files are searched in the current working directory "cwd"/shaders.
-        std::string mShaderSubdir{"/shaders/"};
-        /// @brief If mShaderSourceDirectoryPathFull is set to value, this path will be used as source dir.
-        std::string mShaderSourceDirectoryPathFull;
-        /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
-        std::string mShaderOutputDirectoryPathFull;
-        /// @brief The shader compiler. See shader compiler options for further configuration.
-        ShaderCompiler mShaderCompiler;
+        struct DeviceConfig
+        {
+            vkb::PhysicalDevice PhysicalDeviceVkb = {};
+            VkPhysicalDevice    PhysicalDevice  = {};
+            vkb::Device         DeviceVkb         = {};
+            VkDevice            Device          = {};
+        } mDeviceConfig;
+
+        struct ShaderCompilerconfig
+        {
+            bool EnableShaderCompiler = true;
+            /// @brief By default, shader source files are searched in the current working directory "cwd"/shaders.
+            std::string ShaderSubdir = "/shaders/";
+            /// @brief If mShaderSourceDirectoryPathFull is set to value, this path will be used as source dir.
+            std::string ShaderSourceDirectoryPathFull = {};
+            /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
+            std::string ShaderOutputDirectoryPathFull = {};
+            /// @brief The shader compiler. See shader compiler options for further configuration.
+            hsk::ShaderCompiler ShaderCompiler = {};
+        } mShaderCompilerConfig;
+
+        FrameRenderInfo mRenderInfo{};
 
 #pragma region Vulkan
         /// @brief The applications vulkan context.
-        VkContext    mContext;
+        VkContext mContext;
 
-        VkSurfaceKHR mSurface{};
-
-        vkb::PhysicalDevice mPhysicalDeviceVkb{};
-        VkPhysicalDevice    mPhysicalDevice{};
-
-        vkb::Device mDeviceVkb{};
-        VkDevice    mDevice{};
-
-        vkb::Swapchain              mSwapchainVkb{};
-        VkSwapchainKHR              mSwapchain{};
-        std::vector<SwapchainImage> mSwapchainImages{};
 
         std::vector<InFlightFrame> mFrames{};
         uint32_t                   mCurrentFrameIndex  = 0;
@@ -123,6 +122,13 @@ namespace hsk {
             VkPhysicalDeviceAccelerationStructureFeaturesKHR asfeatures;
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    difeatures;
         } mDeviceFeatures = {};
+
+        struct SyncConfig
+        {
+            VkSemaphore ImageAvailableSemaphore{};
+            VkSemaphore RenderFinishedSemaphore{};
+            VkFence     CommandBufferExecutedFence{};
+        } mSyncConfig;
 
         /// @brief Assuming the default queue supports graphics, transfer and compute. (TODO: are we sure, we don't need dedicated queues? For example dedicated transfer queues for asynchronous transfers)
         QueueInfo mDefaultQueue{};
