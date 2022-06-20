@@ -8,10 +8,9 @@ namespace hsk {
         RenderStage::Destroy();
     }
 
-    void RasterizedRenderStage::DestroyFixedComponents(){
-
-    }
-    void RasterizedRenderStage::DestroyResolutionDependentComponents() {
-
+    void RasterizedRenderStage::OnResized(const VkExtent2D& extent)
+    {
+        DestroyResolutionDependentComponents();
+        CreateResolutionDependentComponents();
     }
 }  // namespace hsk

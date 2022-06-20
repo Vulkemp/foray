@@ -23,12 +23,14 @@ namespace hsk {
       public:
         HSK_PROPERTY_ALL(FrameObjectsIndex)
         HSK_PROPERTY_ALL(CommandBuffer)
+        HSK_PROPERTY_ALL(SwapchainImageIndex)
 
         FrameRenderInfo() : FrameUpdateInfo() {}
 
       protected:
         /// @brief Index of in-flight frame synchronisation objects this frame is using
         uint32_t mFrameObjectsIndex = 0;
+        uint32_t mSwapchainImageIndex = 0;
         /// @brief Render command buffer (do not initialize, reset or finalize it!)
         VkCommandBuffer mCommandBuffer = nullptr;
     };

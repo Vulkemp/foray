@@ -16,15 +16,15 @@ namespace hsk {
         virtual void OnResized(const VkExtent2D& extent){};
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
-        inline std::vector<std::unique_ptr<ManagedImage>>& GetColorAttachments() { return mColorAttachments; }
-        inline ManagedImage&                               GetDepthAttachment() { return mDepthAttachment; }
-        ManagedImage*                                      GetColorAttachmentByName(const std::string_view name);
+        inline std::vector<ManagedImage*>& GetColorAttachments() { return mColorAttachments; }
+        inline ManagedImage&               GetDepthAttachment() { return mDepthAttachment; }
+        ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
 
 
       protected:
-        std::vector<std::unique_ptr<ManagedImage>> mColorAttachments;
-        ManagedImage                               mDepthAttachment;
-        const VkContext*                           mContext{};
-        DescriptorSetHelper                        mDescriptorSet;
+        std::vector<ManagedImage*> mColorAttachments;
+        ManagedImage               mDepthAttachment;
+        const VkContext*           mContext{};
+        DescriptorSetHelper        mDescriptorSet;
     };
 }  // namespace hsk

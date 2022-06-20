@@ -35,6 +35,7 @@ target_link_libraries(
     PUBLIC vma
     PUBLIC tinygltf
     PUBLIC tinyexr
+    PUBLIC imgui
     PUBLIC ${SDL2_LIBRARIES}
     )
 
@@ -67,3 +68,4 @@ add_subdirectory("${thirdparty_dir}/vkbootstrap")
 add_subdirectory("${thirdparty_dir}/glm")
 add_subdirectory("${thirdparty_dir}/tinygltf")
 add_subdirectory("${thirdparty_dir}/tinyexr")
+add_subdirectory("${thirdparty_dir}/imgui")

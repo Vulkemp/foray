@@ -14,16 +14,19 @@ namespace hsk {
         HSK_PROPERTY_CGET(Pipeline)
         HSK_PROPERTY_CGET(PipelineLayout)
 
-      protected:
+        virtual void OnResized(const VkExtent2D& extent) override;
+        virtual void Destroy() override;
 
+      protected:
         VkFramebuffer         mFrameBuffer         = nullptr;
         VkPipelineCache       mPipelineCache       = nullptr;
         VkRenderPass          mRenderpass          = nullptr;
         VkPipeline            mPipeline            = nullptr;
         VkPipelineLayout      mPipelineLayout      = nullptr;
 
-        virtual void Destroy() override;
-        virtual void DestroyFixedComponents();
-        virtual void DestroyResolutionDependentComponents();
+        virtual void CreateFixedSizeComponents(){};
+        virtual void DestroyFixedComponents(){};
+        virtual void CreateResolutionDependentComponents(){};
+        virtual void DestroyResolutionDependentComponents(){};
     };
 }  // namespace hsk

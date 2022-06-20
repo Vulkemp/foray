@@ -8,13 +8,10 @@ namespace hsk {
     {
       public:
         GBufferStage() = default;
-        virtual ~GBufferStage() { Destroy(); }
+        virtual ~GBufferStage() {}
 
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
-        virtual void Destroy();
-
-        virtual void OnResized(const VkExtent2D& extent);
 
         inline static constexpr std::string_view WorldspacePosition = "Position";
         inline static constexpr std::string_view WorldspaceNormal   = "Normal";
@@ -26,10 +23,13 @@ namespace hsk {
       protected:
         Scene* mScene;
         std::vector<VkClearValue> mClearValues;
+        std::vector<std::unique_ptr<ManagedImage>> mGBufferImages;
 
-        virtual void CreateFixedSizeComponents();
-        virtual void CreateResolutionDependentComponents();
-        virtual void DestroyResolutionDependentComponents();
+        virtual void CreateFixedSizeComponents() override;
+        virtual void DestroyFixedComponents() override;
+        virtual void CreateResolutionDependentComponents() override;
+        virtual void DestroyResolutionDependentComponents() override;
+        
 
         void PrepareAttachments();
         void PrepareRenderpass();

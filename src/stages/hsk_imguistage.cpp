@@ -1,22 +1,24 @@
-#include "hsk_gbuffer.hpp"
+#include "hsk_imguistage.hpp"
 #include "../hsk_vkHelpers.hpp"
+#include "../memory/hsk_commandbuffer.hpp"
 #include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
-#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
-#include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
-#include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
-#include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include "../scenegraph/components/hsk_meshinstance.hpp"
-#include "../scenegraph/components/hsk_camera.hpp"
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl.h>
+#include <imgui/imgui_impl_vulkan.h>
 
 
 namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(const VkContext* context, Scene* scene)
+    void ImguiStage::Init(const VkContext* context, ManagedImage* backgroundImage)
     {
-        mContext = context;
-        mScene   = scene;
+        mContext         = context;
+        mBackgroundImage = backgroundImage;
+
+        if(mBackgroundImage == nullptr)
+            throw Exception("Imgui stage can only init when the background image is set!");
 
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
@@ -28,49 +30,79 @@ namespace hsk {
             mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         }
         mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
+
+        VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+                                             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                                             {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType                      = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags                      = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        pool_info.maxSets                    = 1000;
+        pool_info.poolSizeCount              = std::size(pool_sizes);
+        pool_info.pPoolSizes                 = pool_sizes;
+
+        VkDescriptorPool imguiPool;
+        if(vkCreateDescriptorPool(context->Device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS)
+            throw std::runtime_error("TODO");
+
+
+        // 2: initialize imgui library
+
+        //this initializes the core structures of imgui
+        ImGui::CreateContext();
+
+        //this initializes imgui for SDL
+        ImGui_ImplSDL2_InitForVulkan(mContext->Window->GetSdlWindowHandle());
+
+        //this initializes imgui for Vulkan
+        ImGui_ImplVulkan_InitInfo init_info = {};
+        init_info.Instance                  = mContext->Instance;
+        init_info.PhysicalDevice            = mContext->PhysicalDevice;
+        init_info.Device                    = mContext->Device;
+        init_info.Queue                     = mContext->QueueGraphics;
+        init_info.DescriptorPool            = imguiPool;
+        init_info.MinImageCount             = 3;
+        init_info.ImageCount                = 3;
+        init_info.MSAASamples               = VK_SAMPLE_COUNT_1_BIT;
+
+        ImGui_ImplVulkan_Init(&init_info, mRenderpass);
+
+        //execute a gpu command to upload imgui font textures
+        CommandBuffer cmdBuf;
+        cmdBuf.Create(context, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        ImGui_ImplVulkan_CreateFontsTexture(cmdBuf.GetCommandBuffer());
+        cmdBuf.Submit();
+
+        //clear font textures from cpu data
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    void GBufferStage::CreateFixedSizeComponents()
-    {
-        SetupDescriptors();
-        PreparePipeline();
-    }
+    void ImguiStage::CreateFixedSizeComponents() {}
 
-    void GBufferStage::DestroyFixedComponents() {
-        VkDevice device = mContext->Device;
-        if(mPipeline)
-        {
-            vkDestroyPipeline(device, mPipeline, nullptr);
-            mPipeline = nullptr;
-        }
-        if(mPipelineLayout)
-        {
-            vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-            mPipelineLayout = nullptr;
-        }
-        if(mPipelineCache)
-        {
-            vkDestroyPipelineCache(device, mPipelineCache, nullptr);
-            mPipelineCache = nullptr;
-        }
-        mDescriptorSet.Cleanup();
-    }
-
-    void GBufferStage::CreateResolutionDependentComponents()
+    void ImguiStage::CreateResolutionDependentComponents()
     {
         PrepareAttachments();
         PrepareRenderpass();
         BuildCommandBuffer();
     }
 
-    void GBufferStage::DestroyResolutionDependentComponents()
+    void ImguiStage::DestroyResolutionDependentComponents()
     {
         VkDevice device = mContext->Device;
-        for(auto& colorAttachment : mColorAttachments)
+        
+        if(mDepthAttachment.Exists())
         {
-            colorAttachment->Cleanup();
+            mDepthAttachment.Cleanup();
         }
-        mDepthAttachment.Cleanup();
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
@@ -83,7 +115,7 @@ namespace hsk {
         }
     }
 
-    void GBufferStage::PrepareAttachments()
+    void ImguiStage::PrepareAttachments()
     {
         static const VkFormat colorFormat    = VK_FORMAT_R16G16B16A16_SFLOAT;
         static const VkFormat geometryFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
@@ -97,31 +129,14 @@ namespace hsk {
         VkImageLayout            intialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
-        mGBufferImages.clear();
-        mGBufferImages.reserve(5);
-        mGBufferImages.push_back(std::make_unique<ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<ManagedImage>());
-        mGBufferImages[0]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspacePosition);
-        mGBufferImages[1]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspaceNormal);
-        mGBufferImages[2]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, Albedo);
-        mGBufferImages[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, MotionVector);
-        mGBufferImages[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, MeshInstanceIndex);
-
         mColorAttachments.clear();
-        mColorAttachments.reserve(mGBufferImages.size());
-        for(size_t i = 0; i < mGBufferImages.size(); i++)
-        {
-            mColorAttachments.push_back(mGBufferImages[i].get());
-        }
+        mColorAttachments.push_back(mBackgroundImage);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
                                 VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT);
     }
 
-    void GBufferStage::PrepareRenderpass()
+    void ImguiStage::PrepareRenderpass()
     {
         // size + 1 for depth attachment description
         std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size() + 1);
@@ -132,11 +147,11 @@ namespace hsk {
         {
             auto& colorAttachment                    = mColorAttachments[i];
             attachmentDescriptions[i].samples        = colorAttachment->GetSampleCount();
-            attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
             attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_GENERAL;
             attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
             attachmentDescriptions[i].format         = colorAttachment->GetFormat();
 
@@ -206,33 +221,25 @@ namespace hsk {
         AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
-    void GBufferStage::SetupDescriptors()
+    void ImguiStage::Destroy()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->MakeDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<SceneTransformBuffer>()->MakeDescriptorInfo());
-        std::vector<Node*> nodes;
-        mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(3, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfo());
+        DestroyResolutionDependentComponents();
+        VkDevice device = mContext->Device;
 
-        uint32_t              numSets             = 1;
-        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
-
-        std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
-                                                              .offset     = 0,
-                                                              .size       = sizeof(DrawPushConstant)}});
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-        pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCI.pushConstantRangeCount = pushConstantRanges.size();
-        pipelineLayoutCI.pPushConstantRanges    = pushConstantRanges.data();
-        pipelineLayoutCI.setLayoutCount         = 1;
-        pipelineLayoutCI.pSetLayouts            = &descriptorSetLayout;
-
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
+        vkDestroyDescriptorPool(device, mImguiPool, nullptr);
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
     }
 
-    void GBufferStage::RecordFrame(FrameRenderInfo& renderInfo)
+    void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage)
+    {
+        mBackgroundImage = newBackgroundImage;
+        RasterizedRenderStage::OnResized(extent);
+    }
+
+
+    void ImguiStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -245,58 +252,22 @@ namespace hsk {
         VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+        // imgui drawing
+        {
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+            for(auto& subdraw : mWindowDraws)
+            {
+                subdraw();
+            }
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
-
-        const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-
-        // Instanced object
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, descriptorsets.size(), descriptorsets.data(), 0, nullptr);
-        mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+            ImGui::Render();
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+        }
 
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void GBufferStage::PreparePipeline()
-    {
-        VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-        pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
-
-        // shader stages
-        auto                   vertShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.vert.spv");
-        auto                   fragShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.frag.spv");
-        ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
-
-        // vertex layout
-        VertexInputStateBuilder vertexInputStateBuilder;
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Position);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Normal);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Uv);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::MaterialIndex);
-        vertexInputStateBuilder.Build();
-
-        // clang-format off
-        mPipeline = PipelineBuilder()
-            .SetContext(mContext)
-            // Blend attachment states required for all color attachments
-            // This is important, as color write mask will otherwise be 0x0 and you
-            // won't see anything rendered to the attachment
-            .SetColorAttachmentBlendCount(mColorAttachments.size())
-            .SetPipelineLayout(mPipelineLayout)
-            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
-            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
-            .SetPipelineCache(mPipelineCache)
-            .SetRenderPass(mRenderpass)
-            .Build();
-        // clang-format on
-    }
 }  // namespace hsk

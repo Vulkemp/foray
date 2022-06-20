@@ -30,6 +30,8 @@ namespace hsk {
 
         // get vulkan surface handle with created instance
         mDisplayConfig.Surface = mDisplayConfig.Window.GetSurfaceKHR(mInstance);
+        mContext.Window        = &mDisplayConfig.Window;
+        mContext.Instance      = mInstanceVkb;
 
         BaseInitSelectPhysicalDevice();
         BaseInitBuildDevice();
@@ -76,9 +78,9 @@ namespace hsk {
         auto physicalDeviceSelectionReturn = pds.select();
         HSK_ASSERTFMT(physicalDeviceSelectionReturn, "Physical device creation: {}", physicalDeviceSelectionReturn.error().message().c_str())
 
-        mDeviceConfig.PhysicalDeviceVkb      = physicalDeviceSelectionReturn.value();
-        mDeviceConfig.PhysicalDevice         = mDeviceConfig.PhysicalDeviceVkb.physical_device;
-        mContext.PhysicalDevice = mDeviceConfig.PhysicalDevice;
+        mDeviceConfig.PhysicalDeviceVkb = physicalDeviceSelectionReturn.value();
+        mDeviceConfig.PhysicalDevice    = mDeviceConfig.PhysicalDeviceVkb.physical_device;
+        mContext.PhysicalDevice         = mDeviceConfig.PhysicalDeviceVkb;
     }
 
     void DefaultAppBase::BaseInitBuildDevice()
@@ -112,7 +114,7 @@ namespace hsk {
             mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
             mDeviceFeatures.difeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
             deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
-            
+
 
             // This currently causes a segfault, so commented out for the time being
 
@@ -132,10 +134,10 @@ namespace hsk {
         // automatically propagate needed data from instance & physical device
         auto deviceBuilderReturn = deviceBuilder.build();
         HSK_ASSERTFMT(deviceBuilderReturn, "Device creation: {}", deviceBuilderReturn.error().message())
-        mDeviceConfig.DeviceVkb      = deviceBuilderReturn.value();
-        mDeviceConfig.Device         = mDeviceConfig.DeviceVkb.device;
-        mContext.Device = mDeviceConfig.DeviceVkb.device;
-        mContext.DispatchTable = mDeviceConfig.DeviceVkb.make_table();
+        mDeviceConfig.DeviceVkb = deviceBuilderReturn.value();
+        mDeviceConfig.Device    = mDeviceConfig.DeviceVkb.device;
+        mContext.Device         = mDeviceConfig.DeviceVkb;
+        mContext.DispatchTable  = mDeviceConfig.DeviceVkb.make_table();
     }
 
     void DefaultAppBase::BaseInitBuildSwapchain()
@@ -165,9 +167,9 @@ namespace hsk {
 
         HSK_ASSERTFMT(swapchainBuilderReturn, "Swapchain building: {}", swapchainBuilderReturn.error().message())
 
-        mDisplayConfig.SwapchainVkb      = swapchainBuilderReturn.value();
-        mDisplayConfig.Swapchain         = mDisplayConfig.SwapchainVkb.swapchain;
-        mContext.Swapchain = mDisplayConfig.SwapchainVkb;
+        mDisplayConfig.SwapchainVkb = swapchainBuilderReturn.value();
+        mDisplayConfig.Swapchain    = mDisplayConfig.SwapchainVkb.swapchain;
+        mContext.Swapchain          = mDisplayConfig.SwapchainVkb;
 
         auto images     = mDisplayConfig.SwapchainVkb.get_images();
         auto imageviews = mDisplayConfig.SwapchainVkb.get_image_views();
@@ -232,7 +234,8 @@ namespace hsk {
 
     void DefaultAppBase::BaseInitCompileShaders()
     {
-        if (!mShaderCompilerConfig.EnableShaderCompiler){
+        if(!mShaderCompilerConfig.EnableShaderCompiler)
+        {
             return;
         }
         logger()->info("Compiling shaders...");
@@ -349,23 +352,25 @@ namespace hsk {
         VkImage comparisonOutput = nullptr;
 
         // Record Render Command buffer
-
+        // clang-format off
         FrameRenderInfo renderInfo;
-        renderInfo.SetCommandBuffer(currentFrame.CommandBuffer).SetFrameObjectsIndex(mCurrentFrameIndex).SetFrameNumber(mRenderedFrameCount).SetFrameTime(delta);
-
+        renderInfo.SetCommandBuffer(currentFrame.CommandBuffer)
+                  .SetFrameObjectsIndex(mCurrentFrameIndex)
+                  .SetFrameNumber(mRenderedFrameCount)
+                  .SetFrameTime(delta);
+        // cland-format on
         AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
-
         VkCommandBufferBeginInfo cmdbufBI{};
         cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
         AssertVkResult(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
 
-        RecordCommandBuffer(renderInfo);
-
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        VkResult result              = vkAcquireNextImageKHR(mDeviceConfig.Device, mDisplayConfig.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+        VkResult result = vkAcquireNextImageKHR(mDeviceConfig.Device, mDisplayConfig.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+
+        renderInfo.SetSwapchainImageIndex(swapChainImageIndex);
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -408,7 +413,11 @@ namespace hsk {
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
-        vkCmdClearColorImage(currentFrame.CommandBuffer, mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
+        vkCmdClearColorImage(currentFrame.CommandBuffer, mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                             &clearColor, 1, &range);
+
+        // Record command buffer
+        RecordCommandBuffer(renderInfo);
 
         if(mSwapchainCopySourceImage)
         {
@@ -442,7 +451,8 @@ namespace hsk {
             blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mDisplayConfig.SwapchainVkb.extent.width, .y = (int32_t)mDisplayConfig.SwapchainVkb.extent.height, .z = 0};
 
             vkCmdBlitImage(currentFrame.CommandBuffer, mSwapchainCopySourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                           mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
+                           mDisplayConfig.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion,
+                           VkFilter::VK_FILTER_NEAREST);
         }
 
         // Barrier: Change swapchain image to present layout, transfer it back to present queue
