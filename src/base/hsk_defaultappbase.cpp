@@ -93,27 +93,24 @@ namespace hsk {
             // Adapted from https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_extended/raytracing_extended.cpp#L136
             // distributed via Apache 2.0 license https://github.com/KhronosGroup/Vulkan-Samples/blob/master/LICENSE
 
-            mDeviceFeatures.bdafeatures.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-            mDeviceFeatures.bdafeatures.bufferDeviceAddress = VK_TRUE;
-
-
 #ifndef DISABLE_RT_EXTENSIONS
+            mDeviceFeatures.BufferDeviceAdressFeatures.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+            mDeviceFeatures.BufferDeviceAdressFeatures.bufferDeviceAddress = VK_TRUE;
+            deviceBuilder.add_pNext(&mDeviceFeatures.BufferDeviceAdressFeatures);
 
-            deviceBuilder.add_pNext(&mDeviceFeatures.bdafeatures);
+            mDeviceFeatures.RayTracingPipelineFeatures.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+            mDeviceFeatures.RayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
+            deviceBuilder.add_pNext(&mDeviceFeatures.RayTracingPipelineFeatures);
 
-            mDeviceFeatures.rtpfeatures.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-            mDeviceFeatures.rtpfeatures.rayTracingPipeline = VK_TRUE;
-            deviceBuilder.add_pNext(&mDeviceFeatures.rtpfeatures);
-
-            mDeviceFeatures.asfeatures.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-            mDeviceFeatures.asfeatures.accelerationStructure = VK_TRUE;
-            deviceBuilder.add_pNext(&mDeviceFeatures.asfeatures);
+            mDeviceFeatures.AccelerationStructureFeatures.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+            mDeviceFeatures.AccelerationStructureFeatures.accelerationStructure = VK_TRUE;
+            deviceBuilder.add_pNext(&mDeviceFeatures.AccelerationStructureFeatures);
 #endif
 
-            mDeviceFeatures.difeatures.sType                                     = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-            mDeviceFeatures.difeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
-            mDeviceFeatures.difeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
-            deviceBuilder.add_pNext(&mDeviceFeatures.difeatures);
+            mDeviceFeatures.DescriptorIndexingFeatures.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+            mDeviceFeatures.DescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+            mDeviceFeatures.DescriptorIndexingFeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
+            deviceBuilder.add_pNext(&mDeviceFeatures.DescriptorIndexingFeatures);
 
 
             // This currently causes a segfault, so commented out for the time being
@@ -301,6 +298,8 @@ namespace hsk {
         }
 
         BaseCleanupSwapchain();
+
+
         vmaDestroyAllocator(mAllocator);
         vkb::destroy_device(mDeviceConfig.DeviceVkb);
         mDeviceConfig.DeviceVkb = vkb::Device{};

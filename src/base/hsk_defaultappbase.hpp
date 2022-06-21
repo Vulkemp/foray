@@ -117,10 +117,10 @@ namespace hsk {
 
         struct DeviceFeatures
         {
-            VkPhysicalDeviceBufferDeviceAddressFeatures      bdafeatures;
-            VkPhysicalDeviceRayTracingPipelineFeaturesKHR    rtpfeatures;
-            VkPhysicalDeviceAccelerationStructureFeaturesKHR asfeatures;
-            VkPhysicalDeviceDescriptorIndexingFeaturesEXT    difeatures;
+            VkPhysicalDeviceBufferDeviceAddressFeatures      BufferDeviceAdressFeatures;
+            VkPhysicalDeviceRayTracingPipelineFeaturesKHR    RayTracingPipelineFeatures;
+            VkPhysicalDeviceAccelerationStructureFeaturesKHR AccelerationStructureFeatures;
+            VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures;
         } mDeviceFeatures = {};
 
         struct SyncConfig
