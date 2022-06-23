@@ -1,5 +1,6 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
+#include "../utility/hsk_deviceresource.hpp"
 
 /// Explanation of vulkan descriptor sets:
 /// Distinction between a descriptor, a descriptor set, a descriptor set layout and a descriptor pool.
@@ -26,7 +27,7 @@ namespace hsk {
     /// Class usage:
     /// Step 1: Prepare DescriptorInfo objects.
     /// Step 2: Bind DescriptorInfo to a slot, using SetDescriptorInfoAt
-    class DescriptorSetHelper
+    class DescriptorSetHelper : public DeviceResourceBase
     {
       public:
  
@@ -73,9 +74,11 @@ namespace hsk {
         /// @param context - The vulkan context.
         /// @param numSets - If num sets is -1, the number of sets will be automatically determined by all given descriptor infos,
         /// @return The descriptor set layout of the created descriptor sets.
-        VkDescriptorSetLayout Create(const VkContext* context, int32_t numSets = -1);
+        VkDescriptorSetLayout Create(const VkContext* context, int32_t numSets = -1, std::string name = "Unnamed descriptor set");
+        VkDescriptorSetLayout Create(const VkContext* context, std::string name = "Unnamed descriptor set");
 
-        void Cleanup();
+        void Cleanup() override;
+        bool Exists() const override { return mDescriptorSets.size(); }
 
         const std::vector<VkDescriptorSet>& GetDescriptorSets() { return mDescriptorSets; }
 

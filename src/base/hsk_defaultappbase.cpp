@@ -5,6 +5,7 @@
 #include "../memory/hsk_vmaHelpers.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
+#include "../utility/hsk_deviceresource.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -299,15 +300,22 @@ namespace hsk {
 
         BaseCleanupSwapchain();
 
-
+        for(auto deviceResource : *DeviceResourceBase::GetTotalAllocatedResources())
+        {
+            if(deviceResource->Exists())
+            {
+                logger()->error("Resource with name \"{}\" has not been cleaned up!", deviceResource->GetName());
+            }
+        }
         vmaDestroyAllocator(mAllocator);
+        mAllocator = nullptr;
+
         vkb::destroy_device(mDeviceConfig.DeviceVkb);
         mDeviceConfig.DeviceVkb = vkb::Device{};
         mDeviceConfig.Device    = nullptr;
         vkb::destroy_surface(mInstanceVkb, mDisplayConfig.Surface);
         mDisplayConfig.Surface = nullptr;
         mDisplayConfig.Window.Destroy();
-        mAllocator = nullptr;
         MinimalAppBase::BaseCleanupVulkan();
     }
 

@@ -50,10 +50,7 @@ namespace hsk {
         pool_info.poolSizeCount              = std::size(pool_sizes);
         pool_info.pPoolSizes                 = pool_sizes;
 
-        VkDescriptorPool imguiPool;
-        if(vkCreateDescriptorPool(context->Device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS)
-            throw std::runtime_error("TODO");
-
+        AssertVkResult(vkCreateDescriptorPool(context->Device, &pool_info, nullptr, &mImguiPool));
 
         // 2: initialize imgui library
 
@@ -69,7 +66,7 @@ namespace hsk {
         init_info.PhysicalDevice            = mContext->PhysicalDevice;
         init_info.Device                    = mContext->Device;
         init_info.Queue                     = mContext->QueueGraphics;
-        init_info.DescriptorPool            = imguiPool;
+        init_info.DescriptorPool            = mImguiPool;
         init_info.MinImageCount             = 3;
         init_info.ImageCount                = 3;
         init_info.MSAASamples               = VK_SAMPLE_COUNT_1_BIT;
@@ -133,7 +130,7 @@ namespace hsk {
         mColorAttachments.push_back(mBackgroundImage);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT);
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "Imgui_DepthBufferImage");
     }
 
     void ImguiStage::PrepareRenderpass()
@@ -223,13 +220,15 @@ namespace hsk {
 
     void ImguiStage::Destroy()
     {
-        DestroyResolutionDependentComponents();
-        VkDevice device = mContext->Device;
-
-        vkDestroyDescriptorPool(device, mImguiPool, nullptr);
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
+        if(mImguiPool != nullptr)
+        {
+            ImGui_ImplVulkan_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
+            ImGui::DestroyContext();
+            RasterizedRenderStage::Destroy();
+            vkDestroyDescriptorPool(mContext->Device.device, mImguiPool, nullptr);
+            mImguiPool = nullptr;
+        }
     }
 
     void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage)

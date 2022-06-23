@@ -22,7 +22,7 @@ namespace hsk {
       public:
         const bool DeviceLocal;
 
-        inline ManagedVectorBuffer() : DeviceLocal(false) {}
+        inline ManagedVectorBuffer() : DeviceLocal(false), mName("Unnamed Vector Buffer") {}
         inline explicit ManagedVectorBuffer(const VkContext* context) : DeviceLocal(false), mContext(context) {}
         inline explicit ManagedVectorBuffer(const VkContext* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
 

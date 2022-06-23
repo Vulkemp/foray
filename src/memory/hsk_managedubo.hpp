@@ -36,7 +36,7 @@ namespace hsk {
       public:
         using Ptr = std::shared_ptr<ManagedUbo<T_UBO>>;
 
-        inline ManagedUbo();
+        inline ManagedUbo() { mName = "Unnamed Ubo"; };
         explicit inline ManagedUbo(bool mapPersistent = false);
         ~ManagedUbo();
 
@@ -59,6 +59,7 @@ namespace hsk {
     template <typename T_UBO>
     ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mManagedBuffer(), mUbo(), mMapPersistent(mapPersistent)
     {
+        mName = "Unnamed Ubo";
     }
 
     template <typename T_UBO>
