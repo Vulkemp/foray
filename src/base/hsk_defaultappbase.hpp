@@ -16,13 +16,6 @@ namespace hsk {
         DefaultAppBase()          = default;
         virtual ~DefaultAppBase() = default;
 
-
-        struct QueueInfo
-        {
-            VkQueue  Queue{};
-            uint32_t QueueFamilyIndex{};
-        };
-
         struct InFlightFrame
         {
             VkCommandBuffer CommandBuffer{};
@@ -30,15 +23,6 @@ namespace hsk {
             VkSemaphore     RenderFinishedSemaphore{};
             VkFence         CommandBufferExecutedFence{};
         };
-
-        struct SwapchainImage
-        {
-            VkImage     Image;
-            VkImageView ImageView;
-        };
-
-        inline QueueInfo& DefaultQueue() { return mDefaultQueue; }
-        inline QueueInfo& PresentQueue() { return mPresentQueue; }
 
       protected:
         /// @brief Alter physical device selection.
@@ -74,22 +58,7 @@ namespace hsk {
         inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}
         virtual void        BaseSubmitFrame();
 
-        struct DisplayConfig
-        {
-            hsk::Window                 Window       = {};
-            VkSurfaceKHR                Surface      = {};
-            vkb::Swapchain              SwapchainVkb = {};
-            VkSwapchainKHR              Swapchain  = {};
-            std::vector<SwapchainImage> SwapchainImages{};
-        } mDisplayConfig;
-
-        struct DeviceConfig
-        {
-            vkb::PhysicalDevice PhysicalDeviceVkb = {};
-            VkPhysicalDevice    PhysicalDevice  = {};
-            vkb::Device         DeviceVkb         = {};
-            VkDevice            Device          = {};
-        } mDeviceConfig;
+        void SetWindowDisplayMode(hsk::EDisplayMode displayMode);
 
         struct ShaderCompilerconfig
         {
@@ -109,6 +78,7 @@ namespace hsk {
 #pragma region Vulkan
         /// @brief The applications vulkan context.
         VkContext mContext;
+        uint32_t  mRequiredVulkanApiVersion = VK_API_VERSION_1_2;
 
 
         std::vector<InFlightFrame> mFrames{};
@@ -130,19 +100,8 @@ namespace hsk {
             VkFence     CommandBufferExecutedFence{};
         } mSyncConfig;
 
-        /// @brief Assuming the default queue supports graphics, transfer and compute. (TODO: are we sure, we don't need dedicated queues? For example dedicated transfer queues for asynchronous transfers)
-        QueueInfo mDefaultQueue{};
-
-        /// @brief Queue that supports presenting to the connected screen.
-        QueueInfo mPresentQueue{};
-
         /// @brief Commandpool for the default queue.
         VkCommandPool mCommandPoolDefault{};
-
-        VmaAllocator mAllocator{};
-
-        /// @brief Points to the image thats to be copied into the swapchain image during rendering.
-        ManagedImage* mSwapchainCopySourceImage{};
 
 #pragma endregion
     };

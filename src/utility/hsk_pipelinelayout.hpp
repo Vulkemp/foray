@@ -10,7 +10,7 @@ namespace hsk {
     class PipelineLayout
     {
         PipelineLayout()        = default;
-        PipelineLayout& operator=(const PipelineBuilder&) = delete;
+        PipelineLayout& operator=(const PipelineLayout&) = delete;
         PipelineLayout(const PipelineLayout&)             = delete;
         ~PipelineLayout()
         {

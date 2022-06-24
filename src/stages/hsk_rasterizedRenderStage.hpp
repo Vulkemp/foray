@@ -7,6 +7,7 @@ namespace hsk {
     {
       public:
         RasterizedRenderStage(){};
+        ~RasterizedRenderStage() { Destroy(); };
 
         HSK_PROPERTY_CGET(FrameBuffer)
         HSK_PROPERTY_CGET(PipelineCache)

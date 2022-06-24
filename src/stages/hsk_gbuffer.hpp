@@ -8,7 +8,6 @@ namespace hsk {
     {
       public:
         GBufferStage() = default;
-        virtual ~GBufferStage() {}
 
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;

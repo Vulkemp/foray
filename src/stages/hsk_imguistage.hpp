@@ -7,19 +7,12 @@ namespace hsk {
     {
       public:
         ImguiStage() = default;
-        virtual ~ImguiStage() { Destroy(); }
 
-        virtual void Init(const VkContext* context, ManagedImage* backgroundImage);
+        virtual void Init(const VkContext* context);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy();
 
-        void OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage);
-
-        /// @brief Set the window that Imgui will draw onto
-        virtual void SetBackgroundImage(ManagedImage* backgroundImage) { mBackgroundImage = backgroundImage; }
-
         /// @brief Add a function that renders an imgui window. Example:
-        ///
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }
 
       protected:

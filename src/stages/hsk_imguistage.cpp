@@ -229,6 +229,7 @@ namespace hsk {
             vkDestroyDescriptorPool(mContext->Device.device, mImguiPool, nullptr);
             mImguiPool = nullptr;
         }
+        RasterizedRenderStage::Destroy();
     }
 
     void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage)
