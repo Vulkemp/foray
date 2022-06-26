@@ -5,7 +5,6 @@
 #include "../scenegraph/components/hsk_transform.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
-#include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
 
 namespace hsk {
@@ -14,7 +13,6 @@ namespace hsk {
         , mMaterialBuffer(*(scene->GetComponent<MaterialBuffer>()))
         , mGeo(*(scene->GetComponent<GeometryStore>()))
         , mTextures(*(scene->GetComponent<TextureStore>()))
-        , mTransformBuffer(*(scene->GetComponent<SceneTransformBuffer>()))
     {
     }
 
@@ -65,7 +63,17 @@ namespace hsk {
 
         mGeo.GetMeshes().reserve(mGltfModel.meshes.size());
         mIndexBindings.Meshes.resize(mGltfModel.meshes.size());
-        mNextMeshInstanceIndex = mTransformBuffer.GetVector().size();
+        std::vector<Node*> nodesWithMeshInstances{};
+        mScene->FindNodesWithComponent<MeshInstance>(nodesWithMeshInstances);
+        mNextMeshInstanceIndex = 0;
+        if(nodesWithMeshInstances.size())
+        {
+            for(Node* node : nodesWithMeshInstances)
+            {
+                mNextMeshInstanceIndex = std::max(mNextMeshInstanceIndex, node->GetComponent<MeshInstance>()->GetInstanceIndex());
+            }
+            mNextMeshInstanceIndex++;
+        }
 
 
         if(sceneSelect)
@@ -108,12 +116,13 @@ namespace hsk {
     {
         Node*& node = mIndexBindings.Nodes[currentIndex];
 
-        if (node){
+        if(node)
+        {
             return;
         }
 
-        auto& gltfNode  = mGltfModel.nodes[currentIndex];
-        node = mScene->MakeNode(parent);
+        auto& gltfNode = mGltfModel.nodes[currentIndex];
+        node           = mScene->MakeNode(parent);
 
         if(!parent)
         {
@@ -136,11 +145,8 @@ namespace hsk {
         }
     }
 
-    void ModelConverter::InitTransformFromGltf(Transform*                 transform,
-                                               const std::vector<double>& matrix,
-                                               const std::vector<double>& translation,
-                                               const std::vector<double>& rotation,
-                                               const std::vector<double>& scale)
+    void ModelConverter::InitTransformFromGltf(
+        Transform* transform, const std::vector<double>& matrix, const std::vector<double>& translation, const std::vector<double>& rotation, const std::vector<double>& scale)
     {
         if(matrix.size() > 0)
         {
@@ -212,13 +218,13 @@ namespace hsk {
         }
 
         mMaterialBuffer.UpdateDeviceLocal();
-        mTransformBuffer.Resize(mNextMeshInstanceIndex);
     }
 
-    void ModelConverter::Reset(){
-        mGltfScene = nullptr;
-        mGltfModel = tinygltf::Model();
-        mIndexBindings = {};
+    void ModelConverter::Reset()
+    {
+        mGltfScene             = nullptr;
+        mGltfModel             = tinygltf::Model();
+        mIndexBindings         = {};
         mNextMeshInstanceIndex = 0;
         mVertexBuffer.clear();
         mIndexBuffer.clear();

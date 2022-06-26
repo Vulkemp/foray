@@ -11,7 +11,6 @@ namespace hsk {
     class Primitive;
     class GeometryStore;
     class MaterialBuffer;
-    class SceneTransformBuffer;
     class TextureStore;
     class GeometryBufferSet;
 }  // namespace hsk

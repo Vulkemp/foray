@@ -5,7 +5,6 @@
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
-#include "../scenegraph/globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_camera.hpp"
@@ -118,7 +117,7 @@ namespace hsk {
         }
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT);
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer Depth");
     }
 
     void GBufferStage::PrepareRenderpass()
@@ -210,10 +209,9 @@ namespace hsk {
     {
         mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->MakeDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<SceneTransformBuffer>()->MakeDescriptorInfo());
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(3, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfo());
 
         uint32_t              numSets             = 1;
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);

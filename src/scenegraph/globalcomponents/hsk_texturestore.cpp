@@ -1,18 +1,10 @@
 #include "hsk_texturestore.hpp"
 #include "../../hsk_vkHelpers.hpp"
+#include "../../utility/hsk_hash.hpp"
 #include <functional>
 #include <spdlog/fmt/fmt.h>
 
 namespace std {
-
-    template <typename T>
-    inline void accumulateHash(size_t& hash, const T& v)
-    {
-        // https://www.boost.org/doc/libs/1_55_0/doc/html/hash/reference.html#boost.hash_combine
-        // https://www.boost.org/LICENSE_1_0.txt
-        size_t vhash = std::hash<T>{}(v);
-        hash ^= vhash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-    }
 
     template <>
     struct hash<VkSamplerCreateInfo>
@@ -20,22 +12,22 @@ namespace std {
         inline size_t operator()(const VkSamplerCreateInfo& p) const
         {
             size_t hash = 0;
-            accumulateHash(hash, p.flags);
-            accumulateHash(hash, p.magFilter);
-            accumulateHash(hash, p.minFilter);
-            accumulateHash(hash, p.mipmapMode);
-            accumulateHash(hash, p.addressModeU);
-            accumulateHash(hash, p.addressModeV);
-            accumulateHash(hash, p.addressModeW);
-            accumulateHash(hash, p.mipLodBias);
-            accumulateHash(hash, p.anisotropyEnable);
-            accumulateHash(hash, p.maxAnisotropy);
-            accumulateHash(hash, p.compareEnable);
-            accumulateHash(hash, p.compareOp);
-            accumulateHash(hash, p.minLod);
-            accumulateHash(hash, p.maxLod);
-            accumulateHash(hash, p.borderColor);
-            accumulateHash(hash, p.unnormalizedCoordinates);
+            hsk::AccumulateHash(hash, p.flags);
+            hsk::AccumulateHash(hash, p.magFilter);
+            hsk::AccumulateHash(hash, p.minFilter);
+            hsk::AccumulateHash(hash, p.mipmapMode);
+            hsk::AccumulateHash(hash, p.addressModeU);
+            hsk::AccumulateHash(hash, p.addressModeV);
+            hsk::AccumulateHash(hash, p.addressModeW);
+            hsk::AccumulateHash(hash, p.mipLodBias);
+            hsk::AccumulateHash(hash, p.anisotropyEnable);
+            hsk::AccumulateHash(hash, p.maxAnisotropy);
+            hsk::AccumulateHash(hash, p.compareEnable);
+            hsk::AccumulateHash(hash, p.compareOp);
+            hsk::AccumulateHash(hash, p.minLod);
+            hsk::AccumulateHash(hash, p.maxLod);
+            hsk::AccumulateHash(hash, p.borderColor);
+            hsk::AccumulateHash(hash, p.unnormalizedCoordinates);
             return hash;
         }
     };

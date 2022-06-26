@@ -1,7 +1,6 @@
 #include "hsk_scene.hpp"
 #include "globalcomponents/hsk_geometrystore.hpp"
 #include "globalcomponents/hsk_materialbuffer.hpp"
-#include "globalcomponents/hsk_scenetransformbuffer.hpp"
 #include "globalcomponents/hsk_texturestore.hpp"
 #include "hsk_node.hpp"
 
@@ -14,7 +13,6 @@ namespace hsk {
     void Scene::InitDefaultGlobals()
     {
         MakeComponent<MaterialBuffer>(mContext);
-        MakeComponent<SceneTransformBuffer>(mContext);
         MakeComponent<GeometryStore>();
         MakeComponent<TextureStore>();
     }

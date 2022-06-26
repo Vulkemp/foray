@@ -52,7 +52,6 @@ namespace hsk {
         MaterialBuffer&      mMaterialBuffer;
         GeometryStore&        mGeo;
         TextureStore&         mTextures;
-        SceneTransformBuffer& mTransformBuffer;
 
         void RecursivelyTranslateNodes(int32_t currentIndex, Node* parent = nullptr);
 
