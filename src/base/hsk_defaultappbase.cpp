@@ -12,7 +12,8 @@ namespace hsk {
     {
         mContext.DebugEnabled = mDebugEnabled;
 
-        logger()->info("Current working directory: {}", CurrentWorkingDirectory());
+        logger()->info("Debugging and validation layers enabled : {}", mDebugEnabled);
+
         // recompile shaders
         BaseInitCompileShaders();
 
@@ -173,6 +174,7 @@ namespace hsk {
                 .ImageView   = imageviews.value()[i],
                 .ImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
             };
+            SetVulkanObjectName(&mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE, images.value()[i], std::string(fmt::format("Swapchain image {}", i)));
         }
     }
 
@@ -391,6 +393,22 @@ namespace hsk {
         range.levelCount     = 1;
         range.baseArrayLayer = 0;
         range.layerCount     = 1;
+
+        VkImageMemoryBarrier barrier{};
+        barrier.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.subresourceRange = range;
+
+        barrier.srcAccessMask       = 0;
+        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        barrier.oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.srcQueueFamilyIndex = mContext.PresentQueue;
+        barrier.dstQueueFamilyIndex = mContext.QueueGraphics;
+        barrier.image               = mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image;
+
+        
+        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                             nullptr, 0, nullptr, 1, &barrier);
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};

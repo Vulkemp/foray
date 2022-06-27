@@ -54,7 +54,7 @@ namespace hsk {
         /// @brief (Getter) Display Mode
         inline EDisplayMode DisplayMode() const { return mDisplayMode; };
 
-        SDL_Window* GetSdlWindowHandle() { return mHandle; }
+        SDL_Window* GetSdlWindowHandle() const { return mHandle; }
 
         virtual uint32_t SDLId() const;
 

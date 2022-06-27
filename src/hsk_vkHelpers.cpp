@@ -61,5 +61,15 @@ namespace hsk {
         }
     }
 
-    
+    void SetVulkanObjectName(const VkContext* context, VkObjectType objectType, const void* objectHandle, const std::string_view& name)
+    {
+        VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+                                               .pNext        = nullptr,
+                                               .objectType   = objectType,
+                                               .objectHandle = reinterpret_cast<uint64_t>(objectHandle),
+                                               .pObjectName  = name.data()};
+        context->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+    }
+
+
 }  // namespace hsk

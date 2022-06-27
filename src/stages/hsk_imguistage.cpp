@@ -15,9 +15,9 @@ namespace hsk {
     void ImguiStage::Init(const VkContext* context, ManagedImage* backgroundImage)
     {
         mContext         = context;
-        mBackgroundImage = backgroundImage;
+        mTargetImage = backgroundImage;
 
-        if(mBackgroundImage == nullptr)
+        if(mTargetImage == nullptr)
             throw Exception("Imgui stage can only init when the background image is set!");
 
         CreateResolutionDependentComponents();
@@ -58,7 +58,7 @@ namespace hsk {
         ImGui::CreateContext();
 
         //this initializes imgui for SDL
-        ImGui_ImplSDL2_InitForVulkan(mContext->Window->GetSdlWindowHandle());
+        ImGui_ImplSDL2_InitForVulkan(mContext->ContextSwapchain.Window.GetSdlWindowHandle());
 
         //this initializes imgui for Vulkan
         ImGui_ImplVulkan_InitInfo init_info = {};
@@ -127,7 +127,7 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
         mColorAttachments.clear();
-        mColorAttachments.push_back(mBackgroundImage);
+        mColorAttachments.push_back(mTargetImage);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
                                 VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "Imgui_DepthBufferImage");
@@ -232,9 +232,9 @@ namespace hsk {
         RasterizedRenderStage::Destroy();
     }
 
-    void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage)
+    void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newTargetImage)
     {
-        mBackgroundImage = newBackgroundImage;
+        mTargetImage = newTargetImage;
         RasterizedRenderStage::OnResized(extent);
     }
 
