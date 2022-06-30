@@ -9,8 +9,11 @@ namespace hsk {
         mHighestSetCount = std::max(mHighestSetCount, descriptorSetInfo->mImageInfos.size());
     }
 
-    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, int32_t numSets)
+    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, int32_t numSets, std::string name)
     {
+        // set name for debugging
+        mName = name;
+
         // auto detect set count if necessary
         numSets = numSets != -1 ? numSets : mHighestSetCount;
 
@@ -130,6 +133,8 @@ namespace hsk {
         vkUpdateDescriptorSets(context->Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         return mDescriptorSetLayout;
     }
+
+    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, std::string name) { return Create(context, -1, name); }
 
     void DescriptorSetHelper::Cleanup()
     {

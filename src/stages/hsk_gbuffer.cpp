@@ -117,7 +117,7 @@ namespace hsk {
         }
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer Depth");
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer_DepthBufferImage");
     }
 
     void GBufferStage::PrepareRenderpass()
@@ -213,7 +213,7 @@ namespace hsk {
         mScene->FindNodesWithComponent<Camera>(nodes);
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfos());
 
-        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext);
+        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
 
         std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
                                                               .offset     = 0,

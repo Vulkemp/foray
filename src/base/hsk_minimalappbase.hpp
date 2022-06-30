@@ -91,7 +91,6 @@ namespace hsk {
         vkb::Instance        mInstanceVkb{};
         VkInstance           mInstance{};
         bool                 mDebugEnabled{true};
-        bool                 mEnableDefaultValidationLayers{true};
 #pragma endregion
     };
 }  // namespace hsk

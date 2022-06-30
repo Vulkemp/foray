@@ -18,7 +18,7 @@ namespace hsk {
         };
 
       public:
-        ManagedBuffer() = default;
+        ManagedBuffer() { mName = "Unnamed Buffer"; };
 
         void Create(const VkContext* context, ManagedBufferCreateInfo& createInfo);
         /// @brief Creates the buffer with VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT. If data is set, also maps writes and unmaps
@@ -60,7 +60,6 @@ namespace hsk {
 
       protected:
         const VkContext*  mContext{};
-        std::string       mName{};
         VkBuffer          mBuffer{};
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocationInfo{};

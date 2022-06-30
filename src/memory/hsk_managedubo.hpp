@@ -58,6 +58,7 @@ namespace hsk {
     template <typename T_UBO>
     ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mManagedBuffer(), mUbo(), mMapPersistent(mapPersistent)
     {
+        mName = "Unnamed Ubo";
     }
 
     template <typename T_UBO>

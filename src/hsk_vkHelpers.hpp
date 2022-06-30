@@ -3,7 +3,10 @@
 #include <string_view>
 #include <vulkan/vulkan.h>
 
+
 namespace hsk {
+
+    struct VkContext;
 
     std::string_view PrintVkResult(VkResult result);
 
@@ -20,4 +23,11 @@ namespace hsk {
     void BeginCommandBuffer(VkCommandBuffer commandBuffer);
 
     void FlushCommandBuffer(VkDevice device, VkCommandPool cmdpool, VkCommandBuffer commandBuffer, VkQueue queue, bool free = true);
+
+    void SetVulkanObjectName(
+        const VkContext* context,
+        VkObjectType objectType,
+        const void* objectHandle,
+        const std::string_view& name);
+
 }  // namespace hsk

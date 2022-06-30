@@ -147,7 +147,7 @@ namespace hsk {
                 return VK_FALSE;
             });
 
-            if(mEnableDefaultValidationLayers)
+            if(mDebugEnabled)
             {
                 mVkbInstanceBuilder.enable_validation_layers();
             }

@@ -15,9 +15,9 @@ namespace hsk {
     void ImguiStage::Init(const VkContext* context, ManagedImage* backgroundImage)
     {
         mContext         = context;
-        mBackgroundImage = backgroundImage;
+        mTargetImage = backgroundImage;
 
-        if(mBackgroundImage == nullptr)
+        if(mTargetImage == nullptr)
             throw Exception("Imgui stage can only init when the background image is set!");
 
         CreateResolutionDependentComponents();
@@ -50,10 +50,7 @@ namespace hsk {
         pool_info.poolSizeCount              = std::size(pool_sizes);
         pool_info.pPoolSizes                 = pool_sizes;
 
-        VkDescriptorPool imguiPool;
-        if(vkCreateDescriptorPool(context->Device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS)
-            throw std::runtime_error("TODO");
-
+        AssertVkResult(vkCreateDescriptorPool(context->Device, &pool_info, nullptr, &mImguiPool));
 
         // 2: initialize imgui library
 
@@ -61,7 +58,7 @@ namespace hsk {
         ImGui::CreateContext();
 
         //this initializes imgui for SDL
-        ImGui_ImplSDL2_InitForVulkan(mContext->Window->GetSdlWindowHandle());
+        ImGui_ImplSDL2_InitForVulkan(mContext->ContextSwapchain.Window.GetSdlWindowHandle());
 
         //this initializes imgui for Vulkan
         ImGui_ImplVulkan_InitInfo init_info = {};
@@ -69,7 +66,7 @@ namespace hsk {
         init_info.PhysicalDevice            = mContext->PhysicalDevice;
         init_info.Device                    = mContext->Device;
         init_info.Queue                     = mContext->QueueGraphics;
-        init_info.DescriptorPool            = imguiPool;
+        init_info.DescriptorPool            = mImguiPool;
         init_info.MinImageCount             = 3;
         init_info.ImageCount                = 3;
         init_info.MSAASamples               = VK_SAMPLE_COUNT_1_BIT;
@@ -130,10 +127,10 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
         mColorAttachments.clear();
-        mColorAttachments.push_back(mBackgroundImage);
+        mColorAttachments.push_back(mTargetImage);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "ImGui Depth");
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "Imgui_DepthBufferImage");
     }
 
     void ImguiStage::PrepareRenderpass()
@@ -223,18 +220,21 @@ namespace hsk {
 
     void ImguiStage::Destroy()
     {
-        DestroyResolutionDependentComponents();
-        VkDevice device = mContext->Device;
-
-        vkDestroyDescriptorPool(device, mImguiPool, nullptr);
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
+        if(mImguiPool != nullptr)
+        {
+            ImGui_ImplVulkan_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
+            ImGui::DestroyContext();
+            RasterizedRenderStage::Destroy();
+            vkDestroyDescriptorPool(mContext->Device.device, mImguiPool, nullptr);
+            mImguiPool = nullptr;
+        }
+        RasterizedRenderStage::Destroy();
     }
 
-    void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage)
+    void ImguiStage::OnResized(const VkExtent2D& extent, ManagedImage* newTargetImage)
     {
-        mBackgroundImage = newBackgroundImage;
+        mTargetImage = newTargetImage;
         RasterizedRenderStage::OnResized(extent);
     }
 

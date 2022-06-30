@@ -10,7 +10,7 @@ namespace hsk {
     class ManagedImage : public DeviceResourceBase
     {
       public:
-        inline ManagedImage() {}
+        inline ManagedImage() { mName = "Unnamed Image"; }
         inline virtual ~ManagedImage() { Cleanup(); }
 
         struct CreateInfo
@@ -82,7 +82,7 @@ namespace hsk {
         /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
-        virtual void Cleanup();
+        virtual void Cleanup() override;
         virtual bool Exists() const override { return mAllocation; }
 
         HSK_PROPERTY_CGET(Image)
@@ -110,7 +110,6 @@ namespace hsk {
         VmaAllocationInfo mAllocInfo{};
         VkDeviceSize      mSize{};
         VkExtent3D        mExtent3D{};
-        std::string       mName{};
 
         void CheckImageFormatSupport(CreateInfo& createInfo);
         void UpdateDebugNames();
