@@ -1,8 +1,8 @@
 #pragma once
+#include "base/hsk_logger.hpp"
+#include "base/hsk_vkcontext.hpp"
 #include "hsk_exception.hpp"
 #include "hsk_vkHelpers.hpp"
-#include "base/hsk_vkcontext.hpp"
-#include "base/hsk_logger.hpp"
 
 #include <memory>
 #include <stdint.h>
@@ -15,9 +15,9 @@ namespace hsk {
     class NoMoveDefaults
     {
       public:
-        inline NoMoveDefaults()                      = default;
-        NoMoveDefaults(const NoMoveDefaults& other)  = delete;
-        NoMoveDefaults(NoMoveDefaults&& other) = default;
+        inline NoMoveDefaults()                                = default;
+        NoMoveDefaults(const NoMoveDefaults& other)            = delete;
+        NoMoveDefaults(NoMoveDefaults&& other)                 = default;
         NoMoveDefaults& operator=(const NoMoveDefaults& other) = delete;
     };
 
@@ -29,9 +29,15 @@ namespace hsk {
 }  // namespace hsk
 
 #define HSK_PROPERTY_GET(member)                                                                                                                                                   \
-    inline auto& Get##member() { return m##member; }
+    inline auto& Get##member()                                                                                                                                                     \
+    {                                                                                                                                                                              \
+        return m##member;                                                                                                                                                          \
+    }
 #define HSK_PROPERTY_CGET(member)                                                                                                                                                  \
-    inline const auto& Get##member() const { return m##member; }
+    inline const auto& Get##member() const                                                                                                                                         \
+    {                                                                                                                                                                              \
+        return m##member;                                                                                                                                                          \
+    }
 #define HSK_PROPERTY_SET(member)                                                                                                                                                   \
     template <typename TIn>                                                                                                                                                        \
     inline auto& Set##member(const TIn& value)                                                                                                                                     \
@@ -44,3 +50,7 @@ namespace hsk {
     HSK_PROPERTY_GET(member)                                                                                                                                                       \
     HSK_PROPERTY_CGET(member)                                                                                                                                                      \
     HSK_PROPERTY_SET(member)
+
+#define HSK_PROPERTY_ALLGET(member)                                                                                                                                                \
+    HSK_PROPERTY_GET(member)                                                                                                                                                       \
+    HSK_PROPERTY_CGET(member)

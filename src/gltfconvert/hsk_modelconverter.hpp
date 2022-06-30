@@ -69,6 +69,7 @@ namespace hsk {
         void LoadTextures();
         void TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
         void LoadMaterials();
+        void LoadAnimations();
 
         void InitialUpdate();
 
