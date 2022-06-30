@@ -11,7 +11,9 @@ namespace hsk {
       public:
         RenderStage(){};
         inline virtual void RecordFrame(FrameRenderInfo& renderInfo) {}
-        inline virtual void Destroy() {}
+        inline virtual void Destroy() {
+          mDescriptorSet.Cleanup();
+        }
 
         virtual void OnResized(const VkExtent2D& extent){};
 

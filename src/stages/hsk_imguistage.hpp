@@ -11,7 +11,7 @@ namespace hsk {
 
         virtual void Init(const VkContext* context, ManagedImage* backgroundImage);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
-        virtual void Destroy();
+        virtual void Destroy() override;
 
         void OnResized(const VkExtent2D& extent, ManagedImage* newBackgroundImage);
 

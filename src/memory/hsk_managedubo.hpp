@@ -36,7 +36,6 @@ namespace hsk {
       public:
         using Ptr = std::shared_ptr<ManagedUbo<T_UBO>>;
 
-        inline ManagedUbo();
         explicit inline ManagedUbo(bool mapPersistent = false);
         ~ManagedUbo();
 

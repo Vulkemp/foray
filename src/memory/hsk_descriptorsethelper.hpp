@@ -38,8 +38,8 @@ namespace hsk {
             void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>& bufferInfosFirstSet);
             void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>& imageInfosFirstSet);
 
-            void AddDescriptorSet(std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            void AddDescriptorSet(std::vector<VkDescriptorImageInfo>& imageInfos);
+            void AddDescriptorSet(const std::vector<VkDescriptorBufferInfo>& bufferInfos);
+            void AddDescriptorSet(const std::vector<VkDescriptorImageInfo>& imageInfos);
 
             /// @brief Set pointer to an array of samplers, see immutable samplers description:
             /// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBinding.html#_description

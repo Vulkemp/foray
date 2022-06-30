@@ -2,6 +2,7 @@
 #include "../../hsk_glm.hpp"
 #include "../../memory/hsk_descriptorsethelper.hpp"
 #include "../../memory/hsk_managedubo.hpp"
+#include "../../utility/hsk_framerotator.hpp"
 #include "../hsk_component.hpp"
 
 namespace hsk {
@@ -29,13 +30,11 @@ namespace hsk {
 
         inline virtual ~Camera() { Cleanup(); }
 
-        HSK_PROPERTY_GET(Ubo)
-        HSK_PROPERTY_CGET(Ubo)
+        inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
+        inline glm::mat4& ViewMat() { return mViewMatrix; }
 
-        inline glm::mat4& ProjectionMat() { return mUbo.GetUbo().ProjectionMatrix; }
-        inline glm::mat4& ViewMat() { return mUbo.GetUbo().ViewMatrix; }
-
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo(size_t index);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfos();
 
         void SetViewMatrix();
         void SetProjectionMatrix();
@@ -54,16 +53,21 @@ namespace hsk {
         HSK_PROPERTY_CGET(LookatPosition)
         HSK_PROPERTY_GET(UpDirection)
         HSK_PROPERTY_CGET(UpDirection)
+        HSK_PROPERTY_GET(Ubos)
+        HSK_PROPERTY_CGET(Ubos)
 
       protected:
-        float                      mVerticalFov    = 0;
-        float                      mAspect         = 0.f;
-        float                      mNear           = 0;
-        float                      mFar            = 0;
-        glm::vec3                  mEyePosition    = glm::vec3(0.f, 0.f, -1.f);
-        glm::vec3                  mLookatPosition = glm::vec3(0.f, 0.f, 0.f);
-        glm::vec3                  mUpDirection    = glm::vec3(0.f, 1.f, 0.f);
-        ManagedUbo<CameraUboBlock> mUbo;
+        float     mVerticalFov      = 0;
+        float     mAspect           = 0.f;
+        float     mNear             = 0;
+        float     mFar              = 0;
+        glm::vec3 mEyePosition      = glm::vec3(0.f, 0.f, -1.f);
+        glm::vec3 mLookatPosition   = glm::vec3(0.f, 0.f, 0.f);
+        glm::vec3 mUpDirection      = glm::vec3(0.f, 1.f, 0.f);
+        glm::mat4 mViewMatrix       = glm::mat4(1);
+        glm::mat4 mProjectionMatrix = glm::mat4(1);
+        using UboBuffer             = ManagedUbo<CameraUboBlock>;
+        FrameRotator<UboBuffer, 2U> mUbos;
     };
 
     inline float Camera::CalculateAspect(const VkExtent2D extent)

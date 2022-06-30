@@ -169,12 +169,12 @@ namespace hsk {
         mDescriptorCount = imageInfosFirstSet.size();
     }
 
-    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(std::vector<VkDescriptorBufferInfo>& bufferInfos)
+    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(const std::vector<VkDescriptorBufferInfo>& bufferInfos)
     {
         size_t countDescriptorInfos = bufferInfos.size();
         if(mDescriptorCount > 0)
         {
-            Assert(mDescriptorCount != countDescriptorInfos,
+            Assert(mDescriptorCount == countDescriptorInfos,
                    "Cannot add buffer infos with a different amount of descriptor handles! All buffer info vectors need to be of the same size!");
         }
         else
@@ -186,12 +186,12 @@ namespace hsk {
         mBufferInfos.push_back(bufferInfos);
     }
 
-    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(std::vector<VkDescriptorImageInfo>& imageInfos)
+    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(const std::vector<VkDescriptorImageInfo>& imageInfos)
     {
         size_t countDescriptorInfos = imageInfos.size();
         if(mDescriptorCount > 0)
         {
-            Assert(mDescriptorCount != countDescriptorInfos,
+            Assert(mDescriptorCount == countDescriptorInfos,
                    "Cannot add image infos with a different amount of descriptor handles! All image info vectors need to be of the same size!");
         }
         else

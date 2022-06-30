@@ -211,10 +211,9 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfos());
 
-        uint32_t              numSets             = 1;
-        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, numSets);
+        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext);
 
         std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
                                                               .offset     = 0,
@@ -255,7 +254,7 @@ namespace hsk {
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
 
         // Instanced object
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, descriptorsets.size(), descriptorsets.data(), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
         mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);

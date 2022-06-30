@@ -2,38 +2,52 @@
 #include "../../memory/hsk_descriptorsethelper.hpp"
 #include "../../osi/hsk_event.hpp"
 #include "../hsk_scene.hpp"
+#include <spdlog/fmt/fmt.h>
 
 #undef near
 #undef far
 
 namespace hsk {
-    Camera::Camera() : mUbo(true)
+    Camera::Camera() : mUbos(true)
     {
-        mUbo.GetManagedBuffer().SetName("CameraUbo");
+        for(size_t i = 0; i < 2; i++)
+        {
+            mUbos[i].SetName(fmt::format("Camera Ubo #{}", i));
+        }
     }
 
     void Camera::InitDefault()
     {
         SetViewMatrix();
         SetProjectionMatrix();
-        mUbo.Init(GetScene()->GetContext(), true);
+        mUbos.Init(GetScene()->GetContext(), true);
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo(size_t index)
     {
         size_t numUbos = 1;  // we load the complete ubo buffer as a single ubo buffer.
 
-        std::vector<VkDescriptorBufferInfo> bufferInfos({mUbo.GetManagedBuffer().GetVkDescriptorBufferInfo()});
+        std::vector<VkDescriptorBufferInfo> bufferInfos({mUbos[index].GetManagedBuffer().GetVkDescriptorBufferInfo()});
         auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, bufferInfos);
         return descriptorInfo;
     }
 
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfos()
+    {
+        size_t numUbos = 2;  // we load the complete ubo buffer as a single ubo buffer.
+
+        std::vector<VkDescriptorBufferInfo> bufferInfos({mUbos[0].GetManagedBuffer().GetVkDescriptorBufferInfo(), mUbos[1].GetManagedBuffer().GetVkDescriptorBufferInfo()});
+        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
+        descriptorInfo->AddDescriptorSet(std::vector<VkDescriptorBufferInfo>({mUbos[0].GetManagedBuffer().GetVkDescriptorBufferInfo()}));
+        descriptorInfo->AddDescriptorSet(std::vector<VkDescriptorBufferInfo>({mUbos[1].GetManagedBuffer().GetVkDescriptorBufferInfo()}));
+        return descriptorInfo;
+    }
+
     void Camera::SetViewMatrix()
     {
-        auto& ubo = mUbo.GetUbo();
-        ubo.ViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
-        ubo.ProjectionViewMatrix = ubo.ProjectionMatrix * ubo.ViewMatrix;
+        mViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
     }
 
     void Camera::SetProjectionMatrix()
@@ -55,9 +69,7 @@ namespace hsk {
         {
             mFar = 10000.f;
         }
-        auto& ubo = mUbo.GetUbo();
-        ubo.ProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
-        ubo.ProjectionViewMatrix = ubo.ProjectionMatrix * ubo.ViewMatrix;
+        mProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
     }
 
     void Camera::SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up)
@@ -78,7 +90,15 @@ namespace hsk {
 
     void Camera::BeforeDraw(const FrameRenderInfo& renderInfo)
     {
-        mUbo.Update();
+        auto& ubo                            = mUbos[renderInfo.GetFrameNumber()];
+        auto& uboData                        = ubo.GetUbo();
+        uboData.PreviousViewMatrix           = uboData.ViewMatrix;
+        uboData.PreviousProjectionMatrix     = uboData.ProjectionMatrix;
+        uboData.PreviousProjectionViewMatrix = uboData.ProjectionViewMatrix;
+        uboData.ViewMatrix                   = mViewMatrix;
+        uboData.ProjectionMatrix             = mProjectionMatrix;
+        uboData.ProjectionViewMatrix         = mProjectionMatrix * mViewMatrix;
+        ubo.Update();
     }
     void Camera::OnResized(VkExtent2D extent)
     {
@@ -88,7 +108,7 @@ namespace hsk {
 
     void Camera::Cleanup()
     {
-        mUbo.Cleanup();
+        mUbos.Cleanup();
     }
 
 }  // namespace hsk
