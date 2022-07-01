@@ -55,14 +55,16 @@ namespace hsk {
         }
         return out;
     }
-
+    
     Event::ptr OsManager::PollEvent()
     {
-        Event::ptr out;
+        Event::ptr out = nullptr;
         SDL_Event  rawevent;
         if(SDL_PollEvent(&rawevent) != 0)
         {
             TranslateSDLEvent(rawevent, out);
+            if(out != nullptr)
+                out->SetRawSdlEvent(rawevent);
         }
         return out;
     }

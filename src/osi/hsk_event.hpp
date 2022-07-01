@@ -60,6 +60,8 @@ namespace hsk {
         inline Event(const Event& other)            = default;
         inline Event& operator=(const Event& other) = default;
 
+        SDL_Event* GetRawSdlEvent() { return &mRawSdlEventData; }
+        void       SetRawSdlEvent(SDL_Event& event) { mRawSdlEventData = event; }
         virtual ~Event() {}
 
       protected:
@@ -67,6 +69,7 @@ namespace hsk {
         const uint32_t mTimestamp;
         const EType    mType;
         int8_t         mCustomType;
+        SDL_Event      mRawSdlEventData;
     };
 
     class EventInput : public Event

@@ -14,7 +14,7 @@ namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
     void ImguiStage::Init(const VkContext* context, ManagedImage* backgroundImage)
     {
-        mContext         = context;
+        mContext     = context;
         mTargetImage = backgroundImage;
 
         if(mTargetImage == nullptr)
@@ -237,6 +237,8 @@ namespace hsk {
         mTargetImage = newTargetImage;
         RasterizedRenderStage::OnResized(extent);
     }
+
+    void ImguiStage::ProcessSdlEvent(SDL_Event* sdlEvent) { ImGui_ImplSDL2_ProcessEvent(sdlEvent); }
 
 
     void ImguiStage::RecordFrame(FrameRenderInfo& renderInfo)

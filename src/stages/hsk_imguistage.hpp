@@ -18,6 +18,8 @@ namespace hsk {
         /// @brief When the window has been resized, update the target image.
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newTargetImage);
 
+        void ProcessSdlEvent(SDL_Event* sdlEvent);
+
       protected:
         std::vector<VkClearValue>          mClearValues;
         ManagedImage*                      mTargetImage{};
