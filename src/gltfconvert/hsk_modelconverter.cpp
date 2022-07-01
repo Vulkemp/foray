@@ -99,11 +99,14 @@ namespace hsk {
 
         logger()->info("Model Load: Initialising scene state ...");
 
-        // Discover and load
         for(int32_t nodeIndex : mGltfScene->nodes)
         {
             RecursivelyTranslateNodes(nodeIndex, nullptr);
         }
+
+        logger()->info("Model Load: Loading Animations ...");
+
+        LoadAnimations();
 
         InitialUpdate();
 

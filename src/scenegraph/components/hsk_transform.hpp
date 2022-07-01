@@ -16,7 +16,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(GlobalMatrix)
 
         void RecalculateLocalMatrix();
-        void RecalculateGlobalMatrix(Transform* parentTransform);
+        void RecalculateGlobalMatrix(Transform* parentTransform = nullptr);
 
       protected:
         glm::vec3 mTranslation  = {};

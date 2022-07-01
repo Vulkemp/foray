@@ -13,4 +13,9 @@ namespace hsk {
     class MaterialBuffer;
     class TextureStore;
     class GeometryBufferSet;
+    class Animation;
+    struct AnimationSampler;
+    struct AnimationChannel;
+    struct PlaybackConfig;
+    class AnimationDirector;
 }  // namespace hsk
