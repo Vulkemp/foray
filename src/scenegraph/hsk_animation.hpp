@@ -22,7 +22,7 @@ namespace hsk {
     {
       public:
         float     Time;
-        glm::vec3 Value;
+        glm::vec4 Value;
     };
 
     struct AnimationSampler
@@ -31,11 +31,11 @@ namespace hsk {
         glm::vec3 SampleVec(float time) const;
         glm::quat SampleQuat(float time) const;
 
-        static glm::vec3 InterpolateStep(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::vec3 InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::vec4 InterpolateStep(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::vec4 InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
         static glm::quat InterpolateLinearQuat(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::vec3 InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::quat ReinterpreteAsQuat(glm::vec3);
+        static glm::vec4 InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::quat ReinterpreteAsQuat(glm::vec4);
 
         EAnimationInterpolation        Interpolation = {};
         std::vector<AnimationKeyframe> Keyframes     = {};

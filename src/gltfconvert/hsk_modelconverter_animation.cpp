@@ -182,7 +182,7 @@ namespace hsk {
                     for(size_t index = 0; index < accessor.count; index++)
                     {
                         glm::vec3 value = buf[index];
-                        sampler.Keyframes[index].Value = value;
+                        sampler.Keyframes[index].Value = glm::vec4(value, 1.f);
                     }
                     break;
                 }
