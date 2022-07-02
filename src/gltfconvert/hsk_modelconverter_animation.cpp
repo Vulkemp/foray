@@ -107,13 +107,29 @@ namespace hsk {
         AnimationSampler sampler;
         auto&            gltfSampler = gltfAnimation.samplers[samplerIndex];
 
-        // Read sampler input time values
+        auto interpolation = interpolationMap.find(gltfSampler.interpolation);
+        if(interpolation != interpolationMap.end())
         {
+            sampler.Interpolation = interpolation->second;
+        }
+        else
+        {
+            sampler.Interpolation = EAnimationInterpolation::Linear;
+            logger()->warn("Model Load: In animation \"{}\", sampler #{}: Unable to match \"{}\" to an interpolation type! Falling back to linear!", animation.GetName(),
+                           samplerIndex, gltfSampler.interpolation);
+        }
+
+        // Keyframe time points
+        std::vector<float> times;
+
+        {  // Read sampler input time values
             if(gltfSampler.input < 0)
             {
                 logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
                 return;
             }
+            times.reserve(gltfSampler.input);
+
             const tinygltf::Accessor&   accessor   = mGltfModel.accessors[gltfSampler.input];
             const tinygltf::BufferView& bufferView = mGltfModel.bufferViews[accessor.bufferView];
             const tinygltf::Buffer&     buffer     = mGltfModel.buffers[bufferView.buffer];
@@ -128,31 +144,17 @@ namespace hsk {
             const float* buf = reinterpret_cast<const float*>(buffer.data.data() + (accessor.byteOffset + bufferView.byteOffset));
             for(size_t index = 0; index < accessor.count; index++)
             {
-                sampler.Keyframes.push_back(AnimationKeyframe{.Time=buf[index],.Value={}});
-            }
-
-            for(auto keyframe : sampler.Keyframes)
-            {
-                animation.SetStart(std::min(animation.GetStart(), keyframe.Time));
-                animation.SetEnd(std::max(animation.GetEnd(), keyframe.Time));
+                float time = buf[index];
+                times.push_back(time);
+                animation.SetStart(std::min(animation.GetStart(), time));
+                animation.SetEnd(std::max(animation.GetEnd(), time));
             }
         }
 
+        // Keyframe output values
+        std::vector<glm::vec4> values;
 
-        auto interpolation = interpolationMap.find(gltfSampler.interpolation);
-        if(interpolation != interpolationMap.end())
-        {
-            sampler.Interpolation = interpolation->second;
-        }
-        else
-        {
-            sampler.Interpolation = EAnimationInterpolation::Linear;
-            logger()->warn("Model Load: In animation \"{}\", sampler #{}: Unable to match \"{}\" to an interpolation type! Falling back to linear!", animation.GetName(),
-                           samplerIndex, gltfSampler.interpolation);
-        }
-
-        // Read sampler output T/R/S values
-        {
+        {  // Read keyframe property values
             if(gltfSampler.input < 0)
             {
                 logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
@@ -163,11 +165,6 @@ namespace hsk {
             const tinygltf::BufferView& bufferView = mGltfModel.bufferViews[accessor.bufferView];
             const tinygltf::Buffer&     buffer     = mGltfModel.buffers[bufferView.buffer];
 
-            if (accessor.count != sampler.Keyframes.size()){
-                logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count! Skipping sampler!", animation.GetName(), samplerIndex,
-                               accessor.componentType);
-                return;
-            }
             if(accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
             {
                 logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
@@ -182,7 +179,7 @@ namespace hsk {
                     for(size_t index = 0; index < accessor.count; index++)
                     {
                         glm::vec3 value = buf[index];
-                        sampler.Keyframes[index].Value = glm::vec4(value, 1.f);
+                        values.push_back(glm::vec4(value, 1.f));
                     }
                     break;
                 }
@@ -191,7 +188,7 @@ namespace hsk {
                     for(size_t index = 0; index < accessor.count; index++)
                     {
                         glm::vec4 value = buf[index];
-                        sampler.Keyframes[index].Value = value;
+                        values.push_back(value);
                     }
                     break;
                 }
@@ -199,6 +196,41 @@ namespace hsk {
                     logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
                                    accessor.type);
                     return;
+                }
+            }
+        }
+
+        { // Build Keyframes
+            sampler.Keyframes.reserve(times.size());
+
+            if(interpolation->second == EAnimationInterpolation::Cubicspline)
+            {
+                if(times.size() * 3 != values.size())
+                {
+                    logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count (x3)! Skipping sampler!", animation.GetName(),
+                                   samplerIndex);
+                    return;
+                }
+                for(int32_t i = 0; i < times.size(); i++)
+                {
+                    const glm::vec4& value      = values[(i * 3) + 1];
+                    const glm::vec4& intangent  = values[(i * 3) + 0];
+                    const glm::vec4& outtangent = values[(i * 3) + 2];
+                    sampler.Keyframes.push_back(AnimationKeyframe(times[i], value, intangent, outtangent));
+                }
+            }
+            else
+            {
+                if(times.size() != values.size())
+                {
+                    logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count! Skipping sampler!", animation.GetName(),
+                                   samplerIndex);
+                    return;
+                }
+                for(int32_t i = 0; i < times.size(); i++)
+                {
+                    const glm::vec4& value = values[i];
+                    sampler.Keyframes.push_back(AnimationKeyframe(times[i], value));
                 }
             }
         }

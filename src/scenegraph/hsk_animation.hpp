@@ -21,8 +21,17 @@ namespace hsk {
     struct AnimationKeyframe
     {
       public:
-        float     Time;
+        inline AnimationKeyframe() {}
+        inline AnimationKeyframe(float time, const glm::vec4& value) : Time(time), Value(value) {}
+        inline AnimationKeyframe(float time, const glm::vec4& value, const glm::vec4& intangent, const glm::vec4& outtangent)
+            : Time(time), Value(value), InTangent(intangent), OutTangent(outtangent)
+        {
+        }
+
+        float     Time = 0.f;
         glm::vec4 Value;
+        glm::vec4 InTangent;
+        glm::vec4 OutTangent;
     };
 
     struct AnimationSampler
@@ -40,7 +49,7 @@ namespace hsk {
         EAnimationInterpolation        Interpolation = {};
         std::vector<AnimationKeyframe> Keyframes     = {};
 
-        protected:
+      protected:
         void SelectKeyframe(float time, AnimationKeyframe& lower, AnimationKeyframe& upper) const;
     };
     struct AnimationChannel

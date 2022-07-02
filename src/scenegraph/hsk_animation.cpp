@@ -102,8 +102,7 @@ namespace hsk {
     glm::vec4 AnimationSampler::InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
     {
         float dist = upper.Time - lower.Time;
-        float diff = time - lower.Time;
-        float t    = diff / dist;
+        float t    = (time - lower.Time) / dist;
         return glm::mix(upper.Value, lower.Value, t);
     }
 
@@ -112,15 +111,18 @@ namespace hsk {
         glm::quat lowerQuat = ReinterpreteAsQuat(lower.Value);
         glm::quat upperQuat = ReinterpreteAsQuat(upper.Value);
         float     dist      = upper.Time - lower.Time;
-        float     diff      = time - lower.Time;
-        float     t         = diff / dist;
+        float     t         = (time - lower.Time) / dist;
         return glm::normalize(glm::slerp(upperQuat, lowerQuat, t));
     }
 
     glm::vec4 AnimationSampler::InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
     {
-        // TODO Cubic spline interpolation
-        return InterpolateStep(time, lower, upper);
+        float dist     = upper.Time - lower.Time;
+        float t        = (time - lower.Time) / dist;
+        float tSquared = t * t;
+        float tCubed   = t * tSquared;
+        return (2 * tCubed - 3 * tSquared + 1) * lower.Value + dist * (tCubed - 2 * tSquared + t) * lower.OutTangent + (-2 * tCubed + 3 * tSquared) * upper.Value
+               + dist * (tCubed - tSquared) * upper.InTangent;
     }
 
     glm::quat AnimationSampler::ReinterpreteAsQuat(glm::vec4 vec)
