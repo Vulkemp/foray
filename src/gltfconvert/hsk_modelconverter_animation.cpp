@@ -181,7 +181,8 @@ namespace hsk {
                     const glm::vec3* buf = reinterpret_cast<const glm::vec3*>(buffer.data.data() + (accessor.byteOffset + bufferView.byteOffset));
                     for(size_t index = 0; index < accessor.count; index++)
                     {
-                        sampler.Keyframes[index].Value = glm::vec4(buf[index], 0.0f);
+                        glm::vec3 value = buf[index];
+                        sampler.Keyframes[index].Value = value;
                     }
                     break;
                 }
@@ -189,7 +190,8 @@ namespace hsk {
                     const glm::vec4* buf = reinterpret_cast<const glm::vec4*>(buffer.data.data() + (accessor.byteOffset + bufferView.byteOffset));
                     for(size_t index = 0; index < accessor.count; index++)
                     {
-                        sampler.Keyframes[index].Value = glm::vec4(buf[index]);
+                        glm::vec4 value = buf[index];
+                        sampler.Keyframes[index].Value = value;
                     }
                     break;
                 }

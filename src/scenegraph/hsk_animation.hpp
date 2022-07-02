@@ -4,14 +4,14 @@
 #include "hsk_scenegraph_declares.hpp"
 
 namespace hsk {
-    enum EAnimationInterpolation
+    enum class EAnimationInterpolation
     {
         Linear,
         Step,
         Cubicspline
     };
 
-    enum EAnimationTargetPath
+    enum class EAnimationTargetPath
     {
         Translation,
         Rotation,
@@ -22,17 +22,26 @@ namespace hsk {
     {
       public:
         float     Time;
-        glm::vec4 Value;
+        glm::vec3 Value;
     };
 
     struct AnimationSampler
     {
       public:
-        glm::vec4 SampleVec4(float time) const;
-        glm::vec4 SampleQuat(float time) const;
+        glm::vec3 SampleVec(float time) const;
+        glm::quat SampleQuat(float time) const;
+
+        static glm::vec3 InterpolateStep(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::vec3 InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::quat InterpolateLinearQuat(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::vec3 InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::quat ReinterpreteAsQuat(glm::vec3);
 
         EAnimationInterpolation        Interpolation = {};
         std::vector<AnimationKeyframe> Keyframes     = {};
+
+        protected:
+        void SelectKeyframe(float time, AnimationKeyframe& lower, AnimationKeyframe& upper) const;
     };
     struct AnimationChannel
     {
