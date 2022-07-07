@@ -207,8 +207,8 @@ namespace hsk {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->MakeDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->MakeDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo());
+        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->GetDescriptorInfo());
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfos());

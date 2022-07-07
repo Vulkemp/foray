@@ -60,7 +60,7 @@ namespace hsk {
         ManagedBuffer& SetName(std::string_view name);
 
         inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
-        VkDescriptorBufferInfo        FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo);
+        void                          FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo);
 
       protected:
         const VkContext*  mContext{};

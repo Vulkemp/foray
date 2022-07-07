@@ -96,7 +96,7 @@ namespace hsk {
         return *this;
     }
 
-    VkDescriptorBufferInfo ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo)
+    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo)
     {
         bufferInfo->buffer = mBuffer;
         bufferInfo->offset = 0;
