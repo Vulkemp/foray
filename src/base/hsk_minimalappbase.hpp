@@ -50,6 +50,8 @@ namespace hsk {
         int32_t Run();
 
       protected:
+        float           mFps{0};
+        float           mMsPerFrame{0};
         AppUpdateTiming mUpdateTiming;
         OsManager       mOsManager;
         EState          mState = EState::Uninitialized;

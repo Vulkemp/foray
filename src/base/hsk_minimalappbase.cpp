@@ -53,6 +53,9 @@ namespace hsk {
 
             timespan_t balance = timespan_t(0);  // The balance variable is meant to smooth out the inconsistent sleep durations over time
 
+            timepoint_t fpsLastTick = clock.now();
+            uint32_t    fpsFrameCounter = 0;
+
             while(this->State() == EState::Running)
             {
                 BasePollEvents();  // First, poll for new OS events
@@ -62,11 +65,25 @@ namespace hsk {
                 timepoint_t now   = clock.now();
                 timespan_t  delta = now - lastTick;
 
+                // fps calculation
+                {
+                    timespan_t sinceLastFPS = clock.now() - fpsLastTick;
+                    if(sinceLastFPS.count() > 1)
+                    {
+                        mFps = (float)fpsFrameCounter;
+                        fpsFrameCounter = 0;
+                        fpsLastTick     = clock.now();
+                    }
+                }
+                
+
                 if(delta + balance >= timePerTick)
                 {
                     // sufficient time has past since last tick, so we update
                     lastTick = now;
                     balance += delta - timePerTick;
+
+                    fpsFrameCounter++;
 
                     if(balance.count() > mUpdateTiming.SecondsPerUpdate() * 5)
                     {
@@ -78,6 +95,8 @@ namespace hsk {
                     {
                         Render(delta.count());
                     }
+
+                    mMsPerFrame = delta.count();
                 }
                 else
                 {
