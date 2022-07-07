@@ -1,8 +1,8 @@
 #include "hsk_managedbuffer.hpp"
 #include "../hsk_vkHelpers.hpp"
+#include "../utility/hsk_fmtutilities.hpp"
 #include "hsk_commandbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
-#include "../utility/hsk_fmtutilities.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace hsk {
@@ -12,7 +12,8 @@ namespace hsk {
         mContext = context;
         mSize    = createInfo.BufferCreateInfo.size;
         vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
-        if (createInfo.Name.size()){
+        if(createInfo.Name.size())
+        {
             mName = createInfo.Name;
         }
         if(mName.length() > 0 && mContext->DebugEnabled)
@@ -64,12 +65,25 @@ namespace hsk {
         mIsMapped = false;
     }
 
-    void ManagedBuffer::MapAndWrite(const void* data)
+    void ManagedBuffer::MapAndWrite(const void* data, size_t size)
     {
+        if(size == 0)
+        {
+            size = (size_t)mAllocationInfo.size;
+        }
         void* mappedPtr = nullptr;
         AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &mappedPtr));
-        memcpy(mappedPtr, data, (size_t)mAllocationInfo.size);
+        memcpy(mappedPtr, data, size);
         vmaUnmapMemory(mContext->Allocator, mAllocation);
+    }
+
+    VkDeviceAddress ManagedBuffer::GetDeviceAddress()
+    {
+        VkBufferDeviceAddressInfo addressInfo;
+        addressInfo.sType  = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        addressInfo.buffer = mBuffer;
+        addressInfo.pNext  = nullptr;
+        return vkGetBufferDeviceAddress(mContext->Device, &addressInfo);
     }
 
     ManagedBuffer& ManagedBuffer::SetName(std::string_view name)
@@ -80,6 +94,13 @@ namespace hsk {
             UpdateDebugNames();
         }
         return *this;
+    }
+
+    VkDescriptorBufferInfo ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo)
+    {
+        bufferInfo->buffer = mBuffer;
+        bufferInfo->offset = 0;
+        bufferInfo->range  = mSize;
     }
 
     void ManagedBuffer::UpdateDebugNames()
@@ -122,8 +143,8 @@ namespace hsk {
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data);
 
-        CommandBuffer singleTimeCmdBuf;
-        VkCommandBuffer         commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        CommandBuffer   singleTimeCmdBuf;
+        VkCommandBuffer commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
         VkBufferCopy copy{};
         copy.srcOffset = 0;

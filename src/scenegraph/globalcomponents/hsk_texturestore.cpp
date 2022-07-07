@@ -71,21 +71,29 @@ namespace hsk {
         return sampler;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> TextureStore::MakeDescriptorInfo(VkShaderStageFlags shaderStage)
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> TextureStore::GetDescriptorInfo(VkShaderStageFlags shaderStage)
     {
-        auto                               descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        std::vector<VkDescriptorImageInfo> imageInfos;
-
-        imageInfos.resize(mTextures.size());
-        for(size_t i = 0; i < mTextures.size(); i++)
+        if(mDescriptorInfo != nullptr)
         {
-            imageInfos[i].imageLayout = mTextures[i].Image->GetImageLayout();
-            imageInfos[i].imageView   = mTextures[i].Image->GetImageView();
-            imageInfos[i].sampler     = mTextures[i].Sampler;
+            return mDescriptorInfo;
         }
 
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, imageInfos);
-        return descriptorInfo;
+        UpdateImageInfos();
+
+        mDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        mDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, &mDescriptorImageInfos);
+        return mDescriptorInfo;
+    }
+
+    void TextureStore::UpdateImageInfos()
+    {
+        mDescriptorImageInfos.resize(mTextures.size());
+        for(size_t i = 0; i < mTextures.size(); i++)
+        {
+            mDescriptorImageInfos[i].imageLayout = mTextures[i].Image->GetImageLayout();
+            mDescriptorImageInfos[i].imageView   = mTextures[i].Image->GetImageView();
+            mDescriptorImageInfos[i].sampler     = mTextures[i].Sampler;
+        }
     }
 
 }  // namespace hsk

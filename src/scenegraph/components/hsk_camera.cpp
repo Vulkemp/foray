@@ -10,6 +10,9 @@
 namespace hsk {
     Camera::Camera() : mUbos(true)
     {
+        mUboDescriptorBufferInfosSet1.resize(1);
+        mUboDescriptorBufferInfosSet2.resize(1);
+
         for(size_t i = 0; i < 2; i++)
         {
             mUbos[i].SetName(fmt::format("Camera Ubo #{}", i));
@@ -23,26 +26,19 @@ namespace hsk {
         mUbos.Init(GetScene()->GetContext(), true);
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfo(size_t index)
-    {
-        size_t numUbos = 1;  // we load the complete ubo buffer as a single ubo buffer.
-
-        std::vector<VkDescriptorBufferInfo> bufferInfos({mUbos[index].GetManagedBuffer().GetVkDescriptorBufferInfo()});
-        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, bufferInfos);
-        return descriptorInfo;
-    }
-
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfos()
     {
-        size_t numUbos = 2;  // we load the complete ubo buffer as a single ubo buffer.
+        if(mUboDescriptorInfos != nullptr)
+        {
+            return mUboDescriptorInfos;
+        }
 
-        std::vector<VkDescriptorBufferInfo> bufferInfos({mUbos[0].GetManagedBuffer().GetVkDescriptorBufferInfo(), mUbos[1].GetManagedBuffer().GetVkDescriptorBufferInfo()});
-        auto                                descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
-        descriptorInfo->AddDescriptorSet(std::vector<VkDescriptorBufferInfo>({mUbos[0].GetManagedBuffer().GetVkDescriptorBufferInfo()}));
-        descriptorInfo->AddDescriptorSet(std::vector<VkDescriptorBufferInfo>({mUbos[1].GetManagedBuffer().GetVkDescriptorBufferInfo()}));
-        return descriptorInfo;
+        UpdateUboDescriptorBufferInfos();
+        mUboDescriptorInfos = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        mUboDescriptorInfos->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
+        mUboDescriptorInfos->AddDescriptorSet(&mUboDescriptorBufferInfosSet1);
+        mUboDescriptorInfos->AddDescriptorSet(&mUboDescriptorBufferInfosSet2);
+        return mUboDescriptorInfos;
     }
 
     void Camera::SetViewMatrix()

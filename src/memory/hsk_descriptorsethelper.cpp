@@ -97,7 +97,7 @@ namespace hsk {
                 descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 descriptorWrite.dstSet           = mDescriptorSets[setIndex];
                 descriptorWrite.dstBinding       = descriptorLocation.Binding;
-                descriptorWrite.dstArrayElement  = 0;  // This offsets into descriptorLocation.DescriptorInfo->BufferInfos/ImageInfos, which always starts at 0.
+                descriptorWrite.dstArrayElement  = 0;  // This offsets into descriptorLocation.DescriptorInfo->BufferInfos/ImageInfos, which always starts at 0 in this class.
                 descriptorWrite.descriptorType   = descriptorLocation.Descriptor->mDescriptorType;
                 descriptorWrite.descriptorCount  = 0;  // number of descriptors (used for descriptor arrays), set below individually
                 descriptorWrite.pBufferInfo      = nullptr;
@@ -110,8 +110,8 @@ namespace hsk {
 
                     // if only one buffer info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index                  = numBufferInfos > 1 ? setIndex : 0;
-                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mBufferInfos[index].size();
-                    descriptorWrite.pBufferInfo     = descriptorLocation.Descriptor->mBufferInfos[index].data();
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mBufferInfos[index]->size();
+                    descriptorWrite.pBufferInfo     = descriptorLocation.Descriptor->mBufferInfos[index]->data();
                     descriptorWrites.push_back(descriptorWrite);
                     continue;
                 }
@@ -121,9 +121,18 @@ namespace hsk {
                 {
                     // if only one image info specified, use the first(0) for all descriptor sets, otherwise use set index i
                     uint32_t index                  = numImageInfos > 1 ? setIndex : 0;
-                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mImageInfos[index].size();
-                    descriptorWrite.pImageInfo      = descriptorLocation.Descriptor->mImageInfos[index].data();
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mImageInfos[index]->size();
+                    descriptorWrite.pImageInfo      = descriptorLocation.Descriptor->mImageInfos[index]->data();
                 }
+
+                uint32_t numPNext = descriptorLocation.Descriptor->mPNextArray.size();
+                if(numPNext > 0)
+                {
+                    // set pNext
+                    uint32_t index        = numPNext > 1 ? setIndex : 0;
+                    descriptorWrite.pNext = descriptorLocation.Descriptor->mPNextArray[index];
+                }
+
                 if(descriptorWrite.descriptorCount)
                 {
                     descriptorWrites.push_back(descriptorWrite);
@@ -158,46 +167,50 @@ namespace hsk {
         mShaderStageFlags = shaderStageFlags;
     }
 
-    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>& bufferInfosFirstSet)
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType                     type,
+                                                   VkShaderStageFlags                   shaderStageFlags,
+                                                   std::vector<VkDescriptorBufferInfo>* bufferInfosFirstSet)
     {
         mDescriptorType   = type;
         mShaderStageFlags = shaderStageFlags;
         mBufferInfos.push_back(bufferInfosFirstSet);
-        mDescriptorCount = bufferInfosFirstSet.size();
+        mDescriptorCount = bufferInfosFirstSet->size();
     }
 
-    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>& imageInfosFirstSet)
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType                    type,
+                                                   VkShaderStageFlags                  shaderStageFlags,
+                                                   std::vector<VkDescriptorImageInfo>* imageInfosFirstSet)
     {
         mDescriptorType   = type;
         mShaderStageFlags = shaderStageFlags;
         mImageInfos.push_back(imageInfosFirstSet);
-        mDescriptorCount = imageInfosFirstSet.size();
+        mDescriptorCount = imageInfosFirstSet->size();
     }
 
-    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(const std::vector<VkDescriptorBufferInfo>& bufferInfos)
+    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(std::vector<VkDescriptorBufferInfo>* bufferInfos)
     {
-        size_t countDescriptorInfos = bufferInfos.size();
+        size_t countDescriptorInfos = bufferInfos->size();
         if(mDescriptorCount > 0)
         {
             Assert(mDescriptorCount == countDescriptorInfos,
-                   "Cannot add buffer infos with a different amount of descriptor handles! All buffer info vectors need to be of the same size!");
+                   "Cannot add buffer infos with a different amount of descriptor handles! All buffer info vectors need to be of the same size for each added set!");
         }
         else
         {
             // first set added
             mDescriptorCount = static_cast<uint32_t>(countDescriptorInfos);
         }
-
+        
         mBufferInfos.push_back(bufferInfos);
     }
 
-    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(const std::vector<VkDescriptorImageInfo>& imageInfos)
+    void DescriptorSetHelper::DescriptorInfo::AddDescriptorSet(std::vector<VkDescriptorImageInfo>* imageInfos)
     {
-        size_t countDescriptorInfos = imageInfos.size();
+        size_t countDescriptorInfos = imageInfos->size();
         if(mDescriptorCount > 0)
         {
             Assert(mDescriptorCount == countDescriptorInfos,
-                   "Cannot add image infos with a different amount of descriptor handles! All image info vectors need to be of the same size!");
+                   "Cannot add image infos with a different amount of descriptor handles! All image info vectors need to be of the same size for each added set!");
         }
         else
         {

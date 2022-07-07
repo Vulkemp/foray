@@ -18,11 +18,13 @@ namespace hsk {
         void UpdateDeviceLocal();
         void Cleanup();
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo();
 
         inline virtual ~MaterialBuffer() { Cleanup(); }
 
       protected:
         ManagedVectorBuffer<MaterialBufferEntry> mBuffer = {};
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfo;
+        std::vector<VkDescriptorBufferInfo>                  mDescriptorBufferInfos;
     };
 }  // namespace hsk

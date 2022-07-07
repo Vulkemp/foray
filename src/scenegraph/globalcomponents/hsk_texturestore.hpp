@@ -1,7 +1,7 @@
 #pragma once
+#include "../../memory/hsk_descriptorsethelper.hpp"
 #include "../../memory/hsk_managedimage.hpp"
 #include "../hsk_component.hpp"
-#include "../../memory/hsk_descriptorsethelper.hpp"
 #include <map>
 
 namespace hsk {
@@ -24,10 +24,14 @@ namespace hsk {
 
         VkSampler GetOrCreateSampler(const VkSamplerCreateInfo& samplerCI);
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfo(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
 
       protected:
         std::vector<SampledTexture> mTextures;
         std::map<size_t, VkSampler> mSamplers;
+
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfo;
+        std::vector<VkDescriptorImageInfo>                   mDescriptorImageInfos;
+        void                                                 UpdateImageInfos();
     };
 }  // namespace hsk

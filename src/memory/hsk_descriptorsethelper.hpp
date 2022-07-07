@@ -31,24 +31,24 @@ namespace hsk {
     {
       public:
  
-        /// @brief To use this class, use one of the init methods to set descriptor type, shaderstage flags and the descriptor handles.
+        /// @brief Each DescriptorInfo corresponds to a descriptor write. It can specify to how many sets it must be written, by adding more values.
+        /// ATTENTION: All memory is only referenced (BufferInfos, ImageInfos, pNext Structures) is handled externally
+        /// and must be kept valid in order to use the DescriptorInfo.
         class DescriptorInfo
         {
           public:
             void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags);
-            void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>& bufferInfosFirstSet);
-            void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>& imageInfosFirstSet);
+            void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>* bufferInfosFirstSet);
+            void Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>* imageInfosFirstSet);
 
-            void AddDescriptorSet(const std::vector<VkDescriptorBufferInfo>& bufferInfos);
-            void AddDescriptorSet(const std::vector<VkDescriptorImageInfo>& imageInfos);
+            void AddDescriptorSet(std::vector<VkDescriptorBufferInfo>* bufferInfos);
+            void AddDescriptorSet(std::vector<VkDescriptorImageInfo>* imageInfos);
+            void AddPNext(void* pNext) { mPNextArray.push_back(pNext); }
 
             /// @brief Set pointer to an array of samplers, see immutable samplers description:
             /// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBinding.html#_description
             void SetImmutableSamplers(const VkSampler* immutableSamplers) { mImmutableSamplers = immutableSamplers; }
 
-            /// @brief Use this to write all descriptor set data manually.
-            std::vector<std::vector<VkDescriptorBufferInfo>>& GetBufferInfos() { return mBufferInfos; }
-            std::vector<std::vector<VkDescriptorImageInfo>>&  GetImageInfos() { return mImageInfos; }
           protected:
             /// @brief The amount of descriptors this binding has attached in each set.
             uint32_t           mDescriptorCount{0};
@@ -61,8 +61,11 @@ namespace hsk {
             // So the first vector size refers to number of sets and the second to the DescriptorCount in the descriptor layout binding.
             // The size of the first vector in buffer/image infos must either be ONE (use same descriptor in all sets)
             // or equal to the amount of sets that shall be created (ONE descriptor per set)
-            std::vector<std::vector<VkDescriptorBufferInfo>> mBufferInfos{};
-            std::vector<std::vector<VkDescriptorImageInfo>>  mImageInfos{};
+            std::vector<std::vector<VkDescriptorBufferInfo>*> mBufferInfos{};
+            std::vector<std::vector<VkDescriptorImageInfo>*>  mImageInfos{};
+
+            /// @brief For acceleration structures etc. an array of pNext pointers can be passed that will be used for the descriptor writes.
+            std::vector<void*>                               mPNextArray;
 
             friend DescriptorSetHelper;
         };

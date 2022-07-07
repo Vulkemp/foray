@@ -39,7 +39,8 @@ namespace hsk {
         /// - map the buffer
         /// - write data given in data ptr with given size
         /// - unmap buffer
-        void MapAndWrite(const void* data);
+        /// If size is left to 0, attempts to write full buffer size.
+        void MapAndWrite(const void* data, size_t size = 0);
 
         inline virtual ~ManagedBuffer()
         {
@@ -54,9 +55,12 @@ namespace hsk {
         HSK_PROPERTY_CGET(Allocation);
         HSK_PROPERTY_CGET(Name);
 
+        VkDeviceAddress GetDeviceAddress();
+
         ManagedBuffer& SetName(std::string_view name);
 
         inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
+        VkDescriptorBufferInfo        FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo);
 
       protected:
         const VkContext*  mContext{};

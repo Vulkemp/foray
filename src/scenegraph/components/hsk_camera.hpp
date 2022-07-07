@@ -33,7 +33,6 @@ namespace hsk {
         inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
         inline glm::mat4& ViewMat() { return mViewMatrix; }
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfo(size_t index);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfos();
 
         void SetViewMatrix();
@@ -68,10 +67,17 @@ namespace hsk {
         glm::mat4 mProjectionMatrix = glm::mat4(1);
         using UboBuffer             = ManagedUbo<CameraUboBlock>;
         FrameRotator<UboBuffer, 2U> mUbos;
+
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mUboDescriptorInfos;
+        std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet1;
+        std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet2;
+        void                                                 UpdateUboDescriptorBufferInfos();
     };
 
-    inline float Camera::CalculateAspect(const VkExtent2D extent)
+    inline float Camera::CalculateAspect(const VkExtent2D extent) { return (float)extent.width / (float)extent.height; }
+    inline void  Camera::UpdateUboDescriptorBufferInfos()
     {
-        return (float)extent.width / (float)extent.height;
+        mUbos[0].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet1[0]);
+        mUbos[1].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet2[0]);
     }
 }  // namespace hsk
