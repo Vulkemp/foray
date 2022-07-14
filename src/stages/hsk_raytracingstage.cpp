@@ -16,6 +16,12 @@ namespace hsk {
         mContext = context;
         mScene   = scene;
 
+        VkPhysicalDeviceProperties2 prop2{};
+        prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        prop2.pNext = &mRayTracingPipelineProperties;
+        mRayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+        vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice, &prop2);
+
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
 
@@ -195,9 +201,9 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo());
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfos());
+        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 
-        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
+        mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }
 
     void RaytracingStage::CreatePipelineLayout()
@@ -376,7 +382,7 @@ namespace hsk {
 
         mAcclerationStructureDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
-        mAcclerationStructureDescriptorInfo->AddPNext(&mDescriptorAccelerationStructureInfo);
+        mAcclerationStructureDescriptorInfo->AddPNext(&mDescriptorAccelerationStructureInfo, 1);
         return mAcclerationStructureDescriptorInfo;
     }
 

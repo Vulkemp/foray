@@ -43,7 +43,12 @@ namespace hsk {
 
             void AddDescriptorSet(std::vector<VkDescriptorBufferInfo>* bufferInfos);
             void AddDescriptorSet(std::vector<VkDescriptorImageInfo>* imageInfos);
-            void AddPNext(void* pNext) { mPNextArray.push_back(pNext); }
+
+            /// @brief Add a pNext to the descriptor write
+            /// @param pNext - A valid pointer to the existing pNextStructure.
+            /// @param descriptorCount - The number of objects that are referenced by pNext, aka descriptorCount;
+            void AddPNext(void* pNext, uint32_t descriptorCount);
+            
 
             /// @brief Set pointer to an array of samplers, see immutable samplers description:
             /// https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorSetLayoutBinding.html#_description

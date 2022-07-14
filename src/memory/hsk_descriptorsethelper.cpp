@@ -167,9 +167,7 @@ namespace hsk {
         mShaderStageFlags = shaderStageFlags;
     }
 
-    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType                     type,
-                                                   VkShaderStageFlags                   shaderStageFlags,
-                                                   std::vector<VkDescriptorBufferInfo>* bufferInfosFirstSet)
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorBufferInfo>* bufferInfosFirstSet)
     {
         mDescriptorType   = type;
         mShaderStageFlags = shaderStageFlags;
@@ -177,9 +175,7 @@ namespace hsk {
         mDescriptorCount = bufferInfosFirstSet->size();
     }
 
-    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType                    type,
-                                                   VkShaderStageFlags                  shaderStageFlags,
-                                                   std::vector<VkDescriptorImageInfo>* imageInfosFirstSet)
+    void DescriptorSetHelper::DescriptorInfo::Init(VkDescriptorType type, VkShaderStageFlags shaderStageFlags, std::vector<VkDescriptorImageInfo>* imageInfosFirstSet)
     {
         mDescriptorType   = type;
         mShaderStageFlags = shaderStageFlags;
@@ -200,7 +196,7 @@ namespace hsk {
             // first set added
             mDescriptorCount = static_cast<uint32_t>(countDescriptorInfos);
         }
-        
+
         mBufferInfos.push_back(bufferInfos);
     }
 
@@ -218,5 +214,10 @@ namespace hsk {
             mDescriptorCount = static_cast<uint32_t>(countDescriptorInfos);
         }
         mImageInfos.push_back(imageInfos);
+    }
+    void DescriptorSetHelper::DescriptorInfo::AddPNext(void* pNext, uint32_t descriptorCount)
+    {
+        mDescriptorCount = descriptorCount;
+        mPNextArray.push_back(pNext);
     }
 }  // namespace hsk

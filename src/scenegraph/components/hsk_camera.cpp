@@ -26,19 +26,14 @@ namespace hsk {
         mUbos.Init(GetScene()->GetContext(), true);
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::GetUboDescriptorInfos()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::MakeUboDescriptorInfos(VkShaderStageFlags shaderStage)
     {
-        if(mUboDescriptorInfos != nullptr)
-        {
-            return mUboDescriptorInfos;
-        }
-
         UpdateUboDescriptorBufferInfos();
-        mUboDescriptorInfos = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mUboDescriptorInfos->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
-        mUboDescriptorInfos->AddDescriptorSet(&mUboDescriptorBufferInfosSet1);
-        mUboDescriptorInfos->AddDescriptorSet(&mUboDescriptorBufferInfosSet2);
-        return mUboDescriptorInfos;
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, shaderStage);
+        descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSet1);
+        descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSet2);
+        return descriptorInfo;
     }
 
     void Camera::SetViewMatrix()

@@ -33,7 +33,11 @@ namespace hsk {
         inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
         inline glm::mat4& ViewMat() { return mViewMatrix; }
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetUboDescriptorInfos();
+        /// @brief 
+        /// @param shaderStage - The shader stage in which camera ubo should be accessible. Defaults to vertex stage, where
+        /// the camera matrix is usually used, but can also be set to be used in a raygen stage.
+        /// @return 
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeUboDescriptorInfos(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
 
         void SetViewMatrix();
         void SetProjectionMatrix();
@@ -68,7 +72,6 @@ namespace hsk {
         using UboBuffer             = ManagedUbo<CameraUboBlock>;
         FrameRotator<UboBuffer, 2U> mUbos;
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mUboDescriptorInfos;
         std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet1;
         std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet2;
         void                                                 UpdateUboDescriptorBufferInfos();
