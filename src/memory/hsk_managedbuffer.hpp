@@ -54,6 +54,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(IsMapped);
         HSK_PROPERTY_CGET(Allocation);
         HSK_PROPERTY_CGET(Name);
+        HSK_PROPERTY_CGET(Size);
 
         VkDeviceAddress GetDeviceAddress();
 

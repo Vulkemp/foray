@@ -11,7 +11,7 @@ namespace hsk {
     {
         mContext = context;
         mSize    = createInfo.BufferCreateInfo.size;
-        vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo);
+        AssertVkResult(vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo));
         if(createInfo.Name.size())
         {
             mName = createInfo.Name;
