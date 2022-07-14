@@ -1,4 +1,4 @@
-#include "hsk_raytraycingstage.hpp"
+#include "hsk_raytracingstage.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../scenegraph/components/hsk_camera.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
@@ -11,7 +11,7 @@
 
 
 namespace hsk {
-    void RaytraycingStage::Init(const VkContext* context, Scene* scene)
+    void RaytracingStage::Init(const VkContext* context, Scene* scene)
     {
         mContext = context;
         mScene   = scene;
@@ -28,13 +28,15 @@ namespace hsk {
         mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
     }
 
-    void RaytraycingStage::CreateFixedSizeComponents()
+    void RaytracingStage::CreateFixedSizeComponents()
     {
         SetupDescriptors();
-        PreparePipeline();
+        CreatePipelineLayout();
+        CreateRaytraycingPipeline();
+        CreateShaderBindingTables();
     }
 
-    void RaytraycingStage::DestroyFixedComponents()
+    void RaytracingStage::DestroyFixedComponents()
     {
         VkDevice device = mContext->Device;
         if(mPipeline)
@@ -47,7 +49,7 @@ namespace hsk {
             vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
-       /* if(mPipelineCache)
+        /* if(mPipelineCache)
         {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
             mPipelineCache = nullptr;
@@ -55,14 +57,13 @@ namespace hsk {
         mDescriptorSet.Cleanup();
     }
 
-    void RaytraycingStage::CreateResolutionDependentComponents()
+    void RaytracingStage::CreateResolutionDependentComponents()
     {
         PrepareAttachments();
         PrepareRenderpass();
-        BuildCommandBuffer();
     }
 
-    void RaytraycingStage::DestroyResolutionDependentComponents()
+    void RaytracingStage::DestroyResolutionDependentComponents()
     {
         VkDevice device = mContext->Device;
         for(auto& colorAttachment : mColorAttachments)
@@ -82,7 +83,7 @@ namespace hsk {
         }*/
     }
 
-    void RaytraycingStage::PrepareAttachments()
+    void RaytracingStage::PrepareAttachments()
     {
         static const VkFormat          colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
         static const VkImageUsageFlags imageUsageFlags =
@@ -95,22 +96,15 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
 
-        // ---
-        // can we create an image with intial layout general? VK_IMAGE_LAYOUT_GENERAL
         mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
-                                       VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
-
-        mColorAttachments.reserve(mGBufferImages.size());
-        for(size_t i = 0; i < mGBufferImages.size(); i++)
-        {
-            mColorAttachments.push_back(mGBufferImages[i].get());
-        }
+                                       VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
+        mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer_DepthBufferImage");
+                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "rt DepthBufferImage");
     }
 
-    void RaytraycingStage::PrepareRenderpass()
+    void RaytracingStage::PrepareRenderpass()
     {
         // size + 1 for depth attachment description
         std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size() + 1);
@@ -195,7 +189,7 @@ namespace hsk {
         AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));*/
     }
 
-    void RaytraycingStage::SetupDescriptors()
+    void RaytracingStage::SetupDescriptors()
     {
         mDescriptorSet.SetDescriptorInfoAt(0, GetAccelerationStructureDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo());
@@ -204,8 +198,10 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->GetUboDescriptorInfos());
 
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
+    }
 
-
+    void RaytracingStage::CreatePipelineLayout()
+    {
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
         pipelineLayoutCreateInfo.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.setLayoutCount = 1;
@@ -213,7 +209,7 @@ namespace hsk {
         AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
     }
 
-    void RaytraycingStage::RecordFrame(FrameRenderInfo& renderInfo)
+    void RaytracingStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -232,57 +228,45 @@ namespace hsk {
 
         VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
-        const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-
         // Instanced object
+        const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
-        mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+
+        //
+        // raytraycing
+        const uint32_t handle_size_aligned = aligned_size(mRayTracingPipelineProperties.shaderGroupHandleSize, mRayTracingPipelineProperties.shaderGroupHandleAlignment);
+
+        VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry{};
+        raygen_shader_sbt_entry.deviceAddress = mRaygenShaderBindingTable->GetDeviceAddress();
+        raygen_shader_sbt_entry.stride        = handle_size_aligned;
+        raygen_shader_sbt_entry.size          = handle_size_aligned;
+
+        VkStridedDeviceAddressRegionKHR miss_shader_sbt_entry{};
+        miss_shader_sbt_entry.deviceAddress = mMissShaderBindingTable->GetDeviceAddress();
+        miss_shader_sbt_entry.stride        = handle_size_aligned;
+        miss_shader_sbt_entry.size          = handle_size_aligned;
+
+        VkStridedDeviceAddressRegionKHR hit_shader_sbt_entry{};
+        hit_shader_sbt_entry.deviceAddress = mHitShaderBindingTable->GetDeviceAddress();
+        hit_shader_sbt_entry.stride        = handle_size_aligned;
+        hit_shader_sbt_entry.size          = handle_size_aligned;
+
+        VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry{};
+
+        mContext->DispatchTable.cmdTraceRaysKHR(commandBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
+                                                scissor.extent.width, scissor.extent.height, 1);
 
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void RaytraycingStage::PreparePipeline()
+    void RaytracingStage::CreateShaderBindingTables()
     {
-        VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-        pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        //AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
-
-        // shader stages
-        auto                   vertShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.vert.spv");
-        auto                   fragShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer_stage.frag.spv");
-        ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
-
-        // vertex layout
-        VertexInputStateBuilder vertexInputStateBuilder;
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Position);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Normal);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Uv);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::MaterialIndex);
-        vertexInputStateBuilder.Build();
-
-        // clang-format off
-        mPipeline = PipelineBuilder()
-            .SetContext(mContext)
-            // Blend attachment states required for all color attachments
-            // This is important, as color write mask will otherwise be 0x0 and you
-            // won't see anything rendered to the attachment
-            .SetColorAttachmentBlendCount(mColorAttachments.size())
-            .SetPipelineLayout(mPipelineLayout)
-            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
-            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
-            //.SetPipelineCache(mPipelineCache)
-            //.SetRenderPass(mRenderpass)
-            .Build();
-        // clang-format on
-    }
-
-    void RaytraycingStage::CreateShaderBindingTables()
-    {
+        if(mShaderGroups.size() == 0)
+        {
+            throw Exception("Create shader groups (usually during rt pipeline creation) first!");
+        }
         const uint32_t           handleSize          = mRayTracingPipelineProperties.shaderGroupHandleSize;
         const uint32_t           handleSizeAligned   = aligned_size(mRayTracingPipelineProperties.shaderGroupHandleSize, mRayTracingPipelineProperties.shaderGroupHandleAlignment);
         const uint32_t           handleAlignment     = mRayTracingPipelineProperties.shaderGroupHandleAlignment;
@@ -305,7 +289,7 @@ namespace hsk {
 
         // Copy the pipeline's shader handles into a host buffer
         std::vector<uint8_t> shaderHandleStorage(sbtSize);
-        AssertVkResult(vkGetRayTracingShaderGroupHandlesKHR(mContext->Device, mPipeline, 0, groupCount, sbtSize, shaderHandleStorage.data()));
+        AssertVkResult(mContext->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0, groupCount, sbtSize, shaderHandleStorage.data()));
 
         // Copy the shader handles from the host buffer to the binding tables
         mRaygenShaderBindingTable->MapAndWrite(shaderHandleStorage.data(), handleSize);
@@ -313,12 +297,10 @@ namespace hsk {
         mHitShaderBindingTable->MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * 2, handleSize);
     }
 
-    void RaytraycingStage::CreateRaytraycingPipeline()
+    void RaytracingStage::CreateRaytraycingPipeline()
     {
         // Setup ray tracing shader groups
         // Each shader group points at the corresponding shader in the pipeline
-
-        std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
 
         // shader stages
         auto                   rgenShaderModule  = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/raytracing/raygen.rgen.spv");
@@ -370,17 +352,17 @@ namespace hsk {
         // Create the ray tracing pipeline
         VkRayTracingPipelineCreateInfoKHR raytracingPipelineCreateInfo{};
         raytracingPipelineCreateInfo.sType                        = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
-        raytracingPipelineCreateInfo.stageCount                   = static_cast<uint32_t>(shader_stages.size());
-        raytracingPipelineCreateInfo.pStages                      = shader_stages.data();
+        raytracingPipelineCreateInfo.stageCount                   = static_cast<uint32_t>(shaderStageCreateInfos.Get()->size());
+        raytracingPipelineCreateInfo.pStages                      = shaderStageCreateInfos.Get()->data();
         raytracingPipelineCreateInfo.groupCount                   = static_cast<uint32_t>(mShaderGroups.size());
         raytracingPipelineCreateInfo.pGroups                      = mShaderGroups.data();
         raytracingPipelineCreateInfo.maxPipelineRayRecursionDepth = 1;
         raytracingPipelineCreateInfo.layout                       = mPipelineLayout;
-        AssertVkResult(vkCreateRayTracingPipelinesKHR(mContext->Device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
+        AssertVkResult(mContext->DispatchTable.createRayTracingPipelinesKHR(VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
     }
 
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytraycingStage::GetAccelerationStructureDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetAccelerationStructureDescriptorInfo()
     {
         if(mAcclerationStructureDescriptorInfo != nullptr)
         {
@@ -390,7 +372,7 @@ namespace hsk {
         // Setup the descriptor for binding our top level acceleration structure to the ray tracing shaders
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mTopLevelAccelerationStructure;
+        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetTlas().GetAccelerationStructure();
 
         mAcclerationStructureDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
@@ -398,14 +380,8 @@ namespace hsk {
         return mAcclerationStructureDescriptorInfo;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytraycingStage::GetRenderTargetDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetRenderTargetDescriptorInfo()
     {
-
-        VkDescriptorSetLayoutBinding uniformBufferBinding{};
-        uniformBufferBinding.binding         = 2;
-        uniformBufferBinding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        uniformBufferBinding.descriptorCount = 1;
-        uniformBufferBinding.stageFlags      = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 
         if(mRenderTargetDescriptorInfo != nullptr)
         {
@@ -420,8 +396,9 @@ namespace hsk {
         return mRenderTargetDescriptorInfo;
     }
 
-    void RaytraycingStage::UpdateRenderTargetDescriptorBufferInfos()
+    void RaytracingStage::UpdateRenderTargetDescriptorBufferInfos()
     {
+        mRenderTargetDescriptorImageInfos.resize(1);
         mRenderTargetDescriptorImageInfos[0].imageView   = mRaytracingRenderTarget.GetImageView();
         mRenderTargetDescriptorImageInfos[0].imageLayout = mRaytracingRenderTarget.GetImageLayout();
     }

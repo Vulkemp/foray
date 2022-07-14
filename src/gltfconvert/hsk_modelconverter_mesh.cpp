@@ -20,13 +20,13 @@ namespace hsk {
 
         mGeo.GetBufferSets().push_back(std::make_unique<GeometryBufferSet>());
         auto geoBufferSet = mGeo.GetBufferSets().back().get();
+        geoBufferSet->Init(mContext, mVertexBuffer, mIndexBuffer);
 
         for(auto& mesh : mIndexBindings.Meshes)
         {
-            mesh->SetBuffer(geoBufferSet);
+            mesh->SetGeometryBufferSet(geoBufferSet);
+            mesh->BuildAccelerationStructure(mContext);
         }
-
-        geoBufferSet->Init(mContext, mVertexBuffer, mIndexBuffer);
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives)

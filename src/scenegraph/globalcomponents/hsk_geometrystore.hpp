@@ -1,5 +1,6 @@
 #pragma once
 #include "../../memory/hsk_managedbuffer.hpp"
+#include "../../raytracing/hsk_blas.hpp"
 #include "../hsk_component.hpp"
 #include "../hsk_geo.hpp"
 #include <set>
@@ -29,16 +30,25 @@ namespace hsk {
     {
       public:
         inline Mesh() {}
-        inline Mesh(GeometryBufferSet* buffer) : mBuffer(buffer) {}
+        inline Mesh(GeometryBufferSet* buffer) : mGeometryBufferSet(buffer) {}
+
+        virtual ~Mesh(){};
 
         virtual void CmdDraw(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet);
 
-        HSK_PROPERTY_ALL(Buffer)
+        virtual void BuildAccelerationStructure(const VkContext* context) { mBlas.Create(context, this); }
+
+        HSK_PROPERTY_ALL(GeometryBufferSet)
         HSK_PROPERTY_ALL(Primitives)
+        HSK_PROPERTY_ALL(HighestIndexValue)
+        HSK_PROPERTY_GET(Blas)
+
 
       protected:
-        GeometryBufferSet*      mBuffer;
+        GeometryBufferSet*     mGeometryBufferSet;
         std::vector<Primitive> mPrimitives;
+        Blas                   mBlas;
+        uint32_t               mHighestIndexValue{}; // TODO: required for AS building, but shouldn't this instead be acquired from an index buffer directly?
     };
 
     class GeometryBufferSet

@@ -7,10 +7,10 @@
 
 // heavily inspired by https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_basic/raytracing_basic.cpp
 namespace hsk {
-    class RaytraycingStage : public RenderStage
+    class RaytracingStage : public RenderStage
     {
       public:
-        RaytraycingStage() = default;
+        RaytracingStage() = default;
 
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
@@ -27,13 +27,10 @@ namespace hsk {
         virtual void CreateResolutionDependentComponents();
         virtual void DestroyResolutionDependentComponents();
 
-
         void PrepareAttachments();
         void PrepareRenderpass();
         void SetupDescriptors();
-        void BuildCommandBuffer(){};
-        void PreparePipeline();
-
+        void CreatePipelineLayout();
         void CreateShaderBindingTables();
         void CreateRaytraycingPipeline();
 
@@ -43,9 +40,8 @@ namespace hsk {
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
 
-        VkPipeline       mPipeline;
-        VkPipelineLayout mPipelineLayout;
-        VkAccelerationStructureKHR mTopLevelAccelerationStructure; // TODO: this comes from somewhere else?
+        VkPipeline                 mPipeline{};
+        VkPipelineLayout           mPipelineLayout{};
 
         std::unique_ptr<ManagedBuffer>                    mRaygenShaderBindingTable;
         std::unique_ptr<ManagedBuffer>                    mMissShaderBindingTable;

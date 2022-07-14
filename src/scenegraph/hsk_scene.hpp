@@ -5,6 +5,7 @@
 #include "hsk_registry.hpp"
 #include "hsk_scenedrawing.hpp"
 #include "hsk_scenegraph_declares.hpp"
+#include "../raytracing/hsk_tlas.hpp"
 
 namespace hsk {
 
@@ -29,6 +30,8 @@ namespace hsk {
         /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
         void HandleEvent(std::shared_ptr<Event>& event);
 
+        void CreateTlas();
+
         /// Cleans up all memory, GPU structures, etc...
         virtual void Cleanup(bool reinitialize = false);
 
@@ -37,6 +40,7 @@ namespace hsk {
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_ALL(NodeBuffer)
         HSK_PROPERTY_ALL(RootNodes)
+        HSK_PROPERTY_ALL(Tlas)
 
         template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
@@ -53,6 +57,8 @@ namespace hsk {
         CallbackDispatcher mGlobalRootRegistry;
 
         void InitDefaultGlobals();
+
+        Tlas mTlas;
     };
 
     template <typename TComponent>

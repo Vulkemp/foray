@@ -5,12 +5,12 @@ namespace hsk {
 
     void Mesh::CmdDraw(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet)
     {
-        if(mBuffer && mPrimitives.size())
+        if(mGeometryBufferSet && mPrimitives.size())
         {
-            if(mBuffer != currentlyBoundSet)
+            if(mGeometryBufferSet != currentlyBoundSet)
             {
-                mBuffer->CmdBindBuffers(commandBuffer);
-                currentlyBoundSet = mBuffer;
+                mGeometryBufferSet->CmdBindBuffers(commandBuffer);
+                currentlyBoundSet = mGeometryBufferSet;
             }
             for(auto& primitive : mPrimitives)
             {
@@ -45,16 +45,23 @@ namespace hsk {
 
     void GeometryBufferSet::Init(const VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
     {
+        VkBufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+#ifndef DISABLE_RT_EXTENSIONS
+        // enable calls to GetBufferDeviceAdress & using the buffer as source for acceleration structure building
+        bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+#endif
+
         if(vertices.size())
         {
             VkDeviceSize bufferSize = vertices.size() * sizeof(Vertex);
-            mVertices.Create(context, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mVertices.Create(context, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | bufferUsageFlags, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mVertices.WriteDataDeviceLocal(vertices.data(), bufferSize);
         }
         if(indices.size())
         {
             VkDeviceSize bufferSize = indices.size() * sizeof(uint32_t);
-            mIndices.Create(context, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mIndices.Create(context, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | bufferUsageFlags, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mIndices.WriteDataDeviceLocal(indices.data(), bufferSize);
         }
     }

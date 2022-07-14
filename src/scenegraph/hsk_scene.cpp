@@ -40,6 +40,19 @@ namespace hsk {
         mGlobalRootRegistry.InvokeOnEvent(event);
     }
 
+    void Scene::CreateTlas() { 
+        GeometryStore& geoStore = *(GetComponent<GeometryStore>());
+        auto& meshes = geoStore.GetMeshes();
+
+        if(meshes.size() > 1)
+        {
+            throw Exception("Add support for multiple blas!");
+        }
+
+        auto& blas = meshes[0]->GetBlas();
+        mTlas.Create(mContext, blas);
+    }
+
     Node* Scene::MakeNode(Node* parent)
     {
         auto nodeManagedPtr = std::make_unique<Node>(this, parent);

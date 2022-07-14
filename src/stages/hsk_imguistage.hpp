@@ -3,6 +3,7 @@
 #include "hsk_rasterizedRenderStage.hpp"
 
 namespace hsk {
+    /// @brief The ImguiStage renders the imgui menu on top of an existing image. This image is passed via the backgroundImage
     class ImguiStage : public RasterizedRenderStage
     {
       public:
@@ -18,6 +19,7 @@ namespace hsk {
         /// @brief When the window has been resized, update the target image.
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newTargetImage);
 
+        /// @brief Allows imgui to handle input events.
         void ProcessSdlEvent(SDL_Event* sdlEvent);
 
       protected:

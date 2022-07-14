@@ -225,6 +225,11 @@ namespace hsk {
         allocatorCreateInfo.instance               = mInstance;
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
+#ifndef DISABLE_RT_EXTENSIONS
+        // enable calls to GetBufferDeviceAdress
+        allocatorCreateInfo.flags |= VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+#endif
+
         vmaCreateAllocator(&allocatorCreateInfo, &mContext.Allocator);
     }
 
