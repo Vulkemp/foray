@@ -107,10 +107,19 @@ namespace hsk {
             transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             transitionInfo.DstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = 0;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        }
         else
         {
             Exception::Throw("No simple translation for this layout available!");
         }
+        transitionInfo.NewImageLayout = newLayout;
         TransitionLayout(transitionInfo);
     }
 
