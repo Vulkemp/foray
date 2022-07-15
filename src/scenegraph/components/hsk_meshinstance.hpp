@@ -4,12 +4,10 @@
 #include "../hsk_scenegraph_declares.hpp"
 
 namespace hsk {
-    class MeshInstance : public NodeComponent, public Component::DrawCallback
+    class MeshInstance : public NodeComponent
     {
       public:
         inline virtual ~MeshInstance() {}
-
-        virtual void Draw(SceneDrawInfo& drawInfo) override;
 
         HSK_PROPERTY_ALL(InstanceIndex)
         HSK_PROPERTY_ALL(Mesh)

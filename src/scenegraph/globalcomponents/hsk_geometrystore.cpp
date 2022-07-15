@@ -19,6 +19,22 @@ namespace hsk {
         }
     }
 
+    void Mesh::CmdDrawInstanced(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet, uint32_t instanceCount)
+    {
+        if(mGeometryBufferSet && mPrimitives.size())
+        {
+            if(mGeometryBufferSet != currentlyBoundSet)
+            {
+                mGeometryBufferSet->CmdBindBuffers(commandBuffer);
+                currentlyBoundSet = mGeometryBufferSet;
+            }
+            for(auto& primitive : mPrimitives)
+            {
+                primitive.CmdDraw(commandBuffer);
+            }
+        }
+    }
+
     bool GeometryBufferSet::CmdBindBuffers(VkCommandBuffer commandBuffer)
     {
         if(mVertices.GetAllocation())
@@ -64,6 +80,8 @@ namespace hsk {
             mIndices.Create(context, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | bufferUsageFlags, bufferSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
             mIndices.WriteDataDeviceLocal(indices.data(), bufferSize);
         }
+        mIndexCount  = static_cast<uint32_t>(indices.size());
+        mVertexCount = static_cast<uint32_t>(vertices.size());
     }
 
     void GeometryStore::Cleanup()

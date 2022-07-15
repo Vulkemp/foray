@@ -25,7 +25,7 @@ namespace hsk {
 
       protected:
         const VkContext* mContext{};
-        VkAccelerationStructureKHR mAccelerationStructure;
+        VkAccelerationStructureKHR mAccelerationStructure = nullptr;
         ManagedBuffer              mTlasMemory;
         VkDeviceAddress            mTlasAddress{};
     };

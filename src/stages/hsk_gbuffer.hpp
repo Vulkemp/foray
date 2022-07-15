@@ -16,8 +16,8 @@ namespace hsk {
         inline static constexpr std::string_view WorldspaceNormal   = "Normal";
         inline static constexpr std::string_view Albedo             = "Albedo";
         inline static constexpr std::string_view MotionVector       = "Motion";
-        inline static constexpr std::string_view MeshInstanceIndex  = "MeshId";
         inline static constexpr std::string_view MaterialIndex      = "MaterialId";
+        inline static constexpr std::string_view MeshInstanceIndex  = "MeshInstanceId";
 
       protected:
         Scene* mScene;

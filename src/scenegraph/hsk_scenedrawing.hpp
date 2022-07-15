@@ -10,12 +10,12 @@ namespace hsk {
     struct DrawPushConstant
     {
       public:
-        glm::mat4 ModelWorldMatrix         = glm::mat4(1);
-        glm::mat4 PreviousModelWorldMatrix = glm::mat4(1);
-        int32_t   MeshInstanceIndex        = -1;
+        uint32_t TransformBufferOffset = 0;
 
         inline static VkShaderStageFlags  GetShaderStageFlags();
         inline static VkPushConstantRange GetPushConstantRange();
+
+        inline void CmdPushConstant_TransformBufferOffset(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t transformBufferOffset);
     };
 
     inline VkShaderStageFlags DrawPushConstant::GetShaderStageFlags()
@@ -28,6 +28,13 @@ namespace hsk {
         return VkPushConstantRange{.stageFlags = GetShaderStageFlags(), .offset = 0, .size = sizeof(DrawPushConstant)};
     }
 
+    inline void DrawPushConstant::CmdPushConstant_TransformBufferOffset(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t transformBufferOffset)
+    {
+        TransformBufferOffset = transformBufferOffset;
+        vkCmdPushConstants(commandBuffer, pipelineLayout, DrawPushConstant::GetShaderStageFlags(), offsetof(DrawPushConstant, TransformBufferOffset), sizeof(TransformBufferOffset),
+                           &TransformBufferOffset);
+    }
+
     struct SceneDrawInfo
     {
       public:
@@ -38,19 +45,18 @@ namespace hsk {
 
         inline SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
 
-        inline void CmdPushConstant(int32_t meshInstanceIndex, const glm::mat4& worldMatrix, const glm::mat4& prevWorldMatrix);
+        inline void CmdPushConstant(uint32_t transformBufferOffset);
     };
 
-    void SceneDrawInfo::CmdPushConstant(int32_t meshInstanceIndex, const glm::mat4& worldMatrix, const glm::mat4& prevWorldMatrix)
+    void SceneDrawInfo::CmdPushConstant(uint32_t transformBufferOffset)
     {
-        PushConstantState = DrawPushConstant{.ModelWorldMatrix = worldMatrix, .PreviousModelWorldMatrix = prevWorldMatrix, .MeshInstanceIndex = meshInstanceIndex};
-        vkCmdPushConstants(RenderInfo.GetCommandBuffer(), PipelineLayout, DrawPushConstant::GetShaderStageFlags(), 0, sizeof(DrawPushConstant), &PushConstantState);
+        PushConstantState.CmdPushConstant_TransformBufferOffset(RenderInfo.GetCommandBuffer(), PipelineLayout, transformBufferOffset);
     }
 
     SceneDrawInfo::SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
 
         : RenderInfo(renderInfo), PipelineLayout(pipelineLayout), PushConstantState()
     {
-        CmdPushConstant(-1, glm::mat4(1), glm::mat4(1));
+        CmdPushConstant(0);
     }
 }  // namespace hsk

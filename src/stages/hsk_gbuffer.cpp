@@ -6,6 +6,7 @@
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
+#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_camera.hpp"
 
@@ -97,7 +98,8 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
         mGBufferImages.clear();
-        mGBufferImages.reserve(5);
+        mGBufferImages.reserve(6);
+        mGBufferImages.push_back(std::make_unique<ManagedImage>());
         mGBufferImages.push_back(std::make_unique<ManagedImage>());
         mGBufferImages.push_back(std::make_unique<ManagedImage>());
         mGBufferImages.push_back(std::make_unique<ManagedImage>());
@@ -107,7 +109,8 @@ namespace hsk {
         mGBufferImages[1]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspaceNormal);
         mGBufferImages[2]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, Albedo);
         mGBufferImages[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, MotionVector);
-        mGBufferImages[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, MeshInstanceIndex);
+        mGBufferImages[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, MaterialIndex);
+        mGBufferImages[5]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_UINT, intialLayout, aspectMask, MeshInstanceIndex);
 
         mColorAttachments.clear();
         mColorAttachments.reserve(mGBufferImages.size());
@@ -212,6 +215,7 @@ namespace hsk {
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos());
+        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfos());
 
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
 

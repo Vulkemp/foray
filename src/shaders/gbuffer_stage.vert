@@ -15,6 +15,7 @@ layout (location = 3) out vec3 outNormal; 				// Normal in world space
 layout (location = 4) out vec3 outTangent;				// Tangent in world space
 layout (location = 5) out vec2 outUV;					// UV coordinates
 layout (location = 6) flat out int outMaterialIndex;	// Material Index
+layout (location = 7) flat out uint outMeshInstanceId;  // Mesh Instance Id
 
 #define BIND_INSTANCE_PUSHC
 #include "gltf_pushc.glsl"
@@ -22,14 +23,18 @@ layout (location = 6) flat out int outMaterialIndex;	// Material Index
 #define BIND_CAMERA_UBO 2
 #include "camera.glsl"
 
+#define BIND_TRANSFORMBUFFER 3
+#include "transformbuffer.glsl"
+
 void main() 
 {
+	TransformState transform = GetTransform(PushConstant.TransformBufferOffset + gl_InstanceIndex);
 	mat4 ProjMat = Camera.ProjectionMatrix;
 	mat4 ViewMat = Camera.ViewMatrix;
-	mat4 ModelMat = PushConstant.ModelWorldMatrix;
+	mat4 ModelMat = transform.CurrentWorldMatrix;
 	mat4 ProjMatPrev = Camera.PreviousProjectionMatrix;
 	mat4 ViewMatPrev = Camera.PreviousViewMatrix;
-	mat4 ModelMatPrev = PushConstant.PreviousModelWorldMatrix;
+	mat4 ModelMatPrev = transform.PreviousWorldMatrix;
 
 	// Get transformations out of the way
 	outWorldPos = (ModelMat * vec4(inPos, 1.f)).xyz;
@@ -46,4 +51,6 @@ void main()
 	
 	// Set vertex color passthrough
 	outMaterialIndex = inMaterialIndex;
+
+	outMeshInstanceId = PushConstant.TransformBufferOffset + gl_InstanceIndex;
 }

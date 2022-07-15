@@ -6,6 +6,7 @@
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
+#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 
 namespace hsk {
     ModelConverter::ModelConverter(Scene* scene)
@@ -127,11 +128,6 @@ namespace hsk {
         auto& gltfNode = mGltfModel.nodes[currentIndex];
         node           = mScene->MakeNode(parent);
 
-        if(!parent)
-        {
-            mScene->GetRootNodes().push_back(node);
-        }
-
         InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
 
         if(gltfNode.mesh >= 0)
@@ -219,6 +215,8 @@ namespace hsk {
         {
             node->GetTransform()->RecalculateGlobalMatrix(nullptr);
         }
+
+        mScene->GetComponent<DrawDirector>()->InitOrUpdate();
 
         mMaterialBuffer.UpdateDeviceLocal();
     }

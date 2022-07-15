@@ -2,6 +2,7 @@
 #include "globalcomponents/hsk_geometrystore.hpp"
 #include "globalcomponents/hsk_materialbuffer.hpp"
 #include "globalcomponents/hsk_texturestore.hpp"
+#include "globalcomponents/hsk_drawdirector.hpp"
 #include "hsk_node.hpp"
 
 namespace hsk {
@@ -15,6 +16,7 @@ namespace hsk {
         MakeComponent<MaterialBuffer>(mContext);
         MakeComponent<GeometryStore>();
         MakeComponent<TextureStore>();
+        MakeComponent<DrawDirector>();
     }
 
     void Scene::Update(const FrameUpdateInfo& updateInfo)

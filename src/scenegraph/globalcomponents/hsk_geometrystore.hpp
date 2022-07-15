@@ -24,6 +24,7 @@ namespace hsk {
 
         bool        IsValid() const { return Count > 0; }
         inline void CmdDraw(VkCommandBuffer commandBuffer);
+        inline void CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
     };
 
     class Mesh
@@ -35,6 +36,7 @@ namespace hsk {
         virtual ~Mesh(){};
 
         virtual void CmdDraw(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet);
+        virtual void CmdDrawInstanced(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet, uint32_t instanceCount);
 
         virtual void BuildAccelerationStructure(const VkContext* context) { mBlas.Create(context, this); }
 
@@ -48,7 +50,7 @@ namespace hsk {
         GeometryBufferSet*     mGeometryBufferSet;
         std::vector<Primitive> mPrimitives;
         Blas                   mBlas;
-        uint32_t               mHighestIndexValue{}; // TODO: required for AS building, but shouldn't this instead be acquired from an index buffer directly?
+        uint32_t               mHighestIndexValue{};  // TODO: required for AS building, but shouldn't this instead be acquired from an index buffer directly?
     };
 
     class GeometryBufferSet
@@ -58,6 +60,8 @@ namespace hsk {
 
         HSK_PROPERTY_ALL(Indices)
         HSK_PROPERTY_ALL(Vertices)
+        HSK_PROPERTY_ALL(IndexCount)
+        HSK_PROPERTY_ALL(VertexCount)
 
         void Init(const VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
 
@@ -67,11 +71,15 @@ namespace hsk {
         {
             mIndices.Cleanup();
             mVertices.Cleanup();
+            mIndexCount  = 0;
+            mVertexCount = 0;
         }
 
       protected:
         ManagedBuffer mIndices;
         ManagedBuffer mVertices;
+        uint32_t      mIndexCount  = 0;
+        uint32_t      mVertexCount = 0;
     };
 
     class GeometryStore : public GlobalComponent
@@ -104,6 +112,21 @@ namespace hsk {
             else
             {
                 vkCmdDraw(commandBuffer, Count, 1, First, 0);
+            }
+        }
+    }
+
+    inline void Primitive::CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount)
+    {
+        if(IsValid())
+        {
+            if(Type == EType::Index)
+            {
+                vkCmdDrawIndexed(commandBuffer, Count, instanceCount, First, 0, 0);
+            }
+            else
+            {
+                vkCmdDraw(commandBuffer, Count, instanceCount, First, 0);
             }
         }
     }

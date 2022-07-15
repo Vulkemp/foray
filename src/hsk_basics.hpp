@@ -26,6 +26,12 @@ namespace hsk {
       protected:
         virtual void __makeMePolymorphic() {}
     };
+
+#if defined(HSK_INFLIGHTFRAMECOUNT_OVERRIDE)
+    inline constexpr uint32_t INFLIGHTFRAMECOUNT = HSK_INFLIGHTFRAMECOUNT_OVERRIDE;
+#else
+    inline constexpr uint32_t INFLIGHTFRAMECOUNT = 2;
+#endif
 }  // namespace hsk
 
 #define HSK_PROPERTY_GET(member)                                                                                                                                                   \
