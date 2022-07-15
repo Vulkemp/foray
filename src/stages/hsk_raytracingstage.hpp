@@ -42,6 +42,9 @@ namespace hsk {
 
         VkPipeline                 mPipeline{};
         VkPipelineLayout           mPipelineLayout{};
+        VkFramebuffer              mFrameBuffer   = nullptr;
+        VkPipelineCache            mPipelineCache = nullptr;
+        VkRenderPass               mRenderpass    = nullptr;
 
         std::unique_ptr<ManagedBuffer>                    mRaygenShaderBindingTable;
         std::unique_ptr<ManagedBuffer>                    mMissShaderBindingTable;

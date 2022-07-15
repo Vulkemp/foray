@@ -181,7 +181,7 @@ namespace hsk {
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-        /*      AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
+        AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -192,7 +192,7 @@ namespace hsk {
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
         fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
         fbufCreateInfo.layers                  = 1;
-        AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));*/
+        AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void RaytracingStage::SetupDescriptors()
@@ -219,8 +219,8 @@ namespace hsk {
     {
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        //renderPassBeginInfo.renderPass        = mRenderpass;
-        //renderPassBeginInfo.framebuffer       = mFrameBuffer;
+        renderPassBeginInfo.renderPass        = mRenderpass;
+        renderPassBeginInfo.framebuffer       = mFrameBuffer;
         renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
