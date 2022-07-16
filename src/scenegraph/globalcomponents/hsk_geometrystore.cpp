@@ -30,7 +30,7 @@ namespace hsk {
             }
             for(auto& primitive : mPrimitives)
             {
-                primitive.CmdDraw(commandBuffer);
+                primitive.CmdDrawInstanced(commandBuffer, instanceCount);
             }
         }
     }

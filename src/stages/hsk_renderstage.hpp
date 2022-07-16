@@ -21,8 +21,8 @@ namespace hsk {
         inline ManagedImage&               GetDepthAttachment() { return mDepthAttachment; }
         ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
 
-        inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return {}; }
-        inline virtual const std::vector<ResourceReferenceBase*>& Provides() const { return {}; }
+        inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return std::vector<ResourceReferenceBase*>(); }
+        inline virtual const std::vector<ResourceReferenceBase*>& Provides() const { return std::vector<ResourceReferenceBase*>(); }
 
         inline virtual std::string_view GetName() const { return ""; }
 

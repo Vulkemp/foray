@@ -215,7 +215,8 @@ namespace hsk {
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos());
-        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfos());
+        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfosForCurrent());
+        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfosForPrevious());
 
         VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
 

@@ -59,20 +59,21 @@ namespace hsk {
 
     void DrawDirector::Draw(SceneDrawInfo& drawInfo)
     {
-        auto& transformBuffer = mTransformBuffers[drawInfo.RenderInfo.GetFrameNumber()];
-        auto& transformVector = transformBuffer.GetVector();
+        auto& currentTransformBuffer = mTransformBuffers[drawInfo.RenderInfo.GetFrameNumber()];
+        auto& currentTransformVector = currentTransformBuffer.GetVector();
+
 
         for(auto& drawop : mDrawOps)
         {
             for(uint32_t i = 0; i < drawop.Instances.size(); i++)
             {
-                auto& transformState               = transformVector[drawop.TransformOffset + i];
-                transformState.PreviousWorldMatrix = transformState.CurrentWorldMatrix;
-                transformState.CurrentWorldMatrix  = drawop.Instances[i]->GetNode()->GetComponent<Transform>()->GetGlobalMatrix();
+                auto& transformState = currentTransformVector[drawop.TransformOffset + i];
+                auto  transform      = drawop.Instances[i]->GetNode()->GetComponent<Transform>();
+                transformState       = transform->GetGlobalMatrix();
             }
         }
 
-        transformBuffer.InitOrUpdate();
+        currentTransformBuffer.InitOrUpdate();
 
         for(auto& drawop : mDrawOps)
         {
@@ -81,15 +82,28 @@ namespace hsk {
         }
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> DrawDirector::MakeDescriptorInfos(VkShaderStageFlags shaderStage)
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> DrawDirector::MakeDescriptorInfosForCurrent(VkShaderStageFlags shaderStage)
     {
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
 
         for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
         {
-            mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfos[i].data());
-            descriptorInfo->AddDescriptorSet(mBufferInfos + i);
+            mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfosCurrent[i].data());
+            descriptorInfo->AddDescriptorSet(mBufferInfosCurrent + i);
+        }
+        return descriptorInfo;
+    }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> DrawDirector::MakeDescriptorInfosForPrevious(VkShaderStageFlags shaderStage)
+    {
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
+
+        for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
+        {
+            mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfosPrevious[(i + 1) % INFLIGHTFRAMECOUNT].data());
+            descriptorInfo->AddDescriptorSet(mBufferInfosPrevious + i);
         }
         return descriptorInfo;
     }

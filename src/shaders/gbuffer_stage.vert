@@ -23,18 +23,18 @@ layout (location = 7) flat out uint outMeshInstanceId;  // Mesh Instance Id
 #define BIND_CAMERA_UBO 2
 #include "camera.glsl"
 
-#define BIND_TRANSFORMBUFFER 3
+#define BIND_TRANSFORMBUFFER_CURRENT 3
+#define BIND_TRANSFORMBUFFER_PREVIOUS 4
 #include "transformbuffer.glsl"
 
 void main() 
 {
-	TransformState transform = GetTransform(PushConstant.TransformBufferOffset + gl_InstanceIndex);
 	mat4 ProjMat = Camera.ProjectionMatrix;
 	mat4 ViewMat = Camera.ViewMatrix;
-	mat4 ModelMat = transform.CurrentWorldMatrix;
+	mat4 ModelMat = GetCurrentTransform(PushConstant.TransformBufferOffset + gl_InstanceIndex);
 	mat4 ProjMatPrev = Camera.PreviousProjectionMatrix;
 	mat4 ViewMatPrev = Camera.PreviousViewMatrix;
-	mat4 ModelMatPrev = transform.PreviousWorldMatrix;
+	mat4 ModelMatPrev = GetPreviousTransform(PushConstant.TransformBufferOffset + gl_InstanceIndex);
 
 	// Get transformations out of the way
 	outWorldPos = (ModelMat * vec4(inPos, 1.f)).xyz;
