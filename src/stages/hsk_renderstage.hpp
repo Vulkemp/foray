@@ -4,6 +4,7 @@
 #include "../hsk_basics.hpp"
 #include "../memory/hsk_descriptorsethelper.hpp"
 #include "../memory/hsk_managedimage.hpp"
+#include "hsk_stagereferences.hpp"
 
 namespace hsk {
     class RenderStage
@@ -11,9 +12,7 @@ namespace hsk {
       public:
         RenderStage(){};
         inline virtual void RecordFrame(FrameRenderInfo& renderInfo) {}
-        inline virtual void Destroy() {
-          mDescriptorSet.Cleanup();
-        }
+        inline virtual void Destroy() { mDescriptorSet.Cleanup(); }
 
         virtual void OnResized(const VkExtent2D& extent){};
 
@@ -22,6 +21,10 @@ namespace hsk {
         inline ManagedImage&               GetDepthAttachment() { return mDepthAttachment; }
         ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
 
+        inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return {}; }
+        inline virtual const std::vector<ResourceReferenceBase*>& Provides() const { return {}; }
+
+        inline virtual std::string_view GetName() const { return ""; }
 
       protected:
         std::vector<ManagedImage*> mColorAttachments;

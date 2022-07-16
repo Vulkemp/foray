@@ -159,7 +159,7 @@ namespace hsk {
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
-        stagingBuffer.CreateForStaging(mContext, size, data);
+        stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
 
         CommandBuffer singleTimeCmdBuf;
         singleTimeCmdBuf.Create(mContext);

@@ -25,7 +25,7 @@ namespace hsk {
         for(auto& mesh : mIndexBindings.Meshes)
         {
             mesh->SetGeometryBufferSet(geoBufferSet);
-            mesh->BuildAccelerationStructure(mContext);
+            // mesh->BuildAccelerationStructure(mContext);
         }
     }
 

@@ -14,10 +14,11 @@ namespace hsk {
       public:
         static const std::unordered_set<DeviceResourceBase*>* GetTotalAllocatedResources() { return &sAllocatedRessources; }
 
-        virtual bool Exists() const     = 0;
-        virtual void Cleanup()          = 0;
+        virtual bool Exists() const = 0;
+        virtual void Cleanup()      = 0;
 
-        DeviceResourceBase() { sAllocatedRessources.insert(this); }
+        inline DeviceResourceBase() { sAllocatedRessources.insert(this); }
+        inline explicit DeviceResourceBase(std::string_view name);
         inline virtual ~DeviceResourceBase() { sAllocatedRessources.erase(this); }
 
         std::string_view                   GetName() const { return mName; }
@@ -26,6 +27,12 @@ namespace hsk {
       protected:
         std::string mName;
     };
+
+    inline DeviceResourceBase::DeviceResourceBase(std::string_view name)
+    {
+        mName = name;
+        sAllocatedRessources.insert(this);
+    }
 
     inline DeviceResourceBase& DeviceResourceBase::SetName(std::string_view name)
     {

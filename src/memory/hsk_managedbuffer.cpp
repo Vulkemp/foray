@@ -24,11 +24,15 @@ namespace hsk {
         }
     }
 
-    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, const void* data)
+    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, const void* data, std::string_view bufferName)
     {
         // if (mName.length() == 0){
         //     mName = fmt::format("Staging Buffer {0:x}", reinterpret_cast<uint64_t>(data));
         // }
+        if(bufferName.length())
+        {
+            SetName(bufferName);
+        }
         Create(context, VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
                VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 
@@ -141,7 +145,7 @@ namespace hsk {
         Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
         ManagedBuffer stagingBuffer;
-        stagingBuffer.CreateForStaging(mContext, size, data);
+        stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
 
         CommandBuffer   singleTimeCmdBuf;
         VkCommandBuffer commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -155,6 +159,9 @@ namespace hsk {
         singleTimeCmdBuf.Submit();
     }
 
-    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo() { BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO; }
+    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo()
+    {
+        BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    }
 
 }  // namespace hsk
