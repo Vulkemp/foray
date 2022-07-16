@@ -13,7 +13,7 @@ namespace hsk {
         Transform* GetTransform();
 
         template <typename TComponent>
-        inline int32_t FindChildrenWithComponent(std::vector<Node*> outnodes);
+        inline int32_t FindChildrenWithComponent(std::vector<Node*>& outnodes);
 
         inline virtual ~Node(){}
 
@@ -24,7 +24,7 @@ namespace hsk {
 
 
     template <typename TComponent>
-    inline int32_t Node::FindChildrenWithComponent(std::vector<Node*> outnodes){
+    inline int32_t Node::FindChildrenWithComponent(std::vector<Node*>& outnodes){
       int32_t found = 0;
       for (Node* child : mChildren){
         if (child->HasComponent<TComponent>()){
