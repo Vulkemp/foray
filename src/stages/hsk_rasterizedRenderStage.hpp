@@ -22,12 +22,5 @@ namespace hsk {
         VkFramebuffer         mFrameBuffer         = nullptr;
         VkPipelineCache       mPipelineCache       = nullptr;
         VkRenderPass          mRenderpass          = nullptr;
-        VkPipeline            mPipeline            = nullptr;
-        VkPipelineLayout      mPipelineLayout      = nullptr;
-
-        virtual void CreateFixedSizeComponents(){};
-        virtual void DestroyFixedComponents(){};
-        virtual void CreateResolutionDependentComponents(){};
-        virtual void DestroyResolutionDependentComponents(){};
     };
 }  // namespace hsk

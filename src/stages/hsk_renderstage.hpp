@@ -12,9 +12,20 @@ namespace hsk {
       public:
         RenderStage(){};
         inline virtual void RecordFrame(FrameRenderInfo& renderInfo) {}
-        inline virtual void Destroy() { mDescriptorSet.Cleanup(); }
 
-        virtual void OnResized(const VkExtent2D& extent){};
+        inline virtual void Destroy()
+        {
+            DestroyResolutionDependentComponents();
+            DestroyFixedComponents();
+            mDescriptorSet.Cleanup();
+        }
+
+
+        virtual void OnResized(const VkExtent2D& extent)
+        {
+            DestroyResolutionDependentComponents();
+            CreateResolutionDependentComponents();
+        };
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         inline std::vector<ManagedImage*>& GetColorAttachments() { return mColorAttachments; }
@@ -31,5 +42,13 @@ namespace hsk {
         ManagedImage               mDepthAttachment;
         const VkContext*           mContext{};
         DescriptorSetHelper        mDescriptorSet;
+
+        VkPipeline       mPipeline       = nullptr;
+        VkPipelineLayout mPipelineLayout = nullptr;
+
+        virtual void CreateFixedSizeComponents(){};
+        virtual void DestroyFixedComponents(){};
+        virtual void CreateResolutionDependentComponents(){};
+        virtual void DestroyResolutionDependentComponents(){};
     };
 }  // namespace hsk

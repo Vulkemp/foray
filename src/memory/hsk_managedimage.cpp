@@ -128,10 +128,13 @@ namespace hsk {
     {
         bool            createTemporaryCommandBuffer = false;
         VkCommandBuffer commandBuffer;
+        CommandBuffer   hskCmdBuffer;
         if(transitionInfo.CommandBuffer == nullptr)
         {
             createTemporaryCommandBuffer = true;
-            commandBuffer                = CreateCommandBuffer(mContext->Device, mContext->CommandPool, transitionInfo.CommandBufferLevel, true);
+            hskCmdBuffer.Create(mContext);
+            hskCmdBuffer.Begin();
+            commandBuffer = hskCmdBuffer;
         }
         else
         {
@@ -153,6 +156,10 @@ namespace hsk {
 
         // update image layout
         mImageLayout = barrier.newLayout;
+        if(transitionInfo.CommandBuffer == nullptr)
+        {
+            hskCmdBuffer.FlushAndReset();
+        }
     }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)

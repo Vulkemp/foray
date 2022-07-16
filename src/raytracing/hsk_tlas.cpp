@@ -77,6 +77,7 @@ namespace hsk {
         // Allocate a buffer for the acceleration structure.
         mTlasMemory.Create(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                            sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        mTlasMemory.SetName("Tlas memory buffer");
 
         // Create the acceleration structure object.
         // (Data has not yet been set.)

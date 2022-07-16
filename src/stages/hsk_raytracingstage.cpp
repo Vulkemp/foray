@@ -55,6 +55,9 @@ namespace hsk {
             vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
+        mRaygenShaderBindingTable->Cleanup();
+        mMissShaderBindingTable->Cleanup();
+        mHitShaderBindingTable->Cleanup();
         /* if(mPipelineCache)
         {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
@@ -77,16 +80,7 @@ namespace hsk {
             colorAttachment->Cleanup();
         }
         mDepthAttachment.Cleanup();
-        /*if(mFrameBuffer)
-        {
-            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-        if(mRenderpass)
-        {
-            vkDestroyRenderPass(device, mRenderpass, nullptr);
-            mRenderpass = nullptr;
-        }*/
+        mRaytracingRenderTarget.Cleanup();
     }
 
     void RaytracingStage::PrepareAttachments()
@@ -181,7 +175,7 @@ namespace hsk {
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
+        //AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -192,7 +186,7 @@ namespace hsk {
         fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
         fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
         fbufCreateInfo.layers                  = 1;
-        AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
+        //AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void RaytracingStage::SetupDescriptors()
@@ -217,28 +211,28 @@ namespace hsk {
 
     void RaytracingStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
-        VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass        = mRenderpass;
-        renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
-        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
-        renderPassBeginInfo.pClearValues      = mClearValues.data();
+        //VkRenderPassBeginInfo renderPassBeginInfo{};
+        //renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        //renderPassBeginInfo.renderPass        = mRenderpass;
+        //renderPassBeginInfo.framebuffer       = mFrameBuffer;
+        //renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
+        //renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
+        //renderPassBeginInfo.pClearValues      = mClearValues.data();
 
         VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
-        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        //vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+        //VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
+        //vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
         VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
+        //vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipeline);
 
         // Instanced object
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
 
         //
         // raytraycing
@@ -264,7 +258,7 @@ namespace hsk {
         mContext->DispatchTable.cmdTraceRaysKHR(commandBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
                                                 scissor.extent.width, scissor.extent.height, 1);
 
-        vkCmdEndRenderPass(commandBuffer);
+        //vkCmdEndRenderPass(commandBuffer);
     }
 
     void RaytracingStage::CreateShaderBindingTables()
@@ -289,8 +283,11 @@ namespace hsk {
         mHitShaderBindingTable    = std::make_unique<ManagedBuffer>();
 
         mRaygenShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
+        mRaygenShaderBindingTable->SetName("RaygenShaderBindingTable Buffer");
         mMissShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
+        mMissShaderBindingTable->SetName("MissShaderBindingTable Buffer");
         mHitShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
+        mHitShaderBindingTable->SetName("HitShaderBindingTable Buffer");
 
 
         // Copy the pipeline's shader handles into a host buffer

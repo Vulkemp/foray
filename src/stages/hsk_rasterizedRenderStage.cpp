@@ -2,15 +2,7 @@
 #include "../hsk_vkHelpers.hpp"
 
 namespace hsk {
-    void RasterizedRenderStage::Destroy() {
-        DestroyResolutionDependentComponents();
-        DestroyFixedComponents();
-        RenderStage::Destroy();
-    }
+    void RasterizedRenderStage::Destroy() { RenderStage::Destroy(); }
 
-    void RasterizedRenderStage::OnResized(const VkExtent2D& extent)
-    {
-        DestroyResolutionDependentComponents();
-        CreateResolutionDependentComponents();
-    }
+    void RasterizedRenderStage::OnResized(const VkExtent2D& extent) { RenderStage::OnResized(extent); }
 }  // namespace hsk

@@ -129,8 +129,9 @@ namespace hsk {
                 if(numPNext > 0)
                 {
                     // set pNext
-                    uint32_t index        = numPNext > 1 ? setIndex : 0;
-                    descriptorWrite.pNext = descriptorLocation.Descriptor->mPNextArray[index];
+                    uint32_t index                  = numPNext > 1 ? setIndex : 0;
+                    descriptorWrite.descriptorCount = descriptorLocation.Descriptor->mDescriptorCount;
+                    descriptorWrite.pNext           = descriptorLocation.Descriptor->mPNextArray[index];
                 }
 
                 if(descriptorWrite.descriptorCount)

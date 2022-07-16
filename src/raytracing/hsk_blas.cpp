@@ -63,6 +63,7 @@ namespace hsk {
 
         mBlasMemory.Create(context, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, acceleration_structure_build_sizes_info.accelerationStructureSize,
                            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        mBlasMemory.SetName("Blas memory buffer");
 
         // Create the acceleration structure
         VkAccelerationStructureCreateInfoKHR acceleration_structure_create_info{};
