@@ -10,9 +10,11 @@ namespace hsk {
         {
             AccumulateHash(hash, CustomSize.width);
             AccumulateHash(hash, CustomSize.height);
+            AccumulateHash(hash, CustomSize.depth);
         }
         AccumulateHash(hash, Format);
         AccumulateHash(hash, UsageFlags);
+        AccumulateHash(hash, AspectFlags);
         return hash;
     }
 }  // namespace hsk

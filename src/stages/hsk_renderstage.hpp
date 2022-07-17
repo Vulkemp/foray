@@ -7,6 +7,7 @@
 #include "hsk_stagereferences.hpp"
 
 namespace hsk {
+
     class RenderStage
     {
       public:
@@ -32,8 +33,11 @@ namespace hsk {
         inline ManagedImage&               GetDepthAttachment() { return mDepthAttachment; }
         ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
 
-        inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return std::vector<ResourceReferenceBase*>(); }
-        inline virtual const std::vector<ResourceReferenceBase*>& Provides() const { return std::vector<ResourceReferenceBase*>(); }
+        inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return mInputs; }
+        inline virtual const std::vector<ResourceReferenceBase*>& Provides() const { return mOutputs; }
+
+        inline virtual void SetImageInputs(std::unordered_map<std::string_view, ManagedImage*>& dependencies) {}
+        inline virtual void SetImageOutputs(std::unordered_map<std::string_view, ManagedImage*>& dependencies) {}
 
         inline virtual std::string_view GetName() const { return ""; }
 
@@ -43,6 +47,8 @@ namespace hsk {
         const VkContext*           mContext{};
         DescriptorSetHelper        mDescriptorSet;
 
+        std::vector<ResourceReferenceBase*> mInputs;
+        std::vector<ResourceReferenceBase*> mOutputs;
         VkPipeline       mPipeline       = nullptr;
         VkPipelineLayout mPipelineLayout = nullptr;
 

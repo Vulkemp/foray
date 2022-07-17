@@ -2,6 +2,21 @@
 #include <set>
 
 namespace hsk {
+    void StageImage::Init(const VkContext* context, VkExtent2D swapchainSize, std::string_view name)
+    {
+        Image = std::make_unique<ManagedImage>();
+        VkExtent3D extent;
+        if(Size == ESize::SwapchainExtent)
+        {
+            extent = VkExtent3D{.width = swapchainSize.width, .height = swapchainSize.height, .depth = 1};
+        }
+        else
+        {
+            extent = CustomSize;
+        }
+        Image->Create(context, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, extent, UsageFlags, Format, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED, AspectFlags, name);
+    }
+
     StageDirector& StageDirector::AddStage(RenderStage* stage)
     {
         mStages.push_back(stage);
@@ -15,6 +30,12 @@ namespace hsk {
             mContext = context;
         }
 
+        ReorderStages();
+        RecreateAndSetImages(mContext->Swapchain.extent);
+    }
+
+    void StageDirector::ReorderStages()
+    {
         // Lookup for all resources that are already provided
         std::unordered_set<std::string_view> resourceNames;
         // List of all resource references that are already provided
@@ -25,6 +46,7 @@ namespace hsk {
         std::unordered_set<RenderStage*> done;
 
         // Reorder stages by dependencies
+
         while(stageOrder.size() != mStages.size())
         {
             bool didInsert = false;
@@ -58,7 +80,8 @@ namespace hsk {
                         if(!insertIter.second)
                         {
                             // If the insert op returns false, then the resource was already present -> duplicate
-                            HSK_THROWFMT("StageDirector: Resource \"{}\" provided by \"{}\" is duplicate! Resource names need to be unique!", reference->GetName(), stage->GetName())
+                            HSK_THROWFMT("StageDirector: Resource \"{}\" provided by \"{}\" is duplicate! Resource names need to be unique!", reference->GetName(),
+                                         stage->GetName())
                         }
                     }
                     didInsert = true;
@@ -73,7 +96,8 @@ namespace hsk {
         }
         mStages = stageOrder;
 
-        // Build reference bindings list
+        // Build reference bindings list (lookup of all resource reference and which stages use it)
+
         mReferenceBindings.clear();
         for(const auto reference : resourceReferences)
         {
@@ -91,6 +115,9 @@ namespace hsk {
                     binding.ProvidedIndex = i;
                     // We need to provide an output context for this resource, even if it is never read
                     binding.LastUsedIndex = std::max(binding.LastUsedIndex, i);
+                    if (binding.SurvivePresent){
+                        binding.LastUsedIndex = stageOrder.size() - 1;
+                    }
                 }
                 if(std::find(depends.cbegin(), depends.cend(), reference) != depends.cend())
                 {
@@ -100,13 +127,79 @@ namespace hsk {
                 const auto imageBinding = dynamic_cast<const StageImageReference*>(reference);
                 if(imageBinding)
                 {
+                    binding.SurvivePresent = imageBinding->ReferenceType == StageImageReference::EReferenceType::InputPreviousFrame;
                     binding.ImageRequirementsHash = imageBinding->ImageInfo.GetRequirementsHash();
                 }
             }
             mReferenceBindings.push_back(binding);
         }
 
-        
+        // Detect the count of parallely required images
+
+        std::vector<ImageCountSet> stageCounts(mStages.size());
+        for(auto& referenceBinding : mReferenceBindings)
+        {
+            auto imageRef = dynamic_cast<const StageImageReference*>(referenceBinding.Reference);
+            if(imageRef == nullptr)
+            {
+                // not an image, so not handled by the stage director
+                continue;
+            }
+            for(uint32_t i = referenceBinding.ProvidedIndex; i < referenceBinding.LastUsedIndex; i++)
+            {
+                auto find = stageCounts[i].find(referenceBinding.ImageRequirementsHash);
+                if(find == stageCounts[i].end())
+                {
+                    stageCounts[i][referenceBinding.ImageRequirementsHash] = ImageResourceCount{.Info = imageRef->ImageInfo, .Count = 1};
+                }
+                else
+                {
+                    find->second.Count++;
+                }
+            }
+        }
+
+        // Find the maximum count of parallel images required
+        mGlobalCounts.clear();
+        for(auto& stageCount : stageCounts)
+        {
+            for(auto& pair : stageCount)
+            {
+                auto find = mGlobalCounts.find(pair.first);
+                if(find == mGlobalCounts.end())
+                {
+                    mGlobalCounts[pair.first] = pair.second;
+                }
+                else
+                {
+                    find->second.Count = std::max(find->second.Count, pair.second.Count);
+                }
+            }
+        }
+    }
+
+    void StageDirector::RecreateAndSetImages(VkExtent2D swapchainSize)
+    {
+        for(auto& globalCount : mGlobalCounts)
+        {
+            for(uint32_t i = 0; i < globalCount.second.Count; i++)
+            {
+                std::unique_ptr<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>> rotatedImages = std::make_unique<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>>();
+                for(uint32_t f = 0; f < INFLIGHTFRAMECOUNT; f++)
+                {
+                    std::string name = fmt::format("StageDirector_{0}.AutoGen.{1:x}.{2}", GetName(), globalCount.first, f);
+                    rotatedImages->Get(f).Init(GetContext(), swapchainSize, name);
+                }
+                mImages.push_back(std::move(rotatedImages));
+            }
+        }
+
+        std::vector<std::string_view> used(mImages.size());
+        for(uint32_t i = 0; i < mStages.size(); i++)
+        {
+            const auto& depends  = mStages[i]->Depends();
+            const auto& provides = mStages[i]->Provides();
+        }
     }
 
     bool StageDirector::Exists() const

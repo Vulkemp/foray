@@ -13,11 +13,12 @@ namespace hsk {
             Custom
         };
 
-        ESize             Size             = ESize::SwapchainExtent;
-        VkExtent2D        CustomSize       = {};
-        VkFormat          Format           = VkFormat::VK_FORMAT_UNDEFINED;
-        VkImageUsageFlags UsageFlags       = 0;
-        std::string       Name             = "";
+        ESize              Size        = ESize::SwapchainExtent;
+        VkExtent3D         CustomSize  = {};
+        VkFormat           Format      = VkFormat::VK_FORMAT_UNDEFINED;
+        VkImageUsageFlags  UsageFlags  = 0;
+        VkImageAspectFlags AspectFlags = 0;
+        std::string        Name        = "";
 
         uint64_t GetRequirementsHash() const;
     };
@@ -38,7 +39,7 @@ namespace hsk {
             Output
         };
 
-        EReferenceType ReferenceTypeFlags = {};
+        EReferenceType ReferenceType = {};
 
         StageImageInfo ImageInfo;
 

@@ -12,6 +12,8 @@ namespace hsk {
       public:
         inline StageImage() {}
 
+        inline virtual void Init(const VkContext* context, VkExtent2D size, std::string_view name);
+
         inline virtual bool Exists() const override { return Image->Exists(); }
         inline virtual void Cleanup() override { Image->Cleanup(); }
 
@@ -31,13 +33,24 @@ namespace hsk {
             uint32_t                     ProvidedIndex         = -1;
             uint32_t                     LastUsedIndex         = -1;
             uint64_t                     ImageRequirementsHash = 0UL;
+            bool                         SurvivePresent        = false;
         };
+        struct ImageResourceCount
+        {
+            StageImageInfo Info;
+            uint32_t       Count;
+        };
+        using ImageCountSet = std::unordered_map<uint64_t, ImageResourceCount>;
 
         inline StageDirector(const VkContext* context = nullptr) : DeviceResourceBase("StageDirector"), mContext(context) {}
 
         virtual StageDirector& AddStage(RenderStage* stage);
 
         virtual void InitOrUpdate(const VkContext* context = nullptr);
+        virtual void ReorderStages();
+        virtual void RecreateAndSetImages(VkExtent2D swapchainSize);
+
+        virtual void OnResized(Extent2D newsize);
 
         virtual bool Exists() const override;
         virtual void Cleanup() override;
@@ -49,9 +62,10 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Images)
 
       protected:
-        const VkContext*                                                                   mContext = nullptr;
-        std::vector<RenderStage*>                                                          mStages;
-        std::unordered_map<std::string_view, FrameRotator<StageImage, INFLIGHTFRAMECOUNT>> mImages;
-        std::vector<ReferenceBinding>                                                      mReferenceBindings;
+        const VkContext*                                                           mContext = nullptr;
+        std::vector<RenderStage*>                                                  mStages;
+        std::vector<std::unique_ptr<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>>> mImages;
+        std::vector<ReferenceBinding>                                              mReferenceBindings;
+        ImageCountSet                                                              mGlobalCounts;
     };
 }  // namespace hsk
