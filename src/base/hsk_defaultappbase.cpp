@@ -240,7 +240,7 @@ namespace hsk {
             return;
         }
         logger()->info("Compiling shaders...");
-        std::string shaderSourceDirectory = CurrentWorkingDirectory() + mShaderCompilerConfig.ShaderSubdir;
+        std::string shaderSourceDirectory = MakeRelativePath(mShaderCompilerConfig.ShaderSubdir);
         std::string shaderOutputDirectory = shaderSourceDirectory;
         if(mShaderCompilerConfig.ShaderSourceDirectoryPathFull.length() > 0)
         {
@@ -254,7 +254,7 @@ namespace hsk {
             shaderOutputDirectory = mShaderCompilerConfig.ShaderOutputDirectoryPathFull;
         }
 
-        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(CurrentWorkingDirectory() + "/../hsk_rt_rpf/src/shaders");
+        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(MakeRelativePath("./../hsk_rt_rpf/src/shaders"));
         mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
         mShaderCompilerConfig.ShaderCompiler.CompileAll();
         logger()->info("Compiling shaders successfully finished!");

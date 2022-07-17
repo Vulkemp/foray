@@ -82,7 +82,7 @@ namespace hsk {
         createInfo.ImageViewCI.subresourceRange.baseArrayLayer = 0;
         createInfo.ImageViewCI.subresourceRange.layerCount     = 1;
 
-        createInfo.Name = name;
+        createInfo.Name = name == "UnnamedImage" ? GetName() : name;
 
         Create(context, createInfo);
     }
