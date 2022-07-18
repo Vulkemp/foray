@@ -103,7 +103,7 @@ namespace hsk {
         {
             // For each reference
             ReferenceBinding binding{.Reference = reference};
-            for(uint32_t i = 0; i < stageOrder.size(); i++)
+            for(int32_t i = 0; i < stageOrder.size(); i++)
             {
                 // Check all stages, find out which provides it, and which depend on it, logging that as indices so the required lifetime of the resource can be determined
                 RenderStage* stage    = stageOrder[i];

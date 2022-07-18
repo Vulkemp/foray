@@ -30,8 +30,8 @@ namespace hsk {
         {
           public:
             const ResourceReferenceBase* Reference             = nullptr;
-            uint32_t                     ProvidedIndex         = -1;
-            uint32_t                     LastUsedIndex         = -1;
+            int32_t                     ProvidedIndex         = -1;
+            int32_t                     LastUsedIndex         = -1;
             uint64_t                     ImageRequirementsHash = 0UL;
             bool                         SurvivePresent        = false;
         };

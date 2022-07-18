@@ -1,6 +1,7 @@
 #include "hsk_shadercompiler.hpp"
 #include "hsk_logger.hpp"
 #include <codecvt>
+#include "../hsk_env.hpp"
 
 namespace hsk {
 
@@ -109,6 +110,10 @@ namespace hsk {
         // parse all shaders in data directory
         for(auto& sourceDirectory : mSourceDirectories)
         {
+            if (!fs::exists(sourceDirectory)){
+                logger()->warn("ShaderCompiler: Skipping source directory \"{}\" because it does not exist.", ToUtf8Path(sourceDirectory));
+                continue;
+            }
             for(auto& pathIterator : fs::recursive_directory_iterator(sourceDirectory))
             {
                 if(!pathIterator.is_directory())

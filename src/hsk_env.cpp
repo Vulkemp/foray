@@ -84,6 +84,6 @@ namespace hsk {
 
         std::filesystem::path path = cwd;
         path /= std::filesystem::path(FromUtf8Path(relative));
-        return path.c_str();
+        return ToUtf8Path(path);
     }
 }  // namespace hsk
