@@ -64,7 +64,7 @@ namespace hsk {
         {
             bool EnableShaderCompiler = true;
             /// @brief By default, shader source files are searched in the current working directory "cwd"/shaders.
-            std::string ShaderSubdir = "/shaders/";
+            std::string ShaderSubdir = "./shaders/";
             /// @brief If mShaderSourceDirectoryPathFull is set to value, this path will be used as source dir.
             std::string ShaderSourceDirectoryPathFull = {};
             /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
