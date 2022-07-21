@@ -11,7 +11,7 @@ namespace hsk {
         VkDevice                                    device = context->Device;
         VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
         addressInfo.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
-        addressInfo.accelerationStructure = blas;
+        addressInfo.accelerationStructure = blas.GetAccelerationStructure();
         VkDeviceAddress blasAddress       = context->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
 
         VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};

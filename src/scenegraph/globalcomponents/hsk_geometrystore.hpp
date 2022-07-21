@@ -7,7 +7,7 @@
 
 namespace hsk {
 
-    /// @brief Reference into a vertex or index buffer which combine into a valid draw call
+    /// @brief Used to index into a vertex or index buffer which combine into a valid draw call.
     struct Primitive
     {
         enum class EType
@@ -16,7 +16,10 @@ namespace hsk {
             Index
         };
         EType    Type  = {};
+
+        /// @brief Index to the first index/vertex in a buffer.
         uint32_t First = 0;
+        /// @brief Number of indices/vertices used for this primitive.
         uint32_t Count = 0;
 
         inline Primitive() {}
@@ -42,7 +45,6 @@ namespace hsk {
 
         HSK_PROPERTY_ALL(GeometryBufferSet)
         HSK_PROPERTY_ALL(Primitives)
-        HSK_PROPERTY_ALL(HighestIndexValue)
         HSK_PROPERTY_GET(Blas)
 
 
@@ -50,7 +52,6 @@ namespace hsk {
         GeometryBufferSet*     mGeometryBufferSet;
         std::vector<Primitive> mPrimitives;
         Blas                   mBlas;
-        uint32_t               mHighestIndexValue{};  // TODO: required for AS building, but shouldn't this instead be acquired from an index buffer directly?
     };
 
     class GeometryBufferSet
