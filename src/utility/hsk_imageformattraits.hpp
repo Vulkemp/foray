@@ -1,31 +1,49 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include <vulkan/vulkan.h>
 #include <limits>
+#include <vulkan/vulkan.h>
 
 namespace hsk {
+
+    /// @brief Describes the traits of a component type
+    /// @param COMPONENT_T Machine typoe of the component
+    /// @param ALPHA_FALLBACK Fallback for full opacity alpha if no value is provided
+    template <typename COMPONENT_T, COMPONENT_T ALPHA_FALLBACK_, bool IS_FLOAT_, bool IS_SIGNED_>
+    class ComponentTraits
+    {
+      public:
+        /// @brief Component type
+        using COMPONENT = COMPONENT_T;
+        /// @brief Size (bytes) of the component
+        inline static constexpr uint32_t SIZE = sizeof(COMPONENT);
+        /// @brief Full opacity alpha fallback value
+        inline static constexpr COMPONENT ALPHA_FALLBACK = (COMPONENT)ALPHA_FALLBACK_;
+        inline static constexpr bool      IS_FLOAT       = IS_FLOAT_;
+        inline static constexpr bool      IS_SIGNED      = IS_SIGNED_;
+    };
+
+    using ComponentTraits_None = ComponentTraits<nullptr_t, nullptr, false, false>;
+
+    using ComponentTraits_Fp16   = ComponentTraits<uint16_t, 0x3C00, true, true>;      // Represented by an integer because x86 has no native support for half precision floats
+    using ComponentTraits_Fp32   = ComponentTraits<uint32_t, 0x3F800000, true, true>;  // Also an integer because floats can not be passed as template parameters
+    using ComponentTraits_Fp64   = ComponentTraits<uint64_t, 0x3FF0000000000000, true, true>;  // Also an integer because floats can not be passed as template parameters
+    using ComponentTraits_UInt32 = ComponentTraits<uint32_t, std::numeric_limits<uint32_t>::max(), false, false>;
+    using ComponentTraits_UInt8  = ComponentTraits<uint8_t, std::numeric_limits<uint8_t>::max(), false, false>;
+
+    /// @brief Describes the traits of a VkFormat value
     template <VkFormat FORMAT>
     class ImageFormatTraits
     {
       public:
-        inline static constexpr uint32_t COMPONENT_SIZE  = 0;
+        /// @brief Traits of the component
+        using COMPONENT_TRAITS = ComponentTraits_None;
+        /// @brief Count of components per texel
         inline static constexpr uint32_t COMPONENT_COUNT = 0;
-        inline static constexpr uint32_t STRIDE          = COMPONENT_SIZE * COMPONENT_COUNT;
+        /// @brief Stride (bytes) per texel
+        inline static constexpr uint32_t STRIDE = COMPONENT_TRAITS::SIZE * COMPONENT_COUNT;
     };
 
-    template <typename COMPONENT_T, COMPONENT_T ALPHA_FALLBACK_>
-    class ComponentTraits
-    {
-      public:
-        using COMPONENT                                  = COMPONENT_T;
-        inline static constexpr uint32_t  SIZE           = sizeof(COMPONENT);
-        inline static constexpr COMPONENT ALPHA_FALLBACK = (COMPONENT)ALPHA_FALLBACK_;
-    };
-
-    using ComponentTraits_Fp16 = ComponentTraits<uint16_t, 0x3C00>;
-    using ComponentTraits_Fp32 = ComponentTraits<uint32_t, 0x3f800000>;  // Also an integer because floats can not be passed as template parameters
-    using ComponentTraits_UInt32 = ComponentTraits<uint32_t, std::numeric_limits<uint32_t>::max()>;  // Also an integer because floats can not be passed as template parameters
-
+    /// @brief Trait base class assembled from component trait type and component count
     template <typename COMPONENT_TRAITS_, uint32_t COMPONENT_COUNT_>
     class ImageFormatTraitsBase;
 
@@ -38,6 +56,7 @@ namespace hsk {
         inline static const uint32_t COMPONENT_COUNT = 4;
         inline static const uint32_t STRIDE          = COMPONENT_TRAITS::SIZE * 4;
 
+        /// @brief Write a texel in color
         inline static void WriteColor(void* out, COMPONENT r, COMPONENT g, COMPONENT b, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -47,6 +66,7 @@ namespace hsk {
             data[3]         = a;
         }
 
+        /// @brief Write a texel in grayscale
         inline static void WriteGrayscale(void* out, COMPONENT y, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -66,6 +86,7 @@ namespace hsk {
         inline static constexpr uint32_t COMPONENT_COUNT = 3;
         inline static constexpr uint32_t STRIDE          = COMPONENT_TRAITS::SIZE * 3;
 
+        /// @brief Write a texel in color
         inline static void WriteColor(void* out, COMPONENT r, COMPONENT g, COMPONENT b, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -74,6 +95,7 @@ namespace hsk {
             data[2]         = b;
         }
 
+        /// @brief Write a texel in grayscale
         inline static void WriteGrayscale(void* out, COMPONENT y, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -92,6 +114,7 @@ namespace hsk {
         inline static constexpr uint32_t COMPONENT_COUNT = 2;
         inline static constexpr uint32_t STRIDE          = COMPONENT_TRAITS::SIZE * 2;
 
+        /// @brief Write a texel in color
         inline static void WriteColor(void* out, COMPONENT r, COMPONENT g, COMPONENT b, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -99,6 +122,7 @@ namespace hsk {
             data[1]         = g;
         }
 
+        /// @brief Write a texel in grayscale
         inline static void WriteGrayscale(void* out, COMPONENT y, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -116,12 +140,14 @@ namespace hsk {
         inline static constexpr uint32_t COMPONENT_COUNT = 1;
         inline static constexpr uint32_t STRIDE          = COMPONENT_TRAITS::SIZE * 1;
 
+        /// @brief Write a texel in color
         inline static void WriteColor(void* out, COMPONENT r, COMPONENT g, COMPONENT b, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
             data[0]         = r;
         }
 
+        /// @brief Write a texel in grayscale
         inline static void WriteGrayscale(void* out, COMPONENT y, COMPONENT a)
         {
             COMPONENT* data = reinterpret_cast<COMPONENT*>(out);
@@ -166,21 +192,57 @@ namespace hsk {
     {
     };
 #pragma endregion
-#pragma region inteer 32 unsigned
+#pragma region float double
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32A32_UINT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 4>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64B64A64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32_UINT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 3>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64B64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32_UINT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 2>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32_UINT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 1>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 1>
+    {
+    };
+#pragma endregion
+#pragma region integer 32 unsigned
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32A32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 4>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 3>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 2>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 1>
+    {
+    };
+#pragma endregion
+#pragma region integer 8 unsigned
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8A8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
     {
     };
 #pragma endregion

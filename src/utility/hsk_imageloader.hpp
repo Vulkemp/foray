@@ -64,11 +64,9 @@ namespace hsk {
         std::function<void(void*)> mCustomLoaderInfoDeleter = {};
 
         bool PopulateImageInfo_TinyExr();
-        bool PopulateImageInfo_StbHdr();
-        bool PopulateImageInfo_StbLdr();
+        bool PopulateImageInfo_Stb();
         bool Load_TinyExr();
-        bool Load_StbHdr();
-        bool Load_StbLdr();
+        bool Load_Stb();
     };
 
 }  // namespace hsk

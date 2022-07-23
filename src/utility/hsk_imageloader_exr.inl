@@ -5,8 +5,6 @@
 
 // Disclaimer: Most of the code here is heavily inspired or copied from how Godot engine incorporates the tinyexr image loader
 
-using namespace std::filesystem;
-
 namespace hsk {
 
     class ExrLoaderCache

@@ -2,6 +2,7 @@
 #include "../hsk_env.hpp"
 #include "hsk_imageloader.hpp"
 #include "hsk_imageloader_exr.inl"
+#include "hsk_imageloader_stb.inl"
 
 using namespace std::filesystem;
 
@@ -22,9 +23,8 @@ namespace hsk {
     template <VkFormat FORMAT>
     bool ImageLoader<FORMAT>::Init(std::string_view utf8path)
     {
-        // Inplace new requires explicit destructor call
-        mInfo.~ImageInfo();
-        new(&mInfo) ImageInfo();
+        // Reset all members
+        Cleanup();
 
         mInfo.Utf8Path = utf8path;
 
@@ -49,16 +49,8 @@ namespace hsk {
         }
         else
         {
-            return false;
+            return PopulateImageInfo_Stb();
         }
-        // else if(mInfo.Extension == ".hdr")
-        // {
-        //     return PopulateImageInfo_StbHdr();
-        // }
-        // else
-        // {
-        //     return PopulateImageInfo_StbLdr();
-        // }
     }
 
     template <VkFormat FORMAT>
@@ -76,16 +68,8 @@ namespace hsk {
         }
         else
         {
-            return false;
+            return Load_Stb();
         }
-        // else if(mInfo.Extension == ".hdr")
-        // {
-        //     return Load_StbHdr();
-        // }
-        // else
-        // {
-        //     return Load_StbLdr();
-        // }
     }
 
     template <VkFormat FORMAT>
@@ -95,7 +79,11 @@ namespace hsk {
         {
             mCustomLoaderInfoDeleter(mCustomLoaderInfo);
         }
+        mCustomLoaderInfo = nullptr;
+        mCustomLoaderInfoDeleter = nullptr;
         mRawData.clear();
+
+        // Inplace new requires explicit destructor call
         mInfo.~ImageInfo();
         new(&mInfo) ImageInfo();
     }
