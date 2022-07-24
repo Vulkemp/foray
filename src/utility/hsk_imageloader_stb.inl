@@ -63,6 +63,7 @@ namespace hsk {
 
 
         mInfo.Valid = width > 0 && height > 0 && !!mInfo.Channels.size();
+        return mInfo.Valid;
     }
 
     namespace impl {
@@ -116,11 +117,12 @@ namespace hsk {
             stbdata = lReadStbUint16<FORMAT_TRAITS>(name, desired_channels);
         }
 
-        if (!stbdata){
+        if(!stbdata)
+        {
             return false;
         }
 
-        mRawData.resize(FORMAT_TRAITS::STRIDE * mInfo.Extent.width * mInfo.Extent.height);
+        mRawData.resize(FORMAT_TRAITS::BYTESTRIDE * mInfo.Extent.width * mInfo.Extent.height);
 
         memcpy(mRawData.data(), stbdata, mRawData.size());
         stbi_image_free(stbdata);

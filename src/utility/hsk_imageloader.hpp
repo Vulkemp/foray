@@ -56,6 +56,12 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Info)
         HSK_PROPERTY_ALLGET(RawData)
 
+        inline void InitManagedImage(const VkContext*          context,
+                                     ManagedImage*             image,
+                                     ManagedImage::CreateInfo& ci,
+                                     VkImageLayout             afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
+        inline void UpdateManagedImageCI(ManagedImage::CreateInfo& ci) const;
+        inline void WriteManagedImageData(ManagedImage* image, VkImageLayout afterwrite) const;
 
       protected:
         ImageInfo                  mInfo;

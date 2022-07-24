@@ -3,6 +3,7 @@
 #include "hsk_imageloader.hpp"
 #include "hsk_imageloader_exr.inl"
 #include "hsk_imageloader_stb.inl"
+#include "../memory/hsk_managedimage.hpp"
 
 using namespace std::filesystem;
 
@@ -79,7 +80,7 @@ namespace hsk {
         {
             mCustomLoaderInfoDeleter(mCustomLoaderInfo);
         }
-        mCustomLoaderInfo = nullptr;
+        mCustomLoaderInfo        = nullptr;
         mCustomLoaderInfoDeleter = nullptr;
         mRawData.clear();
 
@@ -87,5 +88,36 @@ namespace hsk {
         mInfo.~ImageInfo();
         new(&mInfo) ImageInfo();
     }
+
+    template <VkFormat FORMAT>
+    inline void ImageLoader<FORMAT>::InitManagedImage(const VkContext* context, ManagedImage* image, ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
+    {
+        if(!mInfo.Valid || !mRawData.size())
+        {
+            return;
+        }
+
+        UpdateManagedImageCI(ci);
+
+        image->Create(context, ci);
+        WriteManagedImageData(image, afterwrite);
+    }
+
+    template <VkFormat FORMAT>
+    inline void ImageLoader<FORMAT>::UpdateManagedImageCI(ManagedImage::CreateInfo& ci) const
+    {
+        ci.ImageCI.format        = FORMAT;
+        ci.ImageCI.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        ci.ImageCI.usage         = ci.ImageCI.usage | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        ci.ImageCI.extent        = VkExtent3D{.width = mInfo.Extent.width, .height = mInfo.Extent.height, .depth = 1};
+        ci.ImageCI.imageType     = VkImageType::VK_IMAGE_TYPE_2D;
+    }
+
+    template <VkFormat FORMAT>
+    inline void ImageLoader<FORMAT>::WriteManagedImageData(ManagedImage* image,  VkImageLayout afterwrite) const
+    {
+        image->WriteDeviceLocalData(mRawData.data(), mRawData.size(), afterwrite);
+    }
+
 
 }  // namespace hsk

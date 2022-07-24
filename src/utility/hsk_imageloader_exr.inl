@@ -41,7 +41,7 @@ namespace hsk {
                       int32_t               channels[5])
         {
             using component_t     = FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
-            const uint32_t strideBytes = FORMAT_TRAITS::STRIDE;
+            const uint32_t strideBytes = FORMAT_TRAITS::BYTESTRIDE;
             const uint32_t stride = FORMAT_TRAITS::COMPONENT_COUNT;
 
             component_t* writeData = reinterpret_cast<component_t*>(out.data());
@@ -253,7 +253,7 @@ namespace hsk {
         // STEP #4: Move EXR lib data to custom data vector
 
         // Storing as VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT, so resize to pixelcount * 4 components * x bytes per component (2 or 4)
-        mRawData.resize(FORMAT_TRAITS::STRIDE * mInfo.Extent.width * mInfo.Extent.height);
+        mRawData.resize(FORMAT_TRAITS::BYTESTRIDE * mInfo.Extent.width * mInfo.Extent.height);
 
         EXRTile single_image_tile;
         int     num_tiles;
