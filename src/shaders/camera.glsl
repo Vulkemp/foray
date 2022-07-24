@@ -3,7 +3,7 @@
 #define SET_CAMERA_UBO 0
 #endif
 
-layout (set = SET_CAMERA_UBO, binding = BIND_CAMERA_UBO ) uniform CameraUboBlock 
+layout(set = SET_CAMERA_UBO, binding = BIND_CAMERA_UBO) uniform CameraUboBlock
 {
     mat4 ProjectionMatrix;
     mat4 ViewMatrix;
@@ -11,6 +11,7 @@ layout (set = SET_CAMERA_UBO, binding = BIND_CAMERA_UBO ) uniform CameraUboBlock
     mat4 PreviousViewMatrix;
     mat4 ProjectionViewMatrix;
     mat4 PreviousProjectionViewMatrix;
-} Camera;
+}
+Camera;
 
 #endif

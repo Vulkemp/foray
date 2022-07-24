@@ -3,21 +3,26 @@
 #ifdef BIND_MATERIAL_BUFFER
 #ifndef SET_MATERIAL_BUFFER
 #define SET_MATERIAL_BUFFER 0
-#endif // SET_MATERIAL_BUFFER
-layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER ) buffer readonly MaterialBuffer { MaterialBufferObject Array[]; } Materials;
-#endif // BIND_MATERIAL_BUFFER
+#endif  // SET_MATERIAL_BUFFER
+layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER) buffer readonly MaterialBuffer
+{
+    MaterialBufferObject Array[];
+}
+Materials;
+#endif  // BIND_MATERIAL_BUFFER
 
 #ifdef BIND_TEXTURES_BUFFER
 #ifndef SET_TEXTURES_BUFFER
 #define SET_TEXTURES_BUFFER 0
-#endif // SET_TEXTURES_BUFFER
-layout(set = SET_TEXTURES_BUFFER, binding = BIND_TEXTURES_BUFFER ) uniform sampler2D Textures[];
+#endif  // SET_TEXTURES_BUFFER
+layout(set = SET_TEXTURES_BUFFER, binding = BIND_TEXTURES_BUFFER) uniform sampler2D Textures[];
 
-vec4 SampleTexture(in int index, in vec2 uv) {
+vec4 SampleTexture(in int index, in vec2 uv)
+{
     return texture(Textures[index], uv);
 }
 
-#endif // BIND_TEXTURES_BUFFER
+#endif  // BIND_TEXTURES_BUFFER
 
 #ifndef MATERIALBUFFER_GLSL
 #define MATERIALBUFFER_GLSL
@@ -70,7 +75,7 @@ MaterialProbe ProbeMaterial(in MaterialBufferObject material, in vec2 uv)
     // Grab Metallic + Roughness
     if(material.MetallicRoughnessTextureIndex >= 0)
     {
-        result.MetallicRoughness   = SampleTexture(material.MetallicRoughnessTextureIndex, uv).xy;
+        result.MetallicRoughness = SampleTexture(material.MetallicRoughnessTextureIndex, uv).xy;
         result.MetallicRoughness.x *= material.MetallicFactor;
         result.MetallicRoughness.y *= material.RoughnessFactor;
     }
