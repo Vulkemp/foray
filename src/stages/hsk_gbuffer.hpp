@@ -12,12 +12,12 @@ namespace hsk {
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
 
-        inline static constexpr std::string_view WorldspacePosition = "Position";
-        inline static constexpr std::string_view WorldspaceNormal   = "Normal";
-        inline static constexpr std::string_view Albedo             = "Albedo";
-        inline static constexpr std::string_view MotionVector       = "Motion";
-        inline static constexpr std::string_view MaterialIndex      = "MaterialId";
-        inline static constexpr std::string_view MeshInstanceIndex  = "MeshInstanceId";
+        inline static constexpr std::string_view WorldspacePosition = "Gbuf.Position";
+        inline static constexpr std::string_view WorldspaceNormal   = "Gbuf.Normal";
+        inline static constexpr std::string_view Albedo             = "Gbuf.Albedo";
+        inline static constexpr std::string_view MotionVector       = "Gbuf.Motion";
+        inline static constexpr std::string_view MaterialIndex      = "Gbuf.MaterialId";
+        inline static constexpr std::string_view MeshInstanceIndex  = "Gbuf.MeshInstanceId";
 
       protected:
         Scene* mScene;

@@ -12,7 +12,7 @@ namespace hsk {
         virtual void Init(const VkContext* context, ManagedImage* sourceImage);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
 
-        inline static constexpr std::string_view FlipTarget = "FlipImageStage_FlipTarget";
+        inline static constexpr std::string_view FlipTarget = "Flip.Target";
 
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newSourceImage);
 
