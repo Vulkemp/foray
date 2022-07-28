@@ -15,14 +15,15 @@ namespace hsk {
 
         const uint32_t primitiveCount = primitives.size();
 
+
         // TODO: Get real transform matrices
         // create tmp transform matrix
         VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-        ManagedBuffer        transformMatrixBuffer;
+        //ManagedBuffer        transformMatrixBuffer;
         transformMatrixBuffer.Create(
             context, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
             sizeof(transform_matrix), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        transformMatrixBuffer.WriteDataDeviceLocal(&transformMatrixBuffer, sizeof(transform_matrix));
+        transformMatrixBuffer.WriteDataDeviceLocal(&transform_matrix, sizeof(transform_matrix));
 
         auto                          geoBufferSet = mesh->GetGeometryBufferSet();
         VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = geoBufferSet->GetVertices().GetDeviceAddress()};
@@ -30,19 +31,41 @@ namespace hsk {
         VkDeviceOrHostAddressConstKHR transform_matrix_device_address{.deviceAddress = transformMatrixBuffer.GetDeviceAddress()};
 
 
-        VkAccelerationStructureGeometryKHR geometry{};
-        // The bottom level acceleration structure contains one set of triangles as the input geometry
-        geometry.sType                            = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-        geometry.geometryType                     = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-        geometry.flags                            = VK_GEOMETRY_OPAQUE_BIT_KHR;
-        geometry.geometry.triangles.sType         = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-        geometry.geometry.triangles.vertexFormat  = VK_FORMAT_R32G32B32_SFLOAT;
-        geometry.geometry.triangles.vertexData    = vertex_data_device_address;
-        geometry.geometry.triangles.maxVertex     = 1000;
-        geometry.geometry.triangles.vertexStride  = sizeof(Vertex);
-        geometry.geometry.triangles.indexType     = VK_INDEX_TYPE_UINT32;
-        geometry.geometry.triangles.indexData     = index_data_device_address;
-        geometry.geometry.triangles.transformData = transform_matrix_device_address;
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos;
+        std::vector<uint32_t>                                 primitiveCounts;
+        std::vector<VkAccelerationStructureGeometryKHR>       geometries;
+        geometries.reserve(primitiveCount);
+
+        for(auto& primitive : primitives)
+        {
+            VkAccelerationStructureGeometryKHR geometry{};
+            // The bottom level acceleration structure contains one set of triangles as the input geometry
+            geometry.sType                            = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+            geometry.geometryType                     = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+            geometry.flags                            = VK_GEOMETRY_OPAQUE_BIT_KHR;
+            geometry.geometry.triangles.sType         = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+            geometry.geometry.triangles.vertexFormat  = VK_FORMAT_R32G32B32_SFLOAT;
+            geometry.geometry.triangles.vertexData    = vertex_data_device_address;
+            geometry.geometry.triangles.maxVertex     = primitive.VertexOrIndexCount;
+            geometry.geometry.triangles.vertexStride  = sizeof(Vertex);
+            geometry.geometry.triangles.indexType     = VK_INDEX_TYPE_UINT32;
+            geometry.geometry.triangles.indexData     = index_data_device_address;
+            geometry.geometry.triangles.transformData = transform_matrix_device_address;
+            geometries.push_back(geometry);
+
+            // Infer build range info from geometry
+            uint32_t primitveCount = primitive.VertexOrIndexCount / 3; // TODO: durch 3 teilen?
+            primitiveCounts.push_back(primitveCount);
+
+            // according to the vulkan spec, values behave different, based on which VkGeometryTypeKHR is used.
+            // for triangles, as follows:
+            VkAccelerationStructureBuildRangeInfoKHR build_range_info;
+            build_range_info.primitiveCount  = primitveCount;    // consumes 3x primitiveCount indices
+            build_range_info.primitiveOffset = 0;  // offset into index buffer  // primitveCount.First?
+            build_range_info.firstVertex     = 0;  // added to index values before fetching vertices
+            build_range_info.transformOffset = 0;
+            buildRangeInfos.push_back(build_range_info);
+        }
 
 
         // Get the size requirements for buffers involved in the acceleration structure build process
@@ -51,21 +74,12 @@ namespace hsk {
         buildGeometryInfo.type          = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
         buildGeometryInfo.flags         = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
         buildGeometryInfo.mode          = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-        buildGeometryInfo.geometryCount = 1;
-        buildGeometryInfo.pGeometries   = &geometry;
+        buildGeometryInfo.geometryCount = static_cast<uint32_t>(geometries.size());
+        buildGeometryInfo.pGeometries   = geometries.data();
 
-        // get max number of primitves
-        uint32_t maxPrimitives = 0;
-        for(auto& primitive : primitives)
-        {
-            maxPrimitives = std::max(maxPrimitives, primitive.Count);
-        }
-        // convert vertex/index count to primitive count, as 3 indices make one triangle
-        maxPrimitives /= 3;
-
-        VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo;
+        VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo{};
         buildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-        context->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, &maxPrimitives, &buildSizesInfo);
+        context->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, primitiveCounts.data(), &buildSizesInfo);
 
 
         mBlasMemory.Create(context, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, buildSizesInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
@@ -89,24 +103,13 @@ namespace hsk {
                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT);
         buildGeometryInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
 
-
-        VkAccelerationStructureBuildRangeInfoKHR buildRangeInfo;
-
-        // according to the vulkan spec, values behave different, based on which VkGeometryTypeKHR is used.
-        // for triangles, as follows:
-        buildRangeInfo.primitiveCount  = mesh->GetGeometryBufferSet()->GetIndexCount() / 3;  // consumes 3x primitiveCount indices
-        buildRangeInfo.primitiveOffset = 0;                                                  // offset into index buffer
-        buildRangeInfo.firstVertex     = 0;                                                  // added to index values before fetching vertices
-        buildRangeInfo.transformOffset = 0;
-
-        std::vector<VkAccelerationStructureBuildRangeInfoKHR*> buildRangeInfos = {&buildRangeInfo};
-
         // Build the acceleration structure on the device via a one-time command buffer submission
         // Some implementations may support acceleration structure building on the host (VkPhysicalDeviceAccelerationStructureFeaturesKHR->accelerationStructureHostCommands), but we prefer device builds
         CommandBuffer commandBuffer;
         commandBuffer.Create(context);
         commandBuffer.Begin();
-        context->DispatchTable.cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, buildRangeInfos.data());
+        auto buildRangeInfosPtr = &*buildRangeInfos.data();
+        context->DispatchTable.cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, &buildRangeInfosPtr);
         commandBuffer.Submit();
 
 

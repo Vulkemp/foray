@@ -25,5 +25,6 @@ namespace hsk {
         ManagedBuffer              mBlasMemory;
         VkAccelerationStructureKHR mAccelerationStructure{};
         VkDeviceAddress            mBlasAddress{};
+        ManagedBuffer              transformMatrixBuffer;
     };
 }  // namespace hsk

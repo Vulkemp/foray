@@ -20,12 +20,12 @@ namespace hsk {
         /// @brief Index to the first index/vertex in a buffer.
         uint32_t First = 0;
         /// @brief Number of indices/vertices used for this primitive.
-        uint32_t Count = 0;
+        uint32_t VertexOrIndexCount = 0;
 
         inline Primitive() {}
         inline Primitive(EType type, uint32_t first, uint32_t count);
 
-        bool        IsValid() const { return Count > 0; }
+        bool        IsValid() const { return VertexOrIndexCount > 0; }
         inline void CmdDraw(VkCommandBuffer commandBuffer);
         inline void CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
     };
@@ -100,7 +100,7 @@ namespace hsk {
         std::vector<std::unique_ptr<Mesh>>              mMeshes;
     };
 
-    inline Primitive::Primitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), Count(count) {}
+    inline Primitive::Primitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), VertexOrIndexCount(count) {}
 
     inline void Primitive::CmdDraw(VkCommandBuffer commandBuffer)
     {
@@ -108,11 +108,11 @@ namespace hsk {
         {
             if(Type == EType::Index)
             {
-                vkCmdDrawIndexed(commandBuffer, Count, 1, First, 0, 0);
+                vkCmdDrawIndexed(commandBuffer, VertexOrIndexCount, 1, First, 0, 0);
             }
             else
             {
-                vkCmdDraw(commandBuffer, Count, 1, First, 0);
+                vkCmdDraw(commandBuffer, VertexOrIndexCount, 1, First, 0);
             }
         }
     }
@@ -123,11 +123,11 @@ namespace hsk {
         {
             if(Type == EType::Index)
             {
-                vkCmdDrawIndexed(commandBuffer, Count, instanceCount, First, 0, 0);
+                vkCmdDrawIndexed(commandBuffer, VertexOrIndexCount, instanceCount, First, 0, 0);
             }
             else
             {
-                vkCmdDraw(commandBuffer, Count, instanceCount, First, 0);
+                vkCmdDraw(commandBuffer, VertexOrIndexCount, instanceCount, First, 0);
             }
         }
     }
