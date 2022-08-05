@@ -6,9 +6,9 @@ namespace hsk {
     {
         for(int32_t i = 0; i < mGltfModel.meshes.size(); i++)
         {
-            auto&                   gltfMesh = mGltfModel.meshes[i];
+            auto&                  gltfMesh = mGltfModel.meshes[i];
             std::vector<Primitive> primitives;
-            
+
             logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
 
             PushGltfMeshToBuffers(gltfMesh, primitives);
@@ -16,6 +16,15 @@ namespace hsk {
             mesh->SetPrimitives(primitives);
             mIndexBindings.Meshes[i] = mesh.get();
             mGeo.GetMeshes().push_back(std::move(mesh));
+        }
+
+        // flip vertex order due to coordinate space translation GLTF (OpenGL) -> Vulkan
+        uint32_t swap = {};
+        for(int32_t i = 0; i + 2 < mIndexBuffer.size(); i += 3)
+        {
+            swap                = mIndexBuffer[i + 2];
+            mIndexBuffer[i + 2] = mIndexBuffer[i + 1];
+            mIndexBuffer[i + 1] = swap;
         }
 
         mGeo.GetBufferSets().push_back(std::make_unique<GeometryBufferSet>());
@@ -54,10 +63,10 @@ namespace hsk {
 
             int32_t vertexCount = 0;
 
-            std::function<glm::vec3(int32_t index)> lGetPosition = nullptr;
-            std::function<glm::vec3(int32_t index)> lGetNormal   = nullptr;
-            std::function<glm::vec3(int32_t index)> lGetTangent  = nullptr;
-            std::function<glm::vec2(int32_t index)> lGetUv       = nullptr;
+            std::function<glm::vec3(int32_t index)> lGetPosition = [](int32_t) { return glm::vec3(0.f, 0.f, 0.f); };
+            std::function<glm::vec3(int32_t index)> lGetNormal   = [](int32_t) { return glm::vec3(0.f, 1.f, 0.f); };
+            std::function<glm::vec3(int32_t index)> lGetTangent  = [](int32_t) { return glm::vec3(0.f, 0.f, 1.f); };
+            std::function<glm::vec2(int32_t index)> lGetUv       = [](int32_t) { return glm::vec2(0.f, 0.f); };
             if(positionAccessorQuery != failedQuery)
             {
                 auto& accessor = mGltfModel.accessors[positionAccessorQuery->second];  // The glTF accessor describes in which buffer to look and how to interprete the data stored
@@ -109,11 +118,15 @@ namespace hsk {
 
             for(int32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
             {
-                mVertexBuffer.push_back(Vertex{.Pos           = lGetPosition ? lGetPosition(vertexIndex) : glm::vec3(),
-                                                .Normal        = lGetNormal ? lGetNormal(vertexIndex) : glm::vec3(0.f, 1.f, 0.f),
-                                                .Tangent       = lGetTangent ? lGetTangent(vertexIndex) : glm::vec3(0.f, 0.f, 1.f),
-                                                .Uv            = lGetUv ? lGetUv(vertexIndex) : glm::vec2(),
-                                                .MaterialIndex = gltfPrimitive.material + mIndexBindings.MaterialBufferOffset});
+                auto pos    = lGetPosition(vertexIndex);
+                pos.y       = -1.f * pos.y;
+                auto normal = lGetNormal(vertexIndex);
+                normal.y    = -1.f * normal.y;
+                mVertexBuffer.push_back(Vertex{.Pos           = pos,
+                                               .Normal        = normal,
+                                               .Tangent       = lGetTangent(vertexIndex),
+                                               .Uv            = lGetUv(vertexIndex),
+                                               .MaterialIndex = gltfPrimitive.material + mIndexBindings.MaterialBufferOffset});
             }
 
             if(gltfPrimitive.indices >= 0)

@@ -110,9 +110,9 @@ namespace hsk {
                 // Axis Event
                 result = TranslateEvent_JoyAxis(sdl_event);
                 break;
-            case SDL_JOYBALLMOTION:  // TODO Low Priority: Handle Joystick Ball & Hat input
+            case SDL_JOYBALLMOTION:
             case SDL_JOYHATMOTION:
-                // Neither true Analogue nor Binary -> Requires additional event structure
+                // TODO Low Priority: Handle Joystick Ball & Hat input as directional
                 break;
             case SDL_JOYBUTTONUP:
             case SDL_JOYBUTTONDOWN:
@@ -132,7 +132,7 @@ namespace hsk {
                 // Binary Event
                 result = TranslateEvent_MouseButton(sdl_event);
                 break;
-            case SDL_MOUSEWHEEL:  // Todo: Handle Mousewheel
+            case SDL_MOUSEWHEEL:
                 result = TranslateEvent_MouseScroll(sdl_event);
                 break;
             case SDL_WINDOWEVENT:

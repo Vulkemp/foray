@@ -153,9 +153,12 @@ namespace hsk {
 
             switch(channel.TargetPath)
             {
-                case EAnimationTargetPath::Translation:
-                    transform->SetTranslation(sampler.SampleVec(mPlaybackConfig.Cursor));
+                case EAnimationTargetPath::Translation: {
+                    glm::vec3 translation = sampler.SampleVec(mPlaybackConfig.Cursor);
+                    translation.y         = -1.f * translation.y;
+                    transform->SetTranslation(translation);
                     break;
+                }
                 case EAnimationTargetPath::Rotation:
                     transform->SetRotation(sampler.SampleQuat(mPlaybackConfig.Cursor));
                     break;

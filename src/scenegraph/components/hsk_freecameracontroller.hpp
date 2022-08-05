@@ -36,7 +36,7 @@ namespace hsk {
         float mYaw = 0;
         inline static constexpr float MOUSE_ROTATION_SENSIBILITY = .05f;
         bool mUseMouse = false;
-        bool mInvertYAxis = true;
+        bool mInvertYAxis = false;
 
         std::map<EButton, bool&> mMapping = {{EButton::Keyboard_W, mInputStates.Forward},       {EButton::Keyboard_S, mInputStates.Backward},
                                              {EButton::Keyboard_LShift, mInputStates.StrafeUp}, {EButton::Keyboard_LCtrl, mInputStates.StrafeDown},

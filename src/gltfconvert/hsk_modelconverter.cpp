@@ -3,17 +3,14 @@
 #include "../hsk_glm.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
+#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 
 namespace hsk {
     ModelConverter::ModelConverter(Scene* scene)
-        : mScene(scene)
-        , mMaterialBuffer(*(scene->GetComponent<MaterialBuffer>()))
-        , mGeo(*(scene->GetComponent<GeometryStore>()))
-        , mTextures(*(scene->GetComponent<TextureStore>()))
+        : mScene(scene), mMaterialBuffer(*(scene->GetComponent<MaterialBuffer>())), mGeo(*(scene->GetComponent<GeometryStore>())), mTextures(*(scene->GetComponent<TextureStore>()))
     {
     }
 
@@ -147,6 +144,10 @@ namespace hsk {
     void ModelConverter::InitTransformFromGltf(
         Transform* transform, const std::vector<double>& matrix, const std::vector<double>& translation, const std::vector<double>& rotation, const std::vector<double>& scale)
     {
+        auto& transformMatrix      = transform->GetLocalMatrix();
+        auto& transformTranslation = transform->GetTranslation();
+        auto& transformRotation    = transform->GetRotation();
+        auto& transformScale       = transform->GetScale();
         if(matrix.size() > 0)
         {
             HSK_ASSERTFMT(matrix.size() == 16, "Error loading node. Matrix vector expected to have 16 entries, but has {}", matrix.size())
@@ -160,11 +161,18 @@ namespace hsk {
             // GLM and gltf::node.matrix both are column major, so this is valid:
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_matrix
 
-            auto& transformMatrix = transform->GetLocalMatrix();
             for(int32_t i = 0; i < 16; i++)
             {
                 transformMatrix[i / 4][i % 4] = (float)matrix[i];
             }
+            transformMatrix[3][2] = -1.f * transformMatrix[3][2];
+
+            // glm::vec3 scale;
+            // glm::quat rotation;
+            // glm::vec3 translation;
+            // glm::vec3 skew;
+            // glm::vec4 perspective;
+            // glm::decompose(transformMatrix, transformScale, transformRotation, transformTranslation, skew, perspective);
         }
         if(translation.size() > 0)
         {
@@ -172,11 +180,11 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_translation
 
-            auto& transformTranslation = transform->GetTranslation();
             for(int32_t i = 0; i < 3; i++)
             {
                 transformTranslation[i] = (float)translation[i];
             }
+            transformTranslation.y = -1.f * transformTranslation.y;
         }
         if(rotation.size() > 0)
         {
@@ -184,7 +192,6 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_rotation
 
-            auto& transformRotation = transform->GetRotation();
             for(int32_t i = 0; i < 4; i++)
             {
                 transformRotation[i] = (float)rotation[i];
@@ -196,7 +203,6 @@ namespace hsk {
 
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_node_scale
 
-            auto& transformScale = transform->GetScale();
             for(int32_t i = 0; i < 3; i++)
             {
                 transformScale[i] = (float)scale[i];

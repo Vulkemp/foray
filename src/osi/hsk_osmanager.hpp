@@ -17,8 +17,8 @@ namespace hsk {
 
         OsManager();
 
-        OsManager(const OsManager& other)  = delete;
-        OsManager(const OsManager&& other) = delete;
+        OsManager(const OsManager& other)            = delete;
+        OsManager(const OsManager&& other)           = delete;
         OsManager& operator=(const OsManager& other) = delete;
         virtual ~OsManager();
 
@@ -32,6 +32,7 @@ namespace hsk {
         virtual void Cleanup();
 
         /// @brief Polls next event from system event queue. Retuns nullptr if no event present
+        /// @remark The pointer returned is valid until the next time PollEvent() is invoked.
         virtual const Event* PollEvent();
 
       protected:
