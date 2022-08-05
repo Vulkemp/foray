@@ -70,7 +70,7 @@ namespace hsk {
         glm::mat4 mViewMatrix       = glm::mat4(1);
         glm::mat4 mProjectionMatrix = glm::mat4(1);
         using UboBuffer             = ManagedUbo<CameraUboBlock>;
-        FrameRotator<UboBuffer, 2U> mUbos;
+        FrameRotator<UboBuffer, INFLIGHT_FRAME_COUNT> mUbos;
 
         std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet1;
         std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet2;
@@ -80,7 +80,9 @@ namespace hsk {
     inline float Camera::CalculateAspect(const VkExtent2D extent) { return (float)extent.width / (float)extent.height; }
     inline void  Camera::UpdateUboDescriptorBufferInfos()
     {
-        mUbos[0].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet1[0]);
-        mUbos[1].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet2[0]);
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
+        {
+            mUbos[i].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet1[0]);
+        }
     }
 }  // namespace hsk

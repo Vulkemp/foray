@@ -45,7 +45,7 @@ namespace hsk {
             mDrawOps.push_back(std::move(drawop));
         }
 
-        for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
             if(mFirstSetup)
             {
@@ -87,7 +87,7 @@ namespace hsk {
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
 
-        for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
             mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfosCurrent[i].data());
             descriptorInfo->AddDescriptorSet(mBufferInfosCurrent + i);
@@ -100,9 +100,9 @@ namespace hsk {
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
 
-        for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
-            mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfosPrevious[(i + 1) % INFLIGHTFRAMECOUNT].data());
+            mTransformBuffers[i].GetBuffer().FillVkDescriptorBufferInfo(mBufferInfosPrevious[(i + 1) % INFLIGHT_FRAME_COUNT].data());
             descriptorInfo->AddDescriptorSet(mBufferInfosPrevious + i);
         }
         return descriptorInfo;

@@ -64,7 +64,7 @@ namespace hsk {
       protected:
         const VkContext*                                                           mContext = nullptr;
         std::vector<RenderStage*>                                                  mStages;
-        std::vector<std::unique_ptr<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>>> mImages;
+        std::vector<std::unique_ptr<FrameRotator<StageImage, INFLIGHT_FRAME_COUNT>>> mImages;
         std::vector<ReferenceBinding>                                              mReferenceBindings;
         ImageCountSet                                                              mGlobalCounts;
     };

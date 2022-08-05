@@ -184,8 +184,8 @@ namespace hsk {
         {
             for(uint32_t i = 0; i < globalCount.second.Count; i++)
             {
-                std::unique_ptr<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>> rotatedImages = std::make_unique<FrameRotator<StageImage, INFLIGHTFRAMECOUNT>>();
-                for(uint32_t f = 0; f < INFLIGHTFRAMECOUNT; f++)
+                std::unique_ptr<FrameRotator<StageImage, INFLIGHT_FRAME_COUNT>> rotatedImages = std::make_unique<FrameRotator<StageImage, INFLIGHT_FRAME_COUNT>>();
+                for(uint32_t f = 0; f < INFLIGHT_FRAME_COUNT; f++)
                 {
                     std::string name = fmt::format("StageDirector_{0}.AutoGen.{1:x}.{2}", GetName(), globalCount.first, f);
                     rotatedImages->Get(f).Init(GetContext(), swapchainSize, name);

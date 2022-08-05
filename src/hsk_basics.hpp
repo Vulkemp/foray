@@ -28,9 +28,9 @@ namespace hsk {
     };
 
 #if defined(HSK_INFLIGHTFRAMECOUNT_OVERRIDE)
-    inline constexpr uint32_t INFLIGHTFRAMECOUNT = HSK_INFLIGHTFRAMECOUNT_OVERRIDE;
+    inline constexpr uint32_t INFLIGHT_FRAME_COUNT = HSK_INFLIGHTFRAMECOUNT_OVERRIDE;
 #else
-    inline constexpr uint32_t INFLIGHTFRAMECOUNT = 2;
+    inline constexpr uint32_t INFLIGHT_FRAME_COUNT = 2;
 #endif
 }  // namespace hsk
 

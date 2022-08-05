@@ -20,7 +20,7 @@ namespace hsk {
       public:
         inline DrawDirector() : mTransformBuffers()
         {
-            for(uint32_t i = 0; i < INFLIGHTFRAMECOUNT; i++)
+            for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
             {
                 mBufferInfosCurrent[i].resize(1);
                 mBufferInfosPrevious[i].resize(1);
@@ -41,10 +41,10 @@ namespace hsk {
 
       protected:
         /// @brief Per each inflight frame, have a storage buffer containing transforms
-        FrameRotator<ManagedVectorBuffer<glm::mat4>, INFLIGHTFRAMECOUNT> mTransformBuffers;
+        FrameRotator<ManagedVectorBuffer<glm::mat4>, INFLIGHT_FRAME_COUNT> mTransformBuffers;
         /// @brief Buffer info vectors
-        std::vector<VkDescriptorBufferInfo> mBufferInfosCurrent[INFLIGHTFRAMECOUNT] = {};
-        std::vector<VkDescriptorBufferInfo> mBufferInfosPrevious[INFLIGHTFRAMECOUNT] = {};
+        std::vector<VkDescriptorBufferInfo> mBufferInfosCurrent[INFLIGHT_FRAME_COUNT] = {};
+        std::vector<VkDescriptorBufferInfo> mBufferInfosPrevious[INFLIGHT_FRAME_COUNT] = {};
         /// @brief Draw Op structs store draw operation
         std::vector<DrawOp> mDrawOps    = {};
         bool                mFirstSetup = true;
