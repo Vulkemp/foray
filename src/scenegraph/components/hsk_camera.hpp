@@ -4,6 +4,7 @@
 #include "../../memory/hsk_managedubo.hpp"
 #include "../../utility/hsk_framerotator.hpp"
 #include "../hsk_component.hpp"
+#include <array>
 
 namespace hsk {
 
@@ -15,6 +16,8 @@ namespace hsk {
         glm::mat4 PreviousViewMatrix           = {};
         glm::mat4 ProjectionViewMatrix         = {};
         glm::mat4 PreviousProjectionViewMatrix = {};
+        glm::mat4 InverseViewMatrix            = {};
+        glm::mat4 InverseProjectionMatrix      = {};
     };
 
     class Camera : public NodeComponent, public Component::BeforeDrawCallback, public Component::OnResizedCallback
@@ -33,10 +36,10 @@ namespace hsk {
         inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
         inline glm::mat4& ViewMat() { return mViewMatrix; }
 
-        /// @brief 
+        /// @brief
         /// @param shaderStage - The shader stage in which camera ubo should be accessible. Defaults to vertex stage, where
         /// the camera matrix is usually used, but can also be set to be used in a raygen stage.
-        /// @return 
+        /// @return
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MakeUboDescriptorInfos(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
 
         void SetViewMatrix();
@@ -72,9 +75,10 @@ namespace hsk {
         using UboBuffer             = ManagedUbo<CameraUboBlock>;
         FrameRotator<UboBuffer, INFLIGHT_FRAME_COUNT> mUbos;
 
-        std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet1;
-        std::vector<VkDescriptorBufferInfo>                  mUboDescriptorBufferInfosSet2;
-        void                                                 UpdateUboDescriptorBufferInfos();
+        // one set of buffer infos per frame
+        std::array<std::vector<VkDescriptorBufferInfo>, INFLIGHT_FRAME_COUNT> mUboDescriptorBufferInfosSets;
+        
+        void                                UpdateUboDescriptorBufferInfos();
     };
 
     inline float Camera::CalculateAspect(const VkExtent2D extent) { return (float)extent.width / (float)extent.height; }
@@ -82,7 +86,8 @@ namespace hsk {
     {
         for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
-            mUbos[i].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSet1[0]);
+            // update buffer info with buffer infos of managed buffer
+            mUbos[i].GetManagedBuffer().FillVkDescriptorBufferInfo(&mUboDescriptorBufferInfosSets[i][0]);
         }
     }
 }  // namespace hsk

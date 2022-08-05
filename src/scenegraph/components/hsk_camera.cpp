@@ -10,11 +10,9 @@
 namespace hsk {
     Camera::Camera() : mUbos(true)
     {
-        mUboDescriptorBufferInfosSet1.resize(1);
-        mUboDescriptorBufferInfosSet2.resize(1);
-
-        for(size_t i = 0; i < 2; i++)
+        for(size_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
+            mUboDescriptorBufferInfosSets[i].resize(1);
             mUbos[i].SetName(fmt::format("Camera Ubo #{}", i));
         }
     }
@@ -31,8 +29,10 @@ namespace hsk {
         UpdateUboDescriptorBufferInfos();
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, shaderStage);
-        descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSet1);
-        descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSet2);
+        for(size_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
+        {
+            descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSets[i]);
+        }
         return descriptorInfo;
     }
 
@@ -89,6 +89,8 @@ namespace hsk {
         uboData.ViewMatrix                   = mViewMatrix;
         uboData.ProjectionMatrix             = mProjectionMatrix;
         uboData.ProjectionViewMatrix         = mProjectionMatrix * mViewMatrix;
+        uboData.InverseViewMatrix            = glm::inverse(mViewMatrix);
+        uboData.InverseProjectionMatrix      = glm::inverse(mProjectionMatrix);
         ubo.Update();
     }
     void Camera::OnResized(VkExtent2D extent)
