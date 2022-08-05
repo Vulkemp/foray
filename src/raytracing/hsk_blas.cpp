@@ -61,7 +61,7 @@ namespace hsk {
             // for triangles, as follows:
             VkAccelerationStructureBuildRangeInfoKHR build_range_info;
             build_range_info.primitiveCount  = primitveCount;    // consumes 3x primitiveCount indices
-            build_range_info.primitiveOffset = 0;  // offset into index buffer  // primitveCount.First?
+            build_range_info.primitiveOffset = primitive.First * sizeof(uint32_t);  // offset into index buffer  // primitveCount.First?
             build_range_info.firstVertex     = 0;  // added to index values before fetching vertices
             build_range_info.transformOffset = 0;
             buildRangeInfos.push_back(build_range_info);
