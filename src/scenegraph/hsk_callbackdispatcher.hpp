@@ -13,7 +13,7 @@ namespace hsk {
         virtual void InvokeUpdate(const FrameUpdateInfo& updateInfo);
         virtual void InvokeBeforeDraw(const FrameRenderInfo& renderInfo);
         virtual void InvokeDraw(SceneDrawInfo& renderInfo);
-        virtual void InvokeOnEvent(std::shared_ptr<Event> event);
+        virtual void InvokeOnEvent(const Event* event);
         virtual void InvokeOnResized(VkExtent2D event);
 
       protected:

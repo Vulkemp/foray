@@ -32,7 +32,7 @@ namespace hsk {
         virtual void Cleanup();
 
         /// @brief Polls next event from system event queue. Retuns nullptr if no event present
-        virtual std::shared_ptr<Event> PollEvent();
+        virtual const Event* PollEvent();
 
       protected:
         /// @brief Mouse input device. Assumed standard and always present
@@ -46,17 +46,19 @@ namespace hsk {
         std::vector<std::unique_ptr<InputDevice>> mInputDevices;
 
         /// @brief Translates SDL event structures to Event class objects
-        virtual bool TranslateSDLEvent(const SDL_Event& sdl_event, std::shared_ptr<Event>& ref_event);
+        virtual bool TranslateSDLEvent(const SDL_Event& sdl_event, Event*& out_event);
 
-        virtual std::shared_ptr<Event> TranslateEvent_MouseButton(const SDL_Event& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_Keyboard(const SDL_Event& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_MouseMoved(const SDL_Event& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_MouseScroll(const SDL_Event& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_JoyAxis(const SDL_Event& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event);
-        virtual std::shared_ptr<Event> TranslateEvent_WindowClosed(Window* window, uint32_t timestamp);
-        virtual std::shared_ptr<Event> TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent);
-        virtual std::shared_ptr<Event> TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus);
+        virtual Event* TranslateEvent_MouseButton(const SDL_Event& sdl_event);
+        virtual Event* TranslateEvent_Keyboard(const SDL_Event& sdl_event);
+        virtual Event* TranslateEvent_MouseMoved(const SDL_Event& sdl_event);
+        virtual Event* TranslateEvent_MouseScroll(const SDL_Event& sdl_event);
+        virtual Event* TranslateEvent_JoyAxis(const SDL_Event& sdl_event);
+        virtual Event* TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event);
+        virtual Event* TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event);
+        virtual Event* TranslateEvent_WindowClosed(Window* window, uint32_t timestamp);
+        virtual Event* TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent);
+        virtual Event* TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus);
+
+        Event* mLastEvent = nullptr;
     };
 }  // namespace hsk

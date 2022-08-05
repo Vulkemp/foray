@@ -13,7 +13,7 @@ namespace hsk {
     {
         mDraw.Invoke(drawInfo);
     }
-    void CallbackDispatcher::InvokeOnEvent(std::shared_ptr<Event> event)
+    void CallbackDispatcher::InvokeOnEvent(const Event* event)
     {
         mOnEvent.Invoke(event);
     }

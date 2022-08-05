@@ -8,12 +8,12 @@ namespace hsk {
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:
-        virtual void OnEvent(std::shared_ptr<Event>& event) override;
+        virtual void OnEvent(const Event* event) override;
 
         virtual void Update(const FrameUpdateInfo&) override;
 
       protected:
-        virtual void ProcessMouseMovedEvent(std::shared_ptr<EventInputMouseMoved>& event);
+        virtual void ProcessMouseMovedEvent(const EventInputMouseMoved* event);
 
         struct InputStates
         {

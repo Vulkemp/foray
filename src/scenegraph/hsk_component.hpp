@@ -47,7 +47,7 @@ namespace hsk {
         class OnEventCallback : public Polymorphic
         {
           public:
-            using TArg = std::shared_ptr<Event>&;
+            using TArg = const Event*;
             /// @brief Invoked with every event received by the application
             inline virtual void OnEvent(TArg event) = 0;
             inline void         Invoke(TArg event) { OnEvent(event); }

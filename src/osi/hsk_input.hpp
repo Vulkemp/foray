@@ -6,13 +6,12 @@ namespace hsk {
     class InputBase
     {
       public:
-        /// @brief Device this input is part of
-        inline InputDevice*       Device() { return mDevice; }
-        inline const InputDevice* Device() const { return mDevice; }
+        /// @brief Device providing this input
+        HSK_PROPERTY_ALLGET(Device)
         /// @brief Device-unique Id of the input
-        inline int32_t Id() const { return mId; }
+        HSK_PROPERTY_ALLGET(Id)
         /// @brief Human readable name of the input
-        inline std::string_view Name() const { return mName; }
+        HSK_PROPERTY_ALLGET(Name)
 
       protected:
         InputDevice* mDevice = {};
@@ -28,16 +27,16 @@ namespace hsk {
     {
       public:
         /// @brief Axis id of the input
-        inline EAxis Axis() const { return mAxis; }
+        HSK_PROPERTY_ALLGET(AxisId)
 
         /// @brief Fetches the inputs current state
         virtual int16_t State() const = 0;
 
       protected:
-        EAxis mAxis = {};
+        EAxis mAxisId = {};
 
-        InputAnalogue() : InputBase(), mAxis() {}
-        InputAnalogue(InputDevice* device, int32_t id, std::string_view name, EAxis axis) : InputBase(device, id, name), mAxis(axis) {}
+        InputAnalogue() : InputBase(), mAxisId() {}
+        InputAnalogue(InputDevice* device, int32_t id, std::string_view name, EAxis axis) : InputBase(device, id, name), mAxisId(axis) {}
     };
 
     /// @brief Represents a single input with a state represented by a boolean value
@@ -45,29 +44,29 @@ namespace hsk {
     {
       public:
         /// @brief Button id of the input
-        inline EButton Button() const { return mButton; }
+        HSK_PROPERTY_ALLGET(ButtonId)
 
         /// @brief Fetches the inputs current state
         virtual bool State() const = 0;
 
       protected:
-        EButton mButton = {};
+        EButton mButtonId = {};
 
-        InputBinary() : InputBase(), mButton() {}
-        InputBinary(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBase(device, id, name), mButton(button) {}
+        InputBinary() : InputBase(), mButtonId() {}
+        InputBinary(InputDevice* device, int32_t id, std::string_view name, EButton button) : InputBase(device, id, name), mButtonId(button) {}
     };
 
     /// @brief Represents a stateless directional input
     class InputDirectional : public InputBase
     {
       public:
-        HSK_PROPERTY_CGET(Directional)
+        /// @brief Directional input id of the inptu
+        HSK_PROPERTY_CGET(DirectionalId)
 
       protected:
-        EDirectional mDirectional;
-        InputDirectional() : InputBase(), mDirectional() {}
-        InputDirectional(InputDevice* device, int32_t id, std::string_view name, EDirectional directional) : InputBase(device, id, name), mDirectional(directional) {}
-
+        EDirectional mDirectionalId;
+        InputDirectional() : InputBase(), mDirectionalId() {}
+        InputDirectional(InputDevice* device, int32_t id, std::string_view name, EDirectional directional) : InputBase(device, id, name), mDirectionalId(directional) {}
     };
 
 }  // namespace hsk

@@ -54,7 +54,7 @@ namespace hsk {
     {
         for(InputBinary* buttonptr : mButtons)
         {
-            if(buttonptr->Button() == button)
+            if(buttonptr->GetButtonId() == button)
             {
                 return buttonptr;
             }
@@ -71,7 +71,7 @@ namespace hsk {
             builder << "\t" << mButtons.size() << " Buttons:\n";
             for(auto button : mButtons)
             {
-                builder << "\t\t" << button->Name() << "\n";
+                builder << "\t\t" << button->GetName() << "\n";
             }
         }
         if(mAxes.size() > 0)
@@ -79,7 +79,7 @@ namespace hsk {
             builder << "\t" << mAxes.size() << " Axes:\n";
             for(AxisPtr axis : mAxes)
             {
-                builder << "\t\t" << axis->Name() << "\n";
+                builder << "\t\t" << axis->GetName() << "\n";
             }
         }
 
@@ -190,7 +190,7 @@ namespace hsk {
     {
         uint32_t mouseState = SDL_GetMouseState(nullptr, nullptr);
         uint32_t mask;
-        switch(mButton)
+        switch(mButtonId)
         {
             case EButton::Mouse_Left:
                 mask = SDL_BUTTON_LMASK;
@@ -217,10 +217,10 @@ namespace hsk {
     {
         int            num = 0;
         const uint8_t* arr = SDL_GetKeyboardState(&num);
-        if(arr == nullptr || (int)mButton >= num)
+        if(arr == nullptr || (int)mButtonId >= num)
         {
             return false;  // Break out if arr is null or the button encoded in this button object is not a valid keyboard key
         }
-        return arr[(int)mButton] != 0;
+        return arr[(int)mButtonId] != 0;
     }
 }  // namespace hsk

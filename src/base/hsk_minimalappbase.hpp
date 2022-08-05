@@ -83,7 +83,7 @@ namespace hsk {
          /// @brief Override to update logic. Delta describes time passed since last update.
          inline virtual void Update(float delta) {}
         /// @brief Override this method to react to events
-        inline virtual void OnEvent(std::shared_ptr<Event> event) {}
+        inline virtual void OnEvent(const Event* event) {}
         /// @brief Override this method to cleanup your application
         inline virtual void Cleanup() {}
 #pragma endregion

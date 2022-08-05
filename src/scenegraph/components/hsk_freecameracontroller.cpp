@@ -3,26 +3,28 @@
 #include "hsk_camera.hpp"
 
 namespace hsk {
-    void FreeCameraController::OnEvent(std::shared_ptr<Event>& event)
+    void FreeCameraController::OnEvent(const Event* event)
     {
-        auto binaryInputEvent = std::dynamic_pointer_cast<EventInputBinary>(event);
+        auto binaryInputEvent = dynamic_cast<const EventInputBinary*>(event);
         if(binaryInputEvent)
         {
-            auto finditer = mMapping.find(binaryInputEvent->Button()->Button());
+            auto buttonId = binaryInputEvent->SourceInput->GetButtonId();
+            auto pressed  = binaryInputEvent->State;
+            auto finditer = mMapping.find(buttonId);
             if(finditer != mMapping.end())
             {
-                finditer->second = binaryInputEvent->Pressed();
+                finditer->second = pressed;
             }
 
-            if(binaryInputEvent->Button()->Button() == EButton::Keyboard_Numpad_Plus && binaryInputEvent->Pressed())
+            if(buttonId == EButton::Keyboard_Numpad_Plus && pressed)
             {
                 mSpeedExponent++;
             }
-            if(binaryInputEvent->Button()->Button() == EButton::Keyboard_Numpad_Minus && binaryInputEvent->Pressed())
+            if(buttonId == EButton::Keyboard_Numpad_Minus && pressed)
             {
                 mSpeedExponent--;
             }
-            if(binaryInputEvent->Button()->Button() == EButton::Keyboard_Space && binaryInputEvent->Pressed())
+            if(buttonId == EButton::Keyboard_Space && pressed)
             {
                 int code = SDL_SetRelativeMouseMode(mUseMouse ? SDL_FALSE : SDL_TRUE);
                 if(code < 0)
@@ -36,13 +38,13 @@ namespace hsk {
             }
         }
 
-        auto directional = std::dynamic_pointer_cast<EventInputDirectional>(event);
-        if(directional && directional->InputSource()->GetDirectional() == EDirectional::Mouse_Scroll)
+        auto directional = dynamic_cast<const EventInputDirectional*>(event);
+        if(directional && directional->SourceInput->GetDirectionalId() == EDirectional::Mouse_Scroll)
         {
-            mSpeedExponent += std::clamp(directional->OffsetY(), -1, 1);
+            mSpeedExponent += std::clamp(directional->OffsetY, -1, 1);
         }
 
-        auto mouseMoved = std::dynamic_pointer_cast<EventInputMouseMoved>(event);
+        auto mouseMoved = dynamic_cast<const EventInputMouseMoved*>(event);
         if(mouseMoved && mUseMouse)
         {
             ProcessMouseMovedEvent(mouseMoved);
@@ -95,7 +97,7 @@ namespace hsk {
         camera->SetViewMatrix();
     }
 
-    void FreeCameraController::ProcessMouseMovedEvent(std::shared_ptr<EventInputMouseMoved>& event)
+    void FreeCameraController::ProcessMouseMovedEvent(const EventInputMouseMoved* event)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)
@@ -103,8 +105,8 @@ namespace hsk {
             return;
         }
 
-        float xoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeX();
-        float yoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeY();
+        float xoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeX;
+        float yoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeY;
 
         mYaw += xoffset * -1.f;
         mPitch += yoffset * (mInvertYAxis ? -1.f : 1.f);

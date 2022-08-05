@@ -36,7 +36,7 @@ namespace hsk {
         mGlobalRootRegistry.InvokeDraw(drawInfo);
     }
 
-    void Scene::HandleEvent(std::shared_ptr<Event>& event)
+    void Scene::HandleEvent(const Event* event)
     {
         this->InvokeOnEvent(event);
         mGlobalRootRegistry.InvokeOnEvent(event);

@@ -28,7 +28,7 @@ namespace hsk {
         /// @brief Draw the scene by first invoking all BeforeDraw callbacks (NodeComponent, then GlobalComponent), followed by Draw callbacks (NodeComponent, then GlobalComponent).
         void Draw(const FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
         /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
-        void HandleEvent(std::shared_ptr<Event>& event);
+        void HandleEvent(const Event* event);
 
         void CreateTlas();
 

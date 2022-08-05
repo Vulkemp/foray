@@ -238,7 +238,7 @@ namespace hsk {
         RasterizedRenderStage::OnResized(extent);
     }
 
-    void ImguiStage::ProcessSdlEvent(SDL_Event* sdlEvent) { ImGui_ImplSDL2_ProcessEvent(sdlEvent); }
+    void ImguiStage::ProcessSdlEvent(const SDL_Event* sdlEvent) { ImGui_ImplSDL2_ProcessEvent(sdlEvent); }
 
 
     void ImguiStage::RecordFrame(FrameRenderInfo& renderInfo)

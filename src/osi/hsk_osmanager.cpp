@@ -40,6 +40,10 @@ namespace hsk {
     void OsManager::Cleanup()
     {
         mInputDevices.clear();
+        if(!!mLastEvent)
+        {
+            delete mLastEvent;
+        }
         SDL_Quit();
     }
 
@@ -55,18 +59,24 @@ namespace hsk {
         }
         return out;
     }
-    
-    Event::ptr OsManager::PollEvent()
+
+    const Event* OsManager::PollEvent()
     {
-        Event::ptr out = nullptr;
-        SDL_Event  rawevent;
+        if(!!mLastEvent)
+        {
+            delete mLastEvent;
+            mLastEvent = nullptr;
+        }
+        SDL_Event rawevent;
         if(SDL_PollEvent(&rawevent) != 0)
         {
-            TranslateSDLEvent(rawevent, out);
-            if(out != nullptr)
-                out->SetRawSdlEvent(rawevent);
+            TranslateSDLEvent(rawevent, mLastEvent);
+            if(!!mLastEvent)
+            {
+                mLastEvent->RawSdlEventData = rawevent;
+            }
         }
-        return out;
+        return mLastEvent;
     }
 
 #pragma endregion
@@ -83,7 +93,7 @@ namespace hsk {
         return nullptr;
     }
 
-    bool OsManager::TranslateSDLEvent(const SDL_Event& sdl_event, Event::ptr& result)
+    bool OsManager::TranslateSDLEvent(const SDL_Event& sdl_event, Event*& result)
     {
         result = nullptr;
         switch(sdl_event.type)
@@ -175,9 +185,9 @@ namespace hsk {
 
         if(result)
         {
-            if(result->Source() != nullptr)
+            if(!!result->Source)
             {
-                Window* window = Window::FindBySDLId(result->Source()->SDLId());
+                Window* window = Window::FindBySDLId(result->Source->SDLId());
                 window->HandleEvent(result);
             }
             return true;
@@ -186,7 +196,7 @@ namespace hsk {
     }
 
 #pragma region input
-    Event::ptr OsManager::TranslateEvent_MouseButton(const SDL_Event& sdl_event)
+    Event* OsManager::TranslateEvent_MouseButton(const SDL_Event& sdl_event)
     {
         SDL_MouseButtonEvent mbevent = sdl_event.button;
         Window*              window  = GetWindowPtr<SDL_MouseButtonEvent>(mbevent);
@@ -214,11 +224,10 @@ namespace hsk {
         {
             HSK_THROWFMT("unable to find button {} from event on mouse!", NAMEOF_ENUM(button))
         }
-        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
-        return result;
+        return new EventInputBinary(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
     }
 
-    Event::ptr OsManager::TranslateEvent_Keyboard(const SDL_Event& sdl_event)
+    Event* OsManager::TranslateEvent_Keyboard(const SDL_Event& sdl_event)
     {
         SDL_KeyboardEvent kbevent = sdl_event.key;
         Window*           window  = GetWindowPtr<SDL_KeyboardEvent>(kbevent);
@@ -232,11 +241,10 @@ namespace hsk {
         {
             HSK_THROWFMT("unable to find button {} from event on keyboard!", NAMEOF_ENUM(button))
         }
-        std::shared_ptr<EventInputBinary> result = std::make_shared<EventInputBinary>(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
-        return result;
+        return new EventInputBinary(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
     }
 
-    Event::ptr OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
+    Event* OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
     {
         SDL_MouseMotionEvent mevent    = sdl_event.motion;
         Window*              window    = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
@@ -245,22 +253,20 @@ namespace hsk {
         fp32_t               relativeX = mevent.xrel;
         fp32_t               relativeY = mevent.yrel;
 
-        std::shared_ptr<EventInputMouseMoved> result = std::make_shared<EventInputMouseMoved>(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
-        return result;
+        return new EventInputMouseMoved(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
     }
 
-    Event::ptr OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
+    Event* OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
     {
         SDL_MouseWheelEvent mevent  = sdl_event.wheel;
         Window*             window  = GetWindowPtr<SDL_MouseWheelEvent>(mevent);
         fp32_t              offsetx = mevent.x;
         fp32_t              offsety = mevent.y;
 
-        std::shared_ptr<EventInputDirectional> result = std::make_shared<EventInputDirectional>(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
-        return result;
+        return new EventInputDirectional(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
     }
 
-    Event::ptr OsManager::TranslateEvent_JoyAxis(const SDL_Event& sdl_event)
+    Event* OsManager::TranslateEvent_JoyAxis(const SDL_Event& sdl_event)
     {
         SDL_JoyAxisEvent     ev           = sdl_event.jaxis;
         Window*              window       = nullptr;
@@ -284,10 +290,10 @@ namespace hsk {
         {
             Exception::Throw("unable to find a device from event!");
         }
-        return std::make_shared<EventInputAnalogue>(window, ev.timestamp, sourceDevice, input, ev.value);
+        return new EventInputAnalogue(window, ev.timestamp, sourceDevice, input, ev.value);
     }
 
-    Event::ptr OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event)
+    Event* OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event)
     {
         Window*            window       = nullptr;
         InputDevice*       sourceDevice = nullptr;
@@ -311,10 +317,10 @@ namespace hsk {
         {
             HSK_THROWFMT("unable to find button {} from event on a device!", NAMEOF_ENUM(button))
         }
-        return std::make_shared<EventInputBinary>(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
+        return new EventInputBinary(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
     }
 
-    Event::ptr OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event)
+    Event* OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event)
     {
 
         InputDevice* sourceDevice;
@@ -327,25 +333,25 @@ namespace hsk {
             }
         }
         // TODO edit mInputDevices and query new data (low priority)
-        return std::make_shared<EventInputDeviceAvailability>(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
+        return new EventInputDeviceAvailability(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
     }
 
 #pragma endregion
 #pragma region window
 
-    Event::ptr OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
+    Event* OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
     {
-        return std::make_shared<EventWindowCloseRequested>(window, timestamp);
+        return new EventWindowCloseRequested(window, timestamp);
     }
 
-    Event::ptr OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
+    Event* OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
     {
-        return std::make_shared<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
+        return new EventWindowFocusChanged(window, wevent.timestamp, focus, focus && !mouseonly);
     }
-    Event::ptr OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
+    Event* OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
     {
         Extent2D newSize{wevent.data1, wevent.data2};
-        return std::make_shared<EventWindowResized>(window, wevent.timestamp, newSize);
+        return new EventWindowResized(window, wevent.timestamp, newSize);
     }
 
 #pragma endregion

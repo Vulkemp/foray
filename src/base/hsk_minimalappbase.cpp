@@ -181,12 +181,12 @@ namespace hsk {
     }
     void MinimalAppBase::BasePollEvents()
     {
-        for(Event::ptr event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
+        for(const Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
         {
             OnEvent(event);
-            if(event->Source())
+            if(event->Source)
             {
-                if(event->Type() == Event::EType::WindowCloseRequested && Window::Windows().size() == 1)
+                if(event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() == 1)
                 {
                     State(EState::StopRequested);
                 }

@@ -198,10 +198,10 @@ namespace hsk {
         return out;
     }
 
-    void Window::HandleEvent(std::shared_ptr<Event> event)
+    void Window::HandleEvent(const Event* event)
     {
-        auto resized = std::dynamic_pointer_cast<EventWindowResized>(event);
-        auto closed  = std::dynamic_pointer_cast<EventWindowCloseRequested>(event);
+        auto resized = dynamic_cast<const EventWindowResized*>(event);
+        auto closed  = dynamic_cast<const EventWindowCloseRequested*>(event);
         if(resized)
         {
             HandleEvent_Resized(resized);
@@ -212,18 +212,18 @@ namespace hsk {
         }
     }
 
-    void Window::HandleEvent_Resized(std::shared_ptr<EventWindowResized> event)
+    void Window::HandleEvent_Resized(const EventWindowResized* event)
     {
         if(mDisplayMode <= EDisplayMode::WindowedResizable)
         {
-            mWindowedSize = event->Current();
+            mWindowedSize = event->Current;
         }
         else
         {
-            mFullScreenSize = event->Current();
+            mFullScreenSize = event->Current;
         }
     }
 
-    void Window::HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event) { Destroy(); }
+    void Window::HandleEvent_Closed(const EventWindowCloseRequested* event) { Destroy(); }
 }  // namespace hsk
 // namespace hsk

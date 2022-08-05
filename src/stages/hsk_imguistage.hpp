@@ -20,7 +20,7 @@ namespace hsk {
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newTargetImage);
 
         /// @brief Allows imgui to handle input events.
-        void ProcessSdlEvent(SDL_Event* sdlEvent);
+        void ProcessSdlEvent(const SDL_Event* sdlEvent);
 
       protected:
         std::vector<VkClearValue>          mClearValues;

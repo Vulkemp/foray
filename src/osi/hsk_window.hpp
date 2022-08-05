@@ -61,7 +61,7 @@ namespace hsk {
         virtual VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;
         virtual std::vector<const char*> GetVkSurfaceExtensions() const;
 
-        virtual void HandleEvent(std::shared_ptr<Event> event);
+        virtual void HandleEvent(const Event* event);
 
       protected:
         inline static std::vector<Window*> sWindows = std::vector<Window*>();
@@ -78,8 +78,8 @@ namespace hsk {
 
         SDL_threadID mOwningThreadID;
 
-        virtual void HandleEvent_Resized(std::shared_ptr<EventWindowResized> event);
-        virtual void HandleEvent_Closed(std::shared_ptr<EventWindowCloseRequested> event);
+        virtual void HandleEvent_Resized(const EventWindowResized* event);
+        virtual void HandleEvent_Closed(const EventWindowCloseRequested* event);
 
         virtual void assertThreadIsOwner();
     };
