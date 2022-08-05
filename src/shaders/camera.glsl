@@ -11,6 +11,8 @@ layout(set = SET_CAMERA_UBO, binding = BIND_CAMERA_UBO) uniform CameraUboBlock
     mat4 PreviousViewMatrix;
     mat4 ProjectionViewMatrix;
     mat4 PreviousProjectionViewMatrix;
+    mat4 InverseViewMatrix;
+    mat4 InverseProjectionMatrix;
 }
 Camera;
 
