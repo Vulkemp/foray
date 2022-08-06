@@ -1,8 +1,8 @@
 #pragma once
+#include "../scenegraph/hsk_animation.hpp"
 #include "../scenegraph/hsk_geo.hpp"
 #include "../scenegraph/hsk_scene.hpp"
 #include "../scenegraph/hsk_scenegraph_declares.hpp"
-#include "../scenegraph/hsk_animation.hpp"
 #include <map>
 #include <set>
 #include <tinygltf/tiny_gltf.h>
@@ -17,6 +17,8 @@ namespace hsk {
 
         HSK_PROPERTY_ALL(Scene)
 
+        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
+
       protected:
         const VkContext* mContext = nullptr;
 
@@ -26,6 +28,8 @@ namespace hsk {
         tinygltf::Scene* mGltfScene = nullptr;
 
         // Temporary structures
+
+        std::string mUtf8Dir;
 
         std::vector<Vertex>   mVertexBuffer = {};
         std::vector<uint32_t> mIndexBuffer  = {};
@@ -42,7 +46,6 @@ namespace hsk {
             /// @brief Vector mapping gltfModel texture index to ManagedImage*
             int32_t TextureBufferOffset;
         } mIndexBindings = {};
-
 
         int32_t mNextMeshInstanceIndex = 0;
 
@@ -65,7 +68,6 @@ namespace hsk {
         void PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives);
 
         void LoadTextures();
-        void TranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
         void LoadMaterials();
         void LoadAnimations();
         void TranslateAnimationSampler(Animation&                                                 animation,

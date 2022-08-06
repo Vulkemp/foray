@@ -107,7 +107,7 @@ namespace hsk {
     inline void ImageLoader<FORMAT>::UpdateManagedImageCI(ManagedImage::CreateInfo& ci) const
     {
         ci.ImageCI.format        = FORMAT;
-        ci.ImageCI.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        ci.ImageCI.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
         ci.ImageCI.usage         = ci.ImageCI.usage | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         ci.ImageCI.extent        = VkExtent3D{.width = mInfo.Extent.width, .height = mInfo.Extent.height, .depth = 1};
         ci.ImageCI.imageType     = VkImageType::VK_IMAGE_TYPE_2D;

@@ -5,20 +5,25 @@ namespace hsk {
 
     VkCommandBuffer CommandBuffer::Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
     {
-        mContext = context;
+        return Create(context->Device, context->CommandPool, context->TransferQueue, cmdBufferLvl, begin);
+    }
+
+    VkCommandBuffer CommandBuffer::Create(VkDevice device, VkCommandPool cmdPool, Queue queue, VkCommandBufferLevel cmdBufferLvl, bool begin)
+    {
+        mContext = Context{.Device = device, .Pool = cmdPool, .ExecutingQueue = queue};
         VkCommandBufferAllocateInfo cmdBufAllocateInfo{};
         cmdBufAllocateInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        cmdBufAllocateInfo.commandPool        = context->CommandPool;
+        cmdBufAllocateInfo.commandPool        = mContext.Pool;
         cmdBufAllocateInfo.level              = cmdBufferLvl;
         cmdBufAllocateInfo.commandBufferCount = 1;
 
-        AssertVkResult(vkAllocateCommandBuffers(context->Device, &cmdBufAllocateInfo, &mCommandBuffer));
+        AssertVkResult(vkAllocateCommandBuffers(mContext.Device, &cmdBufAllocateInfo, &mCommandBuffer));
 
         // Create fence to ensure that the command buffer has finished executing
         VkFenceCreateInfo fenceInfo{};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         VkFence fence;
-        AssertVkResult(vkCreateFence(mContext->Device, &fenceInfo, nullptr, &mFence));
+        AssertVkResult(vkCreateFence(mContext.Device, &fenceInfo, nullptr, &mFence));
 
         // If requested, also start recording for the new command buffer
         if(begin)
@@ -48,12 +53,12 @@ namespace hsk {
         submitInfo.pCommandBuffers    = &mCommandBuffer;
 
         // Submit to the queue
-        AssertVkResult(vkQueueSubmit(mContext->TransferQueue, 1, &submitInfo, mFence));  // TODO: Use graphics queue for all command buffer submits??? seems wrong.
+        AssertVkResult(vkQueueSubmit(mContext.ExecutingQueue, 1, &submitInfo, mFence));  // TODO: Use graphics queue for all command buffer submits??? seems wrong.
         if(!fireAndForget)
         {
             // Wait for the fence to signal that command buffer has finished executing
-            AssertVkResult(vkWaitForFences(mContext->Device, 1, &mFence, VK_TRUE, 100000000000));
-            AssertVkResult(vkResetFences(mContext->Device, 1, &mFence));
+            AssertVkResult(vkWaitForFences(mContext.Device, 1, &mFence, VK_TRUE, 100000000000));
+            AssertVkResult(vkResetFences(mContext.Device, 1, &mFence));
         }
     }
 
@@ -70,19 +75,19 @@ namespace hsk {
             return;
         }
         // Wait for the fence to signal that command buffer has finished executing
-        AssertVkResult(vkWaitForFences(mContext->Device, 1, &mFence, VK_TRUE, 100000000000));
-        AssertVkResult(vkResetFences(mContext->Device, 1, &mFence));
+        AssertVkResult(vkWaitForFences(mContext.Device, 1, &mFence, VK_TRUE, 100000000000));
+        AssertVkResult(vkResetFences(mContext.Device, 1, &mFence));
     }
     void CommandBuffer::Cleanup()
     {
         if(mCommandBuffer)
         {
-            vkFreeCommandBuffers(mContext->Device, mContext->CommandPool, 1, &mCommandBuffer);
+            vkFreeCommandBuffers(mContext.Device, mContext.Pool, 1, &mCommandBuffer);
             mCommandBuffer = nullptr;
         }
         if(mFence)
         {
-            vkDestroyFence(mContext->Device, mFence, nullptr);
+            vkDestroyFence(mContext.Device, mFence, nullptr);
             mFence = nullptr;
         }
     }

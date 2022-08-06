@@ -12,6 +12,7 @@ namespace hsk {
         inline virtual ~CommandBuffer() { Cleanup(); }
 
         VkCommandBuffer Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
+        VkCommandBuffer Create(VkDevice device, VkCommandPool cmdPool, Queue queue, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
         void            Begin();
         void            Submit(bool fireAndForget = false);
         void            FlushAndReset();
@@ -25,7 +26,13 @@ namespace hsk {
 
         HSK_PROPERTY_CGET(CommandBuffer)
       protected:
-        const VkContext* mContext{};
+        struct Context
+        {
+            VkDevice      Device;
+            VkCommandPool Pool;
+            Queue         ExecutingQueue;
+        } mContext;
+
         VkCommandBuffer  mCommandBuffer{};
         VkFence          mFence{};
     };

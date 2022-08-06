@@ -7,6 +7,8 @@
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
+#include "../hsk_env.hpp"
+#include <filesystem>
 
 namespace hsk {
     ModelConverter::ModelConverter(Scene* scene)
@@ -18,14 +20,24 @@ namespace hsk {
     {
         mContext = context ? context : mScene->GetContext();
         tinygltf::TinyGLTF gltfContext;
-        std::string        error;
-        std::string        warning;
 
-        bool   binary = false;
-        size_t extpos = utf8Path.rfind('.', utf8Path.length());
-        if(extpos != std::string::npos)
+        std::string error;
+        std::string warning;
+
+        bool binary = false;
+
         {
-            binary = (utf8Path.substr(extpos + 1, utf8Path.length() - extpos) == "glb");
+            using namespace std::filesystem;
+
+            path p = FromUtf8Path(utf8Path);
+            if (!p.has_filename() || !exists(p)){
+                HSK_THROWFMT("ModelLoad: Failed because path \"{}\" is not a file!", utf8Path)
+            }
+
+            std::string ext = ToUtf8Path(p.extension());
+            binary = ext == ".glb";
+
+            mUtf8Dir = ToUtf8Path(p.parent_path());
         }
 
         logger()->info("Model Load: Loading tinygltf model ...");

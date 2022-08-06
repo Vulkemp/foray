@@ -49,8 +49,8 @@ namespace hsk {
                 mInfo.Channels = {EImageChannel::R, EImageChannel::G, EImageChannel::B};
                 break;
             case 4:
-                break;
                 mInfo.Channels = {EImageChannel::R, EImageChannel::G, EImageChannel::B, EImageChannel::A};
+                break;
         }
         mInfo.Extent.width  = static_cast<uint32_t>(width);
         mInfo.Extent.height = static_cast<uint32_t>(height);

@@ -262,6 +262,22 @@ namespace hsk {
     class ImageFormatTraits<VkFormat::VK_FORMAT_R8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
     {
     };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8A8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
+    {
+    };
+    template <>
+    class ImageFormatTraits<VkFormat::VK_FORMAT_R8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
+    {
+    };
 #pragma endregion
 #pragma region integer packed 10 + 10 + 10 + 2 unsigned
 

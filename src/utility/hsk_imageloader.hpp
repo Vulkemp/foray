@@ -76,3 +76,5 @@ namespace hsk {
     };
 
 }  // namespace hsk
+
+#include "hsk_imageloader.inl"
