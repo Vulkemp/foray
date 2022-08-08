@@ -1,13 +1,14 @@
 #include "hsk_modelconverter.hpp"
 #include "../base/hsk_vkcontext.hpp"
+#include "../hsk_env.hpp"
 #include "../hsk_glm.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
+#include "../scenegraph/globalcomponents/hsk_animationdirector.hpp"
 #include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include "../hsk_env.hpp"
 #include <filesystem>
 
 namespace hsk {
@@ -30,12 +31,13 @@ namespace hsk {
             using namespace std::filesystem;
 
             path p = FromUtf8Path(utf8Path);
-            if (!p.has_filename() || !exists(p)){
+            if(!p.has_filename() || !exists(p))
+            {
                 HSK_THROWFMT("ModelLoad: Failed because path \"{}\" is not a file!", utf8Path)
             }
 
             std::string ext = ToUtf8Path(p.extension());
-            binary = ext == ".glb";
+            binary          = ext == ".glb";
 
             mUtf8Dir = ToUtf8Path(p.parent_path());
         }
@@ -117,6 +119,8 @@ namespace hsk {
         logger()->info("Model Load: Loading Animations ...");
 
         LoadAnimations();
+
+        DetectAnimatedNodes();
 
         InitialUpdate();
 
@@ -224,6 +228,44 @@ namespace hsk {
         {
             // Set it static so that the local transform never is updated
             transform->SetStatic(true);
+        }
+    }
+
+    void MarkNodeRecursively(Node* node, bool parentAnimated, std::unordered_set<Node*>& animationTargets)
+    {
+        bool isAnimated = parentAnimated;
+        if(!parentAnimated)
+        {
+            isAnimated = animationTargets.contains(node);
+        }
+        bool markStatic = !isAnimated;
+        node->GetTransform()->SetStatic(markStatic);
+        for(auto child : node->GetChildren())
+        {
+            MarkNodeRecursively(child, isAnimated, animationTargets);
+        }
+    }
+
+    void ModelConverter::DetectAnimatedNodes()
+    {
+        AnimationDirector* animDirector = mScene->GetComponent<AnimationDirector>();
+
+        std::unordered_set<Node*> animationTargets;
+
+        if(!!animDirector)
+        {
+            for(auto animation : animDirector->GetAnimations())
+            {
+                for(auto channel : animation.GetChannels())
+                {
+                    animationTargets.emplace(channel.Target);
+                }
+            }
+        }
+
+        for(auto root : mScene->GetRootNodes())
+        {
+            MarkNodeRecursively(root, false, animationTargets);
         }
     }
 

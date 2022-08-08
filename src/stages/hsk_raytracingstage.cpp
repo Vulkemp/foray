@@ -17,8 +17,8 @@ namespace hsk {
         mScene   = scene;
 
         VkPhysicalDeviceProperties2 prop2{};
-        prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        prop2.pNext = &mRayTracingPipelineProperties;
+        prop2.sType                         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        prop2.pNext                         = &mRayTracingPipelineProperties;
         mRayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
         vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice, &prop2);
 
@@ -375,7 +375,7 @@ namespace hsk {
         // Setup the descriptor for binding our top level acceleration structure to the ray tracing shaders
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetTlas().GetAccelerationStructure();
+        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetComponent<Tlas>()->GetAccelerationStructure();
 
         mAcclerationStructureDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR);

@@ -40,7 +40,6 @@ namespace hsk {
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_ALL(NodeBuffer)
         HSK_PROPERTY_ALL(RootNodes)
-        HSK_PROPERTY_ALL(Tlas)
 
         template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
@@ -57,8 +56,6 @@ namespace hsk {
         CallbackDispatcher mGlobalRootRegistry;
 
         void InitDefaultGlobals();
-
-        Tlas mTlas;
     };
 
     template <typename TComponent>

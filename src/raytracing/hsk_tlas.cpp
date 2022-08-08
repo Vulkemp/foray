@@ -1,40 +1,74 @@
 #include "hsk_tlas.hpp"
 #include "../memory/hsk_commandbuffer.hpp"
+#include "../scenegraph/components/hsk_meshinstance.hpp"
+#include "../scenegraph/components/hsk_transform.hpp"
+#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "../scenegraph/hsk_node.hpp"
+#include "../scenegraph/hsk_scene.hpp"
 #include "hsk_blas.hpp"
 
 namespace hsk {
 
-    void Tlas::Create(const VkContext* context, Blas& blas)
+    BlasInstance::BlasInstance(const VkContext* context, MeshInstance* meshInstance)
+        : mContext(context), mBlas(&(meshInstance->GetMesh()->GetBlas())), mMeshInstance(meshInstance), mTransform(meshInstance->GetNode()->GetTransform())
     {
-        mContext = context;
-
-        VkDevice                                    device = context->Device;
         VkAccelerationStructureDeviceAddressInfoKHR addressInfo{};
         addressInfo.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
-        addressInfo.accelerationStructure = blas.GetAccelerationStructure();
-        VkDeviceAddress blasAddress       = context->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
+        addressInfo.accelerationStructure = mBlas->GetAccelerationStructure();
 
-        VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+        auto& instance = mAsGeometry.geometry.instances;
 
-        VkAccelerationStructureInstanceKHR instance{};
+        mAsInstance.accelerationStructureReference = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
+        mTransform->FillVkTransformMatrix(mAsInstance.transform);
 
-        instance.transform                              = transform_matrix;
-        instance.instanceCustomIndex                    = 0;
-        instance.mask                                   = 0xFF;
-        instance.instanceShaderBindingTableRecordOffset = 0;
-        instance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-        instance.accelerationStructureReference         = blasAddress;
 
-        ManagedBuffer bufferInstances;
-        bufferInstances.SetName("Temporary rt instances buffer");
-        bufferInstances.Create(context,
+        mAsInstance.instanceCustomIndex                    = 0;
+        mAsInstance.mask                                   = 0xFF;
+        mAsInstance.instanceShaderBindingTableRecordOffset = 0;
+        mAsInstance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+
+        mAsInstanceBuffer.SetName(fmt::format("BLAS Instance {:x}", reinterpret_cast<uint64_t>(meshInstance)));
+        mAsInstanceBuffer.Create(mContext,
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-                               sizeof(instance), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+                               sizeof(VkAccelerationStructureInstanceKHR), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
                                VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-        bufferInstances.WriteDataDeviceLocal(&instance, sizeof(instance));
+        mAsInstanceBuffer.WriteDataDeviceLocal(&mAsInstance, sizeof(VkAccelerationStructureInstanceKHR));
+
+        mAsGeometry.sType                                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+        mAsGeometry.geometryType                          = VK_GEOMETRY_TYPE_INSTANCES_KHR;
+        mAsGeometry.flags                                 = VK_GEOMETRY_OPAQUE_BIT_KHR;
+        mAsGeometry.geometry.instances.sType              = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
+        mAsGeometry.geometry.instances.arrayOfPointers    = VK_FALSE;
+        mAsGeometry.geometry.instances.data.deviceAddress = mAsInstanceBuffer.GetDeviceAddress();
+    }
+
+    void Tlas::Create()
+    {
+        mContext = GetContext();
+
+        VkDevice device = mContext->Device;
+
+        auto scene = GetScene();
+
+        std::vector<Node*> nodes;
+        scene->FindNodesWithComponent<MeshInstance>(nodes);
+
+        mBlasInstances.clear();
+        std::vector<VkAccelerationStructureGeometryKHR> geometries;
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos;
+        uint32_t maxBuildCounts = 0;
+
+        for(auto node : nodes)
+        {
+            MeshInstance* meshInstance = node->GetComponent<MeshInstance>();
+            BlasInstance* blasInstance = mBlasInstances.emplace(meshInstance, std::make_unique<BlasInstance>(mContext, meshInstance)).first->second.get();
+            geometries.push_back(blasInstance->GetAsGeometry());
+            buildRangeInfos.push_back(VkAccelerationStructureBuildRangeInfoKHR{.primitiveCount=1});
+        }
+
 
         CommandBuffer cmdBuffer;
-        cmdBuffer.Create(context);
+        cmdBuffer.Create(mContext);
         cmdBuffer.Begin();
 
         VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -42,37 +76,20 @@ namespace hsk {
         barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
         vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
 
-        // Like creating the BLAS , point to the geometry (in this case , the
-        // instances) in a polymorphic object.
-        VkAccelerationStructureGeometryKHR acceleration_structure_geometry{};
-        acceleration_structure_geometry.sType                                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-        acceleration_structure_geometry.geometryType                          = VK_GEOMETRY_TYPE_INSTANCES_KHR;
-        acceleration_structure_geometry.flags                                 = VK_GEOMETRY_OPAQUE_BIT_KHR;
-        acceleration_structure_geometry.geometry.instances.sType              = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
-        acceleration_structure_geometry.geometry.instances.arrayOfPointers    = VK_FALSE;
-        acceleration_structure_geometry.geometry.instances.data.deviceAddress = bufferInstances.GetDeviceAddress();
-
-
         // Create the build info: in this case , pointing to only one
         // geometry object.
-        VkAccelerationStructureBuildGeometryInfoKHR buildInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
+        VkAccelerationStructureBuildGeometryInfoKHR buildInfo{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
         buildInfo.flags                    = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
         buildInfo.geometryCount            = 1;
-        buildInfo.pGeometries              = &acceleration_structure_geometry;
+        buildInfo.pGeometries              = geometries.data();
         buildInfo.mode                     = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
         buildInfo.type                     = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
         buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
 
-        VkAccelerationStructureBuildRangeInfoKHR rangeInfo;
-        rangeInfo.primitiveOffset = 0;
-        rangeInfo.primitiveCount  = 1;  // Number of instances
-        rangeInfo.firstVertex     = 0;
-        rangeInfo.transformOffset = 0;
-
         // Query the worst -case AS size and scratch space size based on
         // the number of instances (in this case , 1).
         VkAccelerationStructureBuildSizesInfoKHR sizeInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
-        context->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &rangeInfo.primitiveCount, &sizeInfo);
+        mContext->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &maxBuildCounts, &sizeInfo);
 
         // Allocate a buffer for the acceleration structure.
         mTlasMemory.Create(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -87,7 +104,7 @@ namespace hsk {
         createInfo.buffer = mTlasMemory.GetBuffer();
         createInfo.offset = 0;
 
-        AssertVkResult(context->DispatchTable.createAccelerationStructureKHR(&createInfo, nullptr, &mAccelerationStructure));
+        AssertVkResult(mContext->DispatchTable.createAccelerationStructureKHR(&createInfo, nullptr, &mAccelerationStructure));
         buildInfo.dstAccelerationStructure = mAccelerationStructure;
 
         // Allocate the scratch buffer holding temporary build data.
@@ -97,9 +114,9 @@ namespace hsk {
         buildInfo.scratchData.deviceAddress = bufferScratch.GetDeviceAddress();
 
         // Create a one -element array of pointers to range info objects.
-        VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+        VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = buildRangeInfos.data();
         // Build the TLAS.
-        context->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
+        mContext->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
 
         cmdBuffer.Submit();
 
@@ -107,7 +124,7 @@ namespace hsk {
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
-        mTlasAddress = context->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
+        mTlasAddress = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
     }
     void Tlas::Destroy()
     {

@@ -36,4 +36,13 @@ namespace hsk {
             childTransform->RecalculateGlobalMatrix(this);
         }
     }
+
+    void Transform::FillVkTransformMatrix(VkTransformMatrixKHR& mat)
+    {
+        for (int32_t row = 0; row < 3; row++){
+            for (int32_t col = 0; col < 4; col++){
+                mat.matrix[row][col] = mGlobalMatrix[col][row];
+            }
+        }
+    }
 }  // namespace hsk

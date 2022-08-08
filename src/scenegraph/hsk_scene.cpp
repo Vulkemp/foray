@@ -1,8 +1,8 @@
 #include "hsk_scene.hpp"
+#include "globalcomponents/hsk_drawdirector.hpp"
 #include "globalcomponents/hsk_geometrystore.hpp"
 #include "globalcomponents/hsk_materialbuffer.hpp"
 #include "globalcomponents/hsk_texturestore.hpp"
-#include "globalcomponents/hsk_drawdirector.hpp"
 #include "hsk_node.hpp"
 
 namespace hsk {
@@ -42,17 +42,14 @@ namespace hsk {
         mGlobalRootRegistry.InvokeOnEvent(event);
     }
 
-    void Scene::CreateTlas() { 
-        GeometryStore& geoStore = *(GetComponent<GeometryStore>());
-        auto& meshes = geoStore.GetMeshes();
-
-        if(meshes.size() > 1)
+    void Scene::CreateTlas()
+    {
+        Tlas* tlas = GetComponent<Tlas>();
+        if(!tlas)
         {
-            throw Exception("Add support for multiple blas!");
+            tlas = MakeComponent<Tlas>();
         }
-
-        auto& blas = meshes[0]->GetBlas();
-        mTlas.Create(mContext, blas);
+        tlas->Create();
     }
 
     Node* Scene::MakeNode(Node* parent)
@@ -64,7 +61,8 @@ namespace hsk {
         {
             mRootNodes.push_back(node);
         }
-        else{
+        else
+        {
             parent->GetChildren().push_back(node);
         }
         return node;

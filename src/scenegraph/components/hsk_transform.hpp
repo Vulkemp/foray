@@ -18,6 +18,8 @@ namespace hsk {
         void RecalculateLocalMatrix();
         void RecalculateGlobalMatrix(Transform* parentTransform = nullptr);
 
+        void FillVkTransformMatrix(VkTransformMatrixKHR& mat);
+
       protected:
         glm::vec3 mTranslation  = {};
         glm::quat mRotation     = {};

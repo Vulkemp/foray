@@ -16,19 +16,19 @@ namespace hsk {
         const uint32_t primitiveCount = primitives.size();
 
 
-        // TODO: Get real transform matrices
-        // create tmp transform matrix
-        VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-        //ManagedBuffer        transformMatrixBuffer;
-        transformMatrixBuffer.Create(
-            context, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-            sizeof(transform_matrix), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        transformMatrixBuffer.WriteDataDeviceLocal(&transform_matrix, sizeof(transform_matrix));
+        // // TODO: Get real transform matrices
+        // // create tmp transform matrix
+        // VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+        // //ManagedBuffer        transformMatrixBuffer;
+        // transformMatrixBuffer.Create(
+        //     context, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
+        //     sizeof(transform_matrix), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+        // transformMatrixBuffer.WriteDataDeviceLocal(&transform_matrix, sizeof(transform_matrix));
 
         auto                          geoBufferSet = mesh->GetGeometryBufferSet();
         VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = geoBufferSet->GetVertices().GetDeviceAddress()};
         VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = geoBufferSet->GetIndices().GetDeviceAddress()};
-        VkDeviceOrHostAddressConstKHR transform_matrix_device_address{.deviceAddress = transformMatrixBuffer.GetDeviceAddress()};
+        VkDeviceOrHostAddressConstKHR transform_matrix_device_address{};
 
 
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos;
@@ -121,7 +121,7 @@ namespace hsk {
     }
     void Blas::Destroy()
     {
-        /* if(mAccelerationStructure != VK_NULL_HANDLE)
+        if(mAccelerationStructure != VK_NULL_HANDLE)
         {
             mContext->DispatchTable.destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = VK_NULL_HANDLE;
@@ -130,6 +130,6 @@ namespace hsk {
         {
             mBlasMemory.Cleanup();
         }
-        mBlasAddress = 0;*/
+        mBlasAddress = 0;
     }
 }  // namespace hsk

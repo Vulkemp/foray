@@ -76,6 +76,8 @@ namespace hsk {
                                        const std::map<std::string_view, EAnimationInterpolation>& interpolationMap,
                                        std::map<int, int>&                                        samplerIndexMap);
 
+        void DetectAnimatedNodes();
+
         void InitialUpdate();
 
         void Reset();
