@@ -14,7 +14,7 @@ namespace hsk {
             return;
         }
 
-        if(!mStatic)
+        if(!mLocalMatrixFixed)
             RecalculateLocalMatrix();
 
         glm::mat4 parentGlobalMatrix(1);

@@ -1,6 +1,6 @@
 #pragma once
-#include "../hsk_component.hpp"
 #include "../../hsk_glm.hpp"
+#include "../hsk_component.hpp"
 
 namespace hsk {
     class Transform : public NodeComponent
@@ -14,6 +14,7 @@ namespace hsk {
         HSK_PROPERTY_ALL(LocalMatrix)
         HSK_PROPERTY_ALL(Static)
         HSK_PROPERTY_CGET(GlobalMatrix)
+        HSK_PROPERTY_ALL(LocalMatrixFixed)
 
         void RecalculateLocalMatrix();
         void RecalculateGlobalMatrix(Transform* parentTransform = nullptr);
@@ -21,11 +22,12 @@ namespace hsk {
         void FillVkTransformMatrix(VkTransformMatrixKHR& mat);
 
       protected:
-        glm::vec3 mTranslation  = {};
-        glm::quat mRotation     = {};
-        glm::vec3 mScale        = glm::vec3(1.f);
-        glm::mat4 mLocalMatrix  = glm::mat4(1.f);
-        glm::mat4 mGlobalMatrix = glm::mat4(1.f);
-        bool      mStatic       = false;
+        glm::vec3 mTranslation      = {};
+        glm::quat mRotation         = {};
+        glm::vec3 mScale            = glm::vec3(1.f);
+        glm::mat4 mLocalMatrix      = glm::mat4(1.f);
+        glm::mat4 mGlobalMatrix     = glm::mat4(1.f);
+        bool      mStatic           = false;
+        bool      mLocalMatrixFixed = false;
     };
 }  // namespace hsk

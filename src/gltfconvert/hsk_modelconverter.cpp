@@ -227,7 +227,7 @@ namespace hsk {
         if(!translation.size() && !scale.size() && !rotation.size())
         {
             // Set it static so that the local transform never is updated
-            transform->SetStatic(true);
+            transform->SetLocalMatrixFixed(true);
         }
     }
 
