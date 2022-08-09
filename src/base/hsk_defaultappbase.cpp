@@ -360,8 +360,8 @@ namespace hsk {
         // Record Render Command buffer
         // clang-format off
         FrameRenderInfo renderInfo;
-        renderInfo.SetCommandBuffer(currentFrame.CommandBuffer)
-                  .SetFrameObjectsIndex(mCurrentFrameIndex)
+        renderInfo.SetFrameObjectsIndex(mCurrentFrameIndex)
+                  .SetCommandBuffer(currentFrame.CommandBuffer)
                   .SetFrameNumber(mRenderedFrameCount)
                   .SetFrameTime(delta);
         // cland-format on

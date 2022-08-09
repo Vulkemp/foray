@@ -20,6 +20,7 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Transform)
         HSK_PROPERTY_ALLGET(AsInstance)
 
+        void Update();
 
       protected:
         const VkContext*                   mContext      = nullptr;
@@ -31,12 +32,13 @@ namespace hsk {
 
     /// @brief Describes a top level accerlation structure. A tlas usually holds multiple Blas.
     /// A blas is an object/mesh instance together with its position/rotation in the 3d space.
-    class Tlas : public GlobalComponent
+    class Tlas : public GlobalComponent, public Component::UpdateCallback
     {
       public:
         virtual ~Tlas() { Destroy(); }
 
         virtual void Create();
+        virtual void Update(const FrameUpdateInfo& drawInfo);
         virtual void Destroy();
 
         HSK_PROPERTY_CGET(AccelerationStructure)
@@ -50,7 +52,9 @@ namespace hsk {
         VkAccelerationStructureKHR                             mAccelerationStructure = nullptr;
         ManagedBuffer                                          mTlasMemory;
         ManagedBuffer                                          mInstanceBuffer;
+        ManagedBuffer                                          mScratchBuffer;
         VkDeviceAddress                                        mTlasAddress{};
-        std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mBlasInstances;
+        std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mAnimatedBlasInstances;
+        std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mStaticBlasInstances;
     };
 }  // namespace hsk
