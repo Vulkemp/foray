@@ -18,7 +18,6 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Blas)
         HSK_PROPERTY_ALLGET(MeshInstance)
         HSK_PROPERTY_ALLGET(Transform)
-        HSK_PROPERTY_ALLGET(AsGeometry)
         HSK_PROPERTY_ALLGET(AsInstance)
 
 
@@ -27,9 +26,7 @@ namespace hsk {
         Blas*                              mBlas         = nullptr;
         MeshInstance*                      mMeshInstance = nullptr;
         Transform*                         mTransform;
-        VkAccelerationStructureGeometryKHR mAsGeometry       = {};
-        VkAccelerationStructureInstanceKHR mAsInstance       = {};
-        ManagedBuffer                      mAsInstanceBuffer = {};
+        VkAccelerationStructureInstanceKHR mAsInstance = {};
     };
 
     /// @brief Describes a top level accerlation structure. A tlas usually holds multiple Blas.
@@ -49,10 +46,11 @@ namespace hsk {
         operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
 
       protected:
-        const VkContext*                      mContext{};
-        VkAccelerationStructureKHR            mAccelerationStructure = nullptr;
-        ManagedBuffer                         mTlasMemory;
-        VkDeviceAddress                       mTlasAddress{};
+        const VkContext*                                       mContext{};
+        VkAccelerationStructureKHR                             mAccelerationStructure = nullptr;
+        ManagedBuffer                                          mTlasMemory;
+        ManagedBuffer                                          mInstanceBuffer;
+        VkDeviceAddress                                        mTlasAddress{};
         std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mBlasInstances;
     };
 }  // namespace hsk
