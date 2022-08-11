@@ -137,7 +137,7 @@ namespace hsk {
 
         // Allocate the scratch buffer holding temporary build data.
         mScratchBuffer.Create(mContext, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
-                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
 
         // Create a one -element array of pointers to range info objects.
@@ -152,6 +152,16 @@ namespace hsk {
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
         mTlasAddress = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
+
+        // Create and map Staging buffers used for runtime updates
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
+        {
+            mAnimatedInstancesStaging[i].SetName(fmt::format("BLAS Animated Instances Staging #{}", i));
+            mAnimatedInstancesStaging[i].Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                                sizeof(VkAccelerationStructureInstanceKHR) * mAnimatedBlasInstances.size(), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
+                                                VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+            mAnimatedInstancesStaging[i].Map(mAnimatedInstancesStagingMaps[i]);
+        }
     }
 
     void Tlas::Update(const FrameUpdateInfo& drawInfo)
@@ -169,8 +179,35 @@ namespace hsk {
 
         buildRangeInfo.primitiveCount = buildCounts;
 
-        mInstanceBuffer.WriteDataDeviceLocal(instanceBufferData.data(), sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size(),
-                                             sizeof(VkAccelerationStructureInstanceKHR) * mStaticBlasInstances.size());
+
+        memcpy(mAnimatedInstancesStagingMaps[drawInfo.GetFrameNumber() % INFLIGHT_FRAME_COUNT], instanceBufferData.data(),
+               sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size());
+
+        auto cmdBuffer = drawInfo.GetCommandBuffer();
+
+        VkBufferMemoryBarrier instanceBufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                                                    .srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
+                                                    .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+                                                    .srcQueueFamilyIndex = mContext->QueueGraphics,
+                                                    .dstQueueFamilyIndex = mContext->QueueGraphics,
+                                                    .buffer              = mInstanceBuffer.GetBuffer(),
+                                                    .offset              = 0,
+                                                    .size                = VK_WHOLE_SIZE};
+
+        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &instanceBufferBarrier, 0, nullptr);
+
+        VkBufferCopy region{.srcOffset = 0,
+                            .dstOffset = sizeof(VkAccelerationStructureInstanceKHR) * mStaticBlasInstances.size(),
+                            .size      = sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size()};
+
+        vkCmdCopyBuffer(cmdBuffer, mAnimatedInstancesStaging[drawInfo.GetFrameNumber()].GetBuffer(), mInstanceBuffer.GetBuffer(), 1, &region);
+
+        instanceBufferBarrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        instanceBufferBarrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
+
+        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                             VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &instanceBufferBarrier, 0, nullptr);
 
         VkAccelerationStructureGeometryKHR geometry{
             .sType        = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
@@ -184,11 +221,10 @@ namespace hsk {
         };
 
 
-        auto cmdBuffer = drawInfo.GetCommandBuffer();
-
         VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+
         vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
 
         // Create the build info: in this case , pointing to only one
@@ -245,6 +281,22 @@ namespace hsk {
         {
             mContext->DispatchTable.destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = VK_NULL_HANDLE;
+        }
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
+        {
+            if(mAnimatedInstancesStaging[i].Exists())
+            {
+                mAnimatedInstancesStaging[i].Unmap();
+                mAnimatedInstancesStaging[i].Cleanup();
+            }
+        }
+        if(mInstanceBuffer.Exists())
+        {
+            mInstanceBuffer.Cleanup();
+        }
+        if(mScratchBuffer.Exists())
+        {
+            mScratchBuffer.Cleanup();
         }
         if(mTlasMemory.Exists())
         {
