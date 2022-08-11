@@ -9,11 +9,21 @@ namespace hsk {
       public:
         ImageToSwapchainStage() = default;
 
+        class PostCopy
+        {
+          public:
+            VkAccessFlags AccessFlags      = 0;
+            VkImageLayout ImageLayout      = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            uint32_t      QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        };
+
         virtual void Init(const VkContext* context, ManagedImage* sourceImage);
+        virtual void Init(const VkContext* context, ManagedImage* sourceImage, const PostCopy& postcopy);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newSourceImage);
 
       protected:
         ManagedImage* mSourceImage{};
+        PostCopy      mPostCopy;
     };
 }  // namespace hsk

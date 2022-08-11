@@ -273,7 +273,7 @@ namespace hsk {
 
         // auto images     = mSwapchainVkb.get_images().value();
         // auto imageviews = mSwapchainVkb.get_image_views().value();
-        for(uint32_t i = 0; i < 1; i++)
+        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
         {
             InFlightFrame target{};
             // target.Image         = images[i];
