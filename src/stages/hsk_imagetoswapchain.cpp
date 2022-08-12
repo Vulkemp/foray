@@ -99,19 +99,21 @@ namespace hsk {
                              0, 0, nullptr, 0, nullptr, 1, &barrier);
 
         if(!!mPostCopy.AccessFlags && !!mPostCopy.ImageLayout)
+        {
             // Return old image back
             ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
-        layoutTransitionInfo.CommandBuffer        = commandBuffer;
-        layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;  // flush color attachment writes
-        layoutTransitionInfo.BarrierDstAccessMask = mPostCopy.AccessFlags;                           // block transfer writes before layout transition is over
-        layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        layoutTransitionInfo.NewImageLayout       = mPostCopy.ImageLayout;
-        layoutTransitionInfo.SrcQueueFamilyIndex  = mContext->QueueGraphics;
-        layoutTransitionInfo.DstQueueFamilyIndex  = mPostCopy.QueueFamilyIndex;
-        layoutTransitionInfo.SubresourceRange     = range;
-        layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_TRANSFER_BIT;      // our source image was a color attachment in a previous pass
-        layoutTransitionInfo.DstStage             = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;  // we block transfer before layout transition is done
-        mSourceImage->TransitionLayout(layoutTransitionInfo);
+            layoutTransitionInfo.CommandBuffer        = commandBuffer;
+            layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;  // flush color attachment writes
+            layoutTransitionInfo.BarrierDstAccessMask = mPostCopy.AccessFlags;                           // block transfer writes before layout transition is over
+            layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            layoutTransitionInfo.NewImageLayout       = mPostCopy.ImageLayout;
+            layoutTransitionInfo.SrcQueueFamilyIndex  = mContext->QueueGraphics;
+            layoutTransitionInfo.DstQueueFamilyIndex  = mPostCopy.QueueFamilyIndex;
+            layoutTransitionInfo.SubresourceRange     = range;
+            layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_TRANSFER_BIT;      // our source image was a color attachment in a previous pass
+            layoutTransitionInfo.DstStage             = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;  // we block transfer before layout transition is done
+            mSourceImage->TransitionLayout(layoutTransitionInfo);
+        }
     }
 
 }  // namespace hsk

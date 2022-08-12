@@ -44,20 +44,32 @@ namespace hsk {
 
     void RaytracingStage::DestroyFixedComponents()
     {
-        VkDevice device = mContext->Device;
-        if(mPipeline)
+        if(!!mContext)
         {
-            vkDestroyPipeline(device, mPipeline, nullptr);
-            mPipeline = nullptr;
+            VkDevice device = mContext->Device;
+            if(!!mPipeline)
+            {
+                vkDestroyPipeline(device, mPipeline, nullptr);
+                mPipeline = nullptr;
+            }
+            if(!!mPipelineLayout)
+            {
+                vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
+                mPipelineLayout = nullptr;
+            }
         }
-        if(mPipelineLayout)
+        if(!!mRaygenShaderBindingTable)
         {
-            vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-            mPipelineLayout = nullptr;
+            mRaygenShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
         }
-        mRaygenShaderBindingTable->Cleanup();
-        mMissShaderBindingTable->Cleanup();
-        mHitShaderBindingTable->Cleanup();
+        if(!!mMissShaderBindingTable)
+        {
+            mMissShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
+        }
+        if(!!mHitShaderBindingTable)
+        {
+            mHitShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
+        }
         /* if(mPipelineCache)
         {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
@@ -74,7 +86,6 @@ namespace hsk {
 
     void RaytracingStage::DestroyResolutionDependentComponents()
     {
-        VkDevice device = mContext->Device;
         for(auto& colorAttachment : mColorAttachments)
         {
             colorAttachment->Cleanup();
@@ -96,8 +107,9 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
 
-        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                                       VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
+        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent,
+                                       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_FORMAT_B8G8R8A8_UNORM,
+                                       VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
         mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
