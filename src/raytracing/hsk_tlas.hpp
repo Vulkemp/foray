@@ -49,7 +49,6 @@ namespace hsk {
         operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
 
       protected:
-        const VkContext*                                       mContext{};
         VkAccelerationStructureKHR                             mAccelerationStructure = nullptr;
         ManagedBuffer                                          mTlasMemory;
         ManagedBuffer                                          mInstanceBuffer;
