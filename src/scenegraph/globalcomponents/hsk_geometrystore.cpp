@@ -41,6 +41,24 @@ namespace hsk {
         return false;
     }
 
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GeometryStore::GetVertexBufferDescriptorInfo(VkShaderStageFlags shaderStage)
+    {
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        mDescriptorBufferInfosVertices.resize(1);
+        mVerticesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosVertices[0]);
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfosVertices);
+        return descriptorInfo;
+    }
+
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GeometryStore::GetIndexBufferDescriptorInfo(VkShaderStageFlags shaderStage)
+    {
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        mDescriptorBufferInfosIndices.resize(1);
+        mVerticesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosIndices[0]);
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfosIndices);
+        return descriptorInfo;
+    }
+
     GeometryStore::GeometryStore()
     {
         mIndicesBuffer.SetName("Indices");
@@ -53,7 +71,7 @@ namespace hsk {
 
 #ifndef DISABLE_RT_EXTENSIONS
         // enable calls to GetBufferDeviceAdress & using the buffer as source for acceleration structure building
-        bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+        bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 #endif
 
         VkDeviceSize verticesSize = mVertices.size() * sizeof(Vertex);

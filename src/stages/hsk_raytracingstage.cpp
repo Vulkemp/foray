@@ -216,6 +216,8 @@ namespace hsk {
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
         mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<GeometryStore>()->GetIndexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
 
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include "../../memory/hsk_managedbuffer.hpp"
 #include "../../raytracing/hsk_blas.hpp"
+#include "../../memory/hsk_descriptorsethelper.hpp"
 #include "../hsk_component.hpp"
 #include "../hsk_geo.hpp"
 #include <set>
@@ -70,12 +71,19 @@ namespace hsk {
         HSK_PROPERTY_ALL(Meshes)
 
         bool CmdBindBuffers(VkCommandBuffer commandBuffer);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetVertexBufferDescriptorInfo(VkShaderStageFlags shaderStage);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetIndexBufferDescriptorInfo(VkShaderStageFlags shaderStage);
 
       protected:
         ManagedBuffer         mIndicesBuffer;
         ManagedBuffer         mVerticesBuffer;
         std::vector<Vertex>   mVertices;
         std::vector<uint32_t> mIndices;
+
+         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfoVertexBuffer;
+         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfoIndexBuffer;
+         std::vector<VkDescriptorBufferInfo>                  mDescriptorBufferInfosVertices;
+         std::vector<VkDescriptorBufferInfo>                  mDescriptorBufferInfosIndices;
 
         std::vector<std::unique_ptr<Mesh>> mMeshes;
     };

@@ -20,6 +20,8 @@
 
 layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 layout(binding = 1, set = 0, rgba8) uniform image2D image;
+layout(binding = 2, set = 0) readonly buffer Vertices { vec4 v[]; } vertices;
+layout(binding = 3, set = 0) readonly buffer Indices { uint i[]; } indices;
 
 #define BIND_CAMERA_UBO 2
 #include "../camera.glsl"
