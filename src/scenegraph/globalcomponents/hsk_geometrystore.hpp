@@ -15,7 +15,7 @@ namespace hsk {
             Vertex,
             Index
         };
-        EType    Type  = {};
+        EType Type = {};
 
         /// @brief Index to the first index/vertex in a buffer.
         uint32_t First = 0;
@@ -34,53 +34,21 @@ namespace hsk {
     {
       public:
         inline Mesh() {}
-        inline Mesh(GeometryBufferSet* buffer) : mGeometryBufferSet(buffer) {}
 
         virtual ~Mesh(){};
 
-        virtual void CmdDraw(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet);
-        virtual void CmdDrawInstanced(VkCommandBuffer commandBuffer, GeometryBufferSet*& currentlyBoundSet, uint32_t instanceCount);
+        virtual void CmdDraw(VkCommandBuffer commandBuffer);
+        virtual void CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
 
-        virtual void BuildAccelerationStructure(const VkContext* context) { mBlas.Create(context, this); }
+        virtual void BuildAccelerationStructure(const VkContext* context, GeometryStore* store) { mBlas.Create(context, this, store); }
 
-        HSK_PROPERTY_ALL(GeometryBufferSet)
         HSK_PROPERTY_ALL(Primitives)
         HSK_PROPERTY_GET(Blas)
 
 
       protected:
-        GeometryBufferSet*     mGeometryBufferSet;
         std::vector<Primitive> mPrimitives;
         Blas                   mBlas;
-    };
-
-    class GeometryBufferSet
-    {
-      public:
-        GeometryBufferSet();
-
-        HSK_PROPERTY_ALL(Indices)
-        HSK_PROPERTY_ALL(Vertices)
-        HSK_PROPERTY_ALL(IndexCount)
-        HSK_PROPERTY_ALL(VertexCount)
-
-        void Init(const VkContext* context, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>{});
-
-        virtual bool CmdBindBuffers(VkCommandBuffer commandBuffer);
-
-        inline virtual ~GeometryBufferSet()
-        {
-            mIndices.Cleanup();
-            mVertices.Cleanup();
-            mIndexCount  = 0;
-            mVertexCount = 0;
-        }
-
-      protected:
-        ManagedBuffer mIndices;
-        ManagedBuffer mVertices;
-        uint32_t      mIndexCount  = 0;
-        uint32_t      mVertexCount = 0;
     };
 
     class GeometryStore : public GlobalComponent
@@ -88,16 +56,28 @@ namespace hsk {
       public:
         GeometryStore();
 
+        void InitOrUpdate();
+
         void Cleanup();
+
+        HSK_PROPERTY_ALL(Indices)
+        HSK_PROPERTY_ALL(Vertices)
+        HSK_PROPERTY_ALL(IndicesBuffer)
+        HSK_PROPERTY_ALL(VerticesBuffer)
 
         virtual ~GeometryStore() { Cleanup(); }
 
-        HSK_PROPERTY_ALL(BufferSets)
         HSK_PROPERTY_ALL(Meshes)
 
+        bool CmdBindBuffers(VkCommandBuffer commandBuffer);
+
       protected:
-        std::vector<std::unique_ptr<GeometryBufferSet>> mBufferSets;
-        std::vector<std::unique_ptr<Mesh>>              mMeshes;
+        ManagedBuffer         mIndicesBuffer;
+        ManagedBuffer         mVerticesBuffer;
+        std::vector<Vertex>   mVertices;
+        std::vector<uint32_t> mIndices;
+
+        std::vector<std::unique_ptr<Mesh>> mMeshes;
     };
 
     inline Primitive::Primitive(EType type, uint32_t first, uint32_t count) : Type(type), First(first), VertexOrIndexCount(count) {}

@@ -74,6 +74,10 @@ namespace hsk {
         mTextures.GetTextures().reserve(mGltfModel.textures.size());
 
         mGeo.GetMeshes().reserve(mGltfModel.meshes.size());
+        mIndexBuffer                    = &mGeo.GetIndices();
+        mVertexBuffer                   = &mGeo.GetVertices();
+        mIndexBindings.IndexBufferStart = mIndexBuffer->size();
+
         mIndexBindings.Meshes.resize(mGltfModel.meshes.size());
         std::vector<Node*> nodesWithMeshInstances{};
         mScene->FindNodesWithComponent<MeshInstance>(nodesWithMeshInstances);
@@ -287,7 +291,7 @@ namespace hsk {
         mGltfModel             = tinygltf::Model();
         mIndexBindings         = {};
         mNextMeshInstanceIndex = 0;
-        mVertexBuffer.clear();
-        mIndexBuffer.clear();
+        mVertexBuffer          = nullptr;
+        mIndexBuffer           = nullptr;
     }
 }  // namespace hsk

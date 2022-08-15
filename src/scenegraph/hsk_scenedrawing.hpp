@@ -41,7 +41,6 @@ namespace hsk {
         const hsk::FrameRenderInfo RenderInfo;
         const VkPipelineLayout     PipelineLayout           = nullptr;
         DrawPushConstant           PushConstantState        = {};
-        GeometryBufferSet*         CurrentlyBoundGeoBuffers = nullptr;
 
         inline SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
 

@@ -43,10 +43,11 @@ namespace hsk {
         /// @brief Per each inflight frame, have a storage buffer containing transforms
         FrameRotator<ManagedVectorBuffer<glm::mat4>, INFLIGHT_FRAME_COUNT> mTransformBuffers;
         /// @brief Buffer info vectors
-        std::vector<VkDescriptorBufferInfo> mBufferInfosCurrent[INFLIGHT_FRAME_COUNT] = {};
+        std::vector<VkDescriptorBufferInfo> mBufferInfosCurrent[INFLIGHT_FRAME_COUNT]  = {};
         std::vector<VkDescriptorBufferInfo> mBufferInfosPrevious[INFLIGHT_FRAME_COUNT] = {};
         /// @brief Draw Op structs store draw operation
         std::vector<DrawOp> mDrawOps    = {};
         bool                mFirstSetup = true;
+        GeometryStore*      mGeo        = nullptr;
     };
 }  // namespace hsk

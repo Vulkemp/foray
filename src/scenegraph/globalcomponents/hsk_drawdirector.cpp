@@ -11,7 +11,8 @@
 namespace hsk {
     void DrawDirector::InitOrUpdate()
     {
-        auto               scene = GetScene();
+        auto scene = GetScene();
+        mGeo       = scene->GetComponent<GeometryStore>();
         std::vector<Node*> meshInstanceNodes;
         scene->FindNodesWithComponent<MeshInstance>(meshInstanceNodes);
         std::map<Mesh*, std::vector<MeshInstance*>> meshMaps;
@@ -75,10 +76,15 @@ namespace hsk {
 
         currentTransformBuffer.InitOrUpdate();
 
+        if(!!mGeo)
+        {
+            mGeo->CmdBindBuffers(drawInfo.RenderInfo.GetCommandBuffer());
+        }
+
         for(auto& drawop : mDrawOps)
         {
             drawInfo.CmdPushConstant(drawop.TransformOffset);
-            drawop.Target->CmdDrawInstanced(drawInfo.RenderInfo.GetCommandBuffer(), drawInfo.CurrentlyBoundGeoBuffers, drawop.Instances.size());
+            drawop.Target->CmdDrawInstanced(drawInfo.RenderInfo.GetCommandBuffer(), drawop.Instances.size());
         }
     }
 

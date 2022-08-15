@@ -31,8 +31,8 @@ namespace hsk {
 
         std::string mUtf8Dir;
 
-        std::vector<Vertex>   mVertexBuffer = {};
-        std::vector<uint32_t> mIndexBuffer  = {};
+        std::vector<Vertex>*   mVertexBuffer = nullptr;
+        std::vector<uint32_t>* mIndexBuffer  = nullptr;
 
         /// @brief Variables which determine how to map gltf-model indices to scene indices/pointers
         struct IndexBindings
@@ -45,6 +45,7 @@ namespace hsk {
             std::vector<Mesh*> Meshes;
             /// @brief Vector mapping gltfModel texture index to ManagedImage*
             int32_t TextureBufferOffset;
+            size_t IndexBufferStart;
         } mIndexBindings = {};
 
         int32_t mNextMeshInstanceIndex = 0;

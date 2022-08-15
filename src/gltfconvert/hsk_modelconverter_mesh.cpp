@@ -18,34 +18,36 @@ namespace hsk {
             mGeo.GetMeshes().push_back(std::move(mesh));
         }
 
+        auto& indexBuffer  = *mIndexBuffer;
+        auto& vertexBuffer = *mVertexBuffer;
+
         // flip vertex order due to coordinate space translation GLTF (OpenGL) -> Vulkan
         uint32_t swap = {};
-        for(int32_t i = 0; i + 2 < mIndexBuffer.size(); i += 3)
+        for(int32_t i = mIndexBindings.IndexBufferStart; i + 2 < indexBuffer.size(); i += 3)
         {
-            swap                = mIndexBuffer[i + 2];
-            mIndexBuffer[i + 2] = mIndexBuffer[i + 1];
-            mIndexBuffer[i + 1] = swap;
+            swap               = indexBuffer[i + 2];
+            indexBuffer[i + 2] = indexBuffer[i + 1];
+            indexBuffer[i + 1] = swap;
         }
 
-        mGeo.GetBufferSets().push_back(std::make_unique<GeometryBufferSet>());
-        auto geoBufferSet = mGeo.GetBufferSets().back().get();
-        geoBufferSet->Init(mContext, mVertexBuffer, mIndexBuffer);
-
+        mGeo.InitOrUpdate();
         for(auto& mesh : mIndexBindings.Meshes)
         {
-            mesh->SetGeometryBufferSet(geoBufferSet);
-            mesh->BuildAccelerationStructure(mContext);
+            mesh->BuildAccelerationStructure(mContext, &mGeo);
         }
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<Primitive>& outprimitives)
     {
+        auto& indexBuffer  = *mIndexBuffer;
+        auto& vertexBuffer = *mVertexBuffer;
+
         outprimitives.resize(mesh.primitives.size());
 
         for(int32_t i = 0; i < mesh.primitives.size(); i++)
         {
-            uint32_t vertexStart = static_cast<uint32_t>(mVertexBuffer.size());
-            uint32_t indexStart  = static_cast<uint32_t>(mIndexBuffer.size());
+            uint32_t vertexStart = static_cast<uint32_t>(vertexBuffer.size());
+            uint32_t indexStart  = static_cast<uint32_t>(indexBuffer.size());
 
             auto& gltfPrimitive = mesh.primitives[i];
             auto& primitive     = outprimitives[i];
@@ -122,7 +124,7 @@ namespace hsk {
                 pos.y       = -1.f * pos.y;
                 auto normal = lGetNormal(vertexIndex);
                 normal.y    = -1.f * normal.y;
-                mVertexBuffer.push_back(Vertex{.Pos           = pos,
+                vertexBuffer.push_back(Vertex{.Pos           = pos,
                                                .Normal        = normal,
                                                .Tangent       = lGetTangent(vertexIndex),
                                                .Uv            = lGetUv(vertexIndex),
@@ -145,7 +147,7 @@ namespace hsk {
                         const uint32_t* buf = static_cast<const uint32_t*>(dataPtr);
                         for(size_t index = 0; index < accessor.count; index++)
                         {
-                            mIndexBuffer.push_back(buf[index] + vertexStart);
+                            indexBuffer.push_back(buf[index] + vertexStart);
                         }
                         break;
                     }
@@ -153,7 +155,7 @@ namespace hsk {
                         const uint16_t* buf = static_cast<const uint16_t*>(dataPtr);
                         for(size_t index = 0; index < accessor.count; index++)
                         {
-                            mIndexBuffer.push_back(buf[index] + vertexStart);
+                            indexBuffer.push_back(buf[index] + vertexStart);
                         }
                         break;
                     }
@@ -161,7 +163,7 @@ namespace hsk {
                         const uint8_t* buf = static_cast<const uint8_t*>(dataPtr);
                         for(size_t index = 0; index < accessor.count; index++)
                         {
-                            mIndexBuffer.push_back(buf[index] + vertexStart);
+                            indexBuffer.push_back(buf[index] + vertexStart);
                         }
                         break;
                     }

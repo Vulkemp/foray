@@ -1,6 +1,7 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
+#include "../scenegraph/hsk_scenegraph_declares.hpp"
 
 namespace hsk {
 
@@ -13,7 +14,7 @@ namespace hsk {
       public:
         virtual ~Blas() { Destroy(); }
 
-        virtual void Create(const VkContext* context, Mesh* mesh);
+        virtual void Create(const VkContext* context, Mesh* mesh, GeometryStore* store);
         virtual void Destroy();
 
         HSK_PROPERTY_CGET(AccelerationStructure)

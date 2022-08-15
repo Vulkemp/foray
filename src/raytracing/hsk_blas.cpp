@@ -6,7 +6,7 @@
 
 namespace hsk {
 
-    void Blas::Create(const VkContext* context, Mesh* mesh)
+    void Blas::Create(const VkContext* context, Mesh* mesh, GeometryStore* store)
     {
         mContext        = context;
         VkDevice device = context->Device;
@@ -25,9 +25,8 @@ namespace hsk {
         //     sizeof(transform_matrix), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         // transformMatrixBuffer.WriteDataDeviceLocal(&transform_matrix, sizeof(transform_matrix));
 
-        auto                          geoBufferSet = mesh->GetGeometryBufferSet();
-        VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = geoBufferSet->GetVertices().GetDeviceAddress()};
-        VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = geoBufferSet->GetIndices().GetDeviceAddress()};
+        VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = store->GetVerticesBuffer().GetDeviceAddress()};
+        VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = store->GetIndicesBuffer().GetDeviceAddress()};
         VkDeviceOrHostAddressConstKHR transform_matrix_device_address{};
 
 
