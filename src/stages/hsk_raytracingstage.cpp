@@ -34,6 +34,12 @@ namespace hsk {
         mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
     }
 
+    void RaytracingStage::OnResized(const VkExtent2D& extent)
+    {
+        RenderStage::OnResized(extent);
+        UpdateDescriptors();
+    }
+
     void RaytracingStage::CreateFixedSizeComponents()
     {
         SetupDescriptors();
@@ -214,6 +220,12 @@ namespace hsk {
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }
 
+    void RaytracingStage::UpdateDescriptors(){
+        mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo(true));
+
+        mDescriptorSet.Update(mContext);
+    }
+
     void RaytracingStage::CreatePipelineLayout()
     {
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
@@ -379,9 +391,9 @@ namespace hsk {
     }
 
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetAccelerationStructureDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetAccelerationStructureDescriptorInfo(bool rebuild)
     {
-        if(mAcclerationStructureDescriptorInfo != nullptr)
+        if(mAcclerationStructureDescriptorInfo != nullptr && !rebuild)
         {
             return mAcclerationStructureDescriptorInfo;
         }
@@ -397,10 +409,9 @@ namespace hsk {
         return mAcclerationStructureDescriptorInfo;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetRenderTargetDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetRenderTargetDescriptorInfo(bool rebuild)
     {
-
-        if(mRenderTargetDescriptorInfo != nullptr)
+        if(mRenderTargetDescriptorInfo != nullptr && !rebuild)
         {
             return mRenderTargetDescriptorInfo;
         }

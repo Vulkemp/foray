@@ -1,6 +1,7 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
 #include "../utility/hsk_deviceresource.hpp"
+#include <unordered_map>
 
 /// Explanation of vulkan descriptor sets:
 /// Distinction between a descriptor, a descriptor set, a descriptor set layout and a descriptor pool.
@@ -85,6 +86,8 @@ namespace hsk {
         VkDescriptorSetLayout Create(const VkContext* context, int32_t numSets = -1, std::string name = "Unnamed descriptor set");
         VkDescriptorSetLayout Create(const VkContext* context, std::string name = "Unnamed descriptor set");
 
+        void Update(const VkContext* context);
+
         void Cleanup() override;
         bool Exists() const override { return mDescriptorSets.size(); }
 
@@ -94,12 +97,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(DescriptorSetLayout)
 
       protected:
-        struct DescriptorLocation
-        {
-            uint32_t                        Binding;
-            std::shared_ptr<DescriptorInfo> Descriptor;
-        };
-        std::vector<DescriptorLocation> mDescriptorLocations;
+        std::unordered_map<uint32_t, std::shared_ptr<DescriptorInfo>> mDescriptorLocations;
 
         const VkContext*             mContext{};
         VkDescriptorPool             mDescriptorPool{};

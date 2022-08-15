@@ -30,6 +30,7 @@ namespace hsk {
 
         // create image
         AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
+        mImageLayout = createInfo.ImageCI.initialLayout;
         mSize = mAllocInfo.size;
 
         // update image in image view create info
@@ -227,6 +228,7 @@ namespace hsk {
             mImage      = nullptr;
             mAllocation = nullptr;
             mAllocInfo  = VmaAllocationInfo{};
+            mImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
         }
     }
 

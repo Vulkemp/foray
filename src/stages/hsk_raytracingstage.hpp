@@ -17,6 +17,7 @@ namespace hsk {
 
         inline static constexpr std::string_view RaytracingRenderTargetName = "RaytraycingRenderTarget";
 
+        virtual void OnResized(const VkExtent2D& extent) override;
       protected:
         Scene*                                     mScene;
         std::vector<VkClearValue>                  mClearValues;
@@ -30,12 +31,13 @@ namespace hsk {
         void PrepareAttachments();
         void PrepareRenderpass();
         void SetupDescriptors();
+        void UpdateDescriptors();
         void CreatePipelineLayout();
         void CreateShaderBindingTables();
         void CreateRaytraycingPipeline();
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo();
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo(bool rebuild = false);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo(bool rebuild = false);
 
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
