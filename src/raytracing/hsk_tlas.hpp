@@ -1,8 +1,7 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include "../memory/hsk_managedbuffer.hpp"
+#include "../memory/hsk_dualbuffer.hpp"
 #include "../scenegraph/hsk_component.hpp"
-#include "../utility/hsk_framerotator.hpp"
 #include <map>
 #include <vulkan/vulkan.h>
 
@@ -51,10 +50,8 @@ namespace hsk {
       protected:
         VkAccelerationStructureKHR                             mAccelerationStructure = nullptr;
         ManagedBuffer                                          mTlasMemory;
-        ManagedBuffer                                          mInstanceBuffer;
+        DualBuffer                                             mInstanceBuffer;
         ManagedBuffer                                          mScratchBuffer;
-        FrameRotator<ManagedBuffer, INFLIGHT_FRAME_COUNT>      mAnimatedInstancesStaging;
-        void*                                                  mAnimatedInstancesStagingMaps[INFLIGHT_FRAME_COUNT];
         VkDeviceAddress                                        mTlasAddress{};
         std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mAnimatedBlasInstances;
         std::map<MeshInstance*, std::unique_ptr<BlasInstance>> mStaticBlasInstances;

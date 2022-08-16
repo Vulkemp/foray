@@ -11,5 +11,21 @@ namespace hsk {
         hash ^= vhash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
     }
 
+    /// @brief Calculates a hash value for any block of memory
+    inline void AccumulateRaw(size_t& hash, const void* data, size_t size)
+    {
+        uint64_t        byteIndex = 0;
+        const uint64_t* data64    = reinterpret_cast<const uint64_t*>(data);
+        const uint8_t*  data8     = reinterpret_cast<const uint8_t*>(data);
+
+        for(; byteIndex < size; byteIndex += 8)
+        {
+            AccumulateHash(hash, data64[byteIndex / 8]);
+        }
+        for(; byteIndex < size; byteIndex++)
+        {
+            AccumulateHash(hash, data8[byteIndex]);
+        }
+    }
 
 }  // namespace hsk

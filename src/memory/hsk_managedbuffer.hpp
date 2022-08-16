@@ -16,16 +16,17 @@ namespace hsk {
             std::string             Name{};
 
             ManagedBufferCreateInfo();
+            ManagedBufferCreateInfo(VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
         };
 
       public:
         ManagedBuffer() { mName = "Unnamed Buffer"; };
 
-        void Create(const VkContext* context, ManagedBufferCreateInfo& createInfo);
+        void Create(const VkContext* context, const ManagedBufferCreateInfo& createInfo);
         /// @brief Creates the buffer with VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT. If data is set, also maps writes and unmaps
         void CreateForStaging(const VkContext* context, VkDeviceSize size, const void* data = nullptr, std::string_view bufferName = {});
         /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
-        void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {});
+        void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
 
         virtual void Cleanup();
 

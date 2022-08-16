@@ -6,7 +6,7 @@
 
 namespace hsk {
 
-    void ManagedBuffer::Create(const VkContext* context, ManagedBufferCreateInfo& createInfo)
+    void ManagedBuffer::Create(const VkContext* context, const ManagedBufferCreateInfo& createInfo)
     {
         mContext = context;
         mSize    = createInfo.BufferCreateInfo.size;
@@ -41,14 +41,9 @@ namespace hsk {
         }
     }
 
-    void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags)
+    void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
     {
-        ManagedBufferCreateInfo createInfo;
-        createInfo.BufferCreateInfo.size      = size;
-        createInfo.BufferCreateInfo.usage     = usage;
-        createInfo.AllocationCreateInfo.usage = memoryUsage;
-        createInfo.AllocationCreateInfo.flags = flags;
-
+        ManagedBufferCreateInfo createInfo(usage, size, memoryUsage, flags, name);
         Create(context, createInfo);
     }
 
@@ -166,6 +161,17 @@ namespace hsk {
     ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo()
     {
         BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    }
+
+    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo(
+        VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    {
+        BufferCreateInfo.sType     = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        BufferCreateInfo.size      = size;
+        BufferCreateInfo.usage     = usage;
+        AllocationCreateInfo.usage = memoryUsage;
+        AllocationCreateInfo.flags = flags;
+        Name                       = name;
     }
 
 }  // namespace hsk

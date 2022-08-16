@@ -72,13 +72,16 @@ namespace hsk {
 
         // STEP #3   Build instance buffer
 
-        mInstanceBuffer.Cleanup();
-        mInstanceBuffer.SetName("BLAS Instances Buffer");
-        mInstanceBuffer.Create(GetContext(),
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-                               sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size(), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
-                               VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-        mInstanceBuffer.WriteDataDeviceLocal(instanceBufferData.data(), sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size());
+        mInstanceBuffer.Destroy();
+        ManagedBuffer::ManagedBufferCreateInfo instanceBufferCI(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT
+                                                                    | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
+                                                                sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size(), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+                                                                VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
+        mInstanceBuffer.Create(GetContext(), instanceBufferCI);
+
+        // Misuse the staging function to upload data to GPU
+
+        mInstanceBuffer.StageFullBuffer(0, instanceBufferData.data());
 
         // STEP #4    Get Size
 
@@ -90,7 +93,7 @@ namespace hsk {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceAddress(),
+            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress(),
         };
 
         // Create the build info. The spec limits this to a single geometry, containing all instance references!
@@ -136,6 +139,16 @@ namespace hsk {
         cmdBuffer.Create(GetContext());
         cmdBuffer.Begin();
 
+        // copy previously staged instance data
+        DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+                                             .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                             .QueueFamilyIndex   = GetContext()->TransferQueue};
+        DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR,
+                                            .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                                            .QueueFamilyIndex   = GetContext()->TransferQueue};
+
+        mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer, before, after);
+
         VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
@@ -155,19 +168,6 @@ namespace hsk {
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
         mTlasAddress = GetContext()->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
-
-        if(!!mAnimatedBlasInstances.size())
-        {
-            // Create and map Staging buffers used for runtime updates
-            for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
-            {
-                mAnimatedInstancesStaging[i].SetName(fmt::format("BLAS Animated Instances Staging #{}", i));
-                mAnimatedInstancesStaging[i].Create(GetContext(), VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                                    sizeof(VkAccelerationStructureInstanceKHR) * mAnimatedBlasInstances.size(), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
-                                                    VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-                mAnimatedInstancesStaging[i].Map(mAnimatedInstancesStagingMaps[i]);
-            }
-        }
     }
 
     void Tlas::Update(const FrameUpdateInfo& drawInfo)
@@ -181,7 +181,6 @@ namespace hsk {
 
         std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;
 
-        size_t t = sizeof(VkAccelerationStructureInstanceKHR);
 
         for(const auto& blasInstancePair : mAnimatedBlasInstances)
         {
@@ -189,36 +188,19 @@ namespace hsk {
             instanceBufferData.push_back(blasInstancePair.second->GetAsInstance());
         }
 
-        memcpy(mAnimatedInstancesStagingMaps[drawInfo.GetFrameNumber() % INFLIGHT_FRAME_COUNT], instanceBufferData.data(),
-               sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size());
+        size_t writeOffset = sizeof(VkAccelerationStructureInstanceKHR) * mStaticBlasInstances.size();
+        size_t writeSize   = sizeof(VkAccelerationStructureInstanceKHR) * mAnimatedBlasInstances.size();
+        mInstanceBuffer.StageSection(drawInfo.GetFrameNumber(), instanceBufferData.data(), writeOffset, writeSize);
 
         auto cmdBuffer = drawInfo.GetCommandBuffer();
 
         // STEP #2 Configure upload from host to device buffer for animated instances
-        
-        VkBufferMemoryBarrier instanceBufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
-                                                    .srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
-                                                    .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                    .srcQueueFamilyIndex = GetContext()->QueueGraphics,
-                                                    .dstQueueFamilyIndex = GetContext()->QueueGraphics,
-                                                    .buffer              = mInstanceBuffer.GetBuffer(),
-                                                    .offset              = 0,
-                                                    .size                = VK_WHOLE_SIZE};
 
-        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &instanceBufferBarrier, 0, nullptr);
-
-        VkBufferCopy region{.srcOffset = 0,
-                            .dstOffset = sizeof(VkAccelerationStructureInstanceKHR) * mStaticBlasInstances.size(),
-                            .size      = sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size()};
-
-        vkCmdCopyBuffer(cmdBuffer, mAnimatedInstancesStaging[drawInfo.GetFrameNumber()].GetBuffer(), mInstanceBuffer.GetBuffer(), 1, &region);
-
-        instanceBufferBarrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-        instanceBufferBarrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT;
-
-        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                             VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &instanceBufferBarrier, 0, nullptr);
+        // copy previously staged instance data
+        DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
+                                                     .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                                                     .QueueFamilyIndex   = GetContext()->QueueGraphics};
+        mInstanceBuffer.CmdCopyToDevice(drawInfo.GetFrameNumber(), cmdBuffer, beforeAndAfter, beforeAndAfter);
 
         // STEP #3 Rebuild/Update TLAS
 
@@ -235,7 +217,7 @@ namespace hsk {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceAddress(),
+            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress(),
         };
 
         VkAccelerationStructureBuildGeometryInfoKHR buildInfo{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
@@ -249,7 +231,7 @@ namespace hsk {
         buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
 
 
-        VkAccelerationStructureBuildRangeInfoKHR buildRangeInfo{.primitiveCount = static_cast<uint32_t>(mAnimatedBlasInstances.size() + mStaticBlasInstances.size())};
+        VkAccelerationStructureBuildRangeInfoKHR  buildRangeInfo{.primitiveCount = static_cast<uint32_t>(mAnimatedBlasInstances.size() + mStaticBlasInstances.size())};
         VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &buildRangeInfo;
 
         GetContext()->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
@@ -265,17 +247,9 @@ namespace hsk {
             GetContext()->DispatchTable.destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = VK_NULL_HANDLE;
         }
-        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
-        {
-            if(mAnimatedInstancesStaging[i].Exists())
-            {
-                mAnimatedInstancesStaging[i].Unmap();
-                mAnimatedInstancesStaging[i].Cleanup();
-            }
-        }
         if(mInstanceBuffer.Exists())
         {
-            mInstanceBuffer.Cleanup();
+            mInstanceBuffer.Destroy();
         }
         if(mScratchBuffer.Exists())
         {
