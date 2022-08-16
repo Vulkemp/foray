@@ -5,6 +5,7 @@
 #include <optional>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
+#include "hsk_commandbuffer.hpp"
 
 namespace hsk {
     class ManagedImage : public DeviceResourceBase
@@ -77,10 +78,12 @@ namespace hsk {
         /// @param layoutAfterWrite - The layout that the image is transitioned to after it has been written.
         /// @param imageCopy - Specify how exactly the image is copied.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
+        void WriteDeviceLocalData(CommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
 
         /// @brief See other overload for description. Omits image copy region and assumes a set of default values to write a simple
         /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
+        void WriteDeviceLocalData(CommandBuffer& cmdBuffer,const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         virtual void Cleanup() override;
         virtual bool Exists() const override { return mAllocation; }

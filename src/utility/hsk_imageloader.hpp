@@ -1,5 +1,6 @@
 #pragma once
 #include "../hsk_basics.hpp"
+#include "../memory/hsk_commandbuffer.hpp"
 #include "hsk_imageformattraits.hpp"
 #include <functional>
 #include <vulkan/vulkan.h>
@@ -60,8 +61,14 @@ namespace hsk {
                                      ManagedImage*             image,
                                      ManagedImage::CreateInfo& ci,
                                      VkImageLayout             afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
+        inline void InitManagedImage(const VkContext*          context,
+                                     CommandBuffer&            cmdBuffer,
+                                     ManagedImage*             image,
+                                     ManagedImage::CreateInfo& ci,
+                                     VkImageLayout             afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
         inline void UpdateManagedImageCI(ManagedImage::CreateInfo& ci) const;
         inline void WriteManagedImageData(ManagedImage* image, VkImageLayout afterwrite) const;
+        inline void WriteManagedImageData(CommandBuffer& cmdBuffer, ManagedImage* image, VkImageLayout afterwrite) const;
 
       protected:
         ImageInfo                  mInfo;

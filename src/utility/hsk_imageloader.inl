@@ -104,6 +104,20 @@ namespace hsk {
     }
 
     template <VkFormat FORMAT>
+    inline void ImageLoader<FORMAT>::InitManagedImage(const VkContext* context, CommandBuffer& cmdBuffer, ManagedImage* image, ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
+    {
+        if(!mInfo.Valid || !mRawData.size())
+        {
+            return;
+        }
+
+        UpdateManagedImageCI(ci);
+
+        image->Create(context, ci);
+        WriteManagedImageData(cmdBuffer, image, afterwrite);
+    }
+
+    template <VkFormat FORMAT>
     inline void ImageLoader<FORMAT>::UpdateManagedImageCI(ManagedImage::CreateInfo& ci) const
     {
         ci.ImageCI.format        = FORMAT;
@@ -117,6 +131,12 @@ namespace hsk {
     inline void ImageLoader<FORMAT>::WriteManagedImageData(ManagedImage* image,  VkImageLayout afterwrite) const
     {
         image->WriteDeviceLocalData(mRawData.data(), mRawData.size(), afterwrite);
+    }
+
+    template <VkFormat FORMAT>
+    inline void ImageLoader<FORMAT>::WriteManagedImageData(CommandBuffer& cmdBuffer, ManagedImage* image,  VkImageLayout afterwrite) const
+    {
+        image->WriteDeviceLocalData(cmdBuffer, mRawData.data(), mRawData.size(), afterwrite);
     }
 
 

@@ -1,8 +1,8 @@
 #include "hsk_managedimage.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_fmtutilities.hpp"
-#include "hsk_managedbuffer.hpp"
 #include "hsk_commandbuffer.hpp"
+#include "hsk_managedbuffer.hpp"
 #include "hsk_vmaHelpers.hpp"
 
 namespace hsk {
@@ -31,7 +31,7 @@ namespace hsk {
         // create image
         AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
         mImageLayout = createInfo.ImageCI.initialLayout;
-        mSize = mAllocInfo.size;
+        mSize        = mAllocInfo.size;
 
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
@@ -165,17 +165,21 @@ namespace hsk {
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Create(mContext);
+        WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, imageCopy);
+    }
+    void ManagedImage::WriteDeviceLocalData(CommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
+    {
         // create staging buffer
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
 
-        CommandBuffer singleTimeCmdBuf;
-        singleTimeCmdBuf.Create(mContext);
-        singleTimeCmdBuf.Begin();
+        cmdBuffer.Begin();
 
         // transform image layout to write dst
         LayoutTransitionInfo transitionInfo;
-        transitionInfo.CommandBuffer        = singleTimeCmdBuf.GetCommandBuffer();
+        transitionInfo.CommandBuffer        = cmdBuffer.GetCommandBuffer();
         transitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         transitionInfo.BarrierSrcAccessMask = 0;
         transitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -185,9 +189,9 @@ namespace hsk {
         TransitionLayout(transitionInfo);
 
         // copy staging buffer data into device local memory
-        vkCmdCopyBufferToImage(singleTimeCmdBuf.GetCommandBuffer(), stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
+        vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
 
-        if (layoutAfterWrite)
+        if(layoutAfterWrite)
         {
             // reset image layout
             transitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -200,10 +204,16 @@ namespace hsk {
             TransitionLayout(transitionInfo);
         }
 
-        singleTimeCmdBuf.Submit();
+        cmdBuffer.Submit();
     }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)
+    {
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Create(mContext);
+        WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite);
+    }
+    void ManagedImage::WriteDeviceLocalData(CommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
         // specify default copy region
         VkBufferImageCopy region{};
@@ -216,7 +226,7 @@ namespace hsk {
         region.imageSubresource.layerCount     = 1;
         region.imageOffset                     = {0, 0, 0};
         region.imageExtent                     = mExtent3D;
-        WriteDeviceLocalData(data, size, layoutAfterWrite, region);
+        WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, region);
     }
 
     void ManagedImage::Cleanup()
@@ -225,9 +235,9 @@ namespace hsk {
         {
             vkDestroyImageView(mContext->Device, mImageView, nullptr);
             vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
-            mImage      = nullptr;
-            mAllocation = nullptr;
-            mAllocInfo  = VmaAllocationInfo{};
+            mImage       = nullptr;
+            mAllocation  = nullptr;
+            mAllocInfo   = VmaAllocationInfo{};
             mImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
         }
     }

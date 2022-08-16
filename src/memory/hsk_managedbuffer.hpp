@@ -2,6 +2,7 @@
 #include "../base/hsk_vkcontext.hpp"
 #include "../utility/hsk_deviceresource.hpp"
 #include <vulkan/vulkan.h>
+#include "hsk_commandbuffer.hpp"
 
 namespace hsk {
 
@@ -31,6 +32,9 @@ namespace hsk {
         virtual bool Exists() const { return mAllocation; }
 
         void WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
+        /// @brief Create staging buffer, copy data to it, copy data to device buffer, destroy staging buffer
+        /// @param cmdBuffer Single use command buffer. Must be completely reset, function will automatically begin, write and submit.
+        void WriteDataDeviceLocal(CommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
 
         void Map(void*& data);
         void Unmap();

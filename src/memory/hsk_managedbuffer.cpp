@@ -142,21 +142,25 @@ namespace hsk {
 
     void ManagedBuffer::WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Create(mContext);
+    }
+    void ManagedBuffer::WriteDataDeviceLocal(CommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
+    {
         Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
         ManagedBuffer stagingBuffer;
         stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
 
-        CommandBuffer   singleTimeCmdBuf;
-        VkCommandBuffer commandBuffer = singleTimeCmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        cmdBuffer.Begin();
 
         VkBufferCopy copy{};
         copy.srcOffset = 0;
         copy.dstOffset = offsetDstBuffer;
         copy.size      = size;
 
-        vkCmdCopyBuffer(commandBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
-        singleTimeCmdBuf.Submit();
+        vkCmdCopyBuffer(cmdBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
+        cmdBuffer.Submit();
     }
 
     ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo()
