@@ -144,6 +144,7 @@ namespace hsk {
     {
         CommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
+        WriteDataDeviceLocal(cmdBuffer, data, size, offsetDstBuffer);
     }
     void ManagedBuffer::WriteDataDeviceLocal(CommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
