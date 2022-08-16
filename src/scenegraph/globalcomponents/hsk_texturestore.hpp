@@ -29,8 +29,6 @@ namespace hsk {
       protected:
         std::vector<SampledTexture> mTextures;
         std::map<size_t, VkSampler> mSamplers;
-
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfo;
         std::vector<VkDescriptorImageInfo>                   mDescriptorImageInfos;
         void                                                 UpdateImageInfos();
     };

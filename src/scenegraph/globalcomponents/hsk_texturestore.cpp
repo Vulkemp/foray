@@ -73,16 +73,11 @@ namespace hsk {
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> TextureStore::GetDescriptorInfo(VkShaderStageFlags shaderStage)
     {
-        if(mDescriptorInfo != nullptr)
-        {
-            return mDescriptorInfo;
-        }
-
         UpdateImageInfos();
 
-        mDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, &mDescriptorImageInfos);
-        return mDescriptorInfo;
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, &mDescriptorImageInfos);
+        return descriptorInfo;
     }
 
     void TextureStore::UpdateImageInfos()

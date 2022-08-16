@@ -38,10 +38,10 @@ namespace hsk {
 
     struct Vertex
     {
-        glm::vec3 Pos           = {};
-        glm::vec3 Normal        = {};
-        glm::vec3 Tangent       = {};
-        glm::vec2 Uv            = {};
+        glm::vec3 Pos = {};
+        glm::vec3 Normal = {};
+        glm::vec3 Tangent = {};
+        glm::vec2 Uv      = {};
         int32_t   MaterialIndex = {};
     };
 

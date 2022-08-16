@@ -17,12 +17,91 @@
 
 #version 460
 #extension GL_EXT_ray_tracing : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+#include "bindpoints.glsl"
 
 layout(location = 0) rayPayloadInEXT vec3 hitValue;
 hitAttributeEXT vec3 attribs;
 
+layout(binding = BIND_VERTICES,  set = 0) readonly buffer Vertices { float v[]; } vertices;
+layout(binding = BIND_INDICES,   set = 0) readonly buffer Indices { uint i[]; } indices;
+
+#include "../materialbuffer.glsl"
+
+struct S_Vertex
+{
+	vec3 pos;
+	vec3 normal;
+	vec3 tangent;
+	vec2 uv;
+	int  materialIndex;
+};
+
+S_Vertex getVertex(uint index)
+{
+
+	const int m = 12; // 12 floats per vertex
+
+	S_Vertex v;
+	v.pos.x = vertices.v[m * index + 0];
+	v.pos.y = vertices.v[m * index + 1];
+	v.pos.z = vertices.v[m * index + 2];
+
+	v.normal.x = vertices.v[m * index + 3];
+	v.normal.y = vertices.v[m * index + 4];
+	v.normal.z = vertices.v[m * index + 5];
+
+	v.tangent.x = vertices.v[m * index + 6];
+	v.tangent.y = vertices.v[m * index + 7];
+	v.tangent.z = vertices.v[m * index + 8];
+
+	v.uv.x = vertices.v[m * index + 9];
+	v.uv.y = vertices.v[m * index + 10];
+
+	v.materialIndex = int(vertices.v[m * index + 11]);
+
+	// old
+	// S_Vertex v;
+	// v.pos = d0.xyz;
+	// v.normal = vec3(d0.w, d1.xy);
+	// v.tangent = vec3(d1.zw, d2.x);
+	// v.uv = d2.yz;
+	// v.materialIndex = int(d2.w);
+
+	return v;
+}
+
 void main()
 {
-  const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
-  hitValue = barycentricCoords;
+	const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
+	
+	// get primitive indices
+	ivec3 index = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+
+	// get primitive vertices
+	S_Vertex v0 = getVertex(index.x);
+	S_Vertex v1 = getVertex(index.y);
+	S_Vertex v2 = getVertex(index.z);
+
+	// calculate uv
+    vec2 uv = v0.uv * barycentricCoords.x + v1.uv * barycentricCoords.y + v2.uv * barycentricCoords.z;
+
+	// get material 
+	MaterialBufferObject material = GetMaterialOrFallback(v0.materialIndex);
+	MaterialProbe probe = ProbeMaterial(material, uv);
+
+	hitValue = barycentricCoords;
+	//hitValue.x = mod(indices.i[3 * gl_PrimitiveID], 255) / 255.f;
+	hitValue = probe.BaseColor.xyz;
+	//hitValue.xy = uv;
+	//hitValue.z = 0.f;
+	//hitValue = probe.Normal;
+
+	//hitValue.xyz = vec3(mod(gl_PrimitiveID,100)/100.0f);
+	hitValue.xyz = vec3(indices.i[3 * gl_PrimitiveID]/10000.f);
+	//hitValue = vec3(v2.materialIndex);
+	//hitValue = normalize(v0.normal);
+	
+
 }

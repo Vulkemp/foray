@@ -54,7 +54,7 @@ namespace hsk {
     {
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mDescriptorBufferInfosIndices.resize(1);
-        mVerticesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosIndices[0]);
+        mIndicesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosIndices[0]);
         descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfosIndices);
         return descriptorInfo;
     }

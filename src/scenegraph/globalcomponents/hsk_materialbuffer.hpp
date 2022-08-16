@@ -18,13 +18,12 @@ namespace hsk {
         void UpdateDeviceLocal();
         void Cleanup();
 
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo();
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage = VK_SHADER_STAGE_FRAGMENT_BIT);
 
         inline virtual ~MaterialBuffer() { Cleanup(); }
 
       protected:
         ManagedVectorBuffer<MaterialBufferEntry> mBuffer = {};
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mDescriptorInfo;
         std::vector<VkDescriptorBufferInfo>                  mDescriptorBufferInfos;
     };
 }  // namespace hsk

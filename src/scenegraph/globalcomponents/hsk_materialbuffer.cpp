@@ -20,17 +20,12 @@ namespace hsk {
         mBuffer.Cleanup();
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MaterialBuffer::GetDescriptorInfo()
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MaterialBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)
     {
-        if(mDescriptorInfo != nullptr)
-        {
-            return mDescriptorInfo;
-        }
-
-        mDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mBuffer.GetBuffer().FillVkDescriptorBufferInfo(&mDescriptorBufferInfos[0]);
-        mDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT, &mDescriptorBufferInfos);
-        return mDescriptorInfo;
+        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfos);
+        return descriptorInfo;
     }
 
 }  // namespace hsk

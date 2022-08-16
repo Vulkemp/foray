@@ -215,14 +215,20 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo());
         std::vector<Node*> nodes;
         mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<GeometryStore>()->GetIndexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
+                                                                                                            | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
+                                                                                                                   | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<GeometryStore>()->GetIndexBufferDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR
+                                                                                                                  | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(5, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(6, mScene->GetComponent<TextureStore>()->GetDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
 
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }
 
-    void RaytracingStage::UpdateDescriptors(){
+    void RaytracingStage::UpdateDescriptors()
+    {
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo(true));
 
         mDescriptorSet.Update(mContext);
@@ -406,7 +412,7 @@ namespace hsk {
         mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetComponent<Tlas>()->GetAccelerationStructure();
 
         mAcclerationStructureDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+        mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
         mAcclerationStructureDescriptorInfo->AddPNext(&mDescriptorAccelerationStructureInfo, 1);
         return mAcclerationStructureDescriptorInfo;
     }
@@ -421,7 +427,7 @@ namespace hsk {
         UpdateRenderTargetDescriptorBufferInfos();
 
         mRenderTargetDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mRenderTargetDescriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+        mRenderTargetDescriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
                                           &mRenderTargetDescriptorImageInfos);
         return mRenderTargetDescriptorInfo;
     }
