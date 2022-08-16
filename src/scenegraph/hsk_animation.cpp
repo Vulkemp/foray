@@ -20,7 +20,7 @@ namespace hsk {
         const AnimationKeyframe* upper = nullptr;
         SelectKeyframe(time, lower, upper);
 
-        if(lower == upper) // happens at start or end of animation. Fallback to step interpolation in this case
+        if(lower == upper)  // happens at start or end of animation. Fallback to step interpolation in this case
         {
             return InterpolateStep(time, lower, upper);
         }
@@ -168,16 +168,28 @@ namespace hsk {
                 case EAnimationTargetPath::Translation: {
                     glm::vec3 translation = sampler.SampleVec(mPlaybackConfig.Cursor);
                     translation.y         = -1.f * translation.y;
+                    if(isnanf(translation.x) || isnanf(translation.y) || isnanf(translation.z))
+                    {
+                        HSK_THROWFMT("NAN: ({}|{}|{}) \"{}\"", translation.x, translation.y, translation.z, "Translation");
+                    }
                     transform->SetTranslation(translation);
                     break;
                 }
                 case EAnimationTargetPath::Rotation: {
                     glm::qua quat = sampler.SampleQuat(mPlaybackConfig.Cursor);
+                    if(isnanf(quat.x) || isnanf(quat.y) || isnanf(quat.z) || isnanf(quat.w))
+                    {
+                        HSK_THROWFMT("NAN: ({}|{}|{}|{}) \"{}\"", quat.x, quat.y, quat.z, quat.w, "Rotation");
+                    }
                     transform->SetRotation(quat);
                     break;
                 }
                 case EAnimationTargetPath::Scale: {
                     glm::vec3 scale = sampler.SampleVec(mPlaybackConfig.Cursor);
+                    if(isnanf(scale.x) || isnanf(scale.y) || isnanf(scale.z))
+                    {
+                        HSK_THROWFMT("NAN: ({}|{}|{}) \"{}\"", scale.x, scale.y, scale.z, "Scale");
+                    }
                     transform->SetScale(scale);
                     break;
                 }

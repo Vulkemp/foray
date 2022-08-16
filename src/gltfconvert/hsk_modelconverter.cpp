@@ -244,6 +244,10 @@ namespace hsk {
         }
         bool markStatic = !isAnimated;
         node->GetTransform()->SetStatic(markStatic);
+        if (isAnimated)
+        {
+            node->GetTransform()->SetLocalMatrixFixed(false);
+        }
         for(auto child : node->GetChildren())
         {
             MarkNodeRecursively(child, isAnimated, animationTargets);

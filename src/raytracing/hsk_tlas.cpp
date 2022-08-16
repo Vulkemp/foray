@@ -177,27 +177,25 @@ namespace hsk {
             return;
         }
 
-        // STEP #1 Grab 
+        // STEP #1 Grab updated transforms of animated instances and upload them to host buffer
 
         std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;
-        VkAccelerationStructureBuildRangeInfoKHR        buildRangeInfo{};
-        uint32_t                                        buildCounts = 0;
+
+        size_t t = sizeof(VkAccelerationStructureInstanceKHR);
 
         for(const auto& blasInstancePair : mAnimatedBlasInstances)
         {
             blasInstancePair.second->Update();
             instanceBufferData.push_back(blasInstancePair.second->GetAsInstance());
-            buildCounts++;
         }
-
-        buildRangeInfo.primitiveCount = buildCounts;
-
 
         memcpy(mAnimatedInstancesStagingMaps[drawInfo.GetFrameNumber() % INFLIGHT_FRAME_COUNT], instanceBufferData.data(),
                sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size());
 
         auto cmdBuffer = drawInfo.GetCommandBuffer();
 
+        // STEP #2 Configure upload from host to device buffer for animated instances
+        
         VkBufferMemoryBarrier instanceBufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
                                                     .srcAccessMask       = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
                                                     .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -222,6 +220,13 @@ namespace hsk {
         vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
                              VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &instanceBufferBarrier, 0, nullptr);
 
+        // STEP #3 Rebuild/Update TLAS
+
+        VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+        vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
+
         VkAccelerationStructureGeometryKHR geometry{
             .sType        = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
             .geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR,
@@ -233,60 +238,21 @@ namespace hsk {
             .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceAddress(),
         };
 
-
-        VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-
-        vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
-
-        // Create the build info: in this case , pointing to only one
-        // geometry object.
         VkAccelerationStructureBuildGeometryInfoKHR buildInfo{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
-        buildInfo.flags                    = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
-        buildInfo.geometryCount            = 1;
-        buildInfo.pGeometries              = &geometry;
-        buildInfo.mode                     = VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR;
-        buildInfo.type                     = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
-        buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
-
-        // Query the worst -case AS size and scratch space size based on
-        // the number of instances (in this case , 1).
-        VkAccelerationStructureBuildSizesInfoKHR sizeInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
-        GetContext()->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &buildCounts, &sizeInfo);
-
-        if(mTlasMemory.GetSize() < sizeInfo.accelerationStructureSize)
-        {
-            mTlasMemory.Cleanup();
-            // Allocate a buffer for the acceleration structure.
-            mTlasMemory.Create(GetContext(),
-                               VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                               sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-            mTlasMemory.SetName("Tlas memory buffer");
-        }
-
-        buildInfo.dstAccelerationStructure = mAccelerationStructure;
-        buildInfo.srcAccelerationStructure = mAccelerationStructure;
-
-        // Allocate the scratch buffer holding temporary build data.
-        if(mScratchBuffer.GetSize() < sizeInfo.buildScratchSize)
-        {
-            mScratchBuffer.Cleanup();
-            mScratchBuffer.Create(GetContext(), VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
-                                  VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        }
+        buildInfo.flags                     = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
+        buildInfo.geometryCount             = 1;
+        buildInfo.pGeometries               = &geometry;
+        buildInfo.mode                      = VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR;
+        buildInfo.type                      = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
+        buildInfo.dstAccelerationStructure  = mAccelerationStructure;
+        buildInfo.srcAccelerationStructure  = mAccelerationStructure;
         buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
 
-        // Create a one -element array of pointers to range info objects.
+
+        VkAccelerationStructureBuildRangeInfoKHR buildRangeInfo{.primitiveCount = static_cast<uint32_t>(mAnimatedBlasInstances.size() + mStaticBlasInstances.size())};
         VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &buildRangeInfo;
-        // Build the TLAS.
+
         GetContext()->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
-
-        VkAccelerationStructureDeviceAddressInfoKHR acceleration_device_address_info{};
-        acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
-        acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
-
-        mTlasAddress = GetContext()->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
     }
 
     void Tlas::Destroy()
