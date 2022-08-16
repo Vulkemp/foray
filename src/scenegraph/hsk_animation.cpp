@@ -16,9 +16,14 @@ namespace hsk {
             return Keyframes[0].Value;
         }
 
-        AnimationKeyframe lower = {};
-        AnimationKeyframe upper = {};
+        const AnimationKeyframe* lower = nullptr;
+        const AnimationKeyframe* upper = nullptr;
         SelectKeyframe(time, lower, upper);
+
+        if(lower == upper) // happens at start or end of animation. Fallback to step interpolation in this case
+        {
+            return InterpolateStep(time, lower, upper);
+        }
 
         switch(Interpolation)
         {
@@ -48,9 +53,14 @@ namespace hsk {
             return ReinterpreteAsQuat(Keyframes[0].Value);
         }
 
-        AnimationKeyframe lower = {};
-        AnimationKeyframe upper = {};
+        const AnimationKeyframe* lower = {};
+        const AnimationKeyframe* upper = {};
         SelectKeyframe(time, lower, upper);
+
+        if(lower == upper)
+        {
+            return ReinterpreteAsQuat(InterpolateStep(time, lower, upper));
+        }
 
         switch(Interpolation)
         {
@@ -68,61 +78,63 @@ namespace hsk {
         return glm::quat();
     }
 
-
-    void AnimationSampler::SelectKeyframe(float time, AnimationKeyframe& lower, AnimationKeyframe& upper) const
+    void AnimationSampler::SelectKeyframe(float time, const AnimationKeyframe*& lower, const AnimationKeyframe*& upper) const
     {
         int32_t lowerIndex = 0;
         int32_t upperIndex = Keyframes.size() - 1;
 
-        bool done = false;
-        while(!done)
+        while(true)
         {
-            done = true;
-            if(lowerIndex + 1 < Keyframes.size() && Keyframes[lowerIndex + 1].Time < time)
+            int32_t nextIndex = lowerIndex + 1;
+            if(nextIndex >= Keyframes.size() || Keyframes[nextIndex].Time > time)
             {
-                lowerIndex++;
-                done = false;
+                break;
             }
-            if(upperIndex - 1 >= 0 && Keyframes[upperIndex - 1].Time > time)
+            lowerIndex++;
+        }
+        while(true)
+        {
+            int32_t nextIndex = upperIndex - 1;
+            if(nextIndex < 0 || Keyframes[nextIndex].Time < time)
             {
-                upperIndex--;
-                done = false;
+                break;
             }
+            upperIndex--;
         }
 
-        lower = Keyframes[lowerIndex];
-        upper = Keyframes[upperIndex];
+        lower = &Keyframes[lowerIndex];
+        upper = &Keyframes[upperIndex];
     }
 
-    glm::vec4 AnimationSampler::InterpolateStep(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
+    glm::vec4 AnimationSampler::InterpolateStep(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)
     {
-        return lower.Value;
+        return lower->Value;
     }
 
-    glm::vec4 AnimationSampler::InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
+    glm::vec4 AnimationSampler::InterpolateLinear(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)
     {
-        float dist = upper.Time - lower.Time;
-        float t    = (time - lower.Time) / dist;
-        return glm::mix(upper.Value, lower.Value, t);
+        float dist = upper->Time - lower->Time;
+        float t    = (time - lower->Time) / dist;
+        return glm::mix(upper->Value, lower->Value, t);
     }
 
-    glm::quat AnimationSampler::InterpolateLinearQuat(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
+    glm::quat AnimationSampler::InterpolateLinearQuat(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)
     {
-        glm::quat lowerQuat = ReinterpreteAsQuat(lower.Value);
-        glm::quat upperQuat = ReinterpreteAsQuat(upper.Value);
-        float     dist      = upper.Time - lower.Time;
-        float     t         = (time - lower.Time) / dist;
+        glm::quat lowerQuat = ReinterpreteAsQuat(lower->Value);
+        glm::quat upperQuat = ReinterpreteAsQuat(upper->Value);
+        float     dist      = upper->Time - lower->Time;
+        float     t         = (time - lower->Time) / dist;
         return glm::normalize(glm::slerp(upperQuat, lowerQuat, t));
     }
 
-    glm::vec4 AnimationSampler::InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper)
+    glm::vec4 AnimationSampler::InterpolateCubicSpline(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)
     {
-        float dist     = upper.Time - lower.Time;
-        float t        = (time - lower.Time) / dist;
+        float dist     = upper->Time - lower->Time;
+        float t        = (time - lower->Time) / dist;
         float tSquared = t * t;
         float tCubed   = t * tSquared;
-        return (2 * tCubed - 3 * tSquared + 1) * lower.Value + dist * (tCubed - 2 * tSquared + t) * lower.OutTangent + (-2 * tCubed + 3 * tSquared) * upper.Value
-               + dist * (tCubed - tSquared) * upper.InTangent;
+        return (2 * tCubed - 3 * tSquared + 1) * lower->Value + dist * (tCubed - 2 * tSquared + t) * lower->OutTangent + (-2 * tCubed + 3 * tSquared) * upper->Value
+               + dist * (tCubed - tSquared) * upper->InTangent;
     }
 
     glm::quat AnimationSampler::ReinterpreteAsQuat(glm::vec4 vec)
@@ -159,12 +171,16 @@ namespace hsk {
                     transform->SetTranslation(translation);
                     break;
                 }
-                case EAnimationTargetPath::Rotation:
-                    transform->SetRotation(sampler.SampleQuat(mPlaybackConfig.Cursor));
+                case EAnimationTargetPath::Rotation: {
+                    glm::qua quat = sampler.SampleQuat(mPlaybackConfig.Cursor);
+                    transform->SetRotation(quat);
                     break;
-                case EAnimationTargetPath::Scale:
-                    transform->SetScale(sampler.SampleVec(mPlaybackConfig.Cursor));
+                }
+                case EAnimationTargetPath::Scale: {
+                    glm::vec3 scale = sampler.SampleVec(mPlaybackConfig.Cursor);
+                    transform->SetScale(scale);
                     break;
+                }
                 default:
                     continue;
             }

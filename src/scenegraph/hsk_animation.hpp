@@ -40,17 +40,17 @@ namespace hsk {
         glm::vec3 SampleVec(float time) const;
         glm::quat SampleQuat(float time) const;
 
-        static glm::vec4 InterpolateStep(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::vec4 InterpolateLinear(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::quat InterpolateLinearQuat(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
-        static glm::vec4 InterpolateCubicSpline(float time, const AnimationKeyframe& lower, const AnimationKeyframe& upper);
+        static glm::vec4 InterpolateStep(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper);
+        static glm::vec4 InterpolateLinear(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper);
+        static glm::quat InterpolateLinearQuat(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper);
+        static glm::vec4 InterpolateCubicSpline(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper);
         static glm::quat ReinterpreteAsQuat(glm::vec4);
 
         EAnimationInterpolation        Interpolation = {};
         std::vector<AnimationKeyframe> Keyframes     = {};
 
       protected:
-        void SelectKeyframe(float time, AnimationKeyframe& lower, AnimationKeyframe& upper) const;
+        void SelectKeyframe(float time, const AnimationKeyframe*& lower, const AnimationKeyframe*& upper) const;
     };
     struct AnimationChannel
     {

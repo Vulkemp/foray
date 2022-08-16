@@ -80,7 +80,7 @@ namespace hsk {
                                VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
         mInstanceBuffer.WriteDataDeviceLocal(instanceBufferData.data(), sizeof(VkAccelerationStructureInstanceKHR) * instanceBufferData.size());
 
-        // STEP #4    Build
+        // STEP #4    Get Size
 
         VkAccelerationStructureGeometryKHR geometry{
             .sType        = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
@@ -102,19 +102,12 @@ namespace hsk {
         buildInfo.type                     = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
         buildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
 
-        CommandBuffer cmdBuffer;
-        cmdBuffer.Create(GetContext());
-        cmdBuffer.Begin();
-
-        VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-        vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
-
         // Query the worst -case AS size and scratch space size based on
         // the number of instances.
         VkAccelerationStructureBuildSizesInfoKHR sizeInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
         GetContext()->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &buildRangeInfo.primitiveCount, &sizeInfo);
+
+        // STEP #5    Create main and scratch memory and acceleration structure
 
         // Allocate a buffer for the acceleration structure.
         mTlasMemory.Create(GetContext(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -137,12 +130,25 @@ namespace hsk {
                               VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
 
+        // STEP #6    Build acceleration structure
+
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Create(GetContext());
+        cmdBuffer.Begin();
+
+        VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+        vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, 0, 1, &barrier, 0, nullptr, 0, nullptr);
+
         // Create a one -element array of pointers to range info objects.
         VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &buildRangeInfo;
         // Build the TLAS.
         GetContext()->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
 
         cmdBuffer.Submit();
+
+        // STEP #7    Setup address and staging buffers for animated instances
 
         VkAccelerationStructureDeviceAddressInfoKHR acceleration_device_address_info{};
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
@@ -170,6 +176,8 @@ namespace hsk {
         {
             return;
         }
+
+        // STEP #1 Grab 
 
         std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;
         VkAccelerationStructureBuildRangeInfoKHR        buildRangeInfo{};
