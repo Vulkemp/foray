@@ -2,7 +2,6 @@
 #include "../hsk_env.hpp"
 #include "../hsk_vkHelpers.hpp"
 #include "../memory/hsk_managedimage.hpp"
-#include "../memory/hsk_vmaHelpers.hpp"
 #include "../utility/hsk_deviceresource.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"

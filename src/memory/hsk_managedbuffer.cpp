@@ -2,7 +2,6 @@
 #include "../hsk_vkHelpers.hpp"
 #include "../utility/hsk_fmtutilities.hpp"
 #include "hsk_commandbuffer.hpp"
-#include "hsk_vmaHelpers.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace hsk {

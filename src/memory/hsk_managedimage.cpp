@@ -3,7 +3,6 @@
 #include "../utility/hsk_fmtutilities.hpp"
 #include "hsk_commandbuffer.hpp"
 #include "hsk_managedbuffer.hpp"
-#include "hsk_vmaHelpers.hpp"
 
 namespace hsk {
     ManagedImage::CreateInfo::CreateInfo()
