@@ -1,6 +1,6 @@
 #pragma once
 #include "../../memory/hsk_descriptorsethelper.hpp"
-#include "../../memory/hsk_managedvectorbuffer.hpp"
+#include "../../memory/hsk_dualbuffer.hpp"
 #include "../../utility/hsk_framerotator.hpp"
 #include "../hsk_component.hpp"
 
@@ -15,21 +15,20 @@ namespace hsk {
         uint32_t                   TransformOffset = 0;
     };
 
-    class DrawDirector : public GlobalComponent, public Component::DrawCallback
+    class DrawDirector : public GlobalComponent, public Component::UpdateCallback, public Component::DrawCallback
     {
       public:
-        inline DrawDirector() : mTransformBuffers()
+        inline DrawDirector()
         {
-            for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
-            {
-                mBufferInfosCurrent[i].resize(1);
-                mBufferInfosPrevious[i].resize(1);
-            }
         }
 
         void InitOrUpdate();
 
-        void Draw(SceneDrawInfo&);
+        void CreateBuffers(size_t transformCount);
+        void DestroyBuffers();
+
+        virtual void Update(const FrameUpdateInfo&) override;
+        virtual void Draw(SceneDrawInfo&) override;
 
         /// @brief
         /// @param shaderStage - The shader stage in which camera ubo should be accessible. Defaults to vertex stage, where
@@ -40,14 +39,16 @@ namespace hsk {
 
 
       protected:
-        /// @brief Per each inflight frame, have a storage buffer containing transforms
-        FrameRotator<ManagedVectorBuffer<glm::mat4>, INFLIGHT_FRAME_COUNT> mTransformBuffers;
-        /// @brief Buffer info vectors
-        std::vector<VkDescriptorBufferInfo> mBufferInfosCurrent[INFLIGHT_FRAME_COUNT]  = {};
-        std::vector<VkDescriptorBufferInfo> mBufferInfosPrevious[INFLIGHT_FRAME_COUNT] = {};
+        DualBuffer    mCurrentTransformBuffer;
+        ManagedBuffer mPreviousTransformBuffer;
+
+        std::vector<VkDescriptorBufferInfo> mCurrentDescriptorInfo;
+        std::vector<VkDescriptorBufferInfo> mPreviousDescriptorInfo;
+
         /// @brief Draw Op structs store draw operation
         std::vector<DrawOp> mDrawOps    = {};
         bool                mFirstSetup = true;
         GeometryStore*      mGeo        = nullptr;
+        uint32_t            mTotalCount = 0;
     };
 }  // namespace hsk

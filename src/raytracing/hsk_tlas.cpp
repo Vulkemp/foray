@@ -142,10 +142,10 @@ namespace hsk {
         // copy previously staged instance data
         DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
                                              .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                             .QueueFamilyIndex   = GetContext()->TransferQueue};
+                                             .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR,
                                             .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                            .QueueFamilyIndex   = GetContext()->TransferQueue};
+                                            .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
 
         mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer, before, after);
 
@@ -199,7 +199,7 @@ namespace hsk {
         // copy previously staged instance data
         DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
                                                      .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                                     .QueueFamilyIndex   = GetContext()->QueueGraphics};
+                                                     .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         mInstanceBuffer.CmdCopyToDevice(drawInfo.GetFrameNumber(), cmdBuffer, beforeAndAfter, beforeAndAfter);
 
         // STEP #3 Rebuild/Update TLAS
