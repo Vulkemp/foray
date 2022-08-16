@@ -4,17 +4,16 @@
 namespace hsk {
     void DualBuffer::Create(const VkContext* context, const ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
     {
+        Destroy();
+
         mDeviceBuffer.Create(context, devicebufferCreateInfo);
-
-        ManagedBuffer::ManagedBufferCreateInfo stagingCI;
-        stagingCI.BufferCreateInfo.size      = devicebufferCreateInfo.BufferCreateInfo.size;
-        stagingCI.BufferCreateInfo.usage     = VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        stagingCI.AllocationCreateInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-        stagingCI.AllocationCreateInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-
         mStagingBufferMaps.resize(stageBufferCount, nullptr);
         mBufferCopies.resize(stageBufferCount);
 
+        // Init staging buffers
+        ManagedBuffer::ManagedBufferCreateInfo stagingCI(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, devicebufferCreateInfo.BufferCreateInfo.size,
+                                                         VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
+                                                         VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
         for(int32_t i = 0; i < static_cast<int32_t>(stageBufferCount); i++)
         {
             auto& stagingBuffer = mStagingBuffers.emplace_back(std::make_unique<ManagedBuffer>());
@@ -56,10 +55,10 @@ namespace hsk {
             Exception::Throw("DualBuffer::CmdCopyToDevice called on object in uninitialized state!");
         }
 
-        uint32_t                   index        = frameIndex % mStagingBuffers.size();
-        VkBuffer                   source       = mStagingBuffers[index]->GetBuffer();
-        VkBuffer                   dest         = mDeviceBuffer.GetBuffer();
-        std::vector<VkBufferCopy>& bufferCopies = mBufferCopies[index];
+        uint32_t                   index        = frameIndex % mStagingBuffers.size();  // Current in-flight index
+        VkBuffer                   source       = mStagingBuffers[index]->GetBuffer();  // Staging buffer containing the delta
+        VkBuffer                   dest         = mDeviceBuffer.GetBuffer();            // Buffer the device uses for drawing
+        std::vector<VkBufferCopy>& bufferCopies = mBufferCopies[index];                 // copy actions submitted to the device
 
         VkBufferMemoryBarrier bufferMemBarrier{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, .pNext = nullptr, .buffer = dest, .offset = 0, .size = VK_WHOLE_SIZE};
@@ -85,11 +84,14 @@ namespace hsk {
             return;
         }
 
+        // Get proper transfer queue
+
         if(transferQueueFamilyIndex == TRANSFER_QUEUE_AUTO)
         {
             transferQueueFamilyIndex = before.QueueFamilyIndex;
         }
 
+        // Convert from 'before' state to transfer write state
         bufferMemBarrier.srcAccessMask       = before.AccessFlags;
         bufferMemBarrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
         bufferMemBarrier.srcQueueFamilyIndex = before.QueueFamilyIndex;
@@ -98,8 +100,10 @@ namespace hsk {
         vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
                              nullptr, 1, &bufferMemBarrier, 0, nullptr);
 
+        // Copy
         vkCmdCopyBuffer(cmdBuffer, source, dest, bufferCopies.size(), bufferCopies.data());
 
+        // Convert back from transfer write state to 'after' state
         bufferMemBarrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
         bufferMemBarrier.dstAccessMask       = after.AccessFlags;
         bufferMemBarrier.srcQueueFamilyIndex = transferQueueFamilyIndex;
@@ -108,6 +112,7 @@ namespace hsk {
         vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, after.PipelineStageFlags, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
                              nullptr, 1, &bufferMemBarrier, 0, nullptr);
 
+        // Clear "submitted" buffer copies
         bufferCopies.clear();
     }
 
@@ -116,9 +121,12 @@ namespace hsk {
         mStagingBufferMaps.clear();
         for(auto& stagingBuffer : mStagingBuffers)
         {
-            stagingBuffer->Unmap();
+            if(stagingBuffer && stagingBuffer->Exists())
+            {
+                stagingBuffer->Unmap();
+            }
         }
-        mStagingBuffers.clear();  // The destructor will destroy all staging buffers
+        mStagingBuffers.clear();  // Calls destructors
         mBufferCopies.clear();
         mDeviceBuffer.Cleanup();
     }
