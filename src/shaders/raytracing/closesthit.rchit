@@ -94,13 +94,22 @@ void main()
 	hitValue = barycentricCoords;
 	//hitValue.x = mod(indices.i[3 * gl_PrimitiveID], 255) / 255.f;
 	hitValue = probe.BaseColor.xyz;
-	//hitValue.xy = uv;
-	//hitValue.z = 0.f;
+	hitValue.xy = uv;
+	hitValue.y = v1.materialIndex;
+	hitValue.z = v1.materialIndex;
 	//hitValue = probe.Normal;
 
+	hitValue = v0.pos * barycentricCoords.x + v1.pos * barycentricCoords.y + v2.pos * barycentricCoords.z;
+	hitValue = vec3(gl_ObjectToWorldEXT * vec4(hitValue, 1.0));
+	//hitValue = v0.normal * barycentricCoords.x + v1.normal * barycentricCoords.y + v2.normal * barycentricCoords.z;
+
+	// Interpolate normal of hitpoint
+	//vec3 normal = v0.normal * barycentricCoords.x + v1.normal * barycentricCoords.y + v2.normal * barycentricCoords.z;
+	//hitValue = normalize(vec3(normal * gl_WorldToObjectEXT));
+
 	//hitValue.xyz = vec3(mod(gl_PrimitiveID,100)/100.0f);
-	hitValue.xyz = vec3(indices.i[3 * gl_PrimitiveID]/10000.f);
-	//hitValue = vec3(v2.materialIndex);
+	//hitValue.xyz = vec3(indices.i[3 * gl_PrimitiveID]/10000.f);
+	//hitValue = vec3(gl_PrimitiveID/10000.0f);
 	//hitValue = normalize(v0.normal);
 	
 
