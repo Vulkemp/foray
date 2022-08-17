@@ -30,8 +30,6 @@ namespace hsk {
         /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
         void HandleEvent(const Event* event);
 
-        void CreateTlas();
-
         /// Cleans up all memory, GPU structures, etc...
         virtual void Destroy(bool reinitialize = false);
 

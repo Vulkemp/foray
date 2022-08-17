@@ -44,16 +44,6 @@ namespace hsk {
         mGlobalRootRegistry.InvokeOnEvent(event);
     }
 
-    void Scene::CreateTlas()
-    {
-        Tlas* tlas = GetComponent<Tlas>();
-        if(!tlas)
-        {
-            tlas = MakeComponent<Tlas>();
-        }
-        tlas->Create();
-    }
-
     Node* Scene::MakeNode(Node* parent)
     {
         auto nodeManagedPtr = std::make_unique<Node>(this, parent);

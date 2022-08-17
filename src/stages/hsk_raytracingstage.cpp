@@ -5,6 +5,7 @@
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
+#include "../scenegraph/globalcomponents/hsk_tlasmanager.hpp"
 #include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
@@ -407,7 +408,7 @@ namespace hsk {
         // Setup the descriptor for binding our top level acceleration structure to the ray tracing shaders
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetComponent<Tlas>()->GetAccelerationStructure();
+        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &mScene->GetComponent<TlasManager>()->GetTlas().GetAccelerationStructure();
 
         mAcclerationStructureDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
         mAcclerationStructureDescriptorInfo->Init(VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
