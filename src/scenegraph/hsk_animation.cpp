@@ -163,6 +163,10 @@ namespace hsk {
             auto  transform = channel.Target->GetTransform();
             auto& sampler   = mSamplers[channel.SamplerIndex];
 
+            #ifdef WIN32
+#define isnanf _isnanf
+            #endif
+
             switch(channel.TargetPath)
             {
                 case EAnimationTargetPath::Translation: {
