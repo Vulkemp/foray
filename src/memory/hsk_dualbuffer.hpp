@@ -48,6 +48,9 @@ namespace hsk {
 
         inline bool Exists() const { return mDeviceBuffer.Exists(); }
 
+        inline std::string_view GetName() const { return mDeviceBuffer.GetName(); }
+        DualBuffer& SetName(std::string_view name);
+
         void Destroy();
 
         inline virtual ~DualBuffer() { Destroy(); }

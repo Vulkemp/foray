@@ -5,6 +5,7 @@
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
 #include "../scenegraph/globalcomponents/hsk_animationdirector.hpp"
+#include "../scenegraph/globalcomponents/hsk_cameramanager.hpp"
 #include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
@@ -244,7 +245,7 @@ namespace hsk {
         }
         bool markStatic = !isAnimated;
         node->GetTransform()->SetStatic(markStatic);
-        if (isAnimated)
+        if(isAnimated)
         {
             node->GetTransform()->SetLocalMatrixFixed(false);
         }
@@ -285,6 +286,7 @@ namespace hsk {
         }
 
         mScene->GetComponent<DrawDirector>()->InitOrUpdate();
+        mScene->GetComponent<CameraManager>()->RefreshCameraList();
 
         mMaterialBuffer.UpdateDeviceLocal();
     }

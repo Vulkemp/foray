@@ -5,126 +5,63 @@
 #include "../memory/hsk_managedbuffer.hpp"
 
 namespace hsk {
-    class UboInterface : public DeviceResourceBase
+    class ManagedUboBase : public DeviceResourceBase
     {
       public:
-        virtual void   Init(const VkContext* context, bool update = false) = 0;
-        virtual void   Update()                                            = 0;
-        virtual size_t SizeOfUbo() const                                   = 0;
-        virtual void*  UboData()                                           = 0;
+        inline size_t SizeOfUbo() const { return mUboBuffer.GetDeviceBuffer().GetSize(); }
 
-        template <typename T_UBO>
-        T_UBO& getUBO()
-        {
-            assert(sizeof(T_UBO) == SizeOfUbo());
-            T_UBO* data = reinterpret_cast<T_UBO*>(UboData());
-            return *data;
-        }
+        HSK_PROPERTY_ALLGET(UboBuffer)
+
+        virtual void UpdateTo(uint32_t frameIndex) = 0;
+        virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
+        virtual void Create(const VkContext* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
+        virtual bool Exists() const;
+        virtual void Destroy() override;
+
+      protected:
+        DualBuffer mUboBuffer;
     };
 
     template <typename T_UBO>
-    class ManagedUbo : public UboInterface
+    class ManagedUbo : public ManagedUboBase
     {
       protected:
-        ManagedBuffer mManagedBuffer = {};
-        T_UBO         mUbo           = {};
-        void*         mMapped        = nullptr;
-        const bool    mMapPersistent = false;
+        T_UBO mData;
 
       public:
-        using Ptr = std::shared_ptr<ManagedUbo<T_UBO>>;
-
-        explicit inline ManagedUbo(bool mapPersistent = false);
+        inline ManagedUbo();
         ~ManagedUbo();
 
-        HSK_PROPERTY_ALL(Ubo)
-        HSK_PROPERTY_GET(ManagedBuffer)
-        HSK_PROPERTY_CGET(ManagedBuffer)
-        HSK_PROPERTY_CGET(MapPersistent)
+        inline void Create(const VkContext* context, std::string_view name);
+        virtual void        UpdateTo(uint32_t frameIndex) override;
 
-        inline virtual void   Init(const VkContext* context, bool update = false) override;
-        inline virtual void   Update() override;
-        inline virtual void   Destroy() override;
-        inline virtual bool   Exists() const override { return mManagedBuffer.Exists(); }
-        inline virtual size_t SizeOfUbo() const override;
-        inline virtual void*  UboData() override { return &mUbo; }
-
-        inline virtual std::string_view   GetName() const { return mManagedBuffer.GetName(); }
-        inline virtual ManagedUbo<T_UBO>& SetName(std::string_view name);
+        HSK_PROPERTY_ALL(Data)
     };
 
     template <typename T_UBO>
-    ManagedUbo<T_UBO>::ManagedUbo(bool mapPersistent) : mManagedBuffer(), mUbo(), mMapPersistent(mapPersistent)
+    ManagedUbo<T_UBO>::ManagedUbo() : ManagedUboBase(), mData{}
     {
-        mName = "Unnamed Ubo";
+    }
+
+    template <typename T_UBO>
+    void ManagedUbo<T_UBO>::Create(const VkContext* context, std::string_view name)
+    {
+        ManagedUboBase::Create(context, sizeof(T_UBO));
+        if(name.size() > 0)
+        {
+            mUboBuffer.SetName(name);
+        }
     }
 
     template <typename T_UBO>
     inline ManagedUbo<T_UBO>::~ManagedUbo()
     {
-        Destroy();
+        ManagedUboBase::Destroy();
     }
 
     template <typename T_UBO>
-    void ManagedUbo<T_UBO>::Init(const VkContext* context, bool update)
+    inline void ManagedUbo<T_UBO>::UpdateTo(uint32_t frameIndex)
     {
-
-        ManagedBuffer::ManagedBufferCreateInfo bufferCI;
-
-        bufferCI.AllocationCreateInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        bufferCI.AllocationCreateInfo.flags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-
-        bufferCI.BufferCreateInfo.size        = sizeof(T_UBO);
-        bufferCI.BufferCreateInfo.usage       = VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-        bufferCI.BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-
-        mManagedBuffer.Create(context, bufferCI);
-
-        if(mMapPersistent)
-        {
-            mManagedBuffer.Map(mMapped);
-        }
-        if(update)
-        {
-            Update();
-        }
+        mUboBuffer.StageFullBuffer(frameIndex, &mData);
     }
-
-    template <typename T_UBO>
-    inline void ManagedUbo<T_UBO>::Update()
-    {
-        if(!mMapPersistent)
-        {
-            mManagedBuffer.Map(mMapped);
-        }
-        memcpy(mMapped, &mUbo, sizeof(mUbo));
-        if(!mMapPersistent)
-        {
-            mManagedBuffer.Unmap();
-        }
-    }
-
-    template <typename T_UBO>
-    inline void ManagedUbo<T_UBO>::Destroy()
-    {
-        if(mManagedBuffer.GetAllocation() && mMapPersistent)
-        {
-            mManagedBuffer.Unmap();
-        }
-        mManagedBuffer.Destroy();
-    }
-    template <typename T_UBO>
-    inline size_t ManagedUbo<T_UBO>::SizeOfUbo() const
-    {
-        return sizeof(T_UBO);
-    }
-
-    template <typename T_UBO>
-    inline ManagedUbo<T_UBO>& ManagedUbo<T_UBO>::SetName(std::string_view name)
-    {
-        mManagedBuffer.SetName(name);
-        return *this;
-    }
-
 }  // namespace hsk

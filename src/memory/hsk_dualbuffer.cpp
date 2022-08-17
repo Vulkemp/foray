@@ -16,6 +16,10 @@ namespace hsk {
                                                          VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
         for(int32_t i = 0; i < static_cast<int32_t>(stageBufferCount); i++)
         {
+            if(devicebufferCreateInfo.Name.size() > 0)
+            {
+                stagingCI.Name = fmt::format("Staging for \"{}\" #{}", devicebufferCreateInfo.Name, i);
+            }
             auto& stagingBuffer = mStagingBuffers.emplace_back(std::make_unique<ManagedBuffer>());
             auto& mapPoint      = mStagingBufferMaps[i];
             stagingBuffer->Create(context, stagingCI);
@@ -108,8 +112,8 @@ namespace hsk {
 
         std::vector<VkBufferMemoryBarrier> barriers{deviceMemBarrier, stagingMemBarrier};
 
-        vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
-                             nullptr, barriers.size(), barriers.data(), 0, nullptr);
+        vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, barriers.size(), barriers.data(), 0, nullptr);
 
         // Copy
         vkCmdCopyBuffer(cmdBuffer, source, dest, bufferCopies.size(), bufferCopies.data());
@@ -125,11 +129,24 @@ namespace hsk {
 
         barriers = {deviceMemBarrier, stagingMemBarrier};
 
-        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, after.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
-                             nullptr, barriers.size(), barriers.data(), 0, nullptr);
+        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT,
+                             after.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr,
+                             barriers.size(), barriers.data(), 0, nullptr);
 
         // Clear "submitted" buffer copies
         bufferCopies.clear();
+    }
+
+    DualBuffer& DualBuffer::SetName(std::string_view name)
+    {
+        mDeviceBuffer.SetName(name);
+        std::string stagingBufferName;
+        for(int32_t i = 0; i < mStagingBuffers.size(); i++)
+        {
+            stagingBufferName = fmt::format("Staging for \"{}\" #{}", name, i);
+            mStagingBuffers[i]->SetName(stagingBufferName);
+        }
+        return *this;
     }
 
     void DualBuffer::Destroy()

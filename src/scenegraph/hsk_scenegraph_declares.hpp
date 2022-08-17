@@ -17,4 +17,6 @@ namespace hsk {
     struct AnimationChannel;
     struct PlaybackConfig;
     class AnimationDirector;
+    struct CameraUboBlock;
+    class Camera;
 }  // namespace hsk

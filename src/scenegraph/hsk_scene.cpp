@@ -1,4 +1,5 @@
 #include "hsk_scene.hpp"
+#include "globalcomponents/hsk_cameramanager.hpp"
 #include "globalcomponents/hsk_drawdirector.hpp"
 #include "globalcomponents/hsk_geometrystore.hpp"
 #include "globalcomponents/hsk_materialbuffer.hpp"
@@ -17,6 +18,7 @@ namespace hsk {
         MakeComponent<GeometryStore>();
         MakeComponent<TextureStore>();
         MakeComponent<DrawDirector>();
+        MakeComponent<CameraManager>(mContext);
     }
 
     void Scene::Update(const FrameUpdateInfo& updateInfo)

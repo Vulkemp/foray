@@ -1,7 +1,7 @@
 #include "hsk_raytracingstage.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../scenegraph/components/hsk_camera.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
+#include "../scenegraph/globalcomponents/hsk_cameramanager.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
@@ -213,9 +213,7 @@ namespace hsk {
     {
         mDescriptorSet.SetDescriptorInfoAt(0, GetAccelerationStructureDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo());
-        std::vector<Node*> nodes;
-        mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<CameraManager>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
                                                                                                             | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
         mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
                                                                                                                    | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
@@ -266,7 +264,7 @@ namespace hsk {
 
         // Instanced object
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
 
         //
         // raytraycing

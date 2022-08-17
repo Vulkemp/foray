@@ -3,37 +3,16 @@
 #include "../../osi/hsk_event.hpp"
 #include "../hsk_scene.hpp"
 #include <spdlog/fmt/fmt.h>
+#include "../hsk_camerauboblock.hpp"
 
 #undef near
 #undef far
 
 namespace hsk {
-    Camera::Camera() : mUbos(true)
-    {
-        for(size_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
-        {
-            mUboDescriptorBufferInfosSets[i].resize(1);
-            mUbos[i].SetName(fmt::format("Camera Ubo #{}", i));
-        }
-    }
-
     void Camera::InitDefault()
     {
         SetViewMatrix();
         SetProjectionMatrix();
-        mUbos.Init(GetScene()->GetContext(), true);
-    }
-
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> Camera::MakeUboDescriptorInfos(VkShaderStageFlags shaderStage)
-    {
-        UpdateUboDescriptorBufferInfos();
-        auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, shaderStage);
-        for(size_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
-        {
-            descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfosSets[i]);
-        }
-        return descriptorInfo;
     }
 
     void Camera::SetViewMatrix()
@@ -79,29 +58,20 @@ namespace hsk {
         SetProjectionMatrix();
     }
 
-    void Camera::BeforeDraw(const FrameRenderInfo& renderInfo)
+    void Camera::UpdateUbo(CameraUboBlock& uboblock)
     {
-        auto& ubo                            = mUbos[renderInfo.GetFrameNumber()];
-        auto& uboData                        = ubo.GetUbo();
-        uboData.PreviousViewMatrix           = uboData.ViewMatrix;
-        uboData.PreviousProjectionMatrix     = uboData.ProjectionMatrix;
-        uboData.PreviousProjectionViewMatrix = uboData.ProjectionViewMatrix;
-        uboData.ViewMatrix                   = mViewMatrix;
-        uboData.ProjectionMatrix             = mProjectionMatrix;
-        uboData.ProjectionViewMatrix         = mProjectionMatrix * mViewMatrix;
-        uboData.InverseViewMatrix            = glm::inverse(mViewMatrix);
-        uboData.InverseProjectionMatrix      = glm::inverse(mProjectionMatrix);
-        ubo.Update();
+        uboblock.PreviousViewMatrix           = uboblock.ViewMatrix;
+        uboblock.PreviousProjectionMatrix     = uboblock.ProjectionMatrix;
+        uboblock.PreviousProjectionViewMatrix = uboblock.ProjectionViewMatrix;
+        uboblock.ViewMatrix                   = mViewMatrix;
+        uboblock.ProjectionMatrix             = mProjectionMatrix;
+        uboblock.ProjectionViewMatrix         = mProjectionMatrix * mViewMatrix;
+        uboblock.InverseViewMatrix            = glm::inverse(mViewMatrix);
+        uboblock.InverseProjectionMatrix      = glm::inverse(mProjectionMatrix);
     }
     void Camera::OnResized(VkExtent2D extent)
     {
         mAspect = CalculateAspect(extent);
         SetProjectionMatrix();
     }
-
-    void Camera::Destroy()
-    {
-        mUbos.Destroy();
-    }
-
 }  // namespace hsk

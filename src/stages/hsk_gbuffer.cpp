@@ -1,14 +1,14 @@
 #include "hsk_gbuffer.hpp"
 #include "../hsk_vkHelpers.hpp"
-#include "../utility/hsk_pipelinebuilder.hpp"
-#include "../utility/hsk_shadermodule.hpp"
-#include "../utility/hsk_shaderstagecreateinfos.hpp"
+#include "../scenegraph/components/hsk_meshinstance.hpp"
+#include "../scenegraph/globalcomponents/hsk_cameramanager.hpp"
+#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
-#include "../scenegraph/globalcomponents/hsk_drawdirector.hpp"
-#include "../scenegraph/components/hsk_meshinstance.hpp"
-#include "../scenegraph/components/hsk_camera.hpp"
+#include "../utility/hsk_pipelinebuilder.hpp"
+#include "../utility/hsk_shadermodule.hpp"
+#include "../utility/hsk_shaderstagecreateinfos.hpp"
 
 
 namespace hsk {
@@ -36,7 +36,8 @@ namespace hsk {
         PreparePipeline();
     }
 
-    void GBufferStage::DestroyFixedComponents() {
+    void GBufferStage::DestroyFixedComponents()
+    {
         VkDevice device = mContext->Device;
         if(mPipeline)
         {
@@ -212,9 +213,7 @@ namespace hsk {
     {
         mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<TextureStore>()->GetDescriptorInfo());
-        std::vector<Node*> nodes;
-        mScene->FindNodesWithComponent<Camera>(nodes);
-        mDescriptorSet.SetDescriptorInfoAt(2, nodes.front()->GetComponent<Camera>()->MakeUboDescriptorInfos());
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<CameraManager>()->MakeUboDescriptorInfos());
         mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfosForCurrent());
         mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<DrawDirector>()->MakeDescriptorInfosForPrevious());
 
@@ -259,7 +258,7 @@ namespace hsk {
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
 
         // Instanced object
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % 2]), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
         mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);
