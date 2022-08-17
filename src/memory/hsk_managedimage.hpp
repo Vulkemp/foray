@@ -12,7 +12,7 @@ namespace hsk {
     {
       public:
         inline ManagedImage() { mName = "Unnamed Image"; }
-        inline virtual ~ManagedImage() { Cleanup(); }
+        inline virtual ~ManagedImage() { Destroy(); }
 
         struct CreateInfo
         {
@@ -85,7 +85,7 @@ namespace hsk {
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
         void WriteDeviceLocalData(CommandBuffer& cmdBuffer,const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
-        virtual void Cleanup() override;
+        virtual void Destroy() override;
         virtual bool Exists() const override { return mAllocation; }
 
         HSK_PROPERTY_CGET(Image)

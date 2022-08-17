@@ -29,9 +29,9 @@ namespace hsk {
 
         void Update();
 
-        void Cleanup();
+        void Destroy();
 
-        inline virtual ~Camera() { Cleanup(); }
+        inline virtual ~Camera() { Destroy(); }
 
         inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
         inline glm::mat4& ViewMat() { return mViewMatrix; }

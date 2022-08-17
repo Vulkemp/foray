@@ -149,7 +149,7 @@ namespace hsk {
 
     VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, std::string name) { return Create(context, -1, name); }
 
-    void DescriptorSetHelper::Cleanup()
+    void DescriptorSetHelper::Destroy()
     {
         if(mDescriptorSetLayout)
         {

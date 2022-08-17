@@ -1,6 +1,7 @@
 #pragma once
 #include "../hsk_basics.hpp"
 #include "../hsk_glm.hpp"
+#include "../memory/hsk_dualbuffer.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
 
 namespace hsk {
@@ -11,9 +12,6 @@ namespace hsk {
         virtual void   Update()                                            = 0;
         virtual size_t SizeOfUbo() const                                   = 0;
         virtual void*  UboData()                                           = 0;
-
-        // virtual void                 BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding, VkWriteDescriptorSet& dest) const = 0;
-        // virtual VkWriteDescriptorSet BuildWriteDescriptorSet(VkDescriptorSet descriptorSet, uint32_t binding) const                             = 0;
 
         template <typename T_UBO>
         T_UBO& getUBO()
@@ -46,8 +44,8 @@ namespace hsk {
 
         inline virtual void   Init(const VkContext* context, bool update = false) override;
         inline virtual void   Update() override;
-        inline virtual void   Cleanup() override;
-        inline virtual bool Exists() const override {return mManagedBuffer.Exists();}
+        inline virtual void   Destroy() override;
+        inline virtual bool   Exists() const override { return mManagedBuffer.Exists(); }
         inline virtual size_t SizeOfUbo() const override;
         inline virtual void*  UboData() override { return &mUbo; }
 
@@ -64,7 +62,7 @@ namespace hsk {
     template <typename T_UBO>
     inline ManagedUbo<T_UBO>::~ManagedUbo()
     {
-        Cleanup();
+        Destroy();
     }
 
     template <typename T_UBO>
@@ -108,13 +106,13 @@ namespace hsk {
     }
 
     template <typename T_UBO>
-    inline void ManagedUbo<T_UBO>::Cleanup()
+    inline void ManagedUbo<T_UBO>::Destroy()
     {
         if(mManagedBuffer.GetAllocation() && mMapPersistent)
         {
             mManagedBuffer.Unmap();
         }
-        mManagedBuffer.Cleanup();
+        mManagedBuffer.Destroy();
     }
     template <typename T_UBO>
     inline size_t ManagedUbo<T_UBO>::SizeOfUbo() const

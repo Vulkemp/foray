@@ -15,9 +15,9 @@ namespace hsk {
         inline virtual void Init(const VkContext* context, VkExtent2D size, std::string_view name);
 
         inline virtual bool Exists() const override { return Image->Exists(); }
-        inline virtual void Cleanup() override { Image->Cleanup(); }
+        inline virtual void Destroy() override { Image->Destroy(); }
 
-        virtual ~StageImage() { Image->Cleanup(); }
+        virtual ~StageImage() { Image->Destroy(); }
 
         std::unique_ptr<ManagedImage> Image;
     };
@@ -53,9 +53,9 @@ namespace hsk {
         virtual void OnResized(Extent2D newsize);
 
         virtual bool Exists() const override;
-        virtual void Cleanup() override;
+        virtual void Destroy() override;
 
-        virtual ~StageDirector() { Cleanup(); }
+        virtual ~StageDirector() { Destroy(); }
 
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_ALLGET(Stages)

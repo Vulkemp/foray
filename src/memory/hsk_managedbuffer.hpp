@@ -28,7 +28,7 @@ namespace hsk {
         /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
         void Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
 
-        virtual void Cleanup();
+        virtual void Destroy();
 
         virtual bool Exists() const { return mAllocation; }
 
@@ -51,7 +51,7 @@ namespace hsk {
         {
             if(mAllocation)
             {
-                Cleanup();
+                Destroy();
             }
         }
 

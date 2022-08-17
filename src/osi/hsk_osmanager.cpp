@@ -37,7 +37,7 @@ namespace hsk {
         }
     }
 
-    void OsManager::Cleanup()
+    void OsManager::Destroy()
     {
         mInputDevices.clear();
         if(!!mLastEvent)

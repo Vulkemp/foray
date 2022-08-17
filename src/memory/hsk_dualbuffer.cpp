@@ -144,6 +144,6 @@ namespace hsk {
         }
         mStagingBuffers.clear();  // Calls destructors
         mBufferCopies.clear();
-        mDeviceBuffer.Cleanup();
+        mDeviceBuffer.Destroy();
     }
 }  // namespace hsk

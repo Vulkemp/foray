@@ -127,7 +127,7 @@ namespace hsk {
         }
         if(mBlasMemory.Exists())
         {
-            mBlasMemory.Cleanup();
+            mBlasMemory.Destroy();
         }
         mBlasAddress = 0;
     }

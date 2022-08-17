@@ -27,11 +27,11 @@ namespace hsk {
             }
         }
 
-        void Cleanup()
+        void Destroy()
         {
             for(size_t i = 0; i < Count; i++)
             {
-                mObjects[i].Cleanup();
+                mObjects[i].Destroy();
             }
         }
 
@@ -41,7 +41,7 @@ namespace hsk {
         T&       operator[](size_t index) { return mObjects[index % Count]; }
         const T& operator[](size_t index) const { return mObjects[index % Count]; }
 
-        ~FrameRotator() { Cleanup(); }
+        ~FrameRotator() { Destroy(); }
 
       protected:
         T mObjects[Count];

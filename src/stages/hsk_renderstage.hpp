@@ -18,7 +18,7 @@ namespace hsk {
         {
             DestroyResolutionDependentComponents();
             DestroyFixedComponents();
-            mDescriptorSet.Cleanup();
+            mDescriptorSet.Destroy();
         }
 
 

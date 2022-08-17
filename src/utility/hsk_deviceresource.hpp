@@ -15,7 +15,7 @@ namespace hsk {
         static const std::unordered_set<DeviceResourceBase*>* GetTotalAllocatedResources() { return &sAllocatedRessources; }
 
         virtual bool Exists() const = 0;
-        virtual void Cleanup()      = 0;
+        virtual void Destroy()      = 0;
 
         inline DeviceResourceBase() { sAllocatedRessources.insert(this); }
         inline explicit DeviceResourceBase(std::string_view name);

@@ -10,7 +10,7 @@ namespace hsk {
     {
       public:
         CommandBuffer() = default;
-        inline virtual ~CommandBuffer() { Cleanup(); }
+        inline virtual ~CommandBuffer() { Destroy(); }
 
         /// @brief Create based on the contexts device, command pool and queue.
         VkCommandBuffer Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
@@ -27,7 +27,7 @@ namespace hsk {
         void WaitForCompletion();
 
         /// @brief Destroys the associated resources
-        virtual void Cleanup() override;
+        virtual void Destroy() override;
         virtual bool Exists() const override { return mCommandBuffer; }
 
         inline operator VkCommandBuffer() { return mCommandBuffer; }

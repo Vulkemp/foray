@@ -50,9 +50,9 @@ namespace hsk {
         inline bool Load();
 
         /// @brief Cleans up the loader
-        inline void Cleanup();
+        inline void Destroy();
 
-        virtual inline ~ImageLoader() { Cleanup(); }
+        virtual inline ~ImageLoader() { Destroy(); }
 
         HSK_PROPERTY_ALLGET(Info)
         HSK_PROPERTY_ALLGET(RawData)

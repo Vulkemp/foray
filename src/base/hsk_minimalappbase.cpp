@@ -117,7 +117,7 @@ namespace hsk {
         {
 #endif
             this->State(EState::Finalizing);
-            Cleanup();
+            Destroy();
             BaseCleanupVulkan();
             BaseCleanupSdlSubsystem();
 #ifdef HSK_CATCH_EXCEPTIONS
@@ -201,7 +201,7 @@ namespace hsk {
     }
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
-        mOsManager.Cleanup();
+        mOsManager.Destroy();
         logger()->flush();
     }
 

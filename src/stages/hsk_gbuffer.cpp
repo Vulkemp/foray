@@ -53,7 +53,7 @@ namespace hsk {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
             mPipelineCache = nullptr;
         }
-        mDescriptorSet.Cleanup();
+        mDescriptorSet.Destroy();
     }
 
     void GBufferStage::CreateResolutionDependentComponents()
@@ -68,9 +68,9 @@ namespace hsk {
         VkDevice device = mContext->Device;
         for(auto& colorAttachment : mColorAttachments)
         {
-            colorAttachment->Cleanup();
+            colorAttachment->Destroy();
         }
-        mDepthAttachment.Cleanup();
+        mDepthAttachment.Destroy();
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);

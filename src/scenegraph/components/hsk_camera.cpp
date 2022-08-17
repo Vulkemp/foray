@@ -99,9 +99,9 @@ namespace hsk {
         SetProjectionMatrix();
     }
 
-    void Camera::Cleanup()
+    void Camera::Destroy()
     {
-        mUbos.Cleanup();
+        mUbos.Destroy();
     }
 
 }  // namespace hsk

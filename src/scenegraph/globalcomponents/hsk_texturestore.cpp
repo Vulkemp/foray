@@ -34,7 +34,7 @@ namespace std {
 }  // namespace std
 
 namespace hsk {
-    void TextureStore::Cleanup()
+    void TextureStore::Destroy()
     {
         mTextures.clear();
         for(auto& hashSamplerPair : mSamplers)

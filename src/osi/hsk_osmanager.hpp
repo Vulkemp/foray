@@ -29,7 +29,7 @@ namespace hsk {
         /// @brief Inits the SDL subsystem and catalogues input devices
         virtual void Init();
         /// @brief Cleans the SDL subsystem
-        virtual void Cleanup();
+        virtual void Destroy();
 
         /// @brief Polls next event from system event queue. Retuns nullptr if no event present
         /// @remark The pointer returned is valid until the next time PollEvent() is invoked.

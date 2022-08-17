@@ -253,11 +253,11 @@ namespace hsk {
         }
         if(mScratchBuffer.Exists())
         {
-            mScratchBuffer.Cleanup();
+            mScratchBuffer.Destroy();
         }
         if(mTlasMemory.Exists())
         {
-            mTlasMemory.Cleanup();
+            mTlasMemory.Destroy();
         }
         mTlasAddress = 0;
     }

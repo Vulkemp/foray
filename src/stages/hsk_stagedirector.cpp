@@ -206,7 +206,7 @@ namespace hsk {
     {
         return !!mImages.size();
     }
-    void StageDirector::Cleanup()
+    void StageDirector::Destroy()
     {
         mImages.clear();
     }

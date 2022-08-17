@@ -68,14 +68,14 @@ namespace hsk {
         return node;
     }
 
-    void Scene::Cleanup(bool reinitialize)
+    void Scene::Destroy(bool reinitialize)
     {
         // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
         mRootNodes.clear();
         mNodeBuffer.clear();
 
         // Clear global components
-        Registry::Cleanup();
+        Registry::Destroy();
         if(reinitialize)
         {
             InitDefaultGlobals();

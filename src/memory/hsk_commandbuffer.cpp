@@ -78,7 +78,7 @@ namespace hsk {
         AssertVkResult(vkWaitForFences(mContext.Device, 1, &mFence, VK_TRUE, 100000000000));
         AssertVkResult(vkResetFences(mContext.Device, 1, &mFence));
     }
-    void CommandBuffer::Cleanup()
+    void CommandBuffer::Destroy()
     {
         if(mCommandBuffer)
         {

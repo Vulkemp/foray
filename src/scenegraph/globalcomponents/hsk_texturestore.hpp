@@ -15,9 +15,9 @@ namespace hsk {
     class TextureStore : public GlobalComponent
     {
       public:
-        void Cleanup();
+        void Destroy();
 
-        virtual ~TextureStore() { Cleanup(); }
+        virtual ~TextureStore() { Destroy(); }
 
         HSK_PROPERTY_CGET(Textures)
         HSK_PROPERTY_GET(Textures)

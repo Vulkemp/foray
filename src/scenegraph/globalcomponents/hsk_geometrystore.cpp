@@ -79,24 +79,24 @@ namespace hsk {
 
         if(verticesSize > mVerticesBuffer.GetSize())
         {
-            mVerticesBuffer.Cleanup();
+            mVerticesBuffer.Destroy();
             mVerticesBuffer.Create(GetContext(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | bufferUsageFlags, verticesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         }
         if(indicesSize > mIndicesBuffer.GetSize())
         {
-            mIndicesBuffer.Cleanup();
+            mIndicesBuffer.Destroy();
             mIndicesBuffer.Create(GetContext(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | bufferUsageFlags, indicesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         }
         mVerticesBuffer.WriteDataDeviceLocal(mVertices.data(), verticesSize);
         mIndicesBuffer.WriteDataDeviceLocal(mIndices.data(), indicesSize);
     }
 
-    void GeometryStore::Cleanup()
+    void GeometryStore::Destroy()
     {
         mMeshes.clear();
         mIndices.clear();
         mVertices.clear();
-        mVerticesBuffer.Cleanup();
-        mIndicesBuffer.Cleanup();
+        mVerticesBuffer.Destroy();
+        mIndicesBuffer.Destroy();
     }
 }  // namespace hsk

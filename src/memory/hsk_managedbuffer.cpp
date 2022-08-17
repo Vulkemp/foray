@@ -113,11 +113,11 @@ namespace hsk {
         mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
-    void ManagedBuffer::Cleanup()
+    void ManagedBuffer::Destroy()
     {
         if(mIsMapped)
         {
-            logger()->warn("ManagedBuffer::Cleanup called before Unmap!");
+            logger()->warn("ManagedBuffer::Destroy called before Unmap!");
             Unmap();
         }
         if(mContext && mContext->Allocator && mAllocation)
@@ -125,7 +125,7 @@ namespace hsk {
             vmaDestroyBuffer(mContext->Allocator, mBuffer, mAllocation);
             if(mName.length() > 0)
             {
-                logger()->debug("ManagedBuffer: Cleanup \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
+                logger()->debug("ManagedBuffer: Destroy \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
                                 reinterpret_cast<uint64_t>(mBuffer));
             }
         }

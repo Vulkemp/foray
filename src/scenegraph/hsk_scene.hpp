@@ -33,9 +33,9 @@ namespace hsk {
         void CreateTlas();
 
         /// Cleans up all memory, GPU structures, etc...
-        virtual void Cleanup(bool reinitialize = false);
+        virtual void Destroy(bool reinitialize = false);
 
-        inline virtual ~Scene() { Cleanup(); }
+        inline virtual ~Scene() { Destroy(); }
 
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_ALL(NodeBuffer)

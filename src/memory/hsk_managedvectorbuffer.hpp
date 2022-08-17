@@ -27,13 +27,13 @@ namespace hsk {
         inline explicit ManagedVectorBuffer(const VkContext* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
 
         void         InitOrUpdate(std::optional<BufferSection> section = {});
-        virtual void Cleanup() override;
+        virtual void Destroy() override;
         virtual bool Exists() const override { return mBuffer.Exists(); }
 
         inline virtual std::string_view   GetName() const { return mBuffer.GetName(); }
         inline virtual ManagedVectorBuffer<TClass>& SetName(std::string_view name);
 
-        inline virtual ~ManagedVectorBuffer() { Cleanup(); }
+        inline virtual ~ManagedVectorBuffer() { Destroy(); }
 
         HSK_PROPERTY_ALL(Context)
         HSK_PROPERTY_GET(Vector)
@@ -73,7 +73,7 @@ namespace hsk {
 
         if(totalCountInVector > mDeviceCapacity)
         {
-            Cleanup();
+            Destroy();
             CreateBuffer(totalCountInVector + (totalCountInVector / 4));
 
             updateSection = BufferSection{.offset = 0, .count = totalCountInVector};
@@ -119,13 +119,13 @@ namespace hsk {
         }
     }
     template <typename TClass>
-    void ManagedVectorBuffer<TClass>::Cleanup()
+    void ManagedVectorBuffer<TClass>::Destroy()
     {
         if(!DeviceLocal && mBuffer.GetIsMapped())
         {
             mBuffer.Unmap();
         }
-        mBuffer.Cleanup();
+        mBuffer.Destroy();
     }
 
     template <typename TClass>

@@ -59,14 +59,14 @@ namespace hsk {
 
         void InitOrUpdate();
 
-        void Cleanup();
+        void Destroy();
 
         HSK_PROPERTY_ALL(Indices)
         HSK_PROPERTY_ALL(Vertices)
         HSK_PROPERTY_ALL(IndicesBuffer)
         HSK_PROPERTY_ALL(VerticesBuffer)
 
-        virtual ~GeometryStore() { Cleanup(); }
+        virtual ~GeometryStore() { Destroy(); }
 
         HSK_PROPERTY_ALL(Meshes)
 

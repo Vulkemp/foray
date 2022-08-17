@@ -81,7 +81,7 @@ namespace hsk {
             vkDestroyPipelineCache(device, mPipelineCache, nullptr);
             mPipelineCache = nullptr;
         }*/
-        mDescriptorSet.Cleanup();
+        mDescriptorSet.Destroy();
     }
 
     void RaytracingStage::CreateResolutionDependentComponents()
@@ -94,10 +94,10 @@ namespace hsk {
     {
         for(auto& colorAttachment : mColorAttachments)
         {
-            colorAttachment->Cleanup();
+            colorAttachment->Destroy();
         }
-        mDepthAttachment.Cleanup();
-        mRaytracingRenderTarget.Cleanup();
+        mDepthAttachment.Destroy();
+        mRaytracingRenderTarget.Destroy();
     }
 
     void RaytracingStage::PrepareAttachments()

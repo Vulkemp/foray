@@ -25,7 +25,7 @@ namespace hsk {
     bool ImageLoader<FORMAT>::Init(std::string_view utf8path)
     {
         // Reset all members
-        Cleanup();
+        Destroy();
 
         mInfo.Utf8Path = utf8path;
 
@@ -74,7 +74,7 @@ namespace hsk {
     }
 
     template <VkFormat FORMAT>
-    void ImageLoader<FORMAT>::Cleanup()
+    void ImageLoader<FORMAT>::Destroy()
     {
         if(mCustomLoaderInfoDeleter && mCustomLoaderInfo)
         {

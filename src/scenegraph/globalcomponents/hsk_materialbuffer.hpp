@@ -16,11 +16,11 @@ namespace hsk {
 
         /// @brief Apply changes made to the cpu local buffer to the device local buffer
         void UpdateDeviceLocal();
-        void Cleanup();
+        void Destroy();
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage = VK_SHADER_STAGE_FRAGMENT_BIT);
 
-        inline virtual ~MaterialBuffer() { Cleanup(); }
+        inline virtual ~MaterialBuffer() { Destroy(); }
 
       protected:
         ManagedVectorBuffer<MaterialBufferEntry> mBuffer = {};

@@ -85,7 +85,7 @@ namespace hsk {
         /// @brief Override this method to react to events
         inline virtual void OnEvent(const Event* event) {}
         /// @brief Override this method to cleanup your application
-        inline virtual void Cleanup() {}
+        inline virtual void Destroy() {}
 #pragma endregion
 
 #pragma region Vulkan

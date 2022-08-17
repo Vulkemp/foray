@@ -228,7 +228,7 @@ namespace hsk {
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, region);
     }
 
-    void ManagedImage::Cleanup()
+    void ManagedImage::Destroy()
     {
         if(mAllocation)
         {

@@ -50,9 +50,9 @@ namespace hsk {
         inline bool RemoveDeleteComponent(Component* component);
 
         /// @brief Finalizes all attached components
-        virtual void Cleanup();
+        virtual void Destroy();
 
-        inline virtual ~Registry() { Cleanup(); }
+        inline virtual ~Registry() { Destroy(); }
 
         /// @brief The root registry manages global callbacks invokable on the components
         HSK_PROPERTY_GET(CallbackDispatcher)

@@ -69,7 +69,7 @@ namespace hsk {
     void DrawDirector::DestroyBuffers()
     {
         mCurrentTransformBuffer.Destroy();
-        mPreviousTransformBuffer.Cleanup();
+        mPreviousTransformBuffer.Destroy();
     }
 
     void DrawDirector::Update(const FrameUpdateInfo& updateInfo)

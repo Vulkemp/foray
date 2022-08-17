@@ -15,9 +15,9 @@ namespace hsk {
         }
         mBuffer.InitOrUpdate();
     }
-    void MaterialBuffer::Cleanup()
+    void MaterialBuffer::Destroy()
     {
-        mBuffer.Cleanup();
+        mBuffer.Destroy();
     }
 
     std::shared_ptr<DescriptorSetHelper::DescriptorInfo> MaterialBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)

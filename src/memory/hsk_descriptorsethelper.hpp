@@ -88,7 +88,7 @@ namespace hsk {
 
         void Update(const VkContext* context);
 
-        void Cleanup() override;
+        void Destroy() override;
         bool Exists() const override { return mDescriptorSets.size(); }
 
         const std::vector<VkDescriptorSet>& GetDescriptorSets() { return mDescriptorSets; }

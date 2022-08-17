@@ -98,7 +98,7 @@ namespace hsk {
 
         if(mDepthAttachment.Exists())
         {
-            mDepthAttachment.Cleanup();
+            mDepthAttachment.Destroy();
         }
         if(mFrameBuffer)
         {

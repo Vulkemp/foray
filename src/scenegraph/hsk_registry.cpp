@@ -72,7 +72,7 @@ namespace hsk {
         }
     }
 
-    void Registry::Cleanup()
+    void Registry::Destroy()
     {
         for(auto component : mComponents)
         {
