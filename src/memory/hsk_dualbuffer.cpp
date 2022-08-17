@@ -60,7 +60,7 @@ namespace hsk {
         VkBuffer                   dest         = mDeviceBuffer.GetBuffer();            // Buffer the device uses for drawing
         std::vector<VkBufferCopy>& bufferCopies = mBufferCopies[index];                 // copy actions submitted to the device
 
-        VkBufferMemoryBarrier bufferMemBarrier{
+        VkBufferMemoryBarrier deviceMemBarrier{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER, .pNext = nullptr, .buffer = dest, .offset = 0, .size = VK_WHOLE_SIZE};
 
         if(bufferCopies.size() == 0)
@@ -73,13 +73,13 @@ namespace hsk {
                 return;
             }
 
-            bufferMemBarrier.srcAccessMask       = before.AccessFlags;
-            bufferMemBarrier.dstAccessMask       = after.AccessFlags;
-            bufferMemBarrier.srcQueueFamilyIndex = before.QueueFamilyIndex;
-            bufferMemBarrier.dstQueueFamilyIndex = after.QueueFamilyIndex;
+            deviceMemBarrier.srcAccessMask       = before.AccessFlags;
+            deviceMemBarrier.dstAccessMask       = after.AccessFlags;
+            deviceMemBarrier.srcQueueFamilyIndex = before.QueueFamilyIndex;
+            deviceMemBarrier.dstQueueFamilyIndex = after.QueueFamilyIndex;
 
             vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags, after.PipelineStageFlags, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1,
-                                 &bufferMemBarrier, 0, nullptr);
+                                 &deviceMemBarrier, 0, nullptr);
 
             return;
         }
@@ -92,25 +92,41 @@ namespace hsk {
         }
 
         // Convert from 'before' state to transfer write state
-        bufferMemBarrier.srcAccessMask       = before.AccessFlags;
-        bufferMemBarrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-        bufferMemBarrier.srcQueueFamilyIndex = before.QueueFamilyIndex;
-        bufferMemBarrier.dstQueueFamilyIndex = transferQueueFamilyIndex;
+        VkBufferMemoryBarrier stagingMemBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+                                                .srcAccessMask       = VkAccessFlagBits::VK_ACCESS_HOST_WRITE_BIT,
+                                                .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
+                                                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                .buffer              = source,
+                                                .offset              = 0,
+                                                .size                = VK_WHOLE_SIZE};
 
-        vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
-                             nullptr, 1, &bufferMemBarrier, 0, nullptr);
+        deviceMemBarrier.srcAccessMask       = before.AccessFlags;
+        deviceMemBarrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        deviceMemBarrier.srcQueueFamilyIndex = before.QueueFamilyIndex;
+        deviceMemBarrier.dstQueueFamilyIndex = transferQueueFamilyIndex;
+
+        std::vector<VkBufferMemoryBarrier> barriers{deviceMemBarrier, stagingMemBarrier};
+
+        vkCmdPipelineBarrier(cmdBuffer, before.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
+                             nullptr, barriers.size(), barriers.data(), 0, nullptr);
 
         // Copy
         vkCmdCopyBuffer(cmdBuffer, source, dest, bufferCopies.size(), bufferCopies.data());
 
         // Convert back from transfer write state to 'after' state
-        bufferMemBarrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-        bufferMemBarrier.dstAccessMask       = after.AccessFlags;
-        bufferMemBarrier.srcQueueFamilyIndex = transferQueueFamilyIndex;
-        bufferMemBarrier.dstQueueFamilyIndex = after.QueueFamilyIndex;
+        stagingMemBarrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+        stagingMemBarrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_HOST_WRITE_BIT;
 
-        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, after.PipelineStageFlags, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
-                             nullptr, 1, &bufferMemBarrier, 0, nullptr);
+        deviceMemBarrier.srcAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
+        deviceMemBarrier.dstAccessMask       = after.AccessFlags;
+        deviceMemBarrier.srcQueueFamilyIndex = transferQueueFamilyIndex;
+        deviceMemBarrier.dstQueueFamilyIndex = after.QueueFamilyIndex;
+
+        barriers = {deviceMemBarrier, stagingMemBarrier};
+
+        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, after.PipelineStageFlags | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_HOST_BIT, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0,
+                             nullptr, barriers.size(), barriers.data(), 0, nullptr);
 
         // Clear "submitted" buffer copies
         bufferCopies.clear();
