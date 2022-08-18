@@ -1,5 +1,6 @@
 #include "hsk_blas.hpp"
 #include "../memory/hsk_commandbuffer.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/hsk_geo.hpp"
 #include <algorithm>

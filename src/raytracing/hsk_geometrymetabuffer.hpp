@@ -6,7 +6,7 @@
 #include "../memory/hsk_descriptorsethelper.hpp"
 
 namespace hsk {
-    struct BlasGeometryMeta
+    struct GeometryMeta
     {
         int32_t  MaterialIndex     = 0;
         uint32_t IndexBufferOffset = 0U;

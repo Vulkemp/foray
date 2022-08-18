@@ -12,8 +12,7 @@ namespace hsk {
         Position,
         Normal,
         Tangent,
-        Uv,
-        MaterialIndex,
+        Uv
     };
 
     struct VertexComponentBinding
@@ -42,7 +41,6 @@ namespace hsk {
         glm::vec3 Normal = {};
         glm::vec3 Tangent = {};
         glm::vec2 Uv      = {};
-        int32_t   MaterialIndex = {};
     };
 
 }  // namespace hsk

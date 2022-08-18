@@ -2,7 +2,7 @@
 #include "../hsk_basics.hpp"
 #include "../memory/hsk_dualbuffer.hpp"
 #include "../scenegraph/hsk_component.hpp"
-#include "hsk_blasmetabuffer.hpp"
+#include "hsk_geometrymetabuffer.hpp"
 #include <map>
 #include <vulkan/vulkan.h>
 

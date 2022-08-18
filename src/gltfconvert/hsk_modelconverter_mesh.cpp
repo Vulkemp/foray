@@ -125,10 +125,9 @@ namespace hsk {
                 auto normal = lGetNormal(vertexIndex);
                 normal.y    = -1.f * normal.y;
                 vertexBuffer.push_back(Vertex{.Pos           = pos,
-                                               .Normal        = normal,
-                                               .Tangent       = lGetTangent(vertexIndex),
-                                               .Uv            = lGetUv(vertexIndex),
-                                               .MaterialIndex = gltfPrimitive.material + mIndexBindings.MaterialBufferOffset});
+                                              .Normal        = normal,
+                                              .Tangent       = lGetTangent(vertexIndex),
+                                              .Uv            = lGetUv(vertexIndex)});
             }
 
             if(gltfPrimitive.indices >= 0)
@@ -171,11 +170,11 @@ namespace hsk {
                         HSK_THROWFMT("Index component type {} not supported!", accessor.componentType);
                 }
 
-                primitive = Primitive(Primitive::EType::Index, indexStart, indexCount);
+                primitive = Primitive(Primitive::EType::Index, indexStart, indexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset);
             }
             else
             {
-                primitive = Primitive(Primitive::EType::Vertex, vertexStart, vertexCount);
+                primitive = Primitive(Primitive::EType::Vertex, vertexStart, vertexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset);
             }
         }
     }

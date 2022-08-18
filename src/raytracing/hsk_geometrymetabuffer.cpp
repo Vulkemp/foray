@@ -1,4 +1,4 @@
-#include "hsk_blasmetabuffer.hpp"
+#include "hsk_geometrymetabuffer.hpp"
 #include "../memory/hsk_descriptorsethelper.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 
@@ -15,7 +15,7 @@ namespace hsk {
             capacity += blas->GetMesh()->GetPrimitives().size();
         }
 
-        std::vector<BlasGeometryMeta> bufferData(capacity);
+        std::vector<GeometryMeta> bufferData(capacity);
         bufferData.resize(capacity);
 
         uint64_t offset = 0;
@@ -31,12 +31,12 @@ namespace hsk {
             for(int32_t primitiveIndex = 0; primitiveIndex < primitives.size(); primitiveIndex++)
             {
                 const Primitive& primitive          = primitives[primitiveIndex];
-                bufferData[offset + primitiveIndex] = BlasGeometryMeta{.MaterialIndex = 0, .IndexBufferOffset = primitive.First};
+                bufferData[offset + primitiveIndex] = GeometryMeta{.MaterialIndex = primitive.MaterialIndex, .IndexBufferOffset = primitive.First};
             }
             offset += primitives.size();
         }
 
-        VkDeviceSize newBufferSize = capacity * sizeof(BlasGeometryMeta);
+        VkDeviceSize newBufferSize = capacity * sizeof(GeometryMeta);
         VkDeviceSize oldBufferSize = mBuffer.GetSize();
 
         if(newBufferSize > oldBufferSize)

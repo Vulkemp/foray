@@ -11,11 +11,13 @@ namespace hsk {
     {
       public:
         uint32_t TransformBufferOffset = 0;
+        int32_t  MaterialIndex         = -1;
 
         inline static VkShaderStageFlags  GetShaderStageFlags();
         inline static VkPushConstantRange GetPushConstantRange();
 
         inline void CmdPushConstant_TransformBufferOffset(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, uint32_t transformBufferOffset);
+        inline void CmdPushConstant_MaterialIndex(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int32_t materialIndex);
     };
 
     inline VkShaderStageFlags DrawPushConstant::GetShaderStageFlags()
@@ -34,28 +36,41 @@ namespace hsk {
         vkCmdPushConstants(commandBuffer, pipelineLayout, DrawPushConstant::GetShaderStageFlags(), offsetof(DrawPushConstant, TransformBufferOffset), sizeof(TransformBufferOffset),
                            &TransformBufferOffset);
     }
+    inline void DrawPushConstant::CmdPushConstant_MaterialIndex(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int32_t materialIndex)
+    {
+        MaterialIndex = materialIndex;
+        vkCmdPushConstants(commandBuffer, pipelineLayout, DrawPushConstant::GetShaderStageFlags(), offsetof(DrawPushConstant, MaterialIndex), sizeof(MaterialIndex),
+                           &MaterialIndex);
+    }
 
     struct SceneDrawInfo
     {
       public:
         const hsk::FrameRenderInfo RenderInfo;
-        const VkPipelineLayout     PipelineLayout           = nullptr;
-        DrawPushConstant           PushConstantState        = {};
+        const VkPipelineLayout     PipelineLayout    = nullptr;
+        DrawPushConstant           PushConstantState = {};
 
         inline SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
 
-        inline void CmdPushConstant(uint32_t transformBufferOffset);
+        inline void CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset);
+        inline void CmdPushConstant_MaterialIndex(int32_t materialIndex);
     };
 
-    void SceneDrawInfo::CmdPushConstant(uint32_t transformBufferOffset)
+    void SceneDrawInfo::CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset)
     {
         PushConstantState.CmdPushConstant_TransformBufferOffset(RenderInfo.GetCommandBuffer(), PipelineLayout, transformBufferOffset);
+    }
+
+    void SceneDrawInfo::CmdPushConstant_MaterialIndex(int32_t materialIndex)
+    {
+        PushConstantState.CmdPushConstant_MaterialIndex(RenderInfo.GetCommandBuffer(), PipelineLayout, materialIndex);
     }
 
     SceneDrawInfo::SceneDrawInfo(const hsk::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
 
         : RenderInfo(renderInfo), PipelineLayout(pipelineLayout), PushConstantState()
     {
-        CmdPushConstant(0);
+        CmdPushConstant_TransformBufferOffset(0);
+        CmdPushConstant_MaterialIndex(-1);
     }
 }  // namespace hsk

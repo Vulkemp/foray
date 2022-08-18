@@ -6,7 +6,6 @@ layout(location = 0) in vec3 inPos;           // Vertex position in model space
 layout(location = 1) in vec3 inNormal;        // Vertex normal
 layout(location = 2) in vec3 inTangent;       // Vertex tangent
 layout(location = 3) in vec2 inUV;            // UV coordinates
-layout(location = 4) in int inMaterialIndex;  // Material Index
 
 layout(location = 0) out vec3 outWorldPos;             // Vertex position in world space
 layout(location = 1) out vec4 outDevicePos;            // Vertex position in normalized device space (current frame)
@@ -14,10 +13,9 @@ layout(location = 2) out vec4 outOldDevicePos;         // Vertex position in nor
 layout(location = 3) out vec3 outNormal;               // Normal in world space
 layout(location = 4) out vec3 outTangent;              // Tangent in world space
 layout(location = 5) out vec2 outUV;                   // UV coordinates
-layout(location = 6) flat out int outMaterialIndex;    // Material Index
-layout(location = 7) flat out uint outMeshInstanceId;  // Mesh Instance Id
+layout(location = 6) flat out uint outMeshInstanceId;  // Mesh Instance Id
 
-#define BIND_INSTANCE_PUSHC
+#define BIND_PUSHC
 #include "gltf_pushc.glsl"
 
 #define BIND_CAMERA_UBO 2
@@ -49,10 +47,5 @@ void main()
     outNormal    = mNormal * normalize(inNormal);
     outTangent   = mNormal * normalize(inTangent);
 
-    // Set vertex color passthrough
-    outMaterialIndex = inMaterialIndex;
-
     outMeshInstanceId = PushConstant.TransformBufferOffset + gl_InstanceIndex;
-
-    outWorldPos = vec3(gl_VertexIndex) / 750000.f;
 }

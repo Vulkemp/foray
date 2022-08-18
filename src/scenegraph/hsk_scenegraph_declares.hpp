@@ -19,4 +19,5 @@ namespace hsk {
     class AnimationDirector;
     struct CameraUboBlock;
     class Camera;
+    struct SceneDrawInfo;
 }  // namespace hsk

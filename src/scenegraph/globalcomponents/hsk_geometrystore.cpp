@@ -3,28 +3,6 @@
 
 namespace hsk {
 
-    void Mesh::CmdDraw(VkCommandBuffer commandBuffer)
-    {
-        if(mPrimitives.size())
-        {
-            for(auto& primitive : mPrimitives)
-            {
-                primitive.CmdDraw(commandBuffer);
-            }
-        }
-    }
-
-    void Mesh::CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount)
-    {
-        if(mPrimitives.size())
-        {
-            for(auto& primitive : mPrimitives)
-            {
-                primitive.CmdDrawInstanced(commandBuffer, instanceCount);
-            }
-        }
-    }
-
     bool GeometryStore::CmdBindBuffers(VkCommandBuffer commandBuffer)
     {
         if(mVerticesBuffer.GetAllocation())

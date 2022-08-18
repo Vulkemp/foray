@@ -2,7 +2,7 @@
 #include "../memory/hsk_commandbuffer.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
-#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
 #include "../scenegraph/hsk_node.hpp"
 #include "../scenegraph/hsk_scene.hpp"
 #include "hsk_blas.hpp"
