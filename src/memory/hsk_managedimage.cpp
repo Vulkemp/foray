@@ -7,8 +7,41 @@
 namespace hsk {
     ManagedImage::CreateInfo::CreateInfo()
     {
+        // required: initial layout, usage flags, the format (also for the view) and the
+        // extent
+        // others as needed.
+
         ImageCI.sType     = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         ImageViewCI.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        AllocCI.flags     = 0;
+        AllocCI.usage     = VMA_MEMORY_USAGE_AUTO;
+
+        ImageCI.imageType     = VK_IMAGE_TYPE_2D;
+        ImageCI.format        = VK_FORMAT_UNDEFINED;
+        ImageCI.mipLevels     = 1;
+        ImageCI.arrayLayers   = 1;
+        ImageCI.samples       = VK_SAMPLE_COUNT_1_BIT;
+        ImageCI.tiling        = VK_IMAGE_TILING_OPTIMAL;
+        ImageCI.usage         = 0;
+        ImageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        ImageViewCI.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+        ImageViewCI.format                          = VK_FORMAT_UNDEFINED;
+        ImageViewCI.subresourceRange                = {};
+        ImageViewCI.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        ImageViewCI.subresourceRange.baseMipLevel   = 0;
+        ImageViewCI.subresourceRange.levelCount     = 1;
+        ImageViewCI.subresourceRange.baseArrayLayer = 0;
+        ImageViewCI.subresourceRange.layerCount     = 1;
+    }
+
+    ManagedImage::CreateInfo::CreateInfo(VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
+    {
+        ImageCI.initialLayout = initialLayout;
+        ImageCI.usage         = usage;
+        ImageCI.format        = format;
+        ImageViewCI.format    = format;
+        ImageCI.extent        = extent;
     }
 
     void ManagedImage::Create(const VkContext* context, CreateInfo createInfo)

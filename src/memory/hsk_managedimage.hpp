@@ -2,10 +2,10 @@
 #include "../base/hsk_vkcontext.hpp"
 #include "../hsk_basics.hpp"
 #include "../utility/hsk_deviceresource.hpp"
+#include "hsk_commandbuffer.hpp"
 #include <optional>
 #include <vma/vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
-#include "hsk_commandbuffer.hpp"
 
 namespace hsk {
     class ManagedImage : public DeviceResourceBase
@@ -22,6 +22,7 @@ namespace hsk {
             std::string             Name{"UnnamedImage"};
 
             CreateInfo();
+            CreateInfo(VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
         };
 
         virtual void Create(const VkContext* context, CreateInfo createInfo);
@@ -83,7 +84,7 @@ namespace hsk {
         /// @brief See other overload for description. Omits image copy region and assumes a set of default values to write a simple
         /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
-        void WriteDeviceLocalData(CommandBuffer& cmdBuffer,const void* data, size_t size, VkImageLayout layoutAfterWrite);
+        void WriteDeviceLocalData(CommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         virtual void Destroy() override;
         virtual bool Exists() const override { return mAllocation; }
