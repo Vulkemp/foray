@@ -146,8 +146,8 @@ namespace hsk {
 
         for(auto& drawop : mDrawOps)
         {
-            drawInfo.CmdPushConstant(drawop.TransformOffset);
-            drawop.Target->CmdDrawInstanced(drawInfo.RenderInfo.GetCommandBuffer(), drawop.Instances.size());
+            drawInfo.CmdPushConstant_TransformBufferOffset(drawop.TransformOffset);
+            drawop.Target->CmdDrawInstanced(drawInfo, drawop.Instances.size());
         }
     }
 

@@ -30,7 +30,7 @@ vec2       SampleSphericalMap(vec3 v)
 #ifndef SET_ENVMAP_UBO
 #define SET_ENVMAP_UBO 0
 #endif
-layout(set = SET_ENVMAP_UBO, binding = BIND_ENVMAP_UBO) uniform
+layout(set = SET_ENVMAP_UBO, binding = BIND_ENVMAP_UBO, std430) uniform
 {
     bool UseCubemap;
     bool UseSpheremap;

@@ -1,5 +1,6 @@
 #include "hsk_blas.hpp"
 #include "../memory/hsk_commandbuffer.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/hsk_geo.hpp"
 #include <algorithm>
@@ -9,6 +10,7 @@ namespace hsk {
     void Blas::Create(const VkContext* context, Mesh* mesh, GeometryStore* store)
     {
         mContext        = context;
+        mMesh           = mesh;
         VkDevice device = context->Device;
 
         auto primitives = mesh->GetPrimitives();
@@ -53,15 +55,15 @@ namespace hsk {
             geometries.push_back(geometry);
 
             // Infer build range info from geometry
-            uint32_t primitveCount = primitive.VertexOrIndexCount / 3; // TODO: durch 3 teilen?
+            uint32_t primitveCount = primitive.VertexOrIndexCount / 3;  // TODO: durch 3 teilen?
             primitiveCounts.push_back(primitveCount);
 
             // according to the vulkan spec, values behave different, based on which VkGeometryTypeKHR is used.
             // for triangles, as follows:
             VkAccelerationStructureBuildRangeInfoKHR build_range_info;
-            build_range_info.primitiveCount  = primitveCount;    // consumes 3x primitiveCount indices
+            build_range_info.primitiveCount  = primitveCount;                       // consumes 3x primitiveCount indices
             build_range_info.primitiveOffset = primitive.First * sizeof(uint32_t);  // offset into index buffer  // primitveCount.First?
-            build_range_info.firstVertex     = 0;  // added to index values before fetching vertices
+            build_range_info.firstVertex     = 0;                                   // added to index values before fetching vertices
             build_range_info.transformOffset = 0;
             buildRangeInfos.push_back(build_range_info);
         }

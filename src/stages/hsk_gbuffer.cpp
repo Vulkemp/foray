@@ -282,7 +282,6 @@ namespace hsk {
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Normal);
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Tangent);
         vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::Uv);
-        vertexInputStateBuilder.AddVertexComponentBinding(EVertexComponent::MaterialIndex);
         vertexInputStateBuilder.Build();
 
         // clang-format off

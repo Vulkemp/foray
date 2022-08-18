@@ -2,16 +2,17 @@
 #include "../memory/hsk_commandbuffer.hpp"
 #include "../scenegraph/components/hsk_meshinstance.hpp"
 #include "../scenegraph/components/hsk_transform.hpp"
-#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
 #include "../scenegraph/hsk_node.hpp"
 #include "../scenegraph/hsk_scene.hpp"
 #include "hsk_blas.hpp"
 
 namespace hsk {
 
-    BlasInstance::BlasInstance(uint64_t instanceId, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc)
+    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc)
         : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(getUpdatedGlobalTransformFunc), mAsInstance{}
     {
+        mBlas                                              = blas;
         mAsInstance.accelerationStructureReference         = blasRef;
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
@@ -21,9 +22,10 @@ namespace hsk {
         Update();
     }
 
-    BlasInstance::BlasInstance(uint64_t instanceId, uint64_t blasRef, const glm::mat4& globalTransform)
+    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform)
         : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(nullptr), mAsInstance{}
     {
+        mBlas                                              = blas;
         mAsInstance.accelerationStructureReference         = blasRef;
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
@@ -42,6 +44,11 @@ namespace hsk {
                 out.matrix[row][col] = in[col][row];
             }
         }
+    }
+
+    void BlasInstance::SetBlasMetaOffset(uint32_t offset)
+    {
+        mAsInstance.instanceCustomIndex = offset;
     }
 
     void BlasInstance::Update()
@@ -119,7 +126,7 @@ namespace hsk {
 
         VkDeviceAddress address = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
 
-        mAnimatedBlasInstances.emplace(id, BlasInstance(id, address, getUpdatedGlobalTransformFunc));
+        mAnimatedBlasInstances.emplace(id, BlasInstance(id, &blas, address, getUpdatedGlobalTransformFunc));
         return id;
     }
     uint64_t Tlas::AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform)
@@ -133,7 +140,7 @@ namespace hsk {
 
         VkDeviceAddress address = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
 
-        mStaticBlasInstances.emplace(id, BlasInstance(id, address, transform));
+        mStaticBlasInstances.emplace(id, BlasInstance(id, &blas, address, transform));
         return id;
     }
 
@@ -152,24 +159,43 @@ namespace hsk {
             return;
         }
 
+
         // STEP #0   Reset state
         bool rebuild = mAccelerationStructure != nullptr;
 
-        // STEP #2   Build instance buffer data. Static first, animated after (this way the buffer data that is updated every frame is in memory in one region)
 
-        std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;  // Vector of instances (each being a reference to a BLAS, with a transform)
-
+        // STEP #1   Rebuild meta buffer, get and assign buffer offsets
+        std::unordered_set<const Blas*> usedBlas; // used to reconstruct the meta info buffer
         for(const auto& blasInstancePair : mStaticBlasInstances)
         {
-            instanceBufferData.push_back(blasInstancePair.second.GetAsInstance());
+            usedBlas.emplace(blasInstancePair.second.GetBlas());
         }
         for(const auto& blasInstancePair : mAnimatedBlasInstances)
         {
-            instanceBufferData.push_back(blasInstancePair.second.GetAsInstance());
+            usedBlas.emplace(blasInstancePair.second.GetBlas());
+        }
+        auto offsets = mMetaBuffer.CreateOrUpdate(mContext, usedBlas);
+
+        // STEP #2   Build instance buffer data. Static first, animated after (this way the buffer data that is updated every frame is in memory in one region)
+        std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;  // Vector of instances (each being a reference to a BLAS, with a transform)
+
+        for(auto& blasInstancePair : mStaticBlasInstances)
+        {
+            auto& blasInstance = blasInstancePair.second;
+            blasInstance.SetBlasMetaOffset(offsets[blasInstance.GetBlas()]);
+            instanceBufferData.push_back(blasInstance.GetAsInstance());
+        }
+        for(auto& blasInstancePair : mAnimatedBlasInstances)
+        {
+            auto& blasInstance = blasInstancePair.second;
+            blasInstance.SetBlasMetaOffset(offsets[blasInstance.GetBlas()]);
+            instanceBufferData.push_back(blasInstance.GetAsInstance());
         }
 
         VkAccelerationStructureBuildRangeInfoKHR buildRangeInfo{};
         buildRangeInfo.primitiveCount = instanceBufferData.size();
+
+
 
         // STEP #3   Build instance buffer
 
@@ -281,7 +307,8 @@ namespace hsk {
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
         mTlasAddress = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
-        mDirty       = false;
+
+        mDirty = false;
     }
 
     void Tlas::UpdateLean(VkCommandBuffer cmdBuffer, uint32_t frameIndex)

@@ -9,8 +9,7 @@ layout(location = 2) in vec4 inOldDevicePos;         // Vertex position in norma
 layout(location = 3) in vec3 inNormal;               // Normal in world space
 layout(location = 4) in vec3 inTangent;              // Tangent in world space
 layout(location = 5) in vec2 inUV;                   // UV coordinates
-layout(location = 6) flat in int inMaterialIndex;    // Material Index
-layout(location = 7) flat in uint inMeshInstanceId;  // Mesh Instance Id
+layout(location = 6) flat in uint inMeshInstanceId;  // Mesh Instance Id
 
 layout(location = 0) out vec4 outPosition;        // Fragment position in world spcae
 layout(location = 1) out vec4 outNormal;          // Fragment normal in world space
@@ -19,8 +18,7 @@ layout(location = 3) out vec2 outMotion;          // Fragment screenspace motion
 layout(location = 4) out int outMaterialIndex;    // Material Index
 layout(location = 5) out uint outMeshInstanceId;  // Fragment mesh id
 
-
-#define BIND_INSTANCE_PUSHC
+#define BIND_PUSHC
 #include "gltf_pushc.glsl"
 
 #define BIND_MATERIAL_BUFFER 0
@@ -33,7 +31,9 @@ void main()
     outMeshInstanceId = inMeshInstanceId;
     outPosition       = vec4(inWorldPos, 1.0);
 
-    MaterialBufferObject material = GetMaterialOrFallback(inMaterialIndex);
+    outMaterialIndex = PushConstant.MaterialIndex;
+
+    MaterialBufferObject material = GetMaterialOrFallback(PushConstant.MaterialIndex);
 
     MaterialProbe probe = ProbeMaterial(material, inUV);
 

@@ -20,9 +20,11 @@ namespace hsk {
         HSK_PROPERTY_CGET(AccelerationStructure)
         HSK_PROPERTY_CGET(BlasAddress)
         HSK_PROPERTY_CGET(BlasMemory)
+        HSK_PROPERTY_CGET(Mesh)
 
       protected:
-        const VkContext*           mContext;
+        const VkContext*           mContext = nullptr;
+        Mesh*                mMesh    = nullptr;
         ManagedBuffer              mBlasMemory;
         VkAccelerationStructureKHR mAccelerationStructure{};
         VkDeviceAddress            mBlasAddress{};

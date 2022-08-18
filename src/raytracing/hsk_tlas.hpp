@@ -2,6 +2,7 @@
 #include "../hsk_basics.hpp"
 #include "../memory/hsk_dualbuffer.hpp"
 #include "../scenegraph/hsk_component.hpp"
+#include "hsk_geometrymetabuffer.hpp"
 #include <map>
 #include <vulkan/vulkan.h>
 
@@ -15,22 +16,26 @@ namespace hsk {
         using TransformUpdateFunc = std::function<void(glm::mat4&)>;
 
         inline BlasInstance() {}
-        BlasInstance(uint64_t instanceId, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc);
-        BlasInstance(uint64_t instanceId, uint64_t blasRef, const glm::mat4& globalTransform);
+        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc);
+        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform);
 
         HSK_PROPERTY_CGET(InstanceId)
         HSK_PROPERTY_ALLGET(AsInstance)
+        HSK_PROPERTY_CGET(Blas)
         HSK_PROPERTY_ALL(GetUpdatedGlobalTransformFunc)
 
         bool IsAnimated() const { return !!mGetUpdatedGlobalTransformFunc; }
+
+        void SetBlasMetaOffset(uint32_t offset);
 
         void Update();
 
         static void TranslateTransformMatrix(const glm::mat4& in, VkTransformMatrixKHR& out);
 
       protected:
-        uint64_t                           mInstanceId                    = 0UL;
-        TransformUpdateFunc  mGetUpdatedGlobalTransformFunc = nullptr;
+        uint64_t                           mInstanceId = 0UL;
+        const Blas*                        mBlas;
+        TransformUpdateFunc                mGetUpdatedGlobalTransformFunc = nullptr;
         VkAccelerationStructureInstanceKHR mAsInstance                    = {};
     };
 
@@ -49,6 +54,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(AccelerationStructure)
         HSK_PROPERTY_CGET(TlasMemory)
         HSK_PROPERTY_CGET(TlasAddress)
+        HSK_PROPERTY_ALLGET(MetaBuffer)
 
         operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
 
@@ -74,5 +80,6 @@ namespace hsk {
         std::map<uint64_t, BlasInstance> mAnimatedBlasInstances;
         std::map<uint64_t, BlasInstance> mStaticBlasInstances;
         uint64_t                         mNextId = 0;
+        BlasMetaBuffer                   mMetaBuffer;
     };
 }  // namespace hsk

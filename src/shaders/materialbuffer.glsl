@@ -4,7 +4,7 @@
 #ifndef SET_MATERIAL_BUFFER
 #define SET_MATERIAL_BUFFER 0
 #endif  // SET_MATERIAL_BUFFER
-layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER) buffer readonly MaterialBuffer
+layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER, std430) buffer readonly MaterialBuffer
 {
     MaterialBufferObject Array[];
 }
