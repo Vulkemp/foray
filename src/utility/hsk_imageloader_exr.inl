@@ -130,10 +130,7 @@ namespace hsk {
             }
         }
 
-        void DeleteExrLoaderCache(void* loaderCache)
-        {
-            delete reinterpret_cast<ExrLoaderCache*>(loaderCache);
-        }
+        void DeleteExrLoaderCache(void* loaderCache);
 
     }  // namespace impl
 
