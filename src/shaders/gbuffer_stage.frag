@@ -59,4 +59,6 @@ void main()
     vec2 screenPos     = inDevicePos.xy / inDevicePos.w;
     vec2 old_screenPos = inOldDevicePos.xy / inOldDevicePos.w;
     outMotion          = (old_screenPos - screenPos) * 0.5;
+
+    outMaterialIndex = inMaterialIndex;
 }

@@ -3,7 +3,7 @@
 #define SET_TRANSFORMBUFFER_CURRENT 0
 #endif
 
-layout(set = SET_TRANSFORMBUFFER_CURRENT, binding = BIND_TRANSFORMBUFFER_CURRENT) readonly buffer TransformBufferCurrent_T
+layout(set = SET_TRANSFORMBUFFER_CURRENT, binding = BIND_TRANSFORMBUFFER_CURRENT, std430) readonly buffer TransformBufferCurrent_T
 {
     mat4 Array[];
 }
@@ -20,7 +20,7 @@ mat4 GetCurrentTransform(in uint transformBufferIndex)
 #define SET_TRANSFORMBUFFER_PREVIOUS 0
 #endif
 
-layout(set = SET_TRANSFORMBUFFER_PREVIOUS, binding = BIND_TRANSFORMBUFFER_PREVIOUS) readonly buffer TransformBufferPrevious_T
+layout(set = SET_TRANSFORMBUFFER_PREVIOUS, binding = BIND_TRANSFORMBUFFER_PREVIOUS, std430) readonly buffer TransformBufferPrevious_T
 {
     mat4 Array[];
 }

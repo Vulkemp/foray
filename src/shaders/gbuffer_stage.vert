@@ -53,4 +53,6 @@ void main()
     outMaterialIndex = inMaterialIndex;
 
     outMeshInstanceId = PushConstant.TransformBufferOffset + gl_InstanceIndex;
+
+    outWorldPos = vec3(gl_VertexIndex) / 750000.f;
 }

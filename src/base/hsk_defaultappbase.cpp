@@ -63,7 +63,9 @@ namespace hsk {
                                                         VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
                                                         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
                                                         // dependencies of rt pipeline
-                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
+                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+                                                        // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
+                                                        VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME};
             pds.add_required_extensions(requiredExtensions);
 #endif
         }
@@ -123,6 +125,8 @@ namespace hsk {
             // 	mVkbPhysicalDevice.get_mutable_requested_features().samplerAnisotropy = true;
             // }
         }
+
+        
 
         // allow user to alter device building
         BeforeDeviceBuilding(deviceBuilder);

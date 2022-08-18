@@ -114,9 +114,8 @@ namespace hsk {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
 
-        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent,
-                                       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_FORMAT_B8G8R8A8_UNORM,
-                                       VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
+        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, imageUsageFlags, colorFormat, VK_IMAGE_LAYOUT_UNDEFINED,
+                                       VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
         mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
@@ -212,16 +211,17 @@ namespace hsk {
 
     void RaytracingStage::SetupDescriptors()
     {
+        VkShaderStageFlags rtShaderStages = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+                                            | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+
         mDescriptorSet.SetDescriptorInfoAt(0, GetAccelerationStructureDescriptorInfo());
         mDescriptorSet.SetDescriptorInfoAt(1, GetRenderTargetDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<CameraManager>()->MakeUboDescriptorInfos(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
-                                                                                                            | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR
-                                                                                                                   | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<GeometryStore>()->GetIndexBufferDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR
-                                                                                                                  | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(5, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
-        mDescriptorSet.SetDescriptorInfoAt(6, mScene->GetComponent<TextureStore>()->GetDescriptorInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR));
+        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<CameraManager>()->MakeUboDescriptorInfos(rtShaderStages));
+        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<GeometryStore>()->GetVertexBufferDescriptorInfo(rtShaderStages));
+        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<GeometryStore>()->GetIndexBufferDescriptorInfo(rtShaderStages));
+        mDescriptorSet.SetDescriptorInfoAt(5, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo(rtShaderStages));
+        mDescriptorSet.SetDescriptorInfoAt(6, mScene->GetComponent<TextureStore>()->GetDescriptorInfo(rtShaderStages));
+        mDescriptorSet.SetDescriptorInfoAt(7, mScene->GetComponent<TlasManager>()->GetTlas().GetMetaBuffer().GetDescriptorInfo(rtShaderStages));
 
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }
@@ -265,7 +265,8 @@ namespace hsk {
 
         // Instanced object
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1,
+                                &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
 
         //
         // raytraycing

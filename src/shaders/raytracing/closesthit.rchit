@@ -16,18 +16,23 @@
  */
 
 #version 460
+#extension GL_KHR_vulkan_glsl : enable
+#extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_ray_tracing : enable
 #extension GL_EXT_nonuniform_qualifier : enable
+// #extension GL_EXT_scalar_block_layout : enable
 
 #include "bindpoints.glsl"
 
 layout(location = 0) rayPayloadInEXT vec3 hitValue;
 hitAttributeEXT vec3 attribs;
 
+#include "../materialbuffer.glsl"
+
 layout(binding = BIND_VERTICES,  set = 0) readonly buffer Vertices { float v[]; } vertices;
 layout(binding = BIND_INDICES,   set = 0) readonly buffer Indices { uint i[]; } indices;
 
-#include "../materialbuffer.glsl"
+#include "geometrymeta.glsl"
 
 struct S_Vertex
 {
@@ -59,15 +64,7 @@ S_Vertex getVertex(uint index)
 	v.uv.x = vertices.v[m * index + 9];
 	v.uv.y = vertices.v[m * index + 10];
 
-	v.materialIndex = int(vertices.v[m * index + 11]);
-
-	// old
-	// S_Vertex v;
-	// v.pos = d0.xyz;
-	// v.normal = vec3(d0.w, d1.xy);
-	// v.tangent = vec3(d1.zw, d2.x);
-	// v.uv = d2.yz;
-	// v.materialIndex = int(d2.w);
+	v.materialIndex = floatBitsToInt(vertices.v[m * index + 11]);
 
 	return v;
 }
@@ -76,8 +73,12 @@ void main()
 {
 	const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
 	
+	GeometryMeta geometa = GetGeometryMeta(uint(gl_InstanceCustomIndexEXT), uint(gl_GeometryIndexEXT));
+
+	uint firstIndex = geometa.IndexBufferOffset + gl_PrimitiveID * 3;
+
 	// get primitive indices
-	ivec3 index = ivec3(indices.i[3 * gl_PrimitiveID], indices.i[3 * gl_PrimitiveID + 1], indices.i[3 * gl_PrimitiveID + 2]);
+	uvec3 index = uvec3(indices.i[firstIndex + 0], indices.i[firstIndex + 1], indices.i[firstIndex + 2]);
 
 	// get primitive vertices
 	S_Vertex v0 = getVertex(index.x);
@@ -91,21 +92,21 @@ void main()
 	MaterialBufferObject material = GetMaterialOrFallback(v0.materialIndex);
 	MaterialProbe probe = ProbeMaterial(material, uv);
 
-	hitValue = barycentricCoords;
-	//hitValue.x = mod(indices.i[3 * gl_PrimitiveID], 255) / 255.f;
-	hitValue = probe.BaseColor.xyz;
-	hitValue.xy = uv;
-	hitValue.y = v1.materialIndex;
-	hitValue.z = v1.materialIndex;
+	// hitValue = probe.BaseColor.xyz;
+	// hitValue.xy = uv;
+	// hitValue.y = v1.materialIndex;
+	// hitValue.z = v1.materialIndex;
 	//hitValue = probe.Normal;
 
-	hitValue = v0.pos * barycentricCoords.x + v1.pos * barycentricCoords.y + v2.pos * barycentricCoords.z;
-	hitValue = vec3(gl_ObjectToWorldEXT * vec4(hitValue, 1.0));
-	//hitValue = v0.normal * barycentricCoords.x + v1.normal * barycentricCoords.y + v2.normal * barycentricCoords.z;
+	vec3 modelspacepos = v0.pos * barycentricCoords.x + v1.pos * barycentricCoords.y + v2.pos * barycentricCoords.z;
+	vec3 worldspacepos = vec3(gl_ObjectToWorldEXT * vec4(modelspacepos, 1.f));
 
 	// Interpolate normal of hitpoint
-	//vec3 normal = v0.normal * barycentricCoords.x + v1.normal * barycentricCoords.y + v2.normal * barycentricCoords.z;
-	//hitValue = normalize(vec3(normal * gl_WorldToObjectEXT));
+	vec3 modelspacenormal = v0.normal * barycentricCoords.x + v1.normal * barycentricCoords.y + v2.normal * barycentricCoords.z;
+	mat3 normalCalcMatrix = transpose(mat3(mat4x3(gl_WorldToObjectEXT)));
+	vec3 worldspacenormal = normalize(normalCalcMatrix * modelspacenormal);
+
+	hitValue = worldspacenormal;
 
 	//hitValue.xyz = vec3(mod(gl_PrimitiveID,100)/100.0f);
 	//hitValue.xyz = vec3(indices.i[3 * gl_PrimitiveID]/10000.f);
