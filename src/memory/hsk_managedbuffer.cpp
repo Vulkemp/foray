@@ -103,7 +103,7 @@ namespace hsk {
 
     void ManagedBuffer::UpdateDebugNames()
     {
-        std::string debugName = fmt::format("Buffer Managed \"{}\" ({})", mName, PrintSize(mSize));
+        std::string debugName = fmt::format("ManBuf \"{}\" ({})", mName, PrintSize(mSize));
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
                                                .pNext        = nullptr,
