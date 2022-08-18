@@ -238,6 +238,13 @@ namespace hsk {
         RasterizedRenderStage::OnResized(extent);
     }
 
+    void ImguiStage::SetTargetImage(ManagedImage* newTargetImage)
+    {
+        mTargetImage = newTargetImage;
+        DestroyResolutionDependentComponents();
+        CreateResolutionDependentComponents();
+    }
+
     void ImguiStage::ProcessSdlEvent(const SDL_Event* sdlEvent) { ImGui_ImplSDL2_ProcessEvent(sdlEvent); }
 
 

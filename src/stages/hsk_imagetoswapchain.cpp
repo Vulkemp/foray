@@ -22,6 +22,11 @@ namespace hsk {
         mSourceImage = newSourceImage;
     }
 
+    void ImageToSwapchainStage::SetTargetImage(ManagedImage* newTargetImage)
+    {
+        mSourceImage = newTargetImage;
+    }
+
     void ImageToSwapchainStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
         VkImageSubresourceRange range{};

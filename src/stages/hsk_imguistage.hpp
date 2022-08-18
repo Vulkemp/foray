@@ -13,6 +13,8 @@ namespace hsk {
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 
+        virtual void SetTargetImage(ManagedImage* newTargetImage);
+
         /// @brief Add a function that renders an imgui window. Example:
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }
 

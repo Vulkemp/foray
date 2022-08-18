@@ -22,6 +22,8 @@ namespace hsk {
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void OnResized(const VkExtent2D& extent, ManagedImage* newSourceImage);
 
+        virtual void SetTargetImage(ManagedImage* newTargetImage);
+
       protected:
         ManagedImage* mSourceImage{};
         PostCopy      mPostCopy;
