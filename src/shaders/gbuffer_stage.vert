@@ -45,7 +45,7 @@ void main()
     outUV = inUV;
 
     // Normal in world space
-    mat3 mNormal = transpose(inverse(mat3(1.0)));
+    mat3 mNormal = transpose(inverse(mat3(ModelMat)));
     outNormal    = mNormal * normalize(inNormal);
     outTangent   = mNormal * normalize(inTangent);
 
