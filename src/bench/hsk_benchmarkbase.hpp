@@ -2,6 +2,7 @@
 #include "../hsk_basics.hpp"
 
 namespace hsk {
+    /// @brief Timestamp combining a label / id with a timestamp in milliseconds
     class BenchmarkTimestamp
     {
       public:
@@ -14,6 +15,7 @@ namespace hsk {
         fp64_t Timestamp = 0.0;
     };
 
+    /// @brief Log of a single benchmark run. All timestamps given must be relative to the same base time
     class BenchmarkLog
     {
       public:
@@ -26,8 +28,11 @@ namespace hsk {
         /// @brief Deltas between the timestamps in milliseconds
         std::vector<fp64_t> Deltas;
 
+        /// @brief Prints a table with all timestamps and deltas, aswell as a total delta
         std::string PrintPretty() const;
-        std::string PrintCSVLines(char separator = ';') const;
+        /// @brief Prints all timestamps, separated by the separator character
+        std::string PrintCSVLine(char separator = ';') const;
+        /// @brief Execute imgui command sequence to display the benchmark results
         void PrintImGui();
     };
 

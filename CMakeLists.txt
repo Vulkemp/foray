@@ -11,7 +11,14 @@ SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
 # Gather sources
 file(GLOB_RECURSE src "src/*.cpp")
 
-option(DISABLE_RT_EXTENSIONS 0)
+option(DISABLE_RT_EXTENSIONS "If set, will disable raytracing extensions" OFF)
+if (DISABLE_RT_EXTENSIONS)
+    add_compile_definitions(DISABLE_RT_EXTENSIONS)
+endif()
+option(ENABLE_GBUFFER_BENCH "If enabled, will perform a device level benchmark in the gbuffer stage" OFF)
+if (ENABLE_GBUFFER_BENCH)
+    add_compile_definitions(ENABLE_GBUFFER_BENCH)
+endif()
 add_library(${PROJECT_NAME} STATIC ${src} )
 
 # dependencies

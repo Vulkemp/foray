@@ -10,6 +10,9 @@
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
 
+#ifdef ENABLE_GBUFFER_BENCH
+#pragma message "Gbuffer Benching enabled. Added synchronisation scopes may cause reduced performance!"
+#endif  // ENABLE_GBUFFER_BENCH
 
 namespace hsk {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
@@ -32,12 +35,20 @@ namespace hsk {
 
     void GBufferStage::CreateFixedSizeComponents()
     {
+#ifdef ENABLE_GBUFFER_BENCH
+        std::vector<const char*> timestampNames(
+            {BenchmarkTimestamp::BEGIN, TIMESTAMP_VERT_BEGIN, TIMESTAMP_VERT_END, TIMESTAMP_FRAG_BEGIN, TIMESTAMP_FRAG_END, BenchmarkTimestamp::END});
+        mBenchmark.Create(mContext, timestampNames);
+#endif  // ENABLE_GBUFFER_BENCH
         SetupDescriptors();
         PreparePipeline();
     }
 
     void GBufferStage::DestroyFixedComponents()
     {
+#ifdef ENABLE_GBUFFER_BENCH
+        mBenchmark.Destroy();
+#endif  // ENABLE_GBUFFER_BENCH
         VkDevice device = mContext->Device;
         if(mPipeline)
         {
@@ -235,6 +246,18 @@ namespace hsk {
 
     void GBufferStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
+
+        VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
+        uint32_t        frameNum      = renderInfo.GetFrameNumber();
+#ifdef ENABLE_GBUFFER_BENCH
+        if(frameNum > 0)
+        {
+            mBenchmark.LogQueryResults(frameNum - 1);
+        }
+        mBenchmark.CmdResetQuery(commandBuffer, frameNum);
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+#endif  // ENABLE_GBUFFER_BENCH
+
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
@@ -243,7 +266,6 @@ namespace hsk {
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
 
-        VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
         vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
@@ -258,10 +280,23 @@ namespace hsk {
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
 
         // Instanced object
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0,
+                                nullptr);
+
+        auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+#ifdef ENABLE_GBUFFER_BENCH
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, TIMESTAMP_VERT_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, TIMESTAMP_VERT_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, TIMESTAMP_FRAG_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, TIMESTAMP_FRAG_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+#endif  // ENABLE_GBUFFER_BENCH
+
         mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(commandBuffer);
+#ifdef ENABLE_GBUFFER_BENCH
+        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, BenchmarkTimestamp::END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+#endif  // ENABLE_GBUFFER_BENCH
     }
 
     void GBufferStage::PreparePipeline()
