@@ -6,60 +6,9 @@
 #include "../scenegraph/hsk_node.hpp"
 #include "../scenegraph/hsk_scene.hpp"
 #include "hsk_blas.hpp"
+#include "hsk_blasinstance.hpp"
 
 namespace hsk {
-
-    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc)
-        : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(getUpdatedGlobalTransformFunc), mAsInstance{}
-    {
-        mBlas                                              = blas;
-        mAsInstance.accelerationStructureReference         = blasRef;
-        mAsInstance.instanceCustomIndex                    = 0;
-        mAsInstance.mask                                   = 0xFF;
-        mAsInstance.instanceShaderBindingTableRecordOffset = 0;
-        mAsInstance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-
-        Update();
-    }
-
-    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform)
-        : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(nullptr), mAsInstance{}
-    {
-        mBlas                                              = blas;
-        mAsInstance.accelerationStructureReference         = blasRef;
-        mAsInstance.instanceCustomIndex                    = 0;
-        mAsInstance.mask                                   = 0xFF;
-        mAsInstance.instanceShaderBindingTableRecordOffset = 0;
-        mAsInstance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-
-        TranslateTransformMatrix(globalTransform, mAsInstance.transform);
-    }
-
-    void BlasInstance::TranslateTransformMatrix(const glm::mat4& in, VkTransformMatrixKHR& out)
-    {
-        for(int32_t row = 0; row < 3; row++)
-        {
-            for(int32_t col = 0; col < 4; col++)
-            {
-                out.matrix[row][col] = in[col][row];
-            }
-        }
-    }
-
-    void BlasInstance::SetBlasMetaOffset(uint32_t offset)
-    {
-        mAsInstance.instanceCustomIndex = offset;
-    }
-
-    void BlasInstance::Update()
-    {
-        if(!!mGetUpdatedGlobalTransformFunc)
-        {
-            glm::mat4 transform;
-            std::invoke(mGetUpdatedGlobalTransformFunc, transform);
-            TranslateTransformMatrix(transform, mAsInstance.transform);
-        }
-    }
 
     Tlas::Tlas(const VkContext* context) : mContext(context) {}
 
@@ -81,7 +30,7 @@ namespace hsk {
             }
         }
     }
-    BlasInstance* Tlas::GetBlasInstance(uint64_t id)
+    const BlasInstance* Tlas::GetBlasInstance(uint64_t id) const
     {
         {
             auto iter = mStaticBlasInstances.find(id);
@@ -182,13 +131,13 @@ namespace hsk {
         for(auto& blasInstancePair : mStaticBlasInstances)
         {
             auto& blasInstance = blasInstancePair.second;
-            blasInstance.SetBlasMetaOffset(offsets[blasInstance.GetBlas()]);
+            blasInstance.SetGeometryMetaOffset(offsets[blasInstance.GetBlas()]);
             instanceBufferData.push_back(blasInstance.GetAsInstance());
         }
         for(auto& blasInstancePair : mAnimatedBlasInstances)
         {
             auto& blasInstance = blasInstancePair.second;
-            blasInstance.SetBlasMetaOffset(offsets[blasInstance.GetBlas()]);
+            blasInstance.SetGeometryMetaOffset(offsets[blasInstance.GetBlas()]);
             instanceBufferData.push_back(blasInstance.GetAsInstance());
         }
 

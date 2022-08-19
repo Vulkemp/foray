@@ -1,12 +1,16 @@
 #include "hsk_geometrymetabuffer.hpp"
 #include "../memory/hsk_descriptorsethelper.hpp"
-#include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
+#include "hsk_blas.hpp"
 
 namespace hsk {
-    const std::unordered_map<const Blas*, uint32_t>& BlasMetaBuffer::CreateOrUpdate(const VkContext* context, const std::unordered_set<const Blas*>& entries)
+    const std::unordered_map<const Blas*, uint32_t>& GeometryMetaBuffer::CreateOrUpdate(const VkContext* context, const std::unordered_set<const Blas*>& entries)
     {
+        // STEP #0   Reset State
         mContext = context;
         mBufferOffsets.clear();
+
+        // STEP #1   Calculate required capacity
 
         uint64_t capacity = 0;
 
@@ -15,14 +19,12 @@ namespace hsk {
             capacity += blas->GetMesh()->GetPrimitives().size();
         }
 
+        // STEP #2   Write array data
+
         std::vector<GeometryMeta> bufferData(capacity);
         bufferData.resize(capacity);
 
         uint64_t offset = 0;
-
-        // BLAS:       BLAS #0           | BLAS #1
-        // Primitives: P0 | P1 | P2 | P3 | P0 | P1
-        // Offsets     0                 | 4
 
         for(auto blas : entries)
         {
@@ -36,22 +38,26 @@ namespace hsk {
             offset += primitives.size();
         }
 
+        // STEP #3    Recreate Buffer (if needed)
+
         VkDeviceSize newBufferSize = capacity * sizeof(GeometryMeta);
         VkDeviceSize oldBufferSize = mBuffer.GetSize();
 
         if(newBufferSize > oldBufferSize)
         {
             mBuffer.Destroy();
-            mBuffer.Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, newBufferSize, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0,
-                           "Blas Geometry Meta Buffer");
+            mBuffer.Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, newBufferSize,
+                           VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Blas Geometry Meta Buffer");
         }
+
+        // STEP #4    Copy array to device
 
         mBuffer.WriteDataDeviceLocal(bufferData.data(), newBufferSize);
 
         return mBufferOffsets;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> BlasMetaBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GeometryMetaBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)
     {
         mDescriptorInfos    = {mBuffer.GetVkDescriptorBufferInfo()};
         auto descriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();

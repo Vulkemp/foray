@@ -3,71 +3,59 @@
 #include "../memory/hsk_dualbuffer.hpp"
 #include "../scenegraph/hsk_component.hpp"
 #include "hsk_geometrymetabuffer.hpp"
+#include "hsk_rt_declares.hpp"
+#include "hsk_blasinstance.hpp"
 #include <map>
 #include <vulkan/vulkan.h>
 
 namespace hsk {
 
-    class Blas;
-
-    class BlasInstance
-    {
-      public:
-        using TransformUpdateFunc = std::function<void(glm::mat4&)>;
-
-        inline BlasInstance() {}
-        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc);
-        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform);
-
-        HSK_PROPERTY_CGET(InstanceId)
-        HSK_PROPERTY_ALLGET(AsInstance)
-        HSK_PROPERTY_CGET(Blas)
-        HSK_PROPERTY_ALL(GetUpdatedGlobalTransformFunc)
-
-        bool IsAnimated() const { return !!mGetUpdatedGlobalTransformFunc; }
-
-        void SetBlasMetaOffset(uint32_t offset);
-
-        void Update();
-
-        static void TranslateTransformMatrix(const glm::mat4& in, VkTransformMatrixKHR& out);
-
-      protected:
-        uint64_t                           mInstanceId = 0UL;
-        const Blas*                        mBlas;
-        TransformUpdateFunc                mGetUpdatedGlobalTransformFunc = nullptr;
-        VkAccelerationStructureInstanceKHR mAsInstance                    = {};
-    };
 
     /// @brief Describes a top level accerlation structure. A tlas usually holds multiple Blas.
-    /// A blas is an object/mesh instance together with its position/rotation in the 3d space.
-    class Tlas
+    /// A blas is an object/mesh instance together with its transformation in 3d space.
+    class Tlas : public DeviceResourceBase
     {
       public:
         explicit Tlas(const VkContext* context);
         virtual ~Tlas() { Destroy(); }
 
+        /// @brief (Re)creates the TLAS. Required to invoke when changes to the TLAS transitioned it to Dirty state. Will synchronize with the CPU.
         virtual void CreateOrUpdate();
+        /// @brief Updates transforms only. TLAS rebuild is performed and synchronized on GPU only. TLAS must by non-Dirty!
         virtual void UpdateLean(VkCommandBuffer cmdBuffer, uint32_t frameIndex);
-        virtual void Destroy();
+
+        inline virtual bool Exists() const override { return !!mAccelerationStructure; }
+        virtual void        Destroy() override;
 
         HSK_PROPERTY_CGET(AccelerationStructure)
         HSK_PROPERTY_CGET(TlasMemory)
         HSK_PROPERTY_CGET(TlasAddress)
         HSK_PROPERTY_ALLGET(MetaBuffer)
+        HSK_PROPERTY_CGET(Dirty)
 
         operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
 
-        void          RemoveBlasInstance(uint64_t id);
-        BlasInstance* GetBlasInstance(uint64_t id);
-        uint64_t      AddBlasInstanceAuto(MeshInstance* meshInstance);
-        uint64_t      AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc);
-        uint64_t      AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform);
+        /// @brief Remove a BLAS instance
+        /// @remark TLAS will be marked Dirty!
+        void RemoveBlasInstance(uint64_t id);
+        /// @brief Get A BLAS instance by id
+        const BlasInstance* GetBlasInstance(uint64_t id) const;
+        /// @brief Add a BLAS instance from meshInstance component
+        /// @remark TLAS will be marked Dirty!
+        uint64_t AddBlasInstanceAuto(MeshInstance* meshInstance);
+        /// @brief Add an animated BLAS instance
+        /// @remark TLAS will be marked Dirty!
+        uint64_t AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc);
+        /// @brief Add a static BLAS instance
+        /// @remark TLAS will be marked Dirty!
+        uint64_t AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform);
 
+        /// @brief Clear all instances
+        /// @remark TLAS will be marked Dirty!
         void ClearBlasInstances();
 
-        HSK_PROPERTY_ALLGET(AnimatedBlasInstances)
-        HSK_PROPERTY_ALLGET(StaticBlasInstances)
+        HSK_PROPERTY_CGET(AnimatedBlasInstances)
+        HSK_PROPERTY_CGET(StaticBlasInstances)
 
       protected:
         const VkContext*                 mContext               = nullptr;
@@ -80,6 +68,6 @@ namespace hsk {
         std::map<uint64_t, BlasInstance> mAnimatedBlasInstances;
         std::map<uint64_t, BlasInstance> mStaticBlasInstances;
         uint64_t                         mNextId = 0;
-        BlasMetaBuffer                   mMetaBuffer;
+        GeometryMetaBuffer               mMetaBuffer;
     };
 }  // namespace hsk
