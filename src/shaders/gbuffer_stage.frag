@@ -25,6 +25,8 @@ layout(location = 5) out uint outMeshInstanceId;  // Fragment mesh id
 #define BIND_TEXTURES_BUFFER 1
 #include "materialbuffer.glsl"
 
+#include "normaltbn.glsl"
+
 
 void main()
 {
@@ -37,20 +39,7 @@ void main()
 
     MaterialProbe probe = ProbeMaterial(material, inUV);
 
-    // Calculate normal in tangent space
-    if(probe.Normal == vec3(0.f, 1.f, 0.f))
-    {
-        outNormal = vec4(normalize(inNormal), 0.0);
-    }
-    else
-    {
-        vec3 N     = normalize(inNormal);
-        vec3 T     = normalize(inTangent);
-        vec3 B     = cross(N, T);
-        mat3 TBN   = mat3(T, B, N);
-        vec3 tnorm = TBN * normalize(probe.Normal * 2.0 - vec3(1.0));
-        outNormal  = vec4(tnorm, 0.0);
-    }
+    outNormal = vec4(ApplyNormalMap(inNormal, inTangent, probe), 0.f);
 
     // Get albedo.
     outAlbedo = probe.BaseColor;

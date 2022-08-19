@@ -35,6 +35,7 @@ layout(binding = BIND_INDICES,   set = 0) readonly buffer Indices { uint i[]; } 
 #include "geometrymeta.glsl"
 
 #include "../vertex.glsl"
+#include "../normaltbn.glsl"
 
 Vertex getVertex(uint index)
 {
@@ -94,8 +95,12 @@ void main()
 
 	// Interpolate normal of hitpoint
 	vec3 modelspacenormal = v0.Normal * barycentricCoords.x + v1.Normal * barycentricCoords.y + v2.Normal * barycentricCoords.z;
+	vec3 modelspacetangent = v0.Tangent * barycentricCoords.x + v1.Tangent * barycentricCoords.y + v2.Tangent * barycentricCoords.z;
 	mat3 normalCalcMatrix = transpose(mat3(mat4x3(gl_WorldToObjectEXT)));
 	vec3 worldspacenormal = normalize(normalCalcMatrix * modelspacenormal);
+	vec3 worldspacetangent = normalize(modelspacetangent);
+	
+	worldspacenormal = ApplyNormalMap(worldspacenormal, worldspacetangent, probe);
 
 	hitValue = worldspacenormal;
 
