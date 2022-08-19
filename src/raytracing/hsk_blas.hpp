@@ -1,5 +1,6 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
+#include "../bench/hsk_bench_declares.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
 #include "../scenegraph/hsk_scenegraph_declares.hpp"
 
@@ -15,7 +16,7 @@ namespace hsk {
       public:
         virtual ~Blas() { Destroy(); }
 
-        virtual void CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store);
+        virtual void CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store, HostBenchmark* benchmark = nullptr);
 
         inline virtual bool Exists() const override { return !mAccelerationStructure; }
         virtual void        Destroy() override;

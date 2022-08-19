@@ -20,6 +20,7 @@ namespace hsk {
 
     void ModelConverter::LoadGltfModel(std::string utf8Path, const VkContext* context, std::function<int32_t(tinygltf::Model)> sceneSelect)
     {
+        mBenchmark.Begin();
         mContext = context ? context : mScene->GetContext();
         tinygltf::TinyGLTF gltfContext;
 
@@ -62,6 +63,8 @@ namespace hsk {
             logger()->error("tinygltf error loading file \"{}\": \"{}\"", utf8Path, error);
             Exception::Throw("Failed to load file");
         }
+
+        mBenchmark.LogTimestamp("tinyGltf::LoadFromFile()");
 
         logger()->info("Model Load: Preparing scene buffers ...");
 
@@ -106,13 +109,20 @@ namespace hsk {
 
         BuildGeometryBuffer();
 
+        mBenchmark.LogTimestamp("Geometry");
+
         logger()->info("Model Load: Uploading textures ...");
 
         LoadTextures();
 
+        mBenchmark.LogTimestamp("Textures");
+
         logger()->info("Model Load: Uploading materials ...");
 
         LoadMaterials();
+
+        
+        mBenchmark.LogTimestamp("Materials");
 
         logger()->info("Model Load: Initialising scene state ...");
 
@@ -121,15 +131,23 @@ namespace hsk {
             RecursivelyTranslateNodes(nodeIndex, nullptr);
         }
 
+        mBenchmark.LogTimestamp("Nodes");
+
         logger()->info("Model Load: Loading Animations ...");
 
         LoadAnimations();
 
         DetectAnimatedNodes();
+        
+        mBenchmark.LogTimestamp("Animations");
 
         InitialUpdate();
 
+        mBenchmark.LogTimestamp("Init");
+
         Reset();
+
+        mBenchmark.End();
 
         logger()->info("Model Load: Done");
     }

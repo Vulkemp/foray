@@ -1,4 +1,5 @@
 #include "hsk_blas.hpp"
+#include "../bench/hsk_hostbenchmark.hpp"
 #include "../memory/hsk_commandbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/hsk_geo.hpp"
@@ -7,9 +8,14 @@
 
 namespace hsk {
 
-    void Blas::CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store)
+    void Blas::CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store, HostBenchmark* benchmark)
     {
         // STEP #0    Reset state
+        if(!!benchmark)
+        {
+            benchmark->Begin();
+        }
+
         mContext        = context;
         mMesh           = mesh;
         VkDevice device = context->Device;
@@ -22,6 +28,11 @@ namespace hsk {
             mAccelerationStructure = VK_NULL_HANDLE;
         }
         mBlasAddress = {};
+
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Reset");
+        }
 
         // STEP #1    Build geometries (1 primitve = 1 geometry)
         auto           primitives     = mesh->GetPrimitives();
@@ -80,6 +91,11 @@ namespace hsk {
         buildGeometryInfo.geometryCount = static_cast<uint32_t>(geometries.size());
         buildGeometryInfo.pGeometries   = geometries.data();
 
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Create Build Structs");
+        }
+
         // STEP #2    Fetch build sizes, (re)create buffers
 
         VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
@@ -98,6 +114,11 @@ namespace hsk {
                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
         buildGeometryInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
 
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Get Build Sizes");
+        }
+
         // STEP #3    Create the Blas
 
         VkAccelerationStructureCreateInfoKHR asCi{.sType         = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
@@ -112,6 +133,11 @@ namespace hsk {
 
         buildGeometryInfo.dstAccelerationStructure = mAccelerationStructure;
 
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Create");
+        }
+
         // STEP #4   Build the Blas
 
         CommandBuffer commandBuffer;
@@ -121,11 +147,26 @@ namespace hsk {
         context->DispatchTable.cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, &buildRangeInfosPtr);
         commandBuffer.Submit();
 
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Build");
+        }
+
         // STEP #5    Get device address
         VkAccelerationStructureDeviceAddressInfoKHR acceleration_device_address_info{};
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
         mBlasAddress                                           = context->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
+
+        if(!!benchmark)
+        {
+            benchmark->LogTimestamp("Get Address");
+        }
+
+        if(!!benchmark)
+        {
+            benchmark->End();
+        }
     }
 
     void Blas::Destroy()

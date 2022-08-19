@@ -1,4 +1,5 @@
 #pragma once
+#include "../bench/hsk_hostbenchmark.hpp"
 #include "../scenegraph/hsk_animation.hpp"
 #include "../scenegraph/hsk_geo.hpp"
 #include "../scenegraph/hsk_scene.hpp"
@@ -18,6 +19,8 @@ namespace hsk {
         HSK_PROPERTY_ALL(Scene)
 
         static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
+
+        HSK_PROPERTY_CGET(Benchmark)
 
       protected:
         const VkContext* mContext = nullptr;
@@ -45,7 +48,7 @@ namespace hsk {
             std::vector<Mesh*> Meshes;
             /// @brief Vector mapping gltfModel texture index to ManagedImage*
             int32_t TextureBufferOffset;
-            size_t IndexBufferStart;
+            size_t  IndexBufferStart;
         } mIndexBindings = {};
 
         int32_t mNextMeshInstanceIndex = 0;
@@ -57,6 +60,7 @@ namespace hsk {
         MaterialBuffer& mMaterialBuffer;
         GeometryStore&  mGeo;
         TextureStore&   mTextures;
+        HostBenchmark   mBenchmark;
 
         void RecursivelyTranslateNodes(int32_t currentIndex, Node* parent = nullptr);
 
