@@ -5,7 +5,9 @@
 
 namespace hsk {
 
-    /// @brief Used to index into a vertex or index buffer which combine into a valid draw call.
+    /// @brief "An object binding indexed or non-indexed geometry with a material." according to the glTF spec.
+    /// It's a subset of a mesh and has its own set of vertices/indices as well as its own material.
+    /// All mesh data is contained in one big buffer, so "First" is used to get the correct offset into the buffer.
     struct Primitive
     {
         enum class EType
