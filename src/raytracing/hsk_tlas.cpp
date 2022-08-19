@@ -70,12 +70,7 @@ namespace hsk {
         uint64_t id = mNextId;
         mNextId++;
 
-        VkAccelerationStructureDeviceAddressInfoKHR addressInfo{.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
-                                                                .accelerationStructure = blas.GetAccelerationStructure()};
-
-        VkDeviceAddress address = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
-
-        mAnimatedBlasInstances.emplace(id, BlasInstance(id, &blas, address, getUpdatedGlobalTransformFunc));
+        mAnimatedBlasInstances.emplace(id, BlasInstance(id, &blas, getUpdatedGlobalTransformFunc));
         return id;
     }
     uint64_t Tlas::AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform)
@@ -84,12 +79,7 @@ namespace hsk {
         uint64_t id = mNextId;
         mNextId++;
 
-        VkAccelerationStructureDeviceAddressInfoKHR addressInfo{.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR,
-                                                                .accelerationStructure = blas.GetAccelerationStructure()};
-
-        VkDeviceAddress address = mContext->DispatchTable.getAccelerationStructureDeviceAddressKHR(&addressInfo);
-
-        mStaticBlasInstances.emplace(id, BlasInstance(id, &blas, address, transform));
+        mStaticBlasInstances.emplace(id, BlasInstance(id, &blas, transform));
         return id;
     }
 
@@ -114,7 +104,7 @@ namespace hsk {
 
 
         // STEP #1   Rebuild meta buffer, get and assign buffer offsets
-        std::unordered_set<const Blas*> usedBlas; // used to reconstruct the meta info buffer
+        std::unordered_set<const Blas*> usedBlas;  // used to reconstruct the meta info buffer
         for(const auto& blasInstancePair : mStaticBlasInstances)
         {
             usedBlas.emplace(blasInstancePair.second.GetBlas());
@@ -143,7 +133,6 @@ namespace hsk {
 
         VkAccelerationStructureBuildRangeInfoKHR buildRangeInfo{};
         buildRangeInfo.primitiveCount = instanceBufferData.size();
-
 
 
         // STEP #3   Build instance buffer

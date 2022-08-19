@@ -14,9 +14,9 @@ namespace hsk {
 
         inline BlasInstance() {}
         /// @brief Initialize as animated
-        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc);
+        BlasInstance(uint64_t instanceId, const Blas* blas, TransformUpdateFunc getUpdatedGlobalTransformFunc);
         /// @brief Initialize as static
-        BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform);
+        BlasInstance(uint64_t instanceId, const Blas* blas, const glm::mat4& globalTransform);
 
         HSK_PROPERTY_CGET(InstanceId)
         HSK_PROPERTY_ALLGET(AsInstance)

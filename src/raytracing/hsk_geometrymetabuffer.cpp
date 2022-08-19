@@ -22,7 +22,6 @@ namespace hsk {
         // STEP #2   Write array data
 
         std::vector<GeometryMeta> bufferData(capacity);
-        bufferData.resize(capacity);
 
         uint64_t offset = 0;
 

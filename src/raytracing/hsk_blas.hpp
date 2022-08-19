@@ -9,13 +9,16 @@ namespace hsk {
     struct Vertex;
     class Mesh;
 
-    class Blas
+    /// @brief A Blas (Bottom Level Acceleration Structure) is the raytracing equivalent concept of a mesh
+    class Blas : public DeviceResourceBase
     {
       public:
         virtual ~Blas() { Destroy(); }
 
-        virtual void Create(const VkContext* context, Mesh* mesh, GeometryStore* store);
-        virtual void Destroy();
+        virtual void CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store);
+
+        inline virtual bool Exists() const override { return !mAccelerationStructure; }
+        virtual void        Destroy() override;
 
         HSK_PROPERTY_CGET(AccelerationStructure)
         HSK_PROPERTY_CGET(BlasAddress)
@@ -24,7 +27,7 @@ namespace hsk {
 
       protected:
         const VkContext*           mContext = nullptr;
-        Mesh*                mMesh    = nullptr;
+        const Mesh*                mMesh    = nullptr;
         ManagedBuffer              mBlasMemory;
         VkAccelerationStructureKHR mAccelerationStructure{};
         VkDeviceAddress            mBlasAddress{};

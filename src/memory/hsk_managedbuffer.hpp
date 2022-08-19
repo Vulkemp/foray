@@ -61,7 +61,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Name);
         HSK_PROPERTY_CGET(Size);
 
-        VkDeviceAddress GetDeviceAddress();
+        VkDeviceAddress GetDeviceAddress() const;
 
         ManagedBuffer& SetName(std::string_view name);
 

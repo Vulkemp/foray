@@ -1,11 +1,12 @@
 #include "hsk_blasinstance.hpp"
+#include "hsk_blas.hpp"
 
 namespace hsk {
-    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, TransformUpdateFunc getUpdatedGlobalTransformFunc)
+    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, TransformUpdateFunc getUpdatedGlobalTransformFunc)
         : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(getUpdatedGlobalTransformFunc), mAsInstance{}
     {
         mBlas                                              = blas;
-        mAsInstance.accelerationStructureReference         = blasRef;
+        mAsInstance.accelerationStructureReference         = blas->GetBlasAddress();
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
         mAsInstance.instanceShaderBindingTableRecordOffset = 0;
@@ -14,11 +15,11 @@ namespace hsk {
         Update();
     }
 
-    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, uint64_t blasRef, const glm::mat4& globalTransform)
+    BlasInstance::BlasInstance(uint64_t instanceId, const Blas* blas, const glm::mat4& globalTransform)
         : mInstanceId(instanceId), mGetUpdatedGlobalTransformFunc(nullptr), mAsInstance{}
     {
         mBlas                                              = blas;
-        mAsInstance.accelerationStructureReference         = blasRef;
+        mAsInstance.accelerationStructureReference         = blas->GetBlasAddress();
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
         mAsInstance.instanceShaderBindingTableRecordOffset = 0;

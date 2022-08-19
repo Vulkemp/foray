@@ -1,75 +1,77 @@
 #include "hsk_blas.hpp"
 #include "../memory/hsk_commandbuffer.hpp"
-#include "../scenegraph/hsk_mesh.hpp"
 #include "../scenegraph/globalcomponents/hsk_geometrystore.hpp"
 #include "../scenegraph/hsk_geo.hpp"
+#include "../scenegraph/hsk_mesh.hpp"
 #include <algorithm>
 
 namespace hsk {
 
-    void Blas::Create(const VkContext* context, Mesh* mesh, GeometryStore* store)
+    void Blas::CreateOrUpdate(const VkContext* context, const Mesh* mesh, const GeometryStore* store)
     {
+        // STEP #0    Reset state
         mContext        = context;
         mMesh           = mesh;
         VkDevice device = context->Device;
 
-        auto primitives = mesh->GetPrimitives();
+        std::string name = fmt::format("Blas #{:x}", reinterpret_cast<uint64_t>(mMesh));
 
+        if(mAccelerationStructure != VK_NULL_HANDLE)
+        {
+            mContext->DispatchTable.destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
+            mAccelerationStructure = VK_NULL_HANDLE;
+        }
+        mBlasAddress = {};
+
+        // STEP #1    Build geometries (1 primitve = 1 geometry)
+        auto           primitives     = mesh->GetPrimitives();
         const uint32_t primitiveCount = primitives.size();
-
-
-        // // TODO: Get real transform matrices
-        // // create tmp transform matrix
-        // VkTransformMatrixKHR transform_matrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-        // //ManagedBuffer        transformMatrixBuffer;
-        // transformMatrixBuffer.Create(
-        //     context, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-        //     sizeof(transform_matrix), VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        // transformMatrixBuffer.WriteDataDeviceLocal(&transform_matrix, sizeof(transform_matrix));
 
         VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = store->GetVerticesBuffer().GetDeviceAddress()};
         VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = store->GetIndicesBuffer().GetDeviceAddress()};
         VkDeviceOrHostAddressConstKHR transform_matrix_device_address{};
 
+        std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos(primitiveCount);  // Counterparts to VkCmdDrawIndexed
+        std::vector<uint32_t>                                 primitiveCounts(primitiveCount);  // Counts of vertices per geometry, used to determine build size of the BLAS
+        std::vector<VkAccelerationStructureGeometryKHR>       geometries(primitiveCount);       // Additional information per geometry/primitive
 
-        std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos;
-        std::vector<uint32_t>                                 primitiveCounts;
-        std::vector<VkAccelerationStructureGeometryKHR>       geometries;
-        geometries.reserve(primitiveCount);
+        // Template geometry with all fields set which are the same for all geometries across this BLAS
+        VkAccelerationStructureGeometryKHR geometryTemplate{
+            .sType        = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR,
+            .pNext        = nullptr,
+            .geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR,
+            .geometry =
+                VkAccelerationStructureGeometryDataKHR{
+                    .triangles = VkAccelerationStructureGeometryTrianglesDataKHR{.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR,
+                                                                                 .pNext = nullptr,
+                                                                                 .vertexFormat  = VK_FORMAT_R32G32B32_SFLOAT,
+                                                                                 .vertexData    = vertex_data_device_address,
+                                                                                 .vertexStride  = sizeof(Vertex),
+                                                                                 .indexType     = VkIndexType::VK_INDEX_TYPE_UINT32,
+                                                                                 .indexData     = index_data_device_address,
+                                                                                 .transformData = {}}},
+            .flags = VK_GEOMETRY_OPAQUE_BIT_KHR};
 
-        for(auto& primitive : primitives)
+        for(int32_t i = 0; i < primitiveCount; i++)
         {
-            VkAccelerationStructureGeometryKHR geometry{};
-            // The bottom level acceleration structure contains one set of triangles as the input geometry
-            geometry.sType                            = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-            geometry.geometryType                     = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-            geometry.flags                            = VK_GEOMETRY_OPAQUE_BIT_KHR;
-            geometry.geometry.triangles.sType         = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-            geometry.geometry.triangles.vertexFormat  = VK_FORMAT_R32G32B32_SFLOAT;
-            geometry.geometry.triangles.vertexData    = vertex_data_device_address;
-            geometry.geometry.triangles.maxVertex     = primitive.VertexOrIndexCount;
-            geometry.geometry.triangles.vertexStride  = sizeof(Vertex);
-            geometry.geometry.triangles.indexType     = VK_INDEX_TYPE_UINT32;
-            geometry.geometry.triangles.indexData     = index_data_device_address;
-            geometry.geometry.triangles.transformData = transform_matrix_device_address;
-            geometries.push_back(geometry);
+            const auto& primitive = primitives[i];
 
-            // Infer build range info from geometry
-            uint32_t primitveCount = primitive.VertexOrIndexCount / 3;  // TODO: durch 3 teilen?
-            primitiveCounts.push_back(primitveCount);
+            VkAccelerationStructureGeometryKHR geometry(geometryTemplate);
+            geometry.geometry.triangles.maxVertex = primitive.HighestReferencedIndex;
 
-            // according to the vulkan spec, values behave different, based on which VkGeometryTypeKHR is used.
-            // for triangles, as follows:
+            uint32_t primitveCount = primitive.VertexOrIndexCount / 3;
+
             VkAccelerationStructureBuildRangeInfoKHR build_range_info;
             build_range_info.primitiveCount  = primitveCount;                       // consumes 3x primitiveCount indices
-            build_range_info.primitiveOffset = primitive.First * sizeof(uint32_t);  // offset into index buffer  // primitveCount.First?
+            build_range_info.primitiveOffset = primitive.First * sizeof(uint32_t);  // offset into index buffer in bytes
             build_range_info.firstVertex     = 0;                                   // added to index values before fetching vertices
             build_range_info.transformOffset = 0;
-            buildRangeInfos.push_back(build_range_info);
+
+            geometries[i]      = geometry;
+            primitiveCounts[i] = primitveCount;
+            buildRangeInfos[i] = build_range_info;
         }
 
-
-        // Get the size requirements for buffers involved in the acceleration structure build process
         VkAccelerationStructureBuildGeometryInfoKHR buildGeometryInfo{};
         buildGeometryInfo.sType         = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         buildGeometryInfo.type          = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
@@ -78,54 +80,60 @@ namespace hsk {
         buildGeometryInfo.geometryCount = static_cast<uint32_t>(geometries.size());
         buildGeometryInfo.pGeometries   = geometries.data();
 
-        VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo{};
-        buildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+        // STEP #2    Fetch build sizes, (re)create buffers
+
+        VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
         context->DispatchTable.getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, primitiveCounts.data(), &buildSizesInfo);
 
+        if(buildSizesInfo.accelerationStructureSize > mBlasMemory.GetSize())
+        {
+            mBlasMemory.Destroy();
+            mBlasMemory.Create(context, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, buildSizesInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0,
+                               name);
+        }
 
-        mBlasMemory.Create(context, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, buildSizesInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        mBlasMemory.SetName("Blas memory buffer");
-
-        // Create the acceleration structure
-        VkAccelerationStructureCreateInfoKHR acceleration_structure_create_info{};
-        acceleration_structure_create_info.sType  = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-        acceleration_structure_create_info.buffer = mBlasMemory.GetBuffer();
-        acceleration_structure_create_info.size   = buildSizesInfo.accelerationStructureSize;
-        acceleration_structure_create_info.type   = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-        context->DispatchTable.createAccelerationStructureKHR(&acceleration_structure_create_info, nullptr, &mAccelerationStructure);
-        buildGeometryInfo.dstAccelerationStructure = mAccelerationStructure;
-
-
-        // The actual build process starts here
-
-        // Create a scratch buffer as a temporary storage for the acceleration structure build
         ManagedBuffer scratchBuffer;
+        std::string   scratchName = fmt::format("{} scratch", name);
         scratchBuffer.Create(context, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
-                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT);
+                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
         buildGeometryInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
 
-        // Build the acceleration structure on the device via a one-time command buffer submission
-        // Some implementations may support acceleration structure building on the host (VkPhysicalDeviceAccelerationStructureFeaturesKHR->accelerationStructureHostCommands), but we prefer device builds
+        // STEP #3    Create the Blas
+
+        VkAccelerationStructureCreateInfoKHR asCi{.sType         = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
+                                                  .pNext         = nullptr,
+                                                  .createFlags   = 0U,
+                                                  .buffer        = mBlasMemory.GetBuffer(),
+                                                  .offset        = 0U,
+                                                  .size          = buildSizesInfo.accelerationStructureSize,
+                                                  .type          = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+                                                  .deviceAddress = {}};
+        context->DispatchTable.createAccelerationStructureKHR(&asCi, nullptr, &mAccelerationStructure);
+
+        buildGeometryInfo.dstAccelerationStructure = mAccelerationStructure;
+
+        // STEP #4   Build the Blas
+
         CommandBuffer commandBuffer;
         commandBuffer.Create(context);
         commandBuffer.Begin();
-        auto buildRangeInfosPtr = &*buildRangeInfos.data();
+        VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfosPtr = buildRangeInfos.data();
         context->DispatchTable.cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, &buildRangeInfosPtr);
         commandBuffer.Submit();
 
-
-        // Get the bottom acceleration structure's handle, which will be used during the top level acceleration build
+        // STEP #5    Get device address
         VkAccelerationStructureDeviceAddressInfoKHR acceleration_device_address_info{};
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
         mBlasAddress                                           = context->DispatchTable.getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
     }
+
     void Blas::Destroy()
     {
-        if(mAccelerationStructure != VK_NULL_HANDLE)
+        if(!!mAccelerationStructure)
         {
             mContext->DispatchTable.destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
-            mAccelerationStructure = VK_NULL_HANDLE;
+            mAccelerationStructure = nullptr;
         }
         if(mBlasMemory.Exists())
         {

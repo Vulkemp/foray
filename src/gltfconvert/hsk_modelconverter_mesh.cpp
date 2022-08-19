@@ -124,10 +124,7 @@ namespace hsk {
                 pos.y       = -1.f * pos.y;
                 auto normal = lGetNormal(vertexIndex);
                 normal.y    = -1.f * normal.y;
-                vertexBuffer.push_back(Vertex{.Pos           = pos,
-                                              .Normal        = normal,
-                                              .Tangent       = lGetTangent(vertexIndex),
-                                              .Uv            = lGetUv(vertexIndex)});
+                vertexBuffer.push_back(Vertex{.Pos = pos, .Normal = normal, .Tangent = lGetTangent(vertexIndex), .Uv = lGetUv(vertexIndex)});
             }
 
             if(gltfPrimitive.indices >= 0)
@@ -138,31 +135,39 @@ namespace hsk {
 
                 int32_t indexCount = (int32_t)accessor.count;
 
+                uint32_t highestIndex = 0;
+
                 const void* dataPtr = &(buffer.data[accessor.byteOffset + bufferView.byteOffset]);
 
                 switch(accessor.componentType)
                 {
                     case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
                         const uint32_t* buf = static_cast<const uint32_t*>(dataPtr);
-                        for(size_t index = 0; index < accessor.count; index++)
+                        for(size_t i = 0; i < accessor.count; i++)
                         {
-                            indexBuffer.push_back(buf[index] + vertexStart);
+                            uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
+                            highestIndex   = std::max(index, highestIndex);
+                            indexBuffer.push_back(index);
                         }
                         break;
                     }
                     case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
                         const uint16_t* buf = static_cast<const uint16_t*>(dataPtr);
-                        for(size_t index = 0; index < accessor.count; index++)
+                        for(size_t i = 0; i < accessor.count; i++)
                         {
-                            indexBuffer.push_back(buf[index] + vertexStart);
+                            uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
+                            highestIndex   = std::max(index, highestIndex);
+                            indexBuffer.push_back(index);
                         }
                         break;
                     }
                     case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
                         const uint8_t* buf = static_cast<const uint8_t*>(dataPtr);
-                        for(size_t index = 0; index < accessor.count; index++)
+                        for(size_t i = 0; i < accessor.count; i++)
                         {
-                            indexBuffer.push_back(buf[index] + vertexStart);
+                            uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
+                            highestIndex   = std::max(index, highestIndex);
+                            indexBuffer.push_back(index);
                         }
                         break;
                     }
@@ -170,11 +175,11 @@ namespace hsk {
                         HSK_THROWFMT("Index component type {} not supported!", accessor.componentType);
                 }
 
-                primitive = Primitive(Primitive::EType::Index, indexStart, indexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset);
+                primitive = Primitive(Primitive::EType::Index, indexStart, indexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, highestIndex);
             }
             else
             {
-                primitive = Primitive(Primitive::EType::Vertex, vertexStart, vertexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset);
+                primitive = Primitive(Primitive::EType::Vertex, vertexStart, vertexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, 0);
             }
         }
     }

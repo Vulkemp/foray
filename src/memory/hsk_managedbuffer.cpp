@@ -41,7 +41,8 @@ namespace hsk {
         }
     }
 
-    void ManagedBuffer::Create(const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    void ManagedBuffer::Create(
+        const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
     {
         ManagedBufferCreateInfo createInfo(usage, size, memoryUsage, flags, name);
         Create(context, createInfo);
@@ -75,7 +76,7 @@ namespace hsk {
         vmaUnmapMemory(mContext->Allocator, mAllocation);
     }
 
-    VkDeviceAddress ManagedBuffer::GetDeviceAddress()
+    VkDeviceAddress ManagedBuffer::GetDeviceAddress() const
     {
         VkBufferDeviceAddressInfo addressInfo;
         addressInfo.sType  = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
