@@ -24,7 +24,7 @@ namespace hsk {
         inline static constexpr std::string_view MeshInstanceIndex  = "Gbuf.MeshInstanceId";
 
 #ifdef ENABLE_GBUFFER_BENCH
-        HSK_PROPERTY_CGET(Benchmark)
+        HSK_PROPERTY_ALLGET(Benchmark)
 #endif
       protected:
         Scene*                                     mScene;

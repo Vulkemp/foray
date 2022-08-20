@@ -32,11 +32,11 @@ namespace hsk {
         }
     }
 
-    void DeviceBenchmark::CmdResetQuery(VkCommandBuffer cmdBuffer, uint32_t frameIndex)
+    void DeviceBenchmark::CmdResetQuery(VkCommandBuffer cmdBuffer, uint64_t frameIndex)
     {
         vkCmdResetQueryPool(cmdBuffer, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size());
     }
-    void DeviceBenchmark::CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint32_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit)
+    void DeviceBenchmark::CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit)
     {
         vkCmdWriteTimestamp(cmdBuffer, stageFlagBit, mQueryPools[frameIndex % mQueryPools.size()], mQueryIds[name]);
     }
@@ -47,7 +47,7 @@ namespace hsk {
         uint64_t Available;
     };
 
-    bool DeviceBenchmark::LogQueryResults(uint32_t frameIndex)
+    bool DeviceBenchmark::LogQueryResults(uint64_t frameIndex)
     {
         std::vector<QueryResult> results(mQueryNames.size());
         vkGetQueryPoolResults(mContext->Device, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size(), sizeof(QueryResult) * results.size(), results.data(),

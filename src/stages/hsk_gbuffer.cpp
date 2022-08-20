@@ -250,10 +250,6 @@ namespace hsk {
         VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
         uint32_t        frameNum      = renderInfo.GetFrameNumber();
 #ifdef ENABLE_GBUFFER_BENCH
-        if(frameNum > 0)
-        {
-            mBenchmark.LogQueryResults(frameNum - 1);
-        }
         mBenchmark.CmdResetQuery(commandBuffer, frameNum);
         mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 #endif  // ENABLE_GBUFFER_BENCH

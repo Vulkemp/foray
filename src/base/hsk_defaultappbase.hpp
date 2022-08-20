@@ -56,6 +56,7 @@ namespace hsk {
 
         virtual void        BasePrepareFrame();
         inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}
+        inline virtual void QueryResultsAvailable(uint64_t frameIndex) {}
         virtual void        BaseSubmitFrame();
 
         void SetWindowDisplayMode(hsk::EDisplayMode displayMode);

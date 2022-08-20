@@ -14,10 +14,10 @@ namespace hsk {
         inline virtual bool Exists() const { return mQueryPools.size() > 0; }
         virtual void        Destroy();
 
-        void CmdResetQuery(VkCommandBuffer cmdBuffer, uint32_t frameIndex);
-        void CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint32_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit);
+        void CmdResetQuery(VkCommandBuffer cmdBuffer, uint64_t frameIndex);
+        void CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit);
 
-        bool LogQueryResults(uint32_t frameIndex);
+        bool LogQueryResults(uint64_t frameIndex);
 
         inline virtual ~DeviceBenchmark() { Destroy(); }
 

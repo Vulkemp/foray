@@ -126,7 +126,6 @@ namespace hsk {
             // }
         }
 
-        
 
         // allow user to alter device building
         BeforeDeviceBuilding(deviceBuilder);
@@ -356,6 +355,11 @@ namespace hsk {
 
         // Make sure that the command buffer we want to use has been presented to the GPU
         vkWaitForFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
+
+        if(mRenderedFrameCount > mFrames.size())
+        {
+            QueryResultsAvailable(mRenderedFrameCount - mFrames.size());
+        }
 
         VkImage primaryOutput    = nullptr;
         VkImage comparisonOutput = nullptr;
