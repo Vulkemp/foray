@@ -1,9 +1,12 @@
 #ifndef GEOMETRYMETA_GLSL
 #define GEOMETRYMETA_GLSL
 
+/// @brief Struct for per Blas meta data
 struct GeometryMeta
 {
+    /// @brief Index into the material information array
     int  MaterialIndex;
+    /// @brief Offset into the Indexbuffer
     uint IndexBufferOffset;
 };
 

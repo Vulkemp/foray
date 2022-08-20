@@ -16,14 +16,14 @@ layout(location = 5) out vec2 outUV;                   // UV coordinates
 layout(location = 6) flat out uint outMeshInstanceId;  // Mesh Instance Id
 
 #define BIND_PUSHC
-#include "gltf_pushc.glsl"
+#include "../common/gltf_pushc.glsl"
 
 #define BIND_CAMERA_UBO 2
-#include "camera.glsl"
+#include "../common/camera.glsl"
 
 #define BIND_TRANSFORMBUFFER_CURRENT 3
 #define BIND_TRANSFORMBUFFER_PREVIOUS 4
-#include "transformbuffer.glsl"
+#include "../common/transformbuffer.glsl"
 
 void main()
 {

@@ -20,22 +20,21 @@
 #extension GL_GOOGLE_include_directive : enable
 #extension GL_EXT_ray_tracing : enable
 #extension GL_EXT_nonuniform_qualifier : enable
-// #extension GL_EXT_scalar_block_layout : enable
 
-#include "bindpoints.glsl"
+#include "../rt_common/bindpoints.glsl"
 
 layout(location = 0) rayPayloadInEXT vec3 hitValue;
 hitAttributeEXT vec3 attribs;
 
-#include "../materialbuffer.glsl"
+#include "../common/materialbuffer.glsl"
 
 layout(binding = BIND_VERTICES,  set = 0) readonly buffer Vertices { float v[]; } vertices;
 layout(binding = BIND_INDICES,   set = 0) readonly buffer Indices { uint i[]; } indices;
 
-#include "geometrymeta.glsl"
+#include "../rt_common/geometrymeta.glsl"
 
-#include "../vertex.glsl"
-#include "../normaltbn.glsl"
+#include "../common/vertex.glsl"
+#include "../common/normaltbn.glsl"
 
 Vertex getVertex(uint index)
 {

@@ -340,9 +340,9 @@ namespace hsk {
         // Each shader group points at the corresponding shader in the pipeline
 
         // shader stages
-        auto                   rgenShaderModule  = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/raytracing/raygen.rgen.spv");
-        auto                   rmissShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/raytracing/miss.rmiss.spv");
-        auto                   rchitShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/raytracing/closesthit.rchit.spv");
+        auto                   rgenShaderModule  = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen.spv");
+        auto                   rmissShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss.spv");
+        auto                   rchitShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit.spv");
         ShaderStageCreateInfos shaderStageCreateInfos;
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_RAYGEN_BIT_KHR, rgenShaderModule);
 

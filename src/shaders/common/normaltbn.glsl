@@ -1,6 +1,16 @@
+/*
+    normaltbn.glsl
+
+    Defines methods for calculating normals based on interpolated vertex normals and normalmap readout
+*/
+
 #ifndef NORMALTBN_GLSL
 #define NORMALTBN_GLSL
 
+/// @brief Calculate normal
+/// @param normal Interpolated vertex normal in world space
+/// @param tangent Interpolated vertex tangent in world space
+/// @param normalMap Normalmap readout
 vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in vec3 normalMap)
 {
     vec3 N   = normalize(normal);
@@ -14,7 +24,7 @@ vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in vec3 normalMap)
 
 vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in MaterialProbe probe)
 {
-    if(probe.Normal == vec3(0.f, 1.f, 0.f))
+    if(probe.Normal == vec3(0.5f, 0.5f, 1.f))
     {
         return normalize(normal);
     }

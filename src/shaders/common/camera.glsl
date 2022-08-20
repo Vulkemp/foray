@@ -1,3 +1,11 @@
+/*
+    camera.glsl
+
+    Contains a definition and layout macros for the Camera Ubo
+
+    C++: src/scenegraph/hsk_camerauboblock.hpp
+*/
+
 #ifdef BIND_CAMERA_UBO
 #ifndef SET_CAMERA_UBO
 #define SET_CAMERA_UBO 0
@@ -5,6 +13,7 @@
 
 layout(set = SET_CAMERA_UBO, binding = BIND_CAMERA_UBO) uniform CameraUboBlock
 {
+    /// @brief Current frames projection matrix
     mat4 ProjectionMatrix;
     mat4 ViewMatrix;
     mat4 PreviousProjectionMatrix;

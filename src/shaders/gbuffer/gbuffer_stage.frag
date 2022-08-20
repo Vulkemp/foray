@@ -19,13 +19,13 @@ layout(location = 4) out int outMaterialIndex;    // Material Index
 layout(location = 5) out uint outMeshInstanceId;  // Fragment mesh id
 
 #define BIND_PUSHC
-#include "gltf_pushc.glsl"
+#include "../common/gltf_pushc.glsl"
 
 #define BIND_MATERIAL_BUFFER 0
-#define BIND_TEXTURES_BUFFER 1
-#include "materialbuffer.glsl"
+#define BIND_TEXTURES_ARRAY 1
+#include "../common/materialbuffer.glsl"
 
-#include "normaltbn.glsl"
+#include "../common/normaltbn.glsl"
 
 
 void main()

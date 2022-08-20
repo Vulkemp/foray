@@ -1,3 +1,9 @@
+/*
+    transformbuffer.glsl
+
+    Layout macros for transform buffer access. Transformbuffer contains model -> world transformation matrices per meshinstance
+*/
+
 #ifdef BIND_TRANSFORMBUFFER_CURRENT
 #ifndef SET_TRANSFORMBUFFER_CURRENT
 #define SET_TRANSFORMBUFFER_CURRENT 0

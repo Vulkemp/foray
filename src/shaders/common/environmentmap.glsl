@@ -1,3 +1,10 @@
+/*
+    environmentmap.glsl
+
+    Contains layout macros for cube and sphere projected environmentmaps aswell as 
+    functions for sampling both projection types through a shared method.
+*/
+
 #ifndef ENV_MAP_GLSL
 #define ENV_MAP_GLSL
 

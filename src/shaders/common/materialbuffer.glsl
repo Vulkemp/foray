@@ -1,3 +1,9 @@
+/*
+    materialbuffer.glsl
+
+    Defines layout macros and sampling methods for materials and textures
+*/
+
 #include "gltf.glsl"
 
 #ifdef BIND_MATERIAL_BUFFER
@@ -11,18 +17,18 @@ layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER, std430) buffer
 Materials;
 #endif  // BIND_MATERIAL_BUFFER
 
-#ifdef BIND_TEXTURES_BUFFER
-#ifndef SET_TEXTURES_BUFFER
-#define SET_TEXTURES_BUFFER 0
-#endif  // SET_TEXTURES_BUFFER
-layout(set = SET_TEXTURES_BUFFER, binding = BIND_TEXTURES_BUFFER) uniform sampler2D Textures[];
+#ifdef BIND_TEXTURES_ARRAY
+#ifndef SET_TEXTURES_ARRAY
+#define SET_TEXTURES_ARRAY 0
+#endif  // SET_TEXTURES_ARRAY
+layout(set = SET_TEXTURES_ARRAY, binding = BIND_TEXTURES_ARRAY) uniform sampler2D Textures[];
 
 vec4 SampleTexture(in int index, in vec2 uv)
 {
     return texture(Textures[index], uv);
 }
 
-#endif  // BIND_TEXTURES_BUFFER
+#endif  // BIND_TEXTURES_ARRAY
 
 #ifndef MATERIALBUFFER_GLSL
 #define MATERIALBUFFER_GLSL
@@ -92,7 +98,7 @@ MaterialProbe ProbeMaterial(in MaterialBufferObject material, in vec2 uv)
     }
     else
     {
-        result.Normal = vec3(0.f, 1.f, 0.f);
+        result.Normal = vec3(0.5f, 0.5f, 1.f);
     }
 
     return result;
