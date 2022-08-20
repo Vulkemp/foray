@@ -14,6 +14,7 @@ namespace hsk {
 
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
+        virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
         inline static constexpr std::string_view RaytracingRenderTargetName = "RaytraycingRenderTarget";
 

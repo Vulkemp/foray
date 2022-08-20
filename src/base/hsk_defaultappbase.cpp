@@ -256,9 +256,9 @@ namespace hsk {
             shaderOutputDirectory = mShaderCompilerConfig.ShaderOutputDirectoryPathFull;
         }
 
-        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(MakeRelativePath("./../hsk_rt_rpf/src/shaders"));
-        mShaderCompilerConfig.ShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
-        mShaderCompilerConfig.ShaderCompiler.CompileAll();
+        mShaderCompiler.AddSourceDirectory(MakeRelativePath("./../hsk_rt_rpf/src/shaders"));
+        mShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
+        mShaderCompiler.CompileAll();
         logger()->info("Compiling shaders successfully finished!");
     }
 
@@ -488,5 +488,25 @@ namespace hsk {
     void DefaultAppBase::SetWindowDisplayMode(hsk::EDisplayMode displayMode)
     {
         mContext.ContextSwapchain.Window.DisplayMode(displayMode);
+    }
+
+    void DefaultAppBase::OnEvent(const Event * event)
+    {
+        auto binaryInputEvent = dynamic_cast<const EventInputBinary*>(event);
+        if(binaryInputEvent)
+        {
+            auto buttonId = binaryInputEvent->SourceInput->GetButtonId();
+            auto pressed  = binaryInputEvent->State;
+           
+
+            if(buttonId == EButton::Keyboard_F2 && pressed)
+            {
+                logger()->info("F2 pressed - triggered shader recompilation!");
+                mShaderCompiler.SetVerbosityFlags(ShaderCompiler::VerbosityFlags::Modified);
+                mShaderCompiler.CompileAll(true);
+                logger()->info("recompilation done!");
+                OnShadersRecompiled(&mShaderCompiler);
+            }
+        } 
     }
 }  // namespace hsk

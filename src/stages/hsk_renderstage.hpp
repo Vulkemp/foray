@@ -5,6 +5,7 @@
 #include "../memory/hsk_descriptorsethelper.hpp"
 #include "../memory/hsk_managedimage.hpp"
 #include "hsk_stagereferences.hpp"
+#include "../base/hsk_shadercompiler.hpp"
 
 namespace hsk {
 
@@ -40,6 +41,9 @@ namespace hsk {
         inline virtual void SetImageOutputs(std::unordered_map<std::string_view, ManagedImage*>& dependencies) {}
 
         inline virtual std::string_view GetName() const { return ""; }
+
+        /// @brief After a shader recompilation has happened, the stage might want to rebuild their pipelines.
+        inline virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler){};
 
       protected:
         std::vector<ManagedImage*> mColorAttachments;

@@ -61,6 +61,11 @@ namespace hsk {
 
         void SetWindowDisplayMode(hsk::EDisplayMode displayMode);
 
+        virtual void OnEvent(const Event* event) override;
+
+        void RecompileShaders();
+        virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler){};
+
         struct ShaderCompilerconfig
         {
             bool EnableShaderCompiler = true;
@@ -70,9 +75,9 @@ namespace hsk {
             std::string ShaderSourceDirectoryPathFull = {};
             /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
             std::string ShaderOutputDirectoryPathFull = {};
-            /// @brief The shader compiler. See shader compiler options for further configuration.
-            hsk::ShaderCompiler ShaderCompiler = {};
         } mShaderCompilerConfig;
+
+        ShaderCompiler mShaderCompiler;
 
         FrameRenderInfo mRenderInfo{};
 

@@ -295,6 +295,10 @@ namespace hsk {
         //vkCmdEndRenderPass(commandBuffer);
     }
 
+    void RaytracingStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler) {
+        //throw Exception("not implemented");
+    }
+
     void RaytracingStage::CreateShaderBindingTables()
     {
         if(mShaderGroups.size() == 0)

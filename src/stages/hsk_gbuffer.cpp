@@ -31,6 +31,7 @@ namespace hsk {
             mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         }
         mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
+
     }
 
     void GBufferStage::CreateFixedSizeComponents()
@@ -93,6 +94,17 @@ namespace hsk {
             vkDestroyRenderPass(device, mRenderpass, nullptr);
             mRenderpass = nullptr;
         }
+    }
+
+    void GBufferStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler)
+    {
+        // check if shaders have been recompiled
+        bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
+        if(!needsPipelineUpdate)
+            return;
+
+        // rebuild pipeline and its dependencies.
+        PreparePipeline();
     }
 
     void GBufferStage::PrepareAttachments()
@@ -302,8 +314,8 @@ namespace hsk {
         AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         // shader stages
-        auto                   vertShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert.spv");
-        auto                   fragShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag.spv");
+        auto                   vertShaderModule = ShaderModule(mContext, mVertexShaderPath);
+        auto                   fragShaderModule = ShaderModule(mContext, mFragmentShaderPath);
         ShaderStageCreateInfos shaderStageCreateInfos;
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
 

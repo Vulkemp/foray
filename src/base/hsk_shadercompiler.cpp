@@ -1,7 +1,7 @@
 #include "hsk_shadercompiler.hpp"
+#include "../hsk_env.hpp"
 #include "hsk_logger.hpp"
 #include <codecvt>
-#include "../hsk_env.hpp"
 
 namespace hsk {
 
@@ -93,7 +93,7 @@ namespace hsk {
     bool ShaderCompiler::CallGlslCompiler(const ShaderFileInfo& shaderFileInfo)
     {
         std::string command("/bin/glslc --target-spv=spv1.5 " + PathToString(shaderFileInfo.mSourcePathFull) + " -o " + PathToString(shaderFileInfo.mOutPathFull));
-        int         returnvalue = std::system(command.c_str());
+        int returnvalue = std::system(command.c_str());
         return returnvalue == 0;
     }
 
@@ -101,7 +101,7 @@ namespace hsk {
 #endif
 
 
-    bool ShaderCompiler::CompileAll()
+    bool ShaderCompiler::CompileAll(bool recompile)
     {
         if(mSourceDirectories.size() == 0)
         {
@@ -110,8 +110,12 @@ namespace hsk {
         // parse all shaders in data directory
         for(auto& sourceDirectory : mSourceDirectories)
         {
-            if (!fs::exists(sourceDirectory)){
-                logger()->warn("ShaderCompiler: Skipping source directory \"{}\" because it does not exist.", ToUtf8Path(sourceDirectory));
+            if(!fs::exists(sourceDirectory))
+            {
+                if((mVerbosityFlags & VerbosityFlags::Verbose) == VerbosityFlags::Verbose)
+                {
+                    logger()->warn("ShaderCompiler: Skipping source directory \"{}\" because it does not exist.", ToUtf8Path(sourceDirectory));
+                }
                 continue;
             }
             for(auto& pathIterator : fs::recursive_directory_iterator(sourceDirectory))
@@ -119,18 +123,18 @@ namespace hsk {
                 if(!pathIterator.is_directory())
                 {
                     fs::path shaderFile = pathIterator.path();
-                    CompileShaderFile(sourceDirectory, shaderFile);
+                    CompileShaderFile(sourceDirectory, shaderFile, recompile);
                 }
             }
         }
         return true;
     }
 
-    bool ShaderCompiler::CompileShaderFile(fs::path sourceDir, fs::path shaderFilePath)
+    bool ShaderCompiler::CompileShaderFile(fs::path sourceDir, fs::path shaderFilePath, bool recompile)
     {
         if(!IsValidSourceFile(shaderFilePath))
         {
-            if((mVerbosityLevel & VerbosityFlags::Unsupported) == VerbosityFlags::Unsupported)
+            if((mVerbosityFlags & VerbosityFlags::Verbose) == VerbosityFlags::Verbose)
             {
                 logger()->info("unsupported file extension: {}", shaderFilePath.string());
             }
@@ -150,10 +154,9 @@ namespace hsk {
         }
         ShaderFileInfo shaderFileInfo{shaderFilePath, fs::path(outputFullPath)};
 
-        if((mVerbosityLevel & VerbosityFlags::Modified) == VerbosityFlags::Modified)
-        {
-            LogLastModified(shaderFileInfo);
-        }
+
+        LogLastModified(shaderFileInfo);
+
 
         if(!NeedsCompiling(shaderFileInfo))
         {
@@ -171,8 +174,30 @@ namespace hsk {
             }
         }
 
+        if(recompile)
+        {
+            mMapShadersRecompiled[shaderFileInfo.mOutPathFull.filename().string()] = true;
+        }
+
         // If you get a runtime exception here, check console for shader compile error messages
         return compileResult;
+    }
+
+    bool ShaderCompiler::HasShaderBeenRecompiled(std::string& shaderFilePath, bool invalidate)
+    {
+        std::string shaderFileName = std::filesystem::path(shaderFilePath).filename().string();
+        bool        recompiled     = false;
+        if(mMapShadersRecompiled.find(shaderFileName) != mMapShadersRecompiled.end())
+        {
+            // true if shaders been recompiled since last check
+            recompiled = mMapShadersRecompiled[shaderFileName];
+        }
+        if(invalidate)
+        {
+            // next call returns false, until another recompilation happens
+            mMapShadersRecompiled[shaderFileName] = false;
+        }
+        return recompiled;
     }
 
     bool ShaderCompiler::IsValidSourceFile(const fs::path& shaderFilePath)
@@ -209,9 +234,12 @@ namespace hsk {
         fs::file_time_type ftimeSource = fs::last_write_time(shaderFileInfo.mSourcePathFull);
         if(!fs::exists(shaderFileInfo.mOutPathFull))
         {
-            // if file does not exist,
-            logger()->info("modified \033[1;32m{}\033[0m - compiled \033[1;31mnever\033[0m RECOMPILING {} ({})", FileTimeToString(ftimeSource),
-                           shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
+            if((mVerbosityFlags & VerbosityFlags::Modified) == VerbosityFlags::Modified)
+            {
+                // if file does not exist, compile it.
+                logger()->info("last compiled \033[1;31mnever\033[0m COMPILING NOW - last modified \033[1;32m{}\033[0m - {} ({})", FileTimeToString(ftimeSource),
+                               shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
+            }
             return;
         }
 
@@ -221,14 +249,20 @@ namespace hsk {
         // colors https://stackoverflow.com/questions/2616906/how-do-i-output-coloured-text-to-a-linux-terminal
         if(needsCompiling)
         {
-            logger()->info("modified \033[1;32m{}\033[0m - compiled \033[1;31m{}\033[0m {} ({})", FileTimeToString(ftimeSource), FileTimeToString(ftimeOutput),
-                           shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
-            logger()->info("==> recompiling {} ...", shaderFileInfo.mSourcePathFull.filename().string());
+            if((mVerbosityFlags & VerbosityFlags::Modified) == VerbosityFlags::Modified)
+            {
+                logger()->info("last compiled \033[1;31m{}\033[0m - last modified \033[1;32m{}\033[0m - {} ({})", FileTimeToString(ftimeOutput), FileTimeToString(ftimeSource),
+                               shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
+                logger()->info("==> recompiling {} ...", shaderFileInfo.mSourcePathFull.filename().string());
+            }
         }
         else
         {
-            logger()->info("modified \033[1;32m{}\033[0m - compiled \033[1;32m{}\033[0m {} ({})", FileTimeToString(ftimeSource), FileTimeToString(ftimeOutput),
-                           shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
+            if((mVerbosityFlags & VerbosityFlags::Unmodified) == VerbosityFlags::Unmodified)
+            {
+                logger()->info("last compiled \033[1;32m{}\033[0m - last modified \033[1;32m{}\033[0m - {} ({})", FileTimeToString(ftimeOutput), FileTimeToString(ftimeSource),
+                               shaderFileInfo.mSourcePathFull.filename().string(), shaderFileInfo.mSourcePathFull.string());
+            }
         }
     }
 

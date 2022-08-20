@@ -29,46 +29,58 @@ namespace hsk {
         };
         enum VerbosityFlags : std::uint8_t
         {
-            Modified = 0x1,
-            Unsupported = 0x2,
-            All         = 0xff,
+            Modified   = (1 << 1),  // log if a file was modified
+            Unmodified = (1 << 2),  // log if a file was not modified
+            Verbose    = (1 << 3),  // log miscellaneous verbose output
+            All        = 0xff,
         };
 
 
       public:
         ShaderCompiler(){};
-        void SetVerbose(VerbosityFlags verbosityLevel) { mVerbosityLevel = verbosityLevel; }
+        void SetVerbosityFlags(VerbosityFlags verbosityLevel) { mVerbosityFlags = verbosityLevel; }
         void SetThrowException(bool throwException) { mThrowException = throwException; }
 
         /// @brief Adding a source directory to search recursivly for shader files.
-        /// @param sourceDirectory 
+        /// @param sourceDirectory
         void AddSourceDirectory(const std::string& sourceDirectory);
 
         /// @brief Tells the shader compiler to output all shader files to this directory.
-        /// If no directory is specified, .spv outputs are placed next to their sources. 
+        /// If no directory is specified, .spv outputs are placed next to their sources.
         void SetOutputDirectory(const std::string& outputDirectory);
 
         bool CallGlslCompiler(const ShaderFileInfo& shaderFileInfo);
-        bool CompileAll();
+        bool CompileAll(bool recompile = false);
 
         /// @brief Expects a glsl shader file and generates a .spv in the same folder.
         /// The path is made of 3 parts. The path to the repository, the relativeSourceDir in the repository &
         /// the path to the shader file in the source directory.
-        /// @param relativeSourceDir -  
+        /// @param relativeSourceDir -
         /// @param shaderFilePath -
-        /// @return 
-        bool CompileShaderFile(fs::path relativeSourceDir, fs::path shaderFilePath);
+        /// @param recompile - Indicates this is a recompilation, aka. a compilation that happens after initial program start.
+        /// @return
+        bool CompileShaderFile(fs::path relativeSourceDir, fs::path shaderFilePath, bool recompile = false);
 
         /// @brief Allows manipulation of the valid file endings that the shader compiler will recognize as shader files.
         /// @return The reference to the vector to manipulate.
         std::vector<SPV_STR>& GetValidFileEndings();
 
+        /// @brief ShaderCompiler intern logic for shader recompilation tracking. Feel free to implement one on your own for more
+        /// complex use cases. Supports only unique shader file names.
+        /// Returns true if the shader has been recompiled since the last time this method was called for its filename.
+        /// @param shaderFilePath - Shaderfile to check for recompilation. Only the filename is used for comparison and must be unique.
+        /// @param invalidate - If true, the recompilation map will be updated, so this method returns false for this shader file
+        /// until the next recompilation occurs.
+        bool HasShaderBeenRecompiled(std::string& shaderFilePath, bool invalidate = true);
+
       protected:
         SPV_STR mOutputDir = SPV_STR();
         /// @brief The verbosity level determines the shader compiler out. By default, compiled and skipped files will be announced.
-        VerbosityFlags mVerbosityLevel = VerbosityFlags::Modified;
+        VerbosityFlags mVerbosityFlags = (VerbosityFlags)(VerbosityFlags::Modified | VerbosityFlags::Unmodified);
         /// @brief If true, throw an exception when a shaderfile is missing.
         bool mThrowException = true;
+
+        std::unordered_map<std::string, bool> mMapShadersRecompiled;
 
         std::vector<SPV_STR> mSourceDirectories;
 

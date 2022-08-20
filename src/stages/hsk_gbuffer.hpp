@@ -15,6 +15,7 @@ namespace hsk {
 
         virtual void Init(const VkContext* context, Scene* scene);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
+        virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
         inline static constexpr std::string_view WorldspacePosition = "Gbuf.Position";
         inline static constexpr std::string_view WorldspaceNormal   = "Gbuf.Normal";
@@ -30,6 +31,8 @@ namespace hsk {
         Scene*                                     mScene;
         std::vector<VkClearValue>                  mClearValues;
         std::vector<std::unique_ptr<ManagedImage>> mGBufferImages;
+        std::string                                mVertexShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert.spv";
+        std::string                                mFragmentShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag.spv";
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;
@@ -51,5 +54,6 @@ namespace hsk {
         inline static const char* TIMESTAMP_FRAG_BEGIN = "Fragment Begin";
         inline static const char* TIMESTAMP_FRAG_END   = "Fragment End";
 #endif  // ENABLE_GBUFFER_BENCH
+
     };
 }  // namespace hsk

@@ -22,7 +22,7 @@ namespace hsk {
             std::string             Name{"UnnamedImage"};
 
             CreateInfo();
-            CreateInfo(VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
+            CreateInfo(std::string name, VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
         };
 
         virtual void Create(const VkContext* context, CreateInfo createInfo);

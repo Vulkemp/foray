@@ -35,13 +35,14 @@ namespace hsk {
         ImageViewCI.subresourceRange.layerCount     = 1;
     }
 
-    ManagedImage::CreateInfo::CreateInfo(VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
+    ManagedImage::CreateInfo::CreateInfo(std::string name, VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
     {
         ImageCI.initialLayout = initialLayout;
         ImageCI.usage         = usage;
         ImageCI.format        = format;
         ImageViewCI.format    = format;
         ImageCI.extent        = extent;
+        Name                  = name;
     }
 
     void ManagedImage::Create(const VkContext* context, CreateInfo createInfo)
