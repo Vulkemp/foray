@@ -29,11 +29,11 @@ namespace hsk {
         std::vector<fp64_t> Deltas;
 
         /// @brief Prints a table with all timestamps and deltas, aswell as a total delta
-        std::string PrintPretty() const;
+        std::string PrintPretty(bool omitTimestamps = true) const;
         /// @brief Prints all timestamps, separated by the separator character
         std::string PrintCSVLine(char separator = ';') const;
         /// @brief Execute imgui command sequence to display the benchmark results
-        void PrintImGui();
+        void PrintImGui(bool omitTimestamps = true);
     };
 
     class BenchmarkBase
