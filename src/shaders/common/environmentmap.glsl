@@ -1,5 +1,5 @@
 /*
-    environmentmap.glsl
+    common/environmentmap.glsl
 
     Contains layout macros for cube and sphere projected environmentmaps aswell as 
     functions for sampling both projection types through a shared method.
@@ -23,9 +23,12 @@ layout(set = SET_ENVMAP_SPHERESAMPLER, binding = BIND_ENVMAP_SPHERESAMPLER) samp
 
 // https://learnopengl.com/PBR/IBL/Diffuse-irradiance CC BY 4.0 https://learnopengl.com/About
 const vec2 invAtan = vec2(0.1591, 0.3183);
-vec2       SampleSphericalMap(vec3 v)
+
+/// @brief Calculates uv coordinates for sampling a spherical environment map
+/// @param dir Directional vector
+vec2 SampleSphericalMap(vec3 dir)
 {
-    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    vec2 uv = vec2(atan(dir.z, dir.x), asin(dir.y));
     uv *= invAtan;
     uv += 0.5;
     return uv;
@@ -37,13 +40,15 @@ vec2       SampleSphericalMap(vec3 v)
 #ifndef SET_ENVMAP_UBO
 #define SET_ENVMAP_UBO 0
 #endif
-layout(set = SET_ENVMAP_UBO, binding = BIND_ENVMAP_UBO, std430) uniform
+/// @brief Ubo defining wether cube and/or sphere map are bound
+layout(set = SET_ENVMAP_UBO, binding = BIND_ENVMAP_UBO, std430) uniform EnvmapConfigBlock
 {
     bool UseCubemap;
     bool UseSpheremap;
 }
 EnvmapConfig;
 
+/// @brief Automatically sample the correct environmentmap
 vec4 SampleEnvironmentMap(vec3 dir)
 {
     if(EnvmapConfig.UseCubemap)
@@ -59,6 +64,7 @@ vec4 SampleEnvironmentMap(vec3 dir)
 
 #else
 
+/// @brief Automatically sample the correct environmentmap
 vec4 SampleEnvironmentMap(vec3 dir)
 {
 #ifdef BIND_ENVMAP_CUBESAMPLER

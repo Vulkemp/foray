@@ -15,14 +15,9 @@ layout(location = 4) out vec3 outTangent;              // Tangent in world space
 layout(location = 5) out vec2 outUV;                   // UV coordinates
 layout(location = 6) flat out uint outMeshInstanceId;  // Mesh Instance Id
 
-#define BIND_PUSHC
+#include "bindpoints.glsl"
 #include "../common/gltf_pushc.glsl"
-
-#define BIND_CAMERA_UBO 2
 #include "../common/camera.glsl"
-
-#define BIND_TRANSFORMBUFFER_CURRENT 3
-#define BIND_TRANSFORMBUFFER_PREVIOUS 4
 #include "../common/transformbuffer.glsl"
 
 void main()

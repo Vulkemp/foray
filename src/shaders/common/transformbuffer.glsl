@@ -1,5 +1,5 @@
 /*
-    transformbuffer.glsl
+    common/transformbuffer.glsl
 
     Layout macros for transform buffer access. Transformbuffer contains model -> world transformation matrices per meshinstance
 */
@@ -8,7 +8,7 @@
 #ifndef SET_TRANSFORMBUFFER_CURRENT
 #define SET_TRANSFORMBUFFER_CURRENT 0
 #endif
-
+/// @brief Current frames model -> worldspace transformations
 layout(set = SET_TRANSFORMBUFFER_CURRENT, binding = BIND_TRANSFORMBUFFER_CURRENT, std430) readonly buffer TransformBufferCurrent_T
 {
     mat4 Array[];
@@ -25,7 +25,7 @@ mat4 GetCurrentTransform(in uint transformBufferIndex)
 #ifndef SET_TRANSFORMBUFFER_PREVIOUS
 #define SET_TRANSFORMBUFFER_PREVIOUS 0
 #endif
-
+/// @brief Previous frames model -> worldspace transformations
 layout(set = SET_TRANSFORMBUFFER_PREVIOUS, binding = BIND_TRANSFORMBUFFER_PREVIOUS, std430) readonly buffer TransformBufferPrevious_T
 {
     mat4 Array[];

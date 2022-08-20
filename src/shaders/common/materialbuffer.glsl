@@ -1,5 +1,5 @@
 /*
-    materialbuffer.glsl
+    common/materialbuffer.glsl
 
     Defines layout macros and sampling methods for materials and textures
 */
@@ -10,6 +10,7 @@
 #ifndef SET_MATERIAL_BUFFER
 #define SET_MATERIAL_BUFFER 0
 #endif  // SET_MATERIAL_BUFFER
+/// @brief Material buffer
 layout(set = SET_MATERIAL_BUFFER, binding = BIND_MATERIAL_BUFFER, std430) buffer readonly MaterialBuffer
 {
     MaterialBufferObject Array[];
@@ -21,9 +22,10 @@ Materials;
 #ifndef SET_TEXTURES_ARRAY
 #define SET_TEXTURES_ARRAY 0
 #endif  // SET_TEXTURES_ARRAY
+/// @brief Textures Array
 layout(set = SET_TEXTURES_ARRAY, binding = BIND_TEXTURES_ARRAY) uniform sampler2D Textures[];
 
-vec4 SampleTexture(in int index, in vec2 uv)
+vec4 SampleTexture(nonuniformEXT in int index, in vec2 uv)
 {
     return texture(Textures[index], uv);
 }
@@ -33,7 +35,7 @@ vec4 SampleTexture(in int index, in vec2 uv)
 #ifndef MATERIALBUFFER_GLSL
 #define MATERIALBUFFER_GLSL
 
-MaterialBufferObject GetMaterialOrFallback(in int index)
+MaterialBufferObject GetMaterialOrFallback(nonuniformEXT in int index)
 {
     if(index >= 0)
     {

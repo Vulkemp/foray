@@ -18,13 +18,9 @@ layout(location = 3) out vec2 outMotion;          // Fragment screenspace motion
 layout(location = 4) out int outMaterialIndex;    // Material Index
 layout(location = 5) out uint outMeshInstanceId;  // Fragment mesh id
 
-#define BIND_PUSHC
+#include "bindpoints.glsl"
 #include "../common/gltf_pushc.glsl"
-
-#define BIND_MATERIAL_BUFFER 0
-#define BIND_TEXTURES_ARRAY 1
 #include "../common/materialbuffer.glsl"
-
 #include "../common/normaltbn.glsl"
 
 

@@ -15,22 +15,28 @@
  * limitations under the License.
  */
 
+/*
+	rt_basic/raygen.rgen
+
+	Basic ray gen shader
+*/
+
 #version 460
-#extension GL_KHR_vulkan_glsl : enable
-#extension GL_EXT_ray_tracing : enable
-#extension GL_GOOGLE_include_directive : enable
+#extension GL_KHR_vulkan_glsl : enable // Vulkan-specific syntax
+#extension GL_GOOGLE_include_directive : enable // Include files
+#extension GL_EXT_ray_tracing : enable // Raytracing
+
+// Include structs and bindings
 
 #include "../rt_common/bindpoints.glsl"
-
-layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
-layout(binding = 1, set = 0, rgba16f) uniform image2D image;
-
-
-#define BIND_CAMERA_UBO 2
 #include "../common/camera.glsl"
+#include "../rt_common/tlas.glsl"
+#include "../rt_common/imageoutput.glsl"
 
+// Declare hitpayloads
 
-layout(location = 0) rayPayloadEXT vec3 hitValue;
+#define HITPAYLOAD_OUT
+#include "../rt_common/payload.glsl"
 
 void main() 
 {
@@ -45,9 +51,9 @@ void main()
 	float tmin = 0.001;
 	float tmax = 10000.0;
 
-    hitValue = vec3(0.0);
+    ChildPayload = ConstructHitPayload();
 
-    traceRayEXT(topLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
+    traceRayEXT(MainTlas, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
 
-	imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(hitValue, 1.0));
+	imageStore(ImageOutput, ivec2(gl_LaunchIDEXT.xy), vec4(ChildPayload.Radiance, 1.0));
 }

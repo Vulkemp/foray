@@ -1,5 +1,5 @@
 /*
-    vertex.glsl
+    common/vertex.glsl
 
     Contains the vertex struct definition (Vertex buffers don't follow alingment rules!)
 */

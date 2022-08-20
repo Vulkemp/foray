@@ -1,3 +1,9 @@
+/*
+    rt_common/bindpoints.glsl
+
+    Defines default bindpoints
+*/
+
 // TLAS
 #define SET_TLAS 0
 #define BIND_TLAS 0

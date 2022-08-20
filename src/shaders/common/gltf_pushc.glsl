@@ -1,5 +1,5 @@
 /*
-    gltf_pushc.glsl
+    common/gltf_pushc.glsl
 
     Definition for the push constant used for rasterized rendering of scenes
 
@@ -7,10 +7,11 @@
 */
 
 #ifdef BIND_PUSHC
+
 layout(push_constant) uniform PushConstantBlock
 {
     uint TransformBufferOffset;
-    int MaterialIndex;
+    int  MaterialIndex;
 }
 PushConstant;
 #endif

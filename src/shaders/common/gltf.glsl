@@ -1,5 +1,5 @@
 /*
-    gltf.glsl
+    common/gltf.glsl
 
     Definitions for Material struct and material probe.
 
@@ -13,21 +13,21 @@
 struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be padded to a total of 64 bytes
 {
     /// @brief Base Color / Albedo Factor
-    vec4  BaseColorFactor;                
+    vec4 BaseColorFactor;
     /// @brief Emissive Factor
-    vec3  EmissiveFactor;                 
+    vec3 EmissiveFactor;
     /// @brief Metallic Factor
-    float MetallicFactor;                 
+    float MetallicFactor;
     /// @brief Roughness Factor
-    float RoughnessFactor;                
+    float RoughnessFactor;
     /// @brief Texture Index for BaseColor
-    int   BaseColorTextureIndex;          
+    int BaseColorTextureIndex;
     /// @brief Texture Index for MetallicRoughness
-    int   MetallicRoughnessTextureIndex;  
+    int MetallicRoughnessTextureIndex;
     /// @brief Texture Index for Emissive
-    int   EmissiveTextureIndex;           
+    int EmissiveTextureIndex;
     /// @brief Texture Index for Normal
-    int   NormalTextureIndex;             
+    int NormalTextureIndex;
 };
 
 /// @brief Represents a probe of a material at a specific Uv coordinate

@@ -1,5 +1,11 @@
+/*
+    common/random.glsl
+*/
+
 #ifndef RANDOM_GLSL
 #define RANDOM_GLSL
+
+// TODO
 
 uint RandomUint(inout uint seed)
 {

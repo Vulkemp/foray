@@ -1,5 +1,5 @@
 /*
-    camera.glsl
+    common/camera.glsl
 
     Contains a definition and layout macros for the Camera Ubo
 
