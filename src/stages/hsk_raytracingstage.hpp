@@ -1,24 +1,37 @@
 #pragma once
 #include "../base/hsk_vkcontext.hpp"
-#include "../scenegraph/hsk_scene.hpp"
-#include "hsk_rasterizedRenderStage.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
 #include "../memory/hsk_managedimage.hpp"
+#include "../scenegraph/hsk_scene.hpp"
+#include "../utility/hsk_shadermodule.hpp"
+#include "hsk_rasterizedRenderStage.hpp"
 
 // heavily inspired by https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_basic/raytracing_basic.cpp
 namespace hsk {
+
+    struct RaytracingStageShaderconfig
+    {
+        std::string RaygenShaderpath;
+        std::string MissShaderpath;
+        std::string ClosesthitShaderpath;
+        std::string AnyhitShaderpath;
+
+        static RaytracingStageShaderconfig Basic();
+    };
+
     class RaytracingStage : public RenderStage
     {
       public:
         RaytracingStage() = default;
 
-        virtual void Init(const VkContext* context, Scene* scene);
+        virtual void Init(const VkContext* context, Scene* scene, const RaytracingStageShaderconfig& shaderconfig);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
         inline static constexpr std::string_view RaytracingRenderTargetName = "RaytraycingRenderTarget";
 
         virtual void OnResized(const VkExtent2D& extent) override;
+
       protected:
         Scene*                                     mScene;
         std::vector<VkClearValue>                  mClearValues;
@@ -29,13 +42,12 @@ namespace hsk {
         virtual void CreateResolutionDependentComponents();
         virtual void DestroyResolutionDependentComponents();
 
-        void PrepareAttachments();
-        void PrepareRenderpass();
-        void SetupDescriptors();
-        void UpdateDescriptors();
-        void CreatePipelineLayout();
-        void CreateShaderBindingTables();
-        void CreateRaytraycingPipeline();
+        virtual void PrepareAttachments();
+        virtual void SetupDescriptors();
+        virtual void UpdateDescriptors();
+        virtual void CreatePipelineLayout();
+        virtual void CreateShaderBindingTables();
+        virtual void CreateRaytraycingPipeline();
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo(bool rebuild = false);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo(bool rebuild = false);
@@ -43,15 +55,19 @@ namespace hsk {
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
 
-        VkPipeline                 mPipeline{};
-        VkPipelineLayout           mPipelineLayout{};
-        VkFramebuffer              mFrameBuffer   = nullptr;
-        VkPipelineCache            mPipelineCache = nullptr;
-        VkRenderPass               mRenderpass    = nullptr;
+        VkPipeline       mPipeline{};
+        VkPipelineLayout mPipelineLayout{};
+        VkFramebuffer    mFrameBuffer   = nullptr;
+        VkPipelineCache  mPipelineCache = nullptr;
+        VkRenderPass     mRenderpass    = nullptr;
 
-        std::unique_ptr<ManagedBuffer>                    mRaygenShaderBindingTable;
-        std::unique_ptr<ManagedBuffer>                    mMissShaderBindingTable;
-        std::unique_ptr<ManagedBuffer>                    mHitShaderBindingTable;
+        struct ShaderResource
+        {
+            std::string   Path;
+            ManagedBuffer BindingTable;
+            ShaderModule  Module;
+        } mRaygenShader, mMissShader, mClosesthitShader, mAnyhitShader;
+
         std::vector<VkRayTracingShaderGroupCreateInfoKHR> mShaderGroups{};
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR  mRayTracingPipelineProperties{};

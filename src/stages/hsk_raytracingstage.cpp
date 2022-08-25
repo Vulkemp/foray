@@ -9,13 +9,25 @@
 #include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
-
+#include <array>
+#include "../base/hsk_shadercompiler.hpp"
 
 namespace hsk {
-    void RaytracingStage::Init(const VkContext* context, Scene* scene)
+    RaytracingStageShaderconfig RaytracingStageShaderconfig::Basic()
+    {
+        return RaytracingStageShaderconfig{.RaygenShaderpath     = "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen.spv",
+                                           .MissShaderpath       = "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss.spv",
+                                           .ClosesthitShaderpath = "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit.spv"};
+    }
+    void RaytracingStage::Init(const VkContext* context, Scene* scene, const RaytracingStageShaderconfig& shaderconfig)
     {
         mContext = context;
         mScene   = scene;
+
+        mRaygenShader.Path     = shaderconfig.RaygenShaderpath;
+        mMissShader.Path       = shaderconfig.MissShaderpath;
+        mClosesthitShader.Path = shaderconfig.ClosesthitShaderpath;
+        mAnyhitShader.Path     = shaderconfig.AnyhitShaderpath;
 
         VkPhysicalDeviceProperties2 prop2{};
         prop2.sType                         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -65,30 +77,18 @@ namespace hsk {
                 mPipelineLayout = nullptr;
             }
         }
-        if(!!mRaygenShaderBindingTable)
+        std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
+        for(auto shader : shaders)
         {
-            mRaygenShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
+            shader->BindingTable.Destroy();
+            shader->Module.Destroy();
         }
-        if(!!mMissShaderBindingTable)
-        {
-            mMissShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
-        }
-        if(!!mHitShaderBindingTable)
-        {
-            mHitShaderBindingTable = nullptr;  // Unique ptr, will invoke destructor
-        }
-        /* if(mPipelineCache)
-        {
-            vkDestroyPipelineCache(device, mPipelineCache, nullptr);
-            mPipelineCache = nullptr;
-        }*/
         mDescriptorSet.Destroy();
     }
 
     void RaytracingStage::CreateResolutionDependentComponents()
     {
         PrepareAttachments();
-        PrepareRenderpass();
     }
 
     void RaytracingStage::DestroyResolutionDependentComponents()
@@ -118,75 +118,6 @@ namespace hsk {
         mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
 
         mColorAttachments = {&mRaytracingRenderTarget};
-    }
-
-    void RaytracingStage::PrepareRenderpass()
-    {
-        // size + 1 for depth attachment description
-        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size());
-        std::vector<VkAttachmentReference>   colorAttachmentReferences(mColorAttachments.size());
-        std::vector<VkImageView>             attachmentViews(attachmentDescriptions.size());
-
-        for(uint32_t i = 0; i < mColorAttachments.size(); i++)
-        {
-            auto& colorAttachment                    = mColorAttachments[i];
-            attachmentDescriptions[i].samples        = colorAttachment->GetSampleCount();
-            attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
-            attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-            attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
-            attachmentDescriptions[i].format         = colorAttachment->GetFormat();
-
-            colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-            attachmentViews[i]           = colorAttachment->GetImageView();
-        }
-
-        // Subpass description
-        VkSubpassDescription subpass    = {};
-        subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = colorAttachmentReferences.size();
-        subpass.pColorAttachments       = colorAttachmentReferences.data();
-        subpass.pDepthStencilAttachment = nullptr;
-
-        VkSubpassDependency subPassDependencies[2] = {};
-        subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[0].dstSubpass          = 0;
-        subPassDependencies[0].srcStageMask        = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[0].dstStageMask        = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subPassDependencies[0].srcAccessMask       = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[0].dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[0].dependencyFlags     = VK_DEPENDENCY_BY_REGION_BIT;
-
-        subPassDependencies[1].srcSubpass      = 0;
-        subPassDependencies[1].dstSubpass      = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subPassDependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.pAttachments           = attachmentDescriptions.data();
-        renderPassInfo.attachmentCount        = static_cast<uint32_t>(attachmentDescriptions.size());
-        renderPassInfo.subpassCount           = 1;
-        renderPassInfo.pSubpasses             = &subpass;
-        renderPassInfo.dependencyCount        = 2;
-        renderPassInfo.pDependencies          = subPassDependencies;
-        //AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
-
-        VkFramebufferCreateInfo fbufCreateInfo = {};
-        fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbufCreateInfo.pNext                   = NULL;
-        fbufCreateInfo.renderPass              = mRenderpass;
-        fbufCreateInfo.pAttachments            = attachmentViews.data();
-        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentViews.size());
-        fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
-        fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
-        fbufCreateInfo.layers                  = 1;
-        //AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void RaytracingStage::SetupDescriptors()
@@ -224,57 +155,51 @@ namespace hsk {
 
     void RaytracingStage::RecordFrame(FrameRenderInfo& renderInfo)
     {
-        //VkRenderPassBeginInfo renderPassBeginInfo{};
-        //renderPassBeginInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        //renderPassBeginInfo.renderPass        = mRenderpass;
-        //renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        //renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
-        //renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
-        //renderPassBeginInfo.pClearValues      = mClearValues.data();
 
         VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
-        //vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        //VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
-        //vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
-        //vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipeline);
 
-        // Instanced object
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1,
                                 &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
-
-        //
-        // raytraycing
         const uint32_t handle_size_aligned = aligned_size(mRayTracingPipelineProperties.shaderGroupHandleSize, mRayTracingPipelineProperties.shaderGroupHandleAlignment);
 
         VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry{};
-        raygen_shader_sbt_entry.deviceAddress = mRaygenShaderBindingTable->GetDeviceAddress();
+        raygen_shader_sbt_entry.deviceAddress = mRaygenShader.BindingTable.GetDeviceAddress();
         raygen_shader_sbt_entry.stride        = handle_size_aligned;
         raygen_shader_sbt_entry.size          = handle_size_aligned;
 
         VkStridedDeviceAddressRegionKHR miss_shader_sbt_entry{};
-        miss_shader_sbt_entry.deviceAddress = mMissShaderBindingTable->GetDeviceAddress();
+        miss_shader_sbt_entry.deviceAddress = mMissShader.BindingTable.GetDeviceAddress();
         miss_shader_sbt_entry.stride        = handle_size_aligned;
         miss_shader_sbt_entry.size          = handle_size_aligned;
 
         VkStridedDeviceAddressRegionKHR hit_shader_sbt_entry{};
-        hit_shader_sbt_entry.deviceAddress = mHitShaderBindingTable->GetDeviceAddress();
+        hit_shader_sbt_entry.deviceAddress = mClosesthitShader.BindingTable.GetDeviceAddress();
         hit_shader_sbt_entry.stride        = handle_size_aligned;
         hit_shader_sbt_entry.size          = handle_size_aligned;
 
         VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry{};
 
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
         mContext->DispatchTable.cmdTraceRaysKHR(commandBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
                                                 scissor.extent.width, scissor.extent.height, 1);
     }
 
-    void RaytracingStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler) {
-        //throw Exception("not implemented");
+    void RaytracingStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler)
+    {
+        bool rebuildNeeded = false;
+        std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
+        for(auto shader : shaders)
+        {
+            rebuildNeeded |= shaderCompiler->HasShaderBeenRecompiled(shader->Path);
+        }
+        if(!rebuildNeeded)
+            return;
+
+        DestroyFixedComponents();
+        CreateFixedSizeComponents();
     }
 
     void RaytracingStage::CreateShaderBindingTables()
@@ -294,26 +219,51 @@ namespace hsk {
 
         // Raygen
         // Create binding table buffers for each shader type
-        mRaygenShaderBindingTable = std::make_unique<ManagedBuffer>();
-        mMissShaderBindingTable   = std::make_unique<ManagedBuffer>();
-        mHitShaderBindingTable    = std::make_unique<ManagedBuffer>();
 
-        mRaygenShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
-        mRaygenShaderBindingTable->SetName("RaygenShaderBindingTable Buffer");
-        mMissShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
-        mMissShaderBindingTable->SetName("MissShaderBindingTable Buffer");
-        mHitShaderBindingTable->Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags);
-        mHitShaderBindingTable->SetName("HitShaderBindingTable Buffer");
-
+        if(mRaygenShader.Path.size() > 0)
+        {
+            mRaygenShader.BindingTable.Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags, "RaygenShaderBindingTable");
+        }
+        if(mMissShader.Path.size() > 0)
+        {
+            mMissShader.BindingTable.Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags, "MissShaderBindingTable");
+        }
+        if(mClosesthitShader.Path.size() > 0)
+        {
+            mClosesthitShader.BindingTable.Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags, "ClosesthitShaderBindingTable");
+        }
+        if(mAnyhitShader.Path.size() > 0)
+        {
+            mAnyhitShader.BindingTable.Create(mContext, sbtBufferUsageFlags, sbtSize, sbtMemoryFlags, sbt_allocation_create_flags, "AnyhitShaderBindingTable");
+        }
 
         // Copy the pipeline's shader handles into a host buffer
         std::vector<uint8_t> shaderHandleStorage(sbtSize);
         AssertVkResult(mContext->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0, groupCount, sbtSize, shaderHandleStorage.data()));
 
+        uint32_t offset = 0;
+
         // Copy the shader handles from the host buffer to the binding tables
-        mRaygenShaderBindingTable->MapAndWrite(shaderHandleStorage.data(), handleSize);
-        mMissShaderBindingTable->MapAndWrite(shaderHandleStorage.data() + handleSizeAligned, handleSize);
-        mHitShaderBindingTable->MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * 2, handleSize);
+        if(mRaygenShader.Path.size() > 0)
+        {
+            mRaygenShader.BindingTable.MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * offset, handleSize);
+            offset++;
+        }
+        if(mMissShader.Path.size() > 0)
+        {
+            mMissShader.BindingTable.MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * offset, handleSize);
+            offset++;
+        }
+        if(mClosesthitShader.Path.size() > 0)
+        {
+            mClosesthitShader.BindingTable.MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * offset, handleSize);
+            offset++;
+        }
+        if(mAnyhitShader.Path.size() > 0)
+        {
+            mAnyhitShader.BindingTable.MapAndWrite(shaderHandleStorage.data() + handleSizeAligned * offset, handleSize);
+            offset++;
+        }
     }
 
     void RaytracingStage::CreateRaytraycingPipeline()
@@ -322,16 +272,13 @@ namespace hsk {
         // Each shader group points at the corresponding shader in the pipeline
 
         // shader stages
-        auto                   rgenShaderModule  = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen.spv");
-        auto                   rmissShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss.spv");
-        auto                   rchitShaderModule = ShaderModule(mContext, "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit.spv");
         ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_RAYGEN_BIT_KHR, rgenShaderModule);
-
 
         // Ray generation group
+        if(mRaygenShader.Path.size() > 0)
         {
-            shaderStageCreateInfos.Add(VK_SHADER_STAGE_RAYGEN_BIT_KHR, rgenShaderModule);
+            new(&mRaygenShader.Module) ShaderModule(mContext, mRaygenShader.Path);
+            shaderStageCreateInfos.Add(VK_SHADER_STAGE_RAYGEN_BIT_KHR, mRaygenShader.Module);
             VkRayTracingShaderGroupCreateInfoKHR raygenGroupCreateInfo{};
             raygenGroupCreateInfo.sType              = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
             raygenGroupCreateInfo.type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
@@ -343,8 +290,10 @@ namespace hsk {
         }
 
         // Ray miss group
+        if(mMissShader.Path.size() > 0)
         {
-            shaderStageCreateInfos.Add(VK_SHADER_STAGE_MISS_BIT_KHR, rmissShaderModule);
+            new(&mMissShader.Module) ShaderModule(mContext, mMissShader.Path);
+            shaderStageCreateInfos.Add(VK_SHADER_STAGE_MISS_BIT_KHR, mMissShader.Module);
             VkRayTracingShaderGroupCreateInfoKHR missGroupCreateInfo{};
             missGroupCreateInfo.sType              = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
             missGroupCreateInfo.type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
@@ -356,16 +305,33 @@ namespace hsk {
         }
 
         // Ray closest hit group
+        if(mClosesthitShader.Path.size() > 0)
         {
-            shaderStageCreateInfos.Add(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, rchitShaderModule);
-            VkRayTracingShaderGroupCreateInfoKHR closes_hit_group_ci{};
-            closes_hit_group_ci.sType              = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
-            closes_hit_group_ci.type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-            closes_hit_group_ci.generalShader      = VK_SHADER_UNUSED_KHR;
-            closes_hit_group_ci.closestHitShader   = static_cast<uint32_t>(shaderStageCreateInfos.Get()->size()) - 1;
-            closes_hit_group_ci.anyHitShader       = VK_SHADER_UNUSED_KHR;
-            closes_hit_group_ci.intersectionShader = VK_SHADER_UNUSED_KHR;
-            mShaderGroups.push_back(closes_hit_group_ci);
+            new(&mClosesthitShader.Module) ShaderModule(mContext, mClosesthitShader.Path);
+            shaderStageCreateInfos.Add(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, mClosesthitShader.Module);
+            VkRayTracingShaderGroupCreateInfoKHR createInfo{};
+            createInfo.sType              = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+            createInfo.type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+            createInfo.generalShader      = VK_SHADER_UNUSED_KHR;
+            createInfo.closestHitShader   = static_cast<uint32_t>(shaderStageCreateInfos.Get()->size()) - 1;
+            createInfo.anyHitShader       = VK_SHADER_UNUSED_KHR;
+            createInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+            mShaderGroups.push_back(createInfo);
+        }
+
+        // Ray any hit group
+        if(mAnyhitShader.Path.size() > 0)
+        {
+            new(&mAnyhitShader.Module) ShaderModule(mContext, mAnyhitShader.Path);
+            shaderStageCreateInfos.Add(VK_SHADER_STAGE_ANY_HIT_BIT_KHR, mAnyhitShader.Module);
+            VkRayTracingShaderGroupCreateInfoKHR createInfo{};
+            createInfo.sType              = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+            createInfo.type               = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+            createInfo.generalShader      = VK_SHADER_UNUSED_KHR;
+            createInfo.closestHitShader   = VK_SHADER_UNUSED_KHR;
+            createInfo.anyHitShader       = static_cast<uint32_t>(shaderStageCreateInfos.Get()->size()) - 1;
+            createInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+            mShaderGroups.push_back(createInfo);
         }
 
         // Create the ray tracing pipeline

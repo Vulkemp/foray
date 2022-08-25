@@ -503,8 +503,10 @@ namespace hsk {
             {
                 logger()->info("F2 pressed - triggered shader recompilation!");
                 mShaderCompiler.SetVerbosityFlags(ShaderCompiler::VerbosityFlags::Modified);
+                mShaderCompiler.SetThrowException(false);
                 mShaderCompiler.CompileAll(true);
                 logger()->info("recompilation done!");
+                vkDeviceWaitIdle(mContext.Device);
                 OnShadersRecompiled(&mShaderCompiler);
             }
         } 

@@ -31,7 +31,7 @@ namespace hsk {
     }
 
 
-    void ShaderModule::DeleteVkModule()
+    void ShaderModule::Destroy()
     {
         if(mShaderModule != nullptr)
         {
