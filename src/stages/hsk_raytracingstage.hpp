@@ -24,7 +24,7 @@ namespace hsk {
       public:
         RaytracingStage() = default;
 
-        virtual void Init(const VkContext* context, Scene* scene, const RaytracingStageShaderconfig& shaderconfig);
+        virtual void Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, const RaytracingStageShaderconfig& shaderconfig);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
@@ -49,11 +49,20 @@ namespace hsk {
         virtual void CreateShaderBindingTables();
         virtual void CreateRaytraycingPipeline();
 
+        void SetupEnvironmentMap();
+
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo(bool rebuild = false);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo(bool rebuild = false);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetEnvironmentMapDescriptorInfo(bool rebuild = false);
 
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
+
+        ManagedImage*                                        mEnvironmentMap        = nullptr;
+        VkSampler                                            mEnvironmentMapSampler = nullptr;
+        std::vector<VkDescriptorImageInfo>                   mEnvironmentMapDescriptorImageInfos;
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mEnvironmentMapDescriptorInfo{};
+        void                                                 UpdateEnvironmentMapDescriptorInfos();
 
         VkPipeline       mPipeline{};
         VkPipelineLayout mPipelineLayout{};

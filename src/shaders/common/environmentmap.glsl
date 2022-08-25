@@ -12,14 +12,14 @@
 #ifndef SET_ENVMAP_CUBESAMPLER
 #define SET_ENVMAP_CUBESAMPLER 0
 #endif  // SET_ENVMAP_CUBESAMPLER
-layout(set = SET_ENVMAP_CUBESAMPLER, binding = BIND_ENVMAP_CUBESAMPLER) samplerCube EnvironmentCube;
+layout(set = SET_ENVMAP_CUBESAMPLER, binding = BIND_ENVMAP_CUBESAMPLER) uniform samplerCube EnvironmentCube;
 #endif  // BIND_ENVMAP_CUBESAMPLER
 
 #ifdef BIND_ENVMAP_SPHERESAMPLER
 #ifndef SET_ENVMAP_SPHERESAMPLER
 #define SET_ENVMAP_SPHERESAMPLER 0
 #endif  // SET_ENVMAP_SPHERESAMPLER
-layout(set = SET_ENVMAP_SPHERESAMPLER, binding = BIND_ENVMAP_SPHERESAMPLER) sampler2D EnvironmentSphere;
+layout(set = SET_ENVMAP_SPHERESAMPLER, binding = BIND_ENVMAP_SPHERESAMPLER) uniform sampler2D EnvironmentSphere;
 
 // https://learnopengl.com/PBR/IBL/Diffuse-irradiance CC BY 4.0 https://learnopengl.com/About
 const vec2 invAtan = vec2(0.1591, 0.3183);

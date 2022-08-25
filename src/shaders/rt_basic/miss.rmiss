@@ -11,11 +11,11 @@
 // Declare hitpayloads
 
 #define HITPAYLOAD_IN
+#include "../rt_common/bindpoints.glsl"
 #include "../rt_common/payload.glsl"
-
-// TODO: Add environmentmap sampling
+#include "../common/environmentmap.glsl"
 
 void main()
 {
-    ReturnPayload.Radiance = vec3(0.f, 0.f, 0.4f);
+    ReturnPayload.Radiance = SampleEnvironmentMap(gl_WorldRayDirectionEXT).xyz;
 }
