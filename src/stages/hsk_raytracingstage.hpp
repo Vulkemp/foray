@@ -37,10 +37,10 @@ namespace hsk {
         std::vector<VkClearValue>                  mClearValues;
         std::vector<std::unique_ptr<ManagedImage>> mGBufferImages;
 
-        virtual void CreateFixedSizeComponents();
-        virtual void DestroyFixedComponents();
-        virtual void CreateResolutionDependentComponents();
-        virtual void DestroyResolutionDependentComponents();
+        virtual void CreateFixedSizeComponents() override;
+        virtual void DestroyFixedComponents() override;
+        virtual void CreateResolutionDependentComponents() override;
+        virtual void DestroyResolutionDependentComponents() override;
 
         virtual void PrepareAttachments();
         virtual void SetupDescriptors();

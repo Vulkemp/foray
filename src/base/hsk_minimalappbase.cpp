@@ -53,7 +53,7 @@ namespace hsk {
 
             timespan_t balance = timespan_t(0);  // The balance variable is meant to smooth out the inconsistent sleep durations over time
 
-            timepoint_t fpsLastTick = clock.now();
+            timepoint_t fpsLastTick     = clock.now();
             uint32_t    fpsFrameCounter = 0;
 
             while(this->State() == EState::Running)
@@ -70,12 +70,12 @@ namespace hsk {
                     timespan_t sinceLastFPS = clock.now() - fpsLastTick;
                     if(sinceLastFPS.count() > 1)
                     {
-                        mFps = (float)fpsFrameCounter;
+                        mFps            = (float)fpsFrameCounter;
                         fpsFrameCounter = 0;
                         fpsLastTick     = clock.now();
                     }
                 }
-                
+
 
                 if(delta + balance >= timePerTick)
                 {
@@ -161,6 +161,8 @@ namespace hsk {
                     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                         logger()->error("{}", pCallbackData->pMessage);
                         throw Exception("{}", pCallbackData->pMessage);
+                        break;
+                    default:
                         break;
                 }
                 return VK_FALSE;

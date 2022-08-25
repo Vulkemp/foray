@@ -40,7 +40,7 @@ namespace hsk {
                       uint32_t              tileWidth,
                       int32_t               channels[5])
         {
-            using component_t     = FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
+            using component_t     = typename FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
             const uint32_t strideBytes = FORMAT_TRAITS::BYTESTRIDE;
             const uint32_t stride = FORMAT_TRAITS::COMPONENT_COUNT;
 

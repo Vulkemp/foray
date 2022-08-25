@@ -17,7 +17,7 @@ namespace hsk {
         virtual void InvokeOnResized(VkExtent2D event);
 
       protected:
-        template <typename TCallback, typename TArg = TCallback::TArg>
+        template <typename TCallback, typename TArg = typename TCallback::TArg>
         struct CallbackVector
         {
             std::vector<TCallback*> Listeners = {};

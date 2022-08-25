@@ -24,7 +24,7 @@ namespace hsk {
         inline static constexpr bool IS_SIGNED = IS_SIGNED_;
     };
 
-    using ComponentTraits_None = ComponentTraits<nullptr_t, nullptr, false, false>;
+    using ComponentTraits_None = ComponentTraits<std::nullptr_t, nullptr, false, false>;
 
     /// @brief 16 bit float component type (1 component per channel)
     using ComponentTraits_Fp16   = ComponentTraits<uint16_t, 0x3C00, true, true>;      // Represented by an integer because x86 has no native support for half precision floats
@@ -65,7 +65,7 @@ namespace hsk {
     {
       public:
         using COMPONENT_TRAITS                            = COMPONENT_TRAITS_;
-        using COMPONENT                                   = COMPONENT_TRAITS_::COMPONENT;
+        using COMPONENT                                   = typename COMPONENT_TRAITS_::COMPONENT;
         inline static const uint32_t     COMPONENT_COUNT  = 4;
         inline static constexpr uint32_t COMPONENT_STRIDE = 4;
         inline static constexpr uint32_t BYTESTRIDE       = COMPONENT_TRAITS::SIZE * COMPONENT_STRIDE;
@@ -96,7 +96,7 @@ namespace hsk {
     {
       public:
         using COMPONENT_TRAITS                            = COMPONENT_TRAITS_;
-        using COMPONENT                                   = COMPONENT_TRAITS_::COMPONENT;
+        using COMPONENT                                   = typename COMPONENT_TRAITS_::COMPONENT;
         inline static constexpr uint32_t COMPONENT_COUNT  = 3;
         inline static constexpr uint32_t COMPONENT_STRIDE = 3;
         inline static constexpr uint32_t BYTESTRIDE       = COMPONENT_TRAITS::SIZE * COMPONENT_STRIDE;
@@ -125,7 +125,7 @@ namespace hsk {
     {
       public:
         using COMPONENT_TRAITS                            = COMPONENT_TRAITS_;
-        using COMPONENT                                   = COMPONENT_TRAITS_::COMPONENT;
+        using COMPONENT                                   = typename COMPONENT_TRAITS_::COMPONENT;
         inline static constexpr uint32_t COMPONENT_COUNT  = 2;
         inline static constexpr uint32_t COMPONENT_STRIDE = 2;
         inline static constexpr uint32_t BYTESTRIDE       = COMPONENT_TRAITS::SIZE * COMPONENT_STRIDE;
@@ -152,7 +152,7 @@ namespace hsk {
     {
       public:
         using COMPONENT_TRAITS                            = COMPONENT_TRAITS_;
-        using COMPONENT                                   = COMPONENT_TRAITS_::COMPONENT;
+        using COMPONENT                                   = typename COMPONENT_TRAITS_::COMPONENT;
         inline static constexpr uint32_t COMPONENT_COUNT  = 1;
         inline static constexpr uint32_t COMPONENT_STRIDE = 1;
         inline static constexpr uint32_t BYTESTRIDE       = COMPONENT_TRAITS::SIZE * COMPONENT_STRIDE;

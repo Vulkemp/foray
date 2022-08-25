@@ -99,7 +99,7 @@ namespace hsk {
         HSK_PROPERTY_GET(Name)
         HSK_PROPERTY_CGET(Name)
 
-        ManagedImage& SetName(std::string_view name);
+        virtual ManagedImage& SetName(std::string_view name) override;
 
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 

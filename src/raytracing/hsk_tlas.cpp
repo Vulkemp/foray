@@ -163,7 +163,7 @@ namespace hsk {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress(),
+            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress()},
         };
 
         // Create the build info. The spec limits this to a single geometry, containing all instance references!
@@ -299,7 +299,7 @@ namespace hsk {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = (VkDeviceOrHostAddressConstKHR)mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress(),
+            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress()},
         };
 
         VkAccelerationStructureBuildGeometryInfoKHR buildInfo{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};

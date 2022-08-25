@@ -15,7 +15,7 @@ namespace hsk {
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
         virtual void Create(const VkContext* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
-        virtual bool Exists() const;
+        virtual bool Exists() const override;
         virtual void Destroy() override;
 
       protected:

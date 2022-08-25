@@ -136,7 +136,7 @@ namespace hsk {
                             sampledTexture.Image->TransitionLayout(layoutTransition);
 
                             VkOffset3D  srcArea{.x = (int32_t)extent.width >> i, .y = (int32_t)extent.height >> i, .z = 1};
-                            VkOffset3D  dstArea{.x = (int32_t)extent.width >> i + 1, .y = (int32_t)extent.height >> i + 1, .z = 1};
+                            VkOffset3D  dstArea{.x = (int32_t)extent.width >> (i + 1), .y = (int32_t)extent.height >> (i + 1), .z = 1};
                             VkImageBlit blit{.srcSubresource =
                                                  VkImageSubresourceLayers{
                                                      .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i, .baseArrayLayer = 0, .layerCount = 1},

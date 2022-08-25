@@ -30,9 +30,9 @@ namespace hsk {
         VkDescriptorPool                   mImguiPool{};
         std::vector<std::function<void()>> mWindowDraws;
 
-        virtual void CreateFixedSizeComponents();
-        virtual void CreateResolutionDependentComponents();
-        virtual void DestroyResolutionDependentComponents();
+        virtual void CreateFixedSizeComponents() override;
+        virtual void CreateResolutionDependentComponents() override;
+        virtual void DestroyResolutionDependentComponents() override;
 
         void PrepareAttachments();
         void PrepareRenderpass();

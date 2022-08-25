@@ -31,7 +31,7 @@ namespace hsk {
         virtual bool Exists() const override { return mBuffer.Exists(); }
 
         inline virtual std::string_view   GetName() const { return mBuffer.GetName(); }
-        inline virtual ManagedVectorBuffer<TClass>& SetName(std::string_view name);
+        inline virtual ManagedVectorBuffer<TClass>& SetName(std::string_view name) override;
 
         inline virtual ~ManagedVectorBuffer() { Destroy(); }
 

@@ -40,6 +40,6 @@
 #define SET_TRACERCONFIG 0
 #define BIND_TRACERCONFIG 8
 
-// Tracer Configuration Ubo
+// Environmentmap
 #define SET_ENVMAP_SPHERESAMPLER 0
 #define BIND_ENVMAP_SPHERESAMPLER 9

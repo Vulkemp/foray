@@ -10,7 +10,7 @@ namespace hsk {
 
     std::string_view PrintVkResult(VkResult result);
 
-    inline void AssertVkResult(VkResult result, const std::source_location location = std::source_location::current())
+    inline void AssertVkResult(VkResult result, const source_location location = source_location::current())
     {
         if(result != VK_SUCCESS)
         {
