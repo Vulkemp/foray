@@ -30,8 +30,9 @@ namespace hsk {
       protected:
         Scene*                                     mScene;
         std::vector<VkClearValue>                  mClearValues;
+        ManagedImage                               mDepthAttachment;
         std::vector<std::unique_ptr<ManagedImage>> mGBufferImages;
-        std::string                                mVertexShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert.spv";
+        std::string                                mVertexShaderPath   = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert.spv";
         std::string                                mFragmentShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag.spv";
 
         virtual void CreateFixedSizeComponents() override;
@@ -54,6 +55,5 @@ namespace hsk {
         inline static const char* TIMESTAMP_FRAG_BEGIN = "Fragment Begin";
         inline static const char* TIMESTAMP_FRAG_END   = "Fragment End";
 #endif  // ENABLE_GBUFFER_BENCH
-
     };
 }  // namespace hsk

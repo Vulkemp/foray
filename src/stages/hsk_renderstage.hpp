@@ -31,7 +31,6 @@ namespace hsk {
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         inline std::vector<ManagedImage*>& GetColorAttachments() { return mColorAttachments; }
-        inline ManagedImage&               GetDepthAttachment() { return mDepthAttachment; }
         ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
 
         inline virtual const std::vector<ResourceReferenceBase*>& Depends() const { return mInputs; }
@@ -47,7 +46,6 @@ namespace hsk {
 
       protected:
         std::vector<ManagedImage*> mColorAttachments;
-        ManagedImage               mDepthAttachment;
         const VkContext*           mContext{};
         DescriptorSetHelper        mDescriptorSet;
 

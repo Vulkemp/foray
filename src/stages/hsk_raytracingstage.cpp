@@ -97,7 +97,6 @@ namespace hsk {
         {
             colorAttachment->Destroy();
         }
-        mDepthAttachment.Destroy();
         mRaytracingRenderTarget.Destroy();
     }
 
@@ -118,16 +117,13 @@ namespace hsk {
                                        VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
         mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
 
-        mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "rt DepthBufferImage");
-
         mColorAttachments = {&mRaytracingRenderTarget};
     }
 
     void RaytracingStage::PrepareRenderpass()
     {
         // size + 1 for depth attachment description
-        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size() + 1);
+        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size());
         std::vector<VkAttachmentReference>   colorAttachmentReferences(mColorAttachments.size());
         std::vector<VkImageView>             attachmentViews(attachmentDescriptions.size());
 
@@ -147,28 +143,12 @@ namespace hsk {
             attachmentViews[i]           = colorAttachment->GetImageView();
         }
 
-        // prepare depth attachment
-        VkAttachmentDescription depthAttachmentDescription{};
-        depthAttachmentDescription.samples        = mDepthAttachment.GetSampleCount();
-        depthAttachmentDescription.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachmentDescription.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
-        depthAttachmentDescription.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depthAttachmentDescription.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachmentDescription.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        depthAttachmentDescription.format         = mDepthAttachment.GetFormat();
-
-        // the depth attachment gets the final id (one higher than the highest color attachment id)
-        VkAttachmentReference depthAttachmentReference   = {(uint32_t)colorAttachmentReferences.size(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
-        attachmentDescriptions[mColorAttachments.size()] = depthAttachmentDescription;
-        attachmentViews[mColorAttachments.size()]        = mDepthAttachment.GetImageView();
-
         // Subpass description
         VkSubpassDescription subpass    = {};
         subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount    = colorAttachmentReferences.size();
         subpass.pColorAttachments       = colorAttachmentReferences.data();
-        subpass.pDepthStencilAttachment = &depthAttachmentReference;
+        subpass.pDepthStencilAttachment = nullptr;
 
         VkSubpassDependency subPassDependencies[2] = {};
         subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
@@ -291,8 +271,6 @@ namespace hsk {
 
         mContext->DispatchTable.cmdTraceRaysKHR(commandBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
                                                 scissor.extent.width, scissor.extent.height, 1);
-
-        //vkCmdEndRenderPass(commandBuffer);
     }
 
     void RaytracingStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler) {

@@ -55,7 +55,6 @@ namespace hsk {
         {
             colorAttachment->Destroy();
         }
-        mDepthAttachment.Destroy();
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
@@ -93,9 +92,6 @@ namespace hsk {
         {
             mColorAttachments.push_back(mFlipImages[i].get());
         }
-
-        mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer_DepthBufferImage");
     }
 
 
