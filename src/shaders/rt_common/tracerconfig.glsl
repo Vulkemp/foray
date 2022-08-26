@@ -19,7 +19,7 @@ TracerConfig;
 
 uint MakeSeed(uvec2 pixelPosition)
 {
-    return RngSeed * (pixelPosition.x + pixelPosition.y * Extent.x);
+    return TracerConfig.RngSeed * (pixelPosition.x + pixelPosition.y * Extent.x);
 }
 
 #endif // BIND_TRACERCONFIG

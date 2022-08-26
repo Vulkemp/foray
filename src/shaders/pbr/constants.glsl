@@ -1,0 +1,6 @@
+#ifndef CONSTANTS_GLSL
+#define CONSTANTS_GLSL
+
+const float PI = 3.1415926535897932384626433f;
+
+#endif  // CONSTANTS_GLSL
