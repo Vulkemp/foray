@@ -32,6 +32,7 @@
 #include "../common/camera.glsl"
 #include "../rt_common/tlas.glsl"
 #include "../rt_common/imageoutput.glsl"
+#include "../common/random.glsl"
 
 // Declare hitpayloads
 
@@ -52,6 +53,7 @@ void main()
 	float tmax = 10000.0;
 
     ChildPayload = ConstructHitPayload();
+	ChildPayload.Seed = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
 
     traceRayEXT(MainTlas, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
 

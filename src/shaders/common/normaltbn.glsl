@@ -7,17 +7,21 @@
 #ifndef NORMALTBN_GLSL
 #define NORMALTBN_GLSL
 
-/// @brief Calculate normal by incorporating tangent space normalmap output
-/// @param normal Interpolated vertex normal in world space
-/// @param tangent Interpolated vertex tangent in world space
-/// @param normalMap Tangent space normalmap readout
-vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in vec3 normalMap)
+mat3 CalculateTBN(in vec3 normal, in vec3 tangent)
 {
     vec3 N   = normalize(normal);
     vec3 T   = normalize(tangent);
     vec3 B   = cross(N, T);
-    mat3 TBN = mat3(T, B, N);
-    return TBN * normalize(normalMap * 2.0 - vec3(1.0));
+    return mat3(T, B, N);
+}
+
+/// @brief Calculate normal by incorporating tangent space normalmap output
+/// @param normal Interpolated vertex normal in world space
+/// @param tangent Interpolated vertex tangent in world space
+/// @param normalMap Tangent space normalmap readout
+vec3 ApplyNormalMap(in mat3 tbn, in vec3 normalMap)
+{
+    return tbn * normalize(normalMap * 2.0 - vec3(1.0));
 }
 
 #ifdef GLTF_GLSL // Requires MaterialProbe struct definition
@@ -26,19 +30,15 @@ vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in vec3 normalMap)
 /// @param normal Interpolated vertex normal in world space
 /// @param tangent Interpolated vertex tangent in world space
 /// @param probe MaterialProbe containing the Tangent space normalmap probe
-vec3 ApplyNormalMap(in vec3 normal, in vec3 tangent, in MaterialProbe probe)
+vec3 ApplyNormalMap(in mat3 tbn, in MaterialProbe probe)
 {
     if(probe.Normal == vec3(0.5f, 0.5f, 1.f))
     {
-        return normalize(normal);
+        return normalize(tbn[2]);
     }
     else
     {
-        vec3 N   = normalize(normal);
-        vec3 T   = normalize(tangent);
-        vec3 B   = cross(N, T);
-        mat3 TBN = mat3(T, B, N);
-        return TBN * normalize(probe.Normal * 2.0 - vec3(1.0));
+        return tbn * normalize(probe.Normal * 2.0 - vec3(1.0));
     }
 }
 

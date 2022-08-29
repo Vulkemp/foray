@@ -13,10 +13,13 @@
 // Include structs and bindings
 
 #include "../rt_common/bindpoints.glsl" // Bindpoints (= descriptor set layout)
+#include "../rt_common/tlas.glsl"
 #include "../common/materialbuffer.glsl" // Material buffer for material information and texture array
 #include "../rt_common/geometrymetabuffer.glsl" // GeometryMeta information
 #include "../rt_common/geobuffers.glsl" // Vertex and index buffer aswell as accessor methods
 #include "../common/normaltbn.glsl" // Normal calculation in tangent space
+#include "../pbr/colorspace.glsl"
+#include "../pbr/specularbrdf.glsl"
 
 // Declare hitpayloads
 
@@ -28,6 +31,11 @@ hitAttributeEXT vec2 attribs; // Barycentric coordinates
 
 void main()
 {
+	if (ReturnPayload.Attenuation <= 0.001f)
+	{
+		return;
+	}
+
 	// Calculate barycentric coords from hitAttribute values
 	const vec3 barycentricCoords = vec3(1.0f - attribs.x - attribs.y, attribs.x, attribs.y);
 	
@@ -59,7 +67,32 @@ void main()
 	vec3 normalWorldSpace = normalize(modelMatTransposedInverse * normalModelSpace);
 	const vec3 tangentWorldSpace = normalize(tangentModelSpace);
 	
-	normalWorldSpace = ApplyNormalMap(normalWorldSpace, tangentWorldSpace, probe);
+	const mat3 TBN = CalculateTBN(normalWorldSpace, tangentWorldSpace);
 
-	ReturnPayload.Radiance = normalWorldSpace;
+	normalWorldSpace = ApplyNormalMap(TBN, probe);
+
+	for (int i = 0; i < 5; i++)
+	{
+		vec3 dir = sampleGGX(ReturnPayload.Seed, TBN, 1.f);
+		vec3 origin = posWorldSpace + dir * 0.001f;
+		ChildPayload = ConstructHitPayload();
+		ChildPayload.Attenuation = 0.f;
+		traceRayEXT(
+			MainTlas,				// acceleration structure
+			gl_RayFlagsOpaqueEXT,	// rayFlags
+			0xFF,					// cullMask
+			0,						// sbtRecordOffset
+			0,						// sbtRecordStride
+			0,						// missIndex
+			origin,					// ray origin
+			0.001,					// ray min range
+			dir,				// ray direction
+			10000.0,				// ray max range
+			0			// payload (location = 0) prd
+		);
+		ReturnPayload.Radiance += ChildPayload.Radiance;
+		ReturnPayload.Radiance *= DecodeGamma(probe.BaseColor.xyz);
+	}
+
+	// ReturnPayload.Radiance = RandomVec3(ReturnPayload.Seed);
 }
