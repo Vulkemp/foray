@@ -8,7 +8,7 @@ namespace hsk {
         /// @brief Radiant flux in Watt per primary wavelength
         alignas(16) glm::vec3 RadiantFluxRgb;
         /// @brief Type (see SimplifiedLightType enum values)
-        uint Type;
+        uint32_t Type;
         /// @brief Position or direction, interprete based on type
         alignas(16) glm::vec3 PosOrDir;
     };

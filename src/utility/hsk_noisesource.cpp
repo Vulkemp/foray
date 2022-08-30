@@ -23,7 +23,7 @@ namespace hsk {
         std::vector<uint32_t> values     = std::vector<uint32_t>(valueCount);
 
         std::mt19937_64 rngEngine;
-        uint64_t        max = 1UL << 32;
+        uint64_t        max = 1ULL << 32;
 
         for(int32_t i = 0; i < valueCount; i++)
         {
