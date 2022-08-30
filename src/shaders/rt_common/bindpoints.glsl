@@ -43,3 +43,7 @@
 // Environmentmap
 #define SET_ENVMAP_SPHERESAMPLER 0
 #define BIND_ENVMAP_SPHERESAMPLER 9
+
+// Noise Source Texture
+#define SET_NOISETEX 0
+#define BIND_NOISETEX 10

@@ -24,7 +24,7 @@ namespace hsk {
       public:
         RaytracingStage() = default;
 
-        virtual void Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, const RaytracingStageShaderconfig& shaderconfig);
+        virtual void Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, ManagedImage* noiseSource, const RaytracingStageShaderconfig& shaderconfig);
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
@@ -50,10 +50,12 @@ namespace hsk {
         virtual void CreateRaytraycingPipeline();
 
         void SetupEnvironmentMap();
+        void SetupNoiseSource();
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo(bool rebuild = false);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo(bool rebuild = false);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetEnvironmentMapDescriptorInfo(bool rebuild = false);
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetNoiseSourceDescriptorInfo(bool rebuild = false);
 
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
@@ -63,6 +65,11 @@ namespace hsk {
         std::vector<VkDescriptorImageInfo>                   mEnvironmentMapDescriptorImageInfos;
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mEnvironmentMapDescriptorInfo{};
         void                                                 UpdateEnvironmentMapDescriptorInfos();
+        ManagedImage*                                        mNoiseSource        = nullptr;
+        VkSampler                                            mNoiseSourceSampler = nullptr;
+        std::vector<VkDescriptorImageInfo>                   mNoiseSourceDescriptorImageInfos;
+        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mNoiseSourceDescriptorInfo{};
+        void                                                 UpdateNoiseSourceDescriptorInfos();
 
         VkPipeline       mPipeline{};
         VkPipelineLayout mPipelineLayout{};

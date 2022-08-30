@@ -32,7 +32,8 @@
 #include "../common/camera.glsl"
 #include "../rt_common/tlas.glsl"
 #include "../rt_common/imageoutput.glsl"
-#include "../common/random.glsl"
+#include "../common/lcrng.glsl"
+#include "../common/noisetex.glsl"
 
 // Declare hitpayloads
 
@@ -53,7 +54,14 @@ void main()
 	float tmax = 10000.0;
 
     ChildPayload = ConstructHitPayload();
-	ChildPayload.Seed = gl_LaunchIDEXT.x + gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x;
+
+	ivec2 texSize = textureSize(NoiseSource, 0);
+
+	ivec2 texel = ivec2(gl_LaunchIDEXT.x % texSize.x, gl_LaunchIDEXT.y % texSize.y);
+
+	ChildPayload.Seed = texelFetch(NoiseSource, texel, 0).x;
+
+	// imageStore(ImageOutput, ivec2(gl_LaunchIDEXT.xy), vec4(vec3(ChildPayload.Seed / float(~0u)), 1.0));
 
     traceRayEXT(MainTlas, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
 

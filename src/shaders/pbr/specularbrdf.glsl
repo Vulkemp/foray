@@ -1,15 +1,15 @@
 #ifndef SPECULAR_BRDF_GLSL
 #define SPECULAR_BRDF_GLSL
 
-#include "../common/random.glsl"
+#include "../common/lcrng.glsl"
 
 // Todo
 vec3 sampleGGX(inout uint seed, in mat3 reflectionTBN, float alpha)
 {
     const float PI = 3.1415926535897932384626433;
 
-	float r1 = RandomFp32(seed);
-	float r2 = RandomFp32(seed);
+	float r1 = lcgFloat(seed);
+	float r2 = lcgFloat(seed);
 
 	float cosTheta = sqrt((1 - r1) / ((alpha * alpha - 1) * r1 + 1));
 	float sinTheta = sqrt(1 - cosTheta * cosTheta);
