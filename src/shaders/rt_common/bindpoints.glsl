@@ -37,8 +37,7 @@
 #define BIND_GEOMETRYMETA 7
 
 // Tracer Configuration Ubo
-#define SET_TRACERCONFIG 0
-#define BIND_TRACERCONFIG 8
+#define PUSHC_TRACERCONFIG
 
 // Environmentmap
 #define SET_ENVMAP_SPHERESAMPLER 0

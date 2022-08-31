@@ -97,5 +97,10 @@ namespace hsk {
         void                                                 UpdateRenderTargetDescriptorBufferInfos();
 
         inline uint32_t aligned_size(uint32_t value, uint32_t alignment) { return (value + alignment - 1) & ~(alignment - 1); }
+
+        struct PushConstant
+        {
+            uint32_t RngSeed = 0u;
+        } mPushConstant;
     };
 }  // namespace hsk

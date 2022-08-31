@@ -172,6 +172,13 @@ namespace hsk {
         pipelineLayoutCreateInfo.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCreateInfo.setLayoutCount = 1;
         pipelineLayoutCreateInfo.pSetLayouts    = &mDescriptorSet.GetDescriptorSetLayout();
+        VkPushConstantRange pushC{
+            .stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
+            .offset     = 0,
+            .size       = sizeof(mPushConstant),
+        };
+        pipelineLayoutCreateInfo.pPushConstantRanges    = &pushC;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
         AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
     }
 
@@ -186,6 +193,10 @@ namespace hsk {
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1,
                                 &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
         const uint32_t handle_size_aligned = aligned_size(mRayTracingPipelineProperties.shaderGroupHandleSize, mRayTracingPipelineProperties.shaderGroupHandleAlignment);
+
+        mPushConstant.RngSeed = renderInfo.GetFrameNumber();
+        vkCmdPushConstants(commandBuffer, mPipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0,
+                           sizeof(mPushConstant), &mPushConstant);
 
         VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry{};
         raygen_shader_sbt_entry.deviceAddress = mRaygenShader.BindingTable.GetDeviceAddress();
