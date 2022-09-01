@@ -79,7 +79,7 @@ namespace hsk {
         /// @brief Override this method to init your application
         inline virtual void Init() {}
         /// @brief Override this method to render your application
-        inline virtual void Render(float delta) {}
+        inline virtual bool Render(float delta) { return false; }
          /// @brief Override to update logic. Delta describes time passed since last update.
          inline virtual void Update(float delta) {}
         /// @brief Override this method to react to events

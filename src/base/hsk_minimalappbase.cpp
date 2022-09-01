@@ -93,7 +93,17 @@ namespace hsk {
                     Update(delta.count());
                     if(this->State() == EState::Running)
                     {
-                        Render(delta.count());
+                        bool didRender = false;
+                        while(!didRender)
+                        {
+                            didRender |= Render(delta.count());
+                            if(!didRender)
+                            {
+                                // Waiting for GPU, polling events now to keep window manager performance decent
+                                BasePollEvents();
+                                SDL_Delay(0);
+                            }
+                        }
                     }
 
                     mMsPerFrame = delta.count();

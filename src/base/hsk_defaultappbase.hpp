@@ -52,7 +52,7 @@ namespace hsk {
         virtual void BaseCleanupSwapchain();
         virtual void BaseCleanupVulkan() override;
 
-        virtual void Render(float delta) override;
+        virtual bool Render(float delta) override;
 
         virtual void        BasePrepareFrame();
         inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}

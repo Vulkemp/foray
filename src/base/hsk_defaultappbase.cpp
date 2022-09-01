@@ -349,11 +349,17 @@ namespace hsk {
         OnResized(mContext.Swapchain.extent);
     }
 
-    void DefaultAppBase::Render(float delta)
+    bool DefaultAppBase::Render(float delta)
     {
         InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
 
         // Make sure that the command buffer we want to use has been presented to the GPU
+        VkResult result = vkGetFenceStatus(mContext.Device, currentFrame.CommandBufferExecutedFence);
+        if(result == VK_NOT_READY)
+        {
+            return false;
+        }
+        AssertVkResult(result);
         vkWaitForFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
 
         if(mRenderedFrameCount > mFrames.size())
@@ -381,7 +387,7 @@ namespace hsk {
 
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        VkResult result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+        result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
 
         renderInfo.SetSwapchainImageIndex(swapChainImageIndex);
 
@@ -389,7 +395,7 @@ namespace hsk {
         {
             // Redo Swapchain
             RecreateSwapchain();
-            return;
+            return true;
         }
         else if(result != VkResult::VK_SUBOPTIMAL_KHR)
         {
@@ -471,7 +477,10 @@ namespace hsk {
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
         {
             // Redo Swapchain
-            RecreateSwapchain();
+            if (mState == EState::Running)
+            {
+                RecreateSwapchain();
+            }
         }
         else
         {
@@ -481,6 +490,7 @@ namespace hsk {
         // Advance frame index
         mRenderedFrameCount++;
         mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrames.size();
+        return true;
     }
     void DefaultAppBase::BasePrepareFrame() {}
     void DefaultAppBase::BaseSubmitFrame() {}
