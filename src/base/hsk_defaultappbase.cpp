@@ -349,9 +349,9 @@ namespace hsk {
         OnResized(mContext.Swapchain.extent);
     }
 
-    bool DefaultAppBase::Render(float delta)
+    bool DefaultAppBase::CanRenderNextFrame()
     {
-        InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
+        InFlightFrame& currentFrame       = mFrames[mCurrentFrameIndex];
 
         // Make sure that the command buffer we want to use has been presented to the GPU
         VkResult result = vkGetFenceStatus(mContext.Device, currentFrame.CommandBufferExecutedFence);
@@ -360,6 +360,16 @@ namespace hsk {
             return false;
         }
         AssertVkResult(result);
+        return true;
+    }
+
+    void DefaultAppBase::Render(float delta)
+    {
+        InFlightFrame& currentFrame       = mFrames[mCurrentFrameIndex];
+        uint32_t       previousFrameIndex = (mRenderedFrameCount - 1 + INFLIGHT_FRAME_COUNT) % INFLIGHT_FRAME_COUNT;
+        InFlightFrame& previousFrame      = mFrames[previousFrameIndex];
+
+        // Make sure that the command buffer we want to use has been presented to the GPU
         vkWaitForFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
 
         if(mRenderedFrameCount > mFrames.size())
@@ -387,7 +397,7 @@ namespace hsk {
 
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+        VkResult result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
 
         renderInfo.SetSwapchainImageIndex(swapChainImageIndex);
 
@@ -395,7 +405,7 @@ namespace hsk {
         {
             // Redo Swapchain
             RecreateSwapchain();
-            return true;
+            return;
         }
         else if(result != VkResult::VK_SUBOPTIMAL_KHR)
         {
@@ -441,14 +451,16 @@ namespace hsk {
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore          readySemaphores[]   = {currentFrame.ImageAvailableSemaphore};
-        VkSemaphore          presentSemaphores[] = {currentFrame.RenderFinishedSemaphore};
-        VkCommandBuffer      commandbuffers[]    = {currentFrame.CommandBuffer};
-        VkPipelineStageFlags waitStages[]        = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT};
-        submitInfo.waitSemaphoreCount            = 1;
-        submitInfo.pWaitSemaphores               = readySemaphores;
+        VkSemaphore          beginRenderSemaphores[] = {currentFrame.ImageAvailableSemaphore, previousFrame.RenderFinishedSemaphore};
+        VkPipelineStageFlags waitStages[]            = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT};
 
+        VkSemaphore          presentSemaphores[] = {currentFrame.RenderFinishedSemaphore};
+
+        VkCommandBuffer      commandbuffers[]    = {currentFrame.CommandBuffer};
+        submitInfo.waitSemaphoreCount            = 1;
+        submitInfo.pWaitSemaphores               = beginRenderSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
+
 
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores    = presentSemaphores;
@@ -490,7 +502,6 @@ namespace hsk {
         // Advance frame index
         mRenderedFrameCount++;
         mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrames.size();
-        return true;
     }
     void DefaultAppBase::BasePrepareFrame() {}
     void DefaultAppBase::BaseSubmitFrame() {}

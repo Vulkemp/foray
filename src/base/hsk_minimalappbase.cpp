@@ -77,7 +77,7 @@ namespace hsk {
                 }
 
 
-                if(delta + balance >= timePerTick)
+                if(delta + balance >= timePerTick && CanRenderNextFrame())
                 {
                     // sufficient time has past since last tick, so we update
                     lastTick = now;
@@ -90,20 +90,9 @@ namespace hsk {
                         // We don't want to attempt smooth out more than 5 missed cycles
                         balance = timespan_t(0.f);
                     }
-                    Update(delta.count());
                     if(this->State() == EState::Running)
                     {
-                        bool didRender = false;
-                        while(!didRender)
-                        {
-                            didRender |= Render(delta.count());
-                            if(!didRender)
-                            {
-                                // Waiting for GPU, polling events now to keep window manager performance decent
-                                BasePollEvents();
-                                SDL_Delay(0);
-                            }
-                        }
+                        Render(delta.count());
                     }
 
                     mMsPerFrame = delta.count();

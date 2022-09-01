@@ -78,8 +78,9 @@ namespace hsk {
         inline virtual void BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
         /// @brief Override this method to init your application
         inline virtual void Init() {}
+        inline virtual bool CanRenderNextFrame() { return false; }
         /// @brief Override this method to render your application
-        inline virtual bool Render(float delta) { return false; }
+        inline virtual void Render(float delta) { }
          /// @brief Override to update logic. Delta describes time passed since last update.
          inline virtual void Update(float delta) {}
         /// @brief Override this method to react to events
