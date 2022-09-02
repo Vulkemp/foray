@@ -76,7 +76,6 @@ namespace hsk {
                     }
                 }
 
-
                 if(delta + balance >= timePerTick && CanRenderNextFrame())
                 {
                     // sufficient time has past since last tick, so we update
@@ -92,6 +91,7 @@ namespace hsk {
                     }
                     if(this->State() == EState::Running)
                     {
+                        Update(delta.count());
                         Render(delta.count());
                     }
 
