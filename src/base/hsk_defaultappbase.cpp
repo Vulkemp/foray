@@ -335,6 +335,16 @@ namespace hsk {
 
     void DefaultAppBase::RecreateSwapchain()
     {
+        VkSurfaceCapabilitiesKHR surfaceCapabilities{};
+        AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext.PhysicalDevice, mContext.ContextSwapchain.Surface, &surfaceCapabilities));
+        
+        if(surfaceCapabilities.maxImageExtent.width == 0 || surfaceCapabilities.maxImageExtent.height == 0)
+        {
+            // we cannot rebuild the swapchain if the maximum supported extent has a zero for either height or width
+            // for example if the window was minimized
+            return;
+        }
+
         AssertVkResult(vkDeviceWaitIdle(mContext.Device));
 
         BaseCleanupSwapchain();
@@ -351,7 +361,7 @@ namespace hsk {
 
     bool DefaultAppBase::CanRenderNextFrame()
     {
-        InFlightFrame& currentFrame       = mFrames[mCurrentFrameIndex];
+        InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
 
         // Make sure that the command buffer we want to use has been presented to the GPU
         VkResult result = vkGetFenceStatus(mContext.Device, currentFrame.CommandBufferExecutedFence);
@@ -389,12 +399,7 @@ namespace hsk {
                   .SetFrameTime(delta);
         // cland-format on
         AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
-        VkCommandBufferBeginInfo cmdbufBI{};
-        cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
-        AssertVkResult(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
-
+        
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
         VkResult result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
@@ -403,7 +408,6 @@ namespace hsk {
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
         {
-            // Redo Swapchain
             RecreateSwapchain();
             return;
         }
@@ -411,6 +415,12 @@ namespace hsk {
         {
             AssertVkResult(result);
         }
+
+        VkCommandBufferBeginInfo cmdbufBI{};
+        cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+        AssertVkResult(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
 
         // Reset the fence
         AssertVkResult(vkResetFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence));
