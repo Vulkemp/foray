@@ -2,9 +2,14 @@
 #include "../hsk_env.hpp"
 #include "../hsk_exception.hpp"
 #include "../hsk_vkHelpers.hpp"
+#include "hsk_shadermanager.hpp"
 
 namespace hsk {
-    ShaderModule::ShaderModule(const VkContext* context, std::string relativeSpirvPath) { LoadFromSpirv(context, relativeSpirvPath); }
+    ShaderModule::ShaderModule(const VkContext* context, std::string relativeSpirvPath)
+    {
+        auto binary = ShaderManager::Instance().GetShaderBinary(relativeSpirvPath);
+        LoadFromBinary(context, binary); 
+    }
 
     void ShaderModule::LoadFromSpirv(const VkContext* context, std::string relativeSpirvPath)
     {
@@ -27,6 +32,17 @@ namespace hsk {
         moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         moduleCreateInfo.codeSize = buffer.size();
         moduleCreateInfo.pCode    = (uint32_t*)buffer.data();
+        vkCreateShaderModule(context->Device, &moduleCreateInfo, NULL, &mShaderModule);
+    }
+
+    void ShaderModule::LoadFromBinary(const VkContext* context, std::vector<char>& binaryBuffer)
+    {
+        mContext                         = context;
+
+        VkShaderModuleCreateInfo moduleCreateInfo{};
+        moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        moduleCreateInfo.codeSize = binaryBuffer.size();
+        moduleCreateInfo.pCode    = (uint32_t*)binaryBuffer.data();
         vkCreateShaderModule(context->Device, &moduleCreateInfo, NULL, &mShaderModule);
     }
 

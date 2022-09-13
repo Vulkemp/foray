@@ -15,9 +15,9 @@
 namespace hsk {
     RaytracingStageShaderconfig RaytracingStageShaderconfig::Basic()
     {
-        return RaytracingStageShaderconfig{.RaygenShaderpath     = "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen.spv",
-                                           .MissShaderpath       = "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss.spv",
-                                           .ClosesthitShaderpath = "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit.spv"};
+        return RaytracingStageShaderconfig{.RaygenShaderpath     = "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen",
+                                           .MissShaderpath       = "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss",
+                                           .ClosesthitShaderpath = "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit"};
     }
     void RaytracingStage::Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, ManagedImage* noiseSource, const RaytracingStageShaderconfig& shaderconfig)
     {

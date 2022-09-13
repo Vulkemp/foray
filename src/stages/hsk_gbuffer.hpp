@@ -32,8 +32,8 @@ namespace hsk {
         std::vector<VkClearValue>                  mClearValues;
         ManagedImage                               mDepthAttachment;
         std::vector<std::unique_ptr<ManagedImage>> mGBufferImages;
-        std::string                                mVertexShaderPath   = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert.spv";
-        std::string                                mFragmentShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag.spv";
+        std::string                                mVertexShaderPath   = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert";
+        std::string                                mFragmentShaderPath = "../hsk_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag";
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;

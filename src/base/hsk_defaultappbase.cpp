@@ -5,6 +5,7 @@
 #include "../utility/hsk_deviceresource.hpp"
 #include "hsk_logger.hpp"
 #include "vma/vk_mem_alloc.h"
+#include "../utility/hsk_shadermanager.hpp"
 
 namespace hsk {
     void DefaultAppBase::BaseInit()
@@ -337,7 +338,7 @@ namespace hsk {
     {
         VkSurfaceCapabilitiesKHR surfaceCapabilities{};
         AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext.PhysicalDevice, mContext.ContextSwapchain.Surface, &surfaceCapabilities));
-        
+
         if(surfaceCapabilities.maxImageExtent.width == 0 || surfaceCapabilities.maxImageExtent.height == 0)
         {
             // we cannot rebuild the swapchain if the maximum supported extent has a zero for either height or width
@@ -513,6 +514,22 @@ namespace hsk {
         mRenderedFrameCount++;
         mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrames.size();
     }
+
+    void DefaultAppBase::Update(float delta)
+    {
+        static float deltaSum = 0;
+        deltaSum += delta;
+        if (deltaSum > 1.0f)
+        {
+            deltaSum = 0;
+            if (ShaderManager::Instance().CheckTrackedFilesForModification())
+            {
+                ShaderManager::Instance().RecompileModifiedShaders();
+                OnShadersRecompiled(nullptr);
+            }
+        }
+    }
+
     void DefaultAppBase::BasePrepareFrame() {}
     void DefaultAppBase::BaseSubmitFrame() {}
 
