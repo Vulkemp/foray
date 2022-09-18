@@ -35,7 +35,7 @@ void main()
 
     MaterialProbe probe = ProbeMaterial(material, inUV);
 
-    outNormal = vec4(ApplyNormalMap(inNormal, inTangent, probe), 0.f);
+    outNormal = vec4(ApplyNormalMap(CalculateTBN(inNormal, inTangent), probe), 0.f);
 
     // Get albedo.
     outAlbedo = probe.BaseColor;
