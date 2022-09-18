@@ -35,7 +35,9 @@ namespace hsk {
 
         virtual void RecompileModifiedShaders();
 
-        virtual bool HasShaderBeenRecompiled(std::string& inputFilePath) { return mNeedRecompileShaderFiles.find(inputFilePath) != mNeedRecompileShaderFiles.end(); }
+        virtual bool HasShaderBeenRecompiledAbsolutePath(std::string& inputFilePath) { return mNeedRecompileShaderFiles.find(inputFilePath) != mNeedRecompileShaderFiles.end(); }
+
+        virtual bool HasShaderBeenRecompiledRelativePath(std::string& inputFilePath);
 
         /// @brief Number of recursive include lookups.
         uint32_t mMaxRecursionDepth = 10;
@@ -60,7 +62,7 @@ namespace hsk {
 
         void SplitString(std::string const& str, const char delim, std::vector<std::string>& out);
 
-        virtual std::string GetFileOutputPath(std::string& sourceFile) { return sourceFile + ".spv"; }
+        virtual std::string GetFileOutputPath(const std::string& sourceFile) { return sourceFile + ".spv"; }
 
         std::unordered_set<std::string> mNeedRecompileShaderFiles;
 

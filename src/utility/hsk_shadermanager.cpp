@@ -102,6 +102,12 @@ namespace hsk {
     }
 #endif
 
+    bool ShaderManager::HasShaderBeenRecompiledRelativePath(std::string& inputFilePath) {
+        auto absolutePath = MakeRelativePath(inputFilePath);
+        NormalizePath(absolutePath);
+        return HasShaderBeenRecompiledAbsolutePath(absolutePath);
+    }
+
     bool ShaderManager::RecursiveScanIncludes(std::string& inputFilePath, uint32_t recursionDepth)
     {
         if(recursionDepth > mMaxRecursionDepth)
@@ -128,7 +134,7 @@ namespace hsk {
             Cache.AddMainFileToIncludee(includeeFullPath);
 
             // check all includes of includee
-            anyIncludeChanged = anyIncludeChanged || RecursiveScanIncludes(includeeFullPath, ++recursionDepth);
+            anyIncludeChanged = RecursiveScanIncludes(includeeFullPath, ++recursionDepth) || anyIncludeChanged;
         }
 
         std::string outputFilePath = GetFileOutputPath(inputFilePath);
@@ -200,27 +206,34 @@ namespace hsk {
         bool anyModification = false;
         for(std::string& inputFilePath : Cache.TrackedFilesIterate)
         {
-            std::string outputFilePath = GetFileOutputPath(inputFilePath);
-
-            // check if tracked file was modified
-            if(fs::last_write_time(inputFilePath) > fs::last_write_time(outputFilePath))
+            auto mapIncludeeToIncluders = Cache.Includees.find(inputFilePath);
+            // is file and includee
+            if(mapIncludeeToIncluders != Cache.Includees.end())
             {
-                anyModification = true;
-                auto mapIncludeeToIncluders = Cache.Includees.find(inputFilePath);
-                // if file is an includee, add all its includers to recompile list
-                if(mapIncludeeToIncluders != Cache.Includees.end())
+                for(const std::string& includer : (*mapIncludeeToIncluders).second)
                 {
-                    for(const std::string& includer : (*mapIncludeeToIncluders).second)
+                    std::string includerOutputPath = GetFileOutputPath(includer);
+                    // check if includee is newer then includer
+                    if(fs::last_write_time(inputFilePath) > fs::last_write_time(includerOutputPath))
                     {
+                        // add includer to recompile list.
                         mNeedRecompileShaderFiles.insert(includer);
+                        anyModification = true;
                     }
                 }
-                else
+            }
+            else // if file is not includee, must be includer
+            {
+                
+                std::string includerOutputPath = GetFileOutputPath(inputFilePath);
+                // check if includer source is newer then spirv binary
+                if(fs::last_write_time(inputFilePath) > fs::last_write_time(includerOutputPath))
                 {
-                    // if file is not includee, must be includer and is added to recompile list 
                     mNeedRecompileShaderFiles.insert(inputFilePath);
+                    anyModification = true;
                 }
             }
+            
         }
         return anyModification;
     }

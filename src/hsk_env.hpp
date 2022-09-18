@@ -14,5 +14,5 @@ namespace hsk {
 
     void OverrideCurrentWorkingDirectory(std::string_view path);
 
-    std::string MakeRelativePath(std::string_view relative);
+    std::string MakeRelativePath(const std::string_view relative);
 }  // namespace hsk

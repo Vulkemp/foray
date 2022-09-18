@@ -7,6 +7,7 @@
 #include "../scenegraph/globalcomponents/hsk_materialbuffer.hpp"
 #include "../scenegraph/globalcomponents/hsk_texturestore.hpp"
 #include "../utility/hsk_pipelinebuilder.hpp"
+#include "../utility/hsk_shadermanager.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
 
@@ -31,7 +32,6 @@ namespace hsk {
             mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         }
         mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
-
     }
 
     void GBufferStage::CreateFixedSizeComponents()
@@ -99,10 +99,14 @@ namespace hsk {
     void GBufferStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler)
     {
         // check if shaders have been recompiled
-        bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
+        //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
+        bool needsPipelineUpdate =
+            ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(mVertexShaderPath) || ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(mFragmentShaderPath);
+
         if(!needsPipelineUpdate)
             return;
 
+        vkDeviceWaitIdle(mContext->Device);
         // rebuild pipeline and its dependencies.
         PreparePipeline();
     }

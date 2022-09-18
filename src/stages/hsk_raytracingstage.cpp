@@ -10,6 +10,7 @@
 #include "../utility/hsk_pipelinebuilder.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "../utility/hsk_shaderstagecreateinfos.hpp"
+#include "../utility/hsk_shadermanager.hpp"
 #include <array>
 
 namespace hsk {
@@ -226,10 +227,12 @@ namespace hsk {
         std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
         for(auto shader : shaders)
         {
-            rebuildNeeded |= shaderCompiler->HasShaderBeenRecompiled(shader->Path);
+            rebuildNeeded |= ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(shader->Path);
         }
         if(!rebuildNeeded)
             return;
+
+        vkDeviceWaitIdle(mContext->Device);
 
         VkDevice device = mContext->Device;
         if(!!mPipeline)

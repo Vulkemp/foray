@@ -75,7 +75,7 @@ namespace hsk {
         cwd_str = path;
     }
 
-    std::string MakeRelativePath(std::string_view relative)
+    std::string MakeRelativePath(const std::string_view relative)
     {
         if(cwd.empty())
         {
