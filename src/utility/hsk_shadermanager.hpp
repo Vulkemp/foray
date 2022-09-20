@@ -85,6 +85,9 @@ namespace hsk {
             /// @brief Maps includee to list of includers.
             std::unordered_map<std::string, std::unordered_set<std::string>> Includees;
 
+            /// @brief After a failed compilation wait for an update.
+            std::unordered_map<std::string, std::filesystem::file_time_type> FailedCompileTimestamps;
+
             void AddMainFileToIncludee(std::string& includee)
             {
                 if(Includees.find(includee) == Includees.end())

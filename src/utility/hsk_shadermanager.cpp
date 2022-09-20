@@ -241,7 +241,38 @@ namespace hsk {
     void ShaderManager::RecompileModifiedShaders() {
         for(std::string toRecompilePath : mNeedRecompileShaderFiles)
         {
-            CallGlslCompiler(toRecompilePath, GetFileOutputPath(toRecompilePath));
+            if(Cache.FailedCompileTimestamps.find(toRecompilePath) != Cache.FailedCompileTimestamps.end())
+            {
+                if(fs::last_write_time(toRecompilePath) <= Cache.FailedCompileTimestamps[toRecompilePath])
+                {
+                    // no write update since last compilation attempt -> skip
+                    continue;
+                }
+            }
+            
+            logger()->info("\033[1;35m Starting compilation of {} \033[0m", toRecompilePath);
+            bool success = CallGlslCompiler(toRecompilePath, GetFileOutputPath(toRecompilePath));
+            if(!success)
+            {
+                logger()->info("\033[1;31m Compilation failed {} \033[0m", toRecompilePath);
+                Cache.FailedCompileTimestamps[toRecompilePath] = fs::last_write_time(toRecompilePath);
+            }
+            else
+            {
+                logger()->info("\033[1;32m Compilation succeeded {} \033[0m", toRecompilePath);
+                // remove from compile failed cache
+                if(Cache.FailedCompileTimestamps.find(toRecompilePath) != Cache.FailedCompileTimestamps.end())
+                {
+                    Cache.FailedCompileTimestamps.erase(toRecompilePath);
+                }
+            }
+        }
+        for(auto& fileTimestampPair : Cache.FailedCompileTimestamps)
+        {
+            if(mNeedRecompileShaderFiles.find(fileTimestampPair.first) != mNeedRecompileShaderFiles.end())
+            {
+                mNeedRecompileShaderFiles.erase(fileTimestampPair.first);
+            }
         }
     }
 
