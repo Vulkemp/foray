@@ -86,4 +86,104 @@ namespace hsk {
         path /= std::filesystem::path(FromUtf8Path(relative));
         return ToUtf8Path(path);
     }
+
+    Utf8Path::Utf8Path() : mPath() {}
+    Utf8Path::Utf8Path(std::string_view path) : mPath(path)
+    {
+        VerifyPath();
+    }
+    Utf8Path::Utf8Path(std::u8string_view path) : mPath(reinterpret_cast<const char*>(path.data()), path.size())
+    {
+        VerifyPath();
+    }
+    Utf8Path::Utf8Path(std::filesystem::path path) : mPath(ToUtf8Path(path))
+    {
+        VerifyPath();
+    }
+
+    void Utf8Path::VerifyPath()
+    {
+        Assert(!mPath.empty(), "Invalid Path Initializer: path argument may not be empty!");
+#ifdef WIN32
+        mRelative = !(mPath.size() >= 2 && mPath[1] == ":" && mPath[2] == "\\");
+        // If the path came from std::filesystem::path, it will contain \ characters
+        for(char& c : mPath)
+        {
+            if(c == '\\')
+            {
+                c = '/';
+            }
+        }
+#else
+        mRelative = !mPath.starts_with("/");
+#endif
+    }
+
+    Utf8Path Utf8Path::operator/(const Utf8Path& other) const
+    {
+        Assert(other.IsRelative(), "Invalid path operation: Cannot resolve absolute path as relative!");
+        std::string       right = other;
+        std::vector<char> path;
+        path.reserve(mPath.size() + right.size() + 1);
+        for(char c : mPath)
+        {
+            path.push_back(c);
+        }
+
+        // Resolve ../ and ./ directory actions
+        while(true)
+        {
+            if(right.starts_with("../"))
+            {
+                right = right.substr(3);
+                while(true)
+                {
+                    Assert(!path.empty(), "Invalid path operation: Navigating above root directory!");
+                    if(path.back() == '/')
+                    {
+                        path.pop_back();
+                        break;
+                    }
+                    path.pop_back();
+                }
+                continue;
+            }
+            if(right.starts_with("./"))
+            {
+                right = right.substr(2);
+                continue;
+            }
+            break;
+        }
+
+        path.push_back('/');
+        for(char c : right)
+        {
+            path.push_back(c);
+        }
+        std::string_view pathstr(path.data(), path.size());
+        return Utf8Path(pathstr);
+    }
+    Utf8Path& Utf8Path::operator/=(const Utf8Path& other)
+    {
+        *this = *this / other;
+        return *this;
+    }
+    Utf8Path::operator const std::string&() const
+    {
+        return mPath;
+    }
+    Utf8Path::operator const char*() const
+    {
+        return mPath.data();
+    }
+    bool Utf8Path::IsRelative() const
+    {
+        return mRelative;
+    }
+    Utf8Path Utf8Path::MakeAbsolute() const
+    {
+        return Utf8Path(CurrentWorkingDirectory()) / *this;
+    }
+
 }  // namespace hsk
