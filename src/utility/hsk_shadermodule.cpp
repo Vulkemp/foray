@@ -7,7 +7,8 @@
 namespace hsk {
     ShaderModule::ShaderModule(const VkContext* context, std::string relativeSpirvPath)
     {
-        auto binary = ShaderManager::Instance().GetShaderBinary(relativeSpirvPath);
+        std::vector<char> binary;
+        ShaderManager::Instance().GetShaderBinary(relativeSpirvPath, binary);
         LoadFromBinary(context, binary); 
     }
 

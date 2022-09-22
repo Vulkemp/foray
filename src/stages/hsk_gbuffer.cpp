@@ -100,8 +100,7 @@ namespace hsk {
     {
         // check if shaders have been recompiled
         //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
-        bool needsPipelineUpdate =
-            ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(mVertexShaderPath) || ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(mFragmentShaderPath);
+        bool needsPipelineUpdate = ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
 
         if(!needsPipelineUpdate)
             return;

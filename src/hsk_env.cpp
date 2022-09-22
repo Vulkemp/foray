@@ -87,18 +87,13 @@ namespace hsk {
         return ToUtf8Path(path);
     }
 
-    Utf8Path::Utf8Path() : mPath() {}
-    Utf8Path::Utf8Path(std::string_view path) : mPath(path)
+    Utf8Path::Utf8Path() : mPath(), mRelative(true), mPathSections() {}
+
+    Utf8Path::Utf8Path(const std::vector<std::string_view>& sections, bool relative)
+        : mPath(), mRelative(relative), mPathSections(sections) 
     {
-        VerifyPath();
-    }
-    Utf8Path::Utf8Path(std::u8string_view path) : mPath(reinterpret_cast<const char*>(path.data()), path.size())
-    {
-        VerifyPath();
-    }
-    Utf8Path::Utf8Path(std::filesystem::path path) : mPath(ToUtf8Path(path))
-    {
-        VerifyPath();
+        sBuildFromSections(mPath, mPathSections);
+        BuildSectionVector();
     }
 
     void Utf8Path::VerifyPath()
@@ -115,60 +110,146 @@ namespace hsk {
             }
         }
 #else
-        mRelative = !mPath.starts_with("/");
+        mRelative = !(mPath.starts_with("/") || mPath.starts_with("~/"));
 #endif
+
+        // Collapse navigator paths
+
+        BuildSectionVector();
+
+        bool attemptCollapse = false;
+        for(int32_t i = 1; i < mPathSections.size(); i++)
+        {
+            std::string_view section = mPathSections[i];
+            if(section == "." || section == "..")
+            {
+                attemptCollapse = true;
+                break;
+            }
+        }
+
+        if(attemptCollapse)
+        {
+            std::vector<std::string_view> path;
+
+            for(std::string_view section : mPathSections)
+            {
+                if(section == "..")
+                {
+                    if(path.empty() || path.back() == "..")
+                    {
+                        Assert(mRelative, "Invalid path operation: Navigating above root directory!");
+                        path.push_back(section);
+                    }
+                    else
+                    {
+                        path.pop_back();
+                    }
+                }
+                else if(section != ".")
+                {
+                    path.push_back(section);
+                }
+            }
+
+            mPathSections = path;
+
+            sBuildFromSections(mPath, mPathSections);
+            BuildSectionVector();
+        }
+    }
+
+    void Utf8Path::BuildSectionVector()
+    {
+        mPathSections.clear();
+
+        int32_t pos       = 0;
+        int32_t start = 0;
+        for(; pos < mPath.size(); pos++)
+        {
+            char c = mPath[pos];
+            if(c == '/')
+            {
+                std::string_view substr(mPath.data() + start, pos - start);
+                mPathSections.push_back(substr);
+                start = pos + 1;
+            }
+        }
+        std::string_view substr(mPath.data() + start, pos - start);
+        mPathSections.push_back(substr);
+    }
+    void Utf8Path::sBuildFromSections(std::string& path, const std::vector<std::string_view>& sections)
+    {
+
+        std::stringstream strbuilder;
+        for(int i = 0; i < sections.size() - 1; i++)
+        {
+            strbuilder << sections[i] << "/";
+        }
+        if(!sections.empty())
+        {
+            strbuilder << sections.back();
+        }
+        path = strbuilder.str();
     }
 
     Utf8Path Utf8Path::operator/(const Utf8Path& other) const
     {
         Assert(other.IsRelative(), "Invalid path operation: Cannot resolve absolute path as relative!");
-        std::string       right = other;
-        std::vector<char> path;
-        path.reserve(mPath.size() + right.size() + 1);
-        for(char c : mPath)
-        {
-            path.push_back(c);
-        }
+        const std::vector<std::string_view> right = other.mPathSections;
+
+        std::vector<std::string_view> path = mPathSections;
+        path.reserve(mPathSections.size() + right.size());
 
         // Resolve ../ and ./ directory actions
-        while(true)
+
+        for(std::string_view section : right)
         {
-            if(right.starts_with("../"))
+            if(section == "..")
             {
-                right = right.substr(3);
-                while(true)
+                Assert(mRelative || !path.empty(), "Invalid path operation: Navigating above root directory!");
+                if(!path.empty() && path.back() == "..")
                 {
-                    Assert(!path.empty(), "Invalid path operation: Navigating above root directory!");
-                    if(path.back() == '/')
-                    {
-                        path.pop_back();
-                        break;
-                    }
+                    path.push_back(section);
+                }
+                else
+                {
                     path.pop_back();
                 }
-                continue;
             }
-            if(right.starts_with("./"))
+            else if(section != ".")
             {
-                right = right.substr(2);
-                continue;
+                path.push_back(section);
             }
-            break;
         }
 
-        path.push_back('/');
-        for(char c : right)
-        {
-            path.push_back(c);
-        }
-        std::string_view pathstr(path.data(), path.size());
-        return Utf8Path(pathstr);
+        return Utf8Path(path, mRelative);
     }
     Utf8Path& Utf8Path::operator/=(const Utf8Path& other)
     {
         *this = *this / other;
         return *this;
     }
+
+    bool Utf8Path::operator==(const Utf8Path& other) const
+    {
+        return mRelative == other.mRelative && other.mPath == other.mPath;
+    }
+    bool Utf8Path::operator!=(const Utf8Path& other) const
+    {
+        return mRelative != other.mRelative || other.mPath != other.mPath;
+    }
+    bool Utf8Path::operator<(const Utf8Path& other) const
+    {
+        Assert(!mRelative && !other.mRelative, "Lexical comparison is only valid for absolute paths!");
+        return mPath < other.mPath;
+    }
+    bool Utf8Path::operator>(const Utf8Path& other) const
+    {
+        Assert(!mRelative && !other.mRelative, "Lexical comparison is only valid for absolute paths!");
+        return mPath > other.mPath;
+    }
+
     Utf8Path::operator const std::string&() const
     {
         return mPath;
@@ -177,6 +258,11 @@ namespace hsk {
     {
         return mPath.data();
     }
+    Utf8Path::operator std::filesystem::path() const
+    {
+        return FromUtf8Path(mPath);
+    }
+
     bool Utf8Path::IsRelative() const
     {
         return mRelative;

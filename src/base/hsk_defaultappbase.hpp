@@ -54,7 +54,7 @@ namespace hsk {
 
         virtual bool CanRenderNextFrame() override;
         virtual void Render(float delta) override;
-        virtual void Update(float delta);
+        virtual void Update(float delta) override;
 
         virtual void        BasePrepareFrame();
         inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}

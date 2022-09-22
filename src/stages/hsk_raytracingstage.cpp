@@ -227,7 +227,7 @@ namespace hsk {
         std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
         for(auto shader : shaders)
         {
-            rebuildNeeded |= ShaderManager::Instance().HasShaderBeenRecompiledRelativePath(shader->Path);
+            rebuildNeeded |= ShaderManager::Instance().HasShaderBeenRecompiled(shader->Path);
         }
         if(!rebuildNeeded)
             return;
