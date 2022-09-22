@@ -522,9 +522,8 @@ namespace hsk {
         if (deltaSum > 1.0f)
         {
             deltaSum = 0;
-            if (ShaderManager::Instance().CheckTrackedFilesForModification())
+            if (ShaderManager::Instance().CheckAndUpdateShaders())
             {
-                ShaderManager::Instance().RecompileModifiedShaders();
                 OnShadersRecompiled(nullptr);
             }
         }

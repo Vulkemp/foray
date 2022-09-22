@@ -12,40 +12,35 @@ namespace hsk {
 
     const std::vector<char>& ShaderManager::GetShaderBinaryAbsolutePath(std::string shaderSourceFilePath)
     {
-        // clean shader file path
+        // clean shader file path (remove ../ etc. from path)
         NormalizePath(shaderSourceFilePath);
-        Cache.CurrentMainIncluder = shaderSourceFilePath;
-
         std::string outputFilePath = GetFileOutputPath(shaderSourceFilePath);
 
-        if(mSpirvCodeMap.find(outputFilePath) == mSpirvCodeMap.end())
+        // if shader code cached, immediate return
+        std::vector<char>* cachedShaderCode = Cache.GetSpirvFileBufferPtr(shaderSourceFilePath);
+        if(cachedShaderCode != nullptr)
         {
-            // output file was not yet listed in spirvmap
-            // => do initial scan which tracks all included files
-            RecursiveScanIncludes(shaderSourceFilePath);
+            return *cachedShaderCode;
         }
 
-        // if either outputfile not exists,
-        // outputfile outdated
-        // or any include file outdated
-        // => recompile
-        if(!fs::exists(outputFilePath) || fs::last_write_time(shaderSourceFilePath) > fs::last_write_time(outputFilePath) || RecursiveScanIncludes(shaderSourceFilePath))
-        {
-            CallGlslCompiler(shaderSourceFilePath, outputFilePath);
-            AddSpirvFile(outputFilePath);
-        }
-        
-        return (*mSpirvCodeMap.find(outputFilePath)).second;
+        AddShaderIncludeesToModificationTracking(shaderSourceFilePath);
+
+        // add includers to tracking
+        Cache.AddTrackedIncluder(shaderSourceFilePath);
+
+        CheckAndUpdateShaders();
+
+        return Cache.AddSpirvFile(shaderSourceFilePath, outputFilePath);
     }
 
 #ifdef _WIN32
     // calls the glslc.exe on windows and passes the shader file path
     // returns false if the compilation failed
-    bool ShaderManager::CallGlslCompiler(const std::string& inputFilePath, const std::string& outputFilePath)
+    bool ShaderManager::CallGlslCompiler(std::string_view inputFilePath, std::string_view outputFilePath)
     {
         // convert paths to wstring
-        std::wstring inputFilePathW  = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(inputFilePath);
-        std::wstring outputFilePathW = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(outputFilePath);
+        std::wstring inputFilePathW  = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(std::string(inputFilePath));
+        std::wstring outputFilePathW = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(std::string(outputFilePath));
         // query vulkan sdk path
         auto         pathVariable      = std::string(std::getenv("VULKAN_SDK"));
         std::wstring pathVariableWStr  = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(pathVariable);
@@ -102,49 +97,34 @@ namespace hsk {
     }
 #endif
 
-    bool ShaderManager::HasShaderBeenRecompiledRelativePath(std::string& inputFilePath) {
+    bool ShaderManager::HasShaderBeenRecompiledRelativePath(std::string& inputFilePath)
+    {
         auto absolutePath = MakeRelativePath(inputFilePath);
         NormalizePath(absolutePath);
         return HasShaderBeenRecompiledAbsolutePath(absolutePath);
     }
 
-    bool ShaderManager::RecursiveScanIncludes(std::string& inputFilePath, uint32_t recursionDepth)
+    void ShaderManager::ScanIncludes(std::vector<std::string>* outIncludes, const std::string& fileToScanPath, uint32_t recursionDepth)
     {
         if(recursionDepth > mMaxRecursionDepth)
         {
             throw Exception("ShaderManager max recursion depth reached. Your shader files might have circular includes.");
         }
 
-        if(Cache.TrackedFilesLookup.find(inputFilePath) == Cache.TrackedFilesLookup.end())
-        {
-            Cache.TrackedFilesLookup.insert(inputFilePath);
-            Cache.TrackedFilesIterate.push_back(inputFilePath);
-        }
+        std::vector<std::string> localFileIncludes;
+        GetAllIncludesWithRelativePath(fileToScanPath, &localFileIncludes);
 
-        std::vector<std::string> includes;
-        GetAllIncludes(inputFilePath, &includes);
-
-        bool anyIncludeChanged = false;
-        for(std::string& includee : includes)
+        for(std::string& includee : localFileIncludes)
         {
             // get includee path
-            std::string includeeFullPath = GetIncludeFilePathRelativeToFile(inputFilePath, includee);
+            std::string includeeFullPath = GetIncludeFilePathRelativeToFile(fileToScanPath, includee);
 
-            // add includee's includer
-            Cache.AddMainFileToIncludee(includeeFullPath);
+            // add full path to output
+            outIncludes->push_back(includeeFullPath);
 
-            // check all includes of includee
-            anyIncludeChanged = RecursiveScanIncludes(includeeFullPath, ++recursionDepth) || anyIncludeChanged;
+            // get includee's includes
+            ScanIncludes(outIncludes, includeeFullPath, ++recursionDepth);
         }
-
-        std::string outputFilePath = GetFileOutputPath(inputFilePath);
-
-        // check if includee was modified
-        if(!fs::exists(outputFilePath) || fs::last_write_time(inputFilePath) > fs::last_write_time(outputFilePath))
-        {
-            anyIncludeChanged = true;
-        }
-        return anyIncludeChanged;
     }
 
     void ShaderManager::SplitString(std::string const& str, const char delim, std::vector<std::string>& out)
@@ -159,7 +139,7 @@ namespace hsk {
         }
     }
 
-    std::string ShaderManager::GetIncludeFilePathRelativeToFile(std::string& includer, const std::string& includee)
+    std::string ShaderManager::GetIncludeFilePathRelativeToFile(const std::string& includer, const std::string& includee)
     {
         // remove file from includer path and append include
         std::filesystem::path includerPath(includer);
@@ -201,82 +181,82 @@ namespace hsk {
         }
     }
 
-    bool ShaderManager::CheckTrackedFilesForModification() { 
+    bool ShaderManager::CheckAndUpdateShaders()
+    {
         mNeedRecompileShaderFiles.clear();
-        bool anyModification = false;
-        for(std::string& inputFilePath : Cache.TrackedFilesIterate)
+        // check all includees if their includers need to be recompiled
+        for(const std::string& includee : Cache.IterateTrackedIncludees)
         {
-            auto mapIncludeeToIncluders = Cache.Includees.find(inputFilePath);
-            // is file and includee
-            if(mapIncludeeToIncluders != Cache.Includees.end())
-            {
-                for(const std::string& includer : (*mapIncludeeToIncluders).second)
-                {
-                    std::string includerOutputPath = GetFileOutputPath(includer);
-                    // check if includee is newer then includer
-                    if(fs::last_write_time(inputFilePath) > fs::last_write_time(includerOutputPath))
-                    {
-                        // add includer to recompile list.
-                        mNeedRecompileShaderFiles.insert(includer);
-                        anyModification = true;
-                    }
-                }
-            }
-            else // if file is not includee, must be includer
-            {
-                
-                std::string includerOutputPath = GetFileOutputPath(inputFilePath);
-                // check if includer source is newer then spirv binary
-                if(fs::last_write_time(inputFilePath) > fs::last_write_time(includerOutputPath))
-                {
-                    mNeedRecompileShaderFiles.insert(inputFilePath);
-                    anyModification = true;
-                }
-            }
-            
+            CheckIncludeeForRecompilations(includee);
         }
-        return anyModification;
+
+        // check includers
+        for(const std::string& includer : Cache.IterateTrackedIncluders)
+        {
+            // check if recompilation failed
+            CheckIncluderForRecompilation(includer);
+        }
+
+        if(mNeedRecompileShaderFiles.size() > 0)
+        {
+            RecompileModifiedShaders();
+            return true;
+        }
+        return false;
     }
 
-    void ShaderManager::RecompileModifiedShaders() {
-        for(std::string toRecompilePath : mNeedRecompileShaderFiles)
+    void ShaderManager::AddShaderIncludeesToModificationTracking(const std::string& shaderSourceFilePath) {
+        std::vector<std::string> includes;
+        ScanIncludes(&includes, shaderSourceFilePath);
+
+        // add all includes to tracking and relate includer & includee
+        for(std::string& includee : includes)
         {
-            if(Cache.FailedCompileTimestamps.find(toRecompilePath) != Cache.FailedCompileTimestamps.end())
-            {
-                if(fs::last_write_time(toRecompilePath) <= Cache.FailedCompileTimestamps[toRecompilePath])
-                {
-                    // no write update since last compilation attempt -> skip
-                    continue;
-                }
-            }
-            
-            logger()->info("\033[1;35m Starting compilation of {} \033[0m", toRecompilePath);
-            bool success = CallGlslCompiler(toRecompilePath, GetFileOutputPath(toRecompilePath));
+            Cache.AddTrackedIncludee(includee);
+            Cache.AddIncludedBy(includee, shaderSourceFilePath);
+        }
+    }
+
+    void ShaderManager::RecompileModifiedShaders()
+    {
+        mRecompiledShaders.clear();
+
+        for(std::string_view shaderPath : mNeedRecompileShaderFiles)
+        {
+            // log magenta shader compiled started
+            logger()->info("\033[1;35m Starting compilation of {} \033[0m", shaderPath);
+
+            // trigger shader recompilation
+            auto             s          = GetFileOutputPath(std::string(shaderPath));
+            bool success = CallGlslCompiler(shaderPath, s);
+
             if(!success)
             {
-                logger()->info("\033[1;31m Compilation failed {} \033[0m", toRecompilePath);
-                Cache.FailedCompileTimestamps[toRecompilePath] = fs::last_write_time(toRecompilePath);
+                // log red failed
+                logger()->error("\033[1;31m Compilation failed {} \033[0m \n", shaderPath);
+                Cache.FailedCompileTimestamps[std::string(shaderPath)] = fs::last_write_time(shaderPath);
             }
             else
             {
-                logger()->info("\033[1;32m Compilation succeeded {} \033[0m", toRecompilePath);
+                // log green success
+                logger()->info("\033[1;32m Compilation succeeded {} \033[0m \n", shaderPath);
+
+                // add to compiled shaders
+                mRecompiledShaders.insert(shaderPath);
+
+                // update shader code cache
+                Cache.AddSpirvFile(std::string(shaderPath), s);
+
                 // remove from compile failed cache
-                if(Cache.FailedCompileTimestamps.find(toRecompilePath) != Cache.FailedCompileTimestamps.end())
+                if(Cache.FailedCompileTimestamps.find(std::string(shaderPath)) != Cache.FailedCompileTimestamps.end())
                 {
-                    Cache.FailedCompileTimestamps.erase(toRecompilePath);
+                    Cache.FailedCompileTimestamps.erase(std::string(shaderPath));
                 }
-            }
-        }
-        for(auto& fileTimestampPair : Cache.FailedCompileTimestamps)
-        {
-            if(mNeedRecompileShaderFiles.find(fileTimestampPair.first) != mNeedRecompileShaderFiles.end())
-            {
-                mNeedRecompileShaderFiles.erase(fileTimestampPair.first);
             }
         }
     }
 
-    void ShaderManager::GetAllIncludes(std::string& inputFilePath, std::vector<std::string>* includes)
+    void ShaderManager::GetAllIncludesWithRelativePath(const std::string& inputFilePath, std::vector<std::string>* includes)
     {
         std::ifstream     ifstream(inputFilePath);
         std::stringstream buffer;
@@ -297,29 +277,101 @@ namespace hsk {
         }
     }
 
-    void ShaderManager::AddSpirvFile(std::string& shaderSpirvFullPath)
+    void ShaderManager::CheckIncludeeForRecompilations(const std::string& includee)
     {
-        std::ifstream file(shaderSpirvFullPath.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
+
+        for(const std::string& includer : Cache.Includees[includee])
+        {
+            // check if includer recompilation failed
+            if(Cache.FailedCompileTimestamps.find(includer) != Cache.FailedCompileTimestamps.end())
+            {
+                // if so, check if includee has been modified afterwards
+                if(fs::last_write_time(includee) > Cache.FailedCompileTimestamps[includer])
+                {
+                    // if yes, its time to recompile includer
+                    mNeedRecompileShaderFiles.insert(includer);
+                    continue;
+                }
+                else
+                {
+                    // includer compilation failed, but we haven't updated includee since last compilation fail
+                    // => skip for now
+                    continue;
+                }
+            }
+
+            // if there was no recompilation fail, simply check if last modification is newer then includer
+            if(fs::last_write_time(includee) > fs::last_write_time(GetFileOutputPath(includer)))
+            {
+                // if yes, its time to recompile includer
+                mNeedRecompileShaderFiles.insert(includer);
+                continue;
+            }
+        }
+    }
+
+    void ShaderManager::CheckIncluderForRecompilation(const std::string& includer)
+    {
+
+        // check if includer recompilation failed
+        if(Cache.FailedCompileTimestamps.find(includer) != Cache.FailedCompileTimestamps.end())
+        {
+            // check if indcluder has been modified since last crash
+            if(fs::last_write_time(includer) > Cache.FailedCompileTimestamps[includer])
+            {
+                // if yes, its time to recompile includer
+                mNeedRecompileShaderFiles.insert(includer);
+                return;
+            }
+            else
+            {
+                // includer compilation failed, but we haven't updated includer since last compilation fail
+                // => skip for now
+                return;
+            }
+        }
+
+        // if includer output binary is missing OR the source is newer then the output, trigger recompilation
+        if(!fs::exists(includer) || fs::last_write_time(includer) > fs::last_write_time(GetFileOutputPath(includer)))
+        {
+            mNeedRecompileShaderFiles.insert(includer);
+        }
+    }
+
+    std::vector<char>& ShaderManager::IncluderCache::AddSpirvFile(const std::string& shaderSourceFilePath, std::string& shaderSpirvPath)
+    {
+        std::ifstream file(shaderSpirvPath.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
 
         if(!file.is_open())
         {
-            throw Exception("Could not open shader file: {}", shaderSpirvFullPath);
+            throw Exception("Could not open shader file: {}", shaderSpirvPath);
         }
 
         // create buffer if not existent
-        if(mSpirvCodeMap.find(shaderSpirvFullPath) == mSpirvCodeMap.end())
+        if(mMapSourceFilePathToSpirv.find(shaderSourceFilePath) == mMapSourceFilePathToSpirv.end())
         {
-            mSpirvCodeMap.insert({shaderSpirvFullPath, std::vector<char>()});
+            mMapSourceFilePathToSpirv.insert({shaderSourceFilePath, std::vector<char>()});
         }
         // get buffer reference
-        auto buffer = &(*mSpirvCodeMap.find(shaderSpirvFullPath)).second;
+        std::vector<char>& buffer = (*mMapSourceFilePathToSpirv.find(shaderSourceFilePath)).second;
 
         size_t fileSize = (size_t)file.tellg();
-        buffer->resize(fileSize);
+        buffer.resize(fileSize);
         file.seekg(0);
-        file.read(buffer->data(), static_cast<std::streamsize>(fileSize));
+        file.read(buffer.data(), static_cast<std::streamsize>(fileSize));
         file.close();
 
+        return buffer;
+    }
+
+    std::vector<char>* ShaderManager::IncluderCache::GetSpirvFileBufferPtr(std::string& shaderSourceFilePath)
+    {
+        auto findSpirvIter = mMapSourceFilePathToSpirv.find(shaderSourceFilePath);
+        if(findSpirvIter == mMapSourceFilePathToSpirv.end())
+        {
+            return nullptr;
+        }
+        return &(*findSpirvIter).second;
     }
 
 }  // namespace hsk
