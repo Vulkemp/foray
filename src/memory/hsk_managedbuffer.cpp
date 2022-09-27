@@ -8,9 +8,17 @@ namespace hsk {
 
     void ManagedBuffer::Create(const VkContext* context, const ManagedBufferCreateInfo& createInfo)
     {
-        mContext = context;
-        mSize    = createInfo.BufferCreateInfo.size;
-        AssertVkResult(vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo));
+        mContext   = context;
+        mSize      = createInfo.BufferCreateInfo.size;
+        mAlignment = createInfo.Alignment;
+        if(mAlignment > 1)
+        {
+            AssertVkResult(vmaCreateBufferWithAlignment(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, mAlignment, &mBuffer, &mAllocation, &mAllocationInfo));
+        }
+        else
+        {
+            AssertVkResult(vmaCreateBuffer(mContext->Allocator, &createInfo.BufferCreateInfo, &createInfo.AllocationCreateInfo, &mBuffer, &mAllocation, &mAllocationInfo));
+        }
         if(createInfo.Name.size())
         {
             mName = createInfo.Name;

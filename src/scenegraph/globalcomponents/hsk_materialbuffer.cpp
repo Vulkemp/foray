@@ -11,7 +11,7 @@ namespace hsk {
         if(!mBuffer.GetVector().size())
         {
             // Push something empty so we don't fail to write to the descriptor set down the line
-            mBuffer.GetVector().push_back(MaterialBufferEntry{});
+            mBuffer.GetVector().push_back(DefaultMaterialEntry{});
         }
         mBuffer.InitOrUpdate();
     }

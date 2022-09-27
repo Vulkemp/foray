@@ -28,6 +28,9 @@ namespace hsk {
         /// @brief Set the offset into the GeometryMetaBuffer (see hsk_geometrymetabuffer.hpp)
         void SetGeometryMetaOffset(uint32_t offset);
 
+        /// @brief Set the offset for shader binding table
+        void SetShaderBindingTableOffset(uint32_t offset);
+
         /// @brief Updates the transform by fetching a new matrix
         void Update();
 

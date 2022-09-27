@@ -12,7 +12,7 @@ namespace hsk {
       public:
         explicit MaterialBuffer(const VkContext* context);
 
-        std::vector<MaterialBufferEntry>& GetVector() { return mBuffer.GetVector(); }
+        std::vector<DefaultMaterialEntry>& GetVector() { return mBuffer.GetVector(); }
 
         /// @brief Apply changes made to the cpu local buffer to the device local buffer
         void UpdateDeviceLocal();
@@ -23,7 +23,7 @@ namespace hsk {
         inline virtual ~MaterialBuffer() { Destroy(); }
 
       protected:
-        ManagedVectorBuffer<MaterialBufferEntry> mBuffer = {};
+        ManagedVectorBuffer<DefaultMaterialEntry> mBuffer = {};
         std::vector<VkDescriptorBufferInfo>                  mDescriptorBufferInfos;
     };
 }  // namespace hsk

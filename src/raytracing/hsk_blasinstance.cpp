@@ -44,6 +44,11 @@ namespace hsk {
         mAsInstance.instanceCustomIndex = offset;
     }
 
+    void BlasInstance::SetShaderBindingTableOffset(uint32_t offset)
+    {
+        mAsInstance.instanceShaderBindingTableRecordOffset = offset;
+    }
+
     void BlasInstance::Update()
     {
         if(!!mGetUpdatedGlobalTransformFunc)
