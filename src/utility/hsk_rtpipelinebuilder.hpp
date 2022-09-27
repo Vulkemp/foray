@@ -51,6 +51,8 @@ namespace hsk {
     using SbtBindId     = int32_t;
     using ShaderGroupId = int32_t;
 
+    class RtShaderCollection;
+
     /// @brief A shader binding table is essentially a list of shader references, with some optional custom data (indices etc.) per shader reference
     class ShaderBindingTable
     {
@@ -84,6 +86,7 @@ namespace hsk {
         }
 
         void WriteToShaderStageCiVector(std::vector<VkPipelineShaderStageCreateInfo>& out) const;
+        void WriteToShaderCollection(RtShaderCollection& collection) const;
         void GetShaderGroupIds(std::unordered_set<uint32_t>& groupIds) const;
         void GetGroupIdIndex(uint32_t groupId, int32_t& first) const;
         void GetGroupIdIndices(uint32_t groupId, int32_t& first, int32_t& count) const;
@@ -108,6 +111,28 @@ namespace hsk {
         std::vector<uint8_t>         mShaderData{};
     };
 
+    class RtShaderCollection
+    {
+      public:
+        struct Entry
+        {
+            ShaderModule* Module       = nullptr;
+            RtShaderType  Type         = RtShaderType::Undefined;
+            uint32_t      StageCiIndex = VK_SHADER_UNUSED_KHR;
+        };
+
+        void     Add(ShaderModule* module, RtShaderType type);
+        void     Clear();
+        uint32_t IndexOf(ShaderModule* module) const;
+
+        void BuildShaderStageCiVector();
+
+        HSK_PROPERTY_CGET(ShaderStageCis)
+
+      protected:
+        std::unordered_map<ShaderModule*, Entry>     mEntries;
+        std::vector<VkPipelineShaderStageCreateInfo> mShaderStageCis;
+    };
 
     class RtPipeline
     {
@@ -128,12 +153,14 @@ namespace hsk {
 
         struct ShaderGroup
         {
-            ShaderGroupId     Id              = {};
-            RtShaderGroupType Type            = RtShaderGroupType::Undefined;
-            SbtBindId         GeneralIndex    = -1;
-            SbtBindId         ClosestHitIndex = -1;
-            SbtBindId         AnyHitIndex     = -1;
-            SbtBindId         IntersectIndex  = -1;
+            ShaderGroupId     Id         = {};
+            RtShaderGroupType Type       = RtShaderGroupType::Undefined;
+            ShaderModule*     General    = nullptr;
+            ShaderModule*     ClosestHit = nullptr;
+            ShaderModule*     AnyHit     = nullptr;
+            ShaderModule*     Intersect  = nullptr;
+
+            VkRayTracingShaderGroupCreateInfoKHR BuildShaderGroupCi(const RtShaderCollection& shaderCollection) const;
         };
 
       protected:
@@ -143,6 +170,8 @@ namespace hsk {
         ShaderBindingTable mCallablesSbt;
 
         std::vector<ShaderGroup> mShaderGroups;
+
+        RtShaderCollection mShaderCollection;
 
         VkPipelineLayout mPipelineLayout;
         VkPipeline       mPipeline;

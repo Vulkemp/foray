@@ -189,6 +189,14 @@ namespace hsk {
         }
     }
 
+    void ShaderBindingTable::WriteToShaderCollection(RtShaderCollection& collection) const
+    {
+        for(const ShaderReference shader : mShaders)
+        {
+            collection.Add(shader.Module, shader.Type);
+        }
+    }
+
     void ShaderBindingTable::GetShaderGroupIds(std::unordered_set<uint32_t>& groupIds) const
     {
         for(const ShaderReference shader : mShaders)
@@ -230,25 +238,65 @@ namespace hsk {
         }
     }
 
+    void RtShaderCollection::Add(ShaderModule* module, RtShaderType type)
+    {
+        const auto iter = mEntries.find(module);
+        if(iter != mEntries.cend())
+        {
+            Assert(iter->second.Type == type, "Shader module inserted with different shader type!");
+        }
+        else
+        {
+            mEntries[module] = Entry{module, type};
+        }
+    }
+    void RtShaderCollection::Clear()
+    {
+        mEntries.clear();
+    }
+
+    uint32_t RtShaderCollection::IndexOf(ShaderModule* module) const
+    {
+        const auto iter = mEntries.find(module);
+        Assert(iter != mEntries.cend(), "Shader module not in collection!");
+        const Entry& entry = iter->second;
+        Assert(entry.StageCiIndex != VK_SHADER_UNUSED_KHR, "Build shader stage ci vector first!");
+        return entry.StageCiIndex;
+    }
+
+    void RtShaderCollection::BuildShaderStageCiVector()
+    {
+        mShaderStageCis.clear();
+        for(auto& entry : mEntries)
+        {
+            uint32_t index = mShaderStageCis.size();
+            mShaderStageCis.push_back(VkPipelineShaderStageCreateInfo{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                                      .stage  = RtShaderEnumConversions::ToStage(entry.second.Type),
+                                                                      .module = *(entry.second.Module),
+                                                                      .pName  = "main"});
+            entry.second.StageCiIndex = index;
+        }
+    }
+
     uint32_t RtPipeline::AddShaderGroupRaygen(ShaderModule* module)
     {
         ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
         SbtBindId     index   = mRaygenSbt.AddShader(module, RtShaderType::Raygen, groupId);
-        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Raygen, .GeneralIndex = index});
+        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Raygen, .General = module});
         return groupId;
     }
     uint32_t RtPipeline::AddShaderGroupCallable(ShaderModule* module)
     {
         ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
         SbtBindId     index   = mCallablesSbt.AddShader(module, RtShaderType::Callable, groupId);
-        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Callable, .GeneralIndex = index});
+        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Callable, .General = module});
         return groupId;
     }
     uint32_t RtPipeline::AddShaderGroupMiss(ShaderModule* module)
     {
         ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
         SbtBindId     index   = mMissSbt.AddShader(module, RtShaderType::Miss, groupId);
-        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Miss, .GeneralIndex = index});
+        mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Miss, .General = module});
         return groupId;
     }
     uint32_t RtPipeline::AddShaderGroupIntersect(ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect)
@@ -257,73 +305,68 @@ namespace hsk {
         ShaderGroup   group   = ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Intersect};
         if(!!closestHit)
         {
-            group.ClosestHitIndex = mIntersectsSbt.AddShader(closestHit, RtShaderType::ClosestHit, groupId);
+            mIntersectsSbt.AddShader(closestHit, RtShaderType::ClosestHit, groupId);
+            group.ClosestHit = closestHit;
         }
         if(!!anyHit)
         {
-            group.AnyHitIndex = mIntersectsSbt.AddShader(anyHit, RtShaderType::Anyhit, groupId);
+            mIntersectsSbt.AddShader(anyHit, RtShaderType::Anyhit, groupId);
+            group.AnyHit = anyHit;
         }
         if(!!intersect)
         {
-            group.IntersectIndex = mIntersectsSbt.AddShader(intersect, RtShaderType::Intersect, groupId);
+            mIntersectsSbt.AddShader(intersect, RtShaderType::Intersect, groupId);
+            group.Intersect = intersect;
         }
         mShaderGroups[groupId] = group;
         return groupId;
     }
 
+    struct ShaderGroupHandles
+    {
+        ShaderHandle General    = {};
+        ShaderHandle ClosestHit = {};
+        ShaderHandle AnyHit     = {};
+        ShaderHandle Intersect  = {};
+    };
+
+    VkRayTracingShaderGroupCreateInfoKHR RtPipeline::ShaderGroup::BuildShaderGroupCi(const RtShaderCollection& shaderCollection) const
+    {
+        switch(Type)
+        {
+            case RtShaderGroupType::Raygen:
+            case RtShaderGroupType::Callable:
+            case RtShaderGroupType::Miss: {
+                return VkRayTracingShaderGroupCreateInfoKHR{.sType              = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+                                                            .type               = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
+                                                            .generalShader      = shaderCollection.IndexOf(General),
+                                                            .closestHitShader   = VK_SHADER_UNUSED_KHR,
+                                                            .anyHitShader       = VK_SHADER_UNUSED_KHR,
+                                                            .intersectionShader = VK_SHADER_UNUSED_KHR};
+                break;
+            }
+            case RtShaderGroupType::Intersect: {
+                VkRayTracingShaderGroupTypeKHR type = (!!Intersect) ? VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR :
+                                                                      VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+                return VkRayTracingShaderGroupCreateInfoKHR{.sType              = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
+                                                            .type               = type,
+                                                            .generalShader      = VK_SHADER_UNUSED_KHR,
+                                                            .closestHitShader   = (!!ClosestHit) ? shaderCollection.IndexOf(ClosestHit) : VK_SHADER_UNUSED_KHR,
+                                                            .anyHitShader       = (!!AnyHit) ? shaderCollection.IndexOf(AnyHit) : VK_SHADER_UNUSED_KHR,
+                                                            .intersectionShader = (!!Intersect) ? shaderCollection.IndexOf(Intersect) : VK_SHADER_UNUSED_KHR};
+                break;
+            }
+            default:
+                Exception::Throw("Build ShaderGroupCi for unconfigured shadergroup!");
+                break;
+        }
+    }
 
     void RtPipeline::Build(const VkContext* context)
     {
-        std::vector<VkPipelineShaderStageCreateInfo> shaderStageCis;
-        uint32_t                                     intersectOffset = 0;
-        uint32_t                                     missOffset      = 0;
-        uint32_t                                     callablesOffset = 0;
+        /// STEP # 0    Reset, get physical device properties
 
-        mRaygenSbt.WriteToShaderStageCiVector(shaderStageCis);
-
-        intersectOffset = (uint32_t)shaderStageCis.size();
-        mIntersectsSbt.WriteToShaderStageCiVector(shaderStageCis);
-
-        missOffset = (uint32_t)shaderStageCis.size();
-        mMissSbt.WriteToShaderStageCiVector(shaderStageCis);
-
-        callablesOffset = (uint32_t)shaderStageCis.size();
-        mCallablesSbt.WriteToShaderStageCiVector(shaderStageCis);
-
-        std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroupCis;
-
-        for(const ShaderGroup& shaderGroup : mShaderGroups)
-        {
-            switch(shaderGroup.Type)
-            {
-                case RtShaderGroupType::Raygen:
-                case RtShaderGroupType::Callable:
-                case RtShaderGroupType::Miss: {
-                    shaderGroupCis.push_back(VkRayTracingShaderGroupCreateInfoKHR{.sType            = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-                                                                                  .type             = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
-                                                                                  .generalShader    = (uint32_t)shaderGroup.GeneralIndex,
-                                                                                  .closestHitShader = VK_SHADER_UNUSED_KHR,
-                                                                                  .anyHitShader     = VK_SHADER_UNUSED_KHR,
-                                                                                  .intersectionShader = VK_SHADER_UNUSED_KHR});
-                    break;
-                }
-                case RtShaderGroupType::Intersect: {
-                    VkRayTracingShaderGroupTypeKHR type = shaderGroup.IntersectIndex >= 0 ?
-                                                              VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR :
-                                                              VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-                    shaderGroupCis.push_back(VkRayTracingShaderGroupCreateInfoKHR{
-                        .sType              = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
-                        .type               = type,
-                        .generalShader      = (shaderGroup.GeneralIndex >= 0) ? (uint32_t)shaderGroup.GeneralIndex : VK_SHADER_UNUSED_KHR,
-                        .closestHitShader   = (shaderGroup.ClosestHitIndex >= 0) ? (uint32_t)shaderGroup.ClosestHitIndex : VK_SHADER_UNUSED_KHR,
-                        .anyHitShader       = (shaderGroup.AnyHitIndex >= 0) ? (uint32_t)shaderGroup.AnyHitIndex : VK_SHADER_UNUSED_KHR,
-                        .intersectionShader = (shaderGroup.IntersectIndex >= 0) ? (uint32_t)shaderGroup.IntersectIndex : VK_SHADER_UNUSED_KHR});
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
+        mShaderCollection.Clear();
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR pipelineProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR};
         {
@@ -333,24 +376,111 @@ namespace hsk {
             vkGetPhysicalDeviceProperties2(context->PhysicalDevice, &prop2);
         }
 
+
+        /// STEP # 1    Rebuild shader collection
+
+        mRaygenSbt.WriteToShaderCollection(mShaderCollection);
+        mMissSbt.WriteToShaderCollection(mShaderCollection);
+        mCallablesSbt.WriteToShaderCollection(mShaderCollection);
+        mIntersectsSbt.WriteToShaderCollection(mShaderCollection);
+
+        mShaderCollection.BuildShaderStageCiVector();
+
+
+        /// STEP # 2    Collect ShaderGroup, build sorted vector
+
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> raygenGroupCis;
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> callableGroupCis;
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> missGroupCis;
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> intersectGroupCis;
+
+        std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroupCis;
+
+        for(const ShaderGroup& shaderGroup : mShaderGroups)
+        {
+            VkRayTracingShaderGroupCreateInfoKHR groupCi = shaderGroup.BuildShaderGroupCi(mShaderCollection);
+
+            switch(shaderGroup.Type)
+            {
+                case RtShaderGroupType::Raygen: {
+                    raygenGroupCis.push_back(groupCi);
+                    break;
+                }
+                case RtShaderGroupType::Miss: {
+                    missGroupCis.push_back(groupCi);
+                    break;
+                }
+                case RtShaderGroupType::Callable: {
+                    callableGroupCis.push_back(groupCi);
+                    break;
+                }
+                case RtShaderGroupType::Intersect: {
+                    intersectGroupCis.push_back(groupCi);
+                    break;
+                }
+            }
+        }
+
+        // Insert grouped into shaderGroupCis vector
+
+        shaderGroupCis.reserve(mShaderGroups.size());
+
+        uint32_t missOffset      = 0;
+        uint32_t callablesOffset = 0;
+        uint32_t intersectOffset = 0;
+
+        shaderGroupCis.insert(shaderGroupCis.end(), raygenGroupCis.begin(), raygenGroupCis.end());
+        missOffset = shaderGroupCis.size();
+        shaderGroupCis.insert(shaderGroupCis.end(), missGroupCis.begin(), missGroupCis.end());
+        callablesOffset = shaderGroupCis.size();
+        shaderGroupCis.insert(shaderGroupCis.end(), callableGroupCis.begin(), callableGroupCis.end());
+        intersectOffset = shaderGroupCis.size();
+        shaderGroupCis.insert(shaderGroupCis.end(), intersectGroupCis.begin(), intersectGroupCis.end());
+
+
+        /// STEP # 3    Build RT pipeline
+
         // Create the ray tracing pipeline
-        VkRayTracingPipelineCreateInfoKHR raytracingPipelineCreateInfo{};
-        raytracingPipelineCreateInfo.sType                        = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
-        raytracingPipelineCreateInfo.stageCount                   = static_cast<uint32_t>(shaderStageCis.size());
-        raytracingPipelineCreateInfo.pStages                      = shaderStageCis.data();
-        raytracingPipelineCreateInfo.groupCount                   = static_cast<uint32_t>(shaderGroupCis.size());
-        raytracingPipelineCreateInfo.pGroups                      = shaderGroupCis.data();
-        raytracingPipelineCreateInfo.maxPipelineRayRecursionDepth = pipelineProperties.maxRayRecursionDepth;
-        raytracingPipelineCreateInfo.layout                       = mPipelineLayout;
+        VkRayTracingPipelineCreateInfoKHR raytracingPipelineCreateInfo{
+            .sType                        = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR,
+            .stageCount                   = static_cast<uint32_t>(mShaderCollection.GetShaderStageCis().size()),
+            .pStages                      = mShaderCollection.GetShaderStageCis().data(),
+            .groupCount                   = static_cast<uint32_t>(shaderGroupCis.size()),
+            .pGroups                      = shaderGroupCis.data(),
+            .maxPipelineRayRecursionDepth = pipelineProperties.maxRayRecursionDepth,
+            .layout                       = mPipelineLayout,
+        };
 
         AssertVkResult(context->DispatchTable.createRayTracingPipelinesKHR(nullptr, nullptr, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
 
 
-        std::vector<uint8_t> shaderHandleData(shaderStageCis.size() * pipelineProperties.shaderGroupHandleSize);
-        // AssertVkResult(context->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0))
+        /// STEP # 4    Get shader handles
 
-        std::vector<ShaderHandle> shaderHandles(shaderStageCis.size());
+        std::vector<uint8_t> shaderHandleData(shaderGroupCis.size() * pipelineProperties.shaderGroupHandleSize);
+        AssertVkResult(context->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
 
+        std::vector<ShaderHandle> shaderHandles;
+        shaderHandles.reserve(mShaderGroups.size());
 
+        {
+            for(const ShaderBindingTable::ShaderReference& shaderRef : mRaygenSbt.GetShaders())
+            {
+                const uint8_t* dataPtr = shaderHandleData.data() + (shaderRef.GroupId * pipelineProperties.shaderGroupHandleSize);
+                ShaderHandle   handle  = {};
+                memcpy(&handle, dataPtr, pipelineProperties.shaderGroupHandleSize);
+                shaderHandles.push_back(handle);
+            }
+            mRaygenSbt.Build(context, pipelineProperties, shaderHandles);
+        }
+        {
+            for(const ShaderBindingTable::ShaderReference& shaderRef : mCallablesSbt.GetShaders())
+            {
+                const uint8_t* dataPtr = shaderHandleData.data() + (shaderRef.GroupId * pipelineProperties.shaderGroupHandleSize);
+                ShaderHandle   handle  = {};
+                memcpy(&handle, dataPtr, pipelineProperties.shaderGroupHandleSize);
+                shaderHandles.push_back(handle);
+            }
+            mRaygenSbt.Build(context, pipelineProperties, shaderHandles);
+        }
     }
 }  // namespace hsk
