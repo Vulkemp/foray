@@ -2,6 +2,7 @@
 #include "../hsk_basics.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
 #include "hsk_shadermodule.hpp"
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -32,9 +33,9 @@ namespace hsk {
     {
         Undefined,
         Raygen,
-        Intersect,
         Miss,
-        Callable
+        Callable,
+        Intersect,
     };
 
     class RtShaderEnumConversions
@@ -46,17 +47,19 @@ namespace hsk {
         static RtShaderType          ToType(VkShaderStageFlagBits stage);
     };
 
-    using ShaderHandle = uint64_t;  // According to vulkan.gpuinfo.org, as of 2022-09, all GPUs use 32 bit values for shader handles. This should be ample for future.
+    using ShaderHandle  = uint64_t;  // According to vulkan.gpuinfo.org, as of 2022-09, all GPUs use 32 bit values for shader handles. This should be ample for future.
+    using SbtBindId     = int32_t;
+    using ShaderGroupId = int32_t;
 
     /// @brief A shader binding table is essentially a list of shader references, with some optional custom data (indices etc.) per shader reference
     class ShaderBindingTable
     {
       public:
         /// @brief Add a shader without custom data
-        ShaderBindingTable& AddShader(ShaderModule* shader, VkShaderStageFlagBits stage, uint32_t groupId = 0);
+        SbtBindId AddShader(ShaderModule* shader, RtShaderType type, ShaderGroupId groupId = 0);
         /// @brief Add shader with custom data
         /// @param data pointer to a memory area of mShaderDataSize size. Use SetShaderDataSize(...) before adding shaders!
-        ShaderBindingTable& AddShader(ShaderModule* shader, VkShaderStageFlagBits stage, const void* data, uint32_t groupId = 0);
+        SbtBindId AddShader(ShaderModule* shader, RtShaderType type, const void* data, ShaderGroupId groupId = 0);
 
         /// @brief Creates / updates the buffer
         void Build(const VkContext* context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties, const std::vector<ShaderHandle>& handles);
@@ -66,16 +69,16 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Buffer)
         HSK_PROPERTY_ALLGET(Shaders)
 
-        void* ShaderDataAt(int32_t index);
-        void* ShaderDataAt(int32_t index) const;
+        void* ShaderDataAt(SbtBindId index);
+        void* ShaderDataAt(SbtBindId index) const;
 
         template <typename TData>
-        TData& ShaderDataAt(int32_t index)
+        TData& ShaderDataAt(SbtBindId index)
         {
             return *(reinterpret_cast<TData*>(ShaderDataAt(index)));
         }
         template <typename TData>
-        TData& ShaderDataAt(int32_t index) const
+        TData& ShaderDataAt(SbtBindId index) const
         {
             return *(reinterpret_cast<TData*>(ShaderDataAt(index)));
         }
@@ -91,7 +94,8 @@ namespace hsk {
         {
             ShaderModule* Module;
             RtShaderType  Type;
-            uint          GroupId = {};
+            SbtBindId     BindingId = {};
+            ShaderGroupId GroupId   = {};
         };
 
       protected:
@@ -102,7 +106,6 @@ namespace hsk {
 
         std::vector<ShaderReference> mShaders;
         std::vector<uint8_t>         mShaderData{};
-        RtShaderGroupType            mGroupType = RtShaderGroupType::Undefined;
     };
 
 
@@ -116,17 +119,21 @@ namespace hsk {
         HSK_PROPERTY_ALLGET(Pipeline)
         HSK_PROPERTY_ALL(PipelineLayout)
 
+        uint32_t AddShaderGroupRaygen(ShaderModule* module);
+        uint32_t AddShaderGroupCallable(ShaderModule* module);
+        uint32_t AddShaderGroupMiss(ShaderModule* module);
+        uint32_t AddShaderGroupIntersect(ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect);
+
         void Build(const VkContext* context);
 
         struct ShaderGroup
         {
-            uint32_t GroupId;
-            int32_t  RaygenIndex;
-            int32_t  IntersectsIndexStart;
-            int32_t  IntersectsIndexCount;
-            int32_t  MissIndex;
-            int32_t  CallablesIndexStart;
-            int32_t  CallablesIndexCount;
+            ShaderGroupId     Id              = {};
+            RtShaderGroupType Type            = RtShaderGroupType::Undefined;
+            SbtBindId         GeneralIndex    = -1;
+            SbtBindId         ClosestHitIndex = -1;
+            SbtBindId         AnyHitIndex     = -1;
+            SbtBindId         IntersectIndex  = -1;
         };
 
       protected:
@@ -135,7 +142,7 @@ namespace hsk {
         ShaderBindingTable mMissSbt;
         ShaderBindingTable mCallablesSbt;
 
-        std::unordered_map<uint32_t, ShaderGroup> mShaderGroups;
+        std::vector<ShaderGroup> mShaderGroups;
 
         VkPipelineLayout mPipelineLayout;
         VkPipeline       mPipeline;
