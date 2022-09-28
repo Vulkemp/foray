@@ -31,7 +31,7 @@ namespace hsk {
             case RtShaderType::ClosestHit:
             case RtShaderType::Anyhit:
             case RtShaderType::Intersect:
-                return RtShaderGroupType::Intersect;
+                return RtShaderGroupType::Hit;
             case RtShaderType::Miss:
                 return RtShaderGroupType::Miss;
             case RtShaderType::Callable:
@@ -50,7 +50,7 @@ namespace hsk {
             case VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR:
             case VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR:
             case VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR:
-                return RtShaderGroupType::Intersect;
+                return RtShaderGroupType::Hit;
             case VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR:
                 return RtShaderGroupType::Miss;
             case VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR:

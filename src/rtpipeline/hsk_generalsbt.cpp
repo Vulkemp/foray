@@ -2,7 +2,7 @@
 #include "hsk_rtshadercollection.hpp"
 
 namespace hsk {
-    GeneralShaderBindingTable::GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize = 0)
+    GeneralShaderBindingTable::GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize)
         : ShaderBindingTableBase(entryDataSize), mShaderGroupType(groupType)
     {
     }
@@ -18,19 +18,19 @@ namespace hsk {
         Assert(data == nullptr || mEntryDataSize > 0, "Set data size before passing data to groups!");
         if(groupIndex >= mGroups.size())
         {
-            mGroups.resize(size_t{groupIndex + 1});
+            mGroups.resize((size_t)(groupIndex + 1));
             ArrayResized(mGroups.size());
         }
         if(mEntryDataSize > 0)
         {
             SetData(groupIndex, data);
         }
-        mGroups[groupIndex] = ShaderGroup{shader, groupIndex};
+        mGroups[groupIndex] = ShaderGroup{shader};
     }
 
     ShaderBindingTableBase::VectorRange GeneralShaderBindingTable::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const
     {
-        VectorRange range{groupCis.size(), 0};
+        VectorRange range{(int32_t)groupCis.size(), 0};
         for(const ShaderGroup& group : mGroups)
         {
             groupCis.push_back(VkRayTracingShaderGroupCreateInfoKHR{
@@ -44,7 +44,7 @@ namespace hsk {
                 .pShaderGroupCaptureReplayHandle = nullptr,
             });
         }
-        range.Count = int32_t{groupCis.size()} - range.Start;
+        range.Count = (int32_t)groupCis.size() - range.Start;
         return range;
     }
 
@@ -68,11 +68,13 @@ namespace hsk {
         }
         for(const ShaderGroup& shader : mGroups)
         {
-            if(shader.Module == nullptr || shader.Index < 0)
-            {
-                continue;
-            }
             collection.Add(shader.Module, shaderType);
         }
+    }
+
+    void GeneralShaderBindingTable::Destroy()
+    {
+        mGroups.clear();
+        ShaderBindingTableBase::Destroy();
     }
 }  // namespace hsk

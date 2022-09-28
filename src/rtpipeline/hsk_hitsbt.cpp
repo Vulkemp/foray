@@ -1,28 +1,28 @@
-#include "hsk_intersectsbt.hpp"
+#include "hsk_hitsbt.hpp"
 #include "hsk_rtshadercollection.hpp"
 
 namespace hsk {
-    void IntersectShaderBindingTable::SetGroup(GroupIndex groupIndex, ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect)
+    void HitShaderBindingTable::SetGroup(GroupIndex groupIndex, ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect)
     {
         SetGroup(groupIndex, closestHit, anyHit, intersect, nullptr);
     }
-    void IntersectShaderBindingTable::SetGroup(GroupIndex groupIndex, ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect, const void* data)
+    void HitShaderBindingTable::SetGroup(GroupIndex groupIndex, ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect, const void* data)
     {
         Assert(groupIndex >= 0, "ShaderGroup index must be >= 0");
         Assert(data == nullptr || mEntryDataSize > 0, "Set data size before passing data to groups!");
         if(groupIndex >= mGroups.size())
         {
-            mGroups.resize(size_t{groupIndex + 1});
+            mGroups.resize((size_t)(groupIndex + 1));
             ArrayResized(mGroups.size());
         }
         if(mEntryDataSize > 0)
         {
             SetData(groupIndex, data);
         }
-        mGroups[groupIndex] = ShaderGroup{closestHit, anyHit, intersect, groupIndex};
+        mGroups[groupIndex] = ShaderGroup{closestHit, anyHit, intersect};
     }
 
-    void IntersectShaderBindingTable::WriteToShaderCollection(RtShaderCollection& shaderCollection) const
+    void HitShaderBindingTable::WriteToShaderCollection(RtShaderCollection& shaderCollection) const
     {
         for(const ShaderGroup& group : mGroups)
         {
@@ -41,10 +41,10 @@ namespace hsk {
         }
     }
 
-    ShaderBindingTableBase::VectorRange IntersectShaderBindingTable::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
-                                                                                                const RtShaderCollection&                          shaderCollection) const
+    ShaderBindingTableBase::VectorRange HitShaderBindingTable::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
+                                                                                          const RtShaderCollection&                          shaderCollection) const
     {
-        VectorRange range{groupCis.size(), 0};
+        VectorRange range{(int32_t)groupCis.size(), 0};
         for(const ShaderGroup& group : mGroups)
         {
             VkRayTracingShaderGroupTypeKHR groupType = (!!group.IntersectModule) ? VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR :
@@ -60,7 +60,13 @@ namespace hsk {
                 .pShaderGroupCaptureReplayHandle = nullptr,
             });
         }
-        range.Count = int32_t{groupCis.size()} - range.Start;
+        range.Count = (int32_t)groupCis.size() - range.Start;
         return range;
+    }
+
+    void HitShaderBindingTable::Destroy()
+    {
+        mGroups.clear();
+        ShaderBindingTableBase::Destroy();
     }
 }  // namespace hsk

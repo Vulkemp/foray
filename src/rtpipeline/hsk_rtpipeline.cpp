@@ -2,10 +2,19 @@
 
 namespace hsk {
 
-    void RtPipeline::Build(const VkContext* context)
+    RtPipeline::RtPipeline() : mRaygenSbt(RtShaderGroupType::Raygen), mMissSbt(RtShaderGroupType::Miss), mCallablesSbt(RtShaderGroupType::Callable), mHitSbt() {}
+
+    void RtPipeline::Build(const VkContext* context, VkPipelineLayout pipelineLayout)
     {
         /// STEP # 0    Reset, get physical device properties
 
+        if(!!mPipeline)
+        {
+            vkDestroyPipeline(mDevice, mPipeline, nullptr);
+            mPipeline = nullptr;
+        }
+        mPipelineLayout = pipelineLayout;
+        mDevice         = context->Device;
         mShaderCollection.Clear();
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR pipelineProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR};
@@ -22,9 +31,7 @@ namespace hsk {
         mRaygenSbt.WriteToShaderCollection(mShaderCollection);
         mMissSbt.WriteToShaderCollection(mShaderCollection);
         mCallablesSbt.WriteToShaderCollection(mShaderCollection);
-        mIntersectsSbt.WriteToShaderCollection(mShaderCollection);
-
-        mShaderCollection.BuildShaderStageCiVector();
+        mHitSbt.WriteToShaderCollection(mShaderCollection);
 
 
         /// STEP # 2    Collect ShaderGroup, build sorted vector
@@ -33,12 +40,12 @@ namespace hsk {
 
         // Insert grouped into shaderGroupCis vector
 
-        ShaderBindingTableBase::VectorRange raygen, miss, callable, intersect;
+        ShaderBindingTableBase::VectorRange raygenGroupHandleRange, missGroupHandleRange, callablesGroupHandleRange, hitGroupHandleRange;
 
-        raygen    = mRaygenSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        miss      = mMissSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        callable  = mCallablesSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        intersect = mIntersectsSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        raygenGroupHandleRange    = mRaygenSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        missGroupHandleRange      = mMissSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        callablesGroupHandleRange = mCallablesSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        hitGroupHandleRange       = mHitSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
 
 
         /// STEP # 3    Build RT pipeline
@@ -63,44 +70,62 @@ namespace hsk {
         AssertVkResult(context->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
 
         {
-            std::unordered_map<int32_t, const uint8_t*> handles;
-            for(int32_t i = 0; i < raygen.Count; i++)
+            std::vector<const uint8_t*> handles(mRaygenSbt.GetGroups().size());
+            for(int32_t i = 0; i < raygenGroupHandleRange.Count; i++)
             {
-                size_t         handleOffset = (i + raygen.Start) * pipelineProperties.shaderGroupHandleSize;
+                size_t         handleOffset = (i + raygenGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
-                handles.emplace(i, handlePtr);
+                handles[i]                  = handlePtr;
             }
             mRaygenSbt.Build(context, pipelineProperties, handles);
         }
         {
-            std::unordered_map<int32_t, const uint8_t*> handles;
-            for(int32_t i = 0; i < miss.Count; i++)
+            std::vector<const uint8_t*> handles(mMissSbt.GetGroups().size());
+            for(int32_t i = 0; i < missGroupHandleRange.Count; i++)
             {
-                size_t         handleOffset = (i + miss.Start) * pipelineProperties.shaderGroupHandleSize;
+                size_t         handleOffset = (i + missGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
-                handles.emplace(i, handlePtr);
+                handles[i]                  = handlePtr;
             }
             mMissSbt.Build(context, pipelineProperties, handles);
         }
         {
-            std::unordered_map<int32_t, const uint8_t*> handles;
-            for(int32_t i = 0; i < callable.Count; i++)
+            std::vector<const uint8_t*> handles(mCallablesSbt.GetGroups().size());
+            for(int32_t i = 0; i < callablesGroupHandleRange.Count; i++)
             {
-                size_t         handleOffset = (i + callable.Start) * pipelineProperties.shaderGroupHandleSize;
+                size_t         handleOffset = (i + callablesGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
-                handles.emplace(i, handlePtr);
+                handles[i]                  = handlePtr;
             }
             mCallablesSbt.Build(context, pipelineProperties, handles);
         }
         {
-            std::unordered_map<int32_t, const uint8_t*> handles;
-            for(int32_t i = 0; i < intersect.Count; i++)
+            std::vector<const uint8_t*> handles(mHitSbt.GetGroups().size());
+            for(int32_t i = 0; i < hitGroupHandleRange.Count; i++)
             {
-                size_t         handleOffset = (i + intersect.Start) * pipelineProperties.shaderGroupHandleSize;
+                size_t         handleOffset = (i + hitGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
-                handles.emplace(i, handlePtr);
+                handles[i]                  = handlePtr;
             }
-            mIntersectsSbt.Build(context, pipelineProperties, handles);
+            mHitSbt.Build(context, pipelineProperties, handles);
+        }
+    }
+
+    void RtPipeline::CmdBindPipeline(VkCommandBuffer cmdBuffer) const
+    {
+        vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipeline);
+    }
+
+    void RtPipeline::Destroy()
+    {
+        mRaygenSbt.Destroy();
+        mMissSbt.Destroy();
+        mCallablesSbt.Destroy();
+        mHitSbt.Destroy();
+        if(!!mPipeline)
+        {
+            vkDestroyPipeline(mDevice, mPipeline, nullptr);
+            mPipeline = nullptr;
         }
     }
 }  // namespace hsk

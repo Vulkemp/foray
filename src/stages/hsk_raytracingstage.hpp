@@ -5,6 +5,7 @@
 #include "../scenegraph/hsk_scene.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "hsk_rasterizedRenderStage.hpp"
+#include "../rtpipeline/hsk_rtpipeline.hpp"
 
 // heavily inspired by https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_basic/raytracing_basic.cpp
 namespace hsk {
@@ -46,7 +47,6 @@ namespace hsk {
         virtual void SetupDescriptors();
         virtual void UpdateDescriptors();
         virtual void CreatePipelineLayout();
-        virtual void CreateShaderBindingTables();
         virtual void CreateRaytraycingPipeline();
 
         void SetupEnvironmentMap();
@@ -71,8 +71,6 @@ namespace hsk {
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mNoiseSourceDescriptorInfo{};
         void                                                 UpdateNoiseSourceDescriptorInfos();
 
-        VkPipeline       mPipeline{};
-        VkPipelineLayout mPipelineLayout{};
         VkFramebuffer    mFrameBuffer   = nullptr;
         VkPipelineCache  mPipelineCache = nullptr;
         VkRenderPass     mRenderpass    = nullptr;
@@ -80,11 +78,10 @@ namespace hsk {
         struct ShaderResource
         {
             std::string   Path;
-            ManagedBuffer BindingTable;
             ShaderModule  Module;
         } mRaygenShader, mMissShader, mClosesthitShader, mAnyhitShader;
 
-        std::vector<VkRayTracingShaderGroupCreateInfoKHR> mShaderGroups{};
+        RtPipeline mPipeline;
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR  mRayTracingPipelineProperties{};
         VkPhysicalDeviceAccelerationStructureFeaturesKHR mAccelerationStructureFeatures{};

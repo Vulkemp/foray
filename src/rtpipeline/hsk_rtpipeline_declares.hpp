@@ -3,7 +3,7 @@
 namespace hsk
 {
     class RtShaderCollection;
-    class ShaderBindingTable;
+    class ShaderBindingTableBase;
     class GeneralShaderBindingTable;
-    class IntersectShaderBindingTable;
+    class HitShaderBindingTable;
 } // namespace hsk

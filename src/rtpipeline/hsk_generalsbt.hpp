@@ -7,53 +7,32 @@ namespace hsk {
     class GeneralShaderBindingTable : public ShaderBindingTableBase
     {
       public:
-        /*
-          A general shader binding table stores entries in the following layout
-
-          | Entry0                      | Entry1                      | ...
-          |-----------------------------|-----------------------------|-------
-          | ShaderHandle | Custom Data  | ShaderHandle | Custom Data  | ...
-
-          Where the shader handle is a vulkan driver specific memory block (all currently known drivers use 
-          32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize
-
-          Custom Data is an optional memory area of user defined size, used to initialize indices. It allows pairing
-          shaders with different configuration parameters.
-
-          For ClosestHit, AnyHit, Intersection shader groups refer to the IntersectShaderBindingTable type
-        */
-
+        /// @brief General shader group
         struct ShaderGroup
         {
             ShaderModule* Module = nullptr;
-            GroupIndex    Index  = -1;
         };
 
         explicit GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize = 0);
 
-        /// @brief Add a shader without custom data
+        /// @brief Set shader group with shader
         void SetGroup(GroupIndex groupIndex, ShaderModule* shader);
-        /// @brief Add shader with custom data
+        /// @brief Set shader group with shader and custom data
         /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
         void SetGroup(GroupIndex groupIndex, ShaderModule* shader, const void* data);
 
-        /// @brief Creates / updates the buffer
-        virtual void Build(const VkContext*                                       context,
-                           const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
-                           const std::unordered_map<int32_t, const uint8_t*>&     handles);
-
-        HSK_PROPERTY_ALLGET(Groups)
+        HSK_PROPERTY_CGET(Groups)
+        HSK_PROPERTY_CGET(ShaderGroupType)
 
         virtual void        WriteToShaderCollection(RtShaderCollection& collection) const;
         virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
 
-        virtual ~GeneralShaderBindingTable();
-
-        inline virtual size_t GetGroupArrayCount() const { return mGroups.size(); }
-
+        virtual void Destroy() override;
 
       protected:
         RtShaderGroupType        mShaderGroupType = RtShaderGroupType::Undefined;
         std::vector<ShaderGroup> mGroups;
+
+        inline virtual size_t GetGroupArrayCount() const { return mGroups.size(); }
     };
 }  // namespace hsk

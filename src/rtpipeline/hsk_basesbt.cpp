@@ -19,7 +19,7 @@ namespace hsk {
 
     void ShaderBindingTableBase::Build(const VkContext*                                       context,
                                        const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
-                                       const std::unordered_map<GroupIndex, const uint8_t*>&  handles)
+                                       const std::vector<const uint8_t*>&                     handles)
     {
         mBuffer.Destroy();
 
@@ -51,12 +51,22 @@ namespace hsk {
 
         ManagedBuffer::ManagedBufferCreateInfo ci(sbtBufferUsageFlags, bufferSize, sbtMemoryFlags, sbtAllocFlags);
         ci.Alignment = bufferAlignment;
-        mBuffer.Create(context, ci);
-        mAddressRegion = VkStridedDeviceAddressRegionKHR{
-            .deviceAddress = mBuffer.GetDeviceAddress(),
-            .stride        = sbtEntrySize,
-            .size          = bufferSize,
-        };
+
+        if(bufferSize > 0)
+        {
+
+            mBuffer.Create(context, ci);
+            mAddressRegion = VkStridedDeviceAddressRegionKHR{
+                .deviceAddress = mBuffer.GetDeviceAddress(),
+                .stride        = sbtEntrySize,
+                .size          = bufferSize,
+            };
+        }
+        else
+        {
+            mAddressRegion = VkStridedDeviceAddressRegionKHR{};
+            return;
+        }
 
 
         /// STEP # 2    Build buffer data
@@ -66,7 +76,7 @@ namespace hsk {
         for(int32_t i = 0; i < entryCount; i++)
         {
             uint8_t*       bufferEntry = bufferData.data() + (i * sbtEntrySize);
-            const uint8_t* handle      = handles.at(i);
+            const uint8_t* handle      = handles[i];
             memcpy(bufferEntry, handle, (size_t)pipelineProperties.shaderGroupHandleSize);
 
             // (Optional) copy custom shader data to entry
@@ -99,8 +109,9 @@ namespace hsk {
         {
             return;
         }
-        mGroupData[groupIndex].resize(mEntryDataSize);
-        memcpy(mGroupData[groupIndex].data(), data, mEntryDataSize);
+        std::vector<uint8_t>& entry = mGroupData[groupIndex];
+        entry.resize(mEntryDataSize);
+        memcpy(entry.data(), data, mEntryDataSize);
     }
 
     void ShaderBindingTableBase::ArrayResized(size_t newSize)
@@ -129,4 +140,11 @@ namespace hsk {
         return *this;
     }
 
+    void ShaderBindingTableBase::Destroy()
+    {
+        mGroupData.clear();
+        mEntryDataSize = 0;
+        mBuffer.Destroy();
+        mAddressRegion = {};
+    }
 }  // namespace hsk
