@@ -3,39 +3,104 @@
 namespace hsk {
     ShaderBindingTableBase::ShaderBindingTableBase(VkDeviceSize entryDataSize) : mEntryDataSize(entryDataSize) {}
 
-    void* ShaderBindingTableBase::GroupDataAt(int32_t index)
+    std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(int32_t groupIndex)
     {
-        if(mEntryDataSize == 0)
-        {
-            return nullptr;
-        }
-        return reinterpret_cast<void*>(mGroupData.data() + (mEntryDataSize * index));
+        Assert(mEntryDataSize != 0, "Entry data size not set!");
+        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range");
+        return mGroupData[groupIndex];
     }
 
-    const void* ShaderBindingTableBase::GroupDataAt(int32_t index) const
+    const std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(GroupIndex groupIndex) const
     {
-        if(mEntryDataSize == 0)
-        {
-            return nullptr;
-        }
-        return reinterpret_cast<const void*>(mGroupData.data() + (mEntryDataSize * index));
+        Assert(mEntryDataSize != 0, "Entry data size not set!");
+        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range");
+        return mGroupData[groupIndex];
     }
 
-    void ShaderBindingTableBase::SetData(int32_t index, const void* data)
+    void ShaderBindingTableBase::Build(const VkContext*                                       context,
+                                       const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
+                                       const std::unordered_map<GroupIndex, const uint8_t*>&  handles)
     {
-        if(mEntryDataSize == 0)
+        mBuffer.Destroy();
+
+        /// STEP # 0    Calculate entry size
+
+        VkDeviceSize entryCount = GetGroupArrayCount();
+
+        // Calculate size of individual entries. These always consist of a shader handle, followed by optional shader data. Alignment rules have to be observed.
+        VkDeviceSize sbtEntrySize = pipelineProperties.shaderGroupHandleSize + mEntryDataSize;
+        if(pipelineProperties.shaderGroupHandleAlignment > 0)
+        {
+            // Make sure every entry start is aligned to the shader group handle alignment rule
+            sbtEntrySize = ((sbtEntrySize + (pipelineProperties.shaderGroupHandleAlignment - 1)) / pipelineProperties.shaderGroupHandleAlignment)
+                           * pipelineProperties.shaderGroupHandleAlignment;
+        }
+        Assert(sbtEntrySize <= pipelineProperties.maxShaderGroupStride, "Shader Data causes max group stride overflow!");
+
+
+        /// STEP # 1    Allocate buffer
+
+        // The buffer may need to observe alignment rules
+        VkDeviceSize bufferAlignment = std::max(pipelineProperties.shaderGroupBaseAlignment, pipelineProperties.shaderGroupHandleAlignment);
+        // Full buffer size
+        VkDeviceSize bufferSize = sbtEntrySize * entryCount;
+
+        const VkBufferUsageFlags sbtBufferUsageFlags = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+        const VmaMemoryUsage     sbtMemoryFlags      = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        const VmaAllocationCreateFlags sbtAllocFlags = VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+
+        ManagedBuffer::ManagedBufferCreateInfo ci(sbtBufferUsageFlags, bufferSize, sbtMemoryFlags, sbtAllocFlags);
+        ci.Alignment = bufferAlignment;
+        mBuffer.Create(context, ci);
+        mAddressRegion = VkStridedDeviceAddressRegionKHR{
+            .deviceAddress = mBuffer.GetDeviceAddress(),
+            .stride        = sbtEntrySize,
+            .size          = bufferSize,
+        };
+
+
+        /// STEP # 2    Build buffer data
+
+        std::vector<uint8_t> bufferData(bufferSize);
+
+        for(int32_t i = 0; i < entryCount; i++)
+        {
+            uint8_t*       bufferEntry = bufferData.data() + (i * sbtEntrySize);
+            const uint8_t* handle      = handles.at(i);
+            memcpy(bufferEntry, handle, (size_t)pipelineProperties.shaderGroupHandleSize);
+
+            // (Optional) copy custom shader data to entry
+
+            if(mEntryDataSize > 0)
+            {
+                bufferEntry                      = bufferEntry + pipelineProperties.shaderGroupHandleSize;
+                const std::vector<uint8_t>& data = GroupDataAt(i);
+                if(data.size() > 0)
+                {
+                    memcpy(bufferEntry, data.data(), mEntryDataSize);
+                }
+                else
+                {
+                    memset(bufferEntry, 0, mEntryDataSize);
+                }
+            }
+        }
+
+
+        /// STEP # 3    Write buffer data
+
+        mBuffer.MapAndWrite(bufferData.data());
+    }
+
+    void ShaderBindingTableBase::SetData(GroupIndex groupIndex, const void* data)
+    {
+        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range!");
+        if(mEntryDataSize == 0 || !data)
         {
             return;
         }
-        size_t offset = index * mEntryDataSize;
-        if(offset >= mGroupData.size())
-        {
-            mGroupData.resize((index + 1) * mEntryDataSize);
-        }
-        if(!!data)
-        {
-            memcpy(GroupDataAt(index), data, mEntryDataSize);
-        }
+        mGroupData[groupIndex].resize(mEntryDataSize);
+        memcpy(mGroupData[groupIndex].data(), data, mEntryDataSize);
     }
 
     void ShaderBindingTableBase::ArrayResized(size_t newSize)
@@ -44,9 +109,7 @@ namespace hsk {
         {
             return;
         }
-        size_t newBufferSize = newSize * mEntryDataSize;
-
-        mGroupData.resize(newBufferSize);
+        mGroupData.resize(newSize);
     }
 
     ShaderBindingTableBase& ShaderBindingTableBase::SetEntryDataSize(VkDeviceSize newSize)
@@ -55,19 +118,11 @@ namespace hsk {
         {
             return *this;
         }
-        size_t       groupCount = GetGroupArrayCount();
-        VkDeviceSize oldSize    = mEntryDataSize;
-        if(oldSize > 0 && groupCount > 0)
+        if(mEntryDataSize > 0 && GetGroupArrayCount() > 0)
         {
-            std::vector<uint8_t> oldDataCopy(mGroupData);
-            mGroupData.clear();
-            mGroupData.resize(newSize * groupCount);
-            size_t entryCopySize = std::min(newSize, oldSize);
-            for(int32_t i = 0; i < oldDataCopy.size(); i++)
+            for(std::vector<uint8_t>& data : mGroupData)
             {
-                const uint8_t* source = oldDataCopy.data() + (oldSize * i);
-                uint8_t*       dest   = mGroupData.data() + (newSize * i);
-                memcpy(dest, source, entryCopySize);
+                data.resize(newSize);
             }
         }
         mEntryDataSize = newSize;

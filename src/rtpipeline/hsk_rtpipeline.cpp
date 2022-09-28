@@ -2,63 +2,6 @@
 
 namespace hsk {
 
-
-
-
-
-
-    // uint32_t RtPipeline::AddShaderGroupRaygen(ShaderModule* module)
-    // {
-    //     ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
-    //     SbtBindId     index   = mRaygenSbt.SetGroup()
-    //     mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Raygen, .General = module});
-    //     return groupId;
-    // }
-    // uint32_t RtPipeline::AddShaderGroupCallable(ShaderModule* module)
-    // {
-    //     ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
-    //     SbtBindId     index   = mCallablesSbt.SetGroup(module, RtShaderType::Callable, groupId);
-    //     mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Callable, .General = module});
-    //     return groupId;
-    // }
-    // uint32_t RtPipeline::AddShaderGroupMiss(ShaderModule* module)
-    // {
-    //     ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
-    //     SbtBindId     index   = mMissSbt.SetGroup(module, RtShaderType::Miss, groupId);
-    //     mShaderGroups.push_back(ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Miss, .General = module});
-    //     return groupId;
-    // }
-    // uint32_t RtPipeline::AddShaderGroupIntersect(ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect)
-    // {
-    //     ShaderGroupId groupId = (ShaderGroupId)mShaderGroups.size();
-    //     ShaderGroup   group   = ShaderGroup{.Id = groupId, .Type = RtShaderGroupType::Intersect};
-    //     if(!!closestHit)
-    //     {
-    //         mIntersectsSbt.SetGroup(closestHit, RtShaderType::ClosestHit, groupId);
-    //         group.ClosestHit = closestHit;
-    //     }
-    //     if(!!anyHit)
-    //     {
-    //         mIntersectsSbt.SetGroup(anyHit, RtShaderType::Anyhit, groupId);
-    //         group.AnyHit = anyHit;
-    //     }
-    //     if(!!intersect)
-    //     {
-    //         mIntersectsSbt.SetGroup(intersect, RtShaderType::Intersect, groupId);
-    //         group.Intersect = intersect;
-    //     }
-    //     mShaderGroups[groupId] = group;
-    //     return groupId;
-    // }
-
-    struct ShaderGroupHandles
-    {
-        ShaderHandle General    = {};
-        ShaderHandle ClosestHit = {};
-        ShaderHandle AnyHit     = {};
-        ShaderHandle Intersect  = {};
-    };
-
     void RtPipeline::Build(const VkContext* context)
     {
         /// STEP # 0    Reset, get physical device properties
@@ -90,19 +33,12 @@ namespace hsk {
 
         // Insert grouped into shaderGroupCis vector
 
-        
+        ShaderBindingTableBase::VectorRange raygen, miss, callable, intersect;
 
-        uint32_t missOffset      = 0;
-        uint32_t callablesOffset = 0;
-        uint32_t intersectOffset = 0;
-
-        mRaygenSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        missOffset = shaderGroupCis.size();
-        mMissSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        callablesOffset = shaderGroupCis.size();
-        mCallablesSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        intersectOffset = shaderGroupCis.size();
-        mIntersectsSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        raygen    = mRaygenSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        miss      = mMissSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        callable  = mCallablesSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        intersect = mIntersectsSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
 
 
         /// STEP # 3    Build RT pipeline
@@ -121,33 +57,50 @@ namespace hsk {
         AssertVkResult(context->DispatchTable.createRayTracingPipelinesKHR(nullptr, nullptr, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
 
 
-        /// STEP # 4    Get shader handles
+        /// STEP # 4    Get shader handles, build SBTs
 
         std::vector<uint8_t> shaderHandleData(shaderGroupCis.size() * pipelineProperties.shaderGroupHandleSize);
         AssertVkResult(context->DispatchTable.getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
 
-        std::vector<ShaderHandle> shaderHandles;
-        shaderHandles.reserve(mShaderGroups.size());
-
         {
-            for(const GeneralShaderBindingTable::ShaderGroup& shaderRef : mRaygenSbt.GetShaders())
+            std::unordered_map<int32_t, const uint8_t*> handles;
+            for(int32_t i = 0; i < raygen.Count; i++)
             {
-                const uint8_t* dataPtr = shaderHandleData.data() + (shaderRef.GroupId * pipelineProperties.shaderGroupHandleSize);
-                ShaderHandle   handle  = {};
-                memcpy(&handle, dataPtr, pipelineProperties.shaderGroupHandleSize);
-                shaderHandles.push_back(handle);
+                size_t         handleOffset = (i + raygen.Start) * pipelineProperties.shaderGroupHandleSize;
+                const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
+                handles.emplace(i, handlePtr);
             }
-            mRaygenSbt.Build(context, pipelineProperties, shaderHandles);
+            mRaygenSbt.Build(context, pipelineProperties, handles);
         }
         {
-            for(const GeneralShaderBindingTable::ShaderGroup& shaderRef : mCallablesSbt.GetShaders())
+            std::unordered_map<int32_t, const uint8_t*> handles;
+            for(int32_t i = 0; i < miss.Count; i++)
             {
-                const uint8_t* dataPtr = shaderHandleData.data() + (shaderRef.GroupId * pipelineProperties.shaderGroupHandleSize);
-                ShaderHandle   handle  = {};
-                memcpy(&handle, dataPtr, pipelineProperties.shaderGroupHandleSize);
-                shaderHandles.push_back(handle);
+                size_t         handleOffset = (i + miss.Start) * pipelineProperties.shaderGroupHandleSize;
+                const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
+                handles.emplace(i, handlePtr);
             }
-            mRaygenSbt.Build(context, pipelineProperties, shaderHandles);
+            mMissSbt.Build(context, pipelineProperties, handles);
+        }
+        {
+            std::unordered_map<int32_t, const uint8_t*> handles;
+            for(int32_t i = 0; i < callable.Count; i++)
+            {
+                size_t         handleOffset = (i + callable.Start) * pipelineProperties.shaderGroupHandleSize;
+                const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
+                handles.emplace(i, handlePtr);
+            }
+            mCallablesSbt.Build(context, pipelineProperties, handles);
+        }
+        {
+            std::unordered_map<int32_t, const uint8_t*> handles;
+            for(int32_t i = 0; i < intersect.Count; i++)
+            {
+                size_t         handleOffset = (i + intersect.Start) * pipelineProperties.shaderGroupHandleSize;
+                const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
+                handles.emplace(i, handlePtr);
+            }
+            mIntersectsSbt.Build(context, pipelineProperties, handles);
         }
     }
 }  // namespace hsk

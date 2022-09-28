@@ -2,9 +2,8 @@
 #include "hsk_basesbt.hpp"
 #include "hsk_rtshadertypes.hpp"
 
-namespace hsk
-{
-        /// @brief Shader binding table for storing raygen, miss and callable shader groups
+namespace hsk {
+    /// @brief Shader binding table for storing raygen, miss and callable shader groups
     class GeneralShaderBindingTable : public ShaderBindingTableBase
     {
       public:
@@ -26,28 +25,27 @@ namespace hsk
 
         struct ShaderGroup
         {
-            ShaderModule* Module  = nullptr;
-            int32_t       Index   = -1;
-            ShaderGroupId GroupId = -1;
+            ShaderModule* Module = nullptr;
+            GroupIndex    Index  = -1;
         };
 
         explicit GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize = 0);
 
         /// @brief Add a shader without custom data
-        void SetGroup(int32_t index, ShaderGroupId groupId, ShaderModule* shader);
+        void SetGroup(GroupIndex groupIndex, ShaderModule* shader);
         /// @brief Add shader with custom data
         /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
-        void SetGroup(int32_t index, ShaderGroupId groupId, ShaderModule* shader, const void* data);
+        void SetGroup(GroupIndex groupIndex, ShaderModule* shader, const void* data);
 
         /// @brief Creates / updates the buffer
-        virtual void Build(const VkContext*                                         context,
-                           const VkPhysicalDeviceRayTracingPipelinePropertiesKHR&   pipelineProperties,
-                           const std::unordered_map<ShaderModule*, const uint8_t*>& handles);
+        virtual void Build(const VkContext*                                       context,
+                           const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
+                           const std::unordered_map<int32_t, const uint8_t*>&     handles);
 
         HSK_PROPERTY_ALLGET(Groups)
 
-        virtual void WriteToShaderCollection(RtShaderCollection& collection) const;
-        virtual void WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
+        virtual void        WriteToShaderCollection(RtShaderCollection& collection) const;
+        virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
 
         virtual ~GeneralShaderBindingTable();
 
@@ -58,4 +56,4 @@ namespace hsk
         RtShaderGroupType        mShaderGroupType = RtShaderGroupType::Undefined;
         std::vector<ShaderGroup> mGroups;
     };
-} // namespace hsk
+}  // namespace hsk
