@@ -61,7 +61,7 @@ namespace hsk {
                                                                                  .indexType     = VkIndexType::VK_INDEX_TYPE_UINT32,
                                                                                  .indexData     = index_data_device_address,
                                                                                  .transformData = {}}},
-            .flags = VK_GEOMETRY_OPAQUE_BIT_KHR};
+            .flags = 0};
 
         for(int32_t i = 0; i < primitiveCount; i++)
         {

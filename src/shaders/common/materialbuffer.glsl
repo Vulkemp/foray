@@ -56,6 +56,23 @@ MaterialBufferObject GetMaterialOrFallback(nonuniformEXT in int index)
     }
 }
 
+bool ProbeAlphaOpacity(in MaterialBufferObject material, in vec2 uv)
+{
+    float alpha;
+
+    // Grab BaseColor / Albedo
+    if(material.BaseColorTextureIndex >= 0)
+    {
+        alpha = SampleTexture(material.BaseColorTextureIndex, uv).a;
+    }
+    else
+    {
+        alpha = material.BaseColorFactor.a;
+    }
+
+    return alpha > 0.f;
+}
+
 MaterialProbe ProbeMaterial(in MaterialBufferObject material, in vec2 uv)
 {
     MaterialProbe result;
