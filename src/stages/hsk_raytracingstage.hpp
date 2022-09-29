@@ -2,32 +2,21 @@
 #include "../base/hsk_vkcontext.hpp"
 #include "../memory/hsk_managedbuffer.hpp"
 #include "../memory/hsk_managedimage.hpp"
+#include "../rtpipeline/hsk_rtpipeline.hpp"
 #include "../scenegraph/hsk_scene.hpp"
 #include "../utility/hsk_shadermodule.hpp"
 #include "hsk_rasterizedRenderStage.hpp"
-#include "../rtpipeline/hsk_rtpipeline.hpp"
 
 // heavily inspired by https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_basic/raytracing_basic.cpp
 namespace hsk {
-
-    struct RaytracingStageShaderconfig
-    {
-        std::string RaygenShaderpath;
-        std::string MissShaderpath;
-        std::string ClosesthitShaderpath;
-        std::string AnyhitShaderpath;
-
-        static RaytracingStageShaderconfig Basic();
-    };
 
     class RaytracingStage : public RenderStage
     {
       public:
         RaytracingStage() = default;
 
-        virtual void Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, ManagedImage* noiseSource, const RaytracingStageShaderconfig& shaderconfig);
+        virtual void Init();
         virtual void RecordFrame(FrameRenderInfo& renderInfo) override;
-        virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler) override;
 
         inline static constexpr std::string_view RaytracingRenderTargetName = "RaytraycingRenderTarget";
 
@@ -49,42 +38,41 @@ namespace hsk {
         virtual void CreatePipelineLayout();
         virtual void CreateRaytraycingPipeline();
 
-        void SetupEnvironmentMap();
-        void SetupNoiseSource();
+        virtual void ReloadShaders();
+        virtual void DestroyShaders() {}
 
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetAccelerationStructureDescriptorInfo(bool rebuild = false);
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetRenderTargetDescriptorInfo(bool rebuild = false);
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetEnvironmentMapDescriptorInfo(bool rebuild = false);
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetNoiseSourceDescriptorInfo(bool rebuild = false);
 
         /// @brief Storage image that the ray generation shader will be writing to.
         ManagedImage mRaytracingRenderTarget;
 
-        ManagedImage*                                        mEnvironmentMap        = nullptr;
-        VkSampler                                            mEnvironmentMapSampler = nullptr;
-        std::vector<VkDescriptorImageInfo>                   mEnvironmentMapDescriptorImageInfos;
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mEnvironmentMapDescriptorInfo{};
-        void                                                 UpdateEnvironmentMapDescriptorInfos();
-        ManagedImage*                                        mNoiseSource        = nullptr;
-        VkSampler                                            mNoiseSourceSampler = nullptr;
-        std::vector<VkDescriptorImageInfo>                   mNoiseSourceDescriptorImageInfos;
-        std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mNoiseSourceDescriptorInfo{};
-        void                                                 UpdateNoiseSourceDescriptorInfos();
-
-        VkFramebuffer    mFrameBuffer   = nullptr;
-        VkPipelineCache  mPipelineCache = nullptr;
-        VkRenderPass     mRenderpass    = nullptr;
-
-        struct ShaderResource
+        struct SampledImage
         {
-            std::string   Path;
-            ShaderModule  Module;
-        } mRaygenShader, mMissShader, mClosesthitShader, mAnyhitShader;
+            bool                                                 IsSet   = false;
+            ManagedImage*                                        Image   = nullptr;
+            VkSampler                                            Sampler = nullptr;
+            std::vector<VkDescriptorImageInfo>                   DescriptorImageInfos;
+            std::shared_ptr<DescriptorSetHelper::DescriptorInfo> DescriptorInfo{};
+
+            inline SampledImage() {}
+
+            void                                                 Create(const VkContext* context, ManagedImage* image, bool initateSampler = true);
+            void                                                 Destroy(const VkContext* context);
+            void                                                 UpdateDescriptorInfos();
+            std::shared_ptr<DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(bool rebuild = false);
+        } mEnvMap, mNoiseSource;
+
+        inline static constexpr VkShaderStageFlags RTSTAGEFLAGS =
+            VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR
+            | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR
+            | VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+
+        VkFramebuffer   mFrameBuffer   = nullptr;
+        VkPipelineCache mPipelineCache = nullptr;
+        VkRenderPass    mRenderpass    = nullptr;
 
         RtPipeline mPipeline;
-
-        VkPhysicalDeviceRayTracingPipelinePropertiesKHR  mRayTracingPipelineProperties{};
-        VkPhysicalDeviceAccelerationStructureFeaturesKHR mAccelerationStructureFeatures{};
 
         VkWriteDescriptorSetAccelerationStructureKHR         mDescriptorAccelerationStructureInfo{};
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mAcclerationStructureDescriptorInfo;
@@ -92,8 +80,6 @@ namespace hsk {
         std::vector<VkDescriptorImageInfo>                   mRenderTargetDescriptorImageInfos;
         std::shared_ptr<DescriptorSetHelper::DescriptorInfo> mRenderTargetDescriptorInfo{};
         void                                                 UpdateRenderTargetDescriptorBufferInfos();
-
-        inline uint32_t aligned_size(uint32_t value, uint32_t alignment) { return (value + alignment - 1) & ~(alignment - 1); }
 
         struct PushConstant
         {

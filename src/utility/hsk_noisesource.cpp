@@ -19,7 +19,7 @@ namespace hsk {
         mImage.Destroy();
         mImage.Create(context, ci);
 
-        int32_t             valueCount = EDGE * EDGE;
+        int32_t               valueCount = EDGE * EDGE;
         std::vector<uint32_t> values     = std::vector<uint32_t>(valueCount);
 
         std::mt19937_64 rngEngine;

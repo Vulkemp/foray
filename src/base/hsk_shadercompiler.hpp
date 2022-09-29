@@ -87,9 +87,9 @@ namespace hsk {
         /// @brief File endings that the shader compiler attempts to compile into spirv bins.
         std::vector<SPV_STR> mValidFileEndings = {
 #ifdef _WIN32
-            L".frag", L".vert", L".rchit", L".rmiss", L".rgen", L".comp",
+            L".frag", L".vert", L".rchit", L".rahit", L".rmiss", L".rgen", L".comp",
 #else
-            ".frag", ".vert", ".rchit", ".rmiss", ".rgen", ".comp",
+            ".frag", ".vert", ".rchit", ".rahit", ".rmiss", ".rgen", ".comp",
 #endif
         };
 

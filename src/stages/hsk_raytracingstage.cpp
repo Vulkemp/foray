@@ -14,30 +14,9 @@
 #include <array>
 
 namespace hsk {
-    RaytracingStageShaderconfig RaytracingStageShaderconfig::Basic()
+
+    void RaytracingStage::Init()
     {
-        return RaytracingStageShaderconfig{.RaygenShaderpath     = "../hsk_rt_rpf/src/shaders/rt_basic/raygen.rgen",
-                                           .MissShaderpath       = "../hsk_rt_rpf/src/shaders/rt_basic/miss.rmiss",
-                                           .ClosesthitShaderpath = "../hsk_rt_rpf/src/shaders/rt_basic/closesthit.rchit"};
-    }
-    void RaytracingStage::Init(const VkContext* context, Scene* scene, ManagedImage* environmentMap, ManagedImage* noiseSource, const RaytracingStageShaderconfig& shaderconfig)
-    {
-        mContext        = context;
-        mScene          = scene;
-        mEnvironmentMap = environmentMap;
-        mNoiseSource    = noiseSource;
-
-        mRaygenShader.Path     = shaderconfig.RaygenShaderpath;
-        mMissShader.Path       = shaderconfig.MissShaderpath;
-        mClosesthitShader.Path = shaderconfig.ClosesthitShaderpath;
-        mAnyhitShader.Path     = shaderconfig.AnyhitShaderpath;
-
-        VkPhysicalDeviceProperties2 prop2{};
-        prop2.sType                         = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-        prop2.pNext                         = &mRayTracingPipelineProperties;
-        mRayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
-        vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice, &prop2);
-
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
 
@@ -58,8 +37,6 @@ namespace hsk {
 
     void RaytracingStage::CreateFixedSizeComponents()
     {
-        SetupEnvironmentMap();
-        SetupNoiseSource();
         SetupDescriptors();
         CreatePipelineLayout();
         CreateRaytraycingPipeline();
@@ -67,31 +44,25 @@ namespace hsk {
 
     void RaytracingStage::DestroyFixedComponents()
     {
+        DestroyShaders();
+        mPipeline.Destroy();
         if(!!mContext)
         {
             VkDevice device = mContext->Device;
-            mPipeline.Destroy();
             if(!!mPipelineLayout)
             {
                 vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
                 mPipelineLayout = nullptr;
             }
         }
-        std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
-        for(auto shader : shaders)
-        {
-            shader->Module.Destroy();
-        }
         mDescriptorSet.Destroy();
-        if(!!mEnvironmentMapSampler)
+        if(mEnvMap.IsSet)
         {
-            vkDestroySampler(mContext->Device, mEnvironmentMapSampler, nullptr);
-            mEnvironmentMapSampler = nullptr;
+            mEnvMap.Destroy(mContext);
         }
-        if(!!mNoiseSourceSampler)
+        if(mNoiseSource.IsSet)
         {
-            vkDestroySampler(mContext->Device, mNoiseSourceSampler, nullptr);
-            mNoiseSourceSampler = nullptr;
+            mNoiseSource.Destroy(mContext);
         }
     }
 
@@ -102,10 +73,7 @@ namespace hsk {
 
     void RaytracingStage::DestroyResolutionDependentComponents()
     {
-        for(auto& colorAttachment : mColorAttachments)
-        {
-            colorAttachment->Destroy();
-        }
+        mColorAttachments.clear();
         mRaytracingRenderTarget.Destroy();
     }
 
@@ -142,13 +110,13 @@ namespace hsk {
         mDescriptorSet.SetDescriptorInfoAt(5, mScene->GetComponent<MaterialBuffer>()->GetDescriptorInfo(rtShaderStages));
         mDescriptorSet.SetDescriptorInfoAt(6, mScene->GetComponent<TextureStore>()->GetDescriptorInfo(rtShaderStages));
         mDescriptorSet.SetDescriptorInfoAt(7, mScene->GetComponent<TlasManager>()->GetTlas().GetMetaBuffer().GetDescriptorInfo(rtShaderStages));
-        if(!!mEnvironmentMap)
+        if(mEnvMap.IsSet)
         {
-            mDescriptorSet.SetDescriptorInfoAt(9, GetEnvironmentMapDescriptorInfo());
+            mDescriptorSet.SetDescriptorInfoAt(9, mEnvMap.GetDescriptorInfo());
         }
-        if(!!mNoiseSource)
+        if(mNoiseSource.IsSet)
         {
-            mDescriptorSet.SetDescriptorInfoAt(10, GetNoiseSourceDescriptorInfo());
+            mDescriptorSet.SetDescriptorInfoAt(10, mNoiseSource.GetDescriptorInfo());
         }
 
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
@@ -187,7 +155,6 @@ namespace hsk {
         const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1,
                                 &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0, nullptr);
-        const uint32_t handle_size_aligned = aligned_size(mRayTracingPipelineProperties.shaderGroupHandleSize, mRayTracingPipelineProperties.shaderGroupHandleAlignment);
 
         mPushConstant.RngSeed = renderInfo.GetFrameNumber();
         vkCmdPushConstants(commandBuffer, mPipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0,
@@ -206,74 +173,17 @@ namespace hsk {
                                                 scissor.extent.width, scissor.extent.height, 1);
     }
 
-    void RaytracingStage::OnShadersRecompiled(ShaderCompiler* shaderCompiler)
+    void RaytracingStage::ReloadShaders()
     {
-        bool                           rebuildNeeded = false;
-        std::array<ShaderResource*, 4> shaders({&mRaygenShader, &mMissShader, &mClosesthitShader, &mAnyhitShader});
-        for(auto shader : shaders)
-        {
-            rebuildNeeded |= ShaderManager::Instance().HasShaderBeenRecompiled(shader->Path);
-        }
-        if(!rebuildNeeded)
-            return;
-
         vkDeviceWaitIdle(mContext->Device);
 
-        VkDevice device = mContext->Device;
+        DestroyShaders();
         mPipeline.Destroy();
-        if(!!mPipelineLayout)
-        {
-            vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-            mPipelineLayout = nullptr;
-        }
-        for(auto shader : shaders)
-        {
-            shader->Module.Destroy();
-        }
-        CreatePipelineLayout();
         CreateRaytraycingPipeline();
     }
 
     void RaytracingStage::CreateRaytraycingPipeline()
     {
-        // Setup ray tracing shader groups
-        // Each shader group points at the corresponding shader in the pipeline
-
-        // shader stages
-        ShaderStageCreateInfos shaderStageCreateInfos;
-
-        // Ray generation group
-        if(mRaygenShader.Path.size() > 0)
-        {
-            new(&mRaygenShader.Module) ShaderModule(mContext, mRaygenShader.Path);
-            mPipeline.GetRaygenSbt().SetGroup(0, &mRaygenShader.Module);
-        }
-
-        // Ray miss group
-        if(mMissShader.Path.size() > 0)
-        {
-            new(&mMissShader.Module) ShaderModule(mContext, mMissShader.Path);
-            mPipeline.GetMissSbt().SetGroup(0, &mMissShader.Module);
-        }
-
-        // Ray hit group
-        if(mClosesthitShader.Path.size() > 0 || mAnyhitShader.Path.size() > 0)
-        {
-            ShaderModule* closestHit = nullptr;
-            ShaderModule* anyHit     = nullptr;
-            if(mClosesthitShader.Path.size() > 0)
-            {
-                new(&mClosesthitShader.Module) ShaderModule(mContext, mClosesthitShader.Path);
-                closestHit = &mClosesthitShader.Module;
-            }
-            if(mAnyhitShader.Path.size() > 0)
-            {
-                new(&mAnyhitShader.Module) ShaderModule(mContext, mAnyhitShader.Path);
-                anyHit = &mAnyhitShader.Module;
-            }
-            mPipeline.GetHitSbt().SetGroup(0, closestHit, anyHit, nullptr);
-        }
-
         mPipeline.Build(mContext, mPipelineLayout);
     }
 
@@ -311,33 +221,18 @@ namespace hsk {
         return mRenderTargetDescriptorInfo;
     }
 
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetEnvironmentMapDescriptorInfo(bool rebuild)
+    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::SampledImage::GetDescriptorInfo(bool rebuild)
     {
-        if(!!mEnvironmentMapDescriptorInfo && !rebuild)
+        if(!!DescriptorInfo && !rebuild)
         {
-            return mEnvironmentMapDescriptorInfo;
+            return DescriptorInfo;
         }
 
-        UpdateEnvironmentMapDescriptorInfos();
+        UpdateDescriptorInfos();
 
-        mEnvironmentMapDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mEnvironmentMapDescriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_MISS_BIT_KHR, &mEnvironmentMapDescriptorImageInfos);
-        return mEnvironmentMapDescriptorInfo;
-    }
-
-    std::shared_ptr<DescriptorSetHelper::DescriptorInfo> RaytracingStage::GetNoiseSourceDescriptorInfo(bool rebuild)
-    {
-        if(!!mNoiseSourceDescriptorInfo && !rebuild)
-        {
-            return mNoiseSourceDescriptorInfo;
-        }
-
-        UpdateNoiseSourceDescriptorInfos();
-
-        mNoiseSourceDescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
-        mNoiseSourceDescriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR,
-                                         &mNoiseSourceDescriptorImageInfos);
-        return mNoiseSourceDescriptorInfo;
+        DescriptorInfo = std::make_shared<DescriptorSetHelper::DescriptorInfo>();
+        DescriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS, &DescriptorImageInfos);
+        return DescriptorInfo;
     }
 
     void RaytracingStage::UpdateRenderTargetDescriptorBufferInfos()
@@ -347,22 +242,20 @@ namespace hsk {
         mRenderTargetDescriptorImageInfos[0].imageLayout = mRaytracingRenderTarget.GetImageLayout();
     }
 
-    void RaytracingStage::UpdateEnvironmentMapDescriptorInfos()
+    void RaytracingStage::SampledImage::UpdateDescriptorInfos()
     {
-        mEnvironmentMapDescriptorImageInfos = {VkDescriptorImageInfo{
-            .sampler = mEnvironmentMapSampler, .imageView = mEnvironmentMap->GetImageView(), .imageLayout = mEnvironmentMap->GetImageLayout()}};  // namespace hsk
+        DescriptorImageInfos = {VkDescriptorImageInfo{.sampler = Sampler, .imageView = Image->GetImageView(), .imageLayout = Image->GetImageLayout()}};  // namespace hsk
     }
 
-    void RaytracingStage::UpdateNoiseSourceDescriptorInfos()
+    void RaytracingStage::SampledImage::Create(const VkContext* context, ManagedImage* image, bool initateSampler)
     {
-        mNoiseSourceDescriptorImageInfos = {
-            VkDescriptorImageInfo{.sampler = mNoiseSourceSampler, .imageView = mNoiseSource->GetImageView(), .imageLayout = mNoiseSource->GetImageLayout()}};  // namespace hsk
-    }
-
-    void RaytracingStage::SetupEnvironmentMap()
-    {
-        if(!mEnvironmentMapSampler && !!mEnvironmentMap)
+        Image = image;
+        if(!!Image && initateSampler)
         {
+            if(!!Sampler)
+            {
+                vkDestroySampler(context->Device, Sampler, nullptr);
+            }
             VkSamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                                           .magFilter               = VkFilter::VK_FILTER_LINEAR,
                                           .minFilter               = VkFilter::VK_FILTER_LINEAR,
@@ -374,26 +267,22 @@ namespace hsk {
                                           .minLod                  = 0,
                                           .maxLod                  = 0,
                                           .unnormalizedCoordinates = VK_FALSE};
-            AssertVkResult(vkCreateSampler(mContext->Device, &samplerCi, nullptr, &mEnvironmentMapSampler));
+            AssertVkResult(vkCreateSampler(context->Device, &samplerCi, nullptr, &Sampler));
         }
+        IsSet = !!Image;
     }
-    void RaytracingStage::SetupNoiseSource()
+
+    void RaytracingStage::SampledImage::Destroy(const VkContext* context)
     {
-        if(!mNoiseSourceSampler && !!mNoiseSource)
+        if(!!Sampler)
         {
-            VkSamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-                                          .magFilter               = VkFilter::VK_FILTER_NEAREST,
-                                          .minFilter               = VkFilter::VK_FILTER_NEAREST,
-                                          .addressModeU            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeV            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeW            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .anisotropyEnable        = VK_FALSE,
-                                          .compareEnable           = VK_FALSE,
-                                          .minLod                  = 0,
-                                          .maxLod                  = 0,
-                                          .unnormalizedCoordinates = VK_FALSE};
-            AssertVkResult(vkCreateSampler(mContext->Device, &samplerCi, nullptr, &mNoiseSourceSampler));
+            vkDestroySampler(context->Device, Sampler, nullptr);
+            Sampler = nullptr;
         }
+        Image = nullptr;
+        IsSet = false;
+        DescriptorImageInfos.clear();
+        DescriptorInfo = nullptr;
     }
 
 }  // namespace hsk

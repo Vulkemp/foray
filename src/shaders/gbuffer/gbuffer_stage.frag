@@ -35,6 +35,11 @@ void main()
 
     MaterialProbe probe = ProbeMaterial(material, inUV);
 
+    if (probe.BaseColor.w <= 0) // Alpha coverage discard
+    {
+        discard;
+    }
+
     outNormal = vec4(ApplyNormalMap(CalculateTBN(inNormal, inTangent), probe), 0.f);
 
     // Get albedo.

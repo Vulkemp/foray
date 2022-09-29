@@ -295,14 +295,25 @@ namespace hsk {
 
     void ManagedImage::UpdateDebugNames()
     {
-        std::string debugName = fmt::format("ManImg \"{}\" ({})", mName, PrintSize(mSize));
-        vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
-        VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-                                               .pNext        = nullptr,
-                                               .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE,
-                                               .objectHandle = reinterpret_cast<uint64_t>(mImage),
-                                               .pObjectName  = debugName.c_str()};
-        mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+        { // Image
+            std::string                   debugName = fmt::format("ManImg \"{}\" ({})", mName, PrintSize(mSize));
+            VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+                                                   .pNext        = nullptr,
+                                                   .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE,
+                                                   .objectHandle = reinterpret_cast<uint64_t>(mImage),
+                                                   .pObjectName  = debugName.c_str()};
+            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+            vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
+        }
+        { // Image View
+            std::string                   debugName = fmt::format("ManImgView \"{}\"", mName);
+            VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+                                                   .pNext        = nullptr,
+                                                   .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW,
+                                                   .objectHandle = reinterpret_cast<uint64_t>(mImageView),
+                                                   .pObjectName  = debugName.c_str()};
+            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+        }
     }
 
 

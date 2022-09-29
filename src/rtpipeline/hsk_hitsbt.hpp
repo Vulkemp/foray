@@ -21,8 +21,8 @@ namespace hsk {
         /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
         void SetGroup(GroupIndex groupIndex, ShaderModule* closestHit, ShaderModule* anyHit, ShaderModule* intersect, const void* data);
 
-        virtual void        WriteToShaderCollection(RtShaderCollection& collection) const;
-        virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
+        virtual void        WriteToShaderCollection(RtShaderCollection& collection) const override;
+        virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const override;
 
 
         HSK_PROPERTY_CGET(Groups)
@@ -32,7 +32,7 @@ namespace hsk {
       protected:
         std::vector<ShaderGroup> mGroups;
 
-        inline virtual size_t GetGroupArrayCount() const { return mGroups.size(); }
+        inline virtual size_t GetGroupArrayCount() const override { return mGroups.size(); }
     };
 
 }  // namespace hsk
