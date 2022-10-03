@@ -52,6 +52,12 @@ MaterialBufferObject GetMaterialOrFallback(nonuniformEXT in int index)
         result.MetallicRoughnessTextureIndex = -1;
         result.EmissiveTextureIndex          = -1;
         result.NormalTextureIndex            = -1;
+        result.IndexOfRefraction = 1.5f;
+        result.TransmissionFactor = 0.f;
+        result.TransmissionTextureIndex = -1;
+        result.AttenuationColor = vec3(0.f);
+        result.AttenuationDistance = 1.f / 0.f; // spec compliant way to get +Infinity
+        result.Flags = 0U;
         return result;
     }
 }

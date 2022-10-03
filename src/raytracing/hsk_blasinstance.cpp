@@ -10,7 +10,7 @@ namespace hsk {
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
         mAsInstance.instanceShaderBindingTableRecordOffset = 0;
-        mAsInstance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+        mAsInstance.flags                                  = 0;
 
         Update();
     }
@@ -23,7 +23,7 @@ namespace hsk {
         mAsInstance.instanceCustomIndex                    = 0;
         mAsInstance.mask                                   = 0xFF;
         mAsInstance.instanceShaderBindingTableRecordOffset = 0;
-        mAsInstance.flags                                  = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+        mAsInstance.flags                                  = 0;
 
         TranslateTransformMatrix(globalTransform, mAsInstance.transform);
     }

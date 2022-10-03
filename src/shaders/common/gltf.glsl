@@ -28,7 +28,22 @@ struct MaterialBufferObject  // 52 Bytes, aligned to 16 bytes causes size to be 
     int EmissiveTextureIndex;
     /// @brief Texture Index for Normal
     int NormalTextureIndex;
+    // Index of Refraction
+    float IndexOfRefraction;
+    // Percentage of light transmitted through the surface
+    float TransmissionFactor;
+    // Texture Index for transmission factor (as multiplied with the factor)
+    int TransmissionTextureIndex;
+    // The color that white light turns into due to absorption when reaching the attenuation distance.
+    vec3 AttenuationColor;
+    // Average distance in the medium that light has to travel before it encounters a particle (world space)
+    float AttenuationDistance;
+    // Material Flags
+    uint Flags;
 };
+
+const uint MATERIALFLAGBIT_FULLYOPAQUE = 1U;
+const uint MATERIALFLAGBIT_DOUBLESIDED = 2U;
 
 /// @brief Represents a probe of a material at a specific Uv coordinate
 struct MaterialProbe

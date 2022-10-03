@@ -1,7 +1,7 @@
 #pragma once
 #include "../hsk_basics.hpp"
-#include "hsk_rt_declares.hpp"
 #include "../hsk_glm.hpp"
+#include "hsk_rt_declares.hpp"
 #include <functional>
 
 namespace hsk {
@@ -30,6 +30,19 @@ namespace hsk {
 
         /// @brief Set the offset for shader binding table
         void SetShaderBindingTableOffset(uint32_t offset);
+
+        inline VkGeometryInstanceFlagsKHR GetGeometryInstanceFlags() const { return mAsInstance.flags; }
+        inline BlasInstance&              SetGeometryInstanceFlags(VkGeometryFlagsKHR flags)
+        {
+            mAsInstance.flags = flags;
+            return *this;
+        }
+        inline BlasInstance& AddGeometryInstanceFlag(VkGeometryFlagBitsKHR flag)
+        {
+            mAsInstance.flags |= flag;
+            return *this;
+        }
+
 
         /// @brief Updates the transform by fetching a new matrix
         void Update();

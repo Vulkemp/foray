@@ -9,7 +9,7 @@ namespace hsk {
     {
       public:
         std::unique_ptr<ManagedImage> Image;
-        VkSampler                     Sampler;
+        VkSampler                     Sampler = nullptr;
     };
 
     class TextureStore : public GlobalComponent
@@ -28,8 +28,9 @@ namespace hsk {
 
       protected:
         std::vector<SampledTexture> mTextures;
-        std::map<size_t, VkSampler> mSamplers;
-        std::vector<VkDescriptorImageInfo>                   mDescriptorImageInfos;
-        void                                                 UpdateImageInfos();
+
+        std::map<size_t, VkSampler>        mSamplers;
+        std::vector<VkDescriptorImageInfo> mDescriptorImageInfos;
+        void                               UpdateImageInfos();
     };
 }  // namespace hsk

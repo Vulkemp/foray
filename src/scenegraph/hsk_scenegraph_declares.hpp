@@ -20,4 +20,5 @@ namespace hsk {
     struct CameraUboBlock;
     class Camera;
     struct SceneDrawInfo;
+    class SampledTexture;
 }  // namespace hsk

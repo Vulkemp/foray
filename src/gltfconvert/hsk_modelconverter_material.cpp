@@ -14,10 +14,26 @@ namespace hsk {
 
     void ModelConverter::LoadMaterials()
     {
+        const std::string extIor     = "KHR_materials_ior";
+        const std::string extIor_ior = "ior";
+
+        const std::string extTransmission                           = "KHR_materials_transmission";
+        const std::string extTransmission_transmissionFactor        = "transmissionFactor";
+        const std::string extTransmission_transmissionTexture       = "transmissionTexture";
+        const std::string extTransmission_transmissionTexture_index = "index";
+
+        const std::string extVolume                     = "KHR_materials_volume";
+        const std::string extVolume_attenuationDistance = "attenuationDistance";
+        const std::string extVolume_attenuationColor    = "attenuationColor";
+
+
         for(int32_t i = 0; i < mGltfModel.materials.size(); i++)
         {
             const auto& gltfMaterial = mGltfModel.materials[i];
             auto&       material     = mMaterialBuffer.GetVector()[mIndexBindings.MaterialBufferOffset + i];
+
+            material.Flags |= (gltfMaterial.alphaMode == "OPAQUE" ? (MaterialFlags)MaterialFlagBits::FullyOpaque : 0);
+            material.Flags |= (gltfMaterial.doubleSided ? (MaterialFlags)MaterialFlagBits::DoubleSided : 0);
 
             // Pbr Base Info
             material.BaseColorFactor               = glm::vec4(gltfMaterial.pbrMetallicRoughness.baseColorFactor[0], gltfMaterial.pbrMetallicRoughness.baseColorFactor[1],
@@ -31,6 +47,84 @@ namespace hsk {
             material.EmissiveFactor       = glm::vec3(gltfMaterial.emissiveFactor[0], gltfMaterial.emissiveFactor[1], gltfMaterial.emissiveFactor[2]);
             material.EmissiveTextureIndex = _calcTextureIndex(gltfMaterial.emissiveTexture.index, mIndexBindings.TextureBufferOffset);
             material.NormalTextureIndex   = _calcTextureIndex(gltfMaterial.normalTexture.index, mIndexBindings.TextureBufferOffset);
+
+            {  // Index of Refraction
+                const auto iter = gltfMaterial.extensions.find(extIor);
+                if(iter != gltfMaterial.extensions.cend())
+                {
+                    if(iter->second.IsObject() && iter->second.Has(extIor_ior))
+                    {
+                        const auto value = iter->second.Get(extIor_ior);
+                        if(value.IsNumber())
+                        {
+                            material.IndexOfRefraction = (fp32_t)value.GetNumberAsDouble();
+                        }
+                    }
+                }
+            }
+            {  // Transmission
+                const auto iter = gltfMaterial.extensions.find(extTransmission);
+                if(iter != gltfMaterial.extensions.cend())
+                {
+                    if(iter->second.IsObject())
+                    {
+                        if(iter->second.Has(extTransmission_transmissionFactor))
+                        {
+                            const tinygltf::Value factor = iter->second.Get(extTransmission_transmissionFactor);
+                            if(factor.IsNumber())
+                            {
+                                material.TransmissionFactor = (fp32_t)factor.GetNumberAsDouble();
+                            }
+                        }
+
+                        if(iter->second.Has(extTransmission_transmissionTexture))
+                        {
+                            const tinygltf::Value texInfoObj = iter->second.Get(extTransmission_transmissionTexture);
+                            if(texInfoObj.IsObject() && texInfoObj.Has(extTransmission_transmissionTexture_index))
+                            {
+                                const tinygltf::Value index = texInfoObj.Get(extTransmission_transmissionTexture_index);
+                                if(index.IsNumber())
+                                {
+                                    material.TransmissionTextureIndex = _calcTextureIndex((int32_t)index.GetNumberAsInt(), mIndexBindings.TextureBufferOffset);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            {  // Volume
+                const auto iter = gltfMaterial.extensions.find(extVolume);
+                if(iter != gltfMaterial.extensions.cend())
+                {
+                    if(iter->second.IsObject())
+                    {
+                        if(iter->second.Has(extVolume_attenuationColor))
+                        {
+                            const tinygltf::Value valueArray = iter->second.Get(extVolume_attenuationColor);
+                            if(valueArray.IsArray())
+                            {
+                                for(int32_t i = 0; i < valueArray.ArrayLen() && i < 3; i++)
+                                {
+                                    const tinygltf::Value value = valueArray.Get(i);
+                                    if(value.IsNumber())
+                                    {
+                                        material.AttenuationColor[i] = (fp32_t)value.GetNumberAsDouble();
+                                    }
+                                }
+                            }
+                        }
+
+                        if(iter->second.Has(extVolume_attenuationDistance))
+                        {
+                            const tinygltf::Value distance = iter->second.Get(extVolume_attenuationDistance);
+                            if(distance.IsNumber())
+                            {
+                                material.AttenuationDistance = (fp32_t)distance.GetNumberAsDouble();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }  // namespace hsk
