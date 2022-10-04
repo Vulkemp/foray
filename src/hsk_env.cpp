@@ -100,7 +100,7 @@ namespace hsk {
     {
         Assert(!mPath.empty(), "Invalid Path Initializer: path argument may not be empty!");
 #ifdef WIN32
-        mRelative = !(mPath.size() >= 2 && mPath[1] == ':' && mPath[2] == '\\');
+        mRelative = !(mPath.size() >= 2 && mPath[1] == ':' && (mPath[2] == '\\' || mPath[2] == '/'));
         // If the path came from std::filesystem::path, it will contain \ characters
         for(char& c : mPath)
         {
