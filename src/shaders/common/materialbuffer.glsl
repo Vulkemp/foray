@@ -5,6 +5,7 @@
 */
 
 #include "gltf.glsl"
+#include "colorspace.glsl"
 
 #ifdef BIND_MATERIAL_BUFFER
 #ifndef SET_MATERIAL_BUFFER
@@ -86,7 +87,7 @@ MaterialProbe ProbeMaterial(in MaterialBufferObject material, in vec2 uv)
     // Grab BaseColor / Albedo
     if(material.BaseColorTextureIndex >= 0)
     {
-        result.BaseColor = SampleTexture(material.BaseColorTextureIndex, uv) * material.BaseColorFactor;
+        result.BaseColor = SrgbToLinear(SampleTexture(material.BaseColorTextureIndex, uv)) * material.BaseColorFactor;
     }
     else
     {
@@ -96,7 +97,7 @@ MaterialProbe ProbeMaterial(in MaterialBufferObject material, in vec2 uv)
     // Grab Emissive
     if(material.EmissiveTextureIndex >= 0)
     {
-        result.EmissiveColor = SampleTexture(material.EmissiveTextureIndex, uv).xyz * material.EmissiveFactor;
+        result.EmissiveColor = SrgbToLinear(SampleTexture(material.EmissiveTextureIndex, uv).xyz) * material.EmissiveFactor;
     }
     else
     {
