@@ -60,6 +60,7 @@ namespace hsk {
         HSK_PROPERTY_CGET(Buffer);
         HSK_PROPERTY_CGET(IsMapped);
         HSK_PROPERTY_CGET(Allocation);
+        HSK_PROPERTY_CGET(AllocationInfo);
         HSK_PROPERTY_CGET(Name);
         HSK_PROPERTY_CGET(Size);
 
