@@ -1,10 +1,31 @@
 #pragma once
 #include "hsk_renderstage.hpp"
 
-namespace hsk
-{
+namespace hsk {
+    class DenoiserConfig
+    {
+      public:
+        ManagedImage*              PrimaryInput = nullptr;
+        ManagedImage*              AlbedoInput  = nullptr;
+        ManagedImage*              NormalInput  = nullptr;
+        std::vector<ManagedImage*> AuxiliaryInputs;
+        ManagedImage*              PrimaryOutput = nullptr;
+        void*                      AuxiliaryData = nullptr;
+
+        inline DenoiserConfig() {}
+        inline DenoiserConfig(ManagedImage* primaryIn, ManagedImage* albedoIn, ManagedImage* normalIn, ManagedImage* primaryOut)
+            : PrimaryInput(primaryIn), AlbedoInput(albedoIn), NormalInput(normalIn), PrimaryOutput(primaryOut)
+        {
+        }
+    };
+
     class DenoiserStage : public RenderStage
     {
+      public:
+        virtual void Init(const VkContext* context, const DenoiserConfig& config){};
 
-    };    
-} // namespace hsk
+        virtual void BeforeDenoise(const FrameRenderInfo& renderInfo){};
+        virtual void AfterDenoise(const FrameRenderInfo& renderInfo){};
+        virtual void DispatchDenoise(VkSemaphore readyToDenoise, VkSemaphore denoiseCompleted){};
+    };
+}  // namespace hsk
