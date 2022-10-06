@@ -1,4 +1,5 @@
 #pragma once
+#include "hsk_basics.hpp"
 #include <filesystem>
 #include <string_view>
 
@@ -23,7 +24,7 @@ namespace hsk {
         /// @brief The stored path, encoded as UTF-8
         std::string mPath;
         /// @brief If true, the path is a relative path
-        bool        mRelative;
+        bool mRelative;
         /// @brief Directory and file names making up this path. References sections in mPath, result of splitting by '/'. May contain empty entries (for example absolute paths on unix systems)
         std::vector<std::string_view> mPathSections;
 
@@ -46,7 +47,7 @@ namespace hsk {
         }
 
         /// @brief Combine paths, interpreted as navigating relative of this path to the other path
-        Utf8Path  operator/(const Utf8Path& other) const;
+        Utf8Path operator/(const Utf8Path& other) const;
         /// @brief Update this paths by navigating relative to self as dictated by other
         Utf8Path& operator/=(const Utf8Path& other);
 
@@ -75,9 +76,6 @@ namespace std {
     template <>
     struct hash<hsk::Utf8Path>
     {
-        inline size_t operator()(const hsk::Utf8Path& p) const
-        {
-            return std::hash<std::string>()(p.GetPath());
-        }
+        inline size_t operator()(const hsk::Utf8Path& p) const { return std::hash<std::string>()(p.GetPath()); }
     };
 }  // namespace std

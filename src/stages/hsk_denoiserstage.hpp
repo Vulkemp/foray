@@ -11,10 +11,11 @@ namespace hsk {
         std::vector<ManagedImage*> AuxiliaryInputs;
         ManagedImage*              PrimaryOutput = nullptr;
         void*                      AuxiliaryData = nullptr;
+        VkSemaphore                Semaphore     = nullptr;
 
         inline DenoiserConfig() {}
-        inline DenoiserConfig(ManagedImage* primaryIn, ManagedImage* albedoIn, ManagedImage* normalIn, ManagedImage* primaryOut)
-            : PrimaryInput(primaryIn), AlbedoInput(albedoIn), NormalInput(normalIn), PrimaryOutput(primaryOut)
+        inline DenoiserConfig(ManagedImage* primaryIn, ManagedImage* albedoIn, ManagedImage* normalIn, ManagedImage* primaryOut, VkSemaphore semaphore)
+            : PrimaryInput(primaryIn), AlbedoInput(albedoIn), NormalInput(normalIn), PrimaryOutput(primaryOut), Semaphore(semaphore)
         {
         }
     };
@@ -26,6 +27,6 @@ namespace hsk {
 
         virtual void BeforeDenoise(const FrameRenderInfo& renderInfo){};
         virtual void AfterDenoise(const FrameRenderInfo& renderInfo){};
-        virtual void DispatchDenoise(VkSemaphore readyToDenoise, VkSemaphore denoiseCompleted){};
+        virtual void DispatchDenoise(uint64_t& timelineValue){};
     };
 }  // namespace hsk
