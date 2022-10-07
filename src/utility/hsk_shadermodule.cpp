@@ -36,6 +36,12 @@ namespace hsk {
         vkCreateShaderModule(context->Device, &moduleCreateInfo, NULL, &mShaderModule);
     }
 
+    void ShaderModule::LoadFromSource(const VkContext* context, std::string relativeSourcePath) {
+        std::vector<char> binary;
+        ShaderManager::Instance().GetShaderBinary(relativeSourcePath, binary);
+        LoadFromBinary(context, binary); 
+    }
+
     void ShaderModule::LoadFromBinary(const VkContext* context, std::vector<char>& binaryBuffer)
     {
         mContext                         = context;
