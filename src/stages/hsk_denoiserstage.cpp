@@ -20,7 +20,7 @@ namespace hsk {
         VkExportSemaphoreCreateInfo exportSemaphoreCi{
             .sType       = VkStructureType::VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO,
             .pNext       = &timelineSemaphoreCi,
-            .handleTypes = handleType,
+            .handleTypes = static_cast<VkExternalSemaphoreHandleTypeFlags>(handleType),
         };
 
         VkSemaphoreCreateInfo semaphoreCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = &exportSemaphoreCi, .flags = 0};
