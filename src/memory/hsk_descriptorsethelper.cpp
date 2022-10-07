@@ -201,6 +201,13 @@ namespace hsk {
             mDescriptorCount = static_cast<uint32_t>(countDescriptorInfos);
         }
 
+        // runtime check buffers for null
+        for(VkDescriptorBufferInfo& bufferInfo : *bufferInfos)
+        {
+            Assert(bufferInfo.buffer != VK_NULL_HANDLE,
+                 "You added a buffer info where the buffer was null!");
+        }
+
         mBufferInfos.push_back(bufferInfos);
     }
 
@@ -217,6 +224,13 @@ namespace hsk {
             // first set added
             mDescriptorCount = static_cast<uint32_t>(countDescriptorInfos);
         }
+
+         // runtime check images for null
+        for(VkDescriptorImageInfo& imageInfo : *imageInfos)
+        {
+            Assert(imageInfo.imageView != VK_NULL_HANDLE, "You added an image info where the view was null!");
+        }
+
         mImageInfos.push_back(imageInfos);
     }
     void DescriptorSetHelper::DescriptorInfo::AddPNext(void* pNext, uint32_t descriptorCount)
