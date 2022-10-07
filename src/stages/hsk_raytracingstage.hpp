@@ -34,6 +34,7 @@ namespace hsk {
 
         virtual void PrepareAttachments();
         virtual void SetupDescriptors();
+        virtual void CreateDescriptorSets();
         virtual void UpdateDescriptors();
         virtual void CreatePipelineLayout();
         virtual void CreateRaytraycingPipeline();

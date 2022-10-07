@@ -38,6 +38,7 @@ namespace hsk {
     void RaytracingStage::CreateFixedSizeComponents()
     {
         SetupDescriptors();
+        CreateDescriptorSets();
         CreatePipelineLayout();
         CreateRaytraycingPipeline();
     }
@@ -117,8 +118,10 @@ namespace hsk {
         if(mNoiseSource.IsSet)
         {
             mDescriptorSet.SetDescriptorInfoAt(10, mNoiseSource.GetDescriptorInfo());
-        }
+        } 
+    }
 
+    void RaytracingStage::CreateDescriptorSets() {
         mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
     }
 
