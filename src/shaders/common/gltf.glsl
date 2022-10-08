@@ -3,7 +3,7 @@
 
     Definitions for Material struct and material probe.
 
-    C++: src/scenegraph/hsk_material.hpp
+    C++: src/scenegraph/foray_material.hpp
 */
 
 #ifndef GLTF_GLSL

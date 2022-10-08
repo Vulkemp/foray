@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 
-project("rtrpf")
+project("foray")
 
 # Include Compiler Config (sets c++ 20 and compiler flags)
 include("cmakescripts/compilerconfig.cmake")
@@ -54,11 +54,9 @@ include_directories(
     PUBLIC ${thirdparty_include_dir}
 )
 
-target_precompile_headers(${PROJECT_NAME}
-    PRIVATE "src/hsk_precompile.hpp")
+# target_precompile_headers(${PROJECT_NAME} PRIVATE "src/foray_precompile.hpp")
 
 # Compile Definitions
-target_compile_definitions(${PROJECT_NAME} PUBLIC HSK_RTRPF_EXPORT)
 if (DISABLE_RT_EXTENSIONS) 
     target_compile_definitions(${PROJECT_NAME} PUBLIC DISABLE_RT_EXTENSIONS)
 endif ()

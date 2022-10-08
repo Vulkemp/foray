@@ -3,7 +3,7 @@
 
     Contains a definition and layout macros for the Camera Ubo
 
-    C++: src/scenegraph/hsk_camerauboblock.hpp
+    C++: src/scenegraph/foray_camerauboblock.hpp
 */
 
 #ifdef BIND_CAMERA_UBO

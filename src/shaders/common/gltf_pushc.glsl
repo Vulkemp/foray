@@ -3,7 +3,7 @@
 
     Definition for the push constant used for rasterized rendering of scenes
 
-    C++: src/scenegraph/hsk_scenedrawing.hpp
+    C++: src/scenegraph/foray_scenedrawing.hpp
 */
 
 #ifdef BIND_PUSHC
