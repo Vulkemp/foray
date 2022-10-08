@@ -32,8 +32,8 @@ namespace foray::stages {
         std::vector<VkClearValue>                        mClearValues;
         core::ManagedImage                               mDepthAttachment;
         std::vector<std::unique_ptr<core::ManagedImage>> mGBufferImages;
-        std::string                                      mVertexShaderPath   = "../foray_rt_rpf/src/shaders/gbuffer/gbuffer_stage.vert";
-        std::string                                      mFragmentShaderPath = "../foray_rt_rpf/src/shaders/gbuffer/gbuffer_stage.frag";
+        std::string                                      mVertexShaderPath   = "../foray/src/shaders/gbuffer/gbuffer_stage.vert";
+        std::string                                      mFragmentShaderPath = "../foray/src/shaders/gbuffer/gbuffer_stage.frag";
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;

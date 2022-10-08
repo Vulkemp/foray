@@ -273,6 +273,15 @@ namespace foray::core {
         }
     }
 
+    fs::file_time_type lLastWriteOrFallback(fs::path file)
+    {
+        if (!fs::exists(file))
+        {
+            return fs::file_time_type{};
+        }
+        return fs::last_write_time(file);
+    }
+
     void ShaderManager::CheckIncludeeForRecompilations(const std::string& includee)
     {
 
@@ -297,7 +306,7 @@ namespace foray::core {
             }
 
             // if there was no recompilation fail, simply check if last modification is newer then includer
-            if(fs::last_write_time(includee) > fs::last_write_time(GetFileOutputPath(includer)))
+            if(fs::last_write_time(includee) > lLastWriteOrFallback(GetFileOutputPath(includer)))
             {
                 // if yes, its time to recompile includer
                 mNeedRecompileShaderFiles.insert(includer);
@@ -308,6 +317,7 @@ namespace foray::core {
 
     void ShaderManager::CheckIncluderForRecompilation(const std::string& includer)
     {
+        osi::Utf8Path spv = GetFileOutputPath(includer);
 
         // check if includer recompilation failed
         if(Cache.FailedCompileTimestamps.find(includer) != Cache.FailedCompileTimestamps.end())
@@ -328,7 +338,7 @@ namespace foray::core {
         }
 
         // if includer output binary is missing OR the source is newer then the output, trigger recompilation
-        if(!fs::exists(includer) || fs::last_write_time(includer) > fs::last_write_time(GetFileOutputPath(includer)))
+        if(!fs::exists(spv) || fs::last_write_time(includer) > lLastWriteOrFallback(spv))
         {
             mNeedRecompileShaderFiles.insert(includer);
         }
