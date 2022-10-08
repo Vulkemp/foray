@@ -95,7 +95,7 @@ namespace foray::stages {
         }
     }
 
-    void GBufferStage::OnShadersRecompiled(base::ShaderCompiler* shaderCompiler)
+    void GBufferStage::OnShadersRecompiled()
     {
         // check if shaders have been recompiled
         //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);

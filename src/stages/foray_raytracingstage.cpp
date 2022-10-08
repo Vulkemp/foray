@@ -1,5 +1,4 @@
 #include "foray_raytracingstage.hpp"
-#include "../base/foray_shadercompiler.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../core/foray_shadermodule.hpp"
 #include "../scene/components/foray_meshinstance.hpp"

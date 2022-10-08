@@ -49,4 +49,6 @@ void main()
     vec2 screenPos     = inDevicePos.xy / inDevicePos.w;
     vec2 old_screenPos = inOldDevicePos.xy / inOldDevicePos.w;
     outMotion          = (old_screenPos - screenPos) * 0.5;
+    
+    outAlbedo = vec4(1.0, 0.0, 0.0, 1.0);
 }

@@ -2,7 +2,6 @@
 #include "../osi/foray_window.hpp"
 #include "foray_framerenderinfo.hpp"
 #include "foray_minimalappbase.hpp"
-#include "foray_shadercompiler.hpp"
 #include "../core/foray_vkcontext.hpp"
 #include <vma/vk_mem_alloc.h>
 
@@ -42,7 +41,6 @@ namespace foray::base {
         virtual void BaseInitGetVkQueues();
         virtual void BaseInitCommandPool();
         virtual void BaseInitCreateVma();
-        virtual void BaseInitCompileShaders();
         virtual void BaseInitSyncObjects();
 
         virtual void        RecreateSwapchain();
@@ -62,23 +60,7 @@ namespace foray::base {
 
         void SetWindowDisplayMode(foray::EDisplayMode displayMode);
 
-        virtual void OnEvent(const Event* event) override;
-
-        void RecompileShaders();
-        virtual void OnShadersRecompiled(ShaderCompiler* shaderCompiler){};
-
-        struct ShaderCompilerconfig
-        {
-            bool EnableShaderCompiler = true;
-            /// @brief By default, shader source files are searched in the current working directory "cwd"/shaders.
-            std::string ShaderSubdir = "./shaders/";
-            /// @brief If mShaderSourceDirectoryPathFull is set to value, this path will be used as source dir.
-            std::string ShaderSourceDirectoryPathFull = {};
-            /// @brief If mShaderOutputDirectoryPathFull is set to value, this path will be used as output dir.
-            std::string ShaderOutputDirectoryPathFull = {};
-        } mShaderCompilerConfig;
-
-        ShaderCompiler mShaderCompiler;
+        virtual void OnShadersRecompiled(){};
 
         FrameRenderInfo mRenderInfo{};
 

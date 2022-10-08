@@ -6,7 +6,7 @@
 #include "../foray_vma.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_env.hpp"
-//include "foray_shadermanager.hpp"
+#include "../core/foray_shadermanager.hpp"
 
 namespace foray::base {
     void DefaultAppBase::BaseInit()
@@ -16,7 +16,9 @@ namespace foray::base {
         core::logger()->info("Debugging and validation layers enabled : {}", mDebugEnabled);
 
         // recompile shaders
-        BaseInitCompileShaders();
+        // BaseInitCompileShaders();
+        // ShaderManager::
+        core::ShaderManager::Instance().CheckAndUpdateShaders();
 
         // create a window and add its requried instance extensions to the instance builder
         mContext.ContextSwapchain.Window.Create();
@@ -235,33 +237,6 @@ namespace foray::base {
 #endif
 
         vmaCreateAllocator(&allocatorCreateInfo, &mContext.Allocator);
-    }
-
-    void DefaultAppBase::BaseInitCompileShaders()
-    {
-        if(!mShaderCompilerConfig.EnableShaderCompiler)
-        {
-            return;
-        }
-        core::logger()->info("Compiling shaders...");
-        std::string shaderSourceDirectory = osi::MakeRelativePath(mShaderCompilerConfig.ShaderSubdir);
-        std::string shaderOutputDirectory = shaderSourceDirectory;
-        if(mShaderCompilerConfig.ShaderSourceDirectoryPathFull.length() > 0)
-        {
-
-            shaderSourceDirectory = mShaderCompilerConfig.ShaderSourceDirectoryPathFull;
-        }
-
-        if(mShaderCompilerConfig.ShaderOutputDirectoryPathFull.length() > 0)
-        {
-
-            shaderOutputDirectory = mShaderCompilerConfig.ShaderOutputDirectoryPathFull;
-        }
-
-        mShaderCompiler.AddSourceDirectory(osi::MakeRelativePath("./../foray_rt_rpf/src/shaders"));
-        mShaderCompiler.AddSourceDirectory(shaderOutputDirectory);
-        mShaderCompiler.CompileAll();
-        core::logger()->info("Compiling shaders successfully finished!");
     }
 
     void DefaultAppBase::BaseInitSyncObjects()
@@ -530,8 +505,7 @@ namespace foray::base {
         if (deltaSum > 1.0f)
         {
             deltaSum = 0;
-            // TODO
-            // if (ShaderManager::Instance().CheckAndUpdateShaders())
+            // if (core::ShaderManager::Instance().CheckAndUpdateShaders())
             // {
             //     OnShadersRecompiled(nullptr);
             // }
@@ -544,27 +518,5 @@ namespace foray::base {
     void DefaultAppBase::SetWindowDisplayMode(foray::EDisplayMode displayMode)
     {
         mContext.ContextSwapchain.Window.DisplayMode(displayMode);
-    }
-
-    void DefaultAppBase::OnEvent(const Event * event)
-    {
-        auto binaryInputEvent = dynamic_cast<const EventInputBinary*>(event);
-        if(binaryInputEvent)
-        {
-            auto buttonId = binaryInputEvent->SourceInput->GetButtonId();
-            auto pressed  = binaryInputEvent->State;
-           
-
-            if(buttonId == EButton::Keyboard_F2 && pressed)
-            {
-                core::logger()->info("F2 pressed - triggered shader recompilation!");
-                mShaderCompiler.SetVerbosityFlags(ShaderCompiler::VerbosityFlags::Modified);
-                mShaderCompiler.SetThrowException(false);
-                mShaderCompiler.CompileAll(true);
-                core::logger()->info("recompilation done!");
-                vkDeviceWaitIdle(mContext.Device);
-                OnShadersRecompiled(&mShaderCompiler);
-            }
-        } 
     }
 }  // namespace foray

@@ -41,29 +41,6 @@ namespace foray::core {
         file.close();
     }
 
-    // const std::vector<char>& ShaderManager::GetShaderBinaryAbsolutePath(std::string shaderSourceFilePath)
-    // {
-    //     // clean shader file path (remove ../ etc. from path)
-    //     NormalizePath(shaderSourceFilePath);
-    //     std::string outputFilePath = GetFileOutputPath(shaderSourceFilePath);
-
-    //     // if shader code cached, immediate return
-    //     std::vector<char>* cachedShaderCode = Cache.GetSpirvFileBufferPtr(shaderSourceFilePath);
-    //     if(cachedShaderCode != nullptr)
-    //     {
-    //         return *cachedShaderCode;
-    //     }
-
-    //     AddShaderIncludeesToModificationTracking(shaderSourceFilePath);
-
-    //     // add includers to tracking
-    //     Cache.AddTrackedIncluder(shaderSourceFilePath);
-
-    //     CheckAndUpdateShaders();
-
-    //     return Cache.AddSpirvFile(shaderSourceFilePath, outputFilePath);
-    // }
-
 #ifdef _WIN32
     // calls the glslc.exe on windows and passes the shader file path
     // returns false if the compilation failed
@@ -336,6 +313,10 @@ namespace foray::core {
                 return;
             }
         }
+
+        auto a = fs::exists(spv);
+        auto b = fs::last_write_time(includer);
+        auto c = lLastWriteOrFallback(spv);
 
         // if includer output binary is missing OR the source is newer then the output, trigger recompilation
         if(!fs::exists(spv) || fs::last_write_time(includer) > lLastWriteOrFallback(spv))
