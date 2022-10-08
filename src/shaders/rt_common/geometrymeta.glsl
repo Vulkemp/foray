@@ -3,7 +3,7 @@
 
     Defines the GeometryMeta struct which provides information applicable per Geometry per Blas
 
-    C++: src/raytracing/hsk_geometrymetabuffer.hpp
+    C++: src/raytracing/foray_geometrymetabuffer.hpp
 */
 
 #ifndef GEOMETRYMETA_GLSL
