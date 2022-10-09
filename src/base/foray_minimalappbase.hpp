@@ -1,6 +1,6 @@
 #pragma once
 #include "../osi/foray_osi.hpp"
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include <stdint.h>
 #include <vkbootstrap/VkBootstrap.h>
 

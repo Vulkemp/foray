@@ -1,6 +1,6 @@
 #include "foray_defaultappbase.hpp"
 #include "../core/foray_deviceresource.hpp"
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include "../core/foray_managedimage.hpp"
 #include "../foray_exception.hpp"
 #include "../foray_vma.hpp"
@@ -13,7 +13,7 @@ namespace foray::base {
     {
         mContext.DebugEnabled = mDebugEnabled;
 
-        core::logger()->info("Debugging and validation layers enabled : {}", mDebugEnabled);
+        logger()->info("Debugging and validation layers enabled : {}", mDebugEnabled);
 
         // recompile shaders
         // BaseInitCompileShaders();
@@ -293,7 +293,7 @@ namespace foray::base {
         {
             if(deviceResource->Exists())
             {
-                core::logger()->error("Resource with name \"{}\" has not been cleaned up!", deviceResource->GetName());
+                logger()->error("Resource with name \"{}\" has not been cleaned up!", deviceResource->GetName());
             }
         }
         vmaDestroyAllocator(mContext.Allocator);

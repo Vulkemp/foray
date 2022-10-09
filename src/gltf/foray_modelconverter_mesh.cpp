@@ -1,6 +1,6 @@
 #include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include "foray_modelconverter.hpp"
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 
 namespace foray::gltf {
     void ModelConverter::BuildGeometryBuffer()
@@ -10,7 +10,7 @@ namespace foray::gltf {
             auto&                         gltfMesh = mGltfModel.meshes[i];
             std::vector<scene::Primitive> primitives;
 
-            core::logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
+            logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
 
             PushGltfMeshToBuffers(gltfMesh, primitives);
             auto mesh = std::make_unique<scene::Mesh>();

@@ -1,5 +1,5 @@
 #include "foray_geo.hpp"
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 
 namespace foray::scene {
 

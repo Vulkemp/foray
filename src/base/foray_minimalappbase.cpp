@@ -150,16 +150,16 @@ namespace foray::base {
                 switch(messageSeverity)
                 {
                     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                        core::logger()->info("{}", pCallbackData->pMessage);
+                        logger()->info("{}", pCallbackData->pMessage);
                         break;
                     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-                        core::logger()->info("{}", pCallbackData->pMessage);
+                        logger()->info("{}", pCallbackData->pMessage);
                         break;
                     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                        core::logger()->warn("{}", pCallbackData->pMessage);
+                        logger()->warn("{}", pCallbackData->pMessage);
                         break;
                     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                        core::logger()->error("{}", pCallbackData->pMessage);
+                        logger()->error("{}", pCallbackData->pMessage);
                         throw Exception("{}", pCallbackData->pMessage);
                         break;
                     default:
@@ -204,11 +204,11 @@ namespace foray::base {
     void MinimalAppBase::BaseCleanupSdlSubsystem()
     {
         mOsManager.Destroy();
-        core::logger()->flush();
+        logger()->flush();
     }
 
     void MinimalAppBase::PrintStateChange(EState oldState, EState newState)
     {
-        core::logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
+        logger()->info("{} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
     }
 }  // namespace foray

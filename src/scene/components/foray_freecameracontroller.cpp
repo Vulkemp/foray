@@ -1,7 +1,7 @@
 #include "foray_freecameracontroller.hpp"
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
-#include "../../core/foray_logger.hpp"
+#include "../../foray_logger.hpp"
 
 namespace foray::scene {
     void FreeCameraController::OnEvent(const Event* event)
@@ -30,7 +30,7 @@ namespace foray::scene {
                 int code = SDL_SetRelativeMouseMode(mUseMouse ? SDL_FALSE : SDL_TRUE);
                 if(code < 0)
                 {
-                    core::logger()->warn("SDL relative mouse not supported: {}", SDL_GetError());
+                    logger()->warn("SDL relative mouse not supported: {}", SDL_GetError());
                 }
                 else
                 {

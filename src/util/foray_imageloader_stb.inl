@@ -2,7 +2,7 @@
 #include "../osi/foray_env.hpp"
 #include "foray_imageloader.hpp"
 #include <tinygltf/stb_image.h>
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 
 namespace foray::util {
 
@@ -58,7 +58,7 @@ namespace foray::util {
 
         if constexpr(FORMAT_TRAITS::COMPONENT_TRAITS::IS_FLOAT && FORMAT_TRAITS::COMPONENT_TRAITS::SIZE != 4)
         {
-            core::logger()->warn("ImageLoad: Stb image loader does not support half or double precision floating point values!");
+            logger()->warn("ImageLoad: Stb image loader does not support half or double precision floating point values!");
             return false;
         }
 

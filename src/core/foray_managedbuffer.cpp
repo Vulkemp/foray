@@ -1,7 +1,7 @@
 #include "foray_managedbuffer.hpp"
 #include "../util/foray_fmtutilities.hpp"
 #include "foray_commandbuffer.hpp"
-#include "foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace foray::core {

@@ -1,4 +1,4 @@
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include "../scene/globalcomponents/foray_animationdirector.hpp"
 #include "foray_modelconverter.hpp"
 #include <map>
@@ -58,7 +58,7 @@ namespace foray::gltf {
                 }
                 else
                 {
-                    core::logger()->warn("Model Load: In animation \"{}\", channel #{}: Referencing invalid animation sampler #{}! Skipping Channel!", animation.GetName(),
+                    logger()->warn("Model Load: In animation \"{}\", channel #{}: Referencing invalid animation sampler #{}! Skipping Channel!", animation.GetName(),
                                          channelIndex, gltfChannel.sampler);
                     continue;
                 }
@@ -69,7 +69,7 @@ namespace foray::gltf {
                 }
                 else
                 {
-                    core::logger()->warn("Model Load: In animation \"{}\", channel #{}: Target Node index #{} out of bounds! Skipping Channel!", animation.GetName(), channelIndex,
+                    logger()->warn("Model Load: In animation \"{}\", channel #{}: Target Node index #{} out of bounds! Skipping Channel!", animation.GetName(), channelIndex,
                                          gltfChannel.target_node);
                     continue;
                 }
@@ -82,7 +82,7 @@ namespace foray::gltf {
                 }
                 else
                 {
-                    core::logger()->warn("Model Load: In animation \"{}\", channel #{}: Unable to match \"{}\" to a target path! Skipping Channel!", animation.GetName(),
+                    logger()->warn("Model Load: In animation \"{}\", channel #{}: Unable to match \"{}\" to a target path! Skipping Channel!", animation.GetName(),
                                          channelIndex, gltfChannel.target_path);
                     continue;
                 }
@@ -92,7 +92,7 @@ namespace foray::gltf {
 
             if(!animation.GetChannels().size() || !animation.GetSamplers().size())
             {
-                core::logger()->warn("Model Load: Animation \"{}\" without samplers or channels, skipping!", animation.GetName());
+                logger()->warn("Model Load: Animation \"{}\" without samplers or channels, skipping!", animation.GetName());
                 continue;
             }
             animDirector->GetAnimations().push_back(animation);
@@ -116,7 +116,7 @@ namespace foray::gltf {
         else
         {
             sampler.Interpolation = scene::EAnimationInterpolation::Linear;
-            core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Unable to match \"{}\" to an interpolation type! Falling back to linear!", animation.GetName(),
+            logger()->warn("Model Load: In animation \"{}\", sampler #{}: Unable to match \"{}\" to an interpolation type! Falling back to linear!", animation.GetName(),
                                  samplerIndex, gltfSampler.interpolation);
         }
 
@@ -126,7 +126,7 @@ namespace foray::gltf {
         {  // Read sampler input time values
             if(gltfSampler.input < 0)
             {
-                core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
+                logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
                 return;
             }
             times.reserve(gltfSampler.input);
@@ -137,7 +137,7 @@ namespace foray::gltf {
 
             if(accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
             {
-                core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Input Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
+                logger()->warn("Model Load: In animation \"{}\", sampler #{}: Input Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
                                      accessor.componentType);
                 return;
             }
@@ -158,7 +158,7 @@ namespace foray::gltf {
         {  // Read keyframe property values
             if(gltfSampler.input < 0)
             {
-                core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
+                logger()->warn("Model Load: In animation \"{}\", sampler #{}: No input accessor provided! Skipping sampler!", animation.GetName(), samplerIndex);
                 return;
             }
 
@@ -168,7 +168,7 @@ namespace foray::gltf {
 
             if(accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT)
             {
-                core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
+                logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(), samplerIndex,
                                      accessor.componentType);
                 return;
             }
@@ -194,7 +194,7 @@ namespace foray::gltf {
                     break;
                 }
                 default: {
-                    core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(),
+                    logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor of unrecognised type {}! Skipping sampler!", animation.GetName(),
                                          samplerIndex, accessor.type);
                     return;
                 }
@@ -208,7 +208,7 @@ namespace foray::gltf {
             {
                 if(times.size() * 3 != values.size())
                 {
-                    core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count (x3)! Skipping sampler!",
+                    logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count (x3)! Skipping sampler!",
                                          animation.GetName(), samplerIndex);
                     return;
                 }
@@ -224,7 +224,7 @@ namespace foray::gltf {
             {
                 if(times.size() != values.size())
                 {
-                    core::logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count! Skipping sampler!", animation.GetName(),
+                    logger()->warn("Model Load: In animation \"{}\", sampler #{}: Output Accessor count does not match input count! Skipping sampler!", animation.GetName(),
                                          samplerIndex);
                     return;
                 }

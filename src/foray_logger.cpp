@@ -2,7 +2,7 @@
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace foray::core {
+namespace foray {
     spdlog::logger* logger()
     {
         static spdlog::logger* defaultLogger{nullptr};

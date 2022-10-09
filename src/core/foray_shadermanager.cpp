@@ -1,6 +1,6 @@
 #include "foray_shadermanager.hpp"
 #include "../foray_exception.hpp"
-#include "foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include <filesystem>
 #include <fstream>
 //#include <regex>
@@ -200,7 +200,7 @@ namespace foray::core {
         for(const osi::Utf8Path& shaderPath : mNeedRecompileShaderFiles)
         {
             // log magenta shader compiled started
-            core::logger()->info("\033[1;35m Starting compilation of {} \033[0m", shaderPath);
+            logger()->info("\033[1;35m Starting compilation of {} \033[0m", shaderPath);
 
             // trigger shader recompilation
             auto s       = GetFileOutputPath(std::string(shaderPath));
@@ -209,13 +209,13 @@ namespace foray::core {
             if(!success)
             {
                 // log red failed
-                core::logger()->error("\033[1;31m Compilation failed {} \033[0m \n", shaderPath);
+                logger()->error("\033[1;31m Compilation failed {} \033[0m \n", shaderPath);
                 Cache.FailedCompileTimestamps[std::string(shaderPath)] = fs::last_write_time(shaderPath);
             }
             else
             {
                 // log green success
-                core::logger()->info("\033[1;32m Compilation succeeded {} \033[0m \n", shaderPath);
+                logger()->info("\033[1;32m Compilation succeeded {} \033[0m \n", shaderPath);
 
                 // add to compiled shaders
                 mRecompiledShaders.insert(shaderPath);

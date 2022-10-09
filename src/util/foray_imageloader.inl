@@ -59,7 +59,7 @@ namespace foray::util {
     {
         if(!mInfo.Valid)
         {
-            core::logger()->warn("Image Loader: Invalid Image Info!");
+            logger()->warn("Image Loader: Invalid Image Info!");
             return false;
         }
 

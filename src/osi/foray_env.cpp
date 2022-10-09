@@ -1,6 +1,6 @@
 #include "foray_env.hpp"
 
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include "../foray_exception.hpp"
 
 #ifdef WIN32
@@ -72,7 +72,7 @@ namespace foray::osi {
     {
         cwd = FromUtf8Path(path);
 
-        core::logger()->info("Setting working directory to \"{}\"", path);
+        logger()->info("Setting working directory to \"{}\"", path);
 
         std::filesystem::current_path(cwd);
         cwd_str = path;

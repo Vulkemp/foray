@@ -2,7 +2,7 @@
 #include "../osi/foray_env.hpp"
 #include "foray_imageloader.hpp"
 #include <tinyexr/tinyexr.h>
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 
 // Disclaimer: Most of the code here is heavily inspired or copied from how Godot engine incorporates the tinyexr image loader
 
@@ -154,12 +154,12 @@ namespace foray::util {
         {
             if(!!exrError)
             {
-                core::logger()->warn("Failed to read image file \"{}\". Failed to read Exr header. TinyExr error: {}", mInfo.Utf8Path, exrError);
+                logger()->warn("Failed to read image file \"{}\". Failed to read Exr header. TinyExr error: {}", mInfo.Utf8Path, exrError);
                 FreeEXRErrorMessage(exrError);
             }
             else
             {
-                core::logger()->warn("Failed to read image file \"{}\". Failed to read Exr header.", mInfo.Utf8Path);
+                logger()->warn("Failed to read image file \"{}\". Failed to read Exr header.", mInfo.Utf8Path);
             }
             return false;
         }
@@ -235,12 +235,12 @@ namespace foray::util {
         {
             if(!!exrError)
             {
-                core::logger()->warn("Failed to read image file \"{}\". Failed to load file. TinyExr error: {}", mInfo.Utf8Path, exrError);
+                logger()->warn("Failed to read image file \"{}\". Failed to load file. TinyExr error: {}", mInfo.Utf8Path, exrError);
                 FreeEXRErrorMessage(exrError);
             }
             else
             {
-                core::logger()->warn("Failed to read image file \"{}\". Failed to load file.", mInfo.Utf8Path);
+                logger()->warn("Failed to read image file \"{}\". Failed to load file.", mInfo.Utf8Path);
             }
             return false;
         }

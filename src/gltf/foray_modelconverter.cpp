@@ -1,5 +1,5 @@
 #include "foray_modelconverter.hpp"
-#include "../core/foray_logger.hpp"
+#include "../foray_logger.hpp"
 #include "../core/foray_vkcontext.hpp"
 #include "../foray_glm.hpp"
 #include "../osi/foray_env.hpp"
@@ -48,7 +48,7 @@ namespace foray::gltf {
             mUtf8Dir = osi::ToUtf8Path(p.parent_path());
         }
 
-        core::logger()->info("Model Load: Loading tinygltf model ...");
+        logger()->info("Model Load: Loading tinygltf model ...");
 
 
         bool fileLoaded = binary ? gltfContext.LoadBinaryFromFile(&mGltfModel, &error, &warning, utf8Path.c_str()) :
@@ -56,7 +56,7 @@ namespace foray::gltf {
 
         if(warning.size())
         {
-            core::logger()->warn("tinygltf warning loading file \"{}\": \"{}\"", utf8Path, warning);
+            logger()->warn("tinygltf warning loading file \"{}\": \"{}\"", utf8Path, warning);
         }
         if(!fileLoaded)
         {
@@ -64,13 +64,13 @@ namespace foray::gltf {
             {
                 error = "Unknown error";
             }
-            core::logger()->error("tinygltf error loading file \"{}\": \"{}\"", utf8Path, error);
+            logger()->error("tinygltf error loading file \"{}\": \"{}\"", utf8Path, error);
             Exception::Throw("Failed to load file");
         }
 
         mBenchmark.LogTimestamp("tinyGltf::LoadFromFile()");
 
-        core::logger()->info("Model Load: Preparing scene buffers ...");
+        logger()->info("Model Load: Preparing scene buffers ...");
 
         mScene->GetNodeBuffer().reserve(mGltfModel.nodes.size());
         mIndexBindings.Nodes.resize(mGltfModel.nodes.size());
@@ -109,26 +109,26 @@ namespace foray::gltf {
             mGltfScene = &(mGltfModel.scenes[mGltfModel.defaultScene]);
         }
 
-        core::logger()->info("Model Load: Building vertex and index buffers ...");
+        logger()->info("Model Load: Building vertex and index buffers ...");
 
         BuildGeometryBuffer();
 
         mBenchmark.LogTimestamp("Geometry");
 
-        core::logger()->info("Model Load: Uploading textures ...");
+        logger()->info("Model Load: Uploading textures ...");
 
         LoadTextures();
 
         mBenchmark.LogTimestamp("Textures");
 
-        core::logger()->info("Model Load: Uploading materials ...");
+        logger()->info("Model Load: Uploading materials ...");
 
         LoadMaterials();
 
 
         mBenchmark.LogTimestamp("Materials");
 
-        core::logger()->info("Model Load: Initialising scene state ...");
+        logger()->info("Model Load: Initialising scene state ...");
 
         for(int32_t nodeIndex : mGltfScene->nodes)
         {
@@ -137,7 +137,7 @@ namespace foray::gltf {
 
         mBenchmark.LogTimestamp("Nodes");
 
-        core::logger()->info("Model Load: Loading Animations ...");
+        logger()->info("Model Load: Loading Animations ...");
 
         LoadAnimations();
 
@@ -153,7 +153,7 @@ namespace foray::gltf {
 
         mBenchmark.End();
 
-        core::logger()->info("Model Load: Done");
+        logger()->info("Model Load: Done");
     }
 
     void ModelConverter::RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent)
@@ -201,7 +201,7 @@ namespace foray::gltf {
             if(translation.size() == 0 && rotation.size() == 0 && scale.size() == 0)
             {
                 // This happens because the recursive matrix recalculation step would immediately overwrite the transform matrix!
-                core::logger()->warn("Node has transform matrix specified, but no transform components. This will prevent writes to local matrix!");
+                logger()->warn("Node has transform matrix specified, but no transform components. This will prevent writes to local matrix!");
             }
 
             // GLM and gltf::node.matrix both are column major, so this is valid:

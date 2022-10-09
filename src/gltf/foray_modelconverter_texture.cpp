@@ -52,7 +52,7 @@ namespace foray::gltf {
                         textureName = fmt::format("Texture #{}", texIndex);
                     }
 
-                    core::logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
+                    logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
                     scene::SampledTexture& sampledTexture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
                     sampledTexture.Image                  = std::make_unique<core::ManagedImage>();
@@ -64,12 +64,12 @@ namespace foray::gltf {
 
                     if(!imageLoader.Init(args.BaseDir + "/" + gltfImage.uri))
                     {
-                        core::logger()->warn("ImageLoad Init failed for gltfImage \"{}\"", textureName);
+                        logger()->warn("ImageLoad Init failed for gltfImage \"{}\"", textureName);
                         continue;
                     }
                     if(!imageLoader.Load())
                     {
-                        core::logger()->warn("ImageLoad load failed for gltfImage \"{}\"", textureName);
+                        logger()->warn("ImageLoad load failed for gltfImage \"{}\"", textureName);
                         continue;
                     }
 
@@ -203,7 +203,7 @@ namespace foray::gltf {
                 }
                 catch(const std::exception& ex)
                 {
-                    core::logger()->error("Thread #{} exception: {}", args.ThreadIndex, ex.what());
+                    logger()->error("Thread #{} exception: {}", args.ThreadIndex, ex.what());
                 }
             }
 
