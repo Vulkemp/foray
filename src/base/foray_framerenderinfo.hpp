@@ -1,6 +1,7 @@
 #pragma once
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
+#include <vector>
 
 namespace foray::base {
     class FrameUpdateInfo
@@ -12,6 +13,7 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(CommandBuffers)
 
         inline VkCommandBuffer  GetCommandBuffer(int32_t index = 0) { return mCommandBuffers[index]; }
+        inline const VkCommandBuffer  GetCommandBuffer(int32_t index = 0) const { return mCommandBuffers[index]; }
 
         FrameUpdateInfo() {}
 
