@@ -505,10 +505,10 @@ namespace foray::base {
         if (deltaSum > 1.0f)
         {
             deltaSum = 0;
-            // if (core::ShaderManager::Instance().CheckAndUpdateShaders())
-            // {
-            //     OnShadersRecompiled(nullptr);
-            // }
+            if (core::ShaderManager::Instance().CheckAndUpdateShaders())
+            {
+                OnShadersRecompiled();
+            }
         }
     }
 
