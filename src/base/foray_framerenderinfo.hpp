@@ -9,7 +9,9 @@ namespace foray::base {
         /// @brief Frame Delay in Seconds
         FORAY_PROPERTY_ALL(FrameTime)
         FORAY_PROPERTY_ALL(FrameNumber)
-        FORAY_PROPERTY_ALL(CommandBuffer)
+        FORAY_PROPERTY_ALL(CommandBuffers)
+
+        inline VkCommandBuffer  GetCommandBuffer(int32_t index = 0) { return mCommandBuffers[index]; }
 
         FrameUpdateInfo() {}
 
@@ -17,8 +19,8 @@ namespace foray::base {
         double mFrameTime = 0;
         /// @brief Number of complete frames rendered since application startup
         uint64_t mFrameNumber = 0;
-        /// @brief Render command buffer (do not initialize, reset or finalize it!)
-        VkCommandBuffer mCommandBuffer = nullptr;
+
+        std::vector<VkCommandBuffer> mCommandBuffers;
     };
 
     class FrameRenderInfo : public FrameUpdateInfo

@@ -1,8 +1,8 @@
 #pragma once
+#include "../core/foray_vkcontext.hpp"
 #include "../osi/foray_window.hpp"
 #include "foray_framerenderinfo.hpp"
 #include "foray_minimalappbase.hpp"
-#include "../core/foray_vkcontext.hpp"
 #include <vma/vk_mem_alloc.h>
 
 namespace foray::base {
@@ -16,10 +16,10 @@ namespace foray::base {
 
         struct InFlightFrame
         {
-            VkCommandBuffer CommandBuffer{};
-            VkSemaphore     ImageAvailableSemaphore{};
-            VkSemaphore     RenderFinishedSemaphore{};
-            VkFence         CommandBufferExecutedFence{};
+            std::vector<VkCommandBuffer> CommandBuffers;
+            VkSemaphore                  ImageAvailableSemaphore{};
+            std::vector<VkSemaphore>     RenderFinishedSemaphores{};
+            VkFence                      CommandBufferExecutedFence{};
         };
 
       protected:
@@ -31,6 +31,8 @@ namespace foray::base {
 
         /// @brief Before building the swapchain
         inline virtual void BeforeSwapchainBuilding(vkb::SwapchainBuilder& swapchainBuilder){};
+
+        inline virtual void BeforeSyncObjectCreation(uint32_t& inFlightFrameCount, uint32_t& perInFlightFrameCommandBufferCount){};
 
         /// @brief Base init is heavily overriden by this class, because a complete simple vulkan setup is included.
         virtual void BaseInit() override;
@@ -67,9 +69,11 @@ namespace foray::base {
 #pragma region Vulkan
         /// @brief The applications vulkan context.
         core::VkContext mContext;
-        uint32_t  mRequiredVulkanApiVersion = VK_API_VERSION_1_2;
+        uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_2;
 
 
+        uint32_t                   mInFlightFrameCount                 = 0;
+        uint32_t                   mPerInFlightFrameCommandBufferCount = 0;
         std::vector<InFlightFrame> mFrames{};
         uint32_t                   mCurrentFrameIndex  = 0;
         uint64_t                   mRenderedFrameCount = 0;
@@ -82,16 +86,9 @@ namespace foray::base {
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures;
         } mDeviceFeatures = {};
 
-        struct SyncConfig
-        {
-            VkSemaphore ImageAvailableSemaphore{};
-            VkSemaphore RenderFinishedSemaphore{};
-            VkFence     CommandBufferExecutedFence{};
-        } mSyncConfig;
-
         /// @brief Commandpool for the default queue.
         VkCommandPool mCommandPoolDefault{};
 
 #pragma endregion
     };
-}  // namespace foray
+}  // namespace foray::base

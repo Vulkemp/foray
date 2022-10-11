@@ -1,12 +1,12 @@
 #include "foray_defaultappbase.hpp"
 #include "../core/foray_deviceresource.hpp"
-#include "../foray_logger.hpp"
 #include "../core/foray_managedimage.hpp"
+#include "../core/foray_shadermanager.hpp"
 #include "../foray_exception.hpp"
+#include "../foray_logger.hpp"
 #include "../foray_vma.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_env.hpp"
-#include "../core/foray_shadermanager.hpp"
 
 namespace foray::base {
     void DefaultAppBase::BaseInit()
@@ -241,6 +241,10 @@ namespace foray::base {
 
     void DefaultAppBase::BaseInitSyncObjects()
     {
+        mInFlightFrameCount                 = INFLIGHT_FRAME_COUNT;
+        mPerInFlightFrameCommandBufferCount = 1;
+        BeforeSyncObjectCreation(mInFlightFrameCount, mPerInFlightFrameCommandBufferCount);
+
         // https://www.asawicki.info/news_1647_vulkan_bits_and_pieces_synchronization_in_a_frame
 
         VkSemaphoreCreateInfo semaphoreCI{};
@@ -252,22 +256,28 @@ namespace foray::base {
 
         // auto images     = mSwapchainVkb.get_images().value();
         // auto imageviews = mSwapchainVkb.get_image_views().value();
-        for(uint32_t i = 0; i < INFLIGHT_FRAME_COUNT; i++)
+        for(uint32_t i = 0; i < mInFlightFrameCount; i++)
         {
             InFlightFrame target{};
+            target.CommandBuffers.resize(mPerInFlightFrameCommandBufferCount);
+            target.RenderFinishedSemaphores.resize(mPerInFlightFrameCommandBufferCount);
             // target.Image         = images[i];
             // target.ImageView     = imageviews[i];
 
             VkCommandBufferAllocateInfo cmdBufAllocateInfo{.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
                                                            .commandPool        = mCommandPoolDefault,
                                                            .level              = VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-                                                           .commandBufferCount = 1};
+                                                           .commandBufferCount = mPerInFlightFrameCommandBufferCount};
 
             VkCommandBuffer cmdBuffer;
-            AssertVkResult(vkAllocateCommandBuffers(mContext.Device, &cmdBufAllocateInfo, &target.CommandBuffer));
+            AssertVkResult(vkAllocateCommandBuffers(mContext.Device, &cmdBufAllocateInfo, target.CommandBuffers.data()));
 
             AssertVkResult(vkCreateSemaphore(mContext.Device, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
-            AssertVkResult(vkCreateSemaphore(mContext.Device, &semaphoreCI, nullptr, &target.RenderFinishedSemaphore));
+
+            for(uint32_t j = 0; j < mPerInFlightFrameCommandBufferCount; j++)
+            {
+                AssertVkResult(vkCreateSemaphore(mContext.Device, &semaphoreCI, nullptr, target.RenderFinishedSemaphores.data() + j));
+            }
 
             AssertVkResult(vkCreateFence(mContext.Device, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
 
@@ -283,7 +293,10 @@ namespace foray::base {
         for(auto& target : mFrames)
         {
             vkDestroySemaphore(mContext.Device, target.ImageAvailableSemaphore, nullptr);
-            vkDestroySemaphore(mContext.Device, target.RenderFinishedSemaphore, nullptr);
+            for(VkSemaphore semaphore : target.RenderFinishedSemaphores)
+            {
+                vkDestroySemaphore(mContext.Device, semaphore, nullptr);
+            }
             vkDestroyFence(mContext.Device, target.CommandBufferExecutedFence, nullptr);
         }
 
@@ -378,7 +391,7 @@ namespace foray::base {
         // clang-format off
         FrameRenderInfo renderInfo;
         renderInfo.SetFrameObjectsIndex(mCurrentFrameIndex)
-                  .SetCommandBuffer(currentFrame.CommandBuffer)
+                  .SetCommandBuffers(currentFrame.CommandBuffers)
                   .SetFrameNumber(mRenderedFrameCount)
                   .SetFrameTime(delta);
         // cland-format on
@@ -429,38 +442,41 @@ namespace foray::base {
         barrier.image               = mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image;
 
         
-        vkCmdPipelineBarrier(currentFrame.CommandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+        vkCmdPipelineBarrier(currentFrame.CommandBuffers.back(), VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
                              nullptr, 0, nullptr, 1, &barrier);
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
-        vkCmdClearColorImage(currentFrame.CommandBuffer, mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        vkCmdClearColorImage(currentFrame.CommandBuffers.back(), mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                              &clearColor, 1, &range);
 
         // Record command buffer
         RecordCommandBuffer(renderInfo);
 
-        AssertVkResult(vkEndCommandBuffer(currentFrame.CommandBuffer));
+        for (VkCommandBuffer cmdBuffer : currentFrame.CommandBuffers)
+        {
+            AssertVkResult(vkEndCommandBuffer(cmdBuffer));
+        }
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore          beginRenderSemaphores[] = {currentFrame.ImageAvailableSemaphore, previousFrame.RenderFinishedSemaphore};
+        VkSemaphore          beginRenderSemaphores[] = {currentFrame.ImageAvailableSemaphore};
         VkPipelineStageFlags waitStages[]            = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT};
 
-        VkSemaphore          presentSemaphores[] = {currentFrame.RenderFinishedSemaphore};
+        std::vector<VkSemaphore>          presentSemaphores = currentFrame.RenderFinishedSemaphores;
 
-        VkCommandBuffer      commandbuffers[]    = {currentFrame.CommandBuffer};
+        std::vector<VkCommandBuffer>      commandbuffers    = currentFrame.CommandBuffers;
         submitInfo.waitSemaphoreCount            = 1;
         submitInfo.pWaitSemaphores               = beginRenderSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
 
 
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores    = presentSemaphores;
+        submitInfo.signalSemaphoreCount = presentSemaphores.size();
+        submitInfo.pSignalSemaphores    = presentSemaphores.data();
 
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers    = commandbuffers;
+        submitInfo.commandBufferCount = commandbuffers.size();
+        submitInfo.pCommandBuffers    = commandbuffers.data();
 
         // Submit all work to the default queue
         AssertVkResult(vkQueueSubmit(mContext.QueueGraphics, 1, &submitInfo, currentFrame.CommandBufferExecutedFence));
@@ -468,8 +484,8 @@ namespace foray::base {
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores    = presentSemaphores;
+        presentInfo.waitSemaphoreCount = presentSemaphores.size();
+        presentInfo.pWaitSemaphores    = presentSemaphores.data();
 
         VkSwapchainKHR swapChains[] = {mContext.Swapchain};
         presentInfo.swapchainCount  = 1;
