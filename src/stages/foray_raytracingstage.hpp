@@ -25,7 +25,6 @@ namespace foray::stages {
       protected:
         scene::Scene*                                    mScene;
         std::vector<VkClearValue>                        mClearValues;
-        std::vector<std::unique_ptr<core::ManagedImage>> mGBufferImages;
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;
