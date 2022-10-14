@@ -16,7 +16,7 @@ namespace foray::stages {
         RaytracingStage() = default;
 
         virtual void Init();
-        virtual void RecordFrame(base::FrameRenderInfo& renderInfo) override;
+        virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         inline static constexpr std::string_view RaytracingRenderTargetName = "RaytraycingRenderTarget";
 

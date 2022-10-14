@@ -146,11 +146,11 @@ namespace foray::core {
 
     void ManagedBuffer::WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
-        CommandBuffer cmdBuffer;
+        HostCommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
         WriteDataDeviceLocal(cmdBuffer, data, size, offsetDstBuffer);
     }
-    void ManagedBuffer::WriteDataDeviceLocal(CommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
+    void ManagedBuffer::WriteDataDeviceLocal(HostCommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
         Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
@@ -165,7 +165,7 @@ namespace foray::core {
         copy.size      = size;
 
         vkCmdCopyBuffer(cmdBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
-        cmdBuffer.Submit();
+        cmdBuffer.SubmitAndWait();
     }
 
     ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo()

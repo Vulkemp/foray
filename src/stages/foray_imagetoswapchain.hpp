@@ -18,7 +18,7 @@ namespace foray::stages {
 
         virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage);
         virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage, const PostCopy& postcopy);
-        virtual void RecordFrame(base::FrameRenderInfo& renderInfo) override;
+        virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnResized(const VkExtent2D& extent, core::ManagedImage* newSourceImage);
 
         virtual void SetTargetImage(core::ManagedImage* newTargetImage);

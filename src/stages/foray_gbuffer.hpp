@@ -14,7 +14,7 @@ namespace foray::stages {
         GBufferStage() = default;
 
         virtual void Init(const core::VkContext* context, scene::Scene* scene);
-        virtual void RecordFrame(base::FrameRenderInfo& renderInfo) override;
+        virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled() override;
 
         inline static constexpr std::string_view WorldspacePosition = "Gbuf.Position";

@@ -26,7 +26,7 @@ namespace foray::scene {
         /// @brief Advance scene state by invoking all NodeComponent update callbacks, followed by GlobalComponent update callbacks
         void Update(const base::FrameUpdateInfo& updateInfo);
         /// @brief Draw the scene by first invoking all BeforeDraw callbacks (NodeComponent, then GlobalComponent), followed by Draw callbacks (NodeComponent, then GlobalComponent).
-        void Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
+        void Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index = base::PRIMARY_COMMAND_BUFFER);
         /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
         void HandleEvent(const Event* event);
 

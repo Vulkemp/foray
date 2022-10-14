@@ -11,7 +11,7 @@ namespace foray::stages {
     {
       public:
         RenderStage(){};
-        inline virtual void RecordFrame(base::FrameRenderInfo& renderInfo) {}
+        inline virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) {}
 
         inline virtual void Destroy()
         {

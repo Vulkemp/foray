@@ -212,7 +212,7 @@ namespace foray::as {
 
         // STEP #6    Build acceleration structure
 
-        core::CommandBuffer cmdBuffer;
+        core::HostCommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
         cmdBuffer.Begin();
 
@@ -236,7 +236,7 @@ namespace foray::as {
         // Build the TLAS.
         mContext->DispatchTable.cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
 
-        cmdBuffer.Submit();
+        cmdBuffer.SubmitAndWait();
 
         // STEP #7    Setup address and staging buffers for animated instances
 

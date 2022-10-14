@@ -38,7 +38,7 @@ namespace foray::core {
         void WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
         /// @brief Create staging buffer, copy data to it, copy data to device buffer, destroy staging buffer
         /// @param cmdBuffer Single use command buffer. Must be completely reset, function will automatically begin, write and submit.
-        void WriteDataDeviceLocal(CommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
+        void WriteDataDeviceLocal(HostCommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
 
         void Map(void*& data);
         void Unmap();

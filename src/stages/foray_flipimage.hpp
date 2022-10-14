@@ -10,7 +10,7 @@ namespace foray::stages {
         FlipImageStage() = default;
 
         virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage);
-        virtual void RecordFrame(base::FrameRenderInfo& renderInfo) override;
+        virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         inline static constexpr std::string_view FlipTarget = "Flip.Target";
 

@@ -30,7 +30,7 @@ namespace foray::scene {
         uint32_t count = mSimplifiedlights.size();
         mBuffer.StageSection(0, &count, sizeof(SimplifiedLight) * mSimplifiedlights.size(), sizeof(count));
 
-        core::CommandBuffer cmdBuf;
+        core::HostCommandBuffer cmdBuf;
         cmdBuf.Create(GetContext());
         cmdBuf.Begin();
         util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,

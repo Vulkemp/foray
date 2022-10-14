@@ -26,14 +26,14 @@ namespace foray::scene {
         this->InvokeUpdate(updateInfo);
         mGlobalRootRegistry.InvokeUpdate(updateInfo);
     }
-    void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
+    void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
     {
         // Process before draw callbacks
         this->InvokeBeforeDraw(renderInfo);
         mGlobalRootRegistry.InvokeBeforeDraw(renderInfo);
 
         // Process draw callbacks
-        SceneDrawInfo drawInfo(renderInfo, pipelineLayout);
+        SceneDrawInfo drawInfo(renderInfo, pipelineLayout, index);
         this->InvokeDraw(drawInfo);
         mGlobalRootRegistry.InvokeDraw(drawInfo);
     }

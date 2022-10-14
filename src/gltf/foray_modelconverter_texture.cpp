@@ -108,7 +108,7 @@ namespace foray::gltf {
                         // sampledTexture.Image->Create(mContext, imageCI);
                         // sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-                        core::CommandBuffer cmdBuf;
+                        core::HostCommandBuffer cmdBuf;
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 
                         for(int32_t i = 0; i < mipLevelCount - 1; i++)

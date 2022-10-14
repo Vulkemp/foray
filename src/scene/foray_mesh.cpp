@@ -38,7 +38,7 @@ namespace foray::scene {
         {
             for(auto& primitive : mPrimitives)
             {
-                primitive.CmdDraw(drawInfo.RenderInfo.GetCommandBuffer());
+                primitive.CmdDraw(drawInfo.CmdBuffer);
             }
         }
     }
@@ -50,7 +50,7 @@ namespace foray::scene {
             for(auto& primitive : mPrimitives)
             {
                 drawInfo.CmdPushConstant_MaterialIndex(primitive.MaterialIndex);
-                primitive.CmdDrawInstanced(drawInfo.RenderInfo.GetCommandBuffer(), instanceCount);
+                primitive.CmdDrawInstanced(drawInfo.CmdBuffer, instanceCount);
             }
         }
     }

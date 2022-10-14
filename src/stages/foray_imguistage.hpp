@@ -10,7 +10,7 @@ namespace foray::stages {
         ImguiStage() = default;
 
         virtual void Init(const core::VkContext* context, core::ManagedImage* backgroundImage);
-        virtual void RecordFrame(base::FrameRenderInfo& renderInfo) override;
+        virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 
         virtual void SetTargetImage(core::ManagedImage* newTargetImage);

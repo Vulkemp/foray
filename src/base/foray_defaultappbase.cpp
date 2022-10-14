@@ -241,9 +241,9 @@ namespace foray::base {
 
     void DefaultAppBase::BaseInitSyncObjects()
     {
-        mInFlightFrameCount                 = INFLIGHT_FRAME_COUNT;
-        mPerInFlightFrameCommandBufferCount = 1;
-        BeforeSyncObjectCreation(mInFlightFrameCount, mPerInFlightFrameCommandBufferCount);
+        mInFlightFrameCount          = INFLIGHT_FRAME_COUNT;
+        mAuxiliaryCommandBufferCount = 1;
+        BeforeSyncObjectCreation(mInFlightFrameCount, mAuxiliaryCommandBufferCount);
 
         // https://www.asawicki.info/news_1647_vulkan_bits_and_pieces_synchronization_in_a_frame
 
@@ -256,32 +256,11 @@ namespace foray::base {
 
         // auto images     = mSwapchainVkb.get_images().value();
         // auto imageviews = mSwapchainVkb.get_image_views().value();
-        for(uint32_t i = 0; i < mInFlightFrameCount; i++)
+        mFrames.resize(mInFlightFrameCount);
+        for(auto& frame : mFrames)
         {
-            InFlightFrame target{};
-            target.CommandBuffers.resize(mPerInFlightFrameCommandBufferCount);
-            target.RenderFinishedSemaphores.resize(mPerInFlightFrameCommandBufferCount);
-            // target.Image         = images[i];
-            // target.ImageView     = imageviews[i];
-
-            VkCommandBufferAllocateInfo cmdBufAllocateInfo{.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-                                                           .commandPool        = mCommandPoolDefault,
-                                                           .level              = VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-                                                           .commandBufferCount = mPerInFlightFrameCommandBufferCount};
-
-            VkCommandBuffer cmdBuffer;
-            AssertVkResult(vkAllocateCommandBuffers(mContext.Device, &cmdBufAllocateInfo, target.CommandBuffers.data()));
-
-            AssertVkResult(vkCreateSemaphore(mContext.Device, &semaphoreCI, nullptr, &target.ImageAvailableSemaphore));
-
-            for(uint32_t j = 0; j < mPerInFlightFrameCommandBufferCount; j++)
-            {
-                AssertVkResult(vkCreateSemaphore(mContext.Device, &semaphoreCI, nullptr, target.RenderFinishedSemaphores.data() + j));
-            }
-
-            AssertVkResult(vkCreateFence(mContext.Device, &fenceCI, nullptr, &target.CommandBufferExecutedFence));
-
-            mFrames.push_back(std::move(target));
+            frame = std::make_unique<InFlightFrame>();
+            frame->Create(&mContext, mAuxiliaryCommandBufferCount);
         }
     }
 
@@ -289,16 +268,8 @@ namespace foray::base {
     {
         AssertVkResult(vkDeviceWaitIdle(mContext.Device));
 
+        mFrames.clear();
         vkDestroyCommandPool(mContext.Device, mCommandPoolDefault, nullptr);
-        for(auto& target : mFrames)
-        {
-            vkDestroySemaphore(mContext.Device, target.ImageAvailableSemaphore, nullptr);
-            for(VkSemaphore semaphore : target.RenderFinishedSemaphores)
-            {
-                vkDestroySemaphore(mContext.Device, semaphore, nullptr);
-            }
-            vkDestroyFence(mContext.Device, target.CommandBufferExecutedFence, nullptr);
-        }
 
         BaseCleanupSwapchain();
 
@@ -358,26 +329,18 @@ namespace foray::base {
 
     bool DefaultAppBase::CanRenderNextFrame()
     {
-        InFlightFrame& currentFrame = mFrames[mCurrentFrameIndex];
+        InFlightFrame* currentFrame = mFrames[mCurrentFrameIndex].get();
 
-        // Make sure that the command buffer we want to use has been presented to the GPU
-        VkResult result = vkGetFenceStatus(mContext.Device, currentFrame.CommandBufferExecutedFence);
-        if(result == VK_NOT_READY)
-        {
-            return false;
-        }
-        AssertVkResult(result);
-        return true;
+        return currentFrame->HasFinishedExecution();
     }
 
     void DefaultAppBase::Render(float delta)
     {
-        InFlightFrame& currentFrame       = mFrames[mCurrentFrameIndex];
+        InFlightFrame* currentFrame       = mFrames[mCurrentFrameIndex].get();
         uint32_t       previousFrameIndex = (mRenderedFrameCount - 1 + INFLIGHT_FRAME_COUNT) % INFLIGHT_FRAME_COUNT;
-        InFlightFrame& previousFrame      = mFrames[previousFrameIndex];
+        InFlightFrame* previousFrame      = mFrames[previousFrameIndex].get();
 
-        // Make sure that the command buffer we want to use has been presented to the GPU
-        vkWaitForFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence, VK_TRUE, UINT64_MAX);
+        currentFrame->WaitForExecutionFinished();
 
         if(mRenderedFrameCount > mFrames.size())
         {
@@ -391,122 +354,37 @@ namespace foray::base {
         // clang-format off
         FrameRenderInfo renderInfo;
         renderInfo.SetFrameObjectsIndex(mCurrentFrameIndex)
-                  .SetCommandBuffers(currentFrame.CommandBuffers)
+                  .SetInFlightFrame(currentFrame)
                   .SetFrameNumber(mRenderedFrameCount)
                   .SetFrameTime(delta);
         // cland-format on
-        AssertVkResult(vkResetCommandBuffer(renderInfo.GetCommandBuffer(), 0));
         
         // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
         uint32_t swapChainImageIndex = 0;
-        VkResult result = vkAcquireNextImageKHR(mContext.Device, mContext.Swapchain, UINT64_MAX, currentFrame.ImageAvailableSemaphore, nullptr, &swapChainImageIndex);
+        ESwapchainInteractResult result = currentFrame->AcquireSwapchainImage();
 
-        renderInfo.SetSwapchainImageIndex(swapChainImageIndex);
+        renderInfo.SetSwapchainImageIndex(currentFrame->GetSwapchainImageIndex());
 
-        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
+        if(result == ESwapchainInteractResult::Resized)
         {
             RecreateSwapchain();
             return;
         }
-        else if(result != VkResult::VK_SUBOPTIMAL_KHR)
-        {
-            AssertVkResult(result);
-        }
 
-        VkCommandBufferBeginInfo cmdbufBI{};
-        cmdbufBI.sType = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        cmdbufBI.flags = VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-
-        AssertVkResult(vkBeginCommandBuffer(renderInfo.GetCommandBuffer(), &cmdbufBI));
-
-        // Reset the fence
-        AssertVkResult(vkResetFences(mContext.Device, 1, &currentFrame.CommandBufferExecutedFence));
-
-        VkImageSubresourceRange range{};
-        range.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-        range.baseMipLevel   = 0;
-        range.levelCount     = 1;
-        range.baseArrayLayer = 0;
-        range.layerCount     = 1;
-
-        VkImageMemoryBarrier barrier{};
-        barrier.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.subresourceRange = range;
-
-        barrier.srcAccessMask       = 0;
-        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        barrier.oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        barrier.srcQueueFamilyIndex = mContext.PresentQueue;
-        barrier.dstQueueFamilyIndex = mContext.QueueGraphics;
-        barrier.image               = mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image;
-
-        
-        vkCmdPipelineBarrier(currentFrame.CommandBuffers.back(), VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
-                             nullptr, 0, nullptr, 1, &barrier);
-
-        // Clear swapchain image
-        VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
-        vkCmdClearColorImage(currentFrame.CommandBuffers.back(), mContext.ContextSwapchain.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                             &clearColor, 1, &range);
+        currentFrame->ResetFence();
 
         // Record command buffer
         RecordCommandBuffer(renderInfo);
 
-        for (VkCommandBuffer cmdBuffer : currentFrame.CommandBuffers)
-        {
-            AssertVkResult(vkEndCommandBuffer(cmdBuffer));
-        }
+        result = currentFrame->Present();
 
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        VkSemaphore          beginRenderSemaphores[] = {currentFrame.ImageAvailableSemaphore};
-        VkPipelineStageFlags waitStages[]            = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT};
-
-        std::vector<VkSemaphore>          presentSemaphores = currentFrame.RenderFinishedSemaphores;
-
-        std::vector<VkCommandBuffer>      commandbuffers    = currentFrame.CommandBuffers;
-        submitInfo.waitSemaphoreCount            = 1;
-        submitInfo.pWaitSemaphores               = beginRenderSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-
-
-        submitInfo.signalSemaphoreCount = presentSemaphores.size();
-        submitInfo.pSignalSemaphores    = presentSemaphores.data();
-
-        submitInfo.commandBufferCount = commandbuffers.size();
-        submitInfo.pCommandBuffers    = commandbuffers.data();
-
-        // Submit all work to the default queue
-        AssertVkResult(vkQueueSubmit(mContext.QueueGraphics, 1, &submitInfo, currentFrame.CommandBufferExecutedFence));
-
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-        presentInfo.waitSemaphoreCount = presentSemaphores.size();
-        presentInfo.pWaitSemaphores    = presentSemaphores.data();
-
-        VkSwapchainKHR swapChains[] = {mContext.Swapchain};
-        presentInfo.swapchainCount  = 1;
-        presentInfo.pSwapchains     = swapChains;
-
-        presentInfo.pImageIndices = &swapChainImageIndex;
-
-        // Present on the present queue
-        result = vkQueuePresentKHR(mContext.PresentQueue, &presentInfo);
-
-        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
+        if(result == ESwapchainInteractResult::Resized)
         {
             // Redo Swapchain
             if (mState == EState::Running)
             {
                 RecreateSwapchain();
             }
-        }
-        else
-        {
-            AssertVkResult(result);
         }
 
         // Advance frame index

@@ -142,7 +142,7 @@ namespace foray::scene {
 
         if(!!mGeo)
         {
-            mGeo->CmdBindBuffers(drawInfo.RenderInfo.GetCommandBuffer());
+            mGeo->CmdBindBuffers(drawInfo.CmdBuffer);
         }
 
         for(auto& drawop : mDrawOps)

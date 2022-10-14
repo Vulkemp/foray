@@ -73,7 +73,7 @@ namespace foray::stages {
         ImGui_ImplVulkan_Init(&init_info, mRenderpass);
 
         //execute a gpu command to upload imgui font textures
-        core::CommandBuffer cmdBuf;
+        core::HostCommandBuffer cmdBuf;
         cmdBuf.Create(context, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         ImGui_ImplVulkan_CreateFontsTexture(cmdBuf.GetCommandBuffer());
         cmdBuf.Submit();
@@ -227,7 +227,7 @@ namespace foray::stages {
     }
 
 
-    void ImguiStage::RecordFrame(base::FrameRenderInfo& renderInfo)
+    void ImguiStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -237,8 +237,7 @@ namespace foray::stages {
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
 
-        VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
-        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // imgui drawing
         {
@@ -252,10 +251,10 @@ namespace foray::stages {
             }
 
             ImGui::Render();
-            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
         }
 
-        vkCmdEndRenderPass(commandBuffer);
+        vkCmdEndRenderPass(cmdBuffer);
     }
 
 }  // namespace foray::stages

@@ -52,8 +52,8 @@ namespace foray::stages {
       public:
         virtual void Init(const core::VkContext* context, const DenoiserConfig& config){};
 
-        virtual void BeforeDenoise(const base::FrameRenderInfo& renderInfo){};
-        virtual void AfterDenoise(const base::FrameRenderInfo& renderInfo){};
+        virtual void BeforeDenoise(VkCommandBuffer cmdBuffer, const base::FrameRenderInfo& renderInfo){};
+        virtual void AfterDenoise(VkCommandBuffer cmdBuffer, const base::FrameRenderInfo& renderInfo){};
         virtual void DispatchDenoise(uint64_t& timelineValue){};
     };
 }  // namespace foray::stages

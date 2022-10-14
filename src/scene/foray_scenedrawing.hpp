@@ -46,11 +46,12 @@ namespace foray::scene {
     struct SceneDrawInfo
     {
       public:
-        const base::FrameRenderInfo  RenderInfo;
-        const VkPipelineLayout PipelineLayout    = nullptr;
-        DrawPushConstant       PushConstantState = {};
+        const base::FrameRenderInfo RenderInfo;
+        VkCommandBuffer             CmdBuffer;
+        const VkPipelineLayout      PipelineLayout    = nullptr;
+        DrawPushConstant            PushConstantState = {};
 
-        inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout);
+        inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index);
 
         inline void CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset);
         inline void CmdPushConstant_MaterialIndex(int32_t materialIndex);
@@ -58,17 +59,17 @@ namespace foray::scene {
 
     void SceneDrawInfo::CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset)
     {
-        PushConstantState.CmdPushConstant_TransformBufferOffset(RenderInfo.GetCommandBuffer(), PipelineLayout, transformBufferOffset);
+        PushConstantState.CmdPushConstant_TransformBufferOffset(CmdBuffer, PipelineLayout, transformBufferOffset);
     }
 
     void SceneDrawInfo::CmdPushConstant_MaterialIndex(int32_t materialIndex)
     {
-        PushConstantState.CmdPushConstant_MaterialIndex(RenderInfo.GetCommandBuffer(), PipelineLayout, materialIndex);
+        PushConstantState.CmdPushConstant_MaterialIndex(CmdBuffer, PipelineLayout, materialIndex);
     }
 
-    SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout)
+    SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
 
-        : RenderInfo(renderInfo), PipelineLayout(pipelineLayout), PushConstantState()
+        : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)), PipelineLayout(pipelineLayout), PushConstantState()
     {
         CmdPushConstant_TransformBufferOffset(0);
         CmdPushConstant_MaterialIndex(-1);

@@ -16,6 +16,7 @@ namespace foray {
                                                .objectHandle = reinterpret_cast<uint64_t>(objectHandle),
                                                .pObjectName  = name.data()};
         context->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+        
     }
 
 }  // namespace foray

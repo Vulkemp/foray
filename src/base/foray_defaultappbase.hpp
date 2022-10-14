@@ -14,14 +14,6 @@ namespace foray::base {
         DefaultAppBase()          = default;
         virtual ~DefaultAppBase() = default;
 
-        struct InFlightFrame
-        {
-            std::vector<VkCommandBuffer> CommandBuffers;
-            VkSemaphore                  ImageAvailableSemaphore{};
-            std::vector<VkSemaphore>     RenderFinishedSemaphores{};
-            VkFence                      CommandBufferExecutedFence{};
-        };
-
       protected:
         /// @brief Alter physical device selection.
         inline virtual void BeforePhysicalDeviceSelection(vkb::PhysicalDeviceSelector& pds){};
@@ -72,11 +64,11 @@ namespace foray::base {
         uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_2;
 
 
-        uint32_t                   mInFlightFrameCount                 = 0;
-        uint32_t                   mPerInFlightFrameCommandBufferCount = 0;
-        std::vector<InFlightFrame> mFrames{};
-        uint32_t                   mCurrentFrameIndex  = 0;
-        uint64_t                   mRenderedFrameCount = 0;
+        uint32_t                                    mInFlightFrameCount                 = 0;
+        uint32_t                                    mAuxiliaryCommandBufferCount = 0;
+        std::vector<std::unique_ptr<InFlightFrame>> mFrames{};
+        uint32_t                                    mCurrentFrameIndex  = 0;
+        uint64_t                                    mRenderedFrameCount = 0;
 
         struct DeviceFeatures
         {
