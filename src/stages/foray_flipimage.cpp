@@ -97,7 +97,7 @@ namespace foray::stages {
     }
 
 
-    void FlipImageStage::RecordFrame(base::FrameRenderInfo& renderInfo)
+    void FlipImageStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         VkImageSubresourceRange range{};
         range.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
@@ -110,11 +110,9 @@ namespace foray::stages {
         barrier.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.subresourceRange = range;
 
-        VkCommandBuffer commandBuffer = renderInfo.GetCommandBuffer();
-
         // transition source attachment to use as transfer source
         core::ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
-        layoutTransitionInfo.CommandBuffer        = commandBuffer;
+        layoutTransitionInfo.CommandBuffer        = cmdBuffer;
         layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // wait for color attachment to be written
         layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;           // block transfer
         layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
@@ -150,7 +148,7 @@ namespace foray::stages {
         blitRegion.dstOffsets[1]  = {.z = 1};
         blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mContext->Swapchain.extent.width, .y = (int32_t)mContext->Swapchain.extent.height, .z = 0};
 
-        vkCmdBlitImage(commandBuffer, mSourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mFlipImages[0]->GetImage(),
+        vkCmdBlitImage(cmdBuffer, mSourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, mFlipImages[0]->GetImage(),
                        VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion, VkFilter::VK_FILTER_NEAREST);
 
         // transition source attachment back

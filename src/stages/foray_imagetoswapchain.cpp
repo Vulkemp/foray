@@ -24,7 +24,7 @@ namespace foray::stages {
         mSourceImage = newTargetImage;
     }
 
-    void ImageToSwapchainStage::RecordFrame(base::FrameRenderInfo& renderInfo)
+    void ImageToSwapchainStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         VkImageSubresourceRange range{};
         range.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
@@ -38,7 +38,6 @@ namespace foray::stages {
         barrier.subresourceRange = range;
 
         uint32_t        swapChainImageIndex = renderInfo.GetSwapchainImageIndex();
-        VkCommandBuffer commandBuffer       = renderInfo.GetCommandBuffer();
 
         // Barrier: Grab swapchain image, change it into transfer dst layout
         barrier.srcAccessMask       = 0;                                               // since no memory operations happen before layout transition, we don't care of a srcMask
@@ -51,11 +50,11 @@ namespace foray::stages {
 
         // srcStage: since we aquire a swapchain image, we don't need to wait for any commands to be processed, so we use top of pipe bit = wait for nothing
         // dstStage: we execute a transfer command later, so we block transfer until the layout has been transfered.
-        vkCmdPipelineBarrier(commandBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
+        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
                              nullptr, 1, &barrier);
 
         core::ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
-        layoutTransitionInfo.CommandBuffer        = commandBuffer;
+        layoutTransitionInfo.CommandBuffer        = cmdBuffer;
         layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // flush color attachment writes
         layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;          // block transfer writes before layout transition is over
         layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
@@ -82,7 +81,7 @@ namespace foray::stages {
         blitRegion.dstOffsets[0]  = VkOffset3D{.x = (int32_t)mContext->Swapchain.extent.width, .y = (int32_t)mContext->Swapchain.extent.height, .z = 0};
         blitRegion.dstOffsets[1]  = {.z = 1};
 
-        vkCmdBlitImage(commandBuffer, mSourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        vkCmdBlitImage(cmdBuffer, mSourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                        mContext->ContextSwapchain.SwapchainImages[swapChainImageIndex].Image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blitRegion,
                        VkFilter::VK_FILTER_NEAREST);
 
@@ -95,7 +94,7 @@ namespace foray::stages {
         barrier.srcQueueFamilyIndex = mContext->QueueGraphics;
         barrier.dstQueueFamilyIndex = mContext->PresentQueue;
 
-        vkCmdPipelineBarrier(commandBuffer,
+        vkCmdPipelineBarrier(cmdBuffer,
                              VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,     // wait for transfer
                              VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,  // block nothing
                              0, 0, nullptr, 0, nullptr, 1, &barrier);
@@ -104,7 +103,7 @@ namespace foray::stages {
         {
             // Return old image back
             core::ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
-            layoutTransitionInfo.CommandBuffer        = commandBuffer;
+            layoutTransitionInfo.CommandBuffer        = cmdBuffer;
             layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;  // flush color attachment writes
             layoutTransitionInfo.BarrierDstAccessMask = mPostCopy.AccessFlags;                           // block transfer writes before layout transition is over
             layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;

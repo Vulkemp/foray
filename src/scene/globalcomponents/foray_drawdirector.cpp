@@ -75,7 +75,7 @@ namespace foray::scene {
 
     void DrawDirector::Update(const base::FrameUpdateInfo& updateInfo)
     {
-        auto cmdBuffer = updateInfo.GetCommandBuffer();
+        VkCommandBuffer cmdBuffer = updateInfo.GetPrimaryCommandBuffer();
 
         VkDeviceSize bufferSize = sizeof(glm::mat4) * mTotalCount;
 

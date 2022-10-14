@@ -56,7 +56,7 @@ namespace foray::scene {
         util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
                                                      .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
                                                      .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        mBuffer.CmdCopyToDevice(updateInfo.GetFrameNumber(), updateInfo.GetCommandBuffer(), beforeAndAfter, beforeAndAfter);
+        mBuffer.CmdCopyToDevice(updateInfo.GetFrameNumber(), updateInfo.GetPrimaryCommandBuffer(), beforeAndAfter, beforeAndAfter);
     }
 
 }  // namespace foray
