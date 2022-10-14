@@ -1,6 +1,6 @@
+#include "../foray_logger.hpp"
 #include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include "foray_modelconverter.hpp"
-#include "../foray_logger.hpp"
 
 namespace foray::gltf {
     void ModelConverter::BuildGeometryBuffer()
@@ -47,8 +47,10 @@ namespace foray::gltf {
 
         for(int32_t i = 0; i < mesh.primitives.size(); i++)
         {
-            uint32_t vertexStart = static_cast<uint32_t>(vertexBuffer.size());
-            uint32_t indexStart  = static_cast<uint32_t>(indexBuffer.size());
+            std::vector<scene::Vertex> perPrimitiveVertices;
+            std::vector<uint32_t>      perPrimitiveIndices;
+            uint32_t                   vertexStart = static_cast<uint32_t>(vertexBuffer.size());
+            uint32_t                   indexStart  = static_cast<uint32_t>(indexBuffer.size());
 
             auto& gltfPrimitive = mesh.primitives[i];
             auto& primitive     = outprimitives[i];
@@ -126,6 +128,7 @@ namespace foray::gltf {
                 auto normal = lGetNormal(vertexIndex);
                 normal.y    = -1.f * normal.y;
                 vertexBuffer.push_back(scene::Vertex{.Pos = pos, .Normal = normal, .Tangent = lGetTangent(vertexIndex), .Uv = lGetUv(vertexIndex)});
+                perPrimitiveVertices.push_back(scene::Vertex{.Pos = pos, .Normal = normal, .Tangent = lGetTangent(vertexIndex), .Uv = lGetUv(vertexIndex)});
             }
 
             if(gltfPrimitive.indices >= 0)
@@ -149,6 +152,7 @@ namespace foray::gltf {
                             uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
                             highestIndex   = std::max(index, highestIndex);
                             indexBuffer.push_back(index);
+                            perPrimitiveIndices.push_back(static_cast<uint32_t>(buf[i]));
                         }
                         break;
                     }
@@ -159,6 +163,7 @@ namespace foray::gltf {
                             uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
                             highestIndex   = std::max(index, highestIndex);
                             indexBuffer.push_back(index);
+                            perPrimitiveIndices.push_back(static_cast<uint32_t>(buf[i]));
                         }
                         break;
                     }
@@ -169,6 +174,7 @@ namespace foray::gltf {
                             uint32_t index = static_cast<uint32_t>(buf[i]) + vertexStart;
                             highestIndex   = std::max(index, highestIndex);
                             indexBuffer.push_back(index);
+                            perPrimitiveIndices.push_back(static_cast<uint32_t>(buf[i]));
                         }
                         break;
                     }
@@ -176,11 +182,13 @@ namespace foray::gltf {
                         FORAY_THROWFMT("Index component type {} not supported!", accessor.componentType);
                 }
 
-                primitive = scene::Primitive(scene::Primitive::EType::Index, indexStart, indexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, highestIndex);
+                primitive = scene::Primitive(scene::Primitive::EType::Index, indexStart, indexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, highestIndex,
+                                             perPrimitiveVertices, perPrimitiveIndices);
             }
             else
             {
-                primitive = scene::Primitive(scene::Primitive::EType::Vertex, vertexStart, vertexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, 0);
+                primitive = scene::Primitive(scene::Primitive::EType::Vertex, vertexStart, vertexCount, gltfPrimitive.material + mIndexBindings.MaterialBufferOffset, 0,
+                                             perPrimitiveVertices, perPrimitiveIndices);
             }
         }
     }

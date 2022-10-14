@@ -2,6 +2,7 @@
 #include "../foray_basics.hpp"
 #include "../as/foray_blas.hpp"
 #include "foray_scene_declares.hpp"
+#include "../scene/foray_geo.hpp"
 
 namespace foray::scene {
 
@@ -26,9 +27,12 @@ namespace foray::scene {
         /// @brief The highest index into the vertex buffer referenced by this primitive. Used in Blas creation
         uint32_t HighestReferencedIndex = 0;
 
+        std::vector<foray::scene::Vertex> Vertices;
+        std::vector<uint32_t> Indices;
+
         inline Primitive() {}
-        inline Primitive(EType type, uint32_t first, uint32_t count, int32_t materialIndex, int32_t highestRef)
-            : Type(type), First(first), VertexOrIndexCount(count), MaterialIndex(materialIndex), HighestReferencedIndex(highestRef)
+        inline Primitive(EType type, uint32_t first, uint32_t count, int32_t materialIndex, int32_t highestRef, std::vector<foray::scene::Vertex>& vertices, std::vector<uint32_t> indices)
+            : Type(type), First(first), VertexOrIndexCount(count), MaterialIndex(materialIndex), HighestReferencedIndex(highestRef), Vertices(vertices), Indices(indices)
         {
         }
 
