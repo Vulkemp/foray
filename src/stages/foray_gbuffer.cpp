@@ -300,7 +300,7 @@ namespace foray::stages {
         mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
 
-        mScene->Draw(renderInfo, mPipelineLayout);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+        mScene->Draw(renderInfo, mPipelineLayout, cmdBuffer);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
 
         vkCmdEndRenderPass(cmdBuffer);
 #ifdef ENABLE_GBUFFER_BENCH

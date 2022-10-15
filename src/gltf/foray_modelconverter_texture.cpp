@@ -110,6 +110,7 @@ namespace foray::gltf {
 
                         core::HostCommandBuffer cmdBuf;
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+                        cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
                         for(int32_t i = 0; i < mipLevelCount - 1; i++)
                         {
@@ -176,7 +177,7 @@ namespace foray::gltf {
                             sampledTexture.Image->TransitionLayout(layoutTransition);
                         }
 
-                        cmdBuf.Submit();
+                        cmdBuf.SubmitAndWait();
 
                         VkSamplerCreateInfo samplerCI{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                                                       .magFilter               = VkFilter::VK_FILTER_LINEAR,

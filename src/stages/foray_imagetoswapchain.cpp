@@ -37,7 +37,7 @@ namespace foray::stages {
         barrier.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.subresourceRange = range;
 
-        uint32_t        swapChainImageIndex = renderInfo.GetSwapchainImageIndex();
+        uint32_t        swapChainImageIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
 
         // Barrier: Grab swapchain image, change it into transfer dst layout
         barrier.srcAccessMask       = 0;                                               // since no memory operations happen before layout transition, we don't care of a srcMask

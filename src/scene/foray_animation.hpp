@@ -85,7 +85,7 @@ namespace foray::scene {
         FORAY_PROPERTY_ALL(End)
         FORAY_PROPERTY_ALL(PlaybackConfig)
 
-        void Update(const base::FrameUpdateInfo&);
+        void Update(const base::FrameRenderInfo&);
 
       protected:
         std::string                   mName;

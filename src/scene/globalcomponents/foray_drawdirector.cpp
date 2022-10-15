@@ -73,7 +73,7 @@ namespace foray::scene {
         mPreviousTransformBuffer.Destroy();
     }
 
-    void DrawDirector::Update(const base::FrameUpdateInfo& updateInfo)
+    void DrawDirector::Update(const base::FrameRenderInfo& updateInfo)
     {
         VkCommandBuffer cmdBuffer = updateInfo.GetPrimaryCommandBuffer();
 

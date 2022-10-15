@@ -52,6 +52,7 @@ namespace foray::scene {
         DrawPushConstant            PushConstantState = {};
 
         inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index);
+        inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer);
 
         inline void CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset);
         inline void CmdPushConstant_MaterialIndex(int32_t materialIndex);
@@ -70,6 +71,14 @@ namespace foray::scene {
     SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
 
         : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)), PipelineLayout(pipelineLayout), PushConstantState()
+    {
+        CmdPushConstant_TransformBufferOffset(0);
+        CmdPushConstant_MaterialIndex(-1);
+    }
+
+    SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer)
+
+        : RenderInfo(renderInfo), CmdBuffer(cmdBuffer), PipelineLayout(pipelineLayout), PushConstantState()
     {
         CmdPushConstant_TransformBufferOffset(0);
         CmdPushConstant_MaterialIndex(-1);

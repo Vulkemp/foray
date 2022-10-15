@@ -23,9 +23,7 @@ namespace foray::core {
         // If requested, also start recording for the new command buffer
         if(begin)
         {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            AssertVkResult(vkBeginCommandBuffer(mCommandBuffer, &beginInfo));
+            Begin();
         }
 
         return mCommandBuffer;

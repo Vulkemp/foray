@@ -1,11 +1,11 @@
 #include "foray_animationdirector.hpp"
 
 namespace foray::scene {
-    void AnimationDirector::Update(const base::FrameUpdateInfo& updateInfo)
+    void AnimationDirector::Update(const base::FrameRenderInfo& updateInfo)
     {
         if(mPlaybackConfig.Enable)
         {
-            base::FrameUpdateInfo animationUpdateInfo(updateInfo);
+            base::FrameRenderInfo animationUpdateInfo(updateInfo);
             animationUpdateInfo.GetFrameTime() *= mPlaybackConfig.PlaybackSpeed;
 
             for(auto& animation : mAnimations)

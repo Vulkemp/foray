@@ -12,7 +12,7 @@ namespace foray::scene {
       public:
         friend Registry;
 
-        virtual void InvokeUpdate(const base::FrameUpdateInfo& updateInfo);
+        virtual void InvokeUpdate(const base::FrameRenderInfo& updateInfo);
         virtual void InvokeDraw(SceneDrawInfo& renderInfo);
         virtual void InvokeOnEvent(const Event* event);
         virtual void InvokeOnResized(VkExtent2D event);

@@ -1,7 +1,7 @@
 #include "foray_callbackdispatcher.hpp"
 
 namespace foray::scene {
-    void CallbackDispatcher::InvokeUpdate(const base::FrameUpdateInfo& updateInfo)
+    void CallbackDispatcher::InvokeUpdate(const base::FrameRenderInfo& updateInfo)
     {
         mUpdate.Invoke(updateInfo);
     }

@@ -19,7 +19,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = true;
-            using TArg                          = const base::FrameUpdateInfo&;
+            using TArg                          = const base::FrameRenderInfo&;
 
             /// @brief Invoked first each frame. Use for changes to the node hierarchy and transforms
             inline virtual void Update(TArg updateInfo) = 0;

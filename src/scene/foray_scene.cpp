@@ -21,7 +21,7 @@ namespace foray::scene {
         MakeComponent<CameraManager>(mContext);
     }
 
-    void Scene::Update(const base::FrameUpdateInfo& updateInfo)
+    void Scene::Update(const base::FrameRenderInfo& updateInfo)
     {
         this->InvokeUpdate(updateInfo);
     }
@@ -29,6 +29,12 @@ namespace foray::scene {
     {
         // Process draw callbacks
         SceneDrawInfo drawInfo(renderInfo, pipelineLayout, index);
+        this->InvokeDraw(drawInfo);
+    }
+    void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer)
+    {
+        // Process draw callbacks
+        SceneDrawInfo drawInfo(renderInfo, pipelineLayout, cmdBuffer);
         this->InvokeDraw(drawInfo);
     }
 

@@ -52,7 +52,7 @@ namespace foray::scene {
         }
     }
 
-    void FreeCameraController::Update(const base::FrameUpdateInfo& updateInfo)
+    void FreeCameraController::Update(const base::FrameRenderInfo& updateInfo)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)

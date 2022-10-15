@@ -76,7 +76,7 @@ namespace foray::stages {
         core::HostCommandBuffer cmdBuf;
         cmdBuf.Create(context, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         ImGui_ImplVulkan_CreateFontsTexture(cmdBuf.GetCommandBuffer());
-        cmdBuf.Submit();
+        cmdBuf.SubmitAndWait();
 
         //clear font textures from cpu data
         ImGui_ImplVulkan_DestroyFontUploadObjects();

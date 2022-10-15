@@ -363,8 +363,6 @@ namespace foray::base {
         uint32_t swapChainImageIndex = 0;
         ESwapchainInteractResult result = currentFrame->AcquireSwapchainImage();
 
-        renderInfo.SetSwapchainImageIndex(currentFrame->GetSwapchainImageIndex());
-
         if(result == ESwapchainInteractResult::Resized)
         {
             RecreateSwapchain();

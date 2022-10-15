@@ -38,10 +38,10 @@ namespace foray::scene {
                                                      .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         mBuffer.CmdCopyToDevice(0, cmdBuf, beforeAndAfter, beforeAndAfter);
 
-        cmdBuf.Submit();
+        cmdBuf.SubmitAndWait();
     }
 
-    void SimplifiedLightManager::Update(const base::FrameUpdateInfo& updateInfo)
+    void SimplifiedLightManager::Update(const base::FrameRenderInfo& updateInfo)
     {
         for(auto pair : mComponentArrayBindings)
         {

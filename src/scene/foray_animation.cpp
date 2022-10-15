@@ -142,7 +142,7 @@ namespace foray::scene {
         return glm::normalize(glm::quat(vec.w, vec.x, vec.y, vec.z));
     }
 
-    void Animation::Update(const base::FrameUpdateInfo& updateInfo)
+    void Animation::Update(const base::FrameRenderInfo& updateInfo)
     {
         if(mPlaybackConfig.Enable)
         {
