@@ -61,21 +61,26 @@ namespace foray::base {
             //// Basic minimums for raytracing
 #ifndef DISABLE_RT_EXTENSIONS
             pds.set_minimum_version(1u, 1u);
-            std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
-                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
-                                                        // dependencies of acceleration structure
-                                                        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-                                                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-                                                        // dependencies of rt pipeline
-                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
-                                                        // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
-                                                        VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME};
+            std::vector<const char*> requiredExtensions{
+                VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
+                VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
+                // dependencies of acceleration structure
+                VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+                VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+                VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+                // dependencies of rt pipeline
+                VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+                VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+                // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
+                VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME,
+            };
             pds.add_required_extensions(requiredExtensions);
 #endif
         }
 
         VkPhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
+
         pds.set_required_features(deviceFeatures);
 
         // allow user to alter phyiscal device selection
@@ -117,6 +122,9 @@ namespace foray::base {
             mDeviceFeatures.DescriptorIndexingFeatures.runtimeDescriptorArray                    = VK_TRUE;  // enable this for unbound descriptor arrays
             deviceBuilder.add_pNext(&mDeviceFeatures.DescriptorIndexingFeatures);
 
+            mDeviceFeatures.Sync2FEatures =
+                VkPhysicalDeviceSynchronization2Features{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES, .synchronization2 = VK_TRUE};
+            deviceBuilder.add_pNext(&mDeviceFeatures.Sync2FEatures);
 
             // This currently causes a segfault, so commented out for the time being
 

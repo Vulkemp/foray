@@ -61,10 +61,10 @@ namespace foray::base {
 #pragma region Vulkan
         /// @brief The applications vulkan context.
         core::VkContext mContext;
-        uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_2;
+        uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_3;
 
 
-        uint32_t                                    mInFlightFrameCount                 = 0;
+        uint32_t                                    mInFlightFrameCount          = 0;
         uint32_t                                    mAuxiliaryCommandBufferCount = 0;
         std::vector<std::unique_ptr<InFlightFrame>> mFrames{};
         uint32_t                                    mCurrentFrameIndex  = 0;
@@ -76,6 +76,7 @@ namespace foray::base {
             VkPhysicalDeviceRayTracingPipelineFeaturesKHR    RayTracingPipelineFeatures;
             VkPhysicalDeviceAccelerationStructureFeaturesKHR AccelerationStructureFeatures;
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures;
+            VkPhysicalDeviceSynchronization2Features         Sync2FEatures;
         } mDeviceFeatures = {};
 
         /// @brief Commandpool for the default queue.

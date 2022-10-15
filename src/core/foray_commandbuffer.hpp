@@ -24,6 +24,7 @@ namespace foray::core {
         /// @brief Destroys the associated resources
         virtual void Destroy() override;
         virtual bool Exists() const override { return mCommandBuffer; }
+        virtual void SetName(const VkContext* context, std::string_view name);
 
         inline operator VkCommandBuffer() { return mCommandBuffer; }
         inline operator const VkCommandBuffer() const { return mCommandBuffer; }

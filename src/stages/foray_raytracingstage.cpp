@@ -149,6 +149,35 @@ namespace foray::stages {
 
     void RaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
+        VkImageMemoryBarrier2 attachmentMemBarrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+            .dstStageMask        = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+            .dstAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = mRaytracingRenderTarget.GetImage(),
+            .subresourceRange =
+                VkImageSubresourceRange{
+                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel   = 0,
+                    .levelCount     = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount     = 1,
+                },
+        };
+
+        VkDependencyInfo depInfo{
+            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .imageMemoryBarrierCount = 1U,
+            .pImageMemoryBarriers    = &attachmentMemBarrier,
+        };
+
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
         mPipeline.CmdBindPipeline(cmdBuffer);
 

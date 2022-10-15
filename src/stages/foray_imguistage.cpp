@@ -140,8 +140,8 @@ namespace foray::stages {
             attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_GENERAL;
-            attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
+            attachmentDescriptions[i].initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+            attachmentDescriptions[i].finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
             attachmentDescriptions[i].format         = colorAttachment->GetFormat();
 
             colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
@@ -236,6 +236,36 @@ namespace foray::stages {
         renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
+
+        VkImageMemoryBarrier2 attachmentMemBarrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+            .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = mTargetImage->GetImage(),
+            .subresourceRange =
+                VkImageSubresourceRange{
+                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel   = 0,
+                    .levelCount     = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount     = 1,
+                },
+        };
+
+        VkDependencyInfo depInfo{
+            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .imageMemoryBarrierCount = 1U,
+            .pImageMemoryBarriers    = &attachmentMemBarrier,
+        };
+
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 

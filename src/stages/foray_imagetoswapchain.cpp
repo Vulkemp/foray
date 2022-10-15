@@ -55,14 +55,14 @@ namespace foray::stages {
 
         core::ManagedImage::LayoutTransitionInfo layoutTransitionInfo;
         layoutTransitionInfo.CommandBuffer        = cmdBuffer;
-        layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // flush color attachment writes
-        layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;          // block transfer writes before layout transition is over
-        layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
+        layoutTransitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_MEMORY_WRITE_BIT;
+        layoutTransitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT;
+        layoutTransitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
         layoutTransitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         layoutTransitionInfo.SrcQueueFamilyIndex  = mContext->QueueGraphics;
         layoutTransitionInfo.DstQueueFamilyIndex  = mContext->QueueGraphics;
         layoutTransitionInfo.SubresourceRange     = range;
-        layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;  // our source image was a color attachment in a previous pass
+        layoutTransitionInfo.SrcStage             = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;  // our source image was a color attachment in a previous pass
         layoutTransitionInfo.DstStage             = VK_PIPELINE_STAGE_TRANSFER_BIT;                 // we block transfer before layout transition is done
         mSourceImage->TransitionLayout(layoutTransitionInfo);
 

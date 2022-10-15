@@ -8,14 +8,14 @@ namespace foray::base {
         Destroy();
         mContext = context;
         mPrimaryCommandBuffer.Create(mContext);
-        mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
+        mPrimaryCommandBuffer.SetName(mContext, "Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
         for(int32_t i = 0; i < auxCommandBufferCount; i++)
         {
             std::unique_ptr<core::DeviceCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
             buf = std::make_unique<core::DeviceCommandBuffer>();
             buf->Create(mContext);
-            buf->SetName(fmt::format("Auxiliary CommandBuffer #{}", i));
+            buf->SetName(mContext, fmt::format("Auxiliary CommandBuffer #{}", i));
         }
 
         VkSemaphoreCreateInfo semaphoreCI{};

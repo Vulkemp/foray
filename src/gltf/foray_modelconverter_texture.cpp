@@ -110,7 +110,7 @@ namespace foray::gltf {
 
                         core::HostCommandBuffer cmdBuf;
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-                        cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
+                        cmdBuf.SetName(args.Context, fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
                         for(int32_t i = 0; i < mipLevelCount - 1; i++)
                         {

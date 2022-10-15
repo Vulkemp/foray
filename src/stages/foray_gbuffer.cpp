@@ -99,7 +99,8 @@ namespace foray::stages {
     {
         // check if shaders have been recompiled
         //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
-        bool needsPipelineUpdate = core::ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || core::ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
+        bool needsPipelineUpdate =
+            core::ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || core::ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
 
         if(!needsPipelineUpdate)
             return;
@@ -261,11 +262,55 @@ namespace foray::stages {
     void GBufferStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
 
-        uint32_t        frameNum      = renderInfo.GetFrameNumber();
+        uint32_t frameNum = renderInfo.GetFrameNumber();
 #ifdef ENABLE_GBUFFER_BENCH
         mBenchmark.CmdResetQuery(commandBuffer, frameNum);
         mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, bench::BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
+
+        VkImageMemoryBarrier2 attachmentMemBarrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
+            .srcAccessMask       = VK_ACCESS_2_NONE,
+            .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .subresourceRange =
+                VkImageSubresourceRange{
+                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel   = 0,
+                    .levelCount     = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount     = 1,
+                },
+        };  // namespace foray::stages
+
+        std::vector<VkImageMemoryBarrier2> barriers;
+        barriers.reserve(mGBufferImages.size() + 1);
+
+        for(std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+        {
+            attachmentMemBarrier.image = image->GetImage();
+            barriers.push_back(attachmentMemBarrier);
+        }
+        attachmentMemBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT;
+        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachmentMemBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
+        attachmentMemBarrier.image                       = mDepthAttachment.GetImage();
+        barriers.push_back(attachmentMemBarrier);
+
+        VkDependencyInfo depInfo{
+            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .imageMemoryBarrierCount = (uint32_t)barriers.size(),
+            .pImageMemoryBarriers    = barriers.data(),
+        };
+
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -315,8 +360,8 @@ namespace foray::stages {
         AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         // shader stages
-        auto                   vertShaderModule = core::ShaderModule(mContext, mVertexShaderPath);
-        auto                   fragShaderModule = core::ShaderModule(mContext, mFragmentShaderPath);
+        auto                         vertShaderModule = core::ShaderModule(mContext, mVertexShaderPath);
+        auto                         fragShaderModule = core::ShaderModule(mContext, mFragmentShaderPath);
         util::ShaderStageCreateInfos shaderStageCreateInfos;
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
 
