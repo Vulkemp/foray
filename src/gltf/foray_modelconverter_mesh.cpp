@@ -22,13 +22,16 @@ namespace foray::gltf {
         auto& indexBuffer  = *mIndexBuffer;
         auto& vertexBuffer = *mVertexBuffer;
 
-        // flip vertex order due to coordinate space translation GLTF (OpenGL) -> Vulkan
-        uint32_t swap = {};
-        for(int32_t i = mIndexBindings.IndexBufferStart; i + 2 < indexBuffer.size(); i += 3)
+        if(mOptions.FlipY)
         {
-            swap               = indexBuffer[i + 2];
-            indexBuffer[i + 2] = indexBuffer[i + 1];
-            indexBuffer[i + 1] = swap;
+            // flip vertex order due to coordinate space translation GLTF (OpenGL) -> Vulkan
+            uint32_t swap = {};
+            for(int32_t i = mIndexBindings.IndexBufferStart; i + 2 < indexBuffer.size(); i += 3)
+            {
+                swap               = indexBuffer[i + 2];
+                indexBuffer[i + 2] = indexBuffer[i + 1];
+                indexBuffer[i + 1] = swap;
+            }
         }
 
         mGeo.InitOrUpdate();
@@ -42,6 +45,8 @@ namespace foray::gltf {
     {
         auto& indexBuffer  = *mIndexBuffer;
         auto& vertexBuffer = *mVertexBuffer;
+
+        fp32_t flipY = mOptions.FlipY ? -1.f : 1.f;
 
         outprimitives.resize(mesh.primitives.size());
 
@@ -124,9 +129,9 @@ namespace foray::gltf {
             for(int32_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
             {
                 auto pos    = lGetPosition(vertexIndex);
-                pos.y       = -1.f * pos.y;
+                pos.y       = flipY * pos.y;
                 auto normal = lGetNormal(vertexIndex);
-                normal.y    = -1.f * normal.y;
+                normal.y    = flipY * normal.y;
                 vertexBuffer.push_back(scene::Vertex{.Pos = pos, .Normal = normal, .Tangent = lGetTangent(vertexIndex), .Uv = lGetUv(vertexIndex)});
                 perPrimitiveVertices.push_back(scene::Vertex{.Pos = pos, .Normal = normal, .Tangent = lGetTangent(vertexIndex), .Uv = lGetUv(vertexIndex)});
             }

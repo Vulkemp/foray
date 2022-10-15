@@ -36,7 +36,8 @@ namespace foray::gltf {
             animation.GetSamplers().reserve(gltfAnimation.samplers.size());
             animation.GetChannels().reserve(gltfAnimation.channels.size());
 
-            std::map<int32_t, int32_t> samplerIndexMap;
+            std::map<int32_t, int32_t>  samplerIndexMap;
+            std::unordered_set<int32_t> flippedSamplers;
 
             auto indexMapNoMatch = samplerIndexMap.end();
 
@@ -93,6 +94,18 @@ namespace foray::gltf {
                     logger()->warn("Model Load: In animation \"{}\", channel #{}: Unable to match \"{}\" to a target path! Skipping Channel!", animation.GetName(), channelIndex,
                                    gltfChannel.target_path);
                     continue;
+                }
+
+                if(mOptions.FlipY && channel.TargetPath == scene::EAnimationTargetPath::Translation)
+                {
+                    if(!flippedSamplers.contains(channel.SamplerIndex))
+                    {
+                        for(scene::AnimationKeyframe& frame : animation.GetSamplers()[channel.SamplerIndex].Keyframes)
+                        {
+                            frame.Value.x = frame.Value.x * -1;
+                        }
+                        flippedSamplers.emplace(channel.SamplerIndex);
+                    }
                 }
 
                 animation.GetChannels().push_back(std::move(channel));

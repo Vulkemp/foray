@@ -9,12 +9,21 @@
 #include <tinygltf/tiny_gltf.h>
 
 namespace foray::gltf {
+
+    struct ModelConverterOptions
+    {
+        using FpSceneSelect = std::function<int32_t(tinygltf::Model&)>;
+
+        FpSceneSelect SceneSelect = nullptr;
+        bool FlipY = true;
+    };
+
     class ModelConverter : public NoMoveDefaults
     {
       public:
         explicit ModelConverter(scene::Scene* scene);
 
-        void LoadGltfModel(std::string utf8Path, const core::VkContext* context = nullptr, std::function<int32_t(tinygltf::Model)> sceneSelect = nullptr);
+        void LoadGltfModel(std::string utf8Path, const core::VkContext* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
 
         FORAY_PROPERTY_ALL(Scene)
 
@@ -31,6 +40,8 @@ namespace foray::gltf {
         tinygltf::Scene* mGltfScene = nullptr;
 
         // Temporary structures
+
+        ModelConverterOptions mOptions;
 
         std::string mUtf8Dir;
 
