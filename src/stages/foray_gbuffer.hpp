@@ -23,6 +23,7 @@ namespace foray::stages {
         inline static constexpr std::string_view MotionVector       = "Gbuf.Motion";
         inline static constexpr std::string_view MaterialIndex      = "Gbuf.MaterialId";
         inline static constexpr std::string_view MeshInstanceIndex  = "Gbuf.MeshInstanceId";
+        core::ManagedImage*                      GetDepthBuffer() { return &mDepthAttachment; }
 
 #ifdef ENABLE_GBUFFER_BENCH
         FORAY_PROPERTY_ALLGET(Benchmark)
