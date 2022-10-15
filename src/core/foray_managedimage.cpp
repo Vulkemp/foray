@@ -237,7 +237,7 @@ namespace foray::core {
             TransitionLayout(transitionInfo);
         }
 
-        cmdBuffer.Submit();
+        cmdBuffer.SubmitAndWait();
     }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)

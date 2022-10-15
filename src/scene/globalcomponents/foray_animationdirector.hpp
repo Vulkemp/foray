@@ -14,6 +14,8 @@ namespace foray::scene {
 
         virtual void Update(const base::FrameUpdateInfo&) override;
 
+        virtual int32_t GetOrder() const override { return 0; }
+
       protected:
         std::vector<Animation> mAnimations;
         PlaybackConfig         mPlaybackConfig;

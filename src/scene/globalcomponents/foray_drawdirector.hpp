@@ -21,6 +21,8 @@ namespace foray::scene {
 
         void InitOrUpdate();
 
+        virtual int32_t GetOrder() const override { return ORDER_TRANSFORM; }
+
         void CreateBuffers(size_t transformCount);
         void DestroyBuffers();
 

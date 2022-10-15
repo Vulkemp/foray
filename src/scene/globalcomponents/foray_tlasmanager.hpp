@@ -13,7 +13,9 @@ namespace foray::scene {
 
         void CreateOrUpdate();
 
-        void Update(const base::FrameUpdateInfo& updateInfo);
+        virtual void Update(const base::FrameUpdateInfo& updateInfo) override;
+
+        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
         FORAY_PROPERTY_ALLGET(Tlas)
         FORAY_PROPERTY_ALLGET(MeshInstances)

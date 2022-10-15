@@ -5,10 +5,6 @@ namespace foray::scene {
     {
         mUpdate.Invoke(updateInfo);
     }
-    void CallbackDispatcher::InvokeBeforeDraw(const base::FrameRenderInfo& renderInfo)
-    {
-        mBeforeDraw.Invoke(renderInfo);
-    }
     void CallbackDispatcher::InvokeDraw(SceneDrawInfo& drawInfo)
     {
         mDraw.Invoke(drawInfo);

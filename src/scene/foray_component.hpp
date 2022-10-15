@@ -1,10 +1,10 @@
 #pragma once
 #include "../base/foray_framerenderinfo.hpp"
+#include "../core/foray_core_declares.hpp"
 #include "../foray_basics.hpp"
 #include "../osi/foray_osi_declares.hpp"
-#include "foray_scenedrawing.hpp"
 #include "foray_scene_declares.hpp"
-#include "../core/foray_core_declares.hpp"
+#include "foray_scenedrawing.hpp"
 
 namespace foray::scene {
 
@@ -18,26 +18,24 @@ namespace foray::scene {
         class UpdateCallback : public Polymorphic
         {
           public:
-            using TArg = const base::FrameUpdateInfo&;
+            static const bool ORDERED_EXECUTION = true;
+            using TArg                          = const base::FrameUpdateInfo&;
+
             /// @brief Invoked first each frame. Use for changes to the node hierarchy and transforms
             inline virtual void Update(TArg updateInfo) = 0;
             inline void         Invoke(TArg updateInfo) { Update(updateInfo); }
-        };
 
-        /// @brief Base class for implementing the before draw callback
-        class BeforeDrawCallback : public Polymorphic
-        {
-          public:
-            using TArg = const base::FrameRenderInfo&;
-            /// @brief Invoked after updates but before drawing. Use to apply changes to the GPU before drawing
-            inline virtual void BeforeDraw(TArg renderInfo) = 0;
-            inline void         Invoke(TArg renderInfo) { BeforeDraw(renderInfo); }
+            static const int32_t ORDER_TRANSFORM    = 100;
+            static const int32_t ORDER_DEVICEUPLOAD = 200;
+
+            virtual inline int32_t GetOrder() const { return 0; }
         };
 
         /// @brief Base class for implementing the draw callback
         class DrawCallback : public Polymorphic
         {
           public:
+            static const bool ORDERED_EXECUTION = false;
             using TArg = SceneDrawInfo&;
             /// @brief Invoked last each frame. Use to submit draw calls (and related)
             inline virtual void Draw(TArg drawInfo) = 0;
@@ -48,6 +46,7 @@ namespace foray::scene {
         class OnEventCallback : public Polymorphic
         {
           public:
+            static const bool ORDERED_EXECUTION = false;
             using TArg = const Event*;
             /// @brief Invoked with every event received by the application
             inline virtual void OnEvent(TArg event) = 0;
@@ -57,6 +56,7 @@ namespace foray::scene {
         class OnResizedCallback : public Polymorphic
         {
           public:
+            static const bool ORDERED_EXECUTION = false;
             using TArg = VkExtent2D;
             /// @brief Invoked when the primary render resolution changes
             inline virtual void OnResized(TArg extent) = 0;
@@ -69,8 +69,8 @@ namespace foray::scene {
         FORAY_PROPERTY_CGET(Registry)
         FORAY_PROPERTY_GET(Registry)
 
-        virtual Scene*          GetScene()   = 0;
-        virtual Registry*        GetGlobals() = 0;
+        virtual Scene*                 GetScene()   = 0;
+        virtual Registry*              GetGlobals() = 0;
         virtual const core::VkContext* GetContext() = 0;
 
       protected:
@@ -100,4 +100,4 @@ namespace foray::scene {
         /// @brief Vulkan Context. Casts mRegistry to Scene and returns Scene->GetContext()
         virtual const core::VkContext* GetContext() override;
     };
-}  // namespace foray
+}  // namespace foray::scene

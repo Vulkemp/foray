@@ -6,12 +6,16 @@ namespace foray::base {
     void InFlightFrame::Create(const core::VkContext* context, uint32_t auxCommandBufferCount)
     {
         Destroy();
+        mContext = context;
         mPrimaryCommandBuffer.Create(mContext);
+        mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
-        for(std::unique_ptr<core::DeviceCommandBuffer>& buf : mAuxiliaryCommandBuffers)
+        for(int32_t i = 0; i < auxCommandBufferCount; i++)
         {
+            std::unique_ptr<core::DeviceCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
             buf = std::make_unique<core::DeviceCommandBuffer>();
             buf->Create(mContext);
+            buf->SetName(fmt::format("Auxiliary CommandBuffer #{}", i));
         }
 
         VkSemaphoreCreateInfo semaphoreCI{};
@@ -39,9 +43,18 @@ namespace foray::base {
         mPrimaryCommandBuffer.Destroy();
         mAuxiliaryCommandBuffers.resize(0);
 
-        vkDestroySemaphore(mContext->Device, mSwapchainImageReady, nullptr);
-        vkDestroySemaphore(mContext->Device, mPrimaryCompletedSemaphore, nullptr);
-        vkDestroyFence(mContext->Device, mPrimaryCompletedFence, nullptr);
+        if(!!mSwapchainImageReady)
+        {
+            vkDestroySemaphore(mContext->Device, mSwapchainImageReady, nullptr);
+        }
+        if(!!mPrimaryCompletedSemaphore)
+        {
+            vkDestroySemaphore(mContext->Device, mPrimaryCompletedSemaphore, nullptr);
+        }
+        if(!!mPrimaryCompletedFence)
+        {
+            vkDestroyFence(mContext->Device, mPrimaryCompletedFence, nullptr);
+        }
     }
     ESwapchainInteractResult InFlightFrame::AcquireSwapchainImage()
     {

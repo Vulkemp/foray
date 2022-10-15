@@ -51,8 +51,6 @@ namespace foray::scene {
         /// @brief All nodes directly attached to the root
         std::vector<Node*> mRootNodes;
 
-        CallbackDispatcher mGlobalRootRegistry;
-
         void InitDefaultGlobals();
     };
 

@@ -7,7 +7,7 @@
 #include "foray_node.hpp"
 
 namespace foray::scene {
-    Scene::Scene(const core::VkContext* context) : Registry(&mGlobalRootRegistry), mContext(context)
+    Scene::Scene(const core::VkContext* context) : Registry(this), mContext(context)
     {
         InitDefaultGlobals();
     }
@@ -24,24 +24,17 @@ namespace foray::scene {
     void Scene::Update(const base::FrameUpdateInfo& updateInfo)
     {
         this->InvokeUpdate(updateInfo);
-        mGlobalRootRegistry.InvokeUpdate(updateInfo);
     }
     void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
     {
-        // Process before draw callbacks
-        this->InvokeBeforeDraw(renderInfo);
-        mGlobalRootRegistry.InvokeBeforeDraw(renderInfo);
-
         // Process draw callbacks
         SceneDrawInfo drawInfo(renderInfo, pipelineLayout, index);
         this->InvokeDraw(drawInfo);
-        mGlobalRootRegistry.InvokeDraw(drawInfo);
     }
 
     void Scene::HandleEvent(const Event* event)
     {
         this->InvokeOnEvent(event);
-        mGlobalRootRegistry.InvokeOnEvent(event);
     }
 
     Node* Scene::MakeNode(Node* parent)

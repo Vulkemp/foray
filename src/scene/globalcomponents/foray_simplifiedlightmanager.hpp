@@ -12,7 +12,9 @@ namespace foray::scene {
       public:
         void CreateOrUpdate();
 
-        void Update(const base::FrameUpdateInfo& updateInfo);
+        virtual void Update(const base::FrameUpdateInfo& updateInfo) override;
+
+        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
       protected:
         std::vector<SimplifiedLight>                            mSimplifiedlights;

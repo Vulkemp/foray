@@ -42,10 +42,10 @@ namespace foray::scene {
         {
             mCallbackDispatcher->mOnEvent.Add(receiver);
         }
-        Component::BeforeDrawCallback* beforedraw = dynamic_cast<Component::BeforeDrawCallback*>(component);
-        if(beforedraw)
+        Component::OnResizedCallback* resizable = dynamic_cast<Component::OnResizedCallback*>(component);
+        if(resizable)
         {
-            mCallbackDispatcher->mBeforeDraw.Add(beforedraw);
+            mCallbackDispatcher->mOnResized.Add(resizable);
         }
     }
     void Registry::UnregisterFromRoot(Component* component)
@@ -65,10 +65,10 @@ namespace foray::scene {
         {
             mCallbackDispatcher->mOnEvent.Remove(receiver);
         }
-        Component::BeforeDrawCallback* beforedraw = dynamic_cast<Component::BeforeDrawCallback*>(component);
-        if(beforedraw)
+        Component::OnResizedCallback* resizable = dynamic_cast<Component::OnResizedCallback*>(component);
+        if(resizable)
         {
-            mCallbackDispatcher->mBeforeDraw.Remove(beforedraw);
+            mCallbackDispatcher->mOnResized.Remove(resizable);
         }
     }
 

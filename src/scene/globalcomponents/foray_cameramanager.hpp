@@ -26,6 +26,7 @@ namespace foray::scene {
 
         virtual void Update(const base::FrameUpdateInfo& updateInfo) override;
 
+        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
       protected:
         util::ManagedUbo<CameraUboBlock> mUbo;
