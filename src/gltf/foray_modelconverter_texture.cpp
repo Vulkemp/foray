@@ -112,29 +112,49 @@ namespace foray::gltf {
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
                         cmdBuf.SetName(args.Context, fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
+                        std::vector<VkImageMemoryBarrier2> barriers(2);
+                        VkImageMemoryBarrier2&             sourceBarrier = barriers[0];
+                        VkImageMemoryBarrier2&             destBarrier   = barriers[1];
+
+                        sourceBarrier =
+                            VkImageMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                                                  .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                                  .srcAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                                  .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                                  .dstAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT,
+                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                  .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                  .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                  .image               = sampledTexture.Image->GetImage(),
+                                                  .subresourceRange =
+                                                      VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
+                        destBarrier =
+                            VkImageMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                                                  .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
+                                                  .srcAccessMask       = VK_ACCESS_2_NONE,
+                                                  .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                                  .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                  .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                  .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                  .image               = sampledTexture.Image->GetImage(),
+                                                  .subresourceRange =
+                                                      VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
+
+                        VkDependencyInfo depInfo{
+                            .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 2U, .pImageMemoryBarriers = barriers.data()};
+
                         for(int32_t i = 0; i < mipLevelCount - 1; i++)
                         {
                             uint32_t sourceMipLevel = (uint32_t)i;
                             uint32_t destMipLevel   = sourceMipLevel + 1;
 
-                            // Step #1 Transition dest miplevel to transfer dst optimal
-                            VkImageSubresourceRange mipSubRange = {};
-                            mipSubRange.aspectMask              = VK_IMAGE_ASPECT_COLOR_BIT;
-                            mipSubRange.baseMipLevel            = destMipLevel;
-                            mipSubRange.levelCount              = 1;
-                            mipSubRange.layerCount              = 1;
+                            sourceBarrier.subresourceRange.baseMipLevel = sourceMipLevel;
+                            destBarrier.subresourceRange.baseMipLevel   = destMipLevel;
 
-                            core::ManagedImage::LayoutTransitionInfo layoutTransition;
-                            layoutTransition.CommandBuffer        = cmdBuf.GetCommandBuffer();
-                            layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_UNDEFINED;
-                            layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                            layoutTransition.BarrierSrcAccessMask = 0;
-                            layoutTransition.BarrierDstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                            layoutTransition.SubresourceRange     = mipSubRange;
-                            layoutTransition.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-                            layoutTransition.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-                            sampledTexture.Image->TransitionLayout(layoutTransition);
+                            vkCmdPipelineBarrier2(cmdBuf, &depInfo);
 
                             VkOffset3D  srcArea{.x = (int32_t)extent.width >> i, .y = (int32_t)extent.height >> i, .z = 1};
                             VkOffset3D  dstArea{.x = (int32_t)extent.width >> (i + 1), .y = (int32_t)extent.height >> (i + 1), .z = 1};
@@ -149,32 +169,28 @@ namespace foray::gltf {
                             blit.dstOffsets[1] = dstArea;
                             vkCmdBlitImage(cmdBuf.GetCommandBuffer(), sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                            sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
-
-                            // Step #3 Transition dest miplevel to transfer src optimal
-                            layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                            layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                            layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-                            layoutTransition.BarrierDstAccessMask = 0;
-
-                            sampledTexture.Image->TransitionLayout(layoutTransition);
                         }
 
                         {
                             // All mip levels are transfer src optimal after mip creation, fix it
 
-                            VkImageSubresourceRange mipSubRange = {
-                                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 0, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS};
-                            core::ManagedImage::LayoutTransitionInfo layoutTransition;
-                            layoutTransition.CommandBuffer        = cmdBuf.GetCommandBuffer();
-                            layoutTransition.OldImageLayout       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                            layoutTransition.NewImageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                            layoutTransition.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-                            layoutTransition.BarrierDstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-                            layoutTransition.SubresourceRange     = mipSubRange;
-                            layoutTransition.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-                            layoutTransition.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+                            VkImageMemoryBarrier2 barrier{
+                                .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                                .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                .srcAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                .dstStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                .dstAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT,
+                                .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                .image               = sampledTexture.Image->GetImage(),
+                                .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = 1}};
 
-                            sampledTexture.Image->TransitionLayout(layoutTransition);
+                            VkDependencyInfo depInfo{
+                            .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 1U, .pImageMemoryBarriers = &barrier};
+
+                            vkCmdPipelineBarrier2(cmdBuf, &depInfo);
                         }
 
                         cmdBuf.SubmitAndWait();
@@ -219,7 +235,7 @@ namespace foray::gltf {
     {
         using namespace impl;
 
-        int32_t                  threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
+        int32_t threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
         std::vector<std::thread> threads(threadCount);
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
@@ -227,50 +243,68 @@ namespace foray::gltf {
         mTextures.GetTextures().resize(mTextures.GetTextures().size() + mGltfModel.textures.size());
 
         std::mutex singleThreadedActionsMutex;
+        if(threadCount > 1)
+        {
 
-        for(int32_t threadIndex = 0; threadIndex < threadCount; threadIndex++)
+
+            for(int32_t threadIndex = 0; threadIndex < threadCount; threadIndex++)
+            {
+                MultithreadLambdaArgs args{.GltfModel                = mGltfModel,
+                                           .Textures                 = mTextures,
+                                           .BaseDir                  = mUtf8Dir,
+                                           .Context                  = mContext,
+                                           .ThreadIndex              = threadIndex,
+                                           .ThreadCount              = threadCount,
+                                           .BaseTexIndex             = baseTexIndex,
+                                           .SingleThreadSectionMutex = singleThreadedActionsMutex,
+                                           .Done                     = done[threadIndex]};
+                auto&                 thread = threads[threadIndex];
+
+                thread = std::thread([args]() { lLoadTexturesThreadInstance(args); });
+                thread.detach();
+            }
+
+            // Wait in main thread until all image loading operations have succeeded
+            while(true)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                bool alldone = true;
+                {
+                    std::lock_guard<std::mutex> lock(singleThreadedActionsMutex);
+                    for(int32_t threadIndex = 0; alldone && threadIndex < threadCount; threadIndex++)
+                    {
+                        alldone &= !!(done[threadIndex]);
+                    }
+                }
+                if(alldone)
+                {
+                    break;
+                }
+            }
+
+            // join all threads
+            for(int32_t threadIndex = 0; threadIndex < threadCount; threadIndex++)
+            {
+                auto& thread = threads[threadIndex];
+                if(thread.joinable())
+                {
+                    thread.join();
+                }
+            }
+        }
+        else if(threadCount == 1)
         {
             MultithreadLambdaArgs args{.GltfModel                = mGltfModel,
                                        .Textures                 = mTextures,
                                        .BaseDir                  = mUtf8Dir,
                                        .Context                  = mContext,
-                                       .ThreadIndex              = threadIndex,
+                                       .ThreadIndex              = 0,
                                        .ThreadCount              = threadCount,
                                        .BaseTexIndex             = baseTexIndex,
                                        .SingleThreadSectionMutex = singleThreadedActionsMutex,
-                                       .Done                     = done[threadIndex]};
-            auto&                 thread = threads[threadIndex];
+                                       .Done                     = done[0]};
 
-            thread = std::thread([args]() { lLoadTexturesThreadInstance(args); });
-            thread.detach();
-        }
-
-        // Wait in main thread until all image loading operations have succeeded
-        while(true)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            bool alldone = true;
-            {
-                std::lock_guard<std::mutex> lock(singleThreadedActionsMutex);
-                for(int32_t threadIndex = 0; alldone && threadIndex < threadCount; threadIndex++)
-                {
-                    alldone &= !!(done[threadIndex]);
-                }
-            }
-            if(alldone)
-            {
-                break;
-            }
-        }
-
-        // join all threads
-        for(int32_t threadIndex = 0; threadIndex < threadCount; threadIndex++)
-        {
-            auto& thread = threads[threadIndex];
-            if(thread.joinable())
-            {
-                thread.join();
-            }
+            lLoadTexturesThreadInstance(args);
         }
     }
 
