@@ -22,6 +22,8 @@ namespace foray::scene {
 
         inline virtual ~MaterialBuffer() { Destroy(); }
 
+        FORAY_PROPERTY_ALLGET(Buffer)
+
       protected:
         util::ManagedVectorBuffer<DefaultMaterialEntry> mBuffer = {};
         std::vector<VkDescriptorBufferInfo>       mDescriptorBufferInfos;

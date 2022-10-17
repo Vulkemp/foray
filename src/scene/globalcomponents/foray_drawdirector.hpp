@@ -38,6 +38,8 @@ namespace foray::scene {
         std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> MakeDescriptorInfosForPrevious(
             VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT);
 
+        FORAY_PROPERTY_ALLGET(CurrentTransformBuffer)
+        FORAY_PROPERTY_ALLGET(PreviousTransformBuffer)
 
       protected:
         util::DualBuffer    mCurrentTransformBuffer;

@@ -148,6 +148,69 @@ namespace foray::stages {
 
         mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
                                 VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer_DepthBufferImage");
+
+        {  // Pre-transfer to correct layout
+            core::HostCommandBuffer commandBuffer;
+            commandBuffer.Create(mContext);
+            commandBuffer.Begin();
+
+            std::vector<VkImageMemoryBarrier2> barriers;
+            barriers.reserve(6);
+
+            VkImageMemoryBarrier2 attachmentMemBarrier{
+                .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
+                .srcAccessMask       = VK_ACCESS_2_NONE,
+                .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .subresourceRange =
+                    VkImageSubresourceRange{
+                        .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                        .baseMipLevel   = 0,
+                        .levelCount     = VK_REMAINING_MIP_LEVELS,
+                        .baseArrayLayer = 0,
+                        .layerCount     = VK_REMAINING_ARRAY_LAYERS,
+                    },
+            };
+
+            for(std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+            {
+                attachmentMemBarrier.image = image->GetImage();
+                barriers.push_back(attachmentMemBarrier);
+            }
+
+            barriers.push_back(VkImageMemoryBarrier2{
+                .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
+                .srcAccessMask       = VK_ACCESS_2_NONE,
+                .dstStageMask        = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT,
+                .dstAccessMask       = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .image               = mDepthAttachment.GetImage(),
+                .subresourceRange =
+                    VkImageSubresourceRange{
+                        .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT,
+                        .baseMipLevel   = 0,
+                        .levelCount     = VK_REMAINING_MIP_LEVELS,
+                        .baseArrayLayer = 0,
+                        .layerCount     = VK_REMAINING_ARRAY_LAYERS,
+                    },
+            });
+
+            VkDependencyInfo depInfo{
+                .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = (uint32_t)barriers.size(), .pImageMemoryBarriers = barriers.data()};
+
+            vkCmdPipelineBarrier2(commandBuffer, &depInfo);
+
+            commandBuffer.SubmitAndWait();
+        }
     }
 
     void GBufferStage::PrepareRenderpass()
@@ -180,8 +243,8 @@ namespace foray::stages {
         depthAttachmentDescription.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachmentDescription.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depthAttachmentDescription.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachmentDescription.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.initialLayout  = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
         depthAttachmentDescription.format         = mDepthAttachment.GetFormat();
 
         // the depth attachment gets the final id (one higher than the highest color attachment id)
@@ -270,7 +333,7 @@ namespace foray::stages {
 
         VkImageMemoryBarrier2 attachmentMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask        = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
             .srcAccessMask       = VK_ACCESS_2_NONE,
             .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
@@ -286,28 +349,51 @@ namespace foray::stages {
                     .baseArrayLayer = 0,
                     .layerCount     = 1,
                 },
-        };  // namespace foray::stages
+        };
 
-        std::vector<VkImageMemoryBarrier2> barriers;
-        barriers.reserve(mGBufferImages.size() + 1);
+        std::vector<VkImageMemoryBarrier2> imgBarriers;
+        imgBarriers.reserve(mGBufferImages.size() + 1);
 
         for(std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
         {
             attachmentMemBarrier.image = image->GetImage();
-            barriers.push_back(attachmentMemBarrier);
+            imgBarriers.push_back(attachmentMemBarrier);
         }
-        attachmentMemBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT;
-        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachmentMemBarrier.dstAccessMask               = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
+        attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
         attachmentMemBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
         attachmentMemBarrier.image                       = mDepthAttachment.GetImage();
-        barriers.push_back(attachmentMemBarrier);
+        imgBarriers.push_back(attachmentMemBarrier);
+
+        std::vector<VkBufferMemoryBarrier2> bufferBarriers;
+
+        VkBufferMemoryBarrier2 bufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
+                                             .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                             .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                             .dstStageMask        = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT,
+                                             .dstAccessMask       = VK_ACCESS_2_SHADER_READ_BIT,
+                                             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                             .offset              = 0,
+                                             .size                = VK_WHOLE_SIZE};
+
+        bufferBarrier.buffer = mScene->GetComponent<scene::MaterialBuffer>()->GetBuffer().GetBuffer().GetBuffer();
+        bufferBarriers.push_back(bufferBarrier);
+        bufferBarrier.buffer = mScene->GetComponent<scene::CameraManager>()->GetUbo().GetUboBuffer().GetDeviceBuffer().GetBuffer();
+        bufferBarriers.push_back(bufferBarrier);
+        bufferBarrier.buffer = mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformBuffer().GetDeviceBuffer().GetBuffer();
+        bufferBarriers.push_back(bufferBarrier);
+        bufferBarrier.buffer = mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformBuffer().GetBuffer();
+        bufferBarriers.push_back(bufferBarrier);
 
         VkDependencyInfo depInfo{
-            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-            .imageMemoryBarrierCount = (uint32_t)barriers.size(),
-            .pImageMemoryBarriers    = barriers.data(),
+            .sType                    = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags          = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .bufferMemoryBarrierCount = (uint32_t)bufferBarriers.size(),
+            .pBufferMemoryBarriers    = bufferBarriers.data(),
+            .imageMemoryBarrierCount  = (uint32_t)imgBarriers.size(),
+            .pImageMemoryBarriers     = imgBarriers.data(),
         };
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
