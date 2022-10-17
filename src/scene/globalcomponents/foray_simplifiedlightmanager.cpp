@@ -41,7 +41,7 @@ namespace foray::scene {
         cmdBuf.SubmitAndWait();
     }
 
-    void SimplifiedLightManager::Update(const base::FrameRenderInfo& updateInfo)
+    void SimplifiedLightManager::Update(SceneUpdateInfo& updateInfo)
     {
         for(auto pair : mComponentArrayBindings)
         {
@@ -51,12 +51,12 @@ namespace foray::scene {
             component->UpdateStruct(simplifiedlight);
         }
 
-        mBuffer.StageSection(updateInfo.GetFrameNumber(), mSimplifiedlights.data(), 0, sizeof(SimplifiedLight) * mSimplifiedlights.size());
+        mBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), mSimplifiedlights.data(), 0, sizeof(SimplifiedLight) * mSimplifiedlights.size());
 
         util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
                                                      .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
                                                      .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        mBuffer.CmdCopyToDevice(updateInfo.GetFrameNumber(), updateInfo.GetPrimaryCommandBuffer(), beforeAndAfter, beforeAndAfter);
+        mBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer, beforeAndAfter, beforeAndAfter);
     }
 
 }  // namespace foray

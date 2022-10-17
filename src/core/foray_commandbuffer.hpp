@@ -55,6 +55,8 @@ namespace foray::core {
 
         virtual void Destroy() override;
 
+        inline virtual ~HostCommandBuffer() { Destroy(); }
+
       protected:
         Queue   mQueue;
         VkFence mFence = nullptr;

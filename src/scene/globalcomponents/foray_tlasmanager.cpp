@@ -25,9 +25,9 @@ namespace foray::scene {
 
         mTlas.CreateOrUpdate();
     }
-    void TlasManager::Update(const base::FrameRenderInfo& updateInfo)
+    void TlasManager::Update(SceneUpdateInfo& updateInfo)
     {
-        mTlas.UpdateLean(updateInfo.GetPrimaryCommandBuffer(), updateInfo.GetFrameNumber());
+        mTlas.UpdateLean(updateInfo.CmdBuffer, updateInfo.RenderInfo.GetFrameNumber());
     }
 
 }  // namespace foray::scene

@@ -21,8 +21,14 @@ namespace foray::scene {
         MakeComponent<CameraManager>(mContext);
     }
 
-    void Scene::Update(const base::FrameRenderInfo& updateInfo)
+    void Scene::Update(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index)
     {
+        SceneUpdateInfo updateInfo(renderInfo, index);
+        this->InvokeUpdate(updateInfo);
+    }
+    void Scene::Update(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer)
+    {
+        SceneUpdateInfo updateInfo(renderInfo, cmdBuffer);
         this->InvokeUpdate(updateInfo);
     }
     void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)

@@ -32,6 +32,8 @@ namespace foray::base {
         void Create(const core::VkContext* context, uint32_t auxCommandBufferCount = 0);
         void Destroy();
 
+        inline virtual ~InFlightFrame() { Destroy(); }
+
         /// @brief Acquires next swapchain image and stores the resulting index in mSwapchainImageIndex
         /// @return If result is Resized, the swapchain must be resized immediately
         ESwapchainInteractResult AcquireSwapchainImage();
@@ -41,6 +43,8 @@ namespace foray::base {
 
         /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
         void ClearSwapchainImage(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
+        /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
+        void PrepareSwapchainImageForPresent(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
 
         /// @brief Non-blocking check wether the frame has been finished execution
         bool HasFinishedExecution();

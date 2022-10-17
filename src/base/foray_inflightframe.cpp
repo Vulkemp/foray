@@ -13,7 +13,7 @@ namespace foray::base {
         for(int32_t i = 0; i < auxCommandBufferCount; i++)
         {
             std::unique_ptr<core::DeviceCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
-            buf = std::make_unique<core::DeviceCommandBuffer>();
+            buf                                             = std::make_unique<core::DeviceCommandBuffer>();
             buf->Create(mContext);
             buf->SetName(mContext, fmt::format("Auxiliary CommandBuffer #{}", i));
         }
@@ -70,6 +70,43 @@ namespace foray::base {
         }
         return ESwapchainInteractResult::Nominal;
     }
+
+    void InFlightFrame::PrepareSwapchainImageForPresent(CmdBufferIndex index)
+    {
+        VkImage         swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
+        VkCommandBuffer cmdBuffer      = GetCommandBuffer(index);
+
+        VkImageMemoryBarrier2 swapImgMemBarrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
+            .dstStageMask        = VK_PIPELINE_STAGE_2_NONE,
+            .dstAccessMask       = 0,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image               = swapchainImage,
+            .subresourceRange =
+                VkImageSubresourceRange{
+                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel   = 0,
+                    .levelCount     = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount     = 1,
+                },
+        };
+
+        VkDependencyInfo depInfo{
+            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .imageMemoryBarrierCount = 1U,
+            .pImageMemoryBarriers    = &swapImgMemBarrier,
+        };
+
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+    }
+
     ESwapchainInteractResult InFlightFrame::Present()
     {
         VkPresentInfoKHR presentInfo{};

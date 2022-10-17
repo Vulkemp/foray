@@ -43,6 +43,19 @@ namespace foray::scene {
                            &MaterialIndex);
     }
 
+    struct SceneUpdateInfo
+    {
+      public:
+        const base::FrameRenderInfo RenderInfo;
+        VkCommandBuffer             CmdBuffer;
+
+        inline SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index);
+        inline SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer);
+    };
+
+    SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index) : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)) {}
+    SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer) : RenderInfo(renderInfo), CmdBuffer(cmdBuffer) {}
+
     struct SceneDrawInfo
     {
       public:

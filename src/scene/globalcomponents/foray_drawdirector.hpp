@@ -26,7 +26,7 @@ namespace foray::scene {
         void CreateBuffers(size_t transformCount);
         void DestroyBuffers();
 
-        virtual void Update(const base::FrameRenderInfo&) override;
+        virtual void Update(SceneUpdateInfo&) override;
         virtual void Draw(SceneDrawInfo&) override;
 
         /// @brief

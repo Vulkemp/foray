@@ -24,7 +24,7 @@ namespace foray::scene {
         virtual void SelectCamera(Camera* camera);
         virtual ~CameraManager();
 
-        virtual void Update(const base::FrameRenderInfo& updateInfo) override;
+        virtual void Update(SceneUpdateInfo& updateInfo) override;
 
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 

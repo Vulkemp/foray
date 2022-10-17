@@ -73,9 +73,9 @@ namespace foray::scene {
         mPreviousTransformBuffer.Destroy();
     }
 
-    void DrawDirector::Update(const base::FrameRenderInfo& updateInfo)
+    void DrawDirector::Update(SceneUpdateInfo& updateInfo)
     {
-        VkCommandBuffer cmdBuffer = updateInfo.GetPrimaryCommandBuffer();
+        VkCommandBuffer cmdBuffer = updateInfo.CmdBuffer;
 
         VkDeviceSize bufferSize = sizeof(glm::mat4) * mTotalCount;
 
@@ -125,7 +125,7 @@ namespace foray::scene {
             }
         }
 
-        mCurrentTransformBuffer.StageSection(updateInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
+        mCurrentTransformBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
 
         util::DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
                                              .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -134,7 +134,7 @@ namespace foray::scene {
                                             .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
                                             .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
 
-        mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.GetFrameNumber(), cmdBuffer, before, after);
+        mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer, before, after);
     }
 
     void DrawDirector::Draw(SceneDrawInfo& drawInfo)

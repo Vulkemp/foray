@@ -52,7 +52,7 @@ namespace foray::scene {
         }
     }
 
-    void FreeCameraController::Update(const base::FrameRenderInfo& updateInfo)
+    void FreeCameraController::Update(SceneUpdateInfo& updateInfo)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)
@@ -60,7 +60,7 @@ namespace foray::scene {
             return;
         }
 
-        float deltaTime = updateInfo.GetFrameTime();
+        float deltaTime = updateInfo.RenderInfo.GetFrameTime();
         float speed     = exp2f(mSpeedExponent) * deltaTime;
         auto& pos       = camera->GetEyePosition();
         auto& lookAt    = camera->GetLookatPosition();

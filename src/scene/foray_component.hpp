@@ -19,7 +19,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = true;
-            using TArg                          = const base::FrameRenderInfo&;
+            using TArg                          = SceneUpdateInfo&;
 
             /// @brief Invoked first each frame. Use for changes to the node hierarchy and transforms
             inline virtual void Update(TArg updateInfo) = 0;
@@ -36,7 +36,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = false;
-            using TArg = SceneDrawInfo&;
+            using TArg                          = SceneDrawInfo&;
             /// @brief Invoked last each frame. Use to submit draw calls (and related)
             inline virtual void Draw(TArg drawInfo) = 0;
             inline void         Invoke(TArg drawInfo) { Draw(drawInfo); }
@@ -47,7 +47,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = false;
-            using TArg = const Event*;
+            using TArg                          = const Event*;
             /// @brief Invoked with every event received by the application
             inline virtual void OnEvent(TArg event) = 0;
             inline void         Invoke(TArg event) { OnEvent(event); }
@@ -57,7 +57,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = false;
-            using TArg = VkExtent2D;
+            using TArg                          = VkExtent2D;
             /// @brief Invoked when the primary render resolution changes
             inline virtual void OnResized(TArg extent) = 0;
             inline void         Invoke(TArg event) { OnResized(event); }

@@ -12,7 +12,7 @@ namespace foray::scene {
         FORAY_PROPERTY_ALLGET(Animations)
         FORAY_PROPERTY_ALL(PlaybackConfig)
 
-        virtual void Update(const base::FrameRenderInfo&) override;
+        virtual void Update(SceneUpdateInfo&) override;
 
         virtual int32_t GetOrder() const override { return 0; }
 

@@ -18,15 +18,15 @@ namespace foray::scene {
         mUboDescriptorBufferInfo = {mUbo.GetUboBuffer().GetDeviceBuffer().GetVkDescriptorBufferInfo()};
     }
 
-    void CameraManager::Update(const base::FrameRenderInfo& updateInfo)
+    void CameraManager::Update(SceneUpdateInfo& updateInfo)
     {
         if(!!mSelectedCamera)
         {
             mSelectedCamera->UpdateUbo(mUbo.GetData());
-            mUbo.UpdateTo(updateInfo.GetFrameNumber());
+            mUbo.UpdateTo(updateInfo.RenderInfo.GetFrameNumber());
         }
 
-        mUbo.CmdCopyToDevice(updateInfo.GetFrameNumber(), updateInfo.GetPrimaryCommandBuffer());
+        mUbo.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
 
     CameraManager::CameraManager(const core::VkContext* context)

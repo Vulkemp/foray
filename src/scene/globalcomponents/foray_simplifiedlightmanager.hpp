@@ -12,7 +12,7 @@ namespace foray::scene {
       public:
         void CreateOrUpdate();
 
-        virtual void Update(const base::FrameRenderInfo& updateInfo) override;
+        virtual void Update(SceneUpdateInfo& updateInfo) override;
 
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 

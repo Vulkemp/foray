@@ -10,7 +10,7 @@ namespace foray::scene {
       public:
         virtual void OnEvent(const Event* event) override;
 
-        virtual void           Update(const base::FrameRenderInfo&) override;
+        virtual void           Update(SceneUpdateInfo&) override;
         inline virtual int32_t GetOrder() const override { return 0; }
 
       protected:
