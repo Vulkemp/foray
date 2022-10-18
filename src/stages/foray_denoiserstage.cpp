@@ -28,9 +28,23 @@ namespace foray::stages {
         AssertVkResult(vkCreateSemaphore(mContext->Device, &semaphoreCi, nullptr, &mSemaphore));
 
 #ifdef WIN32
+        VkSemaphoreGetWin32HandleInfoKHR getWInfo
+        {
+            .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
+            .semaphore = mSemaphore,
+            .handleType = handleType
+        };
 
+        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device, "vkGetSemaphoreWin32HandleKHR"));
+
+        if(!getHandleFunc)
+        {
+            Exception::Throw("Unable to resolve vkGetMemoryWin32HandleKHR device proc addr!");
+        }
+
+        getHandleFunc(mContext->Device, &getWInfo, &mHandle);
 #else
-        VkSemaphoreGetFdInfoKHR getFdInfo{
+        VkSemaphoreGetFdInfoKHR               getFdInfo{
                           .sType      = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
                           .semaphore  = mSemaphore,
                           .handleType = handleType,
@@ -40,19 +54,24 @@ namespace foray::stages {
 #endif
     }
 
-    void DenoiserSynchronisationSemaphore::Destroy() 
+    void DenoiserSynchronisationSemaphore::Destroy()
     {
 #ifdef WIN32
+        if (mHandle != INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(mHandle);
+            mHandle = INVALID_HANDLE_VALUE;
+        }
 #else
-    if (mHandle != -1)
-    {
-        close(mHandle);
-        mHandle = -1;
-    }
+        if(mHandle != -1)
+        {
+            close(mHandle);
+            mHandle = -1;
+        }
 #endif
-    if (!!mSemaphore)
-    {
-        vkDestroySemaphore(mContext->Device, mSemaphore, nullptr);
+        if(!!mSemaphore)
+        {
+            vkDestroySemaphore(mContext->Device, mSemaphore, nullptr);
+        }
     }
-    }
-}  // namespace foray
+}  // namespace foray::stages
