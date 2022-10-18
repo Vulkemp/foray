@@ -71,25 +71,26 @@ namespace foray::stages {
         std::vector<VkImageMemoryBarrier2> barriers({swapImgMemBarrier, srcImgMemBarrier});
 
         VkDependencyInfo depInfo{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-                                 .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
                                  .imageMemoryBarrierCount = (uint32_t)barriers.size(),
                                  .pImageMemoryBarriers    = barriers.data()};
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
-        VkImageSubresourceLayers layers = {};
-        layers.aspectMask               = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-        layers.mipLevel                 = 0;
-        layers.baseArrayLayer           = 0;
-        layers.layerCount               = 1;
+        VkImageSubresourceLayers layers{
+            .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+            .mipLevel       = 0,
+            .baseArrayLayer = 0,
+            .layerCount     = 1,
+        };
 
-        VkImageBlit blitRegion    = {};
-        blitRegion.srcSubresource = layers;
-        blitRegion.srcOffsets[0]  = {};
-        blitRegion.srcOffsets[1]  = VkOffset3D{.x = (int32_t)mContext->Swapchain.extent.width, .y = (int32_t)mContext->Swapchain.extent.height, .z = 1};
-        blitRegion.dstSubresource = layers;
-        blitRegion.dstOffsets[0]  = {};
-        blitRegion.dstOffsets[1]  = VkOffset3D{.x = (int32_t)mContext->Swapchain.extent.width, .y = (int32_t)mContext->Swapchain.extent.height, .z = 1};
+        VkExtent2D size = mContext->Swapchain.extent;
+
+        VkImageBlit blitRegion{
+            .srcSubresource = layers,
+            .srcOffsets     = {VkOffset3D{}, VkOffset3D{(int32_t)size.width, (int32_t)size.height, 1}},
+            .dstSubresource = layers,
+            .dstOffsets     = {VkOffset3D{}, VkOffset3D{(int32_t)size.width, (int32_t)size.height, 1}},
+        };
 
         vkCmdBlitImage(cmdBuffer, mSourceImage->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, swapImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
                        &blitRegion, VkFilter::VK_FILTER_NEAREST);

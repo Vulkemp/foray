@@ -190,7 +190,7 @@ namespace foray::stages {
                 .dstStageMask        = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT,
                 .dstAccessMask       = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
                 .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .image               = mDepthAttachment.GetImage(),
@@ -243,12 +243,12 @@ namespace foray::stages {
         depthAttachmentDescription.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachmentDescription.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-        depthAttachmentDescription.initialLayout  = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-        depthAttachmentDescription.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depthAttachmentDescription.format         = mDepthAttachment.GetFormat();
 
         // the depth attachment gets the final id (one higher than the highest color attachment id)
-        VkAttachmentReference depthAttachmentReference   = {(uint32_t)colorAttachmentReferences.size(), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        VkAttachmentReference depthAttachmentReference   = {(uint32_t)colorAttachmentReferences.size(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
         attachmentDescriptions[mColorAttachments.size()] = depthAttachmentDescription;
         attachmentViews[mColorAttachments.size()]        = mDepthAttachment.GetImageView();
 
@@ -359,8 +359,8 @@ namespace foray::stages {
             attachmentMemBarrier.image = image->GetImage();
             imgBarriers.push_back(attachmentMemBarrier);
         }
-        attachmentMemBarrier.dstAccessMask               = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
         attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        attachmentMemBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT_KHR | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT_KHR;
         attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
         attachmentMemBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
         attachmentMemBarrier.image                       = mDepthAttachment.GetImage();

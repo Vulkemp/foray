@@ -85,7 +85,7 @@ namespace foray::scene {
         mDescriptorImageInfos.resize(mTextures.size());
         for(size_t i = 0; i < mTextures.size(); i++)
         {
-            mDescriptorImageInfos[i].imageLayout = mTextures[i].Image->GetImageLayout();
+            mDescriptorImageInfos[i].imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             mDescriptorImageInfos[i].imageView   = mTextures[i].Image->GetImageView();
             mDescriptorImageInfos[i].sampler     = mTextures[i].Sampler;
         }
