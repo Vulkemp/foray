@@ -25,6 +25,11 @@
 #include <system_error>
 
 #include <vulkan/vulkan.h>
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <vulkan/vulkan_win32.h>
+#endif
 
 #include "VkBootstrapDispatch.h"
 
