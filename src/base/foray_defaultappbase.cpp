@@ -165,7 +165,7 @@ namespace foray::base {
         // use mailbox if possible, else fallback to fifo
         swapchainBuilder.use_default_present_mode_selection();
         swapchainBuilder.use_default_format_feature_flags();
-        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
+        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
 
         // allow user app to modify swapchain building
         BeforeSwapchainBuilding(swapchainBuilder);
