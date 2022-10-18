@@ -71,10 +71,41 @@ namespace foray::base {
         return ESwapchainInteractResult::Nominal;
     }
 
+    ESwapchainInteractResult InFlightFrame::Present()
+    {
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores    = &mPrimaryCompletedSemaphore;
+
+        VkSwapchainKHR swapChains[] = {mContext->Swapchain};
+        presentInfo.swapchainCount  = 1;
+        presentInfo.pSwapchains     = swapChains;
+
+        presentInfo.pImageIndices = &mSwapchainImageIndex;
+
+        // Present on the present queue
+        VkResult result = vkQueuePresentKHR(mContext->QueueGraphics, &presentInfo);
+
+        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
+        {
+            return ESwapchainInteractResult::Resized;
+        }
+        else
+        {
+            AssertVkResult(result);
+        }
+        return ESwapchainInteractResult::Nominal;
+    }
+
     void InFlightFrame::PrepareSwapchainImageForPresent(CmdBufferIndex index)
     {
-        VkImage         swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
-        VkCommandBuffer cmdBuffer      = GetCommandBuffer(index);
+        PrepareSwapchainImageForPresent(GetCommandBuffer(index));
+    }
+    void InFlightFrame::PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer)
+    {
+        VkImage swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
 
         VkImageMemoryBarrier2 swapImgMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -107,61 +138,45 @@ namespace foray::base {
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
     }
 
-    ESwapchainInteractResult InFlightFrame::Present()
-    {
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores    = &mPrimaryCompletedSemaphore;
-
-        VkSwapchainKHR swapChains[] = {mContext->Swapchain};
-        presentInfo.swapchainCount  = 1;
-        presentInfo.pSwapchains     = swapChains;
-
-        presentInfo.pImageIndices = &mSwapchainImageIndex;
-
-        // Present on the present queue
-        VkResult result = vkQueuePresentKHR(mContext->PresentQueue, &presentInfo);
-
-        if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
-        {
-            return ESwapchainInteractResult::Resized;
-        }
-        else
-        {
-            AssertVkResult(result);
-        }
-        return ESwapchainInteractResult::Nominal;
-    }
-
     void InFlightFrame::ClearSwapchainImage(CmdBufferIndex index)
     {
-        VkImage         swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
-        VkCommandBuffer cmdBuffer      = GetCommandBuffer(index);
+        ClearSwapchainImage(GetCommandBuffer(index));
+    }
+    void InFlightFrame::ClearSwapchainImage(VkCommandBuffer cmdBuffer)
+    {
+        VkImage swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
 
-        VkImageSubresourceRange range{};
-        range.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-        range.baseMipLevel   = 0;
-        range.levelCount     = 1;
-        range.baseArrayLayer = 0;
-        range.layerCount     = 1;
+        VkImageMemoryBarrier2 swapImgMemBarrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .srcAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
+            .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+            .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image               = swapchainImage,
+            .subresourceRange =
+                VkImageSubresourceRange{
+                    .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                    .levelCount = 1,
+                    .layerCount = 1,
+                },
+        };
 
-        VkImageMemoryBarrier barrier{};
-        barrier.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.subresourceRange = range;
+        VkDependencyInfo depInfo{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                                 .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+                                 .imageMemoryBarrierCount = 1U,
+                                 .pImageMemoryBarriers    = &swapImgMemBarrier};
 
-        barrier.srcAccessMask       = 0;
-        barrier.dstAccessMask       = VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        barrier.oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-        barrier.newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        barrier.srcQueueFamilyIndex = mContext->PresentQueue;
-        barrier.dstQueueFamilyIndex = mContext->QueueGraphics;
-        barrier.image               = swapchainImage;
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
-
-        vkCmdPipelineBarrier(cmdBuffer, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, nullptr, 0,
-                             nullptr, 1, &barrier);
+        VkImageSubresourceRange range{
+            .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+            .levelCount = 1,
+            .layerCount = 1,
+        };
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};

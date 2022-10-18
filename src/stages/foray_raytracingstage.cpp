@@ -268,12 +268,12 @@ namespace foray::stages {
     {
         mRenderTargetDescriptorImageInfos.resize(1);
         mRenderTargetDescriptorImageInfos[0].imageView   = mRaytracingRenderTarget.GetImageView();
-        mRenderTargetDescriptorImageInfos[0].imageLayout = mRaytracingRenderTarget.GetImageLayout();
+        mRenderTargetDescriptorImageInfos[0].imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL;
     }
 
     void RaytracingStage::SampledImage::UpdateDescriptorInfos()
     {
-        DescriptorImageInfos = {VkDescriptorImageInfo{.sampler = Sampler, .imageView = Image->GetImageView(), .imageLayout = Image->GetImageLayout()}};  // namespace foray
+        DescriptorImageInfos = {VkDescriptorImageInfo{.sampler = Sampler, .imageView = Image->GetImageView(), .imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}};  // namespace foray
     }
 
     void RaytracingStage::SampledImage::Create(const core::VkContext* context, core::ManagedImage* image, bool initateSampler)

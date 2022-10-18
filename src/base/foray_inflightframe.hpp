@@ -42,7 +42,11 @@ namespace foray::base {
         ESwapchainInteractResult Present();
 
         /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
+        void ClearSwapchainImage(VkCommandBuffer cmdBuffer);
+        /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
         void ClearSwapchainImage(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
+        /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
+        void PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer);
         /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
         void PrepareSwapchainImageForPresent(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
 
