@@ -46,7 +46,7 @@ namespace foray::core {
 
         if(data)
         {
-            MapAndWrite(data);
+            MapAndWrite(data, size);
         }
     }
 
