@@ -165,7 +165,8 @@ namespace foray::base {
         // use mailbox if possible, else fallback to fifo
         swapchainBuilder.use_default_present_mode_selection();
         swapchainBuilder.use_default_format_feature_flags();
-        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
+        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT
+                                                  | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
 
         // allow user app to modify swapchain building
         BeforeSwapchainBuilding(swapchainBuilder);
@@ -183,12 +184,15 @@ namespace foray::base {
         mContext.ContextSwapchain.SwapchainImages.resize(mContext.Swapchain.image_count);
         for(uint32_t i = 0; i < mContext.Swapchain.image_count; i++)
         {
-            mContext.ContextSwapchain.SwapchainImages[i] = core::SwapchainImage{
+            core::SwapchainImage& swapImage = mContext.ContextSwapchain.SwapchainImages[i];
+
+            swapImage = core::SwapchainImage{
+                .Name        = fmt::format("Swapchain image {}", i),
                 .Image       = images.value()[i],
                 .ImageView   = imageviews.value()[i],
                 .ImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
             };
-            SetVulkanObjectName(&mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE, images.value()[i], std::string(fmt::format("Swapchain image {}", i)));
+            SetVulkanObjectName(&mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE, swapImage.Image, swapImage.Name);
         }
     }
 

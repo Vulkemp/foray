@@ -105,31 +105,20 @@ namespace foray::base {
     {
         const core::SwapchainImage& swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex];
 
-        VkImageMemoryBarrier2 swapImgMemBarrier{
-            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-            .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
-            .dstStageMask        = VK_PIPELINE_STAGE_2_NONE,
-            .dstAccessMask       = 0,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image               = swapchainImage,
-            .subresourceRange =
-                VkImageSubresourceRange{
-                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel   = 0,
-                    .levelCount     = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount     = 1,
-                },
+        core::ImageLayoutCache::Barrier2 barrier{
+            .SrcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .SrcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
+            .DstStageMask        = VK_PIPELINE_STAGE_2_NONE,
+            .DstAccessMask       = 0,
+            .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
         };
-        imgLayoutCache.Set(swapchainImage.Name, swapImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+        VkImageMemoryBarrier2 vkBarrier = imgLayoutCache.Set(swapchainImage.Name, swapchainImage.Image, barrier);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
             .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
             .imageMemoryBarrierCount = 1U,
-            .pImageMemoryBarriers    = &swapImgMemBarrier,
+            .pImageMemoryBarriers    = &vkBarrier,
         };
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
@@ -139,28 +128,19 @@ namespace foray::base {
     {
         const core::SwapchainImage& swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex];
 
-        VkImageMemoryBarrier2 swapImgMemBarrier{
-            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-            .srcAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
-            .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-            .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image               = swapchainImage,
-            .subresourceRange =
-                VkImageSubresourceRange{
-                    .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-                    .levelCount = 1,
-                    .layerCount = 1,
-                },
+        core::ImageLayoutCache::Barrier2 barrier{
+            .SrcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .SrcAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
+            .DstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+            .DstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+            .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         };
-        imgLayoutCache.Set(swapchainImage.Name, swapImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        VkImageMemoryBarrier2 vkBarrier = imgLayoutCache.Set(swapchainImage.Name, swapchainImage.Image, barrier);
 
         VkDependencyInfo depInfo{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
                                  .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
                                  .imageMemoryBarrierCount = 1U,
-                                 .pImageMemoryBarriers    = &swapImgMemBarrier};
+                                 .pImageMemoryBarriers    = &vkBarrier};
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 

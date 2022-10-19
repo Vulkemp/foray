@@ -237,31 +237,20 @@ namespace foray::stages {
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
 
-        VkImageMemoryBarrier2 attachmentMemBarrier{
-            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-            .srcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-            .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
-            .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .image = mTargetImage->GetImage(),
-            .subresourceRange =
-                VkImageSubresourceRange{
-                    .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-                    .baseMipLevel   = 0,
-                    .levelCount     = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount     = 1,
-                },
+        core::ImageLayoutCache::Barrier2 barrier{
+            .SrcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            .SrcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+            .DstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .DstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
         };
-        renderInfo.GetImageLayoutCache().Set(mTargetImage, attachmentMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+        VkImageMemoryBarrier2 vkBarrier = renderInfo.GetImageLayoutCache().Set(mTargetImage, barrier);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
             .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
             .imageMemoryBarrierCount = 1U,
-            .pImageMemoryBarriers    = &attachmentMemBarrier,
+            .pImageMemoryBarriers    = &vkBarrier,
         };
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);

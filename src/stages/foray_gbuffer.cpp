@@ -438,6 +438,8 @@ namespace foray::stages {
         mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, bench::BenchmarkTimestamp::END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
 
+        // The GBuffer determines the images layouts
+
         for (std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
         {
             renderInfo.GetImageLayoutCache().Set(image.get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
