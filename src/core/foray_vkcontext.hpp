@@ -1,8 +1,8 @@
 #pragma once
+#include "../foray_vma.hpp"
+#include "../foray_vulkan.hpp"
 #include "../osi/foray_window.hpp"
 #include <vkbootstrap/VkBootstrap.h>
-#include "../foray_vulkan.hpp"
-#include "../foray_vma.hpp"
 
 namespace foray::core {
 
@@ -18,14 +18,17 @@ namespace foray::core {
 
     struct SwapchainImage
     {
+        std::string   Name;
         VkImage       Image;
         VkImageView   ImageView;
         VkImageLayout ImageLayout;
+
+        inline operator VkImage() const { return Image; }
     };
 
     struct SwapchainContext
     {
-        foray::Window                 Window  = {};
+        foray::Window               Window  = {};
         VkSurfaceKHR                Surface = {};
         std::vector<SwapchainImage> SwapchainImages{};
     };
@@ -47,4 +50,4 @@ namespace foray::core {
         bool                DebugEnabled;  // global flag indicating debug is enabled
         vkb::DispatchTable  DispatchTable;
     };
-}  // namespace foray
+}  // namespace foray::core

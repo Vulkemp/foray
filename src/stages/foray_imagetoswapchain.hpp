@@ -8,16 +8,7 @@ namespace foray::stages {
       public:
         ImageToSwapchainStage() = default;
 
-        class PostCopy
-        {
-          public:
-            VkAccessFlags AccessFlags      = 0;
-            VkImageLayout ImageLayout      = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-            uint32_t      QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        };
-
         virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage);
-        virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage, const PostCopy& postcopy);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnResized(const VkExtent2D& extent, core::ManagedImage* newSourceImage);
 
@@ -25,6 +16,5 @@ namespace foray::stages {
 
       protected:
         core::ManagedImage* mSourceImage{};
-        PostCopy            mPostCopy;
     };
 }  // namespace foray::stages

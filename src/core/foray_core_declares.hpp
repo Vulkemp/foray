@@ -10,4 +10,5 @@ namespace foray::core {
     class ManagedBuffer;
     class DescriptorSetHelper;
     class CommandBuffer;
+    class ImageLayoutCache;
 }  // namespace foray::core

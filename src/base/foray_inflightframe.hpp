@@ -1,5 +1,6 @@
 #pragma once
 #include "../core/foray_commandbuffer.hpp"
+#include "../core/foray_core_declares.hpp"
 #include <vector>
 
 namespace foray::base {
@@ -42,13 +43,9 @@ namespace foray::base {
         ESwapchainInteractResult Present();
 
         /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
-        void ClearSwapchainImage(VkCommandBuffer cmdBuffer);
-        /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
-        void ClearSwapchainImage(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
+        void ClearSwapchainImage(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache);
         /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
-        void PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer);
-        /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
-        void PrepareSwapchainImageForPresent(CmdBufferIndex index = PRIMARY_COMMAND_BUFFER);
+        void PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache);
 
         /// @brief Non-blocking check wether the frame has been finished execution
         bool HasFinishedExecution();

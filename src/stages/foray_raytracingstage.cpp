@@ -155,8 +155,6 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
             .dstAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image = mRaytracingRenderTarget.GetImage(),
@@ -169,6 +167,7 @@ namespace foray::stages {
                     .layerCount     = 1,
                 },
         };
+        renderInfo.GetImageLayoutCache().Set(mRaytracingRenderTarget, attachmentMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,

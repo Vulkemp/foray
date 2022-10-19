@@ -1,6 +1,6 @@
+#include "../foray_logger.hpp"
 #include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include "foray_modelconverter.hpp"
-#include "../foray_logger.hpp"
 
 namespace foray::gltf {
     void ModelConverter::BuildGeometryBuffer()
@@ -32,10 +32,12 @@ namespace foray::gltf {
         }
 
         mGeo.InitOrUpdate();
+#ifndef DISABLE_RT_EXTENSIONS
         for(auto& mesh : mIndexBindings.Meshes)
         {
             mesh->BuildAccelerationStructure(mContext, &mGeo);
         }
+#endif
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<scene::Primitive>& outprimitives)

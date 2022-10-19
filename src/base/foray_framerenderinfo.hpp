@@ -1,4 +1,5 @@
 #pragma once
+#include "../core/foray_imagelayoutcache.hpp"
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
 #include "foray_inflightframe.hpp"
@@ -13,6 +14,7 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(FrameNumber)
         FORAY_PROPERTY_ALL(InFlightFrame)
         FORAY_PROPERTY_ALL(FrameObjectsIndex)
+        FORAY_PROPERTY_ALL(ImageLayoutCache)
 
         inline core::DeviceCommandBuffer&       GetAuxCommandBuffer(int32_t index) { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
         inline const core::DeviceCommandBuffer& GetAuxCommandBuffer(int32_t index) const { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
@@ -27,11 +29,12 @@ namespace foray::base {
 
       protected:
         /// @brief Index of in-flight frame synchronisation objects this frame is using
-        uint32_t mFrameObjectsIndex   = 0;
-        double mFrameTime = 0;
+        uint32_t mFrameObjectsIndex = 0;
+        double   mFrameTime         = 0;
         /// @brief Number of complete frames rendered since application startup
         uint64_t mFrameNumber = 0;
 
-        InFlightFrame* mInFlightFrame = nullptr;
+        InFlightFrame*         mInFlightFrame = nullptr;
+        core::ImageLayoutCache mImageLayoutCache;
     };
 }  // namespace foray::base

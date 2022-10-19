@@ -1,13 +1,6 @@
 #include "foray_imagetoswapchain.hpp"
 
 namespace foray::stages {
-    void ImageToSwapchainStage::Init(const core::VkContext* context, core::ManagedImage* sourceImage, const PostCopy& postcopy)
-    {
-        mContext     = context;
-        mSourceImage = sourceImage;
-        mPostCopy    = postcopy;
-    }
-
     void ImageToSwapchainStage::Init(const core::VkContext* context, core::ManagedImage* sourceImage)
     {
         mContext     = context;
@@ -28,7 +21,7 @@ namespace foray::stages {
     {
         uint32_t swapChainImageIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
 
-        VkImage swapImage = mContext->ContextSwapchain.SwapchainImages[swapChainImageIndex].Image;
+        const core::SwapchainImage& swapImage = mContext->ContextSwapchain.SwapchainImages[swapChainImageIndex];
 
         VkImageMemoryBarrier2 swapImgMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -36,8 +29,6 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_BLIT_BIT,
             .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image               = swapImage,
@@ -48,6 +39,7 @@ namespace foray::stages {
                     .layerCount = 1,
                 },
         };
+        renderInfo.GetImageLayoutCache().Set(swapImage.Name, swapImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         VkImageMemoryBarrier2 srcImgMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -55,8 +47,6 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_BLIT_BIT,
             .dstAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image               = mSourceImage->GetImage(),
@@ -67,6 +57,7 @@ namespace foray::stages {
                     .layerCount = 1,
                 },
         };
+        renderInfo.GetImageLayoutCache().Set(mSourceImage, srcImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
         std::vector<VkImageMemoryBarrier2> barriers({swapImgMemBarrier, srcImgMemBarrier});
 

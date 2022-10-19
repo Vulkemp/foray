@@ -243,8 +243,6 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image = mTargetImage->GetImage(),
@@ -257,6 +255,7 @@ namespace foray::stages {
                     .layerCount     = 1,
                 },
         };
+        renderInfo.GetImageLayoutCache().Set(mTargetImage, attachmentMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,

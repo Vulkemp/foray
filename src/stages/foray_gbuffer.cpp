@@ -164,7 +164,7 @@ namespace foray::stages {
                 .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
                 .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
                 .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .subresourceRange =
@@ -228,8 +228,8 @@ namespace foray::stages {
             attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-            attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
+            attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             attachmentDescriptions[i].format         = colorAttachment->GetFormat();
 
             colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
@@ -337,8 +337,8 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_NONE,
             .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED, // We do not care about the contents of all attachments as they're cleared and rewritten completely
+            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .subresourceRange =
@@ -361,7 +361,7 @@ namespace foray::stages {
         }
         attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         attachmentMemBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT_KHR | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT_KHR;
-        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         attachmentMemBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
         attachmentMemBarrier.image                       = mDepthAttachment.GetImage();
         imgBarriers.push_back(attachmentMemBarrier);
@@ -437,6 +437,12 @@ namespace foray::stages {
 #ifdef ENABLE_GBUFFER_BENCH
         mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, bench::BenchmarkTimestamp::END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
+
+        for (std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+        {
+            renderInfo.GetImageLayoutCache().Set(image.get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        }
+        renderInfo.GetImageLayoutCache().Set(mDepthAttachment, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
     void GBufferStage::PreparePipeline()

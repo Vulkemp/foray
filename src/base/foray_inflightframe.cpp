@@ -1,5 +1,7 @@
 #include "foray_inflightframe.hpp"
 #include "../core/foray_vkcontext.hpp"
+#include "../core/foray_imagelayoutcache.hpp"
+
 
 namespace foray::base {
 
@@ -99,13 +101,9 @@ namespace foray::base {
         return ESwapchainInteractResult::Nominal;
     }
 
-    void InFlightFrame::PrepareSwapchainImageForPresent(CmdBufferIndex index)
+    void InFlightFrame::PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache)
     {
-        PrepareSwapchainImageForPresent(GetCommandBuffer(index));
-    }
-    void InFlightFrame::PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer)
-    {
-        VkImage swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
+        const core::SwapchainImage& swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex];
 
         VkImageMemoryBarrier2 swapImgMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -113,8 +111,6 @@ namespace foray::base {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_NONE,
             .dstAccessMask       = 0,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image               = swapchainImage,
@@ -127,6 +123,7 @@ namespace foray::base {
                     .layerCount     = 1,
                 },
         };
+        imgLayoutCache.Set(swapchainImage.Name, swapImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
@@ -138,13 +135,9 @@ namespace foray::base {
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
     }
 
-    void InFlightFrame::ClearSwapchainImage(CmdBufferIndex index)
+    void InFlightFrame::ClearSwapchainImage(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache)
     {
-        ClearSwapchainImage(GetCommandBuffer(index));
-    }
-    void InFlightFrame::ClearSwapchainImage(VkCommandBuffer cmdBuffer)
-    {
-        VkImage swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex].Image;
+        const core::SwapchainImage& swapchainImage = mContext->ContextSwapchain.SwapchainImages[mSwapchainImageIndex];
 
         VkImageMemoryBarrier2 swapImgMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -152,8 +145,6 @@ namespace foray::base {
             .srcAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
             .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
             .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-            .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .image               = swapchainImage,
@@ -164,6 +155,7 @@ namespace foray::base {
                     .layerCount = 1,
                 },
         };
+        imgLayoutCache.Set(swapchainImage.Name, swapImgMemBarrier, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
         VkDependencyInfo depInfo{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
                                  .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
