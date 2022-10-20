@@ -24,6 +24,16 @@ namespace foray::core {
             CreateInfo(std::string name, VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
         };
 
+        struct QuickTransition
+        {
+            VkImageLayout        NewImageLayout{};
+            VkAccessFlags        SrcMask{0};
+            VkAccessFlags        DstMask{0};
+            VkPipelineStageFlags SrcStage{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+            VkPipelineStageFlags DstStage{VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT};
+            VkImageAspectFlags   AspectMask{VK_IMAGE_ASPECT_COLOR_BIT};
+        };
+
         virtual void Create(const VkContext* context, CreateInfo createInfo);
 
         /// @brief Uses stored create info to recreate vulkan image.
@@ -67,6 +77,8 @@ namespace foray::core {
         /// @brief Simple layout transition.
         /// @param newLayout - The new layout for the image.
         virtual void TransitionLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+        virtual void TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
         /// @brief Detailed layout transition.
         virtual void TransitionLayout(LayoutTransitionInfo& transitionInfo);
 

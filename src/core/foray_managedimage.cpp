@@ -156,11 +156,76 @@ namespace foray::core {
             transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
             transitionInfo.DstStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
         }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = 0;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            transitionInfo.BarrierDstAccessMask = 0;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            transitionInfo.BarrierDstAccessMask = 0;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        }
         else
         {
             Exception::Throw("No simple translation for this layout available!");
         }
         transitionInfo.NewImageLayout = newLayout;
+
+        // optional command buffer
+        if(commandBuffer != VK_NULL_HANDLE)
+            transitionInfo.CommandBuffer = commandBuffer;
+
+        TransitionLayout(transitionInfo);
+    }
+
+    void ManagedImage::TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer)
+    {
+        LayoutTransitionInfo transitionInfo;
+        transitionInfo.BarrierSrcAccessMask        = quickTransition.SrcMask;
+        transitionInfo.BarrierDstAccessMask        = quickTransition.DstMask;
+        transitionInfo.SrcStage                    = quickTransition.SrcStage;
+        transitionInfo.DstStage                    = quickTransition.DstStage;
+        transitionInfo.NewImageLayout              = quickTransition.NewImageLayout;
+        transitionInfo.SubresourceRange.aspectMask = quickTransition.AspectMask;
 
         // optional command buffer
         if(commandBuffer != VK_NULL_HANDLE)
