@@ -21,16 +21,17 @@ namespace foray::core {
             std::string             Name{"UnnamedImage"};
 
             CreateInfo();
-            CreateInfo(std::string name, VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
+            CreateInfo(std::string name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
         };
 
         struct QuickTransition
         {
-            VkImageLayout        NewImageLayout{};
-            VkAccessFlags        SrcMask{0};
-            VkAccessFlags        DstMask{0};
-            VkPipelineStageFlags SrcStage{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
-            VkPipelineStageFlags DstStage{VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT};
+            VkPipelineStageFlags SrcStageMask{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
+            VkAccessFlags        SrcAccessMask{0};
+            VkPipelineStageFlags DstStageMask{VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT};
+            VkAccessFlags        DstAccessMask{0};
+            VkImageLayout        OldLayout{VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED};
+            VkImageLayout        NewLayout{VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED};
             VkImageAspectFlags   AspectMask{VK_IMAGE_ASPECT_COLOR_BIT};
         };
 
@@ -49,38 +50,34 @@ namespace foray::core {
                             VkImageAspectFlags       aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT,
                             std::string_view         name          = "UnnamedImage");
 
-        /// @brief When doing a layout transition, specify the transition parameters.
-        struct LayoutTransitionInfo
-        {
-            /// @brief New image layout is mandatory!
-            VkImageLayout                NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
-            std::optional<VkImageLayout> OldImageLayout{};
-            VkAccessFlags                BarrierSrcAccessMask{0};
-            VkAccessFlags                BarrierDstAccessMask{0};
-            VkPipelineStageFlags         SrcStage{};
-            VkPipelineStageFlags         DstStage{};
-            /// @brief If no command buffer is passed, a single time command buffer will be created to transfer the layout.
-            VkCommandBuffer         CommandBuffer{nullptr};
-            uint32_t                SrcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
-            uint32_t                DstQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
-            VkImageSubresourceRange SubresourceRange{
-                .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-                .baseMipLevel   = 0,
-                .levelCount     = 1,
-                .baseArrayLayer = 0,
-                .layerCount     = 1,
-            };
-            /// @brief If the CommandBuffer member is left to nullptr, a single time command buffer is generated with this level.
-            VkCommandBufferLevel CommandBufferLevel{VK_COMMAND_BUFFER_LEVEL_PRIMARY};
-        };
+        // /// @brief When doing a layout transition, specify the transition parameters.
+        // struct LayoutTransitionInfo
+        // {
+        //     /// @brief New image layout is mandatory!
+        //     VkImageLayout                NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
+        //     std::optional<VkImageLayout> OldImageLayout{};
+        //     VkAccessFlags                BarrierSrcAccessMask{0};
+        //     VkAccessFlags                BarrierDstAccessMask{0};
+        //     VkPipelineStageFlags         SrcStage{};
+        //     VkPipelineStageFlags         DstStage{};
+        //     /// @brief If no command buffer is passed, a single time command buffer will be created to transfer the layout.
+        //     VkCommandBuffer         CommandBuffer{nullptr};
+        //     uint32_t                SrcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
+        //     uint32_t                DstQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
+        //     VkImageSubresourceRange SubresourceRange{
+        //         .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+        //         .baseMipLevel   = 0,
+        //         .levelCount     = 1,
+        //         .baseArrayLayer = 0,
+        //         .layerCount     = 1,
+        //     };
+        //     /// @brief If the CommandBuffer member is left to nullptr, a single time command buffer is generated with this level.
+        //     VkCommandBufferLevel CommandBufferLevel{VK_COMMAND_BUFFER_LEVEL_PRIMARY};
+        // };
 
         /// @brief Simple layout transition.
         /// @param newLayout - The new layout for the image.
-        virtual void TransitionLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
         virtual void TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-
-        /// @brief Detailed layout transition.
-        virtual void TransitionLayout(LayoutTransitionInfo& transitionInfo);
 
         /// @brief Creates a staging buffer, writes staging buffer, transitions image layout to transfer destination optimal,
         /// copies staging buffer to device local memory, transforms layout back to layoutAfterWrite parameter.
@@ -102,7 +99,6 @@ namespace foray::core {
 
         FORAY_PROPERTY_CGET(Image)
         FORAY_PROPERTY_CGET(ImageView)
-        FORAY_PROPERTY_CGET(ImageLayout)
         FORAY_PROPERTY_CGET(Allocation)
         FORAY_PROPERTY_CGET(AllocInfo)
         FORAY_PROPERTY_CGET(Format)
@@ -114,16 +110,11 @@ namespace foray::core {
 
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 
-        /// @brief Set layout externally. Use with caution. Can sometimes be necessary if an image layout was changed on the GPU during
-        /// a renderpass.
-        void SetLayoutChanged(VkImageLayout layout) { mImageLayout = layout; }
-
       protected:
         const VkContext*  mContext{};
         CreateInfo        mCreateInfo;
         VkImage           mImage{};
         VkImageView       mImageView{};
-        VkImageLayout     mImageLayout{};
         VkFormat          mFormat{};
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocInfo{};

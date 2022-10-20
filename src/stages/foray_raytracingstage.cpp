@@ -91,7 +91,13 @@ namespace foray::stages {
 
         mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, imageUsageFlags, colorFormat, VK_IMAGE_LAYOUT_UNDEFINED,
                                        VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
-        mRaytracingRenderTarget.TransitionLayout(VK_IMAGE_LAYOUT_GENERAL);
+        core::ManagedImage::QuickTransition transition
+        {
+            .SrcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            .DstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL
+        };
+        mRaytracingRenderTarget.TransitionLayout(transition);
 
         mColorAttachments = {&mRaytracingRenderTarget};
     }

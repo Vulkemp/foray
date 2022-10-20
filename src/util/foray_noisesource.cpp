@@ -8,7 +8,7 @@ namespace foray::util {
     {
         const uint32_t EDGE = 2048u;
 
-        core::ManagedImage::CreateInfo ci("Noise Source", VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+        core::ManagedImage::CreateInfo ci("Noise Source",
                                     VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT, VkFormat::VK_FORMAT_R32_UINT,
                                     VkExtent3D{
                                         .width  = EDGE,

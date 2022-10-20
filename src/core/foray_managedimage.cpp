@@ -34,14 +34,13 @@ namespace foray::core {
         ImageViewCI.subresourceRange.layerCount     = 1;
     }
 
-    ManagedImage::CreateInfo::CreateInfo(std::string name, VkImageLayout initialLayout, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
+    ManagedImage::CreateInfo::CreateInfo(std::string name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
     {
-        ImageCI.initialLayout = initialLayout;
-        ImageCI.usage         = usage;
-        ImageCI.format        = format;
-        ImageViewCI.format    = format;
-        ImageCI.extent        = extent;
-        Name                  = name;
+        ImageCI.usage      = usage;
+        ImageCI.format     = format;
+        ImageViewCI.format = format;
+        ImageCI.extent     = extent;
+        Name               = name;
     }
 
     void ManagedImage::Create(const VkContext* context, CreateInfo createInfo)
@@ -62,8 +61,7 @@ namespace foray::core {
 
         // create image
         AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
-        mImageLayout = createInfo.ImageCI.initialLayout;
-        mSize        = mAllocInfo.size;
+        mSize = mAllocInfo.size;
 
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
@@ -120,159 +118,71 @@ namespace foray::core {
         Create(context, createInfo);
     }
 
-
-    void ManagedImage::TransitionLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer)
-    {
-        LayoutTransitionInfo transitionInfo;
-        if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            transitionInfo.BarrierDstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = 0;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = 0;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = 0;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-            transitionInfo.BarrierDstAccessMask = 0;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            transitionInfo.BarrierDstAccessMask = 0;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        }
-        else if(mImageLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        {
-            transitionInfo.BarrierSrcAccessMask = 0;
-            transitionInfo.BarrierDstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-            transitionInfo.SrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            transitionInfo.DstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else
-        {
-            Exception::Throw("No simple translation for this layout available!");
-        }
-        transitionInfo.NewImageLayout = newLayout;
-
-        // optional command buffer
-        if(commandBuffer != VK_NULL_HANDLE)
-            transitionInfo.CommandBuffer = commandBuffer;
-
-        TransitionLayout(transitionInfo);
-    }
-
     void ManagedImage::TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer)
     {
-        LayoutTransitionInfo transitionInfo;
-        transitionInfo.BarrierSrcAccessMask        = quickTransition.SrcMask;
-        transitionInfo.BarrierDstAccessMask        = quickTransition.DstMask;
-        transitionInfo.SrcStage                    = quickTransition.SrcStage;
-        transitionInfo.DstStage                    = quickTransition.DstStage;
-        transitionInfo.NewImageLayout              = quickTransition.NewImageLayout;
-        transitionInfo.SubresourceRange.aspectMask = quickTransition.AspectMask;
+        VkImageMemoryBarrier barrier{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask       = quickTransition.SrcAccessMask,
+            .dstAccessMask       = quickTransition.DstAccessMask,
+            .oldLayout           = quickTransition.OldLayout,
+            .newLayout           = quickTransition.NewLayout,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image               = mImage,
+            .subresourceRange = VkImageSubresourceRange{.aspectMask = quickTransition.AspectMask, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS}};
 
-        // optional command buffer
-        if(commandBuffer != VK_NULL_HANDLE)
-            transitionInfo.CommandBuffer = commandBuffer;
+        core::HostCommandBuffer hostCmdBuffer;
 
-        TransitionLayout(transitionInfo);
-    }
-
-
-    void ManagedImage::TransitionLayout(LayoutTransitionInfo& transitionInfo)
-    {
-        bool            createTemporaryCommandBuffer = false;
-        VkCommandBuffer commandBuffer;
-        HostCommandBuffer   tempCmdBuffer;
-        if(transitionInfo.CommandBuffer == nullptr)
+        if(!commandBuffer)
         {
-            createTemporaryCommandBuffer = true;
-            tempCmdBuffer.Create(mContext);
-            tempCmdBuffer.Begin();
-            commandBuffer = tempCmdBuffer;
-        }
-        else
-        {
-            commandBuffer = transitionInfo.CommandBuffer;
+            commandBuffer = hostCmdBuffer.Create(mContext);
+            hostCmdBuffer.Begin();
         }
 
-        VkImageMemoryBarrier barrier{};
-        barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        barrier.oldLayout           = transitionInfo.OldImageLayout.has_value() ? transitionInfo.OldImageLayout.value() : mImageLayout;
-        barrier.newLayout           = transitionInfo.NewImageLayout;
-        barrier.srcQueueFamilyIndex = transitionInfo.SrcQueueFamilyIndex;
-        barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;
-        barrier.image               = mImage;
-        barrier.subresourceRange    = transitionInfo.SubresourceRange;
-        barrier.srcAccessMask       = transitionInfo.BarrierSrcAccessMask;
-        barrier.dstAccessMask       = transitionInfo.BarrierDstAccessMask;
+        vkCmdPipelineBarrier(commandBuffer, quickTransition.SrcStageMask, quickTransition.DstStageMask, 0, 0, nullptr, 0, nullptr, 1U, &barrier);
 
-        vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-
-        // update image layout
-        mImageLayout = barrier.newLayout;
-        if(tempCmdBuffer.Exists())
+        if(hostCmdBuffer.Exists())
         {
-            tempCmdBuffer.SubmitAndWait();
-            tempCmdBuffer.Destroy();
+            hostCmdBuffer.SubmitAndWait();
         }
     }
+
+
+    // void ManagedImage::TransitionLayout(LayoutTransitionInfo& transitionInfo)
+    // {
+    //     bool              createTemporaryCommandBuffer = false;
+    //     VkCommandBuffer   commandBuffer;
+    //     HostCommandBuffer tempCmdBuffer;
+    //     if(transitionInfo.CommandBuffer == nullptr)
+    //     {
+    //         createTemporaryCommandBuffer = true;
+    //         tempCmdBuffer.Create(mContext);
+    //         tempCmdBuffer.Begin();
+    //         commandBuffer = tempCmdBuffer;
+    //     }
+    //     else
+    //     {
+    //         commandBuffer = transitionInfo.CommandBuffer;
+    //     }
+    //     VkImageMemoryBarrier barrier{};
+    //     barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    //     barrier.oldLayout           = transitionInfo.OldImageLayout.has_value() ? transitionInfo.OldImageLayout.value() : mImageLayout;
+    //     barrier.newLayout           = transitionInfo.NewImageLayout;
+    //     barrier.srcQueueFamilyIndex = transitionInfo.SrcQueueFamilyIndex;
+    //     barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;
+    //     barrier.image               = mImage;
+    //     barrier.subresourceRange    = transitionInfo.SubresourceRange;
+    //     barrier.srcAccessMask       = transitionInfo.BarrierSrcAccessMask;
+    //     barrier.dstAccessMask       = transitionInfo.BarrierDstAccessMask;
+    //     vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+    //     // update image layout
+    //     mImageLayout = barrier.newLayout;
+    //     if(tempCmdBuffer.Exists())
+    //     {
+    //         tempCmdBuffer.SubmitAndWait();
+    //         tempCmdBuffer.Destroy();
+    //     }
+    // }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
@@ -289,30 +199,25 @@ namespace foray::core {
         cmdBuffer.Begin();
 
         // transform image layout to write dst
-        LayoutTransitionInfo transitionInfo;
-        transitionInfo.CommandBuffer        = cmdBuffer.GetCommandBuffer();
-        transitionInfo.NewImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        transitionInfo.BarrierSrcAccessMask = 0;
-        transitionInfo.BarrierDstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-        transitionInfo.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        transitionInfo.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
 
-        TransitionLayout(transitionInfo);
+        QuickTransition transition{.SrcStageMask  = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                                   .DstStageMask  = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                   .DstAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+                                   .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL};
+        TransitionLayout(transition, cmdBuffer);
 
         // copy staging buffer data into device local memory
         vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.GetBuffer(), mImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
 
         if(layoutAfterWrite)
         {
-            // reset image layout
-            transitionInfo.OldImageLayout       = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            transitionInfo.NewImageLayout       = layoutAfterWrite;
-            transitionInfo.BarrierSrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
-            transitionInfo.BarrierDstAccessMask = 0;
-            transitionInfo.SrcStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT;
-            transitionInfo.DstStage             = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
-            TransitionLayout(transitionInfo);
+            // reset image layout   // reset image layout
+            QuickTransition transition{.SrcStageMask  = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                       .SrcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+                                       .DstStageMask  = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                                       .OldLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                       .NewLayout     = layoutAfterWrite};
+            TransitionLayout(transition, cmdBuffer);
         }
 
         cmdBuffer.SubmitAndWait();
@@ -346,10 +251,9 @@ namespace foray::core {
         {
             vkDestroyImageView(mContext->Device, mImageView, nullptr);
             vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
-            mImage       = nullptr;
-            mAllocation  = nullptr;
-            mAllocInfo   = VmaAllocationInfo{};
-            mImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            mImage      = nullptr;
+            mAllocation = nullptr;
+            mAllocInfo  = VmaAllocationInfo{};
         }
     }
 
