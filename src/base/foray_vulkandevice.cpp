@@ -106,6 +106,7 @@ namespace foray::base {
                         ret.error().message())
 
         mDevice = *ret;
+        mDispatchTable = mDevice.make_table();
     }
     void VulkanDevice::Destroy()
     {

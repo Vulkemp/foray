@@ -28,13 +28,14 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(EnableDefaultDeviceFeatures)
         FORAY_PROPERTY_ALL(PhysicalDevice)
         FORAY_PROPERTY_ALL(Device)
+        FORAY_PROPERTY_ALL(DispatchTable)
 
         /// @brief Create logical device by invoking SelectPhysicalDevice(..,) and BuildDevice()
         /// @remark Will throw std::exception on selection or build failure
         void Create(vkb::Instance& instance, VkSurfaceKHR surface = nullptr);
         /// @brief If mSetDefaultCapabilitiesToDeviceSelector is set, configures defaults. If mBeforePhysicalDeviceSelectFunc is set, invokes it. Finally, selects device.
         /// @remark Will throw std::exception if no selection could be made
-        void        SelectPhysicalDevice(vkb::Instance& instance, VkSurfaceKHR surface = nullptr);
+        void SelectPhysicalDevice(vkb::Instance& instance, VkSurfaceKHR surface = nullptr);
         /// @brief If mEnableDefaultDeviceFeatures is set, configures defaults. If mBeforeDeviceBuildFunc is set, invokes it. Builds device.
         /// @remark Will throw std::exception if building fails
         void        BuildDevice();
@@ -50,10 +51,11 @@ namespace foray::base {
         /// @brief Requires present capability, prefers dedicated devices. Sets minimum version 1.3, enables VK_KHR_ACCELERATION_STRUCTURE, VK_KHR_RAY_TRACING_PIPELINE and VK_KHR_SYNCHRONIZATION_2 extensions (plus extensions those depend on). Enables samplerAnisotropy feature.
         bool mSetDefaultCapabilitiesToDeviceSelector = true;
         /// @brief Enables features listed in mDefaultFeatures member
-        bool mEnableDefaultDeviceFeatures            = true;
+        bool mEnableDefaultDeviceFeatures = true;
 
         vkb::PhysicalDevice mPhysicalDevice;
         vkb::Device         mDevice;
+        vkb::DispatchTable  mDispatchTable;
 
         struct DefaultFeatures
         {
