@@ -1,7 +1,7 @@
 #include "foray_modelconverter.hpp"
-#include "../foray_logger.hpp"
 #include "../core/foray_vkcontext.hpp"
 #include "../foray_glm.hpp"
+#include "../foray_logger.hpp"
 #include "../osi/foray_env.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/components/foray_transform.hpp"
@@ -22,10 +22,11 @@ namespace foray::gltf {
     {
     }
 
-    void ModelConverter::LoadGltfModel(std::string utf8Path, const core::VkContext* context, std::function<int32_t(tinygltf::Model)> sceneSelect)
+    void ModelConverter::LoadGltfModel(std::string utf8Path, const core::VkContext* context, const ModelConverterOptions& options)
     {
         mBenchmark.Begin();
         mContext = context ? context : mScene->GetContext();
+        mOptions = options;
         tinygltf::TinyGLTF gltfContext;
 
         std::string error;
@@ -100,9 +101,9 @@ namespace foray::gltf {
         }
 
 
-        if(sceneSelect)
+        if(!!mOptions.SceneSelect)
         {
-            mGltfScene = &(mGltfModel.scenes[sceneSelect(mGltfModel)]);
+            mGltfScene = &(mGltfModel.scenes[mOptions.SceneSelect(mGltfModel)]);
         }
         else
         {
@@ -211,7 +212,10 @@ namespace foray::gltf {
             {
                 transformMatrix[i / 4][i % 4] = (float)matrix[i];
             }
-            transformMatrix[3][2] = -1.f * transformMatrix[3][2];
+            if(mOptions.FlipY)
+            {
+                transformMatrix[3][2] = -1.f * transformMatrix[3][2];
+            }
 
             // glm::vec3 scale;
             // glm::quat rotation;
@@ -230,7 +234,10 @@ namespace foray::gltf {
             {
                 transformTranslation[i] = (float)translation[i];
             }
-            transformTranslation.y = -1.f * transformTranslation.y;
+            if(mOptions.FlipY)
+            {
+                transformTranslation.y = -1.f * transformTranslation.y;
+            }
         }
         if(rotation.size() > 0)
         {

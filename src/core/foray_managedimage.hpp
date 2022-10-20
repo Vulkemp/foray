@@ -66,7 +66,7 @@ namespace foray::core {
 
         /// @brief Simple layout transition.
         /// @param newLayout - The new layout for the image.
-        virtual void TransitionLayout(VkImageLayout newLayout);
+        virtual void TransitionLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
         /// @brief Detailed layout transition.
         virtual void TransitionLayout(LayoutTransitionInfo& transitionInfo);
 
@@ -101,6 +101,10 @@ namespace foray::core {
         virtual ManagedImage& SetName(std::string_view name) override;
 
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
+
+        /// @brief Set layout externally. Use with caution. Can sometimes be necessary if an image layout was changed on the GPU during
+        /// a renderpass.
+        void SetLayoutChanged(VkImageLayout layout) { mImageLayout = layout; }
 
       protected:
         const VkContext*  mContext{};

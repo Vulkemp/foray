@@ -121,7 +121,7 @@ namespace foray::core {
     }
 
 
-    void ManagedImage::TransitionLayout(VkImageLayout newLayout)
+    void ManagedImage::TransitionLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer)
     {
         LayoutTransitionInfo transitionInfo;
         if(mImageLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
@@ -148,11 +148,24 @@ namespace foray::core {
             transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
             transitionInfo.DstStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         }
+        else if(mImageLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL)
+        {
+            transitionInfo.BarrierSrcAccessMask = 0;
+            transitionInfo.BarrierDstAccessMask = 0;
+
+            transitionInfo.SrcStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+            transitionInfo.DstStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
+        }
         else
         {
             Exception::Throw("No simple translation for this layout available!");
         }
         transitionInfo.NewImageLayout = newLayout;
+
+        // optional command buffer
+        if(commandBuffer != VK_NULL_HANDLE)
+            transitionInfo.CommandBuffer = commandBuffer;
+
         TransitionLayout(transitionInfo);
     }
 

@@ -171,7 +171,6 @@ namespace foray::scene {
             {
                 case EAnimationTargetPath::Translation: {
                     glm::vec3 translation = sampler.SampleVec(mPlaybackConfig.Cursor);
-                    translation.y         = -1.f * translation.y;
                     if(isnanf(translation.x) || isnanf(translation.y) || isnanf(translation.z))
                     {
                         FORAY_THROWFMT("NAN: ({}|{}|{}) \"{}\"", translation.x, translation.y, translation.z, "Translation");
