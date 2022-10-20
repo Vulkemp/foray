@@ -1,8 +1,10 @@
 #pragma once
 #include "../core/foray_vkcontext.hpp"
 #include "../osi/foray_window.hpp"
+#include "../stages/foray_stages_declares.hpp"
 #include "foray_framerenderinfo.hpp"
 #include "foray_minimalappbase.hpp"
+#include <unordered_set>
 #include <vma/vk_mem_alloc.h>
 
 namespace foray::base {
@@ -37,8 +39,8 @@ namespace foray::base {
         virtual void BaseInitCreateVma();
         virtual void BaseInitSyncObjects();
 
-        virtual void        RecreateSwapchain();
-        inline virtual void OnResized(VkExtent2D size) {}
+        virtual void RecreateSwapchain();
+        virtual void OnResized(VkExtent2D size);
 
         virtual void BaseCleanupSwapchain();
         virtual void BaseCleanupVulkan() override;
@@ -54,7 +56,10 @@ namespace foray::base {
 
         void SetWindowDisplayMode(foray::EDisplayMode displayMode);
 
-        virtual void OnShadersRecompiled(){};
+        virtual void OnShadersRecompiled();
+
+        virtual void RegisterRenderStage(stages::RenderStage* stage);
+        virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
         FrameRenderInfo mRenderInfo{};
 
@@ -81,6 +86,8 @@ namespace foray::base {
 
         /// @brief Commandpool for the default queue.
         VkCommandPool mCommandPoolDefault{};
+
+        std::unordered_set<stages::RenderStage*> mRegisteredStages;
 
 #pragma endregion
     };

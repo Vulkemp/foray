@@ -7,11 +7,6 @@ namespace foray::stages {
         mSourceImage = sourceImage;
     }
 
-    void ImageToSwapchainStage::OnResized(const VkExtent2D& extent, core::ManagedImage* newSourceImage)
-    {
-        mSourceImage = newSourceImage;
-    }
-
     void ImageToSwapchainStage::SetTargetImage(core::ManagedImage* newTargetImage)
     {
         mSourceImage = newTargetImage;

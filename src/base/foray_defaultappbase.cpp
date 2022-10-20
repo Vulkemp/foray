@@ -7,6 +7,7 @@
 #include "../foray_vma.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_env.hpp"
+#include "../stages/foray_renderstage.hpp"
 
 namespace foray::base {
     void DefaultAppBase::BaseInit()
@@ -418,6 +419,32 @@ namespace foray::base {
 
     void DefaultAppBase::BasePrepareFrame() {}
     void DefaultAppBase::BaseSubmitFrame() {}
+
+    void DefaultAppBase::OnResized(VkExtent2D size)
+    {
+        for (stages::RenderStage* stage : mRegisteredStages)
+        {
+            stage->OnResized(size);
+        }
+    }
+
+    void DefaultAppBase::OnShadersRecompiled()
+    {
+        for (stages::RenderStage* stage : mRegisteredStages)
+        {
+            stage->OnShadersRecompiled();
+        }
+    }
+
+    void DefaultAppBase::RegisterRenderStage(stages::RenderStage* stage) 
+    {
+        mRegisteredStages.emplace(stage);
+    }
+
+    void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage) 
+    {
+        mRegisteredStages.erase(stage);
+    }
 
     void DefaultAppBase::SetWindowDisplayMode(foray::EDisplayMode displayMode)
     {
