@@ -47,36 +47,6 @@ namespace foray::core {
         Set(image->GetName(), layout);
     }
 
-    void ImageLayoutCache::Set(std::string_view imageName, VkImageMemoryBarrier2& barrier, VkImageLayout newLayout)
-    {
-        barrier.oldLayout = Get(imageName);
-        barrier.newLayout = newLayout;
-        Set(imageName, newLayout);
-    }
-    void ImageLayoutCache::Set(const ManagedImage& image, VkImageMemoryBarrier2& barrier, VkImageLayout newLayout)
-    {
-        barrier.image = image.GetImage(), Set(image.GetName(), barrier, newLayout);
-    }
-    void ImageLayoutCache::Set(const ManagedImage* image, VkImageMemoryBarrier2& barrier, VkImageLayout newLayout)
-    {
-        barrier.image = image->GetImage(), Set(image->GetName(), barrier, newLayout);
-    }
-
-    void ImageLayoutCache::Set(std::string_view imageName, VkImageMemoryBarrier& barrier, VkImageLayout newLayout)
-    {
-        barrier.oldLayout = Get(imageName);
-        barrier.newLayout = newLayout;
-        Set(imageName, newLayout);
-    }
-    void ImageLayoutCache::Set(const ManagedImage& image, VkImageMemoryBarrier& barrier, VkImageLayout newLayout)
-    {
-        barrier.image = image.GetImage(), Set(image.GetName(), barrier, newLayout);
-    }
-    void ImageLayoutCache::Set(const ManagedImage* image, VkImageMemoryBarrier& barrier, VkImageLayout newLayout)
-    {
-        barrier.image = image->GetImage(), Set(image->GetName(), barrier, newLayout);
-    }
-
     VkImageMemoryBarrier ImageLayoutCache::Set(std::string_view name, VkImage image, const Barrier& barrier)
     {
         VkImageLayout oldLayout = Get(name);
