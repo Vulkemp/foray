@@ -58,7 +58,7 @@ namespace foray {
 
         virtual uint32_t SDLId() const;
 
-        virtual VkSurfaceKHR             GetSurfaceKHR(const VkInstance& instance) const;
+        virtual VkSurfaceKHR             GetSurfaceKHR(VkInstance instance) const;
         virtual std::vector<const char*> GetVkSurfaceExtensions() const;
 
         virtual void HandleEvent(const Event* event);

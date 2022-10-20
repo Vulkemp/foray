@@ -1,7 +1,7 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "../foray_vkb.hpp"
 #include <functional>
-#include <vkbootstrap/VkBootstrap.h>
 
 namespace foray::base {
     /// @brief Wraps selection and creation of a vulkan logical device
@@ -14,10 +14,18 @@ namespace foray::base {
         using BeforeDeviceBuildFunctionPointer = std::function<void(vkb::DeviceBuilder&)>;
 
         VulkanDevice() = default;
+        /// @param beforePhysicalDeviceSelectFunc Function called after default configuration and before action with physical device selector
+        /// @param beforeDeviceBuildFunc Function called after default configuration and before action with device builder
+        inline VulkanDevice(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc, BeforeDeviceBuildFunctionPointer beforeDeviceBuildFunc)
+            : mBeforePhysicalDeviceSelectFunc{beforePhysicalDeviceSelectFunc}, mBeforeDeviceBuildFunc{beforeDeviceBuildFunc}
+        {
+        }
 
         inline operator bool() const { return !!mDevice.device; }
         inline operator VkDevice() const { return mDevice.device; }
         inline operator VkPhysicalDevice() const { return mPhysicalDevice.physical_device; }
+        inline operator vkb::Device&() { return mDevice; }
+        inline operator const vkb::Device&() const { return mDevice; }
 
         /// @brief Set the function called after default configuration and before action with physical device selector
         VulkanDevice& SetBeforePhysicalDeviceSelectFunc(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc);
@@ -48,7 +56,7 @@ namespace foray::base {
         BeforePhysicalDeviceSelectFunctionPointer mBeforePhysicalDeviceSelectFunc = nullptr;
         BeforeDeviceBuildFunctionPointer          mBeforeDeviceBuildFunc          = nullptr;
 
-        /// @brief Requires present capability, prefers dedicated devices. Sets minimum version 1.3, enables VK_KHR_ACCELERATION_STRUCTURE, VK_KHR_RAY_TRACING_PIPELINE and VK_KHR_SYNCHRONIZATION_2 extensions (plus extensions those depend on). Enables samplerAnisotropy feature.
+        /// @brief Requires present capability, prefers dedicated devices. Enables VK_KHR_ACCELERATION_STRUCTURE, VK_KHR_RAY_TRACING_PIPELINE and VK_KHR_SYNCHRONIZATION_2 extensions (plus extensions those depend on). Enables samplerAnisotropy feature.
         bool mSetDefaultCapabilitiesToDeviceSelector = true;
         /// @brief Enables features listed in mDefaultFeatures member
         bool mEnableDefaultDeviceFeatures = true;

@@ -131,6 +131,8 @@ namespace foray::base {
         int32_t        mRunResult = 0;
 
         AppFrameTiming mFrameTiming;
+        uint64_t       mRenderedFrameCount = 0;
+
 
         struct FrameTime
         {

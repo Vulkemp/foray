@@ -1,94 +1,76 @@
 #pragma once
 #include "../core/foray_vkcontext.hpp"
+#include "../foray_vma.hpp"
 #include "../osi/foray_window.hpp"
 #include "../stages/foray_stages_declares.hpp"
 #include "foray_framerenderinfo.hpp"
 #include "foray_minimalappbase.hpp"
+#include "foray_renderloop.hpp"
+#include "foray_vulkandevice.hpp"
+#include "foray_vulkaninstance.hpp"
+#include "foray_vulkanwindow.hpp"
 #include <unordered_set>
-#include <vma/vk_mem_alloc.h>
 
 namespace foray::base {
 
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
-    class DefaultAppBase : public MinimalAppBase
+    class DefaultAppBase
     {
       public:
-        DefaultAppBase()          = default;
+        DefaultAppBase();
         virtual ~DefaultAppBase() = default;
 
       protected:
+        inline virtual void ApiBeforeInit() {}
+
+        /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
+        inline virtual void ApiBeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
         /// @brief Alter physical device selection.
-        inline virtual void BeforePhysicalDeviceSelection(vkb::PhysicalDeviceSelector& pds){};
-
+        inline virtual void ApiBeforeDeviceSelection(vkb::PhysicalDeviceSelector& pds) {}
         /// @brief Alter device selection.
-        inline virtual void BeforeDeviceBuilding(vkb::DeviceBuilder& deviceBuilder){};
-
+        inline virtual void ApiBeforeDeviceBuilding(vkb::DeviceBuilder& deviceBuilder) {}
         /// @brief Before building the swapchain
-        inline virtual void BeforeSwapchainBuilding(vkb::SwapchainBuilder& swapchainBuilder){};
+        inline virtual void ApiBeforeSwapchainBuilding(vkb::SwapchainBuilder& swapchainBuilder) {}
+        inline virtual void ApiOnResized(VkExtent2D size) {}
+        inline virtual void ApiRender(FrameRenderInfo& renderInfo) {}
+        inline virtual void ApiQueryResultsAvailable(uint64_t frameIndex) {}
+        inline virtual void ApiOnShadersRecompiled() {}
+        inline virtual void ApiDestroy() {}
 
-        inline virtual void BeforeSyncObjectCreation(uint32_t& inFlightFrameCount, uint32_t& perInFlightFrameCommandBufferCount){};
-
-        /// @brief Base init is heavily overriden by this class, because a complete simple vulkan setup is included.
-        virtual void BaseInit() override;
-
-        virtual void BaseInitSelectPhysicalDevice();
-        virtual void BaseInitBuildDevice();
-        virtual void BaseInitBuildSwapchain();
-        virtual void BaseInitGetVkQueues();
-        virtual void BaseInitCommandPool();
-        virtual void BaseInitCreateVma();
-        virtual void BaseInitSyncObjects();
+        virtual void Init();
+        void         BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder);
+        virtual void InitGetVkQueues();
+        virtual void InitCommandPool();
+        virtual void InitCreateVma();
+        virtual void InitSyncObjects();
 
         virtual void RecreateSwapchain();
-        virtual void OnResized(VkExtent2D size);
 
-        virtual void BaseCleanupSwapchain();
-        virtual void BaseCleanupVulkan() override;
+        virtual bool CanRenderNextFrame();
+        virtual void Render(float delta);
 
-        virtual bool CanRenderNextFrame() override;
-        virtual void Render(float delta) override;
-        virtual void Update(float delta) override;
-
-        virtual void        BasePrepareFrame();
-        inline virtual void RecordCommandBuffer(FrameRenderInfo& renderInfo) {}
-        inline virtual void QueryResultsAvailable(uint64_t frameIndex) {}
-        virtual void        BaseSubmitFrame();
-
-        void SetWindowDisplayMode(foray::EDisplayMode displayMode);
-
-        virtual void OnShadersRecompiled();
+        virtual void Destroy();
 
         virtual void RegisterRenderStage(stages::RenderStage* stage);
         virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
-        FrameRenderInfo mRenderInfo{};
+        RenderLoop     mRenderLoop;
+        OsManager      mOsManager;
+        VulkanInstance mInstance;
+        VulkanDevice   mDevice;
+        VulkanWindow   mWindow;
 
-#pragma region Vulkan
         /// @brief The applications vulkan context.
         core::VkContext mContext;
         uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_3;
 
-
-        uint32_t                                    mInFlightFrameCount          = 0;
-        uint32_t                                    mAuxiliaryCommandBufferCount = 0;
-        std::vector<std::unique_ptr<InFlightFrame>> mFrames{};
-        uint32_t                                    mCurrentFrameIndex  = 0;
-        uint64_t                                    mRenderedFrameCount = 0;
-
-        struct DeviceFeatures
-        {
-            VkPhysicalDeviceBufferDeviceAddressFeatures      BufferDeviceAdressFeatures;
-            VkPhysicalDeviceRayTracingPipelineFeaturesKHR    RayTracingPipelineFeatures;
-            VkPhysicalDeviceAccelerationStructureFeaturesKHR AccelerationStructureFeatures;
-            VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures;
-            VkPhysicalDeviceSynchronization2Features         Sync2FEatures;
-        } mDeviceFeatures = {};
+        uint32_t                                        mAuxiliaryCommandBufferCount = 0;
+        std::array<InFlightFrame, INFLIGHT_FRAME_COUNT> mInFlightFrames;
+        uint32_t                                        mInFlightFrameIndex = 0;
 
         /// @brief Commandpool for the default queue.
-        VkCommandPool mCommandPoolDefault{};
+        VkCommandPool mCommandPool{};
 
         std::unordered_set<stages::RenderStage*> mRegisteredStages;
-
-#pragma endregion
     };
 }  // namespace foray::base

@@ -31,9 +31,6 @@ namespace foray::base {
             // Prefer dedicated devices
             deviceSelector.prefer_gpu_device_type();
 
-            // Set minimum version to 1.3 (for Sync2 core support)
-            deviceSelector.set_minimum_version(1u, 3u);
-
             // Set raytracing extensions
             std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
                                                         VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
@@ -115,6 +112,7 @@ namespace foray::base {
             vkb::destroy_device(mDevice);
             mDevice = vkb::Device();
         }
+        mDispatchTable = vkb::DispatchTable();
         mPhysicalDevice = vkb::PhysicalDevice();
     }
 

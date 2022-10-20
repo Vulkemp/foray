@@ -2,7 +2,7 @@
 #include "../foray_vma.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_window.hpp"
-#include <vkbootstrap/VkBootstrap.h>
+#include "../foray_vkb.hpp"
 
 namespace foray::core {
 

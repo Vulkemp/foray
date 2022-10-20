@@ -132,7 +132,7 @@ namespace foray {
         return 0;
     }
 
-    VkSurfaceKHR Window::GetSurfaceKHR(const VkInstance& instance) const
+    VkSurfaceKHR Window::GetSurfaceKHR(VkInstance instance) const
     {
         if(!Exists())
         {

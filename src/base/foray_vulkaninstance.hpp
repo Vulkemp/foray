@@ -1,7 +1,7 @@
 #pragma once
 #include "../foray_basics.hpp"
 #include <functional>
-#include <vkbootstrap/VkBootstrap.h>
+#include "../foray_vkb.hpp"
 
 namespace foray::base {
     /// @brief Wraps creation and lifetime of a vulkan instance. Includes default debug callback logging setup.
@@ -14,7 +14,7 @@ namespace foray::base {
         VulkanInstance() = default;
         /// @param beforeInstanceBuildFunc Function called after default callback configuration and before action of the instance builder
         /// @param enableDebugLayersAndCallbacks If true, validation layers are enabled, and if mDebugCallbackFunc isn't null sets debug layers callback
-        inline explicit VulkanInstance(BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc, bool enableDebugLayersAndCallbacks)
+        inline VulkanInstance(BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc, bool enableDebugLayersAndCallbacks)
             : mBeforeInstanceBuildFunc{beforeInstanceBuildFunc}, mEnableDebugLayersAndCallbacks{enableDebugLayersAndCallbacks}
         {
         }

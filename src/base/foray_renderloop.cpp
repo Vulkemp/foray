@@ -86,6 +86,7 @@ namespace foray::base {
                         if(!!mRenderFunc)
                         {
                             mRenderFunc(frameTime.Delta);
+                            mRenderedFrameCount++;
                         }
                     }
                 }
