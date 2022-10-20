@@ -86,8 +86,8 @@ namespace foray::core {
                                     .dstAccessMask       = barrier.DstAccessMask,
                                     .oldLayout           = oldLayout,
                                     .newLayout           = barrier.NewLayout,
-                                    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                    .srcQueueFamilyIndex = barrier.SrcQueueFamilyIndex,
+                                    .dstQueueFamilyIndex = barrier.DstQueueFamilyIndex,
                                     .image               = image,
                                     .subresourceRange    = barrier.SubresourceRange};
     }
@@ -113,8 +113,8 @@ namespace foray::core {
                                      .dstAccessMask       = barrier.DstAccessMask,
                                      .oldLayout           = oldLayout,
                                      .newLayout           = barrier.NewLayout,
-                                     .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                     .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                     .srcQueueFamilyIndex = barrier.SrcQueueFamilyIndex,
+                                     .dstQueueFamilyIndex = barrier.DstQueueFamilyIndex,
                                      .image               = image,
                                      .subresourceRange    = barrier.SubresourceRange};
     }
@@ -129,5 +129,56 @@ namespace foray::core {
         return Set(image.GetName(), image.GetImage(), barrier);
     }
 
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
+                                      std::string_view     name,
+                                      VkImage              image,
+                                      const Barrier&       barrier,
+                                      VkPipelineStageFlags srcStageMask,
+                                      VkPipelineStageFlags dstStageMask,
+                                      VkDependencyFlags    depFlags)
+    {
+        VkImageMemoryBarrier vkBarrier = Set(name, image, barrier);
+        vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
+                                      const ManagedImage*  image,
+                                      const Barrier&       barrier,
+                                      VkPipelineStageFlags srcStageMask,
+                                      VkPipelineStageFlags dstStageMask,
+                                      VkDependencyFlags    depFlags)
+    {
+        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
+        vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
+                                      const ManagedImage&  image,
+                                      const Barrier&       barrier,
+                                      VkPipelineStageFlags srcStageMask,
+                                      VkPipelineStageFlags dstStageMask,
+                                      VkDependencyFlags    depFlags)
+    {
+        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
+        vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, std::string_view name, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    {
+        VkImageMemoryBarrier2 vkBarrier = Set(name, image, barrier);
+        VkDependencyInfo      depInfo
+        {
+            .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags = depFlags,
+            .imageMemoryBarrierCount = 1U,
+            .pImageMemoryBarriers = &vkBarrier
+        };
+        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage* image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    {
+        CmdBarrier(cmdBuffer, image->GetName(), image->GetImage(), barrier, depFlags);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage& image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    {
+        CmdBarrier(cmdBuffer, image.GetName(), image.GetImage(), barrier, depFlags);
+    }
 
 }  // namespace foray::core

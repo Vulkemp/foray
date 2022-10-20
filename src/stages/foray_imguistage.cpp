@@ -244,16 +244,7 @@ namespace foray::stages {
             .DstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
             .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
         };
-        VkImageMemoryBarrier2 vkBarrier = renderInfo.GetImageLayoutCache().Set(mTargetImage, barrier);
-
-        VkDependencyInfo depInfo{
-            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-            .imageMemoryBarrierCount = 1U,
-            .pImageMemoryBarriers    = &vkBarrier,
-        };
-
-        vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+        renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, mTargetImage, barrier);
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 

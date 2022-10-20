@@ -30,7 +30,7 @@ namespace foray::stages {
                                                            .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL};
 
         core::ImageLayoutCache::Barrier2 srcImgMemBarrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                          .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                          .SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                           .DstStageMask  = VK_PIPELINE_STAGE_2_BLIT_BIT,
                                                           .DstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT,
                                                           .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL};
