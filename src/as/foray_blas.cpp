@@ -1,9 +1,9 @@
 #include "foray_blas.hpp"
 #include "../bench/foray_hostbenchmark.hpp"
 #include "../core/foray_commandbuffer.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include "../scene/foray_geo.hpp"
 #include "../scene/foray_mesh.hpp"
+#include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include <algorithm>
 
 namespace foray::as {
@@ -32,6 +32,12 @@ namespace foray::as {
         if(!!benchmark)
         {
             benchmark->LogTimestamp("Reset");
+        }
+
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
+        {
+            VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &asProperties};
+            vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice, &prop2);
         }
 
         // STEP #1    Build geometries (1 primitve = 1 geometry)
@@ -109,9 +115,11 @@ namespace foray::as {
         }
 
         core::ManagedBuffer scratchBuffer;
-        std::string   scratchName = fmt::format("{} scratch", name);
-        scratchBuffer.Create(context, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
+        std::string         scratchName = fmt::format("{} scratch", name);
+        core::ManagedBuffer::ManagedBufferCreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
                              VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
+        ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
+        scratchBuffer.Create(context, ci);
         buildGeometryInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
 
         if(!!benchmark)
@@ -182,4 +190,4 @@ namespace foray::as {
         }
         mBlasAddress = 0;
     }
-}  // namespace foray
+}  // namespace foray::as

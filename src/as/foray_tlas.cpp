@@ -102,6 +102,11 @@ namespace foray::as {
         // STEP #0   Reset state
         bool rebuild = mAccelerationStructure != nullptr;
 
+        VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
+        {
+            VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &asProperties};
+            vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice, &prop2);
+        }
 
         // STEP #1   Rebuild meta buffer, get and assign buffer offsets
         std::unordered_set<const Blas*> usedBlas;  // used to reconstruct the meta info buffer
@@ -205,8 +210,10 @@ namespace foray::as {
         if(sizeInfo.buildScratchSize > mScratchBuffer.GetSize())
         {
             mScratchBuffer.Destroy();
-            mScratchBuffer.Create(mContext, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
-                                  VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
+            core::ManagedBuffer::ManagedBufferCreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
+                                                            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
+            ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
+            mScratchBuffer.Create(mContext, ci);
         }
         buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
 
@@ -218,11 +225,11 @@ namespace foray::as {
 
         // copy previously staged instance data
         util::DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-                                             .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                             .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
+                                                   .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                   .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         util::DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR,
-                                            .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                            .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
+                                                  .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                                                  .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
 
         mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer, before, after);
 
@@ -280,8 +287,8 @@ namespace foray::as {
 
         // copy previously staged instance data
         util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
-                                                     .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                                     .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
+                                                           .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                                                           .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         mInstanceBuffer.CmdCopyToDevice(frameIndex, cmdBuffer, beforeAndAfter, beforeAndAfter);
 
         // STEP #3 Rebuild/Update TLAS
@@ -342,4 +349,4 @@ namespace foray::as {
         }
         mTlasAddress = 0;
     }
-}  // namespace foray
+}  // namespace foray::as
