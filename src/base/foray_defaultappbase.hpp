@@ -8,6 +8,7 @@
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindow.hpp"
 #include <unordered_set>
+#include <array>
 
 namespace foray::base {
 

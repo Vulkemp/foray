@@ -9,6 +9,7 @@
 #include <vulkan/vulkan_win32.h>
 #undef max // Windows headers included hide std::max
 #undef min // Windows headers included hide std::max
+#undef CreateWindow //
 #endif
 
 namespace foray {

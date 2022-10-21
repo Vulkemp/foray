@@ -35,14 +35,15 @@ namespace foray::stages {
             .handleType = handleType
         };
 
-        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device, "vkGetSemaphoreWin32HandleKHR"));
+        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device(), "vkGetSemaphoreWin32HandleKH"
+                                                                                                                                                    "R"));
 
         if(!getHandleFunc)
         {
             Exception::Throw("Unable to resolve vkGetMemoryWin32HandleKHR device proc addr!");
         }
 
-        getHandleFunc(mContext->Device, &getWInfo, &mHandle);
+        getHandleFunc(mContext->Device(), &getWInfo, &mHandle);
 #else
         VkSemaphoreGetFdInfoKHR               getFdInfo{
                           .sType      = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
