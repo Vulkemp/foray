@@ -34,6 +34,7 @@ namespace foray::stages {
         core::ManagedImage*               PrimaryInput = nullptr;
         core::ManagedImage*               AlbedoInput  = nullptr;
         core::ManagedImage*               NormalInput  = nullptr;
+        core::ManagedImage*               MotionInput  = nullptr;
         std::vector<core::ManagedImage*>  AuxiliaryInputs;
         core::ManagedImage*               PrimaryOutput = nullptr;
         void*                             AuxiliaryData = nullptr;
@@ -41,8 +42,8 @@ namespace foray::stages {
 
         inline DenoiserConfig() {}
         inline DenoiserConfig(
-            core::ManagedImage* primaryIn, core::ManagedImage* albedoIn, core::ManagedImage* normalIn, core::ManagedImage* primaryOut, DenoiserSynchronisationSemaphore& semaphore)
-            : PrimaryInput(primaryIn), AlbedoInput(albedoIn), NormalInput(normalIn), PrimaryOutput(primaryOut), Semaphore(&semaphore)
+            core::ManagedImage* primaryIn, core::ManagedImage* primaryOut)
+            : PrimaryInput(primaryIn), PrimaryOutput(primaryOut)
         {
         }
     };
