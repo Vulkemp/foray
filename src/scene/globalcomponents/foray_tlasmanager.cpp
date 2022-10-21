@@ -4,7 +4,7 @@
 #include <unordered_set>
 
 namespace foray::scene {
-    TlasManager::TlasManager(const core::VkContext* context) : mTlas(context) {}
+    TlasManager::TlasManager(core::Context* context) : mTlas(context) {}
 
     void TlasManager::CreateOrUpdate()
     {

@@ -1,7 +1,7 @@
 #include "foray_imagetoswapchain.hpp"
 
 namespace foray::stages {
-    void ImageToSwapchainStage::Init(const core::VkContext* context, core::ManagedImage* sourceImage)
+    void ImageToSwapchainStage::Init(core::Context* context, core::ManagedImage* sourceImage)
     {
         mContext     = context;
         mSourceImage = sourceImage;
@@ -16,7 +16,7 @@ namespace foray::stages {
     {
         uint32_t swapChainImageIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
 
-        const core::SwapchainImage& swapImage = mContext->ContextSwapchain.SwapchainImages[swapChainImageIndex];
+        const core::SwapchainImageInfo& swapImage = mContext->SwapchainImages[swapChainImageIndex];
 
         core::ImageLayoutCache::Barrier2 swapImgMemBarrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                            .SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
@@ -47,7 +47,7 @@ namespace foray::stages {
             .layerCount     = 1,
         };
 
-        VkExtent2D size = mContext->Swapchain.extent;
+        VkExtent2D size = mContext->GetSwapchainSize();
 
         VkImageBlit blitRegion{
             .srcSubresource = layers,

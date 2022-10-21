@@ -18,7 +18,7 @@ namespace foray::scene {
       public:
         friend Node;
 
-        explicit Scene(const core::VkContext* context);
+        explicit Scene(core::Context* context);
 
         /// @brief Generates a new node and attaches it to the parent if it is set, root otherwise
         Node* MakeNode(Node* parent = nullptr);
@@ -46,7 +46,7 @@ namespace foray::scene {
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
 
       protected:
-        const core::VkContext* mContext;
+        core::Context* mContext;
         /// @brief Buffer holding ownership of all nodes
         /// @remark Holds unique ptrs to be able to preserve pointers if the buffer is changed or moved. These pointers may be null-equivalent.
         std::vector<std::unique_ptr<Node>> mNodeBuffer;

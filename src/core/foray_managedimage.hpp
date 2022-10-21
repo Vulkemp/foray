@@ -3,7 +3,7 @@
 #include "../foray_vulkan.hpp"
 #include "foray_commandbuffer.hpp"
 #include "foray_deviceresource.hpp"
-#include "foray_vkcontext.hpp"
+#include "foray_context.hpp"
 #include <optional>
 
 namespace foray::core {
@@ -35,12 +35,12 @@ namespace foray::core {
             VkImageAspectFlags   AspectMask{VK_IMAGE_ASPECT_COLOR_BIT};
         };
 
-        virtual void Create(const VkContext* context, CreateInfo createInfo);
+        virtual void Create(Context* context, CreateInfo createInfo);
 
         /// @brief Uses stored create info to recreate vulkan image.
         virtual void Recreate();
 
-        virtual void Create(const VkContext*         context,
+        virtual void Create(Context*         context,
                             VmaMemoryUsage           memoryUsage,
                             VmaAllocationCreateFlags flags,
                             VkExtent3D               extent,
@@ -111,7 +111,7 @@ namespace foray::core {
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 
       protected:
-        const VkContext*  mContext{};
+        Context*  mContext{};
         CreateInfo        mCreateInfo;
         VkImage           mImage{};
         VkImageView       mImageView{};

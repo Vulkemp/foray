@@ -43,7 +43,7 @@ namespace foray::core {
         Name               = name;
     }
 
-    void ManagedImage::Create(const VkContext* context, CreateInfo createInfo)
+    void ManagedImage::Create(Context* context, CreateInfo createInfo)
     {
         if(mContext == nullptr)
         {
@@ -65,13 +65,15 @@ namespace foray::core {
 
         // update image in image view create info
         createInfo.ImageViewCI.image = mImage;
-        AssertVkResult(vkCreateImageView(mContext->Device, &createInfo.ImageViewCI, nullptr, &mImageView));
+        AssertVkResult(mContext->VkbDispatchTable->createImageView(&createInfo.ImageViewCI, nullptr, &mImageView));
 
+#if FORAY_DEBUG
         // attach debug information to iamge
-        if(mName.size() && mContext->DebugEnabled)
+        if(mName.size())
         {
             UpdateDebugNames();
         }
+#endif
     }
 
     void ManagedImage::Recreate()
@@ -80,7 +82,7 @@ namespace foray::core {
         Create(mContext, mCreateInfo);
     }
 
-    void ManagedImage::Create(const VkContext*         context,
+    void ManagedImage::Create(Context*                 context,
                               VmaMemoryUsage           memoryUsage,
                               VmaAllocationCreateFlags flags,
                               VkExtent3D               extent,
@@ -249,7 +251,7 @@ namespace foray::core {
     {
         if(mAllocation)
         {
-            vkDestroyImageView(mContext->Device, mImageView, nullptr);
+            mContext->VkbDispatchTable->destroyImageView(mImageView, nullptr);
             vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
             mImage      = nullptr;
             mAllocation = nullptr;
@@ -261,17 +263,19 @@ namespace foray::core {
     {
         VkImageFormatProperties props{};
         // check if image format together with required flags and usage is supported.
-        AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice, createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
+        AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice(), createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
                                                                 createInfo.ImageCI.usage, createInfo.ImageCI.flags, &props));
     }
 
     ManagedImage& ManagedImage::SetName(std::string_view name)
     {
         mName = name;
-        if(mAllocation && mContext->DebugEnabled)
+#if FORAY_DEBUG
+        if(mAllocation)
         {
             UpdateDebugNames();
         }
+#endif
         return *this;
     }
 
@@ -284,7 +288,7 @@ namespace foray::core {
                                                    .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE,
                                                    .objectHandle = reinterpret_cast<uint64_t>(mImage),
                                                    .pObjectName  = debugName.c_str()};
-            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+            mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
             vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         }
         {  // Image View
@@ -294,7 +298,7 @@ namespace foray::core {
                                                    .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW,
                                                    .objectHandle = reinterpret_cast<uint64_t>(mImageView),
                                                    .pObjectName  = debugName.c_str()};
-            mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+            mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
         }
     }
 

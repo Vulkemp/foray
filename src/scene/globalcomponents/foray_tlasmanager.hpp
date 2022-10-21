@@ -9,7 +9,7 @@ namespace foray::scene {
     class TlasManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
-        explicit TlasManager(const core::VkContext* context);
+        explicit TlasManager(core::Context* context);
 
         void CreateOrUpdate();
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "foray_deviceresource.hpp"
-#include "foray_vkcontext.hpp"
+#include "foray_context.hpp"
 #include <unordered_map>
 
 /// Explanation of vulkan descriptor sets:
@@ -82,10 +82,10 @@ namespace foray::core {
         /// @param context - The vulkan context.
         /// @param numSets - If num sets is -1, the number of sets will be automatically determined by all given descriptor infos,
         /// @return The descriptor set layout of the created descriptor sets.
-        VkDescriptorSetLayout Create(const VkContext* context, int32_t numSets = -1, std::string name = "Unnamed descriptor set");
-        VkDescriptorSetLayout Create(const VkContext* context, std::string name = "Unnamed descriptor set");
+        VkDescriptorSetLayout Create(Context* context, int32_t numSets = -1, std::string name = "Unnamed descriptor set");
+        VkDescriptorSetLayout Create(Context* context, std::string name = "Unnamed descriptor set");
 
-        void Update(const VkContext* context);
+        void Update(Context* context);
 
         void Destroy() override;
         bool Exists() const override { return mDescriptorSets.size(); }
@@ -98,7 +98,7 @@ namespace foray::core {
       protected:
         std::unordered_map<uint32_t, std::shared_ptr<DescriptorInfo>> mDescriptorLocations;
 
-        const VkContext*             mContext{};
+        Context*             mContext{};
         VkDescriptorPool             mDescriptorPool{};
         VkDescriptorSetLayout        mDescriptorSetLayout{};
         std::vector<VkDescriptorSet> mDescriptorSets;

@@ -8,7 +8,7 @@ namespace foray::core {
         mHighestSetCount              = std::max(mHighestSetCount, descriptorSetInfo->mImageInfos.size());
     }
 
-    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, int32_t numSets, std::string name)
+    VkDescriptorSetLayout DescriptorSetHelper::Create(Context* context, int32_t numSets, std::string name)
     {
         // set name for debugging
         mName = name;
@@ -39,7 +39,7 @@ namespace foray::core {
         layoutInfo.bindingCount = mDescriptorLocations.size();
         layoutInfo.pBindings    = layoutBindings.data();
 
-        AssertVkResult(vkCreateDescriptorSetLayout(context->Device, &layoutInfo, nullptr, &mDescriptorSetLayout));
+        AssertVkResult(vkCreateDescriptorSetLayout(context->Device(), &layoutInfo, nullptr, &mDescriptorSetLayout));
 
         // --------------------------------------------------------------------------------------------
         // define which descriptors need to be allocated from a descriptor pool, based on the created
@@ -66,7 +66,7 @@ namespace foray::core {
         poolInfo.pPoolSizes    = poolSizes.data();
         poolInfo.maxSets       = static_cast<uint32_t>(numSets);
 
-        AssertVkResult(vkCreateDescriptorPool(context->Device, &poolInfo, nullptr, &mDescriptorPool));
+        AssertVkResult(vkCreateDescriptorPool(context->Device(), &poolInfo, nullptr, &mDescriptorPool));
 
         // --------------------------------------------------------------------------------------------
         // allocate descriptor sets by their layout
@@ -79,7 +79,7 @@ namespace foray::core {
         descriptorSetAllocInfo.pSetLayouts        = layouts.data();
 
         mDescriptorSets.resize(numSets);
-        AssertVkResult(vkAllocateDescriptorSets(context->Device, &descriptorSetAllocInfo, mDescriptorSets.data()));
+        AssertVkResult(vkAllocateDescriptorSets(context->Device(), &descriptorSetAllocInfo, mDescriptorSets.data()));
 
 
         // --------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ namespace foray::core {
         return mDescriptorSetLayout;
     }
 
-    void DescriptorSetHelper::Update(const VkContext* context)
+    void DescriptorSetHelper::Update(Context* context)
     {
         std::vector<VkWriteDescriptorSet> descriptorWrites;
 
@@ -143,10 +143,10 @@ namespace foray::core {
                 }
             }
         }
-        vkUpdateDescriptorSets(context->Device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(context->Device(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
-    VkDescriptorSetLayout DescriptorSetHelper::Create(const VkContext* context, std::string name)
+    VkDescriptorSetLayout DescriptorSetHelper::Create(Context* context, std::string name)
     {
         return Create(context, -1, name);
     }
@@ -155,12 +155,12 @@ namespace foray::core {
     {
         if(mDescriptorSetLayout)
         {
-            vkDestroyDescriptorSetLayout(mContext->Device, mDescriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(mContext->Device(), mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = nullptr;
         }
         if(mDescriptorPool)
         {
-            vkDestroyDescriptorPool(mContext->Device, mDescriptorPool, nullptr);
+            vkDestroyDescriptorPool(mContext->Device(), mDescriptorPool, nullptr);
             mDescriptorPool = nullptr;
         }
         mDescriptorSets.resize(0);

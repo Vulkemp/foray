@@ -1,12 +1,12 @@
 #include "foray_devicebenchmark.hpp"
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 
 namespace foray::bench {
-    void DeviceBenchmark::Create(const core::VkContext* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets)
+    void DeviceBenchmark::Create(core::Context* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets)
     {
         mContext = context;
 
-        mTimestampPeriod = (fp64_t)mContext->PhysicalDevice.properties.limits.timestampPeriod;
+        mTimestampPeriod = (fp64_t)mContext->VkbPhysicalDevice->properties.limits.timestampPeriod;
 
         std::vector<const char*> test(queryNames);
         mQueryNames = queryNames;
@@ -28,17 +28,17 @@ namespace foray::bench {
                                          .queryCount         = static_cast<uint32_t>(mQueryNames.size()),
                                          .pipelineStatistics = 0};
 
-            vkCreateQueryPool(mContext->Device, &poolCi, nullptr, &pool);
+            mContext->VkbDispatchTable->createQueryPool(&poolCi, nullptr, &pool);
         }
     }
 
     void DeviceBenchmark::CmdResetQuery(VkCommandBuffer cmdBuffer, uint64_t frameIndex)
     {
-        vkCmdResetQueryPool(cmdBuffer, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size());
+        mContext->VkbDispatchTable->cmdResetQueryPool(cmdBuffer, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size());
     }
     void DeviceBenchmark::CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit)
     {
-        vkCmdWriteTimestamp(cmdBuffer, stageFlagBit, mQueryPools[frameIndex % mQueryPools.size()], mQueryIds[name]);
+        mContext->VkbDispatchTable->cmdWriteTimestamp(cmdBuffer, stageFlagBit, mQueryPools[frameIndex % mQueryPools.size()], mQueryIds[name]);
     }
 
     struct QueryResult
@@ -50,7 +50,7 @@ namespace foray::bench {
     bool DeviceBenchmark::LogQueryResults(uint64_t frameIndex)
     {
         std::vector<QueryResult> results(mQueryNames.size());
-        vkGetQueryPoolResults(mContext->Device, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size(), sizeof(QueryResult) * results.size(), results.data(),
+        mContext->VkbDispatchTable->getQueryPoolResults(mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size(), sizeof(QueryResult) * results.size(), results.data(),
                               sizeof(QueryResult), VkQueryResultFlagBits::VK_QUERY_RESULT_64_BIT | VkQueryResultFlagBits::VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
 
         if(results[0].Available == 0)
@@ -90,7 +90,7 @@ namespace foray::bench {
     {
         for(auto pool : mQueryPools)
         {
-            vkDestroyQueryPool(mContext->Device, pool, nullptr);
+            mContext->VkbDispatchTable->destroyQueryPool(pool, nullptr);
         }
         mQueryPools.clear();
     }

@@ -4,7 +4,7 @@
 #include "foray_blas.hpp"
 
 namespace foray::as {
-    const std::unordered_map<const Blas*, uint32_t>& GeometryMetaBuffer::CreateOrUpdate(const core::VkContext* context, const std::unordered_set<const Blas*>& entries)
+    const std::unordered_map<const Blas*, uint32_t>& GeometryMetaBuffer::CreateOrUpdate(core::Context* context, const std::unordered_set<const Blas*>& entries)
     {
         // STEP #0   Reset State
         mContext = context;
@@ -31,7 +31,7 @@ namespace foray::as {
             const auto& primitives = blas->GetMesh()->GetPrimitives();
             for(int32_t primitiveIndex = 0; primitiveIndex < primitives.size(); primitiveIndex++)
             {
-                const scene::Primitive& primitive          = primitives[primitiveIndex];
+                const scene::Primitive& primitive   = primitives[primitiveIndex];
                 bufferData[offset + primitiveIndex] = GeometryMeta{.MaterialIndex = primitive.MaterialIndex, .IndexBufferOffset = primitive.First};
             }
             offset += primitives.size();
@@ -63,4 +63,4 @@ namespace foray::as {
         descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorInfos);
         return descriptorInfo;
     }
-}  // namespace foray
+}  // namespace foray::as

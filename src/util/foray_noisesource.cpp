@@ -4,7 +4,7 @@
 namespace foray::util {
     NoiseSource::NoiseSource() {}
 
-    void NoiseSource::Create(const core::VkContext* context)
+    void NoiseSource::Create(core::Context* context)
     {
         const uint32_t EDGE = 2048u;
 

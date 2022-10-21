@@ -12,7 +12,7 @@ namespace foray::util {
       public:
         /// @brief Creates the dualbuffer setup
         /// @param devicebufferCreateInfo Used to initate the drawside buffer. Same size is used for staging buffers
-        void Create(const core::VkContext* context, const core::ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
+        void Create(core::Context* context, const core::ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
 
         /// @brief Updates the entire staging buffer
         void StageFullBuffer(uint32_t frameIndex, const void* data);

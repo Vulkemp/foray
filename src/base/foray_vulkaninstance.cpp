@@ -2,6 +2,8 @@
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
 #include "../foray_vulkan.hpp"
+#include "../core/foray_context.hpp"
+#include "../osi/foray_window.hpp"
 
 namespace foray::base {
     VulkanInstance& VulkanInstance::SetBeforeInstanceBuildFunc(BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc)
@@ -32,6 +34,15 @@ namespace foray::base {
                 instanceBuilder.set_debug_callback_user_data_pointer(mDebugUserData);
             }
         }
+        if (!!mContext && !!mContext->Window)
+        {
+            std::vector<const char*> surfaceExtensions = mContext->Window->GetVkSurfaceExtensions();
+            for (const char* ext : surfaceExtensions)
+            {
+                instanceBuilder.enable_extension(ext);
+            }
+        }
+        instanceBuilder.set_minimum_instance_version(VK_VERSION_1_3);
         if(!!mBeforeInstanceBuildFunc)
         {
             mBeforeInstanceBuildFunc(instanceBuilder);
@@ -41,6 +52,10 @@ namespace foray::base {
                         ret.error().message())
 
         mInstance = *ret;
+        if (!!mContext)
+        {
+            mContext->VkbInstance = &mInstance;
+        }
     }
 
     void VulkanInstance::Destroy()
@@ -50,6 +65,10 @@ namespace foray::base {
             vkb::destroy_instance(mInstance);
             mInstance = vkb::Instance();
         }
+        if (!!mContext)
+        {
+            mContext->VkbInstance = nullptr;
+        }
     }
 
     VulkanInstance::~VulkanInstance()
@@ -58,6 +77,10 @@ namespace foray::base {
         {
             vkb::destroy_instance(mInstance);
             mInstance = vkb::Instance();
+        }
+        if (!!mContext)
+        {
+            mContext->VkbInstance = nullptr;
         }
     }
 

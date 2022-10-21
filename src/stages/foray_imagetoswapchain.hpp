@@ -8,7 +8,7 @@ namespace foray::stages {
       public:
         ImageToSwapchainStage() = default;
 
-        virtual void Init(const core::VkContext* context, core::ManagedImage* sourceImage);
+        virtual void Init(core::Context* context, core::ManagedImage* sourceImage);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         virtual void SetTargetImage(core::ManagedImage* newTargetImage);

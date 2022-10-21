@@ -1,5 +1,5 @@
 #pragma once
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 #include "../scene/foray_scene.hpp"
 #include "foray_rasterizedRenderStage.hpp"
 
@@ -13,7 +13,7 @@ namespace foray::stages {
       public:
         GBufferStage() = default;
 
-        virtual void Init(const core::VkContext* context, scene::Scene* scene);
+        virtual void Init(core::Context* context, scene::Scene* scene);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled() override;
 

@@ -2,11 +2,11 @@
 #include "../core/foray_deviceresource.hpp"
 #include "../foray_basics.hpp"
 #include "../scene/foray_component.hpp"
+#include "../scene/foray_scene_declares.hpp"
 #include "../util/foray_dualbuffer.hpp"
 #include "foray_as_declares.hpp"
 #include "foray_blasinstance.hpp"
 #include "foray_geometrymetabuffer.hpp"
-#include "../scene/foray_scene_declares.hpp"
 #include <map>
 #include <vulkan/vulkan.h>
 
@@ -18,7 +18,7 @@ namespace foray::as {
     class Tlas : public core::DeviceResourceBase
     {
       public:
-        explicit Tlas(const core::VkContext* context);
+        explicit Tlas(core::Context* context);
         virtual ~Tlas() { Destroy(); }
 
         /// @brief (Re)creates the TLAS. Required to invoke when changes to the TLAS transitioned it to Dirty state. Will synchronize with the CPU.
@@ -60,12 +60,12 @@ namespace foray::as {
         FORAY_PROPERTY_CGET(StaticBlasInstances)
 
       protected:
-        const core::VkContext*           mContext               = nullptr;
+        core::Context*                   mContext               = nullptr;
         bool                             mDirty                 = false;
         VkAccelerationStructureKHR       mAccelerationStructure = nullptr;
-        core::ManagedBuffer                    mTlasMemory;
-        util::DualBuffer                       mInstanceBuffer;
-        core::ManagedBuffer                    mScratchBuffer;
+        core::ManagedBuffer              mTlasMemory;
+        util::DualBuffer                 mInstanceBuffer;
+        core::ManagedBuffer              mScratchBuffer;
         VkDeviceAddress                  mTlasAddress = 0;
         std::map<uint64_t, BlasInstance> mAnimatedBlasInstances;
         std::map<uint64_t, BlasInstance> mStaticBlasInstances;

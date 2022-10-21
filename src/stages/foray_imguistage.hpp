@@ -1,5 +1,6 @@
 #pragma once
 #include "foray_rasterizedRenderStage.hpp"
+#include <sdl2/SDL.h>
 #include <functional>
 
 namespace foray::stages {
@@ -9,7 +10,7 @@ namespace foray::stages {
       public:
         ImguiStage() = default;
 
-        virtual void Init(const core::VkContext* context, core::ManagedImage* backgroundImage);
+        virtual void Init(core::Context* context, core::ManagedImage* backgroundImage);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 

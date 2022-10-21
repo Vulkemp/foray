@@ -1,12 +1,12 @@
 #include "foray_managedbuffer.hpp"
+#include "../foray_logger.hpp"
 #include "../util/foray_fmtutilities.hpp"
 #include "foray_commandbuffer.hpp"
-#include "../foray_logger.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace foray::core {
 
-    void ManagedBuffer::Create(const VkContext* context, const ManagedBufferCreateInfo& createInfo)
+    void ManagedBuffer::Create(Context* context, const ManagedBufferCreateInfo& createInfo)
     {
         mContext   = context;
         mSize      = createInfo.BufferCreateInfo.size;
@@ -24,15 +24,17 @@ namespace foray::core {
         {
             mName = createInfo.Name;
         }
-        if(mName.length() > 0 && mContext->DebugEnabled)
+#ifdef FORAY_DEBUG
+        if(mName.length() > 0)
         {
             UpdateDebugNames();
             logger()->debug("ManagedBuffer: Create \"{0}\" Mem {1:x} Buffer {2:x}", mName, reinterpret_cast<uint64_t>(mAllocationInfo.deviceMemory),
                             reinterpret_cast<uint64_t>(mBuffer));
         }
+#endif
     }
 
-    void ManagedBuffer::CreateForStaging(const VkContext* context, VkDeviceSize size, const void* data, std::string_view bufferName)
+    void ManagedBuffer::CreateForStaging(Context* context, VkDeviceSize size, const void* data, std::string_view bufferName)
     {
         // if (mName.length() == 0){
         //     mName = fmt::format("Staging Buffer {0:x}", reinterpret_cast<uint64_t>(data));
@@ -50,8 +52,7 @@ namespace foray::core {
         }
     }
 
-    void ManagedBuffer::Create(
-        const VkContext* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    void ManagedBuffer::Create(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
     {
         ManagedBufferCreateInfo createInfo(usage, size, memoryUsage, flags, name);
         Create(context, createInfo);
@@ -91,16 +92,18 @@ namespace foray::core {
         addressInfo.sType  = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
         addressInfo.buffer = mBuffer;
         addressInfo.pNext  = nullptr;
-        return vkGetBufferDeviceAddress(mContext->Device, &addressInfo);
+        return vkGetBufferDeviceAddress(mContext->Device(), &addressInfo);
     }
 
     ManagedBuffer& ManagedBuffer::SetName(std::string_view name)
     {
         mName = name;
-        if(mAllocation && mContext->DebugEnabled)
+#if FORAY_DEBUG
+        if(mAllocation)
         {
             UpdateDebugNames();
         }
+#endif
         return *this;
     }
 
@@ -120,7 +123,7 @@ namespace foray::core {
                                                .objectType   = VkObjectType::VK_OBJECT_TYPE_BUFFER,
                                                .objectHandle = reinterpret_cast<uint64_t>(mBuffer),
                                                .pObjectName  = debugName.c_str()};
-        mContext->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo);
+        mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
     void ManagedBuffer::Destroy()

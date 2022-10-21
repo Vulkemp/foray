@@ -45,7 +45,7 @@ namespace foray::util {
         inline bool Init(std::string_view utf8path);
 
         /// @brief Checks if format the loader was initialized in supports linear tiling transfer and shader read
-        inline static bool sFormatSupported(const core::VkContext* context);
+        inline static bool sFormatSupported(core::Context* context);
 
         /// @brief Loads the file into CPU memory (Init first!)
         inline bool Load();
@@ -58,11 +58,11 @@ namespace foray::util {
         FORAY_PROPERTY_ALLGET(Info)
         FORAY_PROPERTY_ALLGET(RawData)
 
-        inline void InitManagedImage(const core::VkContext*          context,
+        inline void InitManagedImage(core::Context*          context,
                                      core::ManagedImage*             image,
                                      core::ManagedImage::CreateInfo& ci,
                                      VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
-        inline void InitManagedImage(const core::VkContext*          context,
+        inline void InitManagedImage(core::Context*          context,
                                      core::HostCommandBuffer&            cmdBuffer,
                                      core::ManagedImage*             image,
                                      core::ManagedImage::CreateInfo& ci,

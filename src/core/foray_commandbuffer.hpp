@@ -1,6 +1,6 @@
 #pragma once
+#include "foray_context.hpp"
 #include "foray_deviceresource.hpp"
-#include "foray_vkcontext.hpp"
 #include <vulkan/vulkan.h>
 
 namespace foray::core {
@@ -13,9 +13,7 @@ namespace foray::core {
         inline virtual ~CommandBuffer() { Destroy(); }
 
         /// @brief Create based on the contexts device, command pool and queue.
-        virtual VkCommandBuffer Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
-        /// @brief Create based on custom vulkan context
-        virtual VkCommandBuffer Create(VkDevice device, VkCommandPool cmdPool, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
+        virtual VkCommandBuffer Create(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
         /// @brief vkBeginCommandBuffer();
         virtual void Begin();
         virtual void End();
@@ -24,15 +22,14 @@ namespace foray::core {
         /// @brief Destroys the associated resources
         virtual void Destroy() override;
         virtual bool Exists() const override { return mCommandBuffer; }
-        virtual void SetName(const VkContext* context, std::string_view name);
+        virtual void SetName(Context* context, std::string_view name);
 
         inline operator VkCommandBuffer() { return mCommandBuffer; }
         inline operator const VkCommandBuffer() const { return mCommandBuffer; }
 
         FORAY_PROPERTY_CGET(CommandBuffer)
       protected:
-        VkDevice      mDevice;
-        VkCommandPool mPool;
+        core::Context* mContext = nullptr;
 
         VkCommandBuffer mCommandBuffer{};
         bool            mIsRecording = false;
@@ -43,10 +40,7 @@ namespace foray::core {
     {
       public:
         /// @brief Create based on the contexts device, command pool and queue.
-        virtual VkCommandBuffer Create(const VkContext* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false) override;
-        /// @brief Create based on custom vulkan context
-        virtual VkCommandBuffer Create(
-            VkDevice device, VkCommandPool cmdPool, Queue queue, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
+        virtual VkCommandBuffer Create(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false) override;
 
         void Submit();
         void SubmitAndWait();
@@ -58,7 +52,6 @@ namespace foray::core {
         inline virtual ~HostCommandBuffer() { Destroy(); }
 
       protected:
-        Queue   mQueue;
         VkFence mFence = nullptr;
     };
 
@@ -82,18 +75,16 @@ namespace foray::core {
         virtual DeviceCommandBuffer& AddWaitSemaphore(const SemaphoreSubmit& semaphore);
         virtual DeviceCommandBuffer& AddSignalSemaphore(const SemaphoreSubmit& semaphore);
 
-        FORAY_PROPERTY_ALL(Queue)
         FORAY_PROPERTY_ALL(WaitSemaphores)
         FORAY_PROPERTY_ALL(SignalSemaphores)
         FORAY_PROPERTY_ALL(Fence)
 
-        virtual void Submit(Queue queue = {});
+        virtual void Submit();
 
       protected:
         std::vector<SemaphoreSubmit> mWaitSemaphores;
         std::vector<SemaphoreSubmit> mSignalSemaphores;
         VkFence                      mFence = nullptr;
-        Queue                        mQueue = {};
     };
 
 }  // namespace foray::core

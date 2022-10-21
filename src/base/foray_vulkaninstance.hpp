@@ -14,8 +14,8 @@ namespace foray::base {
         VulkanInstance() = default;
         /// @param beforeInstanceBuildFunc Function called after default callback configuration and before action of the instance builder
         /// @param enableDebugLayersAndCallbacks If true, validation layers are enabled, and if mDebugCallbackFunc isn't null sets debug layers callback
-        inline VulkanInstance(BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc, bool enableDebugLayersAndCallbacks)
-            : mBeforeInstanceBuildFunc{beforeInstanceBuildFunc}, mEnableDebugLayersAndCallbacks{enableDebugLayersAndCallbacks}
+        inline VulkanInstance(core::Context* context, BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc, bool enableDebugLayersAndCallbacks)
+            : mBeforeInstanceBuildFunc{beforeInstanceBuildFunc}, mEnableDebugLayersAndCallbacks{enableDebugLayersAndCallbacks}, mContext{context}
         {
         }
 
@@ -27,6 +27,7 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(DebugUserData)
         FORAY_PROPERTY_ALL(EnableDebugLayersAndCallbacks)
         FORAY_PROPERTY_ALL(Instance)
+        FORAY_PROPERTY_ALL(Context)
 
         inline operator bool() const { return !!mInstance.instance; }
         inline operator VkInstance() const { return mInstance.instance; }
@@ -51,6 +52,8 @@ namespace foray::base {
 
         /// @brief If true, validation layers are enabled, and if mDebugCallbackFunc or mDebugUserData are set they are passed on to the builder respectively
         bool mEnableDebugLayersAndCallbacks = true;
+
+        core::Context* mContext = nullptr;
 
         vkb::Instance mInstance;
     };

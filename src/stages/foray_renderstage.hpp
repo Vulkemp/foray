@@ -2,7 +2,7 @@
 #include "../base/foray_framerenderinfo.hpp"
 #include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_managedimage.hpp"
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 #include "../foray_basics.hpp"
 
 namespace foray::stages {
@@ -38,7 +38,7 @@ namespace foray::stages {
 
       protected:
         std::vector<core::ManagedImage*> mColorAttachments;
-        const core::VkContext*           mContext{};
+        core::Context*           mContext{};
         core::DescriptorSetHelper        mDescriptorSet;
 
         VkPipeline       mPipeline       = nullptr;

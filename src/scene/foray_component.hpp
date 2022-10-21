@@ -71,7 +71,7 @@ namespace foray::scene {
 
         virtual Scene*                 GetScene()   = 0;
         virtual Registry*              GetGlobals() = 0;
-        virtual const core::VkContext* GetContext() = 0;
+        virtual core::Context* GetContext() = 0;
 
       protected:
         Registry* mRegistry = nullptr;
@@ -87,7 +87,7 @@ namespace foray::scene {
         /// @brief Global component registry. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetGlobals()
         virtual Registry* GetGlobals() override;
         /// @brief Vulkan Context. Casts mRegistry->mCallbackDispatcher to Scene and returns Scene->GetContext()
-        virtual const core::VkContext* GetContext() override;
+        virtual core::Context* GetContext() override;
     };
 
     class GlobalComponent : public Component
@@ -98,6 +98,6 @@ namespace foray::scene {
         /// @brief Global component registry. Returns mRegistry
         virtual Registry* GetGlobals() override;
         /// @brief Vulkan Context. Casts mRegistry to Scene and returns Scene->GetContext()
-        virtual const core::VkContext* GetContext() override;
+        virtual core::Context* GetContext() override;
     };
 }  // namespace foray::scene

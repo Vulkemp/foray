@@ -1,7 +1,7 @@
 #include "foray_materialbuffer.hpp"
 
 namespace foray::scene {
-    MaterialBuffer::MaterialBuffer(const core::VkContext* context) : mBuffer(context, false)
+    MaterialBuffer::MaterialBuffer(core::Context* context) : mBuffer(context, false)
     {
         mBuffer.GetBuffer().SetName("MaterialBuffer");
         mDescriptorBufferInfos.resize(1);

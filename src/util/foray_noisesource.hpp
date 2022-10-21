@@ -8,7 +8,7 @@ namespace foray::util {
       public:
         NoiseSource();
 
-        void         Create(const core::VkContext* context);
+        void         Create(core::Context* context);
         virtual void Destroy() override;
         virtual bool Exists() const override;
 

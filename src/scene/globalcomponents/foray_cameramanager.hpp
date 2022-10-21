@@ -19,7 +19,7 @@ namespace foray::scene {
 
         FORAY_PROPERTY_ALLGET(Ubo)
 
-        CameraManager(const core::VkContext* context);
+        CameraManager(core::Context* context);
         virtual void RefreshCameraList();
         virtual void SelectCamera(Camera* camera);
         virtual ~CameraManager();

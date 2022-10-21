@@ -4,6 +4,10 @@
 #include <string>
 #include <string_view>
 
+#ifndef NDEBUG
+#define FORAY_DEBUG 1
+#endif
+
 namespace foray {
     using fp32_t = float;
     using fp64_t = double;

@@ -5,6 +5,11 @@
 #include <sdl2/SDL.h>
 
 namespace foray::base {
+    void PrintStateChange(ELifetimeState oldState, ELifetimeState newState)
+    {
+        logger()->info("Lifetime State: {} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
+    }
+
     using clock_t     = std::chrono::steady_clock;
     using timepoint_t = std::chrono::steady_clock::time_point;
     using timespan_t  = std::chrono::duration<float>;
@@ -27,6 +32,7 @@ namespace foray::base {
         try
         {
 #endif
+
             AdvanceState();  // ELifetimeState::Initializing
             if(!!mInitFunc)
             {
@@ -85,7 +91,10 @@ namespace foray::base {
 
                         if(!!mRenderFunc)
                         {
-                            mRenderFunc(frameTime.Delta);
+                            RenderInfo renderInfo{
+                                .Delta = delta.count(), .TargetDelta = mFrameTiming.GetSecondsPerFrame(), .LoopFrameNumber = mRenderedFrameCount, .SinceStart = sinceStart.count()};
+
+                            mRenderFunc(renderInfo);
                             mRenderedFrameCount++;
                         }
                     }
@@ -156,6 +165,11 @@ namespace foray::base {
             AdvanceState();  // ELifetimeState::StopRequested
         }
         mRunResult = runResult;
+    }
+
+    bool RenderLoop::IsRunning() const
+    {
+        return mState == ELifetimeState::Running;
     }
 
     RenderLoop::FrameTimeAnalysis RenderLoop::AnalyseFrameTimes() const

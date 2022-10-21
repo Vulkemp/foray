@@ -17,7 +17,7 @@ namespace foray::rtpipe {
         return mGroupData[groupIndex];
     }
 
-    void ShaderBindingTableBase::Build(const core::VkContext*                                 context,
+    void ShaderBindingTableBase::Build(core::Context*                                 context,
                                        const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
                                        const std::vector<const uint8_t*>&                     handles)
     {

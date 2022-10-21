@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 #include "../foray_vulkan.hpp"
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 
 namespace foray::util {
     /// @brief Class that holds memory ownership of a vulkan pipeline
@@ -16,10 +16,10 @@ namespace foray::util {
         ~PipelineLayout()
         {
             if(mPipelineLayout)
-                vkDestroyPipelineLayout(mContext->Device, mPipelineLayout, nullptr);
+                vkDestroyPipelineLayout(mContext->Device(), mPipelineLayout, nullptr);
         }
 
-        void Create(const core::VkContext*                    context,
+        void Create(core::Context*                    context,
                     std::vector<VkDescriptorSetLayout>& descriptorLayouts,
                     std::vector<VkPushConstantRange>*   pushConstantRanges = nullptr,
                     VkPipelineLayoutCreateFlags         flags              = 0,
@@ -36,13 +36,13 @@ namespace foray::util {
             pipelineLayoutCreateInfo.setLayoutCount             = descriptorLayouts.size();
             pipelineLayoutCreateInfo.pSetLayouts                = descriptorLayouts.data();
 
-            AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
+            AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
         }
 
         FORAY_PROPERTY_GET(PipelineLayout)
 
       protected:
-        const core::VkContext* mContext{};
+        core::Context* mContext{};
         VkPipelineLayout mPipelineLayout{};
     };
 }  // namespace foray

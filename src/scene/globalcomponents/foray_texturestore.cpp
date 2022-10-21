@@ -39,7 +39,7 @@ namespace foray::scene {
         mTextures.clear();
         for(auto& hashSamplerPair : mSamplers)
         {
-            vkDestroySampler(GetContext()->Device, hashSamplerPair.second, nullptr);
+            GetContext()->VkbDispatchTable->destroySampler(hashSamplerPair.second, nullptr);
         }
         mSamplers.clear();
     }
@@ -55,8 +55,8 @@ namespace foray::scene {
             return find->second;
         }
         VkSampler sampler = nullptr;
-        AssertVkResult(vkCreateSampler(GetContext()->Device, &samplerCI, nullptr, &sampler));
-        if(GetContext()->DebugEnabled)
+        AssertVkResult(GetContext()->VkbDispatchTable->createSampler(&samplerCI, nullptr, &sampler));
+
         {
             std::string                   name = fmt::format("Sampler {:x}", hash);
             VkDebugUtilsObjectNameInfoEXT nameInfo{
@@ -65,7 +65,7 @@ namespace foray::scene {
                 .objectHandle = reinterpret_cast<uint64_t>(sampler),
                 .pObjectName  = name.data(),
             };
-            AssertVkResult(GetContext()->DispatchTable.setDebugUtilsObjectNameEXT(&nameInfo));
+            AssertVkResult(GetContext()->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo));
         }
         mSamplers[hash] = sampler;
         return sampler;

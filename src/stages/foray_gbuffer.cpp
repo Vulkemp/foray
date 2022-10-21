@@ -16,7 +16,7 @@
 
 namespace foray::stages {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(const core::VkContext* context, scene::Scene* scene)
+    void GBufferStage::Init(core::Context* context, scene::Scene* scene)
     {
         mContext = context;
         mScene   = scene;
@@ -49,7 +49,7 @@ namespace foray::stages {
 #ifdef ENABLE_GBUFFER_BENCH
         mBenchmark.Destroy();
 #endif  // ENABLE_GBUFFER_BENCH
-        VkDevice device = mContext->Device;
+        VkDevice device = mContext->Device();
         if(mPipeline)
         {
             vkDestroyPipeline(device, mPipeline, nullptr);
@@ -77,7 +77,7 @@ namespace foray::stages {
 
     void GBufferStage::DestroyResolutionDependentComponents()
     {
-        VkDevice device = mContext->Device;
+        VkDevice device = mContext->Device();
         for(auto& colorAttachment : mColorAttachments)
         {
             colorAttachment->Destroy();
@@ -105,7 +105,7 @@ namespace foray::stages {
         if(!needsPipelineUpdate)
             return;
 
-        vkDeviceWaitIdle(mContext->Device);
+        vkDeviceWaitIdle(mContext->Device());
         // rebuild pipeline and its dependencies.
         PreparePipeline();
     }
@@ -118,7 +118,7 @@ namespace foray::stages {
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 1};
+        VkExtent3D               extent                = {mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
         VkImageLayout            intialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -285,7 +285,7 @@ namespace foray::stages {
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->Device, &renderPassInfo, nullptr, &mRenderpass));
+        AssertVkResult(vkCreateRenderPass(mContext->Device(), &renderPassInfo, nullptr, &mRenderpass));
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -293,10 +293,10 @@ namespace foray::stages {
         fbufCreateInfo.renderPass              = mRenderpass;
         fbufCreateInfo.pAttachments            = attachmentViews.data();
         fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentViews.size());
-        fbufCreateInfo.width                   = mContext->Swapchain.extent.width;
-        fbufCreateInfo.height                  = mContext->Swapchain.extent.height;
+        fbufCreateInfo.width                   = mContext->GetSwapchainSize().width;
+        fbufCreateInfo.height                  = mContext->GetSwapchainSize().height;
         fbufCreateInfo.layers                  = 1;
-        AssertVkResult(vkCreateFramebuffer(mContext->Device, &fbufCreateInfo, nullptr, &mFrameBuffer));
+        AssertVkResult(vkCreateFramebuffer(mContext->Device(), &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void GBufferStage::SetupDescriptors()
@@ -320,7 +320,7 @@ namespace foray::stages {
         pipelineLayoutCI.setLayoutCount         = 1;
         pipelineLayoutCI.pSetLayouts            = &descriptorSetLayout;
 
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCI, nullptr, &mPipelineLayout));
+        AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }
 
     void GBufferStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -403,17 +403,17 @@ namespace foray::stages {
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
         renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent = mContext->Swapchain.extent;
+        renderPassBeginInfo.renderArea.extent = mContext->GetSwapchainSize();
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
-        VkViewport viewport{0.f, 0.f, (float)mContext->Swapchain.extent.width, (float)mContext->Swapchain.extent.height, 0.0f, 1.0f};
+        VkViewport viewport{0.f, 0.f, (float)mContext->GetSwapchainSize().width, (float)mContext->GetSwapchainSize().height, 0.0f, 1.0f};
         vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->GetSwapchainSize()}};
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
@@ -452,7 +452,7 @@ namespace foray::stages {
     {
         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        AssertVkResult(vkCreatePipelineCache(mContext->Device, &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
+        AssertVkResult(vkCreatePipelineCache(mContext->Device(), &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         // shader stages
         auto                         vertShaderModule = core::ShaderModule(mContext, mVertexShaderPath);

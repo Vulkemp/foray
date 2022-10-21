@@ -2,7 +2,7 @@
 //#include "foray_hash.hpp"
 
 namespace foray::util {
-    void DualBuffer::Create(const core::VkContext* context, const core::ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
+    void DualBuffer::Create(core::Context* context, const core::ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
     {
         Destroy();
 

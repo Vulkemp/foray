@@ -13,7 +13,7 @@ namespace foray::util {
 
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
-        virtual void Create(const core::VkContext* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
+        virtual void Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
         virtual bool Exists() const override;
         virtual void Destroy() override;
 
@@ -31,7 +31,7 @@ namespace foray::util {
         inline ManagedUbo();
         ~ManagedUbo();
 
-        inline void Create(const core::VkContext* context, std::string_view name);
+        inline void Create(core::Context* context, std::string_view name);
         virtual void        UpdateTo(uint32_t frameIndex) override;
 
         FORAY_PROPERTY_ALL(Data)
@@ -43,7 +43,7 @@ namespace foray::util {
     }
 
     template <typename T_UBO>
-    void ManagedUbo<T_UBO>::Create(const core::VkContext* context, std::string_view name)
+    void ManagedUbo<T_UBO>::Create(core::Context* context, std::string_view name)
     {
         ManagedUboBase::Create(context, sizeof(T_UBO));
         if(name.size() > 0)

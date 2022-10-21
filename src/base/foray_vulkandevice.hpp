@@ -16,8 +16,8 @@ namespace foray::base {
         VulkanDevice() = default;
         /// @param beforePhysicalDeviceSelectFunc Function called after default configuration and before action with physical device selector
         /// @param beforeDeviceBuildFunc Function called after default configuration and before action with device builder
-        inline VulkanDevice(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc, BeforeDeviceBuildFunctionPointer beforeDeviceBuildFunc)
-            : mBeforePhysicalDeviceSelectFunc{beforePhysicalDeviceSelectFunc}, mBeforeDeviceBuildFunc{beforeDeviceBuildFunc}
+        inline VulkanDevice(core::Context* context, BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc, BeforeDeviceBuildFunctionPointer beforeDeviceBuildFunc)
+            : mBeforePhysicalDeviceSelectFunc{beforePhysicalDeviceSelectFunc}, mBeforeDeviceBuildFunc{beforeDeviceBuildFunc}, mContext{context}
         {
         }
 
@@ -37,13 +37,14 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(PhysicalDevice)
         FORAY_PROPERTY_ALL(Device)
         FORAY_PROPERTY_ALL(DispatchTable)
+        FORAY_PROPERTY_ALL(Context)
 
         /// @brief Create logical device by invoking SelectPhysicalDevice(..,) and BuildDevice()
         /// @remark Will throw std::exception on selection or build failure
-        void Create(vkb::Instance& instance, VkSurfaceKHR surface = nullptr);
+        void Create();
         /// @brief If mSetDefaultCapabilitiesToDeviceSelector is set, configures defaults. If mBeforePhysicalDeviceSelectFunc is set, invokes it. Finally, selects device.
         /// @remark Will throw std::exception if no selection could be made
-        void SelectPhysicalDevice(vkb::Instance& instance, VkSurfaceKHR surface = nullptr);
+        void SelectPhysicalDevice();
         /// @brief If mEnableDefaultDeviceFeatures is set, configures defaults. If mBeforeDeviceBuildFunc is set, invokes it. Builds device.
         /// @remark Will throw std::exception if building fails
         void        BuildDevice();
@@ -60,6 +61,8 @@ namespace foray::base {
         bool mSetDefaultCapabilitiesToDeviceSelector = true;
         /// @brief Enables features listed in mDefaultFeatures member
         bool mEnableDefaultDeviceFeatures = true;
+
+        core::Context* mContext = nullptr;
 
         vkb::PhysicalDevice mPhysicalDevice;
         vkb::Device         mDevice;

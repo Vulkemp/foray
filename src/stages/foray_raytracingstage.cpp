@@ -47,7 +47,7 @@ namespace foray::stages {
         mPipeline.Destroy();
         if(!!mContext)
         {
-            VkDevice device = mContext->Device;
+            VkDevice device = mContext->Device();
             if(!!mPipelineLayout)
             {
                 vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
@@ -82,7 +82,7 @@ namespace foray::stages {
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-        VkExtent3D               extent                = {mContext->Swapchain.extent.width, mContext->Swapchain.extent.height, 1};
+        VkExtent3D               extent                = {mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
         VkImageLayout            intialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -150,7 +150,7 @@ namespace foray::stages {
         };
         pipelineLayoutCreateInfo.pPushConstantRanges    = &pushC;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device, &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
+        AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
     }
 
     void RaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -191,14 +191,14 @@ namespace foray::stages {
 
         VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry = mPipeline.GetCallablesSbt().GetAddressRegion();
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->Swapchain.extent.width, mContext->Swapchain.extent.height}};
-        mContext->DispatchTable.cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height}};
+        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
                                                 scissor.extent.width, scissor.extent.height, 1);
     }
 
     void RaytracingStage::ReloadShaders()
     {
-        vkDeviceWaitIdle(mContext->Device);
+        vkDeviceWaitIdle(mContext->Device());
 
         DestroyShaders();
         mPipeline.Destroy();
@@ -270,14 +270,14 @@ namespace foray::stages {
         DescriptorImageInfos = {VkDescriptorImageInfo{.sampler = Sampler, .imageView = Image->GetImageView(), .imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}};  // namespace foray
     }
 
-    void RaytracingStage::SampledImage::Create(const core::VkContext* context, core::ManagedImage* image, bool initateSampler)
+    void RaytracingStage::SampledImage::Create(core::Context* context, core::ManagedImage* image, bool initateSampler)
     {
         Image = image;
         if(!!Image && initateSampler)
         {
             if(!!Sampler)
             {
-                vkDestroySampler(context->Device, Sampler, nullptr);
+                vkDestroySampler(context->Device(), Sampler, nullptr);
             }
             VkSamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                                           .magFilter               = VkFilter::VK_FILTER_LINEAR,
@@ -290,16 +290,16 @@ namespace foray::stages {
                                           .minLod                  = 0,
                                           .maxLod                  = 0,
                                           .unnormalizedCoordinates = VK_FALSE};
-            AssertVkResult(vkCreateSampler(context->Device, &samplerCi, nullptr, &Sampler));
+            AssertVkResult(vkCreateSampler(context->Device(), &samplerCi, nullptr, &Sampler));
         }
         IsSet = !!Image;
     }
 
-    void RaytracingStage::SampledImage::Destroy(const core::VkContext* context)
+    void RaytracingStage::SampledImage::Destroy(core::Context* context)
     {
         if(!!Sampler)
         {
-            vkDestroySampler(context->Device, Sampler, nullptr);
+            vkDestroySampler(context->Device(), Sampler, nullptr);
             Sampler = nullptr;
         }
         Image = nullptr;

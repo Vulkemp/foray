@@ -18,7 +18,7 @@ namespace foray::gltf {
             /// @brief Base directory to look for textures relative to
             std::string BaseDir;
             /// @brief Context used for GPU stuff
-            const core::VkContext* Context;
+            core::Context* Context;
             /// @brief This threads index
             int32_t ThreadIndex;
             /// @brief Total count of threads used for loading

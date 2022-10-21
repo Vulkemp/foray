@@ -1,4 +1,5 @@
 #pragma once
+#include "../core/foray_swapchainimageinfo.hpp"
 #include "../foray_vkb.hpp"
 #include "../osi/foray_osi_declares.hpp"
 #include "../osi/foray_window.hpp"
@@ -6,7 +7,7 @@
 #include <functional>
 
 namespace foray::base {
-    class VulkanWindow
+    class VulkanWindowSwapchain
     {
       public:
         using BeforeWindowCreateFunctionPointer     = std::function<void(Window&)>;
@@ -14,15 +15,17 @@ namespace foray::base {
         using OnResizedFunctionPointer              = std::function<void(VkExtent2D)>;
         using MakeSwapchainImageNameFunctionPointer = std::function<std::string(uint32_t)>;
 
-        VulkanWindow() = default;
-        inline VulkanWindow(BeforeWindowCreateFunctionPointer     beforeWindowCreateFunc,
-                            BeforeSwapchainBuildFunctionPointer   beforeSwapchainBuildFunc,
-                            OnResizedFunctionPointer              onResizedFunc,
-                            MakeSwapchainImageNameFunctionPointer makeSwapchainImageNameFunc)
+        VulkanWindowSwapchain() = default;
+        inline VulkanWindowSwapchain(core::Context*                        context,
+                                     BeforeWindowCreateFunctionPointer     beforeWindowCreateFunc,
+                                     BeforeSwapchainBuildFunctionPointer   beforeSwapchainBuildFunc,
+                                     OnResizedFunctionPointer              onResizedFunc,
+                                     MakeSwapchainImageNameFunctionPointer makeSwapchainImageNameFunc)
             : mBeforeWindowCreateFunc{beforeWindowCreateFunc}
             , mBeforeSwapchainBuildFunc{beforeSwapchainBuildFunc}
             , mOnResizedFunc{onResizedFunc}
             , mMakeSwapchainImageNameFunc{makeSwapchainImageNameFunc}
+            , mContext(context)
         {
         }
 
@@ -30,12 +33,9 @@ namespace foray::base {
         FORAY_PROPERTY_ALLGET(Surface)
         FORAY_PROPERTY_ALLGET(Swapchain)
         FORAY_PROPERTY_ALLGET(SwapchainImages)
-        FORAY_PROPERTY_ALL(Instance)
-        FORAY_PROPERTY_ALL(Device)
-        FORAY_PROPERTY_ALL(DispatchTable)
+        FORAY_PROPERTY_ALL(Context)
 
         void        CreateWindow();
-        void        CreateSwapchain(vkb::Instance* instance, vkb::Device* device, vkb::DispatchTable* dispatchTable);
         void        CreateSwapchain();
         inline bool Exists() const { return !!mSwapchain.swapchain; }
         void        Destroy();
@@ -44,13 +44,6 @@ namespace foray::base {
         /// @param event
         void HandleEvent(const Event* event);
         void RecreateSwapchain();
-
-        struct SwapchainImageInfo
-        {
-            std::string Name;
-            VkImage     Image;
-            VkImageView ImageView;
-        };
 
       protected:
         void ExtractSwapchainImages();
@@ -63,13 +56,11 @@ namespace foray::base {
 
         bool mNameSwapchainImages = true;
 
-        Window                          mWindow;
-        VkSurfaceKHR                    mSurface = nullptr;
-        vkb::Swapchain                  mSwapchain;
-        std::vector<SwapchainImageInfo> mSwapchainImages;
+        core::Context* mContext = nullptr;
 
-        vkb::Instance*      mInstance      = nullptr;
-        vkb::Device*        mDevice        = nullptr;
-        vkb::DispatchTable* mDispatchTable = nullptr;
+        Window                                mWindow;
+        VkSurfaceKHR                          mSurface = nullptr;
+        vkb::Swapchain                        mSwapchain;
+        std::vector<core::SwapchainImageInfo> mSwapchainImages;
     };
 }  // namespace foray::base

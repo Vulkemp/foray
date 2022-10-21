@@ -23,7 +23,7 @@ namespace foray::gltf {
       public:
         explicit ModelConverter(scene::Scene* scene);
 
-        void LoadGltfModel(std::string utf8Path, const core::VkContext* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
+        void LoadGltfModel(std::string utf8Path, core::Context* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
 
         FORAY_PROPERTY_ALL(Scene)
 
@@ -32,7 +32,7 @@ namespace foray::gltf {
         FORAY_PROPERTY_CGET(Benchmark)
 
       protected:
-        const core::VkContext* mContext = nullptr;
+        core::Context* mContext = nullptr;
 
         // Tinygltf stuff
 

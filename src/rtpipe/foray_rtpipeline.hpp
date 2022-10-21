@@ -9,7 +9,7 @@ namespace foray::rtpipe {
     /// @brief Helper class wrapping 4 SBTs (Raygen, Miss, Callable, Hitgroup) and a raytracing pipeline
     class RtPipeline
     {
-      /*
+        /*
         Usage:
           1. Configure Sbts, by accessing them via GetRaygenSbt(), ... . Refer to ShaderBindingTableBase class definition.
           2. Call Build(...) to build the Pipeline and Sbts
@@ -25,7 +25,7 @@ namespace foray::rtpipe {
         FORAY_PROPERTY_ALLGET(PipelineLayout)
 
         /// @brief Builds RtPipeline with shaders and shadergroups as defined in Sbt wrappers and builds Sbts.
-        void Build(const core::VkContext* context, VkPipelineLayout pipelineLayout);
+        void Build(core::Context* context, VkPipelineLayout pipelineLayout);
 
         /// @brief vkCmdBindPipeline(cmdBuffer, RayTracingBindPoint, mPipeline)
         void CmdBindPipeline(VkCommandBuffer cmdBuffer) const;
@@ -44,6 +44,7 @@ namespace foray::rtpipe {
 
         VkPipelineLayout mPipelineLayout = nullptr;
         VkPipeline       mPipeline       = nullptr;
-        VkDevice         mDevice         = nullptr;
+
+        core::Context* mContext = nullptr;
     };
-}  // namespace foray
+}  // namespace foray::rtpipe

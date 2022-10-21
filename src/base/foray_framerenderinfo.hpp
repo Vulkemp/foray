@@ -13,7 +13,6 @@ namespace foray::base {
         FORAY_PROPERTY_ALL(FrameTime)
         FORAY_PROPERTY_ALL(FrameNumber)
         FORAY_PROPERTY_ALL(InFlightFrame)
-        FORAY_PROPERTY_ALL(FrameObjectsIndex)
         FORAY_PROPERTY_ALL(ImageLayoutCache)
 
         inline core::DeviceCommandBuffer&       GetAuxCommandBuffer(int32_t index) { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
@@ -28,9 +27,7 @@ namespace foray::base {
         FrameRenderInfo() {}
 
       protected:
-        /// @brief Index of in-flight frame synchronisation objects this frame is using
-        uint32_t mFrameObjectsIndex = 0;
-        double   mFrameTime         = 0;
+        double mFrameTime = 0;
         /// @brief Number of complete frames rendered since application startup
         uint64_t mFrameNumber = 0;
 

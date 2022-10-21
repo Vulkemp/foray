@@ -29,7 +29,7 @@ namespace foray::scene {
         mUbo.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
 
-    CameraManager::CameraManager(const core::VkContext* context)
+    CameraManager::CameraManager(core::Context* context)
     {
         mUbo.Create(context, "Camera");
     }

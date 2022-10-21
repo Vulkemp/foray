@@ -30,7 +30,7 @@ namespace foray::base {
             - Use semaphores to synchronise your command buffers as needed
       */
       public:
-        void Create(const core::VkContext* context, uint32_t auxCommandBufferCount = 0);
+        void Create(core::Context* context, uint32_t auxCommandBufferCount = 0);
         void Destroy();
 
         inline virtual ~InFlightFrame() { Destroy(); }
@@ -68,7 +68,7 @@ namespace foray::base {
         FORAY_PROPERTY_ALLGET(PrimaryCompletedFence)
 
       protected:
-        const core::VkContext* mContext = nullptr;
+        core::Context* mContext = nullptr;
 
         /// @brief All command buffers used by the frame
         std::vector<std::unique_ptr<core::DeviceCommandBuffer>> mAuxiliaryCommandBuffers;

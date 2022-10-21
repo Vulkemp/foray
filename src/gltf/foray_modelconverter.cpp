@@ -1,5 +1,5 @@
 #include "foray_modelconverter.hpp"
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 #include "../foray_glm.hpp"
 #include "../foray_logger.hpp"
 #include "../osi/foray_env.hpp"
@@ -22,7 +22,7 @@ namespace foray::gltf {
     {
     }
 
-    void ModelConverter::LoadGltfModel(std::string utf8Path, const core::VkContext* context, const ModelConverterOptions& options)
+    void ModelConverter::LoadGltfModel(std::string utf8Path, core::Context* context, const ModelConverterOptions& options)
     {
         mBenchmark.Begin();
         mContext = context ? context : mScene->GetContext();

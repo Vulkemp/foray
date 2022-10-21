@@ -9,7 +9,7 @@ namespace foray::stages {
     class DenoiserSynchronisationSemaphore : public core::DeviceResourceBase
     {
       public:
-        void                Create(const core::VkContext* context);
+        void                Create(core::Context* context);
         inline virtual bool Exists() const override { return !!mSemaphore; }
         virtual void        Destroy() override;
 
@@ -18,7 +18,7 @@ namespace foray::stages {
         FORAY_PROPERTY_ALL(Value)
 
       protected:
-        const core::VkContext* mContext   = nullptr;
+        core::Context* mContext   = nullptr;
         VkSemaphore            mSemaphore = nullptr;
         uint64_t               mValue     = 0;
 #ifdef WIN32
@@ -50,7 +50,7 @@ namespace foray::stages {
     class DenoiserStage : public RenderStage
     {
       public:
-        virtual void Init(const core::VkContext* context, const DenoiserConfig& config){};
+        virtual void Init(core::Context* context, const DenoiserConfig& config){};
 
         virtual void BeforeDenoise(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
         virtual void AfterDenoise(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};

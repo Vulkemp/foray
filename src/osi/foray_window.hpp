@@ -58,7 +58,7 @@ namespace foray {
 
         virtual uint32_t SDLId() const;
 
-        virtual VkSurfaceKHR             GetSurfaceKHR(VkInstance instance) const;
+        virtual VkSurfaceKHR             GetOrCreateSurfaceKHR(VkInstance instance);
         virtual std::vector<const char*> GetVkSurfaceExtensions() const;
 
         virtual void HandleEvent(const Event* event);
@@ -66,8 +66,9 @@ namespace foray {
       protected:
         inline static std::vector<Window*> sWindows = std::vector<Window*>();
 
-        SDL_Window* mHandle;
-        uint32_t    mId;
+        SDL_Window*  mHandle  = nullptr;
+        VkSurfaceKHR mSurface = nullptr;
+        uint32_t     mId;
 
         std::string  mTitle;
         EDisplayMode mDisplayMode;

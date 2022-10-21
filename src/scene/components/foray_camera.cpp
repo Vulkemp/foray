@@ -27,7 +27,7 @@ namespace foray::scene {
         }
         if(mAspect == 0.f)
         {
-            auto swapchainExtent = GetContext()->Swapchain.extent;
+            auto swapchainExtent = GetContext()->GetSwapchainSize();
             mAspect              = CalculateAspect(swapchainExtent);
         }
         if(mNear == 0.f)

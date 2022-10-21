@@ -34,7 +34,7 @@ namespace foray::util {
         FORAY_PROPERTY_SET(ColorAttachmentBlendCount)
 
       protected:
-        const core::VkContext* mContext{};
+        core::Context* mContext{};
 
         VkPipelineLayout mPipelineLayout{};
 

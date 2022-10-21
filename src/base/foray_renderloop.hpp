@@ -18,6 +18,8 @@ namespace foray::base {
         Finalized
     };
 
+    void PrintStateChange(ELifetimeState oldState, ELifetimeState newState);
+
     /// @brief Controls an apps render scheduling timing
     class AppFrameTiming
     {
@@ -44,10 +46,18 @@ namespace foray::base {
     class RenderLoop
     {
       public:
+        struct RenderInfo
+        {
+            fp32_t   Delta           = 0.f;
+            fp32_t   TargetDelta     = 0.f;
+            uint64_t LoopFrameNumber = 0;
+            fp64_t   SinceStart      = 0.0;
+        };
+
         /// @brief Function pointer for application initialization
         using InitFunctionPointer = std::function<void()>;
         /// @brief Function pointer for a single frame render action. Param#0 : Delta time in seconds
-        using RenderFunctionPointer = std::function<void(fp32_t)>;
+        using RenderFunctionPointer = std::function<void(RenderInfo&)>;
         /// @brief Function pointer for the RenderLoop to check if application is ready to render next frame. Return true if ready.
         using RenderReadyFunctionPointer = std::function<bool()>;
         /// @brief Function pointer for application finalization
@@ -84,6 +94,8 @@ namespace foray::base {
         /// @brief Request the finalization of the application as soon as possible
         /// @param runResult The result the encompassing Run() call should return
         void RequestStop(int32_t runResult = 0);
+        /// @brief Returns true, if the internal state is ELifetimeState::Running; false otherwise
+        bool IsRunning() const;
 
         /// @brief Analysis
         struct FrameTimeAnalysis

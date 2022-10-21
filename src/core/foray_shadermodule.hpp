@@ -1,20 +1,20 @@
 #pragma once
 #include "../foray_vulkan.hpp"
 #include "foray_deviceresource.hpp"
-#include "foray_vkcontext.hpp"
+#include "foray_context.hpp"
 
 namespace foray::core {
     class ShaderModule : public core::DeviceResourceBase
     {
       public:
         ShaderModule() = default;
-        ShaderModule(const core::VkContext* context, std::string relativeSpirvPath);
+        ShaderModule(core::Context* context, std::string relativeSpirvPath);
 
         inline ~ShaderModule() { Destroy(); }
 
-        void                LoadFromSpirv(const VkContext* context, std::string relativeShaderPath);
-        void                LoadFromSource(const VkContext* context, std::string relativeShaderSourcePath);
-        void                LoadFromBinary(const VkContext* context, std::vector<char>& binaryBuffer);
+        void                LoadFromSpirv(Context* context, std::string relativeShaderPath);
+        void                LoadFromSource(Context* context, std::string relativeShaderSourcePath);
+        void                LoadFromBinary(Context* context, std::vector<char>& binaryBuffer);
         inline virtual bool Exists() const override { return !!mShaderModule; }
         virtual void        Destroy() override;
 
@@ -23,7 +23,7 @@ namespace foray::core {
         operator VkShaderModule() const;
 
       protected:
-        const VkContext* mContext           = nullptr;
+        Context* mContext           = nullptr;
         std::string      mAbsoluteSpirvPath = "";
         VkShaderModule   mShaderModule      = nullptr;
     };

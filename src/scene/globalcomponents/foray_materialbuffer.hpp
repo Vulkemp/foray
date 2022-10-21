@@ -10,7 +10,7 @@ namespace foray::scene {
     class MaterialBuffer : public GlobalComponent
     {
       public:
-        explicit MaterialBuffer(const core::VkContext* context);
+        explicit MaterialBuffer(core::Context* context);
 
         std::vector<DefaultMaterialEntry>& GetVector() { return mBuffer.GetVector(); }
 

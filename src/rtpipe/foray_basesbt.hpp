@@ -45,7 +45,7 @@ namespace foray::rtpipe {
         /// @param context Context
         /// @param pipelineProperties Pipeline Properties for alignment information
         /// @param handles Vector of pointers to handles. Indices in this vector have to match shadergroup indices of the SBT. The caller must guarantee that any memory area pointed to is of pipelineProperties.shaderGroupHandleSize size (bytes)
-        virtual void Build(const core::VkContext* context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties, const std::vector<const uint8_t*>& handles);
+        virtual void Build(core::Context* context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties, const std::vector<const uint8_t*>& handles);
 
         FORAY_PROPERTY_CGET(EntryDataSize)
         FORAY_PROPERTY_ALLGET(AddressRegion)

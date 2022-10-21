@@ -1,7 +1,7 @@
 #include "foray_denoiserstage.hpp"
 
 namespace foray::stages {
-    void DenoiserSynchronisationSemaphore::Create(const core::VkContext* context)
+    void DenoiserSynchronisationSemaphore::Create(core::Context* context)
     {
         mContext = context;
 
@@ -25,7 +25,7 @@ namespace foray::stages {
 
         VkSemaphoreCreateInfo semaphoreCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = &exportSemaphoreCi, .flags = 0};
 
-        AssertVkResult(vkCreateSemaphore(mContext->Device, &semaphoreCi, nullptr, &mSemaphore));
+        AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCi, nullptr, &mSemaphore));
 
 #ifdef WIN32
         VkSemaphoreGetWin32HandleInfoKHR getWInfo
@@ -50,7 +50,7 @@ namespace foray::stages {
                           .handleType = handleType,
         };
 
-        AssertVkResult(mContext->DispatchTable.getSemaphoreFdKHR(&getFdInfo, &mHandle));
+        AssertVkResult(mContext->VkbDispatchTable->getSemaphoreFdKHR(&getFdInfo, &mHandle));
 #endif
     }
 
@@ -71,7 +71,7 @@ namespace foray::stages {
 #endif
         if(!!mSemaphore)
         {
-            vkDestroySemaphore(mContext->Device, mSemaphore, nullptr);
+            mContext->VkbDispatchTable->destroySemaphore(mSemaphore, nullptr);
         }
     }
 }  // namespace foray::stages

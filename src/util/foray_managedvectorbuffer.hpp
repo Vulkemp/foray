@@ -23,8 +23,8 @@ namespace foray::util {
         const bool DeviceLocal;
 
         inline ManagedVectorBuffer() : DeviceLocal(false) {}
-        inline explicit ManagedVectorBuffer(const core::VkContext* context) : DeviceLocal(false), mContext(context) {}
-        inline explicit ManagedVectorBuffer(const core::VkContext* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
+        inline explicit ManagedVectorBuffer(core::Context* context) : DeviceLocal(false), mContext(context) {}
+        inline explicit ManagedVectorBuffer(core::Context* context, bool deviceLocal) : DeviceLocal(deviceLocal), mContext(context) {}
 
         void         InitOrUpdate(std::optional<BufferSection> section = {});
         virtual void Destroy() override;
@@ -49,7 +49,7 @@ namespace foray::util {
         inline void CreateBuffer(VkDeviceSize capacity);
         inline void UploadToBuffer(BufferSection section);
 
-        const core::VkContext*    mContext        = nullptr;
+        core::Context*    mContext        = nullptr;
         std::vector<TClass> mVector         = {};
         core::ManagedBuffer       mBuffer         = {};
         VkDeviceSize        mDeviceCount    = 0;

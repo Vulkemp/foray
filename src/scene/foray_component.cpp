@@ -7,7 +7,7 @@ namespace foray::scene {
     Node*           NodeComponent::GetNode() { return dynamic_cast<Node*>(mRegistry); }
     Scene*          NodeComponent::GetScene() { return dynamic_cast<Scene*>(mRegistry->GetCallbackDispatcher()); }
     Registry*        NodeComponent::GetGlobals() { return dynamic_cast<Registry*>(mRegistry->GetCallbackDispatcher()); }
-    const core::VkContext* NodeComponent::GetContext()
+    core::Context* NodeComponent::GetContext()
     {
         auto scene = GetScene();
         if(scene)
@@ -18,7 +18,7 @@ namespace foray::scene {
     }
     Scene*          GlobalComponent::GetScene() { return dynamic_cast<Scene*>(mRegistry); }
     Registry*        GlobalComponent::GetGlobals() { return mRegistry; }
-    const core::VkContext* GlobalComponent::GetContext()
+    core::Context* GlobalComponent::GetContext()
     {
         auto scene = GetScene();
         if(scene)

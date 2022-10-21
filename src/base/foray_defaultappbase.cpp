@@ -1,78 +1,100 @@
 #include "foray_defaultappbase.hpp"
 #include "../core/foray_deviceresource.hpp"
-#include "../core/foray_managedimage.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
-#include "../foray_vma.hpp"
-#include "../foray_vulkan.hpp"
-#include "../osi/foray_env.hpp"
+#include "../osi/foray_event.hpp"
 #include "../stages/foray_renderstage.hpp"
 
 namespace foray::base {
+    DefaultAppBase::DefaultAppBase()
+        : mRenderLoop([this]() { this->Init(); },
+                      [this](RenderLoop::RenderInfo& renderInfo) { this->Render(renderInfo); },
+                      [this]() { return this->CanRenderNextFrame(); },
+                      [this]() { this->Destroy(); },
+                      [this]() { this->PollEvents(); },
+                      &PrintStateChange)
+        , mOsManager()
+        , mInstance(
+              &mContext,
+              [this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); },
+#if FORAY_DEBUG || FORAY_VALIDATION  // Set validation layers and debug callbacks on / off
+              true
+#else
+              false
+#endif
+              )
+        , mDevice(
+              &mContext,
+              [this](vkb::PhysicalDeviceSelector& selector) { this->ApiBeforeDeviceSelection(selector); },
+              [this](vkb::DeviceBuilder& builder) { this->ApiBeforeDeviceBuilding(builder); })
+        , mWindowSwapchain(
+              &mContext,
+              [this](Window& window) { this->ApiBeforeWindowCreate(window); },
+              [this](vkb::SwapchainBuilder& builder) { this->ApiBeforeSwapchainBuilding(builder); },
+              [this](VkExtent2D size) { this->OnResized(size); },
+              nullptr)
+    {
+    }
+
+    int32_t DefaultAppBase::Run()
+    {
+        return mRenderLoop.Run();
+    }
+
     void DefaultAppBase::Init()
     {
         ApiBeforeInit();
 
-        logger()->info("Debugging and validation layers enabled : {}", mContext.DebugEnabled);
+#if FORAY_DEBUG
+        logger()->info("Debugging and validation layers enabled");
+#endif
 
         mOsManager.Init();
-        mWindow.CreateWindow();
-        mInstance.Create();
-        VkSurfaceKHR surface = mWindow.GetWindow().GetSurfaceKHR(mInstance);
-        mDevice.Create(mInstance.GetInstance(), surface);
-        mWindow.SetDispatchTable(&mDevice.GetDispatchTable());
-        mWindow.CreateSwapchain(mInstance, mDevice.GetDevice());
+        mContext.OsManager = &mOsManager;
 
-        InitGetVkQueues();
+        mWindowSwapchain.CreateWindow();
+        mInstance.Create();
+        VkSurfaceKHR surface = mWindowSwapchain.GetWindow().GetOrCreateSurfaceKHR(mInstance);
+        mDevice.Create();
+        mWindowSwapchain.CreateSwapchain();
+
+        InitGetQueue();
         InitCommandPool();
         InitCreateVma();
         InitSyncObjects();
+
+        ApiInit();
     }
 
-    void DefaultAppBase::BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder)
+    void DefaultAppBase::InitGetQueue()
     {
-        auto vulkanSurfaceExtensions = mWindow.GetWindow().GetVkSurfaceExtensions();
-        for(const char* extension : vulkanSurfaceExtensions)
-        {
-            instanceBuilder.enable_extension(extension);
-        }
-        instanceBuilder.require_api_version(mRequiredVulkanApiVersion);
-        ApiBeforeInstanceCreate(instanceBuilder);
-    }
+        // Make sure the graphics queue family supports present and transfer
+        auto retGraphicsIdx = mDevice.GetDevice().get_queue_index(vkb::QueueType::graphics);
+        auto retTransferIdx = mDevice.GetDevice().get_queue_index(vkb::QueueType::transfer);
+        auto retPresentIdx  = mDevice.GetDevice().get_queue_index(vkb::QueueType::present);
+        Assert(retGraphicsIdx && retTransferIdx && retPresentIdx, "Failed to find a queue family supporting all required usage types");
+        uint32_t index = *retGraphicsIdx;
+        Assert(index == *retTransferIdx, "Selected queue does not support transfer");
+        Assert(index == *retPresentIdx, "Selected queue does not support present");
 
-    void DefaultAppBase::InitGetVkQueues()
-    {
         // Get the graphics queue with a helper function
-        auto defaultQueueReturn = mDevice.GetDevice().get_queue(vkb::QueueType::graphics);
-        FORAY_ASSERTFMT(defaultQueueReturn, "Failed to get graphics queue. Error: {} ", defaultQueueReturn.error().message())
-
-        auto presentQueueReturn = mContext.GetDevice().get_queue(vkb::QueueType::present);
-        FORAY_ASSERTFMT(presentQueueReturn, "Failed to get present queue. Error: {} ", presentQueueReturn.error().message())
-
-        mContext.QueueGraphics.Queue            = defaultQueueReturn.value();  // TODO: FIX ME: use a dedicated transfer queue in some cases?
-        mContext.QueueGraphics.QueueFamilyIndex = mContext.Device.get_queue_index(vkb::QueueType::graphics).value();
-
-        mContext.TransferQueue.Queue            = mContext.QueueGraphics;  // TODO: FIX ME: use a dedicated transfer queue in some cases?
-        mContext.TransferQueue.QueueFamilyIndex = mContext.QueueGraphics;
-
-        mContext.PresentQueue.Queue            = presentQueueReturn.value();
-        mContext.PresentQueue.QueueFamilyIndex = mContext.Device.get_queue_index(vkb::QueueType::present).value();
+        auto retQueue = mDevice.GetDevice().get_queue(vkb::QueueType::graphics);
+        FORAY_ASSERTFMT(retQueue, "Failed to get graphics queue. Error: {} ", retQueue.error().message())
+        mContext.Queue            = *retQueue;
+        mContext.QueueFamilyIndex = *retGraphicsIdx;
     }
 
     void DefaultAppBase::InitCommandPool()
     {
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT: Hint that command buffers are rerecorded with new commands very often (may change memory allocation behavior)
         // VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT: Allow command buffers to be rerecorded individually, without this flag they all have to be reset together
+        // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT: Hint that command buffers are rerecorded with new commands very often (may change memory allocation behavior)
         poolInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-        poolInfo.queueFamilyIndex = mContext.QueueGraphics;
+        poolInfo.queueFamilyIndex = mContext.QueueFamilyIndex;
 
-        AssertVkResult(vkCreateCommandPool(mContext.Device, &poolInfo, nullptr, &mCommandPool));
-        mContext.CommandPool = mCommandPool;
-
-        mContext.TransferCommandPool = mCommandPool;  // TODO: FIX ME: dedicated transfer command pool in some cases?
+        AssertVkResult(mDevice.GetDispatchTable().createCommandPool(&poolInfo, nullptr, &mContext.CommandPool));
     }
 
     void DefaultAppBase::InitCreateVma()
@@ -83,8 +105,8 @@ namespace foray::base {
 
         VmaAllocatorCreateInfo allocatorCreateInfo = {};
         allocatorCreateInfo.vulkanApiVersion       = VK_API_VERSION_1_2;
-        allocatorCreateInfo.physicalDevice         = mContext.PhysicalDevice;
-        allocatorCreateInfo.device                 = mContext.Device;
+        allocatorCreateInfo.physicalDevice         = mDevice;
+        allocatorCreateInfo.device                 = mDevice;
         allocatorCreateInfo.instance               = mInstance;
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
@@ -106,7 +128,7 @@ namespace foray::base {
 
     void DefaultAppBase::Destroy()
     {
-        AssertVkResult(vkDeviceWaitIdle(mContext.Device));
+        AssertVkResult(mDevice.GetDispatchTable().deviceWaitIdle());
 
         ApiDestroy();
 
@@ -114,7 +136,8 @@ namespace foray::base {
         {
             frame.Destroy();
         }
-        vkDestroyCommandPool(mContext.Device, mCommandPool, nullptr);
+
+        mDevice.GetDispatchTable().destroyCommandPool(mContext.CommandPool, nullptr);
 
         for(auto deviceResource : *core::DeviceResourceBase::GetTotalAllocatedResources())
         {
@@ -125,7 +148,8 @@ namespace foray::base {
         }
 
         vmaDestroyAllocator(mContext.Allocator);
-        mWindow.Destroy();
+        mContext.Allocator = nullptr;
+        mWindowSwapchain.Destroy();
         mDevice.Destroy();
         mInstance.Destroy();
     }
@@ -133,7 +157,7 @@ namespace foray::base {
     void DefaultAppBase::RecreateSwapchain()
     {
         VkSurfaceCapabilitiesKHR surfaceCapabilities{};
-        AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mContext.PhysicalDevice, mContext.ContextSwapchain.Surface, &surfaceCapabilities));
+        AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mDevice, mWindowSwapchain.GetWindow().GetOrCreateSurfaceKHR(mInstance), &surfaceCapabilities));
 
         if(surfaceCapabilities.maxImageExtent.width == 0 || surfaceCapabilities.maxImageExtent.height == 0)
         {
@@ -142,7 +166,7 @@ namespace foray::base {
             return;
         }
 
-        mWindow.RecreateSwapchain();
+        mWindowSwapchain.RecreateSwapchain();
     }
 
     bool DefaultAppBase::CanRenderNextFrame()
@@ -152,50 +176,75 @@ namespace foray::base {
         return currentFrame.HasFinishedExecution();
     }
 
-    void DefaultAppBase::Render(float delta)
+    void DefaultAppBase::PollEvents()
     {
-        InFlightFrame& currentFrame = mInFlightFrames[mInFlightFrameIndex];
-
-        currentFrame->WaitForExecutionFinished();
-
-        if(mRenderedFrameCount > mFrames.size())
+        for(const Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
         {
-            QueryResultsAvailable(mRenderedFrameCount - mFrames.size());
+            ApiOnEvent(event);
+            mWindowSwapchain.HandleEvent(event);
+            if(event->Source && event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() <= 1)
+            {
+                // The last window has been requested to close, oblige by stopping the renderloop
+                mRenderLoop.RequestStop();
+            }
+        }
+    }
+
+    void DefaultAppBase::Render(RenderLoop::RenderInfo& renderInfo)
+    {
+        // Check for shader recompilation
+        if(mLastShadersCheckedTimestamp + 1 < renderInfo.SinceStart)
+        {
+            mLastShadersCheckedTimestamp = renderInfo.SinceStart;
+            if(core::ShaderManager::Instance().CheckAndUpdateShaders())
+            {
+                OnShadersRecompiled();
+            }
         }
 
-        VkImage primaryOutput    = nullptr;
-        VkImage comparisonOutput = nullptr;
+        // Fetch next in flight frame
+        InFlightFrame& currentFrame = mInFlightFrames[mInFlightFrameIndex];
 
-        // Record Render Command buffer
-        // clang-format off
-        FrameRenderInfo renderInfo;
-        renderInfo.SetFrameObjectsIndex(mCurrentFrameIndex)
-                  .SetInFlightFrame(currentFrame)
-                  .SetFrameNumber(mRenderedFrameCount)
-                  .SetFrameTime(delta);
-        // cland-format on
-        
-        // Get the next image index TODO: This action can be deferred until the command buffer section using the swapchain image is required. Should not be necessary however assuming sufficient in flight frames
-        uint32_t swapChainImageIndex = 0;
-        ESwapchainInteractResult result = currentFrame->AcquireSwapchainImage();
+        // Wait for it to finish vkWaitForFences(...)
+        currentFrame.WaitForExecutionFinished();
+
+        // The previous time this frame was used would now have query results available
+        if(mRenderedFrameCount > INFLIGHT_FRAME_COUNT)
+        {
+            ApiQueryResultsAvailable(mRenderedFrameCount - INFLIGHT_FRAME_COUNT);
+        }
+
+        // Acquire the swapchain image
+        uint32_t                 swapChainImageIndex = 0;
+        ESwapchainInteractResult result              = currentFrame.AcquireSwapchainImage();
 
         if(result == ESwapchainInteractResult::Resized)
-        {
+        {  // Recreate swapchain
             RecreateSwapchain();
             return;
         }
 
-        currentFrame->ResetFence();
+        // Reset the fence so it can be signalled again
+        currentFrame.ResetFence();
+
+
+        FrameRenderInfo frameRenderInfo;
+        frameRenderInfo.SetInFlightFrame(&currentFrame).SetFrameNumber(mRenderedFrameCount).SetFrameTime(renderInfo.Delta);
 
         // Record command buffer
-        RecordCommandBuffer(renderInfo);
+        // The user is expected in here to
+        //      - Begin and Submit all their command buffers
+        //      - Prepare swapchain image for use, write to it, and prepare it for submit
+        ApiRender(frameRenderInfo);
 
-        result = currentFrame->Present();
+        // Present the swapchain image
+        result = currentFrame.Present();
+
 
         if(result == ESwapchainInteractResult::Resized)
         {
             // Redo Swapchain
-            if (mState == EState::Running)
+            if(mRenderLoop.IsRunning())
             {
                 RecreateSwapchain();
             }
@@ -203,29 +252,12 @@ namespace foray::base {
 
         // Advance frame index
         mRenderedFrameCount++;
-        mCurrentFrameIndex = (mCurrentFrameIndex + 1) % mFrames.size();
+        mInFlightFrameIndex = (mInFlightFrameIndex + 1) % INFLIGHT_FRAME_COUNT;
     }
-
-    void DefaultAppBase::Update(float delta)
-    {
-        static float deltaSum = 0;
-        deltaSum += delta;
-        if (deltaSum > 1.0f)
-        {
-            deltaSum = 0;
-            if (core::ShaderManager::Instance().CheckAndUpdateShaders())
-            {
-                OnShadersRecompiled();
-            }
-        }
-    }
-
-    void DefaultAppBase::BasePrepareFrame() {}
-    void DefaultAppBase::BaseSubmitFrame() {}
 
     void DefaultAppBase::OnResized(VkExtent2D size)
     {
-        for (stages::RenderStage* stage : mRegisteredStages)
+        for(stages::RenderStage* stage : mRegisteredStages)
         {
             stage->OnResized(size);
         }
@@ -233,24 +265,19 @@ namespace foray::base {
 
     void DefaultAppBase::OnShadersRecompiled()
     {
-        for (stages::RenderStage* stage : mRegisteredStages)
+        for(stages::RenderStage* stage : mRegisteredStages)
         {
             stage->OnShadersRecompiled();
         }
     }
 
-    void DefaultAppBase::RegisterRenderStage(stages::RenderStage* stage) 
+    void DefaultAppBase::RegisterRenderStage(stages::RenderStage* stage)
     {
         mRegisteredStages.emplace(stage);
     }
 
-    void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage) 
+    void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage)
     {
         mRegisteredStages.erase(stage);
     }
-
-    void DefaultAppBase::SetWindowDisplayMode(foray::EDisplayMode displayMode)
-    {
-        mContext.ContextSwapchain.Window.DisplayMode(displayMode);
-    }
-}  // namespace foray
+}  // namespace foray::base

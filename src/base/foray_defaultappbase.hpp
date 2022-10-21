@@ -1,10 +1,8 @@
 #pragma once
-#include "../core/foray_vkcontext.hpp"
 #include "../foray_vma.hpp"
-#include "../osi/foray_window.hpp"
+#include "../osi/foray_osmanager.hpp"
 #include "../stages/foray_stages_declares.hpp"
 #include "foray_framerenderinfo.hpp"
-#include "foray_minimalappbase.hpp"
 #include "foray_renderloop.hpp"
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
@@ -20,9 +18,20 @@ namespace foray::base {
         DefaultAppBase();
         virtual ~DefaultAppBase() = default;
 
+        FORAY_PROPERTY_ALLGET(RenderLoop)
+        FORAY_PROPERTY_ALLGET(OsManager)
+        FORAY_PROPERTY_ALLGET(Instance)
+        FORAY_PROPERTY_ALLGET(Device)
+        FORAY_PROPERTY_ALLGET(WindowSwapchain)
+        FORAY_PROPERTY_SET(Context)
+
+        int32_t Run();
+
       protected:
         inline virtual void ApiBeforeInit() {}
 
+        /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
+        inline virtual void ApiBeforeWindowCreate(Window& window) {}
         /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
         inline virtual void ApiBeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
         /// @brief Alter physical device selection.
@@ -31,46 +40,54 @@ namespace foray::base {
         inline virtual void ApiBeforeDeviceBuilding(vkb::DeviceBuilder& deviceBuilder) {}
         /// @brief Before building the swapchain
         inline virtual void ApiBeforeSwapchainBuilding(vkb::SwapchainBuilder& swapchainBuilder) {}
+        inline virtual void ApiInit() {}
         inline virtual void ApiOnResized(VkExtent2D size) {}
+        /// @brief Override this method to react to events
+        inline virtual void ApiOnEvent(const Event* event) {}
         inline virtual void ApiRender(FrameRenderInfo& renderInfo) {}
         inline virtual void ApiQueryResultsAvailable(uint64_t frameIndex) {}
         inline virtual void ApiOnShadersRecompiled() {}
         inline virtual void ApiDestroy() {}
 
         virtual void Init();
-        void         BeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder);
-        virtual void InitGetVkQueues();
+        virtual void InitGetQueue();
         virtual void InitCommandPool();
         virtual void InitCreateVma();
         virtual void InitSyncObjects();
 
         virtual void RecreateSwapchain();
+        inline void  OnResized(VkExtent2D size);
+
+        /// @brief Polls and distributes events from the SDL subsystem
+        virtual void PollEvents();
 
         virtual bool CanRenderNextFrame();
-        virtual void Render(float delta);
+        virtual void Render(RenderLoop::RenderInfo& renderInfo);
+        virtual void OnShadersRecompiled();
 
         virtual void Destroy();
 
         virtual void RegisterRenderStage(stages::RenderStage* stage);
         virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
-        RenderLoop     mRenderLoop;
-        OsManager      mOsManager;
-        VulkanInstance mInstance;
-        VulkanDevice   mDevice;
-        VulkanWindow   mWindow;
+        RenderLoop            mRenderLoop;
+        OsManager             mOsManager;
+        VulkanInstance        mInstance;
+        VulkanDevice          mDevice;
+        VulkanWindowSwapchain mWindowSwapchain;
+        core::Context         mContext;
+
 
         /// @brief The applications vulkan context.
-        core::VkContext mContext;
-        uint32_t        mRequiredVulkanApiVersion = VK_API_VERSION_1_3;
+        uint32_t mRequiredVulkanApiVersion = VK_API_VERSION_1_3;
 
         uint32_t                                        mAuxiliaryCommandBufferCount = 0;
         std::array<InFlightFrame, INFLIGHT_FRAME_COUNT> mInFlightFrames;
         uint32_t                                        mInFlightFrameIndex = 0;
-
-        /// @brief Commandpool for the default queue.
-        VkCommandPool mCommandPool{};
+        uint64_t                                        mRenderedFrameCount = 0;
 
         std::unordered_set<stages::RenderStage*> mRegisteredStages;
+
+        fp64_t mLastShadersCheckedTimestamp = 0.0;
     };
 }  // namespace foray::base

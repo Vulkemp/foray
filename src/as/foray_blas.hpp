@@ -1,7 +1,7 @@
 #pragma once
-#include "../core/foray_deviceresource.hpp"
-#include "../core/foray_vkcontext.hpp"
 #include "../bench/foray_bench_declares.hpp"
+#include "../core/foray_context.hpp"
+#include "../core/foray_deviceresource.hpp"
 #include "../core/foray_managedbuffer.hpp"
 #include "../scene/foray_scene_declares.hpp"
 
@@ -13,7 +13,7 @@ namespace foray::as {
       public:
         virtual ~Blas() { Destroy(); }
 
-        virtual void CreateOrUpdate(const core::VkContext* context, const scene::Mesh* mesh, const scene::GeometryStore* store, bench::HostBenchmark* benchmark = nullptr);
+        virtual void CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::GeometryStore* store, bench::HostBenchmark* benchmark = nullptr);
 
         inline virtual bool Exists() const override { return !mAccelerationStructure; }
         virtual void        Destroy() override;
@@ -24,10 +24,10 @@ namespace foray::as {
         FORAY_PROPERTY_CGET(Mesh)
 
       protected:
-        const core::VkContext*           mContext = nullptr;
-        const scene::Mesh*                mMesh    = nullptr;
-        core::ManagedBuffer              mBlasMemory;
+        core::Context*             mContext = nullptr;
+        const scene::Mesh*         mMesh    = nullptr;
+        core::ManagedBuffer        mBlasMemory;
         VkAccelerationStructureKHR mAccelerationStructure{};
         VkDeviceAddress            mBlasAddress{};
     };
-}  // namespace foray
+}  // namespace foray::as

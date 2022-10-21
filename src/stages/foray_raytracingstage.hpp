@@ -2,7 +2,7 @@
 #include "../core/foray_managedbuffer.hpp"
 #include "../core/foray_managedimage.hpp"
 #include "../core/foray_shadermodule.hpp"
-#include "../core/foray_vkcontext.hpp"
+#include "../core/foray_context.hpp"
 #include "../rtpipe/foray_rtpipeline.hpp"
 #include "../scene/foray_scene.hpp"
 #include "foray_rasterizedRenderStage.hpp"
@@ -57,8 +57,8 @@ namespace foray::stages {
 
             inline SampledImage() {}
 
-            void                                                       Create(const core::VkContext* context, core::ManagedImage* image, bool initateSampler = true);
-            void                                                       Destroy(const core::VkContext* context);
+            void                                                       Create(core::Context* context, core::ManagedImage* image, bool initateSampler = true);
+            void                                                       Destroy(core::Context* context);
             void                                                       UpdateDescriptorInfos();
             std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(bool rebuild = false);
         } mEnvMap, mNoiseSource;

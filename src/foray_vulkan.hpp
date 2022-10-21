@@ -22,6 +22,6 @@ namespace foray {
         }
     }
 
-    void SetVulkanObjectName(const core::VkContext* context, VkObjectType objectType, const void* objectHandle, std::string_view name);
+    void SetVulkanObjectName(core::Context* context, VkObjectType objectType, const void* objectHandle, std::string_view name);
 
 }  // namespace foray

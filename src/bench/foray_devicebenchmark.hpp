@@ -11,7 +11,7 @@ namespace foray::bench {
     class DeviceBenchmark : public BenchmarkBase, public core::DeviceResourceBase
     {
       public:
-        void Create(const core::VkContext* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets = INFLIGHT_FRAME_COUNT);
+        void Create(core::Context* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets = INFLIGHT_FRAME_COUNT);
 
         inline virtual bool Exists() const { return mQueryPools.size() > 0; }
         virtual void        Destroy();
@@ -26,7 +26,7 @@ namespace foray::bench {
       protected:
         fp64_t ConvertQueryResultToMillis(uint64_t result);
 
-        const core::VkContext*         mContext = nullptr;
+        core::Context*         mContext = nullptr;
         std::vector<VkQueryPool> mQueryPools;
         fp64_t                   mTimestampPeriod = 0.f;
 

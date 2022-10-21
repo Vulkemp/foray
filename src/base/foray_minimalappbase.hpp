@@ -1,27 +1,11 @@
 #pragma once
 #include "../foray_logger.hpp"
-#include "../osi/foray_osi.hpp"
+#include "../osi/foray_osmanager.hpp"
 #include "foray_renderloop.hpp"
 #include "foray_vulkaninstance.hpp"
-#include <stdint.h>
-#include <vkbootstrap/VkBootstrap.h>
+#include "../core/foray_context.hpp"
 
 namespace foray::base {
-    class AppUpdateTiming
-    {
-      public:
-        inline void  UpdatesPerSecond(float value) { mSecondsPerUpdate = 1.f / value; }
-        inline void  SecondsPerUpdate(float value) { mSecondsPerUpdate = value; }
-        inline float UpdatesPerSecond() const { return 1.f / mSecondsPerUpdate; }
-        inline float SecondsPerUpdate() const { return mSecondsPerUpdate; }
-
-        inline void Set60Fps() { mSecondsPerUpdate = 1.f / 60.f; }
-        inline void DisableFpsLock() { mSecondsPerUpdate = 0; }
-
-      protected:
-        float mSecondsPerUpdate = 1.f / 60.f;
-    };
-
     /// @brief Application base providing bare minimum of functionality (app lifetime, event handling, vulkan instance management)
     class MinimalAppBase
     {
@@ -49,7 +33,7 @@ namespace foray::base {
         /// @brief Override this method to init your application
         inline virtual bool ApiCanRenderNextFrame() { return true; }
         /// @brief Override this method to render your application
-        inline virtual void ApiRender(float delta) {}
+        inline virtual void ApiRender(RenderLoop::RenderInfo& renderInfo) {}
         /// @brief Override this method to react to events
         inline virtual void ApiOnEvent(const Event* event) {}
         /// @brief Override this method to cleanup your application
@@ -58,5 +42,6 @@ namespace foray::base {
         RenderLoop     mRenderLoop;
         OsManager      mOsManager;
         VulkanInstance mInstance;
+        core::Context  mContext;
     };
 }  // namespace foray::base

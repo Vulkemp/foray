@@ -2,6 +2,7 @@
 
 #include "../foray_logger.hpp"
 #include "../osi/foray_event.hpp"
+#include "../osi/foray_window.hpp"
 #include <nameof/nameof.hpp>
 
 namespace foray::base {
@@ -13,13 +14,20 @@ namespace foray::base {
 
     MinimalAppBase::MinimalAppBase(bool printStateChanges)
         : mRenderLoop([this]() { this->Init(); },
-                      [this](fp32_t delta) { this->ApiRender(delta); },
+                      [this](RenderLoop::RenderInfo& renderInfo) { this->ApiRender(renderInfo); },
                       [this]() { return this->ApiCanRenderNextFrame(); },
                       [this]() { this->Destroy(); },
                       [this]() { this->PollEvents(); },
-                      (printStateChanges ? &lPrintStateChange : nullptr))
+                      (printStateChanges ? &PrintStateChange : nullptr))
         , mOsManager()
-        , mInstance([this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); }, true)
+        , mInstance(
+              &mContext, [this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); }, 
+#if FORAY_DEBUG || FORAY_VALIDATION  // Set validation layers and debug callbacks on / off
+              true
+#else
+              false
+#endif
+              )
     {
     }
 

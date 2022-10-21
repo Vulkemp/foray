@@ -10,10 +10,10 @@ using namespace std::filesystem;
 namespace foray::util {
 
     template <VkFormat FORMAT>
-    bool ImageLoader<FORMAT>::sFormatSupported(const core::VkContext* context)
+    bool ImageLoader<FORMAT>::sFormatSupported(core::Context* context)
     {
         VkFormatProperties properties;
-        vkGetPhysicalDeviceFormatProperties(context->PhysicalDevice.physical_device, FORMAT, &properties);
+        vkGetPhysicalDeviceFormatProperties(context->VkbPhysicalDevice->physical_device, FORMAT, &properties);
         if((properties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) > 0)
         {
             return true;
@@ -90,7 +90,7 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::InitManagedImage(const core::VkContext* context, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
+    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
     {
         if(!mInfo.Valid || !mRawData.size())
         {
@@ -104,7 +104,7 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::InitManagedImage(const core::VkContext* context, core::HostCommandBuffer& cmdBuffer, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
+    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::HostCommandBuffer& cmdBuffer, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
     {
         if(!mInfo.Valid || !mRawData.size())
         {

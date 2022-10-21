@@ -49,7 +49,7 @@ namespace foray::as {
         */
       public:
         /// @brief (re)creates the meta buffer
-        const std::unordered_map<const Blas*, uint32_t>& CreateOrUpdate(const core::VkContext* context, const std::unordered_set<const Blas*>& entries);
+        const std::unordered_map<const Blas*, uint32_t>& CreateOrUpdate(core::Context* context, const std::unordered_set<const Blas*>& entries);
 
         FORAY_PROPERTY_ALLGET(Buffer)
         FORAY_PROPERTY_CGET(BufferOffsets)
@@ -57,11 +57,11 @@ namespace foray::as {
         std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage);
 
       protected:
-        const core::VkContext* mContext = nullptr;
+        core::Context* mContext = nullptr;
         /// @brief Maps BLAS to their offsets into the BlasMetaBuffers GeometryMeta array
         std::unordered_map<const Blas*, uint32_t> mBufferOffsets;
         /// @brief The device local buffer holding the array
-        core::ManagedBuffer                       mBuffer;
+        core::ManagedBuffer                 mBuffer;
         std::vector<VkDescriptorBufferInfo> mDescriptorInfos;
     };
 }  // namespace foray::as

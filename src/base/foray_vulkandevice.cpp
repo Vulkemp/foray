@@ -1,5 +1,7 @@
 #include "foray_vulkandevice.hpp"
+#include "../core/foray_context.hpp"
 #include "../foray_vulkan.hpp"
+#include "../osi/foray_window.hpp"
 
 namespace foray::base {
     VulkanDevice& VulkanDevice::SetBeforePhysicalDeviceSelectFunc(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc)
@@ -13,15 +15,17 @@ namespace foray::base {
         return *this;
     }
 
-    void VulkanDevice::Create(vkb::Instance& instance, VkSurfaceKHR surface)
+    void VulkanDevice::Create()
     {
-        SelectPhysicalDevice(instance, surface);
+        SelectPhysicalDevice();
         BuildDevice();
     }
-    void VulkanDevice::SelectPhysicalDevice(vkb::Instance& instance, VkSurfaceKHR surface)
+    void VulkanDevice::SelectPhysicalDevice()
     {
+        Assert(!!(mContext->VkbInstance), "[VulkanDevice::SelectPhysicalDevice] require instance to initialize device selection process!");
+
         // create physical device selector
-        vkb::PhysicalDeviceSelector deviceSelector(instance, surface);
+        vkb::PhysicalDeviceSelector deviceSelector(*(mContext->VkbInstance), mContext->Window->GetOrCreateSurfaceKHR(mContext->Instance()));
 
         if(mSetDefaultCapabilitiesToDeviceSelector)
         {
@@ -30,6 +34,8 @@ namespace foray::base {
 
             // Prefer dedicated devices
             deviceSelector.prefer_gpu_device_type();
+
+            deviceSelector.set_minimum_version(1U, 3U);
 
             // Set raytracing extensions
             std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
@@ -61,7 +67,8 @@ namespace foray::base {
         FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::SelectPhysicalDevice] vkb Device Selector failed to find a satisifying device. VkResult: {} Reason: {}",
                         PrintVkResult(ret.vk_result()), ret.error().message())
 
-        mPhysicalDevice = *ret;
+        mPhysicalDevice          = *ret;
+        mContext->VkbPhysicalDevice = &mPhysicalDevice;
     }
     void VulkanDevice::BuildDevice()
     {
@@ -102,9 +109,12 @@ namespace foray::base {
         FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
                         ret.error().message())
 
-        mDevice = *ret;
-        mDispatchTable = mDevice.make_table();
+        mDevice                 = *ret;
+        mDispatchTable          = mDevice.make_table();
+        mContext->VkbDevice        = &mDevice;
+        mContext->VkbDispatchTable = &mDispatchTable;
     }
+
     void VulkanDevice::Destroy()
     {
         if(!!mDevice.device)
@@ -112,8 +122,14 @@ namespace foray::base {
             vkb::destroy_device(mDevice);
             mDevice = vkb::Device();
         }
-        mDispatchTable = vkb::DispatchTable();
+        mDispatchTable  = vkb::DispatchTable();
         mPhysicalDevice = vkb::PhysicalDevice();
+        if(!!mContext)
+        {
+            mContext->VkbPhysicalDevice = nullptr;
+            mContext->VkbDevice         = nullptr;
+            mContext->VkbDispatchTable  = nullptr;
+        }
     }
 
     VulkanDevice::~VulkanDevice()
@@ -124,6 +140,13 @@ namespace foray::base {
             mDevice = vkb::Device();
         }
         mPhysicalDevice = vkb::PhysicalDevice();
+        mDispatchTable  = vkb::DispatchTable();
+        if(!!mContext)
+        {
+            mContext->VkbPhysicalDevice = nullptr;
+            mContext->VkbDevice         = nullptr;
+            mContext->VkbDispatchTable  = nullptr;
+        }
     }
 
 }  // namespace foray::base

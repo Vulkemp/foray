@@ -2,9 +2,7 @@
 
 namespace foray::core {
     struct Queue;
-    struct SwapchainImage;
-    struct SwapchainContext;
-    struct VkContext;
+    struct Context;
     class DeviceResourceBase;
     class ManagedImage;
     class ManagedBuffer;

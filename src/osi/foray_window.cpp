@@ -122,6 +122,7 @@ namespace foray {
         }
         SDL_DestroyWindow(mHandle);
         mHandle = nullptr;
+        mSurface = nullptr;
     }
     uint32_t Window::SDLId() const
     {
@@ -132,15 +133,18 @@ namespace foray {
         return 0;
     }
 
-    VkSurfaceKHR Window::GetSurfaceKHR(VkInstance instance) const
+    VkSurfaceKHR Window::GetOrCreateSurfaceKHR(VkInstance instance)
     {
         if(!Exists())
         {
             return nullptr;
         }
-        VkSurfaceKHR surface;
-        SDL_Vulkan_CreateSurface(mHandle, instance, &surface);
-        return surface;
+        if(!!mSurface)
+        {
+            return mSurface;
+        }
+        SDL_Vulkan_CreateSurface(mHandle, instance, &mSurface);
+        return mSurface;
     }
 
     std::vector<const char*> Window::GetVkSurfaceExtensions() const

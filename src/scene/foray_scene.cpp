@@ -7,7 +7,7 @@
 #include "foray_node.hpp"
 
 namespace foray::scene {
-    Scene::Scene(const core::VkContext* context) : Registry(this), mContext(context)
+    Scene::Scene(core::Context* context) : Registry(this), mContext(context)
     {
         InitDefaultGlobals();
     }

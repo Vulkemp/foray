@@ -4,7 +4,7 @@ namespace foray::base {
     class RenderLoop;
     class VulkanInstance;
     class VulkanDevice;
-    class VulkanWindow;
+    class VulkanWindowSwapchain;
     class MinimalAppBase;
     class DefaultAppBase;
     class InFlightFrame;
