@@ -256,6 +256,7 @@ namespace foray::base {
 
     void DefaultAppBase::OnResized(VkExtent2D size)
     {
+        ApiOnResized(size);
         for(stages::RenderStage* stage : mRegisteredStages)
         {
             stage->OnResized(size);
@@ -264,6 +265,7 @@ namespace foray::base {
 
     void DefaultAppBase::OnShadersRecompiled()
     {
+        ApiOnShadersRecompiled();
         for(stages::RenderStage* stage : mRegisteredStages)
         {
             stage->OnShadersRecompiled();

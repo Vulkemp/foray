@@ -76,9 +76,11 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedImage::Recreate()
+    void ManagedImage::Resize(VkExtent3D newextent)
     {
-        Assert(mContext != nullptr, "Attempted to recreate image before initial creation!");
+        Assert(Exists(), "Attempted to resize image before initial creation!");
+        mCreateInfo.ImageCI.extent = newextent;
+        Destroy();
         Create(mContext, mCreateInfo);
     }
 

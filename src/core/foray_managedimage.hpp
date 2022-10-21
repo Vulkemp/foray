@@ -38,7 +38,7 @@ namespace foray::core {
         virtual void Create(Context* context, CreateInfo createInfo);
 
         /// @brief Uses stored create info to recreate vulkan image.
-        virtual void Recreate();
+        virtual void Resize(VkExtent3D newextent);
 
         virtual void Create(Context*         context,
                             VmaMemoryUsage           memoryUsage,
@@ -49,31 +49,6 @@ namespace foray::core {
                             VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
                             VkImageAspectFlags       aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT,
                             std::string_view         name          = "UnnamedImage");
-
-        // /// @brief When doing a layout transition, specify the transition parameters.
-        // struct LayoutTransitionInfo
-        // {
-        //     /// @brief New image layout is mandatory!
-        //     VkImageLayout                NewImageLayout{VK_IMAGE_LAYOUT_UNDEFINED};
-        //     std::optional<VkImageLayout> OldImageLayout{};
-        //     VkAccessFlags                BarrierSrcAccessMask{0};
-        //     VkAccessFlags                BarrierDstAccessMask{0};
-        //     VkPipelineStageFlags         SrcStage{};
-        //     VkPipelineStageFlags         DstStage{};
-        //     /// @brief If no command buffer is passed, a single time command buffer will be created to transfer the layout.
-        //     VkCommandBuffer         CommandBuffer{nullptr};
-        //     uint32_t                SrcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
-        //     uint32_t                DstQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
-        //     VkImageSubresourceRange SubresourceRange{
-        //         .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
-        //         .baseMipLevel   = 0,
-        //         .levelCount     = 1,
-        //         .baseArrayLayer = 0,
-        //         .layerCount     = 1,
-        //     };
-        //     /// @brief If the CommandBuffer member is left to nullptr, a single time command buffer is generated with this level.
-        //     VkCommandBufferLevel CommandBufferLevel{VK_COMMAND_BUFFER_LEVEL_PRIMARY};
-        // };
 
         /// @brief Simple layout transition.
         /// @param newLayout - The new layout for the image.
