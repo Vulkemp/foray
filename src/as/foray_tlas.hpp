@@ -1,5 +1,5 @@
 #pragma once
-#include "../core/foray_deviceresource.hpp"
+#include "../core/foray_managedresource.hpp"
 #include "../foray_basics.hpp"
 #include "../scene/foray_component.hpp"
 #include "../scene/foray_scene_declares.hpp"
@@ -15,11 +15,13 @@ namespace foray::as {
 
     /// @brief Describes a top level accerlation structure. A tlas usually holds multiple Blas.
     /// A blas is an object/mesh instance together with its transformation in 3d space.
-    class Tlas : public core::DeviceResourceBase
+    class Tlas : public core::ManagedResource
     {
       public:
         explicit Tlas(core::Context* context);
         virtual ~Tlas() { Destroy(); }
+
+        inline virtual std::string_view GetTypeName() const override { return "Top-Level AS"; }
 
         /// @brief (Re)creates the TLAS. Required to invoke when changes to the TLAS transitioned it to Dirty state. Will synchronize with the CPU.
         virtual void CreateOrUpdate();

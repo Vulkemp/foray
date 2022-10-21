@@ -42,9 +42,9 @@ namespace foray::core {
         AssertVkResult(mContext->VkbDispatchTable->resetCommandBuffer(mCommandBuffer, flags));
     }
 
-    void CommandBuffer::SetName(Context* context, std::string_view name)
+    void CommandBuffer::SetName(std::string_view name)
     {
-        SetVulkanObjectName(context, VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER, mCommandBuffer, name);
+        SetObjectName(mContext, mCommandBuffer, name, true);
     }
 
     void CommandBuffer::Destroy()

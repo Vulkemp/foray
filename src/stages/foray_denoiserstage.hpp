@@ -6,7 +6,7 @@
 #endif
 
 namespace foray::stages {
-    class DenoiserSynchronisationSemaphore : public core::DeviceResourceBase
+    class DenoiserSynchronisationSemaphore : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SEMAPHORE>
     {
       public:
         void                Create(core::Context* context);

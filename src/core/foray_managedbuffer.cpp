@@ -95,7 +95,7 @@ namespace foray::core {
         return vkGetBufferDeviceAddress(mContext->Device(), &addressInfo);
     }
 
-    ManagedBuffer& ManagedBuffer::SetName(std::string_view name)
+    void ManagedBuffer::SetName(std::string_view name)
     {
         mName = name;
 #if FORAY_DEBUG
@@ -104,7 +104,6 @@ namespace foray::core {
             UpdateDebugNames();
         }
 #endif
-        return *this;
     }
 
     void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo)
@@ -117,13 +116,8 @@ namespace foray::core {
     void ManagedBuffer::UpdateDebugNames()
     {
         std::string debugName = fmt::format("ManBuf \"{}\" ({})", mName, util::PrintSize(mSize));
+        SetObjectName(mContext, mBuffer, debugName, false);
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
-        VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-                                               .pNext        = nullptr,
-                                               .objectType   = VkObjectType::VK_OBJECT_TYPE_BUFFER,
-                                               .objectHandle = reinterpret_cast<uint64_t>(mBuffer),
-                                               .pObjectName  = debugName.c_str()};
-        mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
     void ManagedBuffer::Destroy()

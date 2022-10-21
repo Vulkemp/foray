@@ -151,43 +151,6 @@ namespace foray::core {
         }
     }
 
-
-    // void ManagedImage::TransitionLayout(LayoutTransitionInfo& transitionInfo)
-    // {
-    //     bool              createTemporaryCommandBuffer = false;
-    //     VkCommandBuffer   commandBuffer;
-    //     HostCommandBuffer tempCmdBuffer;
-    //     if(transitionInfo.CommandBuffer == nullptr)
-    //     {
-    //         createTemporaryCommandBuffer = true;
-    //         tempCmdBuffer.Create(mContext);
-    //         tempCmdBuffer.Begin();
-    //         commandBuffer = tempCmdBuffer;
-    //     }
-    //     else
-    //     {
-    //         commandBuffer = transitionInfo.CommandBuffer;
-    //     }
-    //     VkImageMemoryBarrier barrier{};
-    //     barrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    //     barrier.oldLayout           = transitionInfo.OldImageLayout.has_value() ? transitionInfo.OldImageLayout.value() : mImageLayout;
-    //     barrier.newLayout           = transitionInfo.NewImageLayout;
-    //     barrier.srcQueueFamilyIndex = transitionInfo.SrcQueueFamilyIndex;
-    //     barrier.dstQueueFamilyIndex = transitionInfo.DstQueueFamilyIndex;
-    //     barrier.image               = mImage;
-    //     barrier.subresourceRange    = transitionInfo.SubresourceRange;
-    //     barrier.srcAccessMask       = transitionInfo.BarrierSrcAccessMask;
-    //     barrier.dstAccessMask       = transitionInfo.BarrierDstAccessMask;
-    //     vkCmdPipelineBarrier(commandBuffer, transitionInfo.SrcStage, transitionInfo.DstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-    //     // update image layout
-    //     mImageLayout = barrier.newLayout;
-    //     if(tempCmdBuffer.Exists())
-    //     {
-    //         tempCmdBuffer.SubmitAndWait();
-    //         tempCmdBuffer.Destroy();
-    //     }
-    // }
-
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
         HostCommandBuffer cmdBuffer;
@@ -269,7 +232,7 @@ namespace foray::core {
                                                                 createInfo.ImageCI.usage, createInfo.ImageCI.flags, &props));
     }
 
-    ManagedImage& ManagedImage::SetName(std::string_view name)
+    void ManagedImage::SetName(std::string_view name)
     {
         mName = name;
 #if FORAY_DEBUG
@@ -278,29 +241,18 @@ namespace foray::core {
             UpdateDebugNames();
         }
 #endif
-        return *this;
     }
 
     void ManagedImage::UpdateDebugNames()
     {
         {  // Image
             std::string                   debugName = fmt::format("ManImg \"{}\" ({})", mName, util::PrintSize(mSize));
-            VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-                                                   .pNext        = nullptr,
-                                                   .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE,
-                                                   .objectHandle = reinterpret_cast<uint64_t>(mImage),
-                                                   .pObjectName  = debugName.c_str()};
-            mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
+            SetObjectName(mContext, mImage, debugName, false);
             vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         }
         {  // Image View
             std::string                   debugName = fmt::format("ManImgView \"{}\"", mName);
-            VkDebugUtilsObjectNameInfoEXT nameInfo{.sType        = VkStructureType::VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-                                                   .pNext        = nullptr,
-                                                   .objectType   = VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW,
-                                                   .objectHandle = reinterpret_cast<uint64_t>(mImageView),
-                                                   .pObjectName  = debugName.c_str()};
-            mContext->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
+            SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW, mImageView, debugName);
         }
     }
 

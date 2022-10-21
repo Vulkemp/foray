@@ -1,10 +1,10 @@
 #pragma once
 #include "../foray_vulkan.hpp"
-#include "foray_deviceresource.hpp"
+#include "foray_managedresource.hpp"
 #include "foray_context.hpp"
 
 namespace foray::core {
-    class ShaderModule : public core::DeviceResourceBase
+    class ShaderModule : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SHADER_MODULE>
     {
       public:
         ShaderModule() = default;

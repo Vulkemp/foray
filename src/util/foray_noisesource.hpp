@@ -3,7 +3,7 @@
 #include "../core/foray_managedimage.hpp"
 
 namespace foray::util {
-    class NoiseSource : public core::DeviceResourceBase
+    class NoiseSource : public core::ManagedResource
     {
       public:
         NoiseSource();

@@ -110,7 +110,7 @@ namespace foray::gltf {
 
                         core::HostCommandBuffer cmdBuf;
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-                        cmdBuf.SetName(args.Context, fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
+                        cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
                         std::vector<VkImageMemoryBarrier2> barriers(2);
                         VkImageMemoryBarrier2&             sourceBarrier = barriers[0];

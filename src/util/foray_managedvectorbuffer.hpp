@@ -17,7 +17,7 @@ namespace foray::util {
     };
 
     template <typename TClass>
-    class ManagedVectorBuffer : public core::DeviceResourceBase
+    class ManagedVectorBuffer : public core::ManagedResource
     {
       public:
         const bool DeviceLocal;
@@ -31,7 +31,7 @@ namespace foray::util {
         virtual bool Exists() const override { return mBuffer.Exists(); }
 
         inline virtual std::string_view   GetName() const { return mBuffer.GetName(); }
-        inline virtual ManagedVectorBuffer<TClass>& SetName(std::string_view name) override;
+        inline virtual void SetName(std::string_view name) override;
 
         inline virtual ~ManagedVectorBuffer() { Destroy(); }
 
@@ -129,10 +129,9 @@ namespace foray::util {
     }
 
     template <typename TClass>
-    inline ManagedVectorBuffer<TClass>& ManagedVectorBuffer<TClass>::SetName(std::string_view name)
+    inline void ManagedVectorBuffer<TClass>::SetName(std::string_view name)
     {
         mBuffer.SetName(name);
-        return *this;
     }
 
 }  // namespace foray

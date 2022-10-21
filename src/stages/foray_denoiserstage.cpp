@@ -28,15 +28,12 @@ namespace foray::stages {
         AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCi, nullptr, &mSemaphore));
 
 #ifdef WIN32
-        VkSemaphoreGetWin32HandleInfoKHR getWInfo
-        {
-            .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR,
-            .semaphore = mSemaphore,
-            .handleType = handleType
-        };
+        VkSemaphoreGetWin32HandleInfoKHR getWInfo{
+            .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, .semaphore = mSemaphore, .handleType = handleType};
 
-        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device(), "vkGetSemaphoreWin32HandleKH"
-                                                                                                                                                    "R"));
+        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device(),
+                                                                                                                                "vkGetSemaphoreWin32HandleKH"
+                                                                                                                                "R"));
 
         if(!getHandleFunc)
         {
@@ -58,7 +55,7 @@ namespace foray::stages {
     void DenoiserSynchronisationSemaphore::Destroy()
     {
 #ifdef WIN32
-        if (mHandle != INVALID_HANDLE_VALUE)
+        if(mHandle != INVALID_HANDLE_VALUE)
         {
             CloseHandle(mHandle);
             mHandle = INVALID_HANDLE_VALUE;
@@ -73,6 +70,7 @@ namespace foray::stages {
         if(!!mSemaphore)
         {
             mContext->VkbDispatchTable->destroySemaphore(mSemaphore, nullptr);
+            mSemaphore = nullptr;
         }
     }
 }  // namespace foray::stages

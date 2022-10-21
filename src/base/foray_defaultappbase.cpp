@@ -1,5 +1,5 @@
 #include "foray_defaultappbase.hpp"
-#include "../core/foray_deviceresource.hpp"
+#include "../core/foray_managedresource.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
@@ -138,13 +138,7 @@ namespace foray::base {
 
         mDevice.GetDispatchTable().destroyCommandPool(mContext.CommandPool, nullptr);
 
-        for(auto deviceResource : *core::DeviceResourceBase::GetTotalAllocatedResources())
-        {
-            if(deviceResource->Exists())
-            {
-                logger()->error("Resource with name \"{}\" has not been cleaned up!", deviceResource->GetName());
-            }
-        }
+        core::ManagedResource::sPrintAllocatedResources(true);
 
         vmaDestroyAllocator(mContext.Allocator);
         mContext.Allocator = nullptr;

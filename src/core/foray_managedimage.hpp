@@ -2,15 +2,15 @@
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
 #include "foray_commandbuffer.hpp"
-#include "foray_deviceresource.hpp"
+#include "foray_managedresource.hpp"
 #include "foray_context.hpp"
 #include <optional>
 
 namespace foray::core {
-    class ManagedImage : public DeviceResourceBase
+    class ManagedImage : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_IMAGE>
     {
       public:
-        inline ManagedImage() { mName = "Unnamed Image"; }
+        inline ManagedImage() : VulkanResource("Unnamed Image") { }
         inline virtual ~ManagedImage() { Destroy(); }
 
         struct CreateInfo
@@ -81,7 +81,7 @@ namespace foray::core {
         FORAY_PROPERTY_GET(Name)
         FORAY_PROPERTY_CGET(Name)
 
-        virtual ManagedImage& SetName(std::string_view name) override;
+        virtual void SetName(std::string_view name) override;
 
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 

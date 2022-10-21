@@ -4,7 +4,7 @@
 #include "foray_dualbuffer.hpp"
 
 namespace foray::util {
-    class ManagedUboBase : public core::DeviceResourceBase
+    class ManagedUboBase : public core::ManagedResource
     {
       public:
         inline size_t SizeOfUbo() const { return mUboBuffer.GetDeviceBuffer().GetSize(); }

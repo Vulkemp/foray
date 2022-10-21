@@ -11,14 +11,14 @@ namespace foray::base {
         mContext = context;
         Assert(!!mContext->VkbDispatchTable, "[InFlightFrame::Create] Requires Dispatch table");
         mPrimaryCommandBuffer.Create(context);
-        mPrimaryCommandBuffer.SetName(context, "Primary CommandBuffer");
+        mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
         for(int32_t i = 0; i < auxCommandBufferCount; i++)
         {
             std::unique_ptr<core::DeviceCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
             buf                                             = std::make_unique<core::DeviceCommandBuffer>();
             buf->Create(context);
-            buf->SetName(context, fmt::format("Auxiliary CommandBuffer #{}", i));
+            buf->SetName(fmt::format("Auxiliary CommandBuffer #{}", i));
         }
 
         VkSemaphoreCreateInfo semaphoreCI{};

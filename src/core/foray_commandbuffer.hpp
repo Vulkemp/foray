@@ -1,12 +1,12 @@
 #pragma once
 #include "foray_context.hpp"
-#include "foray_deviceresource.hpp"
+#include "foray_managedresource.hpp"
 #include <vulkan/vulkan.h>
 
 namespace foray::core {
 
     /// @brief VkCommandBuffer wrapper
-    class CommandBuffer : public DeviceResourceBase
+    class CommandBuffer : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER>
     {
       public:
         CommandBuffer() = default;
@@ -22,7 +22,7 @@ namespace foray::core {
         /// @brief Destroys the associated resources
         virtual void Destroy() override;
         virtual bool Exists() const override { return mCommandBuffer; }
-        virtual void SetName(Context* context, std::string_view name);
+        virtual void SetName(std::string_view name) override;
 
         inline operator VkCommandBuffer() { return mCommandBuffer; }
         inline operator const VkCommandBuffer() const { return mCommandBuffer; }

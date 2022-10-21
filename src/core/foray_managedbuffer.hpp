@@ -2,12 +2,12 @@
 #include "../foray_vulkan.hpp"
 #include "../foray_vma.hpp"
 #include "foray_commandbuffer.hpp"
-#include "foray_deviceresource.hpp"
+#include "foray_managedresource.hpp"
 #include "foray_context.hpp"
 
 namespace foray::core {
 
-    class ManagedBuffer : public DeviceResourceBase
+    class ManagedBuffer : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_BUFFER>
     {
       public:
         struct ManagedBufferCreateInfo
@@ -22,7 +22,7 @@ namespace foray::core {
         };
 
       public:
-        ManagedBuffer() { mName = "Unnamed Buffer"; };
+        ManagedBuffer() : VulkanResource("Unnamed Buffer") { };
 
         void Create(Context* context, const ManagedBufferCreateInfo& createInfo);
         /// @brief Creates the buffer with VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT. If data is set, also maps writes and unmaps
@@ -31,9 +31,9 @@ namespace foray::core {
         void Create(
             Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
 
-        virtual void Destroy();
+        virtual void Destroy() override;
 
-        virtual bool Exists() const { return mAllocation; }
+        virtual bool Exists() const override { return mAllocation; }
 
         void WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
         /// @brief Create staging buffer, copy data to it, copy data to device buffer, destroy staging buffer
@@ -67,7 +67,7 @@ namespace foray::core {
 
         VkDeviceAddress GetDeviceAddress() const;
 
-        ManagedBuffer& SetName(std::string_view name);
+        virtual void SetName(std::string_view name) override;
 
         inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
         void                          FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo);

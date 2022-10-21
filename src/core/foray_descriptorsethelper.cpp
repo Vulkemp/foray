@@ -10,9 +10,6 @@ namespace foray::core {
 
     VkDescriptorSetLayout DescriptorSetHelper::Create(Context* context, int32_t numSets, std::string name)
     {
-        // set name for debugging
-        mName = name;
-
         // auto detect set count if necessary
         numSets = numSets != -1 ? numSets : mHighestSetCount;
 
@@ -40,6 +37,9 @@ namespace foray::core {
         layoutInfo.pBindings    = layoutBindings.data();
 
         AssertVkResult(vkCreateDescriptorSetLayout(context->Device(), &layoutInfo, nullptr, &mDescriptorSetLayout));
+
+        // set name for debugging
+        SetObjectName(mContext, mDescriptorSetLayout, name);
 
         // --------------------------------------------------------------------------------------------
         // define which descriptors need to be allocated from a descriptor pool, based on the created

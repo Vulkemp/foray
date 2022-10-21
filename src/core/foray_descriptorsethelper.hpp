@@ -1,5 +1,5 @@
 #pragma once
-#include "foray_deviceresource.hpp"
+#include "foray_managedresource.hpp"
 #include "foray_context.hpp"
 #include <unordered_map>
 
@@ -28,7 +28,7 @@ namespace foray::core {
     /// Class usage:
     /// Step 1: Prepare DescriptorInfo objects.
     /// Step 2: Bind DescriptorInfo to a slot, using SetDescriptorInfoAt
-    class DescriptorSetHelper : public DeviceResourceBase
+    class DescriptorSetHelper : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT>
     {
       public:
         /// @brief Each DescriptorInfo corresponds to a descriptor write. It can specify to how many sets it must be written, by adding more values.

@@ -1,5 +1,5 @@
 #pragma once
-#include "../core/foray_deviceresource.hpp"
+#include "../core/foray_managedresource.hpp"
 #include "../core/foray_core_declares.hpp"
 #include "foray_benchmarkbase.hpp"
 #include <unordered_map>
@@ -8,7 +8,7 @@ namespace foray::bench {
 
     struct VkContext;
 
-    class DeviceBenchmark : public BenchmarkBase, public core::DeviceResourceBase
+    class DeviceBenchmark : public BenchmarkBase, public core::ManagedResource
     {
       public:
         void Create(core::Context* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets = INFLIGHT_FRAME_COUNT);

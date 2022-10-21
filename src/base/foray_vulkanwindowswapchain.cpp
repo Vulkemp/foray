@@ -1,11 +1,11 @@
-#include "foray_vulkanwindow.hpp"
+#include "foray_vulkanwindowswapchain.hpp"
+#include "../core/foray_context.hpp"
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_event.hpp"
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
-#include "../core/foray_context.hpp"
 #include <spdlog/fmt/fmt.h>
 
 namespace foray::base {
@@ -16,7 +16,7 @@ namespace foray::base {
             mBeforeWindowCreateFunc(mWindow);
         }
         mWindow.Create();
-        if (!!mContext)
+        if(!!mContext)
         {
             mContext->Window = &mWindow;
         }
@@ -61,7 +61,7 @@ namespace foray::base {
                         PrintVkResult(ret.vk_result()), ret.error().message())
 
         mSwapchain = *ret;
-        if (!!mContext)
+        if(!!mContext)
         {
             mContext->Swapchain = &mSwapchain;
         }
@@ -107,7 +107,7 @@ namespace foray::base {
                 }
             }
         }
-        if (!!mContext)
+        if(!!mContext)
         {
             mContext->SwapchainImages = mSwapchainImages;
         }
@@ -147,9 +147,9 @@ namespace foray::base {
 
     void VulkanWindowSwapchain::DestroySwapchain()
     {
-        if (!mContext)
+        if(!mContext)
         {
-            return;            
+            return;
         }
         for(auto& image : mSwapchainImages)
         {

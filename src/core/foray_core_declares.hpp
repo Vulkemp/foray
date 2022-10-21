@@ -3,7 +3,7 @@
 namespace foray::core {
     struct Queue;
     struct Context;
-    class DeviceResourceBase;
+    class ManagedResource;
     class ManagedImage;
     class ManagedBuffer;
     class DescriptorSetHelper;
