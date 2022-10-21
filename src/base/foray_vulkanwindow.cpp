@@ -147,7 +147,7 @@ namespace foray::base {
 
     void VulkanWindowSwapchain::DestroySwapchain()
     {
-        if (!!mContext)
+        if (!mContext)
         {
             return;            
         }
@@ -167,9 +167,9 @@ namespace foray::base {
 
     void VulkanWindowSwapchain::Destroy()
     {
-        mSurface = nullptr;
         DestroySwapchain();
         vkb::destroy_surface(mContext->Instance(), mSurface);
+        mSurface = nullptr;
         mWindow.Destroy();
         mContext->Window = nullptr;
     }

@@ -49,15 +49,19 @@ namespace foray::base {
         if(!!mSwapchainImageReady)
         {
             mContext->VkbDispatchTable->destroySemaphore(mSwapchainImageReady, nullptr);
+            mSwapchainImageReady = nullptr;
         }
         if(!!mPrimaryCompletedSemaphore)
         {
             mContext->VkbDispatchTable->destroySemaphore(mPrimaryCompletedSemaphore, nullptr);
+            mPrimaryCompletedSemaphore = nullptr;
         }
         if(!!mPrimaryCompletedFence)
         {
             mContext->VkbDispatchTable->destroyFence(mPrimaryCompletedFence, nullptr);
+            mPrimaryCompletedFence = nullptr;
         }
+        mContext = nullptr;
     }
     ESwapchainInteractResult InFlightFrame::AcquireSwapchainImage()
     {
