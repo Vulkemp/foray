@@ -1,5 +1,6 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "../foray_vulkan.hpp"
 #include "foray_helpers.hpp"
 #include "foray_osi_declares.hpp"
 #include <memory>
@@ -41,14 +42,14 @@ namespace foray {
         void Title(const std::string& title);
         /// @brief (Getter) WindowPtr Size
         /// @return Hardware-Level size in Pixels
-        inline Extent2D Size() const { return (mDisplayMode > EDisplayMode::WindowedResizable ? mFullScreenSize : mWindowedSize); };
+        inline VkExtent2D Size() const { return (mDisplayMode > EDisplayMode::WindowedResizable ? mFullScreenSize : mWindowedSize); };
         /// @brief (Setter) WindowPtr Size. Only works in windowed display modes.
         /// @param size Hardware-Level size in Pixels
-        void Size(const Extent2D size);
+        void Size(const VkExtent2D size);
         /// @brief (Getter) Window Position
-        inline Pos2D Position() const { return mPosition; }
+        inline VkOffset2D Position() const { return mPosition; }
         /// @brief (Setter) Window Position
-        void Position(const Pos2D pos);
+        void Position(const VkOffset2D pos);
         /// @brief (Setter) Display Mode
         void DisplayMode(EDisplayMode mode, bool preserveSize = false);
         /// @brief (Getter) Display Mode
@@ -73,9 +74,9 @@ namespace foray {
         std::string  mTitle;
         EDisplayMode mDisplayMode;
         int32_t      mDisplayId;
-        Extent2D     mFullScreenSize;
-        Extent2D     mWindowedSize;
-        Pos2D        mPosition;
+        VkExtent2D   mFullScreenSize;
+        VkExtent2D   mWindowedSize;
+        VkOffset2D   mPosition;
 
         SDL_threadID mOwningThreadID;
 

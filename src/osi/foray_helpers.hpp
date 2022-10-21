@@ -387,20 +387,4 @@ namespace foray {
         /// @brief Fullscreen-like application, but run as a regular OS window
         FullscreenWindowed
     };
-
-    struct Extent2D
-    {
-      public:
-        int32_t Width  = 1;
-        int32_t Height = 1;
-
-        bool IsZeroArea() const { return Width <= 0 || Height <= 0; }
-    };
-
-    struct Pos2D
-    {
-      public:
-        int32_t X = 0;
-        int32_t Y = 0;
-    };
 }  // namespace foray

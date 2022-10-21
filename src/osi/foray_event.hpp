@@ -1,5 +1,6 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "../foray_vulkan.hpp"
 #include "foray_helpers.hpp"
 #include "foray_input.hpp"
 #include "foray_osi_declares.hpp"
@@ -147,10 +148,10 @@ namespace foray {
     {
       public:
         inline EventWindowResized() = default;
-        inline EventWindowResized(Window* const source, const uint32_t timestamp, Extent2D current) : Event(source, timestamp, EType::WindowResized), Current(current) {}
+        inline EventWindowResized(Window* const source, const uint32_t timestamp, VkExtent2D current) : Event(source, timestamp, EType::WindowResized), Current(current) {}
 
         /// @brief Current window extent
-        Extent2D Current = {};
+        VkExtent2D Current = {};
     };
 
     class EventWindowFocusChanged : public Event

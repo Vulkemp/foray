@@ -1,7 +1,7 @@
 #include "foray_osmanager.hpp"
 
-#include "foray_osi.hpp"
 #include "../foray_exception.hpp"
+#include "foray_osi.hpp"
 #include <nameof/nameof.hpp>
 #include <sdl2/SDL.h>
 
@@ -352,7 +352,7 @@ namespace foray {
     }
     Event* OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
     {
-        Extent2D newSize{wevent.data1, wevent.data2};
+        VkExtent2D newSize{(uint32_t)wevent.data1, (uint32_t)wevent.data2};
         return new EventWindowResized(window, wevent.timestamp, newSize);
     }
 

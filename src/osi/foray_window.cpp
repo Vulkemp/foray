@@ -35,7 +35,7 @@ namespace foray {
         {
             SDL_DisplayMode displayMode;
             SDL_GetDisplayMode(mDisplayId, 0, &displayMode);
-            mFullScreenSize = Extent2D{displayMode.w, displayMode.h};
+            mFullScreenSize = VkExtent2D{(uint32_t)displayMode.w, (uint32_t)displayMode.h};
 
             switch(mDisplayMode)
             {
@@ -59,13 +59,13 @@ namespace foray {
         }
     }
 
-    void Window::Position(Pos2D pos)
+    void Window::Position(VkOffset2D pos)
     {
         mPosition = pos;
         if(Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
         {
-            int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
-            int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
+            int x = (mPosition.x == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.x);
+            int y = (mPosition.y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.y);
             SDL_SetWindowPosition(mHandle, x, y);
         }
     }
@@ -80,32 +80,32 @@ namespace foray {
 
         SDL_DisplayMode displayMode;
         SDL_GetDisplayMode(mDisplayId, 0, &displayMode);
-        mFullScreenSize = Extent2D{displayMode.w, displayMode.h};
-        if(mWindowedSize.IsZeroArea())
+        mFullScreenSize = VkExtent2D{(uint32_t)displayMode.w, (uint32_t)displayMode.h};
+        if(mWindowedSize.width * mWindowedSize.height == 0U)
         {
-            mWindowedSize = Extent2D{1280, 720};
+            mWindowedSize = VkExtent2D{1280, 720};
         }
         if(mTitle.length() == 0)
         {
-            mTitle = "Raytracing Rapid Prototyping Framework - Hochschule Kempten";
+            mTitle = "Foray";
         }
-        int x = (mPosition.X == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.X);
-        int y = (mPosition.Y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.Y);
+        int x = (mPosition.x == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.x);
+        int y = (mPosition.y == WINDOWPOS_AUTO ? SDL_WINDOWPOS_CENTERED : mPosition.y);
 
         switch(mDisplayMode)
         {
             case EDisplayMode::Windowed:
-                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN);
+                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.width, mWindowedSize.height, SDL_WINDOW_VULKAN);
                 break;
             case EDisplayMode::WindowedResizable:
-                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.Width, mWindowedSize.Height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+                mHandle = SDL_CreateWindow(mTitle.data(), x, y, mWindowedSize.width, mWindowedSize.height, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
                 break;
             case EDisplayMode::FullscreenHardware:
-                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
+                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.width, mFullScreenSize.height,
                                            SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN);
                 break;
             case EDisplayMode::FullscreenWindowed:
-                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.Width, mFullScreenSize.Height,
+                mHandle = SDL_CreateWindow(mTitle.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mFullScreenSize.width, mFullScreenSize.height,
                                            SDL_WINDOW_VULKAN | SDL_WINDOW_FULLSCREEN_DESKTOP);
                 break;
         }
@@ -121,7 +121,7 @@ namespace foray {
             return;
         }
         SDL_DestroyWindow(mHandle);
-        mHandle = nullptr;
+        mHandle  = nullptr;
         mSurface = nullptr;
     }
     uint32_t Window::SDLId() const
@@ -168,12 +168,12 @@ namespace foray {
             SDL_SetWindowTitle(mHandle, mTitle.data());
         }
     }
-    void Window::Size(Extent2D size)
+    void Window::Size(VkExtent2D size)
     {
         mWindowedSize = size;
         if(Exists() && mDisplayMode <= EDisplayMode::WindowedResizable)
         {
-            SDL_SetWindowSize(mHandle, mWindowedSize.Width, mWindowedSize.Height);
+            SDL_SetWindowSize(mHandle, mWindowedSize.width, mWindowedSize.height);
         }
     }
 
