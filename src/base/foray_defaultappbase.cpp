@@ -70,19 +70,18 @@ namespace foray::base {
     void DefaultAppBase::InitGetQueue()
     {
         // Make sure the graphics queue family supports present and transfer
-        auto retGraphicsIdx = mDevice.GetDevice().get_queue_index(vkb::QueueType::graphics);
-        auto retTransferIdx = mDevice.GetDevice().get_queue_index(vkb::QueueType::transfer);
-        auto retPresentIdx  = mDevice.GetDevice().get_queue_index(vkb::QueueType::present);
-        Assert(retGraphicsIdx && retTransferIdx && retPresentIdx, "Failed to find a queue family supporting all required usage types");
-        uint32_t index = *retGraphicsIdx;
-        Assert(index == *retTransferIdx, "Selected queue does not support transfer");
-        Assert(index == *retPresentIdx, "Selected queue does not support present");
+        auto retPresentQueueIndex  = mDevice.GetDevice().get_queue_index(vkb::QueueType::present);
+        Assert((bool)retPresentQueueIndex, "Failed to find a queue family supporting present for the configured surface");
+        auto vkQueueProperties = mDevice.GetPhysicalDevice().get_queue_families()[*retPresentQueueIndex];
+
+        Assert((vkQueueProperties.queueFlags & VkQueueFlagBits::VK_QUEUE_TRANSFER_BIT) > 0, "Present queue does not support transfer");
+        Assert((vkQueueProperties.queueFlags & VkQueueFlagBits::VK_QUEUE_GRAPHICS_BIT) > 0, "Present queue does not support graphics");
 
         // Get the graphics queue with a helper function
-        auto retQueue = mDevice.GetDevice().get_queue(vkb::QueueType::graphics);
-        FORAY_ASSERTFMT(retQueue, "Failed to get graphics queue. Error: {} ", retQueue.error().message())
+        auto retQueue = mDevice.GetDevice().get_queue(vkb::QueueType::present);
+        FORAY_ASSERTFMT(retQueue, "Failed to get queue. Error: {} ", retQueue.error().message())
         mContext.Queue            = *retQueue;
-        mContext.QueueFamilyIndex = *retGraphicsIdx;
+        mContext.QueueFamilyIndex = *retPresentQueueIndex;
     }
 
     void DefaultAppBase::InitCommandPool()

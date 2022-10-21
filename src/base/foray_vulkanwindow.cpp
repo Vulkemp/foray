@@ -65,6 +65,8 @@ namespace foray::base {
         {
             mContext->Swapchain = &mSwapchain;
         }
+
+        ExtractSwapchainImages();
     }
     void VulkanWindowSwapchain::ExtractSwapchainImages()
     {
@@ -78,7 +80,7 @@ namespace foray::base {
         Assert(imageviews.has_value(), "[VulkanWindowSwapchain::ExtractSwapchainImages] Failed to acquire swapchain image views!");
         for(uint32_t i = 0; i < imageCount; i++)
         {
-            core::SwapchainImageInfo swapImage = mSwapchainImages[i];
+            core::SwapchainImageInfo& swapImage = mSwapchainImages[i];
 
             swapImage = core::SwapchainImageInfo{
                 .Image     = images.value()[i],
@@ -165,9 +167,9 @@ namespace foray::base {
 
     void VulkanWindowSwapchain::Destroy()
     {
-        vkb::destroy_surface(mContext->Instance(), mSurface);
         mSurface = nullptr;
         DestroySwapchain();
+        vkb::destroy_surface(mContext->Instance(), mSurface);
         mWindow.Destroy();
         mContext->Window = nullptr;
     }

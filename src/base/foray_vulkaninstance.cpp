@@ -34,6 +34,8 @@ namespace foray::base {
                 instanceBuilder.set_debug_callback_user_data_pointer(mDebugUserData);
             }
         }
+        instanceBuilder.require_api_version(VK_MAKE_API_VERSION(0, 1, 3, 0));
+        instanceBuilder.set_minimum_instance_version(VK_MAKE_API_VERSION(0, 1, 3, 0));
         if (!!mContext && !!mContext->Window)
         {
             std::vector<const char*> surfaceExtensions = mContext->Window->GetVkSurfaceExtensions();
@@ -42,7 +44,6 @@ namespace foray::base {
                 instanceBuilder.enable_extension(ext);
             }
         }
-        instanceBuilder.set_minimum_instance_version(VK_VERSION_1_3);
         if(!!mBeforeInstanceBuildFunc)
         {
             mBeforeInstanceBuildFunc(instanceBuilder);
