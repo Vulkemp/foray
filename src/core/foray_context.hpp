@@ -10,14 +10,14 @@ namespace foray::core {
     /// @brief Non owning context object
     struct Context
     {
-        OsManager*                      OsManager         = nullptr;
+        osi::OsManager*                 OsManager         = nullptr;
         vkb::Instance*                  VkbInstance       = nullptr;
         vkb::PhysicalDevice*            VkbPhysicalDevice = nullptr;
         vkb::Device*                    VkbDevice         = nullptr;
         vkb::DispatchTable*             VkbDispatchTable  = nullptr;
         vkb::Swapchain*                 Swapchain         = nullptr;
         std::vector<SwapchainImageInfo> SwapchainImages   = {};
-        Window*                         Window            = nullptr;
+        osi::Window*                    Window            = nullptr;
         VmaAllocator                    Allocator         = nullptr;
         VkQueue                         Queue             = nullptr;
         uint32_t                        QueueFamilyIndex  = VK_QUEUE_FAMILY_IGNORED;
@@ -26,7 +26,7 @@ namespace foray::core {
         inline operator VkInstance() const { return VkbInstance->instance; }
         inline operator VkPhysicalDevice() const { return VkbPhysicalDevice->physical_device; }
         inline operator VkDevice() const { return VkbDevice->device; }
-        inline operator VkQueue() const {return Queue; }
+        inline operator VkQueue() const { return Queue; }
 
         inline VkInstance       Instance() const { return VkbInstance->instance; }
         inline VkPhysicalDevice PhysicalDevice() const { return VkbPhysicalDevice->physical_device; }

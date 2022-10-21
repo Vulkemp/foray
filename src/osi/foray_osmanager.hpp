@@ -4,7 +4,7 @@
 #include <sdl2/SDL.h>
 #include <vector>
 
-namespace foray {
+namespace foray::osi {
     /// @brief Class of which a single instance needs to be present for interaction with the operating system via SDL
     class OsManager
     {

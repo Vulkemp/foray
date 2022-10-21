@@ -2,7 +2,7 @@
 #include "foray_helpers.hpp"
 #include "foray_osi_declares.hpp"
 
-namespace foray {
+namespace foray::osi {
     class InputBase
     {
       public:

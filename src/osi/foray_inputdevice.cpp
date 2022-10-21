@@ -3,7 +3,7 @@
 #include <nameof/nameof.hpp>
 #include <sstream>
 
-namespace foray {
+namespace foray::osi {
     std::vector<EButton> DefinedButtons = std::vector<EButton>();
 
     const std::vector<EButton>& GetDefinedButtons()

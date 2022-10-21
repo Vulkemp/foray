@@ -8,13 +8,13 @@ namespace foray::scene {
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:
-        virtual void OnEvent(const Event* event) override;
+        virtual void OnEvent(const osi::Event* event) override;
 
         virtual void           Update(SceneUpdateInfo&) override;
         inline virtual int32_t GetOrder() const override { return 0; }
 
       protected:
-        virtual void ProcessMouseMovedEvent(const EventInputMouseMoved* event);
+        virtual void ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event);
 
         struct InputStates
         {
@@ -39,10 +39,10 @@ namespace foray::scene {
         bool                          mUseMouse                     = false;
         bool                          mInvertYAxis                  = false;
 
-        std::map<EButton, bool&> mMapping = {{EButton::Keyboard_W, mInputStates.Forward},       {EButton::Keyboard_S, mInputStates.Backward},
-                                             {EButton::Keyboard_LShift, mInputStates.StrafeUp}, {EButton::Keyboard_LCtrl, mInputStates.StrafeDown},
-                                             {EButton::Keyboard_A, mInputStates.StrafeLeft},    {EButton::Keyboard_D, mInputStates.StrafeRight},
-                                             {EButton::Keyboard_Up, mInputStates.PitchUp},      {EButton::Keyboard_Down, mInputStates.PitchDown},
-                                             {EButton::Keyboard_Left, mInputStates.YawLeft},    {EButton::Keyboard_Right, mInputStates.YawRight}};
+        std::map<osi::EButton, bool&> mMapping = {{osi::EButton::Keyboard_W, mInputStates.Forward},       {osi::EButton::Keyboard_S, mInputStates.Backward},
+                                                  {osi::EButton::Keyboard_LShift, mInputStates.StrafeUp}, {osi::EButton::Keyboard_LCtrl, mInputStates.StrafeDown},
+                                                  {osi::EButton::Keyboard_A, mInputStates.StrafeLeft},    {osi::EButton::Keyboard_D, mInputStates.StrafeRight},
+                                                  {osi::EButton::Keyboard_Up, mInputStates.PitchUp},      {osi::EButton::Keyboard_Down, mInputStates.PitchDown},
+                                                  {osi::EButton::Keyboard_Left, mInputStates.YawLeft},    {osi::EButton::Keyboard_Right, mInputStates.YawRight}};
     };
 }  // namespace foray::scene

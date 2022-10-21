@@ -1,7 +1,7 @@
 #pragma once
 #include "../base/foray_framerenderinfo.hpp"
-#include "../osi/foray_osi_declares.hpp"
 #include "../foray_logger.hpp"
+#include "../osi/foray_osi_declares.hpp"
 #include "foray_component.hpp"
 #include <map>
 #include <vector>
@@ -14,7 +14,7 @@ namespace foray::scene {
 
         virtual void InvokeUpdate(SceneUpdateInfo& updateInfo);
         virtual void InvokeDraw(SceneDrawInfo& renderInfo);
-        virtual void InvokeOnEvent(const Event* event);
+        virtual void InvokeOnEvent(const osi::Event* event);
         virtual void InvokeOnResized(VkExtent2D event);
 
       protected:
@@ -92,7 +92,7 @@ namespace foray::scene {
         auto range = Listeners.equal_range(callback->GetOrder());
         for(auto iter = range.first; iter != range.second; ++iter)
         {
-            if (iter->second == callback)
+            if(iter->second == callback)
             {
                 Listeners.erase(iter);
                 return true;

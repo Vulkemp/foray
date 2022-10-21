@@ -1,7 +1,7 @@
 #pragma once
 // Forward declares
 
-namespace foray {
+namespace foray::osi {
     class Window;
     class Event;
     class EventInput;
@@ -17,4 +17,4 @@ namespace foray {
     class InputDevice;
     class InputAnalogue;
     class InputBinary;
-}  // namespace foray
+}  // namespace foray::osi

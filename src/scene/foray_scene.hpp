@@ -1,11 +1,11 @@
 #pragma once
+#include "../as/foray_tlas.hpp"
 #include "../osi/foray_osi_declares.hpp"
 #include "foray_callbackdispatcher.hpp"
 #include "foray_node.hpp"
 #include "foray_registry.hpp"
-#include "foray_scenedrawing.hpp"
 #include "foray_scene_declares.hpp"
-#include "../as/foray_tlas.hpp"
+#include "foray_scenedrawing.hpp"
 
 namespace foray::scene {
 
@@ -31,7 +31,7 @@ namespace foray::scene {
         /// @brief Draw the scene by invoking the Draw callbacks
         void Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer);
         /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
-        void HandleEvent(const Event* event);
+        void HandleEvent(const osi::Event* event);
 
         /// Cleans up all memory, GPU structures, etc...
         virtual void Destroy(bool reinitialize = false);
@@ -73,4 +73,4 @@ namespace foray::scene {
         return found;
     }
 
-}  // namespace foray
+}  // namespace foray::scene

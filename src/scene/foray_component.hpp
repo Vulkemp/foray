@@ -47,7 +47,7 @@ namespace foray::scene {
         {
           public:
             static const bool ORDERED_EXECUTION = false;
-            using TArg                          = const Event*;
+            using TArg                          = const osi::Event*;
             /// @brief Invoked with every event received by the application
             inline virtual void OnEvent(TArg event) = 0;
             inline void         Invoke(TArg event) { OnEvent(event); }
@@ -69,8 +69,8 @@ namespace foray::scene {
         FORAY_PROPERTY_CGET(Registry)
         FORAY_PROPERTY_GET(Registry)
 
-        virtual Scene*                 GetScene()   = 0;
-        virtual Registry*              GetGlobals() = 0;
+        virtual Scene*         GetScene()   = 0;
+        virtual Registry*      GetGlobals() = 0;
         virtual core::Context* GetContext() = 0;
 
       protected:

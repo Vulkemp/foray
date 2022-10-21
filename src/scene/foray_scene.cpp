@@ -1,10 +1,10 @@
 #include "foray_scene.hpp"
+#include "foray_node.hpp"
 #include "globalcomponents/foray_cameramanager.hpp"
 #include "globalcomponents/foray_drawdirector.hpp"
 #include "globalcomponents/foray_geometrystore.hpp"
 #include "globalcomponents/foray_materialbuffer.hpp"
 #include "globalcomponents/foray_texturestore.hpp"
-#include "foray_node.hpp"
 
 namespace foray::scene {
     Scene::Scene(core::Context* context) : Registry(this), mContext(context)
@@ -44,7 +44,7 @@ namespace foray::scene {
         this->InvokeDraw(drawInfo);
     }
 
-    void Scene::HandleEvent(const Event* event)
+    void Scene::HandleEvent(const osi::Event* event)
     {
         this->InvokeOnEvent(event);
     }
@@ -80,4 +80,4 @@ namespace foray::scene {
     }
 
 
-}  // namespace foray
+}  // namespace foray::scene

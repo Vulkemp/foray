@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace foray {
+namespace foray::osi {
     /// @brief Wraps a generic input device (mouse, keyboard, joystick, controller ...) in a hardware agnostic way
     class InputDevice
     {

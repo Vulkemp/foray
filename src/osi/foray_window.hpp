@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace foray {
+namespace foray::osi {
     /// @brief Window class. Provides access to common properties of operating system level windows
     class Window
     {

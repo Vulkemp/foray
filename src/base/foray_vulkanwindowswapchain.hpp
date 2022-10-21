@@ -10,7 +10,7 @@ namespace foray::base {
     class VulkanWindowSwapchain
     {
       public:
-        using BeforeWindowCreateFunctionPointer     = std::function<void(Window&)>;
+        using BeforeWindowCreateFunctionPointer     = std::function<void(osi::Window&)>;
         using BeforeSwapchainBuildFunctionPointer   = std::function<void(vkb::SwapchainBuilder&)>;
         using OnResizedFunctionPointer              = std::function<void(VkExtent2D)>;
         using MakeSwapchainImageNameFunctionPointer = std::function<std::string(uint32_t)>;
@@ -42,7 +42,7 @@ namespace foray::base {
 
         /// @brief Listens for WindowSizeChanged events to preemptively resize the swapchain
         /// @param event
-        void HandleEvent(const Event* event);
+        void HandleEvent(const osi::Event* event);
         void RecreateSwapchain();
 
       protected:
@@ -58,7 +58,7 @@ namespace foray::base {
 
         core::Context* mContext = nullptr;
 
-        Window                                mWindow;
+        osi::Window                           mWindow;
         VkSurfaceKHR                          mSurface = nullptr;
         vkb::Swapchain                        mSwapchain;
         std::vector<core::SwapchainImageInfo> mSwapchainImages;

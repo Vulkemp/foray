@@ -7,8 +7,8 @@
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindowswapchain.hpp"
-#include <vector>
 #include <array>
+#include <vector>
 
 namespace foray::base {
 
@@ -32,7 +32,7 @@ namespace foray::base {
         inline virtual void ApiBeforeInit() {}
 
         /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
-        inline virtual void ApiBeforeWindowCreate(Window& window) {}
+        inline virtual void ApiBeforeWindowCreate(osi::Window& window) {}
         /// @brief Override this method to alter vulkan instance creation parameters via the instance builder
         inline virtual void ApiBeforeInstanceCreate(vkb::InstanceBuilder& instanceBuilder) {}
         /// @brief Alter physical device selection.
@@ -44,7 +44,7 @@ namespace foray::base {
         inline virtual void ApiInit() {}
         inline virtual void ApiOnResized(VkExtent2D size) {}
         /// @brief Override this method to react to events
-        inline virtual void ApiOnEvent(const Event* event) {}
+        inline virtual void ApiOnEvent(const osi::Event* event) {}
         inline virtual void ApiRender(FrameRenderInfo& renderInfo) {}
         inline virtual void ApiQueryResultsAvailable(uint64_t frameIndex) {}
         inline virtual void ApiOnShadersRecompiled() {}
@@ -72,7 +72,7 @@ namespace foray::base {
         virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
         RenderLoop            mRenderLoop;
-        OsManager             mOsManager;
+        osi::OsManager        mOsManager;
         VulkanInstance        mInstance;
         VulkanDevice          mDevice;
         VulkanWindowSwapchain mWindowSwapchain;

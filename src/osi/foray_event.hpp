@@ -7,7 +7,7 @@
 #include <memory>
 #include <sdl2/SDL.h>
 
-namespace foray {
+namespace foray::osi {
     /// @brief Event Base class
     class Event : public Polymorphic
     {

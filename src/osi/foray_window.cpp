@@ -3,7 +3,7 @@
 #include "../foray_exception.hpp"
 #include "foray_osi.hpp"
 
-namespace foray {
+namespace foray::osi {
 
     Window::Window()
         : mTitle(), mDisplayMode(EDisplayMode::Windowed), mDisplayId(), mFullScreenSize{0, 0}, mWindowedSize{1280, 720}, mPosition{WINDOWPOS_AUTO, WINDOWPOS_AUTO}, mHandle(nullptr)
@@ -236,5 +236,5 @@ namespace foray {
     {
         Destroy();
     }
-}  // namespace foray
+}  // namespace foray::osi
 // namespace foray

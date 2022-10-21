@@ -2,7 +2,7 @@
 #include "../foray_basics.hpp"
 #include <cstring>
 
-namespace foray {
+namespace foray::osi {
     /// @brief All supported buttons (mouse, controllers, etc.) and keys (keyboard)
     enum class EButton : uint16_t
     {

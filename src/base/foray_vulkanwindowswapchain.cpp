@@ -113,9 +113,9 @@ namespace foray::base {
         }
     }
 
-    void VulkanWindowSwapchain::HandleEvent(const Event* event)
+    void VulkanWindowSwapchain::HandleEvent(const osi::Event* event)
     {
-        const EventWindowResized* resizeEvent = dynamic_cast<const EventWindowResized*>(event);
+        const osi::EventWindowResized* resizeEvent = dynamic_cast<const osi::EventWindowResized*>(event);
 
         if(!!resizeEvent && resizeEvent->Source == &mWindow)
         {

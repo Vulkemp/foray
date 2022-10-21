@@ -30,7 +30,7 @@ namespace foray::base {
               [this](vkb::DeviceBuilder& builder) { this->ApiBeforeDeviceBuilding(builder); })
         , mWindowSwapchain(
               &mContext,
-              [this](Window& window) { this->ApiBeforeWindowCreate(window); },
+              [this](osi::Window& window) { this->ApiBeforeWindowCreate(window); },
               [this](vkb::SwapchainBuilder& builder) { this->ApiBeforeSwapchainBuilding(builder); },
               [this](VkExtent2D size) { this->OnResized(size); },
               nullptr)
@@ -70,7 +70,7 @@ namespace foray::base {
     void DefaultAppBase::InitGetQueue()
     {
         // Make sure the graphics queue family supports present and transfer
-        auto retPresentQueueIndex  = mDevice.GetDevice().get_queue_index(vkb::QueueType::present);
+        auto retPresentQueueIndex = mDevice.GetDevice().get_queue_index(vkb::QueueType::present);
         Assert((bool)retPresentQueueIndex, "Failed to find a queue family supporting present for the configured surface");
         auto vkQueueProperties = mDevice.GetPhysicalDevice().get_queue_families()[*retPresentQueueIndex];
 
@@ -171,11 +171,11 @@ namespace foray::base {
 
     void DefaultAppBase::PollEvents()
     {
-        for(const Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
+        for(const osi::Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
         {
             ApiOnEvent(event);
             mWindowSwapchain.HandleEvent(event);
-            if(event->Source && event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() <= 1)
+            if(event->Source && event->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
             {
                 // The last window has been requested to close, oblige by stopping the renderloop
                 mRenderLoop.RequestStop();
@@ -274,7 +274,7 @@ namespace foray::base {
     void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage)
     {
         auto iter = std::find(mRegisteredStages.begin(), mRegisteredStages.end(), stage);
-        if (iter != mRegisteredStages.end())
+        if(iter != mRegisteredStages.end())
         {
             mRegisteredStages.erase(iter);
         }

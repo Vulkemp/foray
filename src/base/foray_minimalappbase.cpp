@@ -21,13 +21,14 @@ namespace foray::base {
                       (printStateChanges ? &PrintStateChange : nullptr))
         , mOsManager()
         , mInstance(
-              &mContext, [this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); }, 
+              &mContext,
+              [this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); },
 #if FORAY_DEBUG || FORAY_VALIDATION  // Set validation layers and debug callbacks on / off
               true
 #else
               false
 #endif
-              )
+          )
     {
     }
 
@@ -44,10 +45,10 @@ namespace foray::base {
 
     void MinimalAppBase::PollEvents()
     {
-        for(const Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
+        for(const osi::Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
         {
             ApiOnEvent(event);
-            if(event->Source && event->Type == Event::EType::WindowCloseRequested && Window::Windows().size() <= 1)
+            if(event->Source && event->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
             {
                 // The last window has been requested to close, oblige by stopping the renderloop
                 mRenderLoop.RequestStop();

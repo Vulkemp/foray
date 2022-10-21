@@ -1,12 +1,12 @@
 #include "foray_freecameracontroller.hpp"
+#include "../../foray_logger.hpp"
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
-#include "../../foray_logger.hpp"
 
 namespace foray::scene {
-    void FreeCameraController::OnEvent(const Event* event)
+    void FreeCameraController::OnEvent(const osi::Event* event)
     {
-        auto binaryInputEvent = dynamic_cast<const EventInputBinary*>(event);
+        auto binaryInputEvent = dynamic_cast<const osi::EventInputBinary*>(event);
         if(binaryInputEvent)
         {
             auto buttonId = binaryInputEvent->SourceInput->GetButtonId();
@@ -17,15 +17,15 @@ namespace foray::scene {
                 finditer->second = pressed;
             }
 
-            if(buttonId == EButton::Keyboard_Numpad_Plus && pressed)
+            if(buttonId == osi::EButton::Keyboard_Numpad_Plus && pressed)
             {
                 mSpeedExponent++;
             }
-            if(buttonId == EButton::Keyboard_Numpad_Minus && pressed)
+            if(buttonId == osi::EButton::Keyboard_Numpad_Minus && pressed)
             {
                 mSpeedExponent--;
             }
-            if(buttonId == EButton::Keyboard_Space && pressed)
+            if(buttonId == osi::EButton::Keyboard_Space && pressed)
             {
                 int code = SDL_SetRelativeMouseMode(mUseMouse ? SDL_FALSE : SDL_TRUE);
                 if(code < 0)
@@ -39,13 +39,13 @@ namespace foray::scene {
             }
         }
 
-        auto directional = dynamic_cast<const EventInputDirectional*>(event);
-        if(directional && directional->SourceInput->GetDirectionalId() == EDirectional::Mouse_Scroll)
+        auto directional = dynamic_cast<const osi::EventInputDirectional*>(event);
+        if(directional && directional->SourceInput->GetDirectionalId() == osi::EDirectional::Mouse_Scroll)
         {
             mSpeedExponent += std::clamp(directional->OffsetY, -1, 1);
         }
 
-        auto mouseMoved = dynamic_cast<const EventInputMouseMoved*>(event);
+        auto mouseMoved = dynamic_cast<const osi::EventInputMouseMoved*>(event);
         if(mouseMoved && mUseMouse)
         {
             ProcessMouseMovedEvent(mouseMoved);
@@ -98,7 +98,7 @@ namespace foray::scene {
         camera->SetViewMatrix();
     }
 
-    void FreeCameraController::ProcessMouseMovedEvent(const EventInputMouseMoved* event)
+    void FreeCameraController::ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
         if(!camera)
@@ -124,4 +124,4 @@ namespace foray::scene {
     }
 
 
-}  // namespace foray
+}  // namespace foray::scene

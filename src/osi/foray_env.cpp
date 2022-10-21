@@ -1,7 +1,7 @@
 #include "foray_env.hpp"
 
-#include "../foray_logger.hpp"
 #include "../foray_exception.hpp"
+#include "../foray_logger.hpp"
 
 #ifdef WIN32
 #include <stringapiset.h>

@@ -5,7 +5,7 @@
 #include <nameof/nameof.hpp>
 #include <sdl2/SDL.h>
 
-namespace foray {
+namespace foray::osi {
 #pragma region lifetime
 
     OsManager::OsManager() : mInputDevices(), mMouse(), mKeyboard()

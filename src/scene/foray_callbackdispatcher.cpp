@@ -9,7 +9,7 @@ namespace foray::scene {
     {
         mDraw.Invoke(drawInfo);
     }
-    void CallbackDispatcher::InvokeOnEvent(const Event* event)
+    void CallbackDispatcher::InvokeOnEvent(const osi::Event* event)
     {
         mOnEvent.Invoke(event);
     }
