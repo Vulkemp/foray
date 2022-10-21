@@ -274,11 +274,15 @@ namespace foray::base {
 
     void DefaultAppBase::RegisterRenderStage(stages::RenderStage* stage)
     {
-        mRegisteredStages.emplace(stage);
+        mRegisteredStages.push_back(stage);
     }
 
     void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage)
     {
-        mRegisteredStages.erase(stage);
+        auto iter = std::find(mRegisteredStages.begin(), mRegisteredStages.end(), stage);
+        if (iter != mRegisteredStages.end())
+        {
+            mRegisteredStages.erase(iter);
+        }
     }
 }  // namespace foray::base

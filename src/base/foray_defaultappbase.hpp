@@ -7,7 +7,7 @@
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindow.hpp"
-#include <unordered_set>
+#include <vector>
 #include <array>
 
 namespace foray::base {
@@ -87,7 +87,7 @@ namespace foray::base {
         uint32_t                                        mInFlightFrameIndex = 0;
         uint64_t                                        mRenderedFrameCount = 0;
 
-        std::unordered_set<stages::RenderStage*> mRegisteredStages;
+        std::vector<stages::RenderStage*> mRegisteredStages;
 
         fp64_t mLastShadersCheckedTimestamp = 0.0;
     };
