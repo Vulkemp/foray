@@ -1,8 +1,8 @@
 #pragma once
+#include "../core/foray_context.hpp"
 #include "../core/foray_managedbuffer.hpp"
 #include "../core/foray_managedimage.hpp"
 #include "../core/foray_shadermodule.hpp"
-#include "../core/foray_context.hpp"
 #include "../rtpipe/foray_rtpipeline.hpp"
 #include "../scene/foray_scene.hpp"
 #include "foray_rasterizedRenderStage.hpp"
@@ -23,8 +23,8 @@ namespace foray::stages {
         virtual void OnResized(const VkExtent2D& extent) override;
 
       protected:
-        scene::Scene*                                    mScene;
-        std::vector<VkClearValue>                        mClearValues;
+        scene::Scene*             mScene;
+        std::vector<VkClearValue> mClearValues;
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;
@@ -71,6 +71,9 @@ namespace foray::stages {
         VkFramebuffer   mFrameBuffer   = nullptr;
         VkPipelineCache mPipelineCache = nullptr;
         VkRenderPass    mRenderpass    = nullptr;
+
+        core::DescriptorSetHelper mDescriptorSet;
+        VkPipelineLayout          mPipelineLayout = nullptr;
 
         rtpipe::RtPipeline mPipeline;
 

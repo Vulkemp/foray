@@ -17,7 +17,6 @@ namespace foray::stages {
         {
             DestroyResolutionDependentComponents();
             DestroyFixedComponents();
-            mDescriptorSet.Destroy();
         }
 
 
@@ -39,10 +38,6 @@ namespace foray::stages {
       protected:
         std::vector<core::ManagedImage*> mColorAttachments;
         core::Context*           mContext{};
-        core::DescriptorSetHelper        mDescriptorSet;
-
-        VkPipeline       mPipeline       = nullptr;
-        VkPipelineLayout mPipelineLayout = nullptr;
 
         virtual void CreateFixedSizeComponents(){};
         virtual void DestroyFixedComponents(){};

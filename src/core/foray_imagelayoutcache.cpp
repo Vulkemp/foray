@@ -27,6 +27,10 @@ namespace foray::core {
 
     void ImageLayoutCache::Set(std::string_view name, VkImageLayout layout)
     {
+        if (name.size() == 0)
+        {
+            Exception::Throw("[ImageLayoutCache::Set] Image name must not be empty!");
+        }
         std::string namecopy(name);
         // if(layout < NAMEOF_ENUM_RANGE_MAX)
         // {

@@ -84,9 +84,9 @@ namespace foray::core {
 
     std::string_view PrintVkObjectType(VkObjectType objectType)
     {
-        if(objectType < NAMEOF_ENUM_RANGE_MIN || objectType > NAMEOF_ENUM_RANGE_MAX)
+        if(objectType > NAMEOF_ENUM_RANGE_MAX)
         {
-            return fmt::format("VkObjectType::{}", (int)objectType);
+            return "VkObjectType (Out of NAMEOF_ENUM_RANGE)";
         }
         else
         {

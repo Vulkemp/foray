@@ -18,8 +18,11 @@ namespace foray::stages {
         virtual void Destroy() override;
 
       protected:
-        VkFramebuffer         mFrameBuffer         = nullptr;
-        VkPipelineCache       mPipelineCache       = nullptr;
-        VkRenderPass          mRenderpass          = nullptr;
+        VkFramebuffer             mFrameBuffer   = nullptr;
+        VkPipelineCache           mPipelineCache = nullptr;
+        VkRenderPass              mRenderpass    = nullptr;
+        core::DescriptorSetHelper mDescriptorSet;
+        VkPipeline                mPipeline       = nullptr;
+        VkPipelineLayout          mPipelineLayout = nullptr;
     };
-}  // namespace foray
+}  // namespace foray::stages
