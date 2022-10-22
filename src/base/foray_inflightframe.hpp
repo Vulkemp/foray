@@ -5,10 +5,12 @@
 
 namespace foray::base {
 
-
+    /// @brief Result of swapchain interaction (AcquireImage or Present)
     enum class ESwapchainInteractResult
     {
+        /// @brief The interaction resulted nominally
         Nominal,
+        /// @brief The interaction indicated that the swapchain should be resized
         Resized
     };
 
@@ -51,15 +53,28 @@ namespace foray::base {
         bool HasFinishedExecution();
         /// @brief Blocks the current thread until the frame has finished execution
         void WaitForExecutionFinished();
+        /// @brief Resets the frames host synchronization fence
         void ResetFence();
+
+        /// @brief Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::ExternalSubmit(...) 
+        /// and submitting them in a single vkQueueSubmit2(...) call
+        void SubmitAll();
 
         /// @brief Get an auxiliary command buffer
         /// @param index Command buffer index to return
         core::DeviceCommandBuffer&       GetAuxiliaryCommandBuffer(uint32_t index);
+        /// @brief Get primary command buffer
         core::DeviceCommandBuffer&       GetPrimaryCommandBuffer();
+        /// @brief Get a command buffer
+        /// @param index If PRIMARY_COMMAND_BUFFER, the primary is returned. Auxiliary command buffer index otherwise
         core::DeviceCommandBuffer&       GetCommandBuffer(CmdBufferIndex index);
+        /// @brief Get an auxiliary command buffer
+        /// @param index Command buffer index to return
         const core::DeviceCommandBuffer& GetAuxiliaryCommandBuffer(uint32_t index) const;
+        /// @brief Get primary command buffer
         const core::DeviceCommandBuffer& GetPrimaryCommandBuffer() const;
+        /// @brief Get a command buffer
+        /// @param index If PRIMARY_COMMAND_BUFFER, the primary is returned. Auxiliary command buffer index otherwise
         const core::DeviceCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const;
 
         FORAY_PROPERTY_CGET(SwapchainImageIndex)
@@ -70,12 +85,15 @@ namespace foray::base {
       protected:
         core::Context* mContext = nullptr;
 
-        /// @brief All command buffers used by the frame
+        /// @brief Auxiliary command buffers
         std::vector<std::unique_ptr<core::DeviceCommandBuffer>> mAuxiliaryCommandBuffers;
+        /// @brief Primary command buffer
         core::DeviceCommandBuffer                               mPrimaryCommandBuffer;
-
+        /// @brief Semaphore signalled by the device when the swapchain image becomes ready
         VkSemaphore mSwapchainImageReady       = nullptr;
+        /// @brief Semaphore signalled by the primary command buffer when execution has finished
         VkSemaphore mPrimaryCompletedSemaphore = nullptr;
+        /// @brief Fence signalled after the primary / all command buffers have finished execution
         VkFence     mPrimaryCompletedFence     = nullptr;
 
         uint32_t mSwapchainImageIndex = 0;

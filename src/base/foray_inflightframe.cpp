@@ -217,4 +217,15 @@ namespace foray::base {
         AssertVkResult(mContext->VkbDispatchTable->resetFences(1, &mPrimaryCompletedFence));
     }
 
+    void InFlightFrame::SubmitAll()
+    {
+        std::vector<VkSubmitInfo2> submitInfos;
+        mPrimaryCommandBuffer.ExternalSubmit(submitInfos);
+        for (std::unique_ptr<core::DeviceCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
+        {
+            auxCommandBuffer->ExternalSubmit(submitInfos);
+        }
+        mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, (uint32_t)submitInfos.size(), submitInfos.data(), mPrimaryCompletedFence);
+    }
+
 }  // namespace foray::base

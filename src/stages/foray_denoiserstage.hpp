@@ -19,8 +19,8 @@ namespace foray::stages {
 
       protected:
         core::Context* mContext   = nullptr;
-        VkSemaphore            mSemaphore = nullptr;
-        uint64_t               mValue     = 0;
+        VkSemaphore    mSemaphore = nullptr;
+        uint64_t       mValue     = 0;
 #ifdef WIN32
         HANDLE mHandle = INVALID_HANDLE_VALUE;
 #else
@@ -41,11 +41,7 @@ namespace foray::stages {
         DenoiserSynchronisationSemaphore* Semaphore     = nullptr;
 
         inline DenoiserConfig() {}
-        inline DenoiserConfig(
-            core::ManagedImage* primaryIn, core::ManagedImage* primaryOut)
-            : PrimaryInput(primaryIn), PrimaryOutput(primaryOut)
-        {
-        }
+        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut) {}
     };
 
     class DenoiserStage : public RenderStage
@@ -55,6 +51,5 @@ namespace foray::stages {
 
         virtual void BeforeDenoise(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
         virtual void AfterDenoise(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
-        virtual void DispatchDenoise(uint64_t& timelineValue){};
     };
 }  // namespace foray::stages

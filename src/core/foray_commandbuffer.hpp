@@ -81,6 +81,8 @@ namespace foray::core {
 
         virtual void Submit();
 
+        virtual void ExternalSubmit(std::vector<VkSubmitInfo2>& submitInfos);
+
       protected:
         std::vector<SemaphoreSubmit> mWaitSemaphores;
         std::vector<SemaphoreSubmit> mSignalSemaphores;

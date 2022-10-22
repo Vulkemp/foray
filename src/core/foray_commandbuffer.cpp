@@ -178,4 +178,40 @@ namespace foray::core {
         AssertVkResult(mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, 1, &submitInfo, mFence));
     }
 
+    void DeviceCommandBuffer::ExternalSubmit(std::vector<VkSubmitInfo2>& submitInfos)
+    {
+        Assert(!!mCommandBuffer, "Cannot submit uninitialized command buffer");
+
+        if(mIsRecording)
+        {
+            End();
+        }
+
+        std::vector<VkSemaphoreSubmitInfo> signalSemaphores;
+        std::vector<VkSemaphoreSubmitInfo> waitSemaphores;
+
+        signalSemaphores.reserve(mSignalSemaphores.size());
+        for(const SemaphoreSubmit& submit : mSignalSemaphores)
+        {
+            signalSemaphores.push_back(submit);
+        }
+        waitSemaphores.reserve(mWaitSemaphores.size());
+        for(const SemaphoreSubmit& submit : mWaitSemaphores)
+        {
+            waitSemaphores.push_back(submit);
+        }
+
+        VkCommandBufferSubmitInfo bufferSubmitInfo{
+            .sType         = VkStructureType::VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+            .commandBuffer = mCommandBuffer,
+        };
+
+        submitInfos.push_back(VkSubmitInfo2{.sType                    = VkStructureType::VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+                                            .waitSemaphoreInfoCount   = (uint32_t)waitSemaphores.size(),
+                                            .pWaitSemaphoreInfos      = waitSemaphores.data(),
+                                            .commandBufferInfoCount   = 1,
+                                            .pCommandBufferInfos      = &bufferSubmitInfo,
+                                            .signalSemaphoreInfoCount = (uint32_t)signalSemaphores.size(),
+                                            .pSignalSemaphoreInfos    = signalSemaphores.data()});
+    }
 }  // namespace foray::core
