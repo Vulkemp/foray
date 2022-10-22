@@ -10,14 +10,14 @@ namespace foray::stages {
     }
     void BlitStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        if(!mSrcImage || (mSrcImageSize.width * mSrcImageSize.height) == 0)
+        if((!mSrcImage_ || !mSrcImage_->Exists()) && (!mSrcVkImage || (mSrcImageSize.width * mSrcImageSize.height) == 0))
         {
 #ifdef FORAY_DEBUG
             logger()->warn("[BlitStage::RecordFrame] Blit Image Stage skipped: SrcImage not set or source area zero!");
 #endif
             return;
         }
-        if(!mDstImage || (mDstImageSize.width * mDstImageSize.height) == 0)
+        if(((!mDstImage_ || !mDstImage_->Exists()) && (!mDstVkImage || (mDstImageSize.width * mDstImageSize.height) == 0)))
         {
 #ifdef FORAY_DEBUG
             logger()->warn("[BlitStage::RecordFrame] Blit Image Stage skipped: DstImage not set or dest area zero!");
@@ -39,8 +39,22 @@ namespace foray::stages {
 
         std::vector<VkImageMemoryBarrier2> barriers;
         barriers.reserve(2);
-        barriers.push_back(renderInfo.GetImageLayoutCache().Set(mSrcImageName, mSrcImage, srcImgMemBarrier));
-        barriers.push_back(renderInfo.GetImageLayoutCache().Set(mDstImageName, mDstImage, dstImgMemBarrier));
+        if(!!mSrcImage_)
+        {
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mSrcImage_, srcImgMemBarrier));
+        }
+        else
+        {
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mSrcImageName, mSrcVkImage, srcImgMemBarrier));
+        }
+        if(!!mDstImage_)
+        {
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mDstImage_, dstImgMemBarrier));
+        }
+        else
+        {
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mDstImageName, mDstVkImage, dstImgMemBarrier));
+        }
 
         VkDependencyInfo depInfo{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = (uint32_t)barriers.size(), .pImageMemoryBarriers = barriers.data()};
@@ -59,9 +73,9 @@ namespace foray::stages {
         ConfigureBlitRegion(imageBlit);
 
         VkBlitImageInfo2 blitInfo{.sType          = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
-                                  .srcImage       = mSrcImage,
+                                  .srcImage       = !!mSrcImage_ ? mSrcImage_->GetImage() : mSrcVkImage,
                                   .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                  .dstImage       = mDstImage,
+                                  .dstImage       = !!mDstImage_ ? mDstImage_->GetImage() : mDstVkImage,
                                   .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                   .regionCount    = 1U,
                                   .pRegions       = &imageBlit,
@@ -73,8 +87,7 @@ namespace foray::stages {
     {
         if(!!image && image->Exists())
         {
-            VkExtent3D size3d = image->GetExtent3D();
-            SetSrcImage(image->GetImage(), image->GetName(), VkExtent2D{.width = size3d.width, .height = size3d.height});
+            mSrcImage_ = image;
         }
         else
         {
@@ -83,7 +96,8 @@ namespace foray::stages {
     }
     void BlitStage::SetSrcImage(VkImage image, std::string_view name, VkExtent2D size)
     {
-        mSrcImage     = image;
+        mSrcImage_    = nullptr;
+        mSrcVkImage   = image;
         mSrcImageName = name;
         mSrcImageSize = size;
     }
@@ -91,8 +105,7 @@ namespace foray::stages {
     {
         if(!!image && image->Exists())
         {
-            VkExtent3D size3d = image->GetExtent3D();
-            SetDstImage(image->GetImage(), image->GetName(), VkExtent2D{.width = size3d.width, .height = size3d.height});
+            mDstImage_ = image;
         }
         else
         {
@@ -101,17 +114,38 @@ namespace foray::stages {
     }
     void BlitStage::SetDstImage(VkImage image, std::string_view name, VkExtent2D size)
     {
-        mDstImage     = image;
+        mDstImage_    = nullptr;
+        mDstVkImage   = image;
         mDstImageName = name;
         mDstImageSize = size;
     }
 
     void BlitStage::ConfigureBlitRegion(VkImageBlit2& imageBlit)
     {
-        int32_t srcWidth  = (int32_t)mSrcImageSize.width;
-        int32_t srcHeight = (int32_t)mSrcImageSize.height;
-        int32_t dstWidth  = (int32_t)mDstImageSize.width;
-        int32_t dstHeight = (int32_t)mDstImageSize.height;
+        int32_t srcWidth;
+        int32_t srcHeight;
+        int32_t dstWidth;
+        int32_t dstHeight;
+        if(!!mSrcImage_)
+        {
+            srcWidth  = (int32_t)mSrcImage_->GetExtent3D().width;
+            srcHeight = (int32_t)mSrcImage_->GetExtent3D().height;
+        }
+        else
+        {
+            srcWidth  = (int32_t)mSrcImageSize.width;
+            srcHeight = (int32_t)mSrcImageSize.height;
+        }
+        if(!!mDstImage_)
+        {
+            dstWidth  = (int32_t)mDstImage_->GetExtent3D().width;
+            dstHeight = (int32_t)mDstImage_->GetExtent3D().height;
+        }
+        else
+        {
+            dstWidth  = (int32_t)mDstImageSize.width;
+            dstHeight = (int32_t)mDstImageSize.height;
+        }
 
         VkOffset3D dst0{.z = 0};
         VkOffset3D dst1{.z = 1};

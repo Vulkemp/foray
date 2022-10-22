@@ -17,13 +17,15 @@ namespace foray::stages {
         virtual void SetDstImage(VkImage image, std::string_view name, VkExtent2D size);
 
       protected:
-        VkImage     mSrcImage     = nullptr;
-        std::string mSrcImageName = "";
-        VkExtent2D  mSrcImageSize = {};
+        core::ManagedImage* mSrcImage_    = nullptr;
+        VkImage             mSrcVkImage   = nullptr;
+        std::string         mSrcImageName = "";
+        VkExtent2D          mSrcImageSize = {};
 
-        VkImage     mDstImage     = nullptr;
-        std::string mDstImageName = "";
-        VkExtent2D  mDstImageSize = {};
+        core::ManagedImage* mDstImage_    = nullptr;
+        VkImage             mDstVkImage   = nullptr;
+        std::string         mDstImageName = "";
+        VkExtent2D          mDstImageSize = {};
 
         virtual void ConfigureBlitRegion(VkImageBlit2& blit);
 
