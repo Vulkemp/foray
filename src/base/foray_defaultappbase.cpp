@@ -221,8 +221,8 @@ namespace foray::base {
         currentFrame.ResetFence();
 
 
-        FrameRenderInfo frameRenderInfo;
-        frameRenderInfo.SetInFlightFrame(&currentFrame).SetFrameNumber(mRenderedFrameCount).SetFrameTime(renderInfo.Delta);
+        FrameRenderInfo frameRenderInfo(renderInfo, &currentFrame);
+        frameRenderInfo.SetFrameNumber(mRenderedFrameCount);
 
         // Record command buffer
         // The user is expected in here to
