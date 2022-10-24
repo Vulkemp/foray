@@ -22,7 +22,7 @@ namespace foray::gltf {
     {
     }
 
-    void ModelConverter::LoadGltfModel(std::string utf8Path, core::Context* context, const ModelConverterOptions& options)
+    void ModelConverter::LoadGltfModel(osi::Utf8Path utf8Path, core::Context* context, const ModelConverterOptions& options)
     {
         mBenchmark.Begin();
         mContext = context ? context : mScene->GetContext();
@@ -34,10 +34,15 @@ namespace foray::gltf {
 
         bool binary = false;
 
+        if (utf8Path.IsRelative())
+        {
+            utf8Path = utf8Path.MakeAbsolute();
+        }
+
         {
             using namespace std::filesystem;
 
-            path p = osi::FromUtf8Path(utf8Path);
+            path p = utf8Path;
             if(!p.has_filename() || !exists(p))
             {
                 FORAY_THROWFMT("ModelLoad: Failed because path \"{}\" is not a file!", utf8Path)
@@ -52,8 +57,8 @@ namespace foray::gltf {
         logger()->info("Model Load: Loading tinygltf model ...");
 
 
-        bool fileLoaded = binary ? gltfContext.LoadBinaryFromFile(&mGltfModel, &error, &warning, utf8Path.c_str()) :
-                                   gltfContext.LoadASCIIFromFile(&mGltfModel, &error, &warning, utf8Path.c_str());
+        bool fileLoaded = binary ? gltfContext.LoadBinaryFromFile(&mGltfModel, &error, &warning, utf8Path) :
+                                   gltfContext.LoadASCIIFromFile(&mGltfModel, &error, &warning, utf8Path);
 
         if(warning.size())
         {

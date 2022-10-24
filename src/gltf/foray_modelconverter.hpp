@@ -4,6 +4,7 @@
 #include "../scene/foray_geo.hpp"
 #include "../scene/foray_scene.hpp"
 #include "../scene/foray_scene_declares.hpp"
+#include "../osi/foray_env.hpp"
 #include <map>
 #include <set>
 #include <tinygltf/tiny_gltf.h>
@@ -23,7 +24,7 @@ namespace foray::gltf {
       public:
         explicit ModelConverter(scene::Scene* scene);
 
-        void LoadGltfModel(std::string utf8Path, core::Context* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
+        void LoadGltfModel(osi::Utf8Path utf8Path, core::Context* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
 
         FORAY_PROPERTY_ALL(Scene)
 
@@ -43,7 +44,7 @@ namespace foray::gltf {
 
         ModelConverterOptions mOptions;
 
-        std::string mUtf8Dir;
+        osi::Utf8Path mUtf8Dir;
 
         std::vector<scene::Vertex>* mVertexBuffer = nullptr;
         std::vector<uint32_t>*      mIndexBuffer  = nullptr;

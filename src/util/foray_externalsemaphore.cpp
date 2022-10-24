@@ -33,16 +33,7 @@ namespace foray::util
         VkSemaphoreGetWin32HandleInfoKHR getWInfo{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, .semaphore = mSemaphore, .handleType = handleType};
 
-        PFN_vkGetSemaphoreWin32HandleKHR getHandleFunc = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(mContext->Device(),
-                                                                                                                                "vkGetSemaphoreWin32HandleKH"
-                                                                                                                                "R"));
-
-        if(!getHandleFunc)
-        {
-            Exception::Throw("Unable to resolve vkGetMemoryWin32HandleKHR device proc addr!");
-        }
-
-        getHandleFunc(mContext->Device(), &getWInfo, &mHandle);
+        mContext->VkbDispatchTable->getSemaphoreWin32HandleKHR(&getWInfo, &mHandle);
 #else
         VkSemaphoreGetFdInfoKHR               getFdInfo{
                           .sType      = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
