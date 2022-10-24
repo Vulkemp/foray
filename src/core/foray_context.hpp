@@ -8,6 +8,9 @@
 namespace foray::core {
 
     /// @brief Non owning context object
+    /// @remark For many purposes, using a single Context object for an entire project would work out fine.
+    /// Where it is is not, being trivially copyable allows the programmer to maintain multiple context objects with ease.
+    /// Individual fields can be shared between many context objects, and changed at will
     struct Context
     {
         osi::OsManager*                 OsManager         = nullptr;
