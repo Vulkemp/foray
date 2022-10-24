@@ -18,13 +18,13 @@ namespace foray::as {
     class Tlas : public core::ManagedResource
     {
       public:
-        explicit Tlas(core::Context* context);
+        Tlas() = default;
         virtual ~Tlas() { Destroy(); }
 
         inline virtual std::string_view GetTypeName() const override { return "Top-Level AS"; }
 
         /// @brief (Re)creates the TLAS. Required to invoke when changes to the TLAS transitioned it to Dirty state. Will synchronize with the CPU.
-        virtual void CreateOrUpdate();
+        virtual void CreateOrUpdate(core::Context* context = nullptr);
         /// @brief Updates transforms only. TLAS rebuild is performed and synchronized on GPU only. TLAS must by non-Dirty!
         virtual void UpdateLean(VkCommandBuffer cmdBuffer, uint32_t frameIndex);
 

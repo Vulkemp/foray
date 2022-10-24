@@ -10,8 +10,6 @@
 
 namespace foray::as {
 
-    Tlas::Tlas(core::Context* context) : mContext(context) {}
-
     void Tlas::RemoveBlasInstance(uint64_t id)
     {
         mDirty = true;
@@ -91,8 +89,13 @@ namespace foray::as {
     }
 
 
-    void Tlas::CreateOrUpdate()
+    void Tlas::CreateOrUpdate(core::Context* context)
     {
+        if (!!context)
+        {
+            mContext = context;
+        }
+
         if(!mDirty)
         {
             return;

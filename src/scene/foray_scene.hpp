@@ -45,6 +45,10 @@ namespace foray::scene {
         template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
 
+        void UseDefaultCamera();
+
+        void UpdateTlasManager();        
+
       protected:
         core::Context* mContext;
         /// @brief Buffer holding ownership of all nodes

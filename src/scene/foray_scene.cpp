@@ -1,10 +1,14 @@
 #include "foray_scene.hpp"
+#include "components/foray_camera.hpp"
+#include "components/foray_freecameracontroller.hpp"
 #include "foray_node.hpp"
 #include "globalcomponents/foray_cameramanager.hpp"
 #include "globalcomponents/foray_drawdirector.hpp"
 #include "globalcomponents/foray_geometrystore.hpp"
 #include "globalcomponents/foray_materialbuffer.hpp"
 #include "globalcomponents/foray_texturestore.hpp"
+#include "globalcomponents/foray_tlasmanager.hpp"
+
 
 namespace foray::scene {
     Scene::Scene(core::Context* context) : Registry(this), mContext(context)
@@ -63,6 +67,29 @@ namespace foray::scene {
             parent->GetChildren().push_back(node);
         }
         return node;
+    }
+
+    void Scene::UseDefaultCamera()
+    {
+        Node* cameraNode = MakeNode();
+
+        Camera* camera = cameraNode->MakeComponent<foray::scene::Camera>();
+        camera->InitDefault();
+        cameraNode->MakeComponent<FreeCameraController>();
+        CameraManager* cameraManager = GetComponent<CameraManager>();
+
+        cameraManager->RefreshCameraList();
+        cameraManager->SelectCamera(camera);
+    }
+
+    void Scene::UpdateTlasManager()
+    {
+        TlasManager* tlasManager = GetComponent<TlasManager>();
+        if(!tlasManager)
+        {
+            tlasManager = MakeComponent<TlasManager>();
+        }
+        tlasManager->CreateOrUpdate();
     }
 
     void Scene::Destroy(bool reinitialize)

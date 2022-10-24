@@ -4,7 +4,6 @@
 #include <unordered_set>
 
 namespace foray::scene {
-    TlasManager::TlasManager(core::Context* context) : mTlas(context) {}
 
     void TlasManager::CreateOrUpdate()
     {
@@ -23,7 +22,7 @@ namespace foray::scene {
             mMeshInstances[id]             = meshInstance;
         }
 
-        mTlas.CreateOrUpdate();
+        mTlas.CreateOrUpdate(GetContext());
     }
     void TlasManager::Update(SceneUpdateInfo& updateInfo)
     {
