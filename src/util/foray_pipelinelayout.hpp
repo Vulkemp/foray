@@ -1,48 +1,64 @@
 #pragma once
 
+#include "../core/foray_managedresource.hpp"
 #include "../foray_basics.hpp"
+#include "../foray_vulkan.hpp"
 #include <map>
 #include <vector>
-#include "../foray_vulkan.hpp"
-#include "../core/foray_context.hpp"
 
 namespace foray::util {
     /// @brief Class that holds memory ownership of a vulkan pipeline
-    class PipelineLayout
+    class PipelineLayout : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_PIPELINE_LAYOUT>
     {
-        PipelineLayout()        = default;
-        PipelineLayout& operator=(const PipelineLayout&) = delete;
-        PipelineLayout(const PipelineLayout&)             = delete;
-        ~PipelineLayout()
+      public:
+        PipelineLayout() = default;
+
+        inline virtual bool Exists() const { return !!mPipelineLayout; }
+
+        virtual void Destroy();
+
+        inline ~PipelineLayout()
         {
-            if(mPipelineLayout)
-                vkDestroyPipelineLayout(mContext->Device(), mPipelineLayout, nullptr);
+            Destroy();
         }
 
-        void Create(core::Context*                    context,
-                    std::vector<VkDescriptorSetLayout>& descriptorLayouts,
-                    std::vector<VkPushConstantRange>*   pushConstantRanges = nullptr,
-                    VkPipelineLayoutCreateFlags         flags              = 0,
-                    void*                               pNext              = nullptr)
-        {
-            mContext = context;
+        void AddDescriptorSetLayout(VkDescriptorSetLayout layout);
+        void AddDescriptorSetLayouts(const std::vector<VkDescriptorSetLayout>& layouts);
+        void AddPushConstantRange(VkPushConstantRange range);
+        void AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges);
 
-            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-            pipelineLayoutCreateInfo.sType                      = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-            pipelineLayoutCreateInfo.flags                      = flags;
-            pipelineLayoutCreateInfo.pNext                      = pNext;
-            pipelineLayoutCreateInfo.pushConstantRangeCount     = pushConstantRanges != nullptr ? pushConstantRanges->size() : 0;
-            pipelineLayoutCreateInfo.pPushConstantRanges        = pushConstantRanges != nullptr ? pushConstantRanges->data() : nullptr;
-            pipelineLayoutCreateInfo.setLayoutCount             = descriptorLayouts.size();
-            pipelineLayoutCreateInfo.pSetLayouts                = descriptorLayouts.data();
+        template <typename TPushC>
+        inline void AddPushConstantRange(uint32_t offset = 0U);
 
-            AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
-        }
+        VkPipelineLayout Create(core::Context* context, VkPipelineLayoutCreateFlags flags = 0, void* pNext = nullptr);
+
+        VkPipelineLayout Create(core::Context*                            context,
+                                const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
+                                const std::vector<VkPushConstantRange>&   pushConstantRanges,
+                                VkPipelineLayoutCreateFlags               flags = 0,
+                                void*                                     pNext = nullptr);
 
         FORAY_PROPERTY_GET(PipelineLayout)
 
+        inline operator VkPipelineLayout() const { return mPipelineLayout; }
+
       protected:
-        core::Context* mContext{};
+        core::Context*   mContext{};
         VkPipelineLayout mPipelineLayout{};
+
+        std::vector<VkDescriptorSetLayout> mDescriptorSetLayouts;
+        std::vector<VkPushConstantRange>   mPushConstantRanges;
     };
-}  // namespace foray
+
+    template <typename TPushC>
+    inline void PipelineLayout::AddPushConstantRange(uint32_t offset)
+    {
+        VkPushConstantRange range{
+            .stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
+            .offset     = offset,
+            .size       = sizeof(TPushC),
+        };
+        AddPushConstantRange(range);
+    }
+
+}  // namespace foray::util
