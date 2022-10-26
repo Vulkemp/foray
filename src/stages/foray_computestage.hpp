@@ -19,7 +19,7 @@ namespace foray::stages {
         core::DescriptorSetHelper mDescriptorSet;
         util::PipelineLayout      mPipelineLayout;
 
-        VkPipeline mPipeline;
+        VkPipeline mPipeline = nullptr;
 
         inline virtual void ApiInitShader(){};
         inline virtual void ApiCreateDescriptorSetLayout(){};

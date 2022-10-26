@@ -17,6 +17,9 @@ namespace foray::core {
             sourceFilePath = sourceFilePath.MakeAbsolute();
         }
 
+        bool exists = fs::exists(sourceFilePath);
+        bool isFile = !fs::is_directory(sourceFilePath);
+        FORAY_ASSERTFMT(exists && isFile, "[ShaderManager::GetShaderBinary] Shader source file \"{}\" does not exist or is not a file!", (const std::string&)sourceFilePath);
 
         if(Cache.LookupTrackedIncluders.find(sourceFilePath) == Cache.LookupTrackedIncluders.end())
         {

@@ -112,8 +112,8 @@ namespace foray::stages {
 
     void GBufferStage::PrepareAttachments()
     {
-        static const VkFormat colorFormat    = VK_FORMAT_R16G16B16A16_SFLOAT;
-        static const VkFormat geometryFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+        static const VkFormat colorFormat    = VK_FORMAT_R32G32B32A32_SFLOAT;
+        static const VkFormat geometryFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
 
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -135,7 +135,7 @@ namespace foray::stages {
         mGBufferImages[0]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspacePosition);
         mGBufferImages[1]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspaceNormal);
         mGBufferImages[2]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, Albedo);
-        mGBufferImages[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R16G16_SFLOAT, intialLayout, aspectMask, MotionVector);
+        mGBufferImages[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, intialLayout, aspectMask, MotionVector);
         mGBufferImages[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, MaterialIndex);
         mGBufferImages[5]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_UINT, intialLayout, aspectMask, MeshInstanceIndex);
 

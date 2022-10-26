@@ -6,7 +6,10 @@ namespace foray::util {
     void PipelineLayout::Destroy()
     {
         if(!!mPipelineLayout)
+        {
             mContext->VkbDispatchTable->destroyPipelineLayout(mPipelineLayout, nullptr);
+            mPipelineLayout = nullptr;
+        }
     }
 
     void PipelineLayout::AddDescriptorSetLayout(VkDescriptorSetLayout layout)

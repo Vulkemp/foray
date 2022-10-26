@@ -43,7 +43,7 @@ namespace foray::stages {
         {
             .sType = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .stage = shaderStageCi,
-            .layout = mPipelineLayout.GetPipelineLayout(),
+            .layout = mPipelineLayout,
         };
 
         AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
