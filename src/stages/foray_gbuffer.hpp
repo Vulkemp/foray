@@ -74,7 +74,6 @@ namespace foray::stages {
         void         PrepareRenderpass();
         virtual void SetupDescriptors() override;
         virtual void CreateDescriptorSets() override;
-        virtual void UpdateDescriptors() override;
         virtual void CreatePipelineLayout() override;
         void         CreatePipeline();
 

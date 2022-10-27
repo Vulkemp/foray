@@ -25,6 +25,8 @@ namespace foray::stages {
                                                        GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName,
                                                        GBufferStage::DepthOutputName};
 
+#pragma region Init
+
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
     void GBufferStage::Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath, std::string_view fragmentShaderPath)
     {
@@ -50,95 +52,10 @@ namespace foray::stages {
         CreatePipeline();
     }
 
-    void GBufferStage::DestroyFixedComponents()
-    {
-#ifdef ENABLE_GBUFFER_BENCH
-        mBenchmark.Destroy();
-#endif  // ENABLE_GBUFFER_BENCH
-        VkDevice device = mContext->Device();
-        if(mPipeline)
-        {
-            vkDestroyPipeline(device, mPipeline, nullptr);
-            mPipeline = nullptr;
-        }
-        if(mPipelineLayout)
-        {
-            vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-            mPipelineLayout = nullptr;
-        }
-        if(mPipelineCache)
-        {
-            vkDestroyPipelineCache(device, mPipelineCache, nullptr);
-            mPipelineCache = nullptr;
-        }
-        mDescriptorSet.Destroy();
-        mVertexShaderModule.Destroy();
-        mFragmentShaderModule.Destroy();
-    }
-
     void GBufferStage::CreateResolutionDependentComponents()
     {
         CreateImages();
         PrepareRenderpass();
-    }
-
-    void GBufferStage::OnResized(const VkExtent2D& extent)
-    {
-        VkExtent3D imageExtent{.width = extent.width, .height = extent.height, .depth = 1};
-        for(PerImageInfo& info : mImageInfos)
-        {
-            info.Image.Resize(imageExtent);
-        }
-        if(mFrameBuffer)
-        {
-            vkDestroyFramebuffer(mContext->Device(), mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-        if(mRenderpass)
-        {
-            vkDestroyRenderPass(mContext->Device(), mRenderpass, nullptr);
-            mRenderpass = nullptr;
-        }
-        PrepareRenderpass();
-    }
-
-    void GBufferStage::DestroyResolutionDependentComponents()
-    {
-        VkDevice device = mContext->Device();
-        for(PerImageInfo& info : mImageInfos)
-        {
-            info.Image.Destroy();
-        }
-        if(mFrameBuffer)
-        {
-            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-        if(mRenderpass)
-        {
-            vkDestroyRenderPass(device, mRenderpass, nullptr);
-            mRenderpass = nullptr;
-        }
-    }
-
-    core::ManagedImage* GBufferStage::GetImageOutput(EOutput output, bool noThrow)
-    {
-        return RenderStage::GetImageOutput(OutputNames[(size_t)output], noThrow);
-    }
-
-    void GBufferStage::OnShadersRecompiled()
-    {
-        // check if shaders have been recompiled
-        //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
-        bool needsPipelineUpdate =
-            core::ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || core::ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
-
-        if(!needsPipelineUpdate)
-            return;
-
-        vkDeviceWaitIdle(mContext->Device());
-        // rebuild pipeline and its dependencies.
-        CreatePipeline();
     }
 
     void GBufferStage::CreateImages()
@@ -278,11 +195,11 @@ namespace foray::stages {
     {
         std::array<VkAttachmentDescription, (size_t)EOutput::MaxEnum> attachmentDescriptions;
 
-        std::array<VkAttachmentReference, (size_t)EOutput::Depth>     colorAttachmentReferences;
+        std::array<VkAttachmentReference, (size_t)EOutput::Depth> colorAttachmentReferences;
 
-        std::array<VkImageView, (size_t)EOutput::MaxEnum>               attachmentViews;
-        
-        VkAttachmentReference                                         depthAttachmentReference{};
+        std::array<VkImageView, (size_t)EOutput::MaxEnum> attachmentViews;
+
+        VkAttachmentReference depthAttachmentReference{};
 
         attachmentDescriptions.fill({});
         colorAttachmentReferences.fill({});
@@ -376,11 +293,11 @@ namespace foray::stages {
         mDescriptorSet.SetDescriptorAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
         mDescriptorSet.SetDescriptorAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                        VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                       VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
         mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                        VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                       VK_SHADER_STAGE_VERTEX_BIT);
     }
 
     void GBufferStage::CreateDescriptorSets()
@@ -388,23 +305,144 @@ namespace foray::stages {
         mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
     }
 
-    void GBufferStage::UpdateDescriptors() {}
-
     void GBufferStage::CreatePipelineLayout()
     {
-        std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
-                                                              .offset     = 0,
-                                                              .size       = sizeof(scene::DrawPushConstant)}});
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCI{};
-        pipelineLayoutCI.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCI.pushConstantRangeCount = pushConstantRanges.size();
-        pipelineLayoutCI.pPushConstantRanges    = pushConstantRanges.data();
-        pipelineLayoutCI.setLayoutCount         = 1;
-        pipelineLayoutCI.pSetLayouts            = &mDescriptorSet.GetDescriptorSetLayout();
-
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCI, nullptr, &mPipelineLayout));
+        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        mPipelineLayout.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        mPipelineLayout.Build(mContext);
     }
+
+    void GBufferStage::CreatePipeline()
+    {
+        // shader stages
+        if(mVertexShaderPath.size() > 0)
+        {
+            mVertexShaderModule.LoadFromSource(mContext, mVertexShaderPath);
+        }
+        else
+        {
+            mVertexShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_VERT, sizeof(GBUFFER_SHADER_VERT));
+        }
+        if(mFragmentShaderPath.size() > 0)
+        {
+            mFragmentShaderModule.LoadFromSource(mContext, mFragmentShaderPath);
+        }
+        {
+            mFragmentShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_FRAG, sizeof(GBUFFER_SHADER_FRAG));
+        }
+        util::ShaderStageCreateInfos shaderStageCreateInfos;
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule);
+
+        // vertex layout
+        scene::VertexInputStateBuilder vertexInputStateBuilder;
+        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Position);
+        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Normal);
+        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Tangent);
+        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Uv);
+        vertexInputStateBuilder.Build();
+
+        // clang-format off
+        mPipeline = util::PipelineBuilder()
+            .SetContext(mContext)
+            // Blend attachment states required for all color attachments
+            // This is important, as color write mask will otherwise be 0x0 and you
+            // won't see anything rendered to the attachment
+            .SetColorAttachmentBlendCount((size_t)EOutput::MaxEnum - 1)
+            .SetPipelineLayout(mPipelineLayout)
+            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
+            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
+            .SetPipelineCache(mContext->PipelineCache)
+            .SetRenderPass(mRenderpass)
+            .Build();
+        // clang-format on
+    }
+
+#pragma endregion
+#pragma region Destroy
+
+    void GBufferStage::DestroyFixedComponents()
+    {
+#ifdef ENABLE_GBUFFER_BENCH
+        mBenchmark.Destroy();
+#endif  // ENABLE_GBUFFER_BENCH
+        VkDevice device = mContext->Device();
+        if(mPipeline)
+        {
+            vkDestroyPipeline(device, mPipeline, nullptr);
+            mPipeline = nullptr;
+        }
+        mPipelineLayout.Destroy();
+        mDescriptorSet.Destroy();
+        mVertexShaderModule.Destroy();
+        mFragmentShaderModule.Destroy();
+    }
+
+    void GBufferStage::DestroyResolutionDependentComponents()
+    {
+        VkDevice device = mContext->Device();
+        for(PerImageInfo& info : mImageInfos)
+        {
+            info.Image.Destroy();
+        }
+        if(mFrameBuffer)
+        {
+            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
+            mFrameBuffer = nullptr;
+        }
+        if(mRenderpass)
+        {
+            vkDestroyRenderPass(device, mRenderpass, nullptr);
+            mRenderpass = nullptr;
+        }
+    }
+
+#pragma endregion
+#pragma region Runtime Update
+
+    void GBufferStage::OnResized(const VkExtent2D& extent)
+    {
+        VkExtent3D imageExtent{.width = extent.width, .height = extent.height, .depth = 1};
+        for(PerImageInfo& info : mImageInfos)
+        {
+            info.Image.Resize(imageExtent);
+        }
+        if(mFrameBuffer)
+        {
+            vkDestroyFramebuffer(mContext->Device(), mFrameBuffer, nullptr);
+            mFrameBuffer = nullptr;
+        }
+        if(mRenderpass)
+        {
+            vkDestroyRenderPass(mContext->Device(), mRenderpass, nullptr);
+            mRenderpass = nullptr;
+        }
+        PrepareRenderpass();
+    }
+
+    void GBufferStage::OnShadersRecompiled()
+    {
+        // check if shaders have been recompiled
+        //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
+        bool needsPipelineUpdate =
+            core::ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || core::ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
+
+        if(!needsPipelineUpdate)
+            return;
+
+        vkDeviceWaitIdle(mContext->Device());
+        // rebuild pipeline and its dependencies.
+        CreatePipeline();
+    }
+
+#pragma endregion
+#pragma region Misc
+
+    core::ManagedImage* GBufferStage::GetImageOutput(EOutput output, bool noThrow)
+    {
+        return RenderStage::GetImageOutput(OutputNames[(size_t)output], noThrow);
+    }
+
+#pragma endregion
 
     void GBufferStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -535,54 +573,5 @@ namespace foray::stages {
             renderInfo.GetImageLayoutCache().Set(mImageInfos[i].Image, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
         renderInfo.GetImageLayoutCache().Set(mImageInfos[(size_t)EOutput::Depth].Image, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    }
-
-    void GBufferStage::CreatePipeline()
-    {
-        VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-        pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-        AssertVkResult(vkCreatePipelineCache(mContext->Device(), &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
-
-        // shader stages
-        if(mVertexShaderPath.size() > 0)
-        {
-            mVertexShaderModule.LoadFromSource(mContext, mVertexShaderPath);
-        }
-        else
-        {
-            mVertexShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_VERT, sizeof(GBUFFER_SHADER_VERT));
-        }
-        if(mFragmentShaderPath.size() > 0)
-        {
-            mFragmentShaderModule.LoadFromSource(mContext, mFragmentShaderPath);
-        }
-        {
-            mFragmentShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_FRAG, sizeof(GBUFFER_SHADER_FRAG));
-        }
-        util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule);
-
-        // vertex layout
-        scene::VertexInputStateBuilder vertexInputStateBuilder;
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Position);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Normal);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Uv);
-        vertexInputStateBuilder.Build();
-
-        // clang-format off
-        mPipeline = util::PipelineBuilder()
-            .SetContext(mContext)
-            // Blend attachment states required for all color attachments
-            // This is important, as color write mask will otherwise be 0x0 and you
-            // won't see anything rendered to the attachment
-            .SetColorAttachmentBlendCount((size_t)EOutput::MaxEnum - 1)
-            .SetPipelineLayout(mPipelineLayout)
-            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
-            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
-            .SetPipelineCache(mPipelineCache)
-            .SetRenderPass(mRenderpass)
-            .Build();
-        // clang-format on
     }
 }  // namespace foray::stages

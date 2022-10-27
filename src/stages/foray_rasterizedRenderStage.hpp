@@ -1,5 +1,6 @@
 #pragma once
 #include "foray_renderstage.hpp"
+#include "../util/foray_pipelinelayout.hpp"
 
 namespace foray::stages {
     class RasterizedRenderStage : public RenderStage
@@ -9,7 +10,6 @@ namespace foray::stages {
         ~RasterizedRenderStage() { Destroy(); };
 
         FORAY_PROPERTY_CGET(FrameBuffer)
-        FORAY_PROPERTY_CGET(PipelineCache)
         FORAY_PROPERTY_CGET(Renderpass)
         FORAY_PROPERTY_CGET(Pipeline)
         FORAY_PROPERTY_CGET(PipelineLayout)
@@ -23,11 +23,10 @@ namespace foray::stages {
         virtual void Destroy() override;
 
       protected:
-        VkFramebuffer       mFrameBuffer   = nullptr;
-        VkPipelineCache     mPipelineCache = nullptr;
-        VkRenderPass        mRenderpass    = nullptr;
-        core::DescriptorSet mDescriptorSet;
-        VkPipeline          mPipeline       = nullptr;
-        VkPipelineLayout    mPipelineLayout = nullptr;
+        VkFramebuffer        mFrameBuffer   = nullptr;
+        VkRenderPass         mRenderpass    = nullptr;
+        core::DescriptorSet  mDescriptorSet;
+        VkPipeline           mPipeline       = nullptr;
+        util::PipelineLayout mPipelineLayout;
     };
 }  // namespace foray::stages

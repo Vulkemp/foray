@@ -25,6 +25,7 @@ namespace foray::core {
         VkQueue                         Queue             = nullptr;
         uint32_t                        QueueFamilyIndex  = VK_QUEUE_FAMILY_IGNORED;
         VkCommandPool                   CommandPool       = nullptr;
+        VkPipelineCache                 PipelineCache     = nullptr;
 
         inline operator VkInstance() const { return VkbInstance->instance; }
         inline operator VkPhysicalDevice() const { return VkbPhysicalDevice->physical_device; }
