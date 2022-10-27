@@ -12,28 +12,32 @@ namespace foray::core {
 
     void ShaderModule::LoadFromSpirv(Context* context, std::string relativeSpirvPath)
     {
-        std::vector<char> binary;
+        std::vector<uint8_t> binary;
         ShaderManager::Instance().GetShaderBinary(relativeSpirvPath, binary);
         LoadFromBinary(context, binary); 
     }
 
     void ShaderModule::LoadFromSource(Context* context, std::string relativeSourcePath) {
-        std::vector<char> binary;
+        std::vector<uint8_t> binary;
         ShaderManager::Instance().GetShaderBinary(relativeSourcePath, binary);
         LoadFromBinary(context, binary); 
     }
 
-    void ShaderModule::LoadFromBinary(Context* context, std::vector<char>& binaryBuffer)
+    void ShaderModule::LoadFromBinary(Context* context, const std::vector<uint8_t>& binaryBuffer)
     {
-        mContext                         = context;
+        LoadFromBinary(context, reinterpret_cast<const uint32_t*>(binaryBuffer.data()), binaryBuffer.size());
+    }
+
+    void ShaderModule::LoadFromBinary(Context* context, const uint32_t* binaryBuffer, size_t sizeInBytes)
+    {
+        mContext = context;
 
         VkShaderModuleCreateInfo moduleCreateInfo{};
         moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        moduleCreateInfo.codeSize = binaryBuffer.size();
-        moduleCreateInfo.pCode    = (uint32_t*)binaryBuffer.data();
+        moduleCreateInfo.codeSize = sizeInBytes;
+        moduleCreateInfo.pCode    = binaryBuffer;
         mContext->VkbDispatchTable->createShaderModule(&moduleCreateInfo, NULL, &mShaderModule);
     }
-
 
     void ShaderModule::Destroy()
     {

@@ -14,7 +14,8 @@ namespace foray::core {
 
         void                LoadFromSpirv(Context* context, std::string relativeShaderPath);
         void                LoadFromSource(Context* context, std::string relativeShaderSourcePath);
-        void                LoadFromBinary(Context* context, std::vector<char>& binaryBuffer);
+        void                LoadFromBinary(Context* context, const std::vector<uint8_t>& binaryBuffer);
+        void                LoadFromBinary(Context* context, const uint32_t* binaryBuffer, size_t sizeInBytes);
         inline virtual bool Exists() const override { return !!mShaderModule; }
         virtual void        Destroy() override;
 

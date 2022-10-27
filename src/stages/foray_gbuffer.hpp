@@ -1,5 +1,6 @@
 #pragma once
 #include "../core/foray_context.hpp"
+#include "../core/foray_shadermodule.hpp"
 #include "../scene/foray_scene.hpp"
 #include "foray_rasterizedRenderStage.hpp"
 
@@ -13,7 +14,7 @@ namespace foray::stages {
       public:
         GBufferStage() = default;
 
-        virtual void Init(core::Context* context, scene::Scene* scene);
+        virtual void Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath = "", std::string_view fragmentShaderPath = "");
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled() override;
 
@@ -33,8 +34,11 @@ namespace foray::stages {
         std::vector<VkClearValue>                        mClearValues;
         core::ManagedImage                               mDepthAttachment;
         std::vector<std::unique_ptr<core::ManagedImage>> mGBufferImages;
-        std::string                                      mVertexShaderPath   = "../foray/src/shaders/gbuffer/gbuffer_stage.vert";
-        std::string                                      mFragmentShaderPath = "../foray/src/shaders/gbuffer/gbuffer_stage.frag";
+        std::string                                      mVertexShaderPath   = "";
+        std::string                                      mFragmentShaderPath = "";
+
+        core::ShaderModule mVertexShaderModule;
+        core::ShaderModule mFragmentShaderModule;
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;

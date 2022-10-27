@@ -1,6 +1,5 @@
 #include "foray_gbuffer.hpp"
 #include "../core/foray_shadermanager.hpp"
-#include "../core/foray_shadermodule.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
 #include "../scene/globalcomponents/foray_drawdirector.hpp"
@@ -14,12 +13,21 @@
 #pragma message "Gbuffer Benching enabled. Added synchronisation scopes may cause reduced performance!"
 #endif  // ENABLE_GBUFFER_BENCH
 
+const uint32_t GBUFFER_SHADER_VERT[] = 
+#include "foray_gbuffer.vert.spv.h"
+;
+const uint32_t GBUFFER_SHADER_FRAG[] = 
+#include "foray_gbuffer.frag.spv.h"
+;
+
 namespace foray::stages {
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(core::Context* context, scene::Scene* scene)
+    void GBufferStage::Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath, std::string_view fragmentShaderPath)
     {
         mContext = context;
         mScene   = scene;
+        mVertexShaderPath = vertexShaderPath;
+        mFragmentShaderPath = fragmentShaderPath;
 
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
@@ -66,6 +74,8 @@ namespace foray::stages {
             mPipelineCache = nullptr;
         }
         mDescriptorSet.Destroy();
+        mVertexShaderModule.Destroy();
+        mFragmentShaderModule.Destroy();
     }
 
     void GBufferStage::CreateResolutionDependentComponents()
@@ -455,10 +465,23 @@ namespace foray::stages {
         AssertVkResult(vkCreatePipelineCache(mContext->Device(), &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         // shader stages
-        auto                         vertShaderModule = core::ShaderModule(mContext, mVertexShaderPath);
-        auto                         fragShaderModule = core::ShaderModule(mContext, mFragmentShaderPath);
+        if (mVertexShaderPath.size() > 0)
+        {
+            mVertexShaderModule.LoadFromSource(mContext, mVertexShaderPath);
+        }
+        else
+        {
+            mVertexShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_VERT, sizeof(GBUFFER_SHADER_VERT));
+        }
+        if (mFragmentShaderPath.size() > 0)
+        {
+            mFragmentShaderModule.LoadFromSource(mContext, mFragmentShaderPath);
+        }
+        {
+            mFragmentShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_FRAG, sizeof(GBUFFER_SHADER_FRAG));
+        }
         util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule);
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule);
 
         // vertex layout
         scene::VertexInputStateBuilder vertexInputStateBuilder;

@@ -9,7 +9,7 @@ namespace foray::core {
 
     namespace fs = std::filesystem;
 
-    const void ShaderManager::GetShaderBinary(std::string_view filePath, std::vector<char>& out)
+    const void ShaderManager::GetShaderBinary(std::string_view filePath, std::vector<uint8_t>& out)
     {
         osi::Utf8Path sourceFilePath(filePath);
         if(sourceFilePath.IsRelative())
@@ -40,7 +40,8 @@ namespace foray::core {
         size_t fileSize = (size_t)file.tellg();
         out.resize(fileSize);
         file.seekg(0);
-        file.read(out.data(), static_cast<std::streamsize>(fileSize));
+        char* readPtr = reinterpret_cast<char*>(out.data());
+        file.read(readPtr, static_cast<std::streamsize>(fileSize));
         file.close();
     }
 

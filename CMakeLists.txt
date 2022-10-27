@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.20)
 
 project("foray")
 
 # Include Compiler Config (sets c++ 20 and compiler flags)
 include("cmakescripts/compilerconfig.cmake")
+include("cmakescripts/compileshader.cmake")
 
 # Enable strict mode for own lib
 SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
@@ -63,6 +64,8 @@ endif ()
 
 
 # subdirectories
+
+add_subdirectory("src/shaders")
 
 # Set nonstrict mode for third party stuff
 
