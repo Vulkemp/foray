@@ -91,4 +91,11 @@ namespace foray::scene {
         }
     }
 
+    std::vector<VkDescriptorImageInfo>& TextureStore::GetDescriptorImageInfos()
+    {
+        UpdateImageInfos();
+        return mDescriptorImageInfos;
+    }
+
+
 }  // namespace foray

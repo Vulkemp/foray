@@ -48,9 +48,12 @@ namespace foray::stages {
 
         void PrepareAttachments();
         void PrepareRenderpass();
-        void SetupDescriptors();
+        virtual void SetupDescriptors() override;
+        virtual void CreateDescriptorSets() override;
+        virtual void UpdateDescriptors() override;
+        virtual void CreatePipelineLayout() override;
         void BuildCommandBuffer(){};
-        void PreparePipeline();
+        void CreatePipeline();
 
 #ifdef ENABLE_GBUFFER_BENCH
         bench::DeviceBenchmark mBenchmark;

@@ -61,6 +61,7 @@ namespace foray::stages {
             void                                                       Destroy(core::Context* context);
             void                                                       UpdateDescriptorInfos();
             std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(bool rebuild = false);
+            std::vector<VkDescriptorImageInfo>&                        GetDescriptorImageInfos();
         } mEnvMap, mNoiseSource;
 
         inline static constexpr VkShaderStageFlags RTSTAGEFLAGS =
@@ -72,8 +73,8 @@ namespace foray::stages {
         VkPipelineCache mPipelineCache = nullptr;
         VkRenderPass    mRenderpass    = nullptr;
 
-        core::DescriptorSetHelper mDescriptorSet;
-        VkPipelineLayout          mPipelineLayout = nullptr;
+        core::DescriptorSet mDescriptorSet;
+        VkPipelineLayout    mPipelineLayout = nullptr;
 
         rtpipe::RtPipeline mPipeline;
 

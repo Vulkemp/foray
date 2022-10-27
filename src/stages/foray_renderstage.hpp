@@ -1,8 +1,9 @@
 #pragma once
 #include "../base/foray_framerenderinfo.hpp"
+#include "../core/foray_context.hpp"
+#include "../core/foray_descriptorset.hpp"
 #include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_managedimage.hpp"
-#include "../core/foray_context.hpp"
 #include "../foray_basics.hpp"
 
 namespace foray::stages {
@@ -37,7 +38,7 @@ namespace foray::stages {
 
       protected:
         std::vector<core::ManagedImage*> mColorAttachments;
-        core::Context*           mContext{};
+        core::Context*                   mContext{};
 
         virtual void CreateFixedSizeComponents(){};
         virtual void DestroyFixedComponents(){};

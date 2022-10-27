@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 #include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_managedbuffer.hpp"
 #include "foray_as_declares.hpp"

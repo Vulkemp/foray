@@ -25,7 +25,7 @@ namespace foray::scene {
         VkSampler GetOrCreateSampler(const VkSamplerCreateInfo& samplerCI);
 
         std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage = VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
-
+        std::vector<VkDescriptorImageInfo>&                        GetDescriptorImageInfos();
       protected:
         std::vector<SampledTexture> mTextures;
 

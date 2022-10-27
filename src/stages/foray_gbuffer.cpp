@@ -49,7 +49,9 @@ namespace foray::stages {
         mBenchmark.Create(mContext, timestampNames);
 #endif  // ENABLE_GBUFFER_BENCH
         SetupDescriptors();
-        PreparePipeline();
+        CreateDescriptorSets();
+        CreatePipelineLayout();
+        CreatePipeline();
     }
 
     void GBufferStage::DestroyFixedComponents()
@@ -117,7 +119,7 @@ namespace foray::stages {
 
         vkDeviceWaitIdle(mContext->Device());
         // rebuild pipeline and its dependencies.
-        PreparePipeline();
+        CreatePipeline();
     }
 
     void GBufferStage::PrepareAttachments()
@@ -311,14 +313,27 @@ namespace foray::stages {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorInfoAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorInfo());
-        mDescriptorSet.SetDescriptorInfoAt(2, mScene->GetComponent<scene::CameraManager>()->MakeUboDescriptorInfos());
-        mDescriptorSet.SetDescriptorInfoAt(3, mScene->GetComponent<scene::DrawDirector>()->MakeDescriptorInfosForCurrent());
-        mDescriptorSet.SetDescriptorInfoAt(4, mScene->GetComponent<scene::DrawDirector>()->MakeDescriptorInfosForPrevious());
+        mDescriptorSet.SetDescriptorAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetBuffer().GetBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorImageInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                       VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetUbo().GetUboBuffer().GetDeviceBuffer(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                       VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformBuffer().GetDeviceBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                       VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                       VK_SHADER_STAGE_VERTEX_BIT);
 
-        VkDescriptorSetLayout descriptorSetLayout = mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
+    }
 
+    void GBufferStage::CreateDescriptorSets() {
+        mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
+    }
+
+    void GBufferStage::UpdateDescriptors() {
+
+    }
+
+    void GBufferStage::CreatePipelineLayout() {
         std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
                                                               .offset     = 0,
                                                               .size       = sizeof(scene::DrawPushConstant)}});
@@ -328,7 +343,7 @@ namespace foray::stages {
         pipelineLayoutCI.pushConstantRangeCount = pushConstantRanges.size();
         pipelineLayoutCI.pPushConstantRanges    = pushConstantRanges.data();
         pipelineLayoutCI.setLayoutCount         = 1;
-        pipelineLayoutCI.pSetLayouts            = &descriptorSetLayout;
+        pipelineLayoutCI.pSetLayouts            = &mDescriptorSet.GetDescriptorSetLayout();
 
         AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCI, nullptr, &mPipelineLayout));
     }
@@ -428,10 +443,8 @@ namespace foray::stages {
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
-        const auto& descriptorsets = mDescriptorSet.GetDescriptorSets();
-
         // Instanced object
-        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &(descriptorsets[(renderInfo.GetFrameNumber()) % descriptorsets.size()]), 0,
+        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0,
                                 nullptr);
 
         auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -458,7 +471,7 @@ namespace foray::stages {
         renderInfo.GetImageLayoutCache().Set(mDepthAttachment, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
-    void GBufferStage::PreparePipeline()
+    void GBufferStage::CreatePipeline()
     {
         VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.sType                     = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;

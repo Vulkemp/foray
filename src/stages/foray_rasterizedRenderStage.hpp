@@ -14,15 +14,20 @@ namespace foray::stages {
         FORAY_PROPERTY_CGET(Pipeline)
         FORAY_PROPERTY_CGET(PipelineLayout)
 
+        virtual void SetupDescriptors(){};
+        virtual void CreateDescriptorSets(){};
+        virtual void UpdateDescriptors(){};
+        virtual void CreatePipelineLayout(){};
+
         virtual void OnResized(const VkExtent2D& extent) override;
         virtual void Destroy() override;
 
       protected:
-        VkFramebuffer             mFrameBuffer   = nullptr;
-        VkPipelineCache           mPipelineCache = nullptr;
-        VkRenderPass              mRenderpass    = nullptr;
-        core::DescriptorSetHelper mDescriptorSet;
-        VkPipeline                mPipeline       = nullptr;
-        VkPipelineLayout          mPipelineLayout = nullptr;
+        VkFramebuffer       mFrameBuffer   = nullptr;
+        VkPipelineCache     mPipelineCache = nullptr;
+        VkRenderPass        mRenderpass    = nullptr;
+        core::DescriptorSet mDescriptorSet;
+        VkPipeline          mPipeline       = nullptr;
+        VkPipelineLayout    mPipelineLayout = nullptr;
     };
 }  // namespace foray::stages
