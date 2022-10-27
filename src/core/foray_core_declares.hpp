@@ -5,8 +5,8 @@ namespace foray::core {
     class ManagedResource;
     class ManagedImage;
     class ManagedBuffer;
-    class DescriptorSetHelper;
     class CommandBuffer;
+    class DescriptorSet;
     class HostCommandBuffer;
     class DeviceCommandBuffer;
     class ImageLayoutCache;

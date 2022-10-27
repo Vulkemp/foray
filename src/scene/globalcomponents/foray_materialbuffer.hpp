@@ -1,5 +1,4 @@
 #pragma once
-#include "../../core/foray_descriptorsethelper.hpp"
 #include "../../util/foray_managedvectorbuffer.hpp"
 #include "../foray_component.hpp"
 #include "../foray_material.hpp"
@@ -18,14 +17,15 @@ namespace foray::scene {
         void UpdateDeviceLocal();
         void Destroy();
 
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage = VK_SHADER_STAGE_FRAGMENT_BIT);
-
         inline virtual ~MaterialBuffer() { Destroy(); }
 
         FORAY_PROPERTY_ALLGET(Buffer)
 
+        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer().GetVkDescriptorBufferInfo(); }
+        inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer().GetBuffer(); }
+
+
       protected:
         util::ManagedVectorBuffer<DefaultMaterialEntry> mBuffer = {};
-        std::vector<VkDescriptorBufferInfo>       mDescriptorBufferInfos;
     };
 }  // namespace foray::scene

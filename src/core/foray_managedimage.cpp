@@ -90,7 +90,6 @@ namespace foray::core {
                               VkExtent3D               extent,
                               VkImageUsageFlags        usage,
                               VkFormat                 format,
-                              VkImageLayout            initialLayout,
                               VkImageAspectFlags       aspectMask,
                               std::string_view         name)
     {
@@ -106,7 +105,6 @@ namespace foray::core {
         createInfo.ImageCI.samples       = VK_SAMPLE_COUNT_1_BIT;
         createInfo.ImageCI.tiling        = VK_IMAGE_TILING_OPTIMAL;
         createInfo.ImageCI.usage         = usage;
-        createInfo.ImageCI.initialLayout = initialLayout;
 
         createInfo.ImageViewCI.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
         createInfo.ImageViewCI.format                          = format;

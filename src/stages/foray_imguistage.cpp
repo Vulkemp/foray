@@ -1,8 +1,8 @@
 #include "foray_imguistage.hpp"
 #include "../core/foray_commandbuffer.hpp"
 #include "../core/foray_shadermodule.hpp"
-#include "../util/foray_pipelinebuilder.hpp"
 #include "../osi/foray_window.hpp"
+#include "../util/foray_pipelinebuilder.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_sdl.h>
@@ -23,12 +23,12 @@ namespace foray::stages {
         CreateFixedSizeComponents();
 
         // Clear values for all attachments written in the fragment shader
-        mClearValues.resize(mColorAttachments.size() + 1);
-        for(size_t i = 0; i < mColorAttachments.size(); i++)
+        mClearValues.resize(mImageOutputs.size() + 1);
+        for(size_t i = 0; i < mImageOutputs.size(); i++)
         {
             mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         }
-        mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
+        mClearValues[mImageOutputs.size()].depthStencil = {1.0f, 0};
 
         VkDescriptorPoolSize pool_sizes[] = {{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
                                              {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
@@ -86,9 +86,7 @@ namespace foray::stages {
 
     void ImguiStage::CreateResolutionDependentComponents()
     {
-        PrepareAttachments();
         PrepareRenderpass();
-        BuildCommandBuffer();
     }
 
     void ImguiStage::DestroyResolutionDependentComponents()
@@ -107,40 +105,29 @@ namespace foray::stages {
         }
     }
 
-    void ImguiStage::PrepareAttachments()
-    {
-        mColorAttachments.clear();
-        mColorAttachments.push_back(mTargetImage);
-    }
-
     void ImguiStage::PrepareRenderpass()
     {
         // size + 1 for depth attachment description
-        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size());
-        std::vector<VkAttachmentReference>   colorAttachmentReferences(mColorAttachments.size());
-        std::vector<VkImageView>             attachmentViews(attachmentDescriptions.size());
-
-        for(uint32_t i = 0; i < mColorAttachments.size(); i++)
+        VkAttachmentDescription attachmentDescription{.format         = mTargetImage->GetFormat(),
+                                                      .samples        = mTargetImage->GetSampleCount(),
+                                                      .loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD,
+                                                      .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
+                                                      .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                                      .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                                                      .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+                                                      .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
+        VkAttachmentReference   colorAttachmentReference
         {
-            auto& colorAttachment                    = mColorAttachments[i];
-            attachmentDescriptions[i].samples        = colorAttachment->GetSampleCount();
-            attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
-            attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
-            attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-            attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            attachmentDescriptions[i].initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-            attachmentDescriptions[i].finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-            attachmentDescriptions[i].format         = colorAttachment->GetFormat();
-
-            colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-            attachmentViews[i]           = colorAttachment->GetImageView();
-        }
+            .attachment = 0,
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+        VkImageView attachmentView = mTargetImage->GetImageView();
 
         // Subpass description
         VkSubpassDescription subpass    = {};
         subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = colorAttachmentReferences.size();
-        subpass.pColorAttachments       = colorAttachmentReferences.data();
+        subpass.colorAttachmentCount    = 1U;
+        subpass.pColorAttachments       = &colorAttachmentReference;
         subpass.pDepthStencilAttachment = nullptr;
 
         VkSubpassDependency subPassDependencies[2] = {};
@@ -162,8 +149,8 @@ namespace foray::stages {
 
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.pAttachments           = attachmentDescriptions.data();
-        renderPassInfo.attachmentCount        = static_cast<uint32_t>(attachmentDescriptions.size());
+        renderPassInfo.pAttachments           = &attachmentDescription;
+        renderPassInfo.attachmentCount        = 1U;
         renderPassInfo.subpassCount           = 1;
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
@@ -174,8 +161,8 @@ namespace foray::stages {
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         fbufCreateInfo.pNext                   = NULL;
         fbufCreateInfo.renderPass              = mRenderpass;
-        fbufCreateInfo.pAttachments            = attachmentViews.data();
-        fbufCreateInfo.attachmentCount         = static_cast<uint32_t>(attachmentViews.size());
+        fbufCreateInfo.pAttachments            = &attachmentView;
+        fbufCreateInfo.attachmentCount         = 1U;
         fbufCreateInfo.width                   = mContext->GetSwapchainSize().width;
         fbufCreateInfo.height                  = mContext->GetSwapchainSize().height;
         fbufCreateInfo.layers                  = 1;
@@ -224,13 +211,11 @@ namespace foray::stages {
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
         renderPassBeginInfo.pClearValues      = mClearValues.data();
 
-        core::ImageLayoutCache::Barrier2 barrier{
-            .SrcStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-            .SrcAccessMask       = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
-            .DstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .DstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .NewLayout = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL
-        };
+        core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                 .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+                                                 .DstStageMask  = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                                                 .DstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                                                 .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
         renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, mTargetImage, barrier);
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);

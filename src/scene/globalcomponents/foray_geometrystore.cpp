@@ -19,24 +19,6 @@ namespace foray::scene {
         return false;
     }
 
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GeometryStore::GetVertexBufferDescriptorInfo(VkShaderStageFlags shaderStage)
-    {
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        mDescriptorBufferInfosVertices.resize(1);
-        mVerticesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosVertices[0]);
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfosVertices);
-        return descriptorInfo;
-    }
-
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GeometryStore::GetIndexBufferDescriptorInfo(VkShaderStageFlags shaderStage)
-    {
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        mDescriptorBufferInfosIndices.resize(1);
-        mIndicesBuffer.FillVkDescriptorBufferInfo(&mDescriptorBufferInfosIndices[0]);
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfosIndices);
-        return descriptorInfo;
-    }
-
     GeometryStore::GeometryStore()
     {
         mIndicesBuffer.SetName("Indices");

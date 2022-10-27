@@ -6,7 +6,7 @@ namespace foray::util {
     {
         Destroy();
         core::ManagedBuffer::ManagedBufferCreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, size,
-                                                  VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+                                                        VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         mUboBuffer.Create(context, ci, stageBufferCount);
     }
     void ManagedUboBase::CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer)
@@ -17,6 +17,10 @@ namespace foray::util {
                                                      .QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED};
         mUboBuffer.CmdCopyToDevice(frameIndex, cmdBuffer, beforeAndAfter, beforeAndAfter);
     }
+    VkDescriptorBufferInfo ManagedUboBase::GetVkDescriptorBufferInfo() const
+    {
+        return mUboBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo();
+    }
     bool ManagedUboBase::Exists() const
     {
         return mUboBuffer.Exists();
@@ -26,4 +30,4 @@ namespace foray::util {
         mUboBuffer.Destroy();
     }
 
-}  // namespace foray
+}  // namespace foray::util

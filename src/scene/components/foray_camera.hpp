@@ -1,6 +1,5 @@
 #pragma once
 #include "../../foray_glm.hpp"
-#include "../../core/foray_descriptorsethelper.hpp"
 #include "../../util/foray_managedubo.hpp"
 #include "../foray_component.hpp"
 #include <array>

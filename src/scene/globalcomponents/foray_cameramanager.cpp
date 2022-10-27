@@ -4,20 +4,6 @@
 
 namespace foray::scene {
 
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> CameraManager::MakeUboDescriptorInfos(VkShaderStageFlags shaderStage)
-    {
-        UpdateUboDescriptorBufferInfos();
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, shaderStage);
-        descriptorInfo->AddDescriptorSet(&mUboDescriptorBufferInfo);
-        return descriptorInfo;
-    }
-
-    inline void CameraManager::UpdateUboDescriptorBufferInfos()
-    {
-        mUboDescriptorBufferInfo = {mUbo.GetUboBuffer().GetDeviceBuffer().GetVkDescriptorBufferInfo()};
-    }
-
     void CameraManager::Update(SceneUpdateInfo& updateInfo)
     {
         if(!!mSelectedCamera)
@@ -67,7 +53,6 @@ namespace foray::scene {
     {
         mSelectedCamera = nullptr;
         mCameras.clear();
-        mUboDescriptorBufferInfo.clear();
         mUbo.Destroy();
     }
 

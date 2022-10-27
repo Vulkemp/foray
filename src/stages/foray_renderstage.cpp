@@ -1,18 +1,27 @@
 #include "foray_renderstage.hpp"
 
 namespace foray::stages {
-    core::ManagedImage* RenderStage::GetColorAttachmentByName(const std::string_view name, bool noThrow)
+    std::vector<core::ManagedImage*> RenderStage::GetImageOutputs()
     {
-        for(auto& attachment : mColorAttachments)
+        std::vector<core::ManagedImage*> result;
+        result.reserve(mImageOutputs.size());
+        for (auto& output : mImageOutputs)
         {
-            if(attachment->GetName() == name)
-            {
-                return attachment;
-            }
+            result.push_back(output.second);
+        }
+        return result;
+    }
+    core::ManagedImage* RenderStage::GetImageOutput(const std::string_view name, bool noThrow)
+    {
+        std::string namecopy(name);
+        auto iter = mImageOutputs.find(namecopy);
+        if (iter != mImageOutputs.end())
+        {
+            return iter->second;
         }
         if(!noThrow)
         {
-            throw Exception(std::string("Failed to get color attachment with name: ") + std::string(name));
+            FORAY_THROWFMT("Failed to get color attachment with name: {}", name)
         }
         return nullptr;
     }

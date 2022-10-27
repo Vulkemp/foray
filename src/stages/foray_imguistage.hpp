@@ -35,8 +35,6 @@ namespace foray::stages {
         virtual void CreateResolutionDependentComponents() override;
         virtual void DestroyResolutionDependentComponents() override;
 
-        void PrepareAttachments();
         void PrepareRenderpass();
-        void BuildCommandBuffer(){};
     };
 }  // namespace foray

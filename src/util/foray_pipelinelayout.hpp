@@ -30,9 +30,9 @@ namespace foray::util {
         template <typename TPushC>
         inline void AddPushConstantRange(uint32_t offset = 0U);
 
-        VkPipelineLayout Create(core::Context* context, VkPipelineLayoutCreateFlags flags = 0, void* pNext = nullptr);
+        VkPipelineLayout Build(core::Context* context, VkPipelineLayoutCreateFlags flags = 0, void* pNext = nullptr);
 
-        VkPipelineLayout Create(core::Context*                            context,
+        VkPipelineLayout Build(core::Context*                            context,
                                 const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
                                 const std::vector<VkPushConstantRange>&   pushConstantRanges,
                                 VkPipelineLayoutCreateFlags               flags = 0,

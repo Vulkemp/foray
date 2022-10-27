@@ -63,17 +63,21 @@ namespace foray::core {
     void DescriptorSet::Destroy()
     {
 
-        if(mDescriptorSet)
+        if(!!mDescriptorPool)
+        {
+            vkDestroyDescriptorPool(mContext->Device(), mDescriptorPool, nullptr);
+            mDescriptorPool = nullptr;
+            mDescriptorSet = nullptr;
+        }
+        if(!!mDescriptorSetLayout)
         {
             vkDestroyDescriptorSetLayout(mContext->Device(), mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = VK_NULL_HANDLE;
         }
     }
 
-    void DescriptorSet::SetDescriptorAt(uint32_t binding, const std::vector<ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSet::SetDescriptorAt(uint32_t binding, const std::vector<const ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        AssertBindingInUse(binding);
-
         uint32_t                            count = buffers.size();
         std::vector<VkDescriptorBufferInfo> bufferInfos(count);
         for(size_t i = 0; i < count; i++)
@@ -84,28 +88,23 @@ namespace foray::core {
         mMapBindingToDescriptorInfo[binding] = {.BufferInfos = bufferInfos, .DescriptorType = descriptorType, .DescriptorCount = count, .ShaderStageFlags = shaderStageFlags};
     }
 
-    void DescriptorSet::SetDescriptorAt(uint32_t binding, const std::vector<ManagedBuffer>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSet::SetDescriptorAt(uint32_t binding, const ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<ManagedBuffer*> v;
-        for(const ManagedBuffer& buffer : buffers)
-        {
-            v.push_back(const_cast<ManagedBuffer*>(&buffer));
-        }
-        SetDescriptorAt(binding, v, descriptorType, shaderStageFlags);
+        mMapBindingToDescriptorInfo[binding] = {
+            .BufferInfos = {buffer.GetVkDescriptorBufferInfo()}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
     }
 
-    void DescriptorSet::SetDescriptorAt(uint32_t binding, ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSet::SetDescriptorAt(uint32_t binding, const ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        SetDescriptorAt(binding, {&buffer}, descriptorType, shaderStageFlags);
+        SetDescriptorAt(binding, *buffer, descriptorType, shaderStageFlags);
     }
 
-    void DescriptorSet::SetDescriptorAt(uint32_t binding, ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
-    {
-        SetDescriptorAt(binding, std::vector<ManagedBuffer*>(1,buffer), descriptorType, shaderStageFlags);
-    }
-
-    void DescriptorSet::SetDescriptorAt(
-        uint32_t binding, const std::vector<ManagedImage*>& images, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags, VkImageLayout layout, VkSampler sampler)
+    void DescriptorSet::SetDescriptorAt(uint32_t                                binding,
+                                        const std::vector<const ManagedImage*>& images,
+                                        VkImageLayout                           layout,
+                                        VkSampler                               sampler,
+                                        VkDescriptorType                        descriptorType,
+                                        VkShaderStageFlags                      shaderStageFlags)
     {
         uint32_t                           count = images.size();
         std::vector<VkDescriptorImageInfo> imageInfos(count);
@@ -117,27 +116,48 @@ namespace foray::core {
         }
         mMapBindingToDescriptorInfo[binding] = {.ImageInfos = imageInfos, .DescriptorType = descriptorType, .DescriptorCount = count, .ShaderStageFlags = shaderStageFlags};
     }
-
-    void DescriptorSet::SetDescriptorAt(uint32_t binding, std::vector<VkDescriptorImageInfo>& imageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSet::SetDescriptorAt(
+        uint32_t binding, const ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        AssertBindingInUse(binding);
+        SetDescriptorAt(binding, *image, layout, sampler, descriptorType, shaderStageFlags);
+    }
+    void DescriptorSet::SetDescriptorAt(
+        uint32_t binding, const ManagedImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        mMapBindingToDescriptorInfo[binding] = {.ImageInfos       = {VkDescriptorImageInfo{.sampler = sampler, .imageView = image.GetImageView(), .imageLayout = layout}},
+                                                .DescriptorType   = descriptorType,
+                                                .DescriptorCount  = 1U,
+                                                .ShaderStageFlags = shaderStageFlags};
+    }
+
+    void DescriptorSet::SetDescriptorAt(uint32_t                                  binding,
+                                        const std::vector<VkDescriptorImageInfo>& imageInfos,
+                                        VkDescriptorType                          descriptorType,
+                                        VkShaderStageFlags                        shaderStageFlags)
+    {
         mMapBindingToDescriptorInfo[binding] = {
             .ImageInfos = imageInfos, .DescriptorType = descriptorType, .DescriptorCount = static_cast<uint32_t>(imageInfos.size()), .ShaderStageFlags = shaderStageFlags};
+    }
+    void DescriptorSet::SetDescriptorAt(uint32_t                                   binding,
+                                        const std::vector<VkDescriptorBufferInfo>& bufferInfos,
+                                        VkDescriptorType                           descriptorType,
+                                        VkShaderStageFlags                         shaderStageFlags)
+    {
+        mMapBindingToDescriptorInfo[binding] = {
+            .BufferInfos = bufferInfos, .DescriptorType = descriptorType, .DescriptorCount = static_cast<uint32_t>(bufferInfos.size()), .ShaderStageFlags = shaderStageFlags};
+    }
+    void DescriptorSet::SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        mMapBindingToDescriptorInfo[binding] = {.ImageInfos = {imageInfo}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
+    }
+    void DescriptorSet::SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        mMapBindingToDescriptorInfo[binding] = {.BufferInfos = {bufferInfo}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
     }
 
     void DescriptorSet::SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        AssertBindingInUse(binding);
         mMapBindingToDescriptorInfo[binding] = {.pNext = pNext, .DescriptorType = descriptorType, .DescriptorCount = DescriptorCount, .ShaderStageFlags = shaderStageFlags};
-    }
-
-    void DescriptorSet::AssertBindingInUse(uint32_t binding)
-    {
-        // before descriptor set created, prevent double use of binding slots.
-        if(mDescriptorSet == VK_NULL_HANDLE && mMapBindingToDescriptorInfo.find(binding) != mMapBindingToDescriptorInfo.end())
-        {
-            throw Exception("Attempted to set descriptor to binding that is already in use!");
-        }
     }
 
     void DescriptorSet::CreateDescriptorSet()

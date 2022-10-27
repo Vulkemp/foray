@@ -1,5 +1,4 @@
 #include "foray_geometrymetabuffer.hpp"
-#include "../core/foray_descriptorsethelper.hpp"
 #include "../scene/foray_mesh.hpp"
 #include "foray_blas.hpp"
 
@@ -54,13 +53,5 @@ namespace foray::as {
         mBuffer.WriteDataDeviceLocal(bufferData.data(), newBufferSize);
 
         return mBufferOffsets;
-    }
-
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GeometryMetaBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)
-    {
-        mDescriptorInfos    = {mBuffer.GetVkDescriptorBufferInfo()};
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorInfos);
-        return descriptorInfo;
     }
 }  // namespace foray::as

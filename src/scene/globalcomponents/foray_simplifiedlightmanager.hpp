@@ -1,5 +1,4 @@
 #pragma once
-#include "../../core/foray_descriptorsethelper.hpp"
 #include "../../util/foray_dualbuffer.hpp"
 #include "../components/foray_simplifiedlightcomponent.hpp"
 #include "../foray_component.hpp"

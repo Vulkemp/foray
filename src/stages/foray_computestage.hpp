@@ -1,5 +1,4 @@
 #pragma once
-#include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_shadermodule.hpp"
 #include "../foray_glm.hpp"
 #include "../util/foray_pipelinelayout.hpp"
@@ -16,8 +15,8 @@ namespace foray::stages {
       protected:
         core::ShaderModule mShader;
 
-        core::DescriptorSetHelper mDescriptorSet;
-        util::PipelineLayout      mPipelineLayout;
+        core::DescriptorSet  mDescriptorSet;
+        util::PipelineLayout mPipelineLayout;
 
         VkPipeline mPipeline = nullptr;
 

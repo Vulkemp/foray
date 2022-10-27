@@ -1,7 +1,7 @@
 #pragma once
-#include "foray_managedresource.hpp"
 #include "foray_managedbuffer.hpp"
 #include "foray_managedimage.hpp"
+#include "foray_managedresource.hpp"
 #include <unordered_map>
 
 namespace foray::core {
@@ -24,19 +24,26 @@ namespace foray::core {
         virtual void Destroy() override;
         ~DescriptorSet() { Destroy(); }
 
-        void SetDescriptorAt(uint32_t binding, const std::vector<ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, const std::vector<ManagedBuffer>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<const ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
-        void SetDescriptorAt(uint32_t                          binding,
-                             const std::vector<ManagedImage*>& images,
-                             VkDescriptorType                  descriptorType,
-                             VkShaderStageFlags                shaderStageFlags,
-                             VkImageLayout                     layout,
-                             VkSampler                         sampler);
+        void SetDescriptorAt(uint32_t                                binding,
+                             const std::vector<const ManagedImage*>& images,
+                             VkImageLayout                           layout,
+                             VkSampler                               sampler,
+                             VkDescriptorType                        descriptorType,
+                             VkShaderStageFlags                      shaderStageFlags);
+        void SetDescriptorAt(
+            uint32_t binding, const ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(
+            uint32_t binding, const ManagedImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
-        void SetDescriptorAt(uint32_t binding, std::vector<VkDescriptorImageInfo>& ImageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorImageInfo>& imageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorBufferInfo>& bufferInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+
         void SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
 
@@ -62,7 +69,6 @@ namespace foray::core {
         VkDescriptorSetLayout                        mDescriptorSetLayout{};
         VkDescriptorSet                              mDescriptorSet{};
 
-        void AssertBindingInUse(uint32_t binding);
         void CreateDescriptorSet();
         void CreateDescriptorSetLayout(VkDescriptorSetLayoutCreateFlags descriptorSetLayoutCreateFlags);
     };

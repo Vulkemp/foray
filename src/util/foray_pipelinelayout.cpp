@@ -10,6 +10,8 @@ namespace foray::util {
             mContext->VkbDispatchTable->destroyPipelineLayout(mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
+        mDescriptorSetLayouts.clear();
+        mPushConstantRanges.clear();
     }
 
     void PipelineLayout::AddDescriptorSetLayout(VkDescriptorSetLayout layout)
@@ -35,9 +37,14 @@ namespace foray::util {
         }
     }
 
-    VkPipelineLayout PipelineLayout::Create(core::Context* context, VkPipelineLayoutCreateFlags flags, void* pNext)
+    VkPipelineLayout PipelineLayout::Build(core::Context* context, VkPipelineLayoutCreateFlags flags, void* pNext)
     {
-        Destroy();
+        if(!!mPipelineLayout)
+        {
+            mContext->VkbDispatchTable->destroyPipelineLayout(mPipelineLayout, nullptr);
+            mPipelineLayout = nullptr;
+        }
+
         mContext = context;
 
         VkPipelineLayoutCreateInfo ci = {
@@ -61,7 +68,7 @@ namespace foray::util {
         return mPipelineLayout;
     }
 
-    VkPipelineLayout PipelineLayout::Create(core::Context*                            context,
+    VkPipelineLayout PipelineLayout::Build(core::Context*                            context,
                                             const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
                                             const std::vector<VkPushConstantRange>&   pushConstantRanges,
                                             VkPipelineLayoutCreateFlags               flags,
@@ -70,7 +77,7 @@ namespace foray::util {
         AddDescriptorSetLayouts(descriptorLayouts);
         AddPushConstantRanges(pushConstantRanges);
 
-        return Create(context, flags, pNext);
+        return Build(context, flags, pNext);
     }
 
 }  // namespace foray::util

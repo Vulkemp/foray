@@ -106,7 +106,7 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo)
+    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo) const
     {
         bufferInfo->buffer = mBuffer;
         bufferInfo->offset = 0;

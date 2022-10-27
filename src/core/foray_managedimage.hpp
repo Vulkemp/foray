@@ -2,15 +2,15 @@
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
 #include "foray_commandbuffer.hpp"
-#include "foray_managedresource.hpp"
 #include "foray_context.hpp"
+#include "foray_managedresource.hpp"
 #include <optional>
 
 namespace foray::core {
     class ManagedImage : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_IMAGE>
     {
       public:
-        inline ManagedImage() : VulkanResource("Unnamed Image") { }
+        inline ManagedImage() : VulkanResource("Unnamed Image") {}
         inline virtual ~ManagedImage() { Destroy(); }
 
         struct CreateInfo
@@ -40,15 +40,14 @@ namespace foray::core {
         /// @brief Uses stored create info to recreate vulkan image.
         virtual void Resize(VkExtent3D newextent);
 
-        virtual void Create(Context*         context,
+        virtual void Create(Context*                 context,
                             VmaMemoryUsage           memoryUsage,
                             VmaAllocationCreateFlags flags,
                             VkExtent3D               extent,
                             VkImageUsageFlags        usage,
                             VkFormat                 format,
-                            VkImageLayout            initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-                            VkImageAspectFlags       aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT,
-                            std::string_view         name          = "UnnamedImage");
+                            VkImageAspectFlags       aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                            std::string_view         name       = "UnnamedImage");
 
         /// @brief Simple layout transition.
         /// @param newLayout - The new layout for the image.
@@ -86,7 +85,7 @@ namespace foray::core {
         VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
 
       protected:
-        Context*  mContext{};
+        Context*          mContext{};
         CreateInfo        mCreateInfo;
         VkImage           mImage{};
         VkImageView       mImageView{};

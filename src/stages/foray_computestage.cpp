@@ -15,9 +15,9 @@ namespace foray::stages {
 
         mContext->VkbDispatchTable->cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipeline);
 
-        std::vector<VkDescriptorSet> descriptorSets = mDescriptorSet.GetDescriptorSets();
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
 
-        mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, descriptorSets.size(), descriptorSets.data(), 0U, nullptr);
+        mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
 
         glm::uvec3 groupSize;
         ApiBeforeDispatch(cmdBuffer, renderInfo, groupSize);

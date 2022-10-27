@@ -2,7 +2,7 @@
 
 #include "foray_commandbuffer.hpp"
 #include "foray_context.hpp"
-#include "foray_descriptorsethelper.hpp"
+#include "foray_descriptorset.hpp"
 #include "foray_imagelayoutcache.hpp"
 #include "foray_managedbuffer.hpp"
 #include "foray_managedimage.hpp"

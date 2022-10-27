@@ -151,28 +151,4 @@ namespace foray::scene {
             drawop.Target->CmdDrawInstanced(drawInfo, drawop.Instances.size());
         }
     }
-
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> DrawDirector::MakeDescriptorInfosForCurrent(VkShaderStageFlags shaderStage)
-    {
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
-
-        mCurrentDescriptorInfo = std::vector<VkDescriptorBufferInfo>({mCurrentTransformBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo()});
-
-        descriptorInfo->AddDescriptorSet(&mCurrentDescriptorInfo);
-
-        return descriptorInfo;
-    }
-
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> DrawDirector::MakeDescriptorInfosForPrevious(VkShaderStageFlags shaderStage)
-    {
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage);
-
-        mPreviousDescriptorInfo = std::vector<VkDescriptorBufferInfo>({mPreviousTransformBuffer.GetVkDescriptorBufferInfo()});
-
-        descriptorInfo->AddDescriptorSet(&mPreviousDescriptorInfo);
-
-        return descriptorInfo;
-    }
 }  // namespace foray::scene

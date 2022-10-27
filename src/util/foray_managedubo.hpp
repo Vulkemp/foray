@@ -17,6 +17,12 @@ namespace foray::util {
         virtual bool Exists() const override;
         virtual void Destroy() override;
 
+        core::ManagedBuffer* GetDeviceBuffer() { return &(mUboBuffer.GetDeviceBuffer()); }
+        
+                             operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
+        
+        VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const;
+
       protected:
         DualBuffer mUboBuffer;
     };
@@ -31,8 +37,9 @@ namespace foray::util {
         inline ManagedUbo();
         ~ManagedUbo();
 
-        inline void Create(core::Context* context, std::string_view name);
-        virtual void        UpdateTo(uint32_t frameIndex) override;
+        inline void  Create(core::Context* context, std::string_view name);
+        virtual void UpdateTo(uint32_t frameIndex) override;
+
 
         FORAY_PROPERTY_ALL(Data)
     };
@@ -63,4 +70,4 @@ namespace foray::util {
     {
         mUboBuffer.StageFullBuffer(frameIndex, &mData);
     }
-}  // namespace foray
+}  // namespace foray::util

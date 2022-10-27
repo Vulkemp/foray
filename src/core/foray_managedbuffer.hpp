@@ -69,8 +69,8 @@ namespace foray::core {
 
         virtual void SetName(std::string_view name) override;
 
-        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
-        void                          FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo);
+        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
+        void                          FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo) const;
 
       protected:
         Context*  mContext{};

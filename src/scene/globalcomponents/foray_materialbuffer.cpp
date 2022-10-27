@@ -4,7 +4,6 @@ namespace foray::scene {
     MaterialBuffer::MaterialBuffer(core::Context* context) : mBuffer(context, false)
     {
         mBuffer.GetBuffer().SetName("MaterialBuffer");
-        mDescriptorBufferInfos.resize(1);
     }
     void MaterialBuffer::UpdateDeviceLocal()
     {
@@ -19,13 +18,4 @@ namespace foray::scene {
     {
         mBuffer.Destroy();
     }
-
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> MaterialBuffer::GetDescriptorInfo(VkShaderStageFlags shaderStage)
-    {
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        mBuffer.GetBuffer().FillVkDescriptorBufferInfo(&mDescriptorBufferInfos[0]);
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, shaderStage, &mDescriptorBufferInfos);
-        return descriptorInfo;
-    }
-
 }  // namespace foray

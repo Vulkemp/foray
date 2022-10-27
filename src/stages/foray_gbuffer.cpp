@@ -13,32 +13,28 @@
 #pragma message "Gbuffer Benching enabled. Added synchronisation scopes may cause reduced performance!"
 #endif  // ENABLE_GBUFFER_BENCH
 
-const uint32_t GBUFFER_SHADER_VERT[] = 
+const uint32_t GBUFFER_SHADER_VERT[] =
 #include "foray_gbuffer.vert.spv.h"
-;
-const uint32_t GBUFFER_SHADER_FRAG[] = 
+    ;
+const uint32_t GBUFFER_SHADER_FRAG[] =
 #include "foray_gbuffer.frag.spv.h"
-;
+    ;
 
 namespace foray::stages {
+    inline constexpr std::string_view OutputNames[] = {GBufferStage::PositionOutputName, GBufferStage::NormalOutputName,      GBufferStage::AlbedoOutputName,
+                                                       GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName,
+                                                       GBufferStage::DepthOutputName};
+
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
     void GBufferStage::Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath, std::string_view fragmentShaderPath)
     {
-        mContext = context;
-        mScene   = scene;
-        mVertexShaderPath = vertexShaderPath;
+        mContext            = context;
+        mScene              = scene;
+        mVertexShaderPath   = vertexShaderPath;
         mFragmentShaderPath = fragmentShaderPath;
 
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
-
-        // Clear values for all attachments written in the fragment shader
-        mClearValues.resize(mColorAttachments.size() + 1);
-        for(size_t i = 0; i < mColorAttachments.size(); i++)
-        {
-            mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        }
-        mClearValues[mColorAttachments.size()].depthStencil = {1.0f, 0};
     }
 
     void GBufferStage::CreateFixedSizeComponents()
@@ -82,19 +78,37 @@ namespace foray::stages {
 
     void GBufferStage::CreateResolutionDependentComponents()
     {
-        PrepareAttachments();
+        CreateImages();
         PrepareRenderpass();
-        BuildCommandBuffer();
+    }
+
+    void GBufferStage::OnResized(const VkExtent2D& extent)
+    {
+        VkExtent3D imageExtent{.width = extent.width, .height = extent.height, .depth = 1};
+        for(PerImageInfo& info : mImageInfos)
+        {
+            info.Image.Resize(imageExtent);
+        }
+        if(mFrameBuffer)
+        {
+            vkDestroyFramebuffer(mContext->Device(), mFrameBuffer, nullptr);
+            mFrameBuffer = nullptr;
+        }
+        if(mRenderpass)
+        {
+            vkDestroyRenderPass(mContext->Device(), mRenderpass, nullptr);
+            mRenderpass = nullptr;
+        }
+        PrepareRenderpass();
     }
 
     void GBufferStage::DestroyResolutionDependentComponents()
     {
         VkDevice device = mContext->Device();
-        for(auto& colorAttachment : mColorAttachments)
+        for(PerImageInfo& info : mImageInfos)
         {
-            colorAttachment->Destroy();
+            info.Image.Destroy();
         }
-        mDepthAttachment.Destroy();
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
@@ -105,6 +119,11 @@ namespace foray::stages {
             vkDestroyRenderPass(device, mRenderpass, nullptr);
             mRenderpass = nullptr;
         }
+    }
+
+    core::ManagedImage* GBufferStage::GetImageOutput(EOutput output, bool noThrow)
+    {
+        return RenderStage::GetImageOutput(OutputNames[(size_t)output], noThrow);
     }
 
     void GBufferStage::OnShadersRecompiled()
@@ -122,7 +141,7 @@ namespace foray::stages {
         CreatePipeline();
     }
 
-    void GBufferStage::PrepareAttachments()
+    void GBufferStage::CreateImages()
     {
         static const VkFormat colorFormat    = VK_FORMAT_R32G32B32A32_SFLOAT;
         static const VkFormat geometryFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
@@ -133,42 +152,67 @@ namespace foray::stages {
         VkExtent3D               extent                = {mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
         VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationCreateFlags = 0;
-        VkImageLayout            intialLayout          = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
-        mGBufferImages.clear();
-        mGBufferImages.reserve(6);
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages.push_back(std::make_unique<core::ManagedImage>());
-        mGBufferImages[0]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspacePosition);
-        mGBufferImages[1]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, WorldspaceNormal);
-        mGBufferImages[2]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, intialLayout, aspectMask, Albedo);
-        mGBufferImages[3]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, intialLayout, aspectMask, MotionVector);
-        mGBufferImages[4]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, intialLayout, aspectMask, MaterialIndex);
-        mGBufferImages[5]->Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_UINT, intialLayout, aspectMask, MeshInstanceIndex);
+        VkClearValue defaultClearValue = {0, 0, 0, 0};
 
-        mColorAttachments.clear();
-        mColorAttachments.reserve(mGBufferImages.size());
-        for(size_t i = 0; i < mGBufferImages.size(); i++)
+        for(int32_t i = 0; i < (int32_t)EOutput::MaxEnum; i++)
         {
-            mColorAttachments.push_back(mGBufferImages[i].get());
+            PerImageInfo& info                         = mImageInfos[i];
+            info.Output                                = (EOutput)i;
+            mImageOutputs[std::string(OutputNames[i])] = &(info.Image);
         }
 
-        mDepthAttachment.Create(mContext, memoryUsage, allocationCreateFlags, extent,
-                                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-                                VK_FORMAT_D32_SFLOAT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_ASPECT_DEPTH_BIT, "GBuffer_DepthBufferImage");
+        {  // Position
+            mImageInfos[(size_t)EOutput::Position].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, geometryFormat, aspectMask,
+                                                                OutputNames[(size_t)EOutput::Position]);
+            mImageInfos[(size_t)EOutput::Position].ClearValue = defaultClearValue;
+        }
+
+        {  // Normal
+            mImageInfos[(size_t)EOutput::Normal].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, geometryFormat, aspectMask,
+                                                              OutputNames[(size_t)EOutput::Normal]);
+            mImageInfos[(size_t)EOutput::Normal].ClearValue = defaultClearValue;
+        }
+
+        {  // Albedo
+            mImageInfos[(size_t)EOutput::Albedo].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, aspectMask,
+                                                              OutputNames[(size_t)EOutput::Albedo]);
+            mImageInfos[(size_t)EOutput::Albedo].ClearValue = defaultClearValue;
+        }
+
+        {  // Motion
+            mImageInfos[(size_t)EOutput::Motion].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, aspectMask,
+                                                              OutputNames[(size_t)EOutput::Motion]);
+            mImageInfos[(size_t)EOutput::Motion].ClearValue = defaultClearValue;
+        }
+
+        {  // Material
+            mImageInfos[(size_t)EOutput::MaterialIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, aspectMask,
+                                                                   OutputNames[(size_t)EOutput::MaterialIdx]);
+            mImageInfos[(size_t)EOutput::MaterialIdx].ClearValue = defaultClearValue;
+        }
+
+        {  // MeshId
+            mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, aspectMask,
+                                                                       OutputNames[(size_t)EOutput::MeshInstanceIdx]);
+            mImageInfos[(size_t)EOutput::MeshInstanceIdx].ClearValue = defaultClearValue;
+        }
+
+        {  // Depth
+            VkImageUsageFlags depthUsage =
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+            mImageInfos[(size_t)EOutput::Depth].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, depthUsage, VK_FORMAT_D32_SFLOAT, VK_IMAGE_ASPECT_DEPTH_BIT,
+                                                             OutputNames[(size_t)EOutput::Depth]);
+            mImageInfos[(size_t)EOutput::Depth].ClearValue = {1.f, 0};
+        }
 
         {  // Pre-transfer to correct layout
             core::HostCommandBuffer commandBuffer;
             commandBuffer.Create(mContext);
             commandBuffer.Begin();
 
-            std::vector<VkImageMemoryBarrier2> barriers;
-            barriers.reserve(6);
+            std::array<VkImageMemoryBarrier2, (size_t)EOutput::MaxEnum> barriers;
 
             VkImageMemoryBarrier2 attachmentMemBarrier{
                 .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -190,13 +234,17 @@ namespace foray::stages {
                     },
             };
 
-            for(std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+            for(int32_t i = 0; i < (int32_t)EOutput::Depth; i++)
             {
-                attachmentMemBarrier.image = image->GetImage();
-                barriers.push_back(attachmentMemBarrier);
+                PerImageInfo&          info    = mImageInfos[i];
+                VkImageMemoryBarrier2& barrier = barriers[i];
+
+                barrier       = attachmentMemBarrier;
+                barrier.image = info.Image.GetImage();
             }
 
-            barriers.push_back(VkImageMemoryBarrier2{
+
+            barriers[(size_t)EOutput::Depth] = VkImageMemoryBarrier2{
                 .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
                 .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
                 .srcAccessMask       = VK_ACCESS_2_NONE,
@@ -206,7 +254,7 @@ namespace foray::stages {
                 .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image               = mDepthAttachment.GetImage(),
+                .image               = mImageInfos[(size_t)EOutput::Depth].Image.GetImage(),
                 .subresourceRange =
                     VkImageSubresourceRange{
                         .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -215,7 +263,7 @@ namespace foray::stages {
                         .baseArrayLayer = 0,
                         .layerCount     = VK_REMAINING_ARRAY_LAYERS,
                     },
-            });
+            };
 
             VkDependencyInfo depInfo{
                 .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = (uint32_t)barriers.size(), .pImageMemoryBarriers = barriers.data()};
@@ -228,42 +276,54 @@ namespace foray::stages {
 
     void GBufferStage::PrepareRenderpass()
     {
-        // size + 1 for depth attachment description
-        std::vector<VkAttachmentDescription> attachmentDescriptions(mColorAttachments.size() + 1);
-        std::vector<VkAttachmentReference>   colorAttachmentReferences(mColorAttachments.size());
-        std::vector<VkImageView>             attachmentViews(attachmentDescriptions.size());
+        std::array<VkAttachmentDescription, (size_t)EOutput::MaxEnum> attachmentDescriptions;
 
-        for(uint32_t i = 0; i < mColorAttachments.size(); i++)
+        std::array<VkAttachmentReference, (size_t)EOutput::Depth>     colorAttachmentReferences;
+
+        std::array<VkImageView, (size_t)EOutput::MaxEnum>               attachmentViews;
+        
+        VkAttachmentReference                                         depthAttachmentReference{};
+
+        attachmentDescriptions.fill({});
+        colorAttachmentReferences.fill({});
+        attachmentViews.fill({});
+
+        // Color Outputs
+
+        for(int32_t i = 0; i < (int32_t)EOutput::Depth; i++)
         {
-            auto& colorAttachment                    = mColorAttachments[i];
-            attachmentDescriptions[i].samples        = colorAttachment->GetSampleCount();
+            core::ManagedImage& image                = mImageInfos[i].Image;
+            attachmentDescriptions[i].samples        = image.GetSampleCount();
             attachmentDescriptions[i].loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
             attachmentDescriptions[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
             attachmentDescriptions[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachmentDescriptions[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             attachmentDescriptions[i].initialLayout  = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             attachmentDescriptions[i].finalLayout    = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            attachmentDescriptions[i].format         = colorAttachment->GetFormat();
+            attachmentDescriptions[i].format         = image.GetFormat();
 
-            colorAttachmentReferences[i] = {i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-            attachmentViews[i]           = colorAttachment->GetImageView();
+            colorAttachmentReferences[i] = {(uint32_t)i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
+            attachmentViews[i]           = image.GetImageView();
         }
 
-        // prepare depth attachment
+
+        // Depth Output
+        core::ManagedImage& depthImage = mImageInfos[(size_t)EOutput::Depth].Image;
+
         VkAttachmentDescription depthAttachmentDescription{};
-        depthAttachmentDescription.samples        = mDepthAttachment.GetSampleCount();
+        depthAttachmentDescription.samples        = depthImage.GetSampleCount();
         depthAttachmentDescription.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachmentDescription.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachmentDescription.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachmentDescription.initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depthAttachmentDescription.finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        depthAttachmentDescription.format         = mDepthAttachment.GetFormat();
+        depthAttachmentDescription.format         = depthImage.GetFormat();
 
         // the depth attachment gets the final id (one higher than the highest color attachment id)
-        VkAttachmentReference depthAttachmentReference   = {(uint32_t)colorAttachmentReferences.size(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
-        attachmentDescriptions[mColorAttachments.size()] = depthAttachmentDescription;
-        attachmentViews[mColorAttachments.size()]        = mDepthAttachment.GetImageView();
+        depthAttachmentReference                       = {(uint32_t)EOutput::Depth, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        attachmentDescriptions[(size_t)EOutput::Depth] = depthAttachmentDescription;
+        attachmentViews[(size_t)EOutput::Depth]        = depthImage.GetImageView();
 
         // Subpass description
         VkSubpassDescription subpass    = {};
@@ -313,27 +373,25 @@ namespace foray::stages {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetBuffer().GetBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorImageInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        mDescriptorSet.SetDescriptorAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                        VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetUbo().GetUboBuffer().GetDeviceBuffer(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                        VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformBuffer().GetDeviceBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                        VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                       VK_SHADER_STAGE_VERTEX_BIT);
-
+        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
     }
 
-    void GBufferStage::CreateDescriptorSets() {
+    void GBufferStage::CreateDescriptorSets()
+    {
         mDescriptorSet.Create(mContext, "GBuffer_DescriptorSet");
     }
 
-    void GBufferStage::UpdateDescriptors() {
+    void GBufferStage::UpdateDescriptors() {}
 
-    }
-
-    void GBufferStage::CreatePipelineLayout() {
+    void GBufferStage::CreatePipelineLayout()
+    {
         std::vector<VkPushConstantRange> pushConstantRanges({{.stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT,
                                                               .offset     = 0,
                                                               .size       = sizeof(scene::DrawPushConstant)}});
@@ -351,8 +409,8 @@ namespace foray::stages {
     void GBufferStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
 
-        uint32_t frameNum = renderInfo.GetFrameNumber();
 #ifdef ENABLE_GBUFFER_BENCH
+        uint32_t frameNum = renderInfo.GetFrameNumber();
         mBenchmark.CmdResetQuery(commandBuffer, frameNum);
         mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, bench::BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
@@ -363,7 +421,7 @@ namespace foray::stages {
             .srcAccessMask       = VK_ACCESS_2_NONE,
             .dstStageMask        = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             .dstAccessMask       = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED, // We do not care about the contents of all attachments as they're cleared and rewritten completely
+            .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,  // We do not care about the contents of all attachments as they're cleared and rewritten completely
             .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -377,20 +435,23 @@ namespace foray::stages {
                 },
         };
 
-        std::vector<VkImageMemoryBarrier2> imgBarriers;
-        imgBarriers.reserve(mGBufferImages.size() + 1);
+        std::array<VkImageMemoryBarrier2, (size_t)EOutput::MaxEnum> imgBarriers;
 
-        for(std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+        for(int32_t i = 0; i < (int32_t)EOutput::Depth; i++)
         {
-            attachmentMemBarrier.image = image->GetImage();
-            imgBarriers.push_back(attachmentMemBarrier);
+            PerImageInfo&          info    = mImageInfos[i];
+            VkImageMemoryBarrier2& barrier = imgBarriers[i];
+
+            barrier       = attachmentMemBarrier;
+            barrier.image = info.Image.GetImage();
         }
-        attachmentMemBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-        attachmentMemBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT_KHR | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT_KHR;
-        attachmentMemBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        attachmentMemBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
-        attachmentMemBarrier.image                       = mDepthAttachment.GetImage();
-        imgBarriers.push_back(attachmentMemBarrier);
+        VkImageMemoryBarrier2& depthBarrier      = imgBarriers[(size_t)EOutput::Depth];
+        depthBarrier                             = attachmentMemBarrier;
+        depthBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        depthBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT_KHR | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT_KHR;
+        depthBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
+        depthBarrier.image                       = mImageInfos[(size_t)EOutput::Depth].Image.GetImage();
 
         std::vector<VkBufferMemoryBarrier2> bufferBarriers;
 
@@ -424,17 +485,23 @@ namespace foray::stages {
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
+        std::array<VkClearValue, (size_t)EOutput::MaxEnum> clearValues;
+
+        for(int32_t i = 0; i < (int32_t)EOutput::MaxEnum; i++)
+        {
+            clearValues[i] = mImageInfos[i].ClearValue;
+        }
+
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
         renderPassBeginInfo.framebuffer       = mFrameBuffer;
         renderPassBeginInfo.renderArea.extent = mContext->GetSwapchainSize();
-        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(mClearValues.size());
-        renderPassBeginInfo.pClearValues      = mClearValues.data();
+        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
+        renderPassBeginInfo.pClearValues      = clearValues.data();
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // = vks::initializers::viewport((float)mRenderResolution.width, (float)mRenderResolution.height, 0.0f, 1.0f);
         VkViewport viewport{0.f, 0.f, (float)mContext->GetSwapchainSize().width, (float)mContext->GetSwapchainSize().height, 0.0f, 1.0f};
         vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
@@ -444,8 +511,7 @@ namespace foray::stages {
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
         // Instanced object
-        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0,
-                                nullptr);
+        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
 
         auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 #ifdef ENABLE_GBUFFER_BENCH
@@ -464,11 +530,11 @@ namespace foray::stages {
 
         // The GBuffer determines the images layouts
 
-        for (std::unique_ptr<core::ManagedImage>& image : mGBufferImages)
+        for(int32_t i = 0; i < (int32_t)EOutput::Depth; i++)
         {
-            renderInfo.GetImageLayoutCache().Set(image.get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            renderInfo.GetImageLayoutCache().Set(mImageInfos[i].Image, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
-        renderInfo.GetImageLayoutCache().Set(mDepthAttachment, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        renderInfo.GetImageLayoutCache().Set(mImageInfos[(size_t)EOutput::Depth].Image, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
     void GBufferStage::CreatePipeline()
@@ -478,7 +544,7 @@ namespace foray::stages {
         AssertVkResult(vkCreatePipelineCache(mContext->Device(), &pipelineCacheCreateInfo, nullptr, &mPipelineCache));
 
         // shader stages
-        if (mVertexShaderPath.size() > 0)
+        if(mVertexShaderPath.size() > 0)
         {
             mVertexShaderModule.LoadFromSource(mContext, mVertexShaderPath);
         }
@@ -486,7 +552,7 @@ namespace foray::stages {
         {
             mVertexShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_VERT, sizeof(GBUFFER_SHADER_VERT));
         }
-        if (mFragmentShaderPath.size() > 0)
+        if(mFragmentShaderPath.size() > 0)
         {
             mFragmentShaderModule.LoadFromSource(mContext, mFragmentShaderPath);
         }
@@ -510,7 +576,7 @@ namespace foray::stages {
             // Blend attachment states required for all color attachments
             // This is important, as color write mask will otherwise be 0x0 and you
             // won't see anything rendered to the attachment
-            .SetColorAttachmentBlendCount(mColorAttachments.size())
+            .SetColorAttachmentBlendCount((size_t)EOutput::MaxEnum - 1)
             .SetPipelineLayout(mPipelineLayout)
             .SetVertexInputStateBuilder(&vertexInputStateBuilder)
             .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())

@@ -71,30 +71,16 @@ namespace foray::scene {
         return sampler;
     }
 
-    std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> TextureStore::GetDescriptorInfo(VkShaderStageFlags shaderStage)
+    std::vector<VkDescriptorImageInfo> TextureStore::GetDescriptorInfos()
     {
-        UpdateImageInfos();
-
-        auto descriptorInfo = std::make_shared<core::DescriptorSetHelper::DescriptorInfo>();
-        descriptorInfo->Init(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStage, &mDescriptorImageInfos);
-        return descriptorInfo;
-    }
-
-    void TextureStore::UpdateImageInfos()
-    {
-        mDescriptorImageInfos.resize(mTextures.size());
+        std::vector<VkDescriptorImageInfo> imageInfos(mTextures.size());
         for(size_t i = 0; i < mTextures.size(); i++)
         {
-            mDescriptorImageInfos[i].imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            mDescriptorImageInfos[i].imageView   = mTextures[i].Image->GetImageView();
-            mDescriptorImageInfos[i].sampler     = mTextures[i].Sampler;
+            imageInfos[i].imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfos[i].imageView   = mTextures[i].Image->GetImageView();
+            imageInfos[i].sampler     = mTextures[i].Sampler;
         }
-    }
-
-    std::vector<VkDescriptorImageInfo>& TextureStore::GetDescriptorImageInfos()
-    {
-        UpdateImageInfos();
-        return mDescriptorImageInfos;
+        return imageInfos;
     }
 
 

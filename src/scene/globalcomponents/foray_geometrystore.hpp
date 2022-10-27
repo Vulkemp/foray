@@ -1,5 +1,4 @@
 #pragma once
-#include "../../core/foray_descriptorsethelper.hpp"
 #include "../../core/foray_managedbuffer.hpp"
 #include "../foray_component.hpp"
 #include "../foray_geo.hpp"
@@ -26,20 +25,15 @@ namespace foray::scene {
 
         FORAY_PROPERTY_ALL(Meshes)
 
-        bool                                                       CmdBindBuffers(VkCommandBuffer commandBuffer);
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetVertexBufferDescriptorInfo(VkShaderStageFlags shaderStage);
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetIndexBufferDescriptorInfo(VkShaderStageFlags shaderStage);
+        bool                   CmdBindBuffers(VkCommandBuffer commandBuffer);
+        VkDescriptorBufferInfo GetVertexBufferDescriptorInfo() const { return mVerticesBuffer.GetVkDescriptorBufferInfo(); }
+        VkDescriptorBufferInfo GetIndexBufferDescriptorInfo() const { return mIndicesBuffer.GetVkDescriptorBufferInfo(); }
 
       protected:
         core::ManagedBuffer   mIndicesBuffer;
         core::ManagedBuffer   mVerticesBuffer;
         std::vector<Vertex>   mVertices;
         std::vector<uint32_t> mIndices;
-
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> mDescriptorInfoVertexBuffer;
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> mDescriptorInfoIndexBuffer;
-        std::vector<VkDescriptorBufferInfo>                        mDescriptorBufferInfosVertices;
-        std::vector<VkDescriptorBufferInfo>                        mDescriptorBufferInfosIndices;
 
         std::vector<std::unique_ptr<Mesh>> mMeshes;
     };

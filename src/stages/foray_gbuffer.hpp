@@ -3,6 +3,7 @@
 #include "../core/foray_shadermodule.hpp"
 #include "../scene/foray_scene.hpp"
 #include "foray_rasterizedRenderStage.hpp"
+#include <array>
 
 #ifdef ENABLE_GBUFFER_BENCH
 #include "../bench/foray_devicebenchmark.hpp"
@@ -18,24 +19,47 @@ namespace foray::stages {
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void OnShadersRecompiled() override;
 
-        inline static constexpr std::string_view WorldspacePosition = "Gbuf.Position";
-        inline static constexpr std::string_view WorldspaceNormal   = "Gbuf.Normal";
-        inline static constexpr std::string_view Albedo             = "Gbuf.Albedo";
-        inline static constexpr std::string_view MotionVector       = "Gbuf.Motion";
-        inline static constexpr std::string_view MaterialIndex      = "Gbuf.MaterialId";
-        inline static constexpr std::string_view MeshInstanceIndex  = "Gbuf.MeshInstanceId";
-        core::ManagedImage*                      GetDepthBuffer() { return &mDepthAttachment; }
+        virtual void OnResized(const VkExtent2D& extent) override;
+
+        enum class EOutput
+        {
+            Position,
+            Normal,
+            Albedo,
+            Motion,
+            MaterialIdx,
+            MeshInstanceIdx,
+            Depth,
+            MaxEnum
+        };
+
+        inline static constexpr std::string_view PositionOutputName       = "Gbuf.Position";
+        inline static constexpr std::string_view NormalOutputName         = "Gbuf.Normal";
+        inline static constexpr std::string_view AlbedoOutputName         = "Gbuf.Albedo";
+        inline static constexpr std::string_view MotionOutputName         = "Gbuf.Motion";
+        inline static constexpr std::string_view MaterialIdxOutputName    = "Gbuf.MaterialIdx";
+        inline static constexpr std::string_view MeshInstanceIdOutputName = "Gbuf.MeshInstanceIdx";
+        inline static constexpr std::string_view DepthOutputName          = "Gbuf.Depth";
+
+        core::ManagedImage* GetImageOutput(EOutput output, bool noThrow = false);
 
 #ifdef ENABLE_GBUFFER_BENCH
         FORAY_PROPERTY_ALLGET(Benchmark)
 #endif
       protected:
-        scene::Scene*                                    mScene;
-        std::vector<VkClearValue>                        mClearValues;
-        core::ManagedImage                               mDepthAttachment;
-        std::vector<std::unique_ptr<core::ManagedImage>> mGBufferImages;
-        std::string                                      mVertexShaderPath   = "";
-        std::string                                      mFragmentShaderPath = "";
+        scene::Scene* mScene;
+
+        struct PerImageInfo
+        {
+            EOutput            Output;
+            core::ManagedImage Image;
+            VkClearValue       ClearValue;
+        };
+
+        std::array<PerImageInfo, (size_t)EOutput::MaxEnum> mImageInfos;
+
+        std::string mVertexShaderPath   = "";
+        std::string mFragmentShaderPath = "";
 
         core::ShaderModule mVertexShaderModule;
         core::ShaderModule mFragmentShaderModule;
@@ -46,14 +70,13 @@ namespace foray::stages {
         virtual void DestroyResolutionDependentComponents() override;
 
 
-        void PrepareAttachments();
-        void PrepareRenderpass();
+        void         CreateImages();
+        void         PrepareRenderpass();
         virtual void SetupDescriptors() override;
         virtual void CreateDescriptorSets() override;
         virtual void UpdateDescriptors() override;
         virtual void CreatePipelineLayout() override;
-        void BuildCommandBuffer(){};
-        void CreatePipeline();
+        void         CreatePipeline();
 
 #ifdef ENABLE_GBUFFER_BENCH
         bench::DeviceBenchmark mBenchmark;

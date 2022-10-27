@@ -1,5 +1,4 @@
 #pragma once
-#include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_managedbuffer.hpp"
 #include "foray_as_declares.hpp"
 #include <unordered_map>
@@ -54,7 +53,7 @@ namespace foray::as {
         FORAY_PROPERTY_ALLGET(Buffer)
         FORAY_PROPERTY_CGET(BufferOffsets)
 
-        std::shared_ptr<core::DescriptorSetHelper::DescriptorInfo> GetDescriptorInfo(VkShaderStageFlags shaderStage);
+        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetVkDescriptorBufferInfo(); }
 
       protected:
         core::Context* mContext = nullptr;
@@ -62,6 +61,5 @@ namespace foray::as {
         std::unordered_map<const Blas*, uint32_t> mBufferOffsets;
         /// @brief The device local buffer holding the array
         core::ManagedBuffer                 mBuffer;
-        std::vector<VkDescriptorBufferInfo> mDescriptorInfos;
     };
 }  // namespace foray::as

@@ -2,9 +2,9 @@
 #include "../base/foray_framerenderinfo.hpp"
 #include "../core/foray_context.hpp"
 #include "../core/foray_descriptorset.hpp"
-#include "../core/foray_descriptorsethelper.hpp"
 #include "../core/foray_managedimage.hpp"
 #include "../foray_basics.hpp"
+#include <unordered_map>
 
 namespace foray::stages {
 
@@ -28,17 +28,15 @@ namespace foray::stages {
         };
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
-        inline std::vector<core::ManagedImage*>& GetColorAttachments() { return mColorAttachments; }
-        core::ManagedImage*                      GetColorAttachmentByName(const std::string_view name, bool noThrow = false);
-
-        inline virtual std::string_view GetName() const { return ""; }
+        std::vector<core::ManagedImage*> GetImageOutputs();
+        core::ManagedImage*              GetImageOutput(const std::string_view name, bool noThrow = false);
 
         /// @brief After a shader recompilation has happened, the stage might want to rebuild their pipelines.
         inline virtual void OnShadersRecompiled(){};
 
       protected:
-        std::vector<core::ManagedImage*> mColorAttachments;
-        core::Context*                   mContext{};
+        std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;
+        core::Context*                                       mContext{};
 
         virtual void CreateFixedSizeComponents(){};
         virtual void DestroyFixedComponents(){};
