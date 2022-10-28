@@ -142,10 +142,7 @@ namespace foray::stages {
         VkShaderStageFlags rtShaderStages = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
                                             | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
         mDescriptorSet.SetDescriptorAt(1, mRaytracingRenderTarget, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, rtShaderStages);
-        if(mDescriptorSet.Exists())
-        {
-            mDescriptorSet.Update();
-        }
+        mDescriptorSet.Update();
     }
 
     void RaytracingStage::CreatePipelineLayout()
