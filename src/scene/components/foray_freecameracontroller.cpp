@@ -2,7 +2,6 @@
 #include "../../foray_logger.hpp"
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
-#include <nameof/nameof.hpp>
 
 namespace foray::scene {
     void FreeCameraController::OnEvent(const osi::Event* event)
@@ -12,8 +11,6 @@ namespace foray::scene {
         {
             auto buttonId = binaryInputEvent->SourceInput->GetButtonId();
             auto pressed  = binaryInputEvent->State;
-
-            logger()->info("[{}] {}", NAMEOF_ENUM(buttonId), pressed ? "Pressed" : "Released");
 
             auto finditer = mMapping.find(buttonId);
             if(finditer != mMapping.end())
@@ -41,9 +38,6 @@ namespace foray::scene {
                     mUseMouse = !mUseMouse;
                 }
             }
-        }
-        else {
-            logger()->info("Other Event {}", NAMEOF_ENUM(event->Type));
         }
 
         auto directional = dynamic_cast<const osi::EventInputDirectional*>(event);
