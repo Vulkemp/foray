@@ -41,7 +41,7 @@ namespace foray::stages {
         inline static constexpr std::string_view MeshInstanceIdOutputName = "Gbuf.MeshInstanceIdx";
         inline static constexpr std::string_view DepthOutputName          = "Gbuf.Depth";
 
-        core::ManagedImage* GetImageOutput(EOutput output, bool noThrow = false);
+        core::ManagedImage* GetImageEOutput(EOutput output, bool noThrow = false);
 
 #ifdef ENABLE_GBUFFER_BENCH
         FORAY_PROPERTY_ALLGET(Benchmark)

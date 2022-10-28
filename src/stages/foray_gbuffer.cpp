@@ -437,7 +437,7 @@ namespace foray::stages {
 #pragma endregion
 #pragma region Misc
 
-    core::ManagedImage* GBufferStage::GetImageOutput(EOutput output, bool noThrow)
+    core::ManagedImage* GBufferStage::GetImageEOutput(EOutput output, bool noThrow)
     {
         return RenderStage::GetImageOutput(OutputNames[(size_t)output], noThrow);
     }

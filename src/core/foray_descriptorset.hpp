@@ -46,7 +46,6 @@ namespace foray::core {
 
         void SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
-
         bool Exists() const override { return mDescriptorSet != VK_NULL_HANDLE; }
 
         FORAY_PROPERTY_GET(DescriptorSet)
@@ -71,5 +70,8 @@ namespace foray::core {
 
         void CreateDescriptorSet();
         void CreateDescriptorSetLayout(VkDescriptorSetLayoutCreateFlags descriptorSetLayoutCreateFlags);
+
+        void AssertBindingInUse(uint32_t binding);
+        void AssertHandleNotNull(void* handle, uint32_t binding);
     };
 }  // namespace foray::core

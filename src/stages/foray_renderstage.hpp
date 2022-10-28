@@ -29,7 +29,7 @@ namespace foray::stages {
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         std::vector<core::ManagedImage*> GetImageOutputs();
-        core::ManagedImage*              GetImageOutput(const std::string_view name, bool noThrow = false);
+        core::ManagedImage*              GetImageOutput(std::string_view name, bool noThrow = false);
 
         /// @brief After a shader recompilation has happened, the stage might want to rebuild their pipelines.
         inline virtual void OnShadersRecompiled(){};

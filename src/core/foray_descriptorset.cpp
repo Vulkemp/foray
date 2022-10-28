@@ -62,14 +62,13 @@ namespace foray::core {
 
     void DescriptorSet::Destroy()
     {
-
-        if(!!mDescriptorPool)
+        if(mDescriptorPool != VK_NULL_HANDLE)
         {
             vkDestroyDescriptorPool(mContext->Device(), mDescriptorPool, nullptr);
-            mDescriptorPool = nullptr;
-            mDescriptorSet = nullptr;
+            mDescriptorPool = VK_NULL_HANDLE;
+            mDescriptorSet  = VK_NULL_HANDLE;
         }
-        if(!!mDescriptorSetLayout)
+        if(mDescriptorSetLayout != VK_NULL_HANDLE)
         {
             vkDestroyDescriptorSetLayout(mContext->Device(), mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = VK_NULL_HANDLE;
@@ -78,11 +77,13 @@ namespace foray::core {
 
     void DescriptorSet::SetDescriptorAt(uint32_t binding, const std::vector<const ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
         uint32_t                            count = buffers.size();
         std::vector<VkDescriptorBufferInfo> bufferInfos(count);
         for(size_t i = 0; i < count; i++)
         {
             buffers[i]->FillVkDescriptorBufferInfo(&bufferInfos[i]);
+            AssertHandleNotNull(bufferInfos[i].buffer, binding);
         }
 
         mMapBindingToDescriptorInfo[binding] = {.BufferInfos = bufferInfos, .DescriptorType = descriptorType, .DescriptorCount = count, .ShaderStageFlags = shaderStageFlags};
@@ -90,6 +91,8 @@ namespace foray::core {
 
     void DescriptorSet::SetDescriptorAt(uint32_t binding, const ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(buffer.GetBuffer(), binding);
         mMapBindingToDescriptorInfo[binding] = {
             .BufferInfos = {buffer.GetVkDescriptorBufferInfo()}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
     }
@@ -106,6 +109,9 @@ namespace foray::core {
                                         VkDescriptorType                        descriptorType,
                                         VkShaderStageFlags                      shaderStageFlags)
     {
+
+        AssertBindingInUse(binding);
+
         uint32_t                           count = images.size();
         std::vector<VkDescriptorImageInfo> imageInfos(count);
         for(size_t i = 0; i < count; i++)
@@ -113,6 +119,7 @@ namespace foray::core {
             imageInfos[i].imageView   = images[i]->GetImageView();
             imageInfos[i].imageLayout = layout;
             imageInfos[i].sampler     = sampler;
+            AssertHandleNotNull(imageInfos[i].imageView, binding);
         }
         mMapBindingToDescriptorInfo[binding] = {.ImageInfos = imageInfos, .DescriptorType = descriptorType, .DescriptorCount = count, .ShaderStageFlags = shaderStageFlags};
     }
@@ -124,6 +131,8 @@ namespace foray::core {
     void DescriptorSet::SetDescriptorAt(
         uint32_t binding, const ManagedImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(image.GetImageView(), binding);
         mMapBindingToDescriptorInfo[binding] = {.ImageInfos       = {VkDescriptorImageInfo{.sampler = sampler, .imageView = image.GetImageView(), .imageLayout = layout}},
                                                 .DescriptorType   = descriptorType,
                                                 .DescriptorCount  = 1U,
@@ -135,6 +144,11 @@ namespace foray::core {
                                         VkDescriptorType                          descriptorType,
                                         VkShaderStageFlags                        shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        for(const VkDescriptorImageInfo& imageInfo: imageInfos)
+        {
+            AssertHandleNotNull(imageInfo.imageView, binding);
+        }
         mMapBindingToDescriptorInfo[binding] = {
             .ImageInfos = imageInfos, .DescriptorType = descriptorType, .DescriptorCount = static_cast<uint32_t>(imageInfos.size()), .ShaderStageFlags = shaderStageFlags};
     }
@@ -143,20 +157,31 @@ namespace foray::core {
                                         VkDescriptorType                           descriptorType,
                                         VkShaderStageFlags                         shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        for(const VkDescriptorBufferInfo& bufferInfo : bufferInfos)
+        {
+            AssertHandleNotNull(bufferInfo.buffer, binding);
+        }
         mMapBindingToDescriptorInfo[binding] = {
             .BufferInfos = bufferInfos, .DescriptorType = descriptorType, .DescriptorCount = static_cast<uint32_t>(bufferInfos.size()), .ShaderStageFlags = shaderStageFlags};
     }
     void DescriptorSet::SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(imageInfo.imageView, binding);
         mMapBindingToDescriptorInfo[binding] = {.ImageInfos = {imageInfo}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
     }
     void DescriptorSet::SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(bufferInfo.buffer, binding);
         mMapBindingToDescriptorInfo[binding] = {.BufferInfos = {bufferInfo}, .DescriptorType = descriptorType, .DescriptorCount = 1U, .ShaderStageFlags = shaderStageFlags};
     }
 
     void DescriptorSet::SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(pNext, binding);
         mMapBindingToDescriptorInfo[binding] = {.pNext = pNext, .DescriptorType = descriptorType, .DescriptorCount = DescriptorCount, .ShaderStageFlags = shaderStageFlags};
     }
 
@@ -230,5 +255,27 @@ namespace foray::core {
         layoutInfo.flags        = descriptorSetLayoutCreateFlags;
 
         AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device(), &layoutInfo, nullptr, &mDescriptorSetLayout));
+    }
+
+    void DescriptorSet::AssertBindingInUse(uint32_t binding)
+    {
+#ifdef FORAY_DEBUG
+        // only check binding in use if descriptor set not yet created
+        if(Exists())
+            return;
+
+        if(mMapBindingToDescriptorInfo.find(binding) != mMapBindingToDescriptorInfo.end())
+            throw Exception("Attempted to use descriptor slot binding {} which is already in use!", binding);
+#endif
+    }
+
+    void DescriptorSet::AssertHandleNotNull(void* handle, uint32_t binding)
+    {
+#ifdef FORAY_DEBUG
+        if(handle == VK_NULL_HANDLE)
+        {
+            throw Exception("Attempted to bind VK_NULL_HANDLE on descriptor with binding index {}", binding);
+        }
+#endif
     }
 }  // namespace foray::core
