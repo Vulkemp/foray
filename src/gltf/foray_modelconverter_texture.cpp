@@ -55,7 +55,6 @@ namespace foray::gltf {
                     logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
                     scene::SampledTexture& sampledTexture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
-                    sampledTexture.Image                  = std::make_unique<core::ManagedImage>();
 
                     const unsigned char* buffer     = nullptr;
                     VkDeviceSize         bufferSize = 0;
@@ -241,6 +240,10 @@ namespace foray::gltf {
 
         int32_t baseTexIndex = (int32_t)mTextures.GetTextures().size();
         mTextures.GetTextures().resize(mTextures.GetTextures().size() + mGltfModel.textures.size());
+        for (int32_t i = baseTexIndex; i < mTextures.GetTextures().size(); i++)
+        {
+            mTextures.GetTextures()[i].Image = std::make_unique<core::ManagedImage>();
+        }
 
         std::mutex singleThreadedActionsMutex;
         if(threadCount > 1)
