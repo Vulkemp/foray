@@ -1,16 +1,10 @@
 #pragma once
 #include "../../core/foray_managedimage.hpp"
+#include "../../core/foray_samplercollection.hpp"
 #include "../foray_component.hpp"
-#include <map>
+#include <unordered_map>
 
 namespace foray::scene {
-    class SampledTexture
-    {
-      public:
-        std::unique_ptr<core::ManagedImage> Image;
-        VkSampler                           Sampler = nullptr;
-    };
-
     class TextureStore : public GlobalComponent
     {
       public:
@@ -18,16 +12,36 @@ namespace foray::scene {
 
         virtual ~TextureStore() { Destroy(); }
 
-        FORAY_PROPERTY_CGET(Textures)
-        FORAY_PROPERTY_GET(Textures)
+        struct Texture
+        {
+          public:
+            inline Texture() : mImage(), mSampler() { mSampler.SetManagedImage(&mImage); }
+            virtual ~Texture() = default;
 
-        VkSampler GetOrCreateSampler(const VkSamplerCreateInfo& samplerCI);
+            FORAY_PROPERTY_ALLGET(Image)
+            inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+            {
+                return VkDescriptorImageInfo{.sampler = mSampler.GetSampler(), .imageView = mImage.GetImageView(), .imageLayout = layout};
+            }
 
-        std::vector<VkDescriptorImageInfo> GetDescriptorInfos();
+            FORAY_PROPERTY_ALL(Sampler)
+
+          protected:
+            core::ManagedImage         mImage;
+            core::CombinedImageSampler mSampler;
+        };
+
+        FORAY_PROPERTY_ALLGET(Textures)
+
+        std::vector<VkDescriptorImageInfo> GetDescriptorInfos(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        inline Texture& PrepareTexture(int32_t texId)
+        {
+            Assert(!mTextures.contains(texId));
+            return mTextures[texId];
+        }
 
       protected:
-        std::vector<SampledTexture> mTextures;
-
-        std::map<size_t, VkSampler>        mSamplers;
+        std::unordered_map<int32_t, Texture> mTextures;
     };
 }  // namespace foray::scene

@@ -64,6 +64,9 @@ namespace foray::base {
         InitCreateVma();
         InitSyncObjects();
 
+        mSamplerCollection.Init(&mContext);
+        mContext.SamplerCollection = &mSamplerCollection;
+
         ApiInit();
     }
 
@@ -130,6 +133,8 @@ namespace foray::base {
         AssertVkResult(mDevice.GetDispatchTable().deviceWaitIdle());
 
         ApiDestroy();
+
+        mSamplerCollection.Destroy();
 
         for(InFlightFrame& frame : mInFlightFrames)
         {

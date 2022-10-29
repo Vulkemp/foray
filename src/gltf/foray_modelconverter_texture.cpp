@@ -54,7 +54,7 @@ namespace foray::gltf {
 
                     logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
-                    scene::SampledTexture& sampledTexture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
+                    scene::TextureStore::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
 
                     const unsigned char* buffer     = nullptr;
                     VkDeviceSize         bufferSize = 0;
@@ -102,10 +102,12 @@ namespace foray::gltf {
                         imageCI.ImageViewCI.subresourceRange.levelCount = mipLevelCount;
                         imageCI.Name                                    = textureName;
 
-                        imageLoader.InitManagedImage(args.Context, sampledTexture.Image.get(), imageCI, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                        imageLoader.InitManagedImage(args.Context, &(texture.GetImage()), imageCI, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-                        // sampledTexture.Image->Create(mContext, imageCI);
-                        // sampledTexture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                        VkImage image = texture.GetImage().GetImage();
+
+                        // texture.Image->Create(mContext, imageCI);
+                        // texture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
                         core::HostCommandBuffer cmdBuf;
                         cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -125,7 +127,7 @@ namespace foray::gltf {
                                                   .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                   .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .image               = sampledTexture.Image->GetImage(),
+                                                  .image               = image,
                                                   .subresourceRange =
                                                       VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
                         destBarrier =
@@ -138,7 +140,7 @@ namespace foray::gltf {
                                                   .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                   .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .image               = sampledTexture.Image->GetImage(),
+                                                  .image               = image,
                                                   .subresourceRange =
                                                       VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
 
@@ -166,8 +168,8 @@ namespace foray::gltf {
                                                                                         .layerCount     = 1}};
                             blit.srcOffsets[1] = srcArea;
                             blit.dstOffsets[1] = dstArea;
-                            vkCmdBlitImage(cmdBuf.GetCommandBuffer(), sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                           sampledTexture.Image->GetImage(), VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
+                            vkCmdBlitImage(cmdBuf.GetCommandBuffer(), image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                           image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
                         }
 
                         {
@@ -183,7 +185,7 @@ namespace foray::gltf {
                                 .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                .image               = sampledTexture.Image->GetImage(),
+                                .image               = image,
                                 .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = 1}};
 
                             VkDependencyInfo depInfo{
@@ -213,8 +215,7 @@ namespace foray::gltf {
                         {
                             ModelConverter::sTranslateSampler(args.GltfModel.samplers[gltfTexture.sampler], samplerCI);
                         }
-
-                        sampledTexture.Sampler = args.Textures.GetOrCreateSampler(samplerCI);
+                        texture.GetSampler().Init(args.Context, samplerCI);
                     }
                 }
                 catch(const std::exception& ex)
@@ -235,14 +236,15 @@ namespace foray::gltf {
         using namespace impl;
 
         int32_t threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
+        threadCount = 1;
         std::vector<std::thread> threads(threadCount);
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
         int32_t baseTexIndex = (int32_t)mTextures.GetTextures().size();
-        mTextures.GetTextures().resize(mTextures.GetTextures().size() + mGltfModel.textures.size());
-        for (int32_t i = baseTexIndex; i < mTextures.GetTextures().size(); i++)
+        auto& textureCollection = mTextures.GetTextures();
+        for (int32_t i = 0; i < mGltfModel.textures.size(); i++)
         {
-            mTextures.GetTextures()[i].Image = std::make_unique<core::ManagedImage>();
+            mTextures.PrepareTexture(i + baseTexIndex);
         }
 
         std::mutex singleThreadedActionsMutex;

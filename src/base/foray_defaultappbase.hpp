@@ -1,4 +1,5 @@
 #pragma once
+#include "../core/foray_samplercollection.hpp"
 #include "../foray_vma.hpp"
 #include "../osi/foray_osmanager.hpp"
 #include "../stages/foray_stages_declares.hpp"
@@ -71,12 +72,13 @@ namespace foray::base {
         virtual void RegisterRenderStage(stages::RenderStage* stage);
         virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
-        RenderLoop            mRenderLoop;
-        osi::OsManager        mOsManager;
-        VulkanInstance        mInstance;
-        VulkanDevice          mDevice;
-        VulkanWindowSwapchain mWindowSwapchain;
-        core::Context         mContext;
+        RenderLoop              mRenderLoop;
+        osi::OsManager          mOsManager;
+        VulkanInstance          mInstance;
+        VulkanDevice            mDevice;
+        VulkanWindowSwapchain   mWindowSwapchain;
+        core::SamplerCollection mSamplerCollection;
+        core::Context           mContext;
 
 
         /// @brief The applications vulkan context.

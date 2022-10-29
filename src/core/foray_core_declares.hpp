@@ -10,4 +10,5 @@ namespace foray::core {
     class HostCommandBuffer;
     class DeviceCommandBuffer;
     class ImageLayoutCache;
+    class SamplerCollection;
 }  // namespace foray::core
