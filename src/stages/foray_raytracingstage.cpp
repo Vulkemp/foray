@@ -1,6 +1,7 @@
 #include "foray_raytracingstage.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../core/foray_shadermodule.hpp"
+#include "../scene/foray_scene.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
 #include "../scene/globalcomponents/foray_geometrystore.hpp"
@@ -9,6 +10,7 @@
 #include "../scene/globalcomponents/foray_tlasmanager.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
+#include "../core/foray_samplercollection.hpp"
 #include <array>
 
 namespace foray::stages {
@@ -17,14 +19,6 @@ namespace foray::stages {
     {
         CreateResolutionDependentComponents();
         CreateFixedSizeComponents();
-
-        // Clear values for all attachments written in the fragment shader
-        mClearValues.resize(mImageOutputs.size() + 1);
-        for(size_t i = 0; i < mImageOutputs.size(); i++)
-        {
-            mClearValues[i].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-        }
-        mClearValues[mImageOutputs.size()].depthStencil = {1.0f, 0};
     }
 
     void RaytracingStage::OnResized(const VkExtent2D& extent)
@@ -46,23 +40,7 @@ namespace foray::stages {
         DestroyShaders();
         mDescriptorSet.Destroy();
         mPipeline.Destroy();
-        if(!!mContext)
-        {
-            VkDevice device = mContext->Device();
-            if(!!mPipelineLayout)
-            {
-                vkDestroyPipelineLayout(device, mPipelineLayout, nullptr);
-                mPipelineLayout = nullptr;
-            }
-        }
-        if(mEnvMap.IsSet)
-        {
-            mEnvMap.Destroy(mContext);
-        }
-        if(mNoiseSource.IsSet)
-        {
-            mNoiseSource.Destroy(mContext);
-        }
+        mPipelineLayout.Destroy();
     }
 
     void RaytracingStage::CreateResolutionDependentComponents()
@@ -122,13 +100,13 @@ namespace foray::stages {
         as::GeometryMetaBuffer& metaBuffer = tlas.GetMetaBuffer();
         mDescriptorSet.SetDescriptorAt(7, metaBuffer.GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
-        if(mEnvMap.IsSet)
+        if(!!mEnvMap)
         {
-            mDescriptorSet.SetDescriptorAt(9, mEnvMap.Image, VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mEnvMap.Sampler, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+            mDescriptorSet.SetDescriptorAt(9, mEnvMap->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
         }
-        if(mNoiseSource.IsSet)
+        if(!!mNoiseSource)
         {
-            mDescriptorSet.SetDescriptorAt(10, mNoiseSource.Image, VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mNoiseSource.Sampler, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+            mDescriptorSet.SetDescriptorAt(10, mNoiseSource->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
         }
     }
 
@@ -147,18 +125,9 @@ namespace foray::stages {
 
     void RaytracingStage::CreatePipelineLayout()
     {
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-        pipelineLayoutCreateInfo.sType          = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.setLayoutCount = 1;
-        pipelineLayoutCreateInfo.pSetLayouts    = &mDescriptorSet.GetDescriptorSetLayout();
-        VkPushConstantRange pushC{
-            .stageFlags = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR,
-            .offset     = 0,
-            .size       = sizeof(mPushConstant),
-        };
-        pipelineLayoutCreateInfo.pPushConstantRanges    = &pushC;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &pipelineLayoutCreateInfo, nullptr, &mPipelineLayout));
+        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        mPipelineLayout.AddPushConstantRange<PushConstant>(RTSTAGEFLAGS);
+        mPipelineLayout.Build(mContext);
     }
 
     void RaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -184,7 +153,7 @@ namespace foray::stages {
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
 
         mPushConstant.RngSeed = renderInfo.GetFrameNumber();
-        vkCmdPushConstants(cmdBuffer, mPipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, 0,
+        vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, 0,
                            sizeof(mPushConstant), &mPushConstant);
 
         VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry = mPipeline.GetRaygenSbt().GetAddressRegion();
@@ -213,42 +182,4 @@ namespace foray::stages {
     {
         mPipeline.Build(mContext, mPipelineLayout);
     }
-
-
-    void RaytracingStage::SampledImage::Create(core::Context* context, core::ManagedImage* image, bool initateSampler)
-    {
-        Image = image;
-        if(!!Image && initateSampler)
-        {
-            if(!!Sampler)
-            {
-                vkDestroySampler(context->Device(), Sampler, nullptr);
-            }
-            VkSamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-                                          .magFilter               = VkFilter::VK_FILTER_LINEAR,
-                                          .minFilter               = VkFilter::VK_FILTER_LINEAR,
-                                          .addressModeU            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeV            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .addressModeW            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                          .anisotropyEnable        = VK_FALSE,
-                                          .compareEnable           = VK_FALSE,
-                                          .minLod                  = 0,
-                                          .maxLod                  = 0,
-                                          .unnormalizedCoordinates = VK_FALSE};
-            AssertVkResult(vkCreateSampler(context->Device(), &samplerCi, nullptr, &Sampler));
-        }
-        IsSet = !!Image;
-    }
-
-    void RaytracingStage::SampledImage::Destroy(core::Context* context)
-    {
-        if(!!Sampler)
-        {
-            vkDestroySampler(context->Device(), Sampler, nullptr);
-            Sampler = nullptr;
-        }
-        Image = nullptr;
-        IsSet = false;
-    }
-
 }  // namespace foray::stages

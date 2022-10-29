@@ -19,9 +19,9 @@ namespace foray::scene {
             virtual ~Texture() = default;
 
             FORAY_PROPERTY_ALLGET(Image)
-            inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+            inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
             {
-                return VkDescriptorImageInfo{.sampler = mSampler.GetSampler(), .imageView = mImage.GetImageView(), .imageLayout = layout};
+                return mSampler.GetVkDescriptorInfo();
             }
 
             FORAY_PROPERTY_ALL(Sampler)

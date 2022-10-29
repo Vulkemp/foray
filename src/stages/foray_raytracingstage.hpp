@@ -1,11 +1,9 @@
 #pragma once
-#include "../core/foray_context.hpp"
-#include "../core/foray_managedbuffer.hpp"
-#include "../core/foray_managedimage.hpp"
-#include "../core/foray_shadermodule.hpp"
+#include "../core/foray_core_declares.hpp"
 #include "../rtpipe/foray_rtpipeline.hpp"
-#include "../scene/foray_scene.hpp"
-#include "foray_rasterizedRenderStage.hpp"
+#include "../scene/foray_scene_declares.hpp"
+#include "../util/foray_pipelinelayout.hpp"
+#include "foray_renderstage.hpp"
 
 // heavily inspired by https://github.com/KhronosGroup/Vulkan-Samples/blob/master/samples/extensions/raytracing_basic/raytracing_basic.cpp
 namespace foray::stages {
@@ -24,7 +22,6 @@ namespace foray::stages {
 
       protected:
         scene::Scene*             mScene;
-        std::vector<VkClearValue> mClearValues;
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;
@@ -44,17 +41,8 @@ namespace foray::stages {
         /// @brief Storage image that the ray generation shader will be writing to.
         core::ManagedImage mRaytracingRenderTarget;
 
-        struct SampledImage
-        {
-            bool                                                       IsSet   = false;
-            core::ManagedImage*                                        Image   = nullptr;
-            VkSampler                                                  Sampler = nullptr;
-
-            inline SampledImage() {}
-
-            void                                                       Create(core::Context* context, core::ManagedImage* image, bool initateSampler = true);
-            void                                                       Destroy(core::Context* context);
-        } mEnvMap, mNoiseSource;
+        core::CombinedImageSampler* mEnvMap      = nullptr;
+        core::CombinedImageSampler* mNoiseSource = nullptr;
 
         inline static constexpr VkShaderStageFlags RTSTAGEFLAGS =
             VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR
@@ -65,12 +53,12 @@ namespace foray::stages {
         VkPipelineCache mPipelineCache = nullptr;
         VkRenderPass    mRenderpass    = nullptr;
 
-        core::DescriptorSet mDescriptorSet;
-        VkPipelineLayout    mPipelineLayout = nullptr;
+        core::DescriptorSet  mDescriptorSet;
+        util::PipelineLayout mPipelineLayout;
 
         rtpipe::RtPipeline mPipeline;
 
-        VkWriteDescriptorSetAccelerationStructureKHR               mDescriptorAccelerationStructureInfo{};
+        VkWriteDescriptorSetAccelerationStructureKHR mDescriptorAccelerationStructureInfo{};
         struct PushConstant
         {
             uint32_t RngSeed = 0u;

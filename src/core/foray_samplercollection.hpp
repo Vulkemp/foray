@@ -25,6 +25,11 @@ namespace foray::core {
 
         void Destroy();
 
+        VkDescriptorImageInfo GetVkDescriptorInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
+        {
+            return VkDescriptorImageInfo{.sampler = mSampler, .imageView = mManagedImage->GetImageView(), .imageLayout = layout};
+        }
+
         FORAY_PROPERTY_ALL(ManagedImage)
         FORAY_PROPERTY_CGET(Sampler)
         FORAY_PROPERTY_CGET(Hash)
