@@ -236,7 +236,6 @@ namespace foray::gltf {
         using namespace impl;
 
         int32_t threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
-        threadCount = 1;
         std::vector<std::thread> threads(threadCount);
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
