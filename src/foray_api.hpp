@@ -14,6 +14,8 @@
 #include "stages/foray_imguistage.hpp"
 #include "stages/foray_raytracingstage.hpp"
 
+#include "gltf/foray_modelconverter.hpp"
+
 namespace foray::api {
     using DefaultAppBase = foray::base::DefaultAppBase;
     using FrameRenderInfo = foray::base::FrameRenderInfo;

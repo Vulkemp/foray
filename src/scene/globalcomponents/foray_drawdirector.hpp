@@ -36,6 +36,7 @@ namespace foray::scene {
         inline VkBuffer GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetBuffer(); }
         inline VkBuffer GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer.GetBuffer(); }
 
+        FORAY_PROPERTY_CGET(TotalCount)
 
       protected:
         util::DualBuffer    mCurrentTransformBuffer;

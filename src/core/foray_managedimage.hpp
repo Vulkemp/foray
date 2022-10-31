@@ -21,7 +21,7 @@ namespace foray::core {
             std::string             Name{"UnnamedImage"};
 
             CreateInfo();
-            CreateInfo(std::string name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
+            CreateInfo(std::string_view name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
         };
 
         struct QuickTransition

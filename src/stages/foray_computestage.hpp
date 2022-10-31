@@ -28,7 +28,5 @@ namespace foray::stages {
 
         virtual void CreateFixedSizeComponents() override;
         virtual void DestroyFixedComponents() override;
-        virtual void CreateResolutionDependentComponents() override;
-        virtual void DestroyResolutionDependentComponents() override;
     };
 }  // namespace foray::stages

@@ -5,8 +5,8 @@ namespace foray::stages {
     {
         Destroy();
         mContext = context;
-        CreateFixedSizeComponents();
         CreateResolutionDependentComponents();
+        CreateFixedSizeComponents();
     }
 
     void ComputeStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -59,6 +59,4 @@ namespace foray::stages {
         mDescriptorSet.Destroy();
         mShader.Destroy();
     }
-    void ComputeStage::CreateResolutionDependentComponents() {}
-    void ComputeStage::DestroyResolutionDependentComponents() {}
 }  // namespace foray::stages

@@ -111,7 +111,7 @@ namespace foray::stages {
         }
 
         {  // MeshId
-            mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, aspectMask,
+            mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_UINT, aspectMask,
                                                                        OutputNames[(size_t)EOutput::MeshInstanceIdx]);
             mImageInfos[(size_t)EOutput::MeshInstanceIdx].ClearValue = defaultClearValue;
         }

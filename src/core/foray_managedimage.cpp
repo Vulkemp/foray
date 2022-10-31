@@ -34,7 +34,7 @@ namespace foray::core {
         ImageViewCI.subresourceRange.layerCount     = 1;
     }
 
-    ManagedImage::CreateInfo::CreateInfo(std::string name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
+    ManagedImage::CreateInfo::CreateInfo(std::string_view name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
     {
         ImageCI.usage      = usage;
         ImageCI.format     = format;

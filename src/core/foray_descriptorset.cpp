@@ -28,6 +28,11 @@ namespace foray::core {
             uint32_t              binding        = pairBindingDescriptorInfo.first;
             const DescriptorInfo& descriptorInfo = pairBindingDescriptorInfo.second;
 
+            if (descriptorInfo.DescriptorCount == 0)
+            {
+                continue;
+            }
+
             // prepare write
             VkWriteDescriptorSet descriptorWrite{};
             descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -145,7 +150,7 @@ namespace foray::core {
                                         VkShaderStageFlags                        shaderStageFlags)
     {
         AssertBindingInUse(binding);
-        for(const VkDescriptorImageInfo& imageInfo: imageInfos)
+        for(const VkDescriptorImageInfo& imageInfo : imageInfos)
         {
             AssertHandleNotNull(imageInfo.imageView, binding);
         }
@@ -201,7 +206,10 @@ namespace foray::core {
             poolSize.descriptorCount = descriptorLocation.second.DescriptorCount;
 
             // prepare pool size
-            poolSizes.push_back(poolSize);
+            if(poolSize.descriptorCount > 0)
+            {
+                poolSizes.push_back(poolSize);
+            }
         }
 
         VkDescriptorPoolCreateInfo poolInfo{};
