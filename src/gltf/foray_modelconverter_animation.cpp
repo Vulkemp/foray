@@ -102,7 +102,7 @@ namespace foray::gltf {
                     {
                         for(scene::AnimationKeyframe& frame : animation.GetSamplers()[channel.SamplerIndex].Keyframes)
                         {
-                            frame.Value.x = frame.Value.x * -1;
+                            frame.Value.y = frame.Value.y * -1;
                         }
                         flippedSamplers.emplace(channel.SamplerIndex);
                     }
