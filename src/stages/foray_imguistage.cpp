@@ -91,6 +91,10 @@ namespace foray::stages {
 
     void ImguiStage::DestroyResolutionDependentComponents()
     {
+        if (!mContext)
+        {
+            return;
+        }
         VkDevice device = mContext->Device();
 
         if(mFrameBuffer)

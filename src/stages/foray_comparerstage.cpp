@@ -8,26 +8,10 @@ namespace foray::stages {
     void ComparerStage::Init(core::Context* context)
     {
         mContext = context;
-        SetInput(0, &mMissingInput, 4);
-        SetInput(1, &mMissingInput, 4);
-        ComputeStage::Init(context);
+        CreateResolutionDependentComponents();
+        CreateFixedSizeComponents();
     }
 
-    void ComparerStage::ApiInitShader()
-    {
-        mShader.LoadFromSource(mContext, "shaders/comparerstage.comp");
-    }
-    void ComparerStage::ApiCreateDescriptorSetLayout()
-    {
-        UpdateDescriptorSet();
-        mDescriptorSet.Create(mContext, "Comparer Stage Descriptor Set");
-    }
-    void ComparerStage::ApiCreatePipelineLayout()
-    {
-        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
-        mPipelineLayout.AddPushConstantRange<PushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-        mPipelineLayout.Build(mContext);
-    }
     void ComparerStage::CreateResolutionDependentComponents()
     {
         VkImageUsageFlags usage =
@@ -39,31 +23,91 @@ namespace foray::stages {
     }
     void ComparerStage::CreateFixedSizeComponents()
     {
-        {
+        {  // Load Shaders
+            mShaders[(size_t)EInputType::Float].LoadFromSource(mContext, "shaders/comparerstage.f.comp");
+            mShaders[(size_t)EInputType::Int].LoadFromSource(mContext, "shaders/comparerstage.i.comp");
+            mShaders[(size_t)EInputType::Uint].LoadFromSource(mContext, "shaders/comparerstage.u.comp");
+        }
+        {  // Create Pipette Buffer
             VkBufferUsageFlags usage = VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            core::ManagedBuffer::ManagedBufferCreateInfo ci(usage, sizeof(glm::vec4), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+            core::ManagedBuffer::ManagedBufferCreateInfo ci(usage, sizeof(PipetteValue), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
                                                             VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "Comparer.Pipette.Device");
             mPipetteBuffer.Create(mContext, ci);
             mPipetteBuffer.Map(mPipetteMap);
         }
-        {
-            VkImageUsageFlags usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-            core::ManagedImage::CreateInfo ci("Missing Image", usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, VkExtent3D{1, 1, 1});
-            mMissingInput.Create(mContext, ci);
-            glm::vec4 color(0.5, 0.f, 0.5f, 1.f);
-            mMissingInput.WriteDeviceLocalData(&color, sizeof(color), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
+    void ComparerStage::CreateSubStage(SubStage& substage)
+    {
+        {  // Sampler
+            VkSamplerCreateInfo samplerCi{
+                .sType            = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                .addressModeU     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                .addressModeV     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                .addressModeW     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                .anisotropyEnable = VK_FALSE,
+                .compareEnable    = VK_FALSE,
+                .minLod           = 0,
+                .maxLod           = 0,
+            };
+
+            switch(substage.Input.Type)
+            {
+                case EInputType::Float:
+                    samplerCi.magFilter = VkFilter::VK_FILTER_LINEAR;
+                    samplerCi.minFilter = VkFilter::VK_FILTER_LINEAR;
+                default:
+                    samplerCi.magFilter = VkFilter::VK_FILTER_NEAREST;
+                    samplerCi.minFilter = VkFilter::VK_FILTER_NEAREST;
+            }
+
+            substage.InputSampled.Init(mContext, substage.Input.Image, samplerCi);
         }
-        ComputeStage::CreateFixedSizeComponents();
+        {  // Descriptor Set
+            substage.DescriptorSet.SetDescriptorAt(0, substage.InputSampled.GetVkDescriptorInfo(), VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                                   VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            substage.DescriptorSet.SetDescriptorAt(1, mOutput, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                   VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            substage.DescriptorSet.SetDescriptorAt(2, mPipetteBuffer, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            if(substage.DescriptorSet.Exists())
+            {
+                substage.DescriptorSet.Update();
+            }
+            else
+            {
+                substage.DescriptorSet.Create(mContext, "Comparer Stage Descriptor Set");
+            }
+        }
+        {  // Pipeline Layout
+            substage.PipelineLayout.AddDescriptorSetLayout(substage.DescriptorSet.GetDescriptorSetLayout());
+            substage.PipelineLayout.AddPushConstantRange<PushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            substage.PipelineLayout.Build(mContext);
+        }
+        {  // Pipeline
+            VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                          .stage  = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
+                                                          .module = *substage.Shader,
+                                                          .pName  = "main"};
+
+            VkComputePipelineCreateInfo pipelineCi{
+                .sType  = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+                .stage  = shaderStageCi,
+                .layout = substage.PipelineLayout,
+            };
+
+            AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &substage.Pipeline));
+        }
     }
     void ComparerStage::DestroyFixedComponents()
     {
+        for(core::ShaderModule& shader : mShaders)
+        {
+            shader.Destroy();
+        }
         if(mPipetteBuffer.Exists())
         {
             mPipetteBuffer.Unmap();
         }
         mPipetteBuffer.Destroy();
-        mMissingInput.Destroy();
-        ComputeStage::DestroyFixedComponents();
     }
 
     void ComparerStage::DestroyResolutionDependentComponents()
@@ -71,78 +115,51 @@ namespace foray::stages {
         mOutput.Destroy();
     }
 
+    void ComparerStage::DestroySubStage(SubStage& substage, bool final)
+    {
+        if(!!mContext && !!mContext->VkbDispatchTable && !!substage.Pipeline)
+        {
+            mContext->VkbDispatchTable->destroyPipeline(substage.Pipeline, nullptr);
+            substage.Pipeline = nullptr;
+        }
+        substage.Shader = nullptr;
+        substage.PipelineLayout.Destroy();
+        if(final)
+        {
+            substage.DescriptorSet.Destroy();
+        }
+        substage.InputSampled.Destroy();
+        substage.Input = Input{};
+    }
+
+    void ComparerStage::Destroy()
+    {
+        for(SubStage& substage : mSubStages)
+        {
+            DestroySubStage(substage, true);
+        }
+        DestroyFixedComponents();
+        DestroyResolutionDependentComponents();
+    }
+
 #pragma endregion
 #pragma region Runtime Update
-    void ComparerStage::SetInput(uint32_t index, core::ManagedImage* image, uint32_t channelCount, glm::vec4 scale)
+    void ComparerStage::SetInput(uint32_t index, const Input& input)
     {
-        if (image == nullptr)
+        DestroySubStage(mSubStages[index], false);
+        if(input.Image == nullptr)
         {
-            image = &mMissingInput;
-        }
-        mInputs[index] = image;
-        mInputsSampled[index].Destroy();
-
-        VkSamplerCreateInfo samplerCi{
-            .sType            = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .addressModeU     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-            .addressModeV     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-            .addressModeW     = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-            .anisotropyEnable = VK_FALSE,
-            .compareEnable    = VK_FALSE,
-            .minLod           = 0,
-            .maxLod           = 0,
-        };
-
-        switch(image->GetFormat())
-        {
-            case VkFormat::VK_FORMAT_R32G32_SFLOAT:
-            case VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT:
-                samplerCi.magFilter = VkFilter::VK_FILTER_LINEAR;
-                samplerCi.minFilter = VkFilter::VK_FILTER_LINEAR;
-            default:
-                samplerCi.magFilter = VkFilter::VK_FILTER_NEAREST;
-                samplerCi.minFilter = VkFilter::VK_FILTER_NEAREST;
+            mMixValue = index == 0 ? 0.f : 1.f;
+            return;
         }
 
-        mPushC.Channels[index] = channelCount;
-        mPushC.Scale[index]    = scale;
+        mSubStages[index].Input  = input;
+        mSubStages[index].Index  = index;
+        mSubStages[index].Shader = &mShaders[(size_t)input.Type];
 
         if(!!mContext)
         {
-            mInputsSampled[index].Init(mContext, mInputs[index], samplerCi);
-        }
-
-        if(mDescriptorSet.Exists())
-        {
-            UpdateDescriptorSet();
-        }
-    }
-
-    void ComparerStage::UpdateDescriptorSet()
-    {
-        std::vector<VkDescriptorImageInfo> inputInfos;
-        inputInfos.reserve(2);
-
-        mPushC.InputCount = 0;
-
-        for(core::CombinedImageSampler& sampler : mInputsSampled)
-        {
-            VkDescriptorImageInfo info = sampler.GetVkDescriptorInfo();
-            if(!!info.imageView && !!info.sampler)
-            {
-                mPushC.InputCount++;
-                inputInfos.push_back(info);
-            }
-        }
-
-        mDescriptorSet.SetDescriptorAt(0, inputInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-        mDescriptorSet.SetDescriptorAt(1, mOutput, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                       VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-        mDescriptorSet.SetDescriptorAt(2, mPipetteBuffer, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-
-        if(mDescriptorSet.Exists())
-        {
-            mDescriptorSet.Update();
+            CreateSubStage(mSubStages[index]);
         }
     }
 
@@ -151,14 +168,24 @@ namespace foray::stages {
         const osi::EventInputMouseMoved* mouseMove = dynamic_cast<const osi::EventInputMouseMoved*>(event);
         if(!!mouseMove)
         {
-            mPushC.MousePos = glm::ivec2(mouseMove->CurrentX, mouseMove->CurrentY);
+            mMousePos = glm::ivec2(mouseMove->CurrentX, mouseMove->CurrentY);
         }
     }
 
     void ComparerStage::OnResized(const VkExtent2D& extent)
     {
         mOutput.Resize(VkExtent3D{extent.width, extent.height, 1});
-        UpdateDescriptorSet();
+        for(SubStage& substage : mSubStages)
+        {
+            if(substage.DescriptorSet.Exists())
+            {
+                substage.DescriptorSet.SetDescriptorAt(0, substage.InputSampled.GetVkDescriptorInfo(), VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                                       VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+                substage.DescriptorSet.SetDescriptorAt(1, mOutput, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                       VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+                substage.DescriptorSet.Update();
+            }
+        }
     }
 
 #pragma endregion
@@ -169,27 +196,36 @@ namespace foray::stages {
         {  // Get Pipette value (which might be up to 1 frame out of date, but since it's for UI purposes only this is fine)
             memcpy(&mPipetteValue, mPipetteMap, sizeof(mPipetteValue));
         }
+        if(!!mSubStages[0].Input.Image)
+        {
+            DispatchSubStage(mSubStages[0], cmdBuffer, renderInfo);
+        }
+        if(!!mSubStages[1].Input.Image)
+        {
+            DispatchSubStage(mSubStages[1], cmdBuffer, renderInfo);
+        }
+    }
+
+    void ComparerStage::DispatchSubStage(SubStage& substage, VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    {
         {  // Barriers
-            std::array<VkImageMemoryBarrier2, 3> vkBarriers;
+            std::array<VkImageMemoryBarrier2, 2> vkBarriers;
 
             uint32_t index = 0;
 
-            for(core::ManagedImage* image : mInputs)
+            {
+                core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask     = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                         .SrcAccessMask    = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                         .DstStageMask     = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+                                                         .DstAccessMask    = VK_ACCESS_2_SHADER_READ_BIT,
+                                                         .NewLayout        = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                         .SubresourceRange = VkImageSubresourceRange{.aspectMask = substage.Input.Aspect, .levelCount = 1, .layerCount = 1}};
+                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().Set(substage.Input.Image, barrier));
+            }
             {
                 core::ImageLayoutCache::Barrier2 barrier{
                     .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                    .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                    .DstStageMask  = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-                    .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-                    .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                };
-                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().Set(image, barrier));
-            }
-
-            {
-                core::ImageLayoutCache::Barrier2 barrier{
-                    .SrcStageMask  = VK_PIPELINE_STAGE_2_NONE,
-                    .SrcAccessMask = VK_ACCESS_2_NONE,
+                    .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
                     .DstStageMask  = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
                     .DstAccessMask = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT,
                     .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
@@ -203,22 +239,43 @@ namespace foray::stages {
             vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
         }
         {  // Bind
-            mContext->VkbDispatchTable->cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipeline);
+            mContext->VkbDispatchTable->cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.Pipeline);
 
-            VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
+            VkDescriptorSet descriptorSet = substage.DescriptorSet.GetDescriptorSet();
 
-            mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
+            mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout, 0U, 1U, &descriptorSet, 0U,
+                                                              nullptr);
         }
-        {  // PushConstant
-            mContext->VkbDispatchTable->cmdPushConstants(cmdBuffer, mPipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &mPushC);
-        }
-        {  // Dispatch
+        glm::uvec2 groupSize;
+        uint32_t   writeOffset;
+        VkExtent2D screenSize = mContext->GetSwapchainSize();
+        {  // Group size & Write Offset
             const glm::uvec2 localSize = glm::uvec2(16, 16);
 
-            VkExtent2D screenSize = mContext->GetSwapchainSize();
-            glm::uvec3 groupSize((screenSize.width + localSize.x - 1) / localSize.x, (screenSize.height + localSize.y - 1) / localSize.y, 1);
+            if(substage.Index == 0)
+            {
+                writeOffset = 0;
+                groupSize.x = ((uint32_t)(screenSize.width * mMixValue) + localSize.x - 1) / localSize.x;
+            }
+            else
+            {
+                writeOffset = ((uint32_t)(screenSize.width * mMixValue) / localSize.x) * localSize.x;
+                groupSize.x = (screenSize.width - writeOffset + localSize.x - 1) / localSize.x;
+            }
+            groupSize.y = (screenSize.height + localSize.y - 1) / localSize.y;
+        }
+        {  // PushConstant
+            PushConstant pushC{.Scale       = substage.Input.Scale,
+                               .MousePos    = mMousePos,
+                               .Channels    = substage.Input.ChannelCount,
+                               .Mix         = mMixValue,
+                               .WriteOffset = writeOffset,
+                               .WriteLeft   = (substage.Index == 0) ? VK_TRUE : VK_FALSE};
 
-            mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, groupSize.z);
+            mContext->VkbDispatchTable->cmdPushConstants(cmdBuffer, substage.PipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &pushC);
+        }
+        {  // Dispatch
+            mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, 1U);
         }
     }
 
