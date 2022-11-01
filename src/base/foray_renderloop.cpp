@@ -117,7 +117,7 @@ namespace foray::base {
 
         catch(const std::exception& e)
         {
-            logger()->error("Exception thrown during {}: {}", NAMEOF_ENUM(mState) e.what());
+            logger()->error("Exception thrown during {}: {}", NAMEOF_ENUM(mState), e.what());
             return -1;
         }
 #endif
