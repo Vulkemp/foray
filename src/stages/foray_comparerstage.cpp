@@ -3,6 +3,16 @@
 #include "../osi/foray_inputdevice.hpp"
 #include "../osi/foray_osmanager.hpp"
 
+const uint32_t SHADER_F[] =
+#include "foray_comparerstage.f.comp.spv.h"
+    ;
+const uint32_t SHADER_I[] =
+#include "foray_comparerstage.i.comp.spv.h"
+    ;
+const uint32_t SHADER_U[] =
+#include "foray_comparerstage.u.comp.spv.h"
+    ;
+
 namespace foray::stages {
 #pragma region Init
     void ComparerStage::Init(core::Context* context)
@@ -24,9 +34,9 @@ namespace foray::stages {
     void ComparerStage::CreateFixedSizeComponents()
     {
         {  // Load Shaders
-            mShaders[(size_t)EInputType::Float].LoadFromSource(mContext, "shaders/comparerstage.f.comp");
-            mShaders[(size_t)EInputType::Int].LoadFromSource(mContext, "shaders/comparerstage.i.comp");
-            mShaders[(size_t)EInputType::Uint].LoadFromSource(mContext, "shaders/comparerstage.u.comp");
+            mShaders[(size_t)EInputType::Float].LoadFromBinary(mContext, SHADER_F, sizeof(SHADER_F));
+            mShaders[(size_t)EInputType::Int].LoadFromBinary(mContext, SHADER_I, sizeof(SHADER_I));
+            mShaders[(size_t)EInputType::Uint].LoadFromBinary(mContext, SHADER_U, sizeof(SHADER_U));
         }
         {  // Create Pipette Buffer
             VkBufferUsageFlags usage = VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;

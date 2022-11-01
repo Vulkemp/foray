@@ -1,0 +1,73 @@
+#version 460
+#extension GL_KHR_vulkan_glsl : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout (set = 0, binding = 0) uniform isampler2D Input;
+
+layout (rgba32f, set = 0, binding = 1) uniform restrict writeonly image2D Output;
+
+layout (std430, set = 0, binding = 2) restrict writeonly buffer Pipette_T {
+    vec4  Value;
+    vec2  UvPos;
+    ivec2 TexelPos;
+} Pipette;
+
+layout (push_constant) uniform PushC_T
+{
+    vec4 Scale;
+    ivec2 MousePos;
+    uint  Channels;
+    float    Mix;
+    uint WriteOffset;
+    uint WriteLeft;
+} PushC;
+
+void main()
+{
+    // Calculate texel and uv pos
+    ivec2 texelPos = ivec2(gl_GlobalInvocationID.x + PushC.WriteOffset, gl_GlobalInvocationID.y);
+    ivec2 texSize = ivec2(imageSize(Output).xy);
+    vec2 uvPos = vec2(texelPos) / vec2(texSize);
+
+    // Skip out if outside of output texture bounds
+    if (texelPos.x >= texSize.x || texelPos.y >= texSize.y)
+    {
+        return;
+    }
+
+    // Determine which seam we're on
+    bool doWrite = (PushC.WriteLeft > 0) ? (uvPos.x < PushC.Mix) : (uvPos.x >= PushC.Mix);
+    if (!doWrite)
+    {
+        return;
+    }
+
+    vec4 readValue;
+    vec4 scale = PushC.Scale;
+    switch (PushC.Channels)
+    {
+        case 1:
+            readValue = vec4(texture(Input, uvPos).r, 0, 0, 1);
+            break;
+        case 2:
+            readValue = vec4(texture(Input, uvPos).rg, 0, 1);
+            break;
+        case 3:
+            readValue = vec4(texture(Input, uvPos).rgb , 1);
+            break;
+        case 4:
+            readValue = vec4(texture(Input, uvPos).rgba);
+            break;
+    }
+
+    imageStore(Output, texelPos, readValue * scale);
+
+    if (PushC.MousePos == texelPos)
+    {
+        Pipette.Value = readValue;
+        Pipette.UvPos = uvPos;
+        Pipette.TexelPos = texelPos;
+    }
+}
