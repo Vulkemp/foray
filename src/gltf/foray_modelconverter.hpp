@@ -28,7 +28,7 @@ namespace foray::gltf {
 
         FORAY_PROPERTY_ALL(Scene)
 
-        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI);
+        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
 
         FORAY_PROPERTY_CGET(Benchmark)
 

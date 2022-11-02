@@ -75,9 +75,32 @@ namespace foray::gltf {
                     {  // Any GPU action for the moment is single threaded
                         std::lock_guard<std::mutex> lock(args.SingleThreadSectionMutex);
 
+                        bool generateMipMaps = false;
+
+                        VkSamplerCreateInfo samplerCI{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                                                      .magFilter               = VkFilter::VK_FILTER_LINEAR,
+                                                      .minFilter               = VkFilter::VK_FILTER_LINEAR,
+                                                      .mipmapMode              = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+                                                      .addressModeU            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                                      .addressModeV            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                                      .addressModeW            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                                                      .mipLodBias              = 0.5f,
+                                                      .anisotropyEnable        = VK_TRUE,
+                                                      .maxAnisotropy           = 4,
+                                                      .compareEnable           = VK_FALSE,
+                                                      .compareOp               = {},
+                                                      .minLod                  = 0,
+                                                      .maxLod                  = VK_LOD_CLAMP_NONE,
+                                                      .borderColor             = {},
+                                                      .unnormalizedCoordinates = VK_FALSE};
+                        if(gltfTexture.sampler >= 0)
+                        {
+                            ModelConverter::sTranslateSampler(args.GltfModel.samplers[gltfTexture.sampler], samplerCI, generateMipMaps);
+                        }
+                        texture.GetSampler().Init(args.Context, samplerCI);
 
                         VkExtent2D extent        = imageLoader.GetInfo().Extent;
-                        uint32_t   mipLevelCount = (uint32_t)(floorf(log2f(std::max(extent.width, extent.height))));
+                        uint32_t   mipLevelCount = generateMipMaps ? (uint32_t)(floorf(log2f(std::max(extent.width, extent.height)))) : 1;
 
                         core::ManagedImage::CreateInfo imageCI;
                         imageCI.AllocCI.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
@@ -102,120 +125,99 @@ namespace foray::gltf {
                         imageCI.ImageViewCI.subresourceRange.levelCount = mipLevelCount;
                         imageCI.Name                                    = textureName;
 
-                        imageLoader.InitManagedImage(args.Context, &(texture.GetImage()), imageCI, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+                        VkImageLayout afterUpload = generateMipMaps ? VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                        imageLoader.InitManagedImage(args.Context, &(texture.GetImage()), imageCI, afterUpload);
 
                         VkImage image = texture.GetImage().GetImage();
 
-                        // texture.Image->Create(mContext, imageCI);
-                        // texture.Image->WriteDeviceLocalData(buffer, bufferSize, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-
-                        core::HostCommandBuffer cmdBuf;
-                        cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-                        cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
-
-                        std::vector<VkImageMemoryBarrier2> barriers(2);
-                        VkImageMemoryBarrier2&             sourceBarrier = barriers[0];
-                        VkImageMemoryBarrier2&             destBarrier   = barriers[1];
-
-                        sourceBarrier =
-                            VkImageMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                                                  .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                                                  .srcAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                                                  .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                                                  .dstAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT,
-                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                  .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .image               = image,
-                                                  .subresourceRange =
-                                                      VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
-                        destBarrier =
-                            VkImageMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                                                  .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
-                                                  .srcAccessMask       = VK_ACCESS_2_NONE,
-                                                  .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                                                  .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                  .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                  .image               = image,
-                                                  .subresourceRange =
-                                                      VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
-
-                        VkDependencyInfo depInfo{
-                            .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 2U, .pImageMemoryBarriers = barriers.data()};
-
-                        for(int32_t i = 0; i < mipLevelCount - 1; i++)
+                        if(generateMipMaps)
                         {
-                            uint32_t sourceMipLevel = (uint32_t)i;
-                            uint32_t destMipLevel   = sourceMipLevel + 1;
+                            core::HostCommandBuffer cmdBuf;
+                            cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+                            cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
-                            sourceBarrier.subresourceRange.baseMipLevel = sourceMipLevel;
-                            destBarrier.subresourceRange.baseMipLevel   = destMipLevel;
+                            std::vector<VkImageMemoryBarrier2> barriers(2);
+                            VkImageMemoryBarrier2&             sourceBarrier = barriers[0];
+                            VkImageMemoryBarrier2&             destBarrier   = barriers[1];
 
-                            vkCmdPipelineBarrier2(cmdBuf, &depInfo);
-
-                            VkOffset3D  srcArea{.x = (int32_t)extent.width >> i, .y = (int32_t)extent.height >> i, .z = 1};
-                            VkOffset3D  dstArea{.x = (int32_t)extent.width >> (i + 1), .y = (int32_t)extent.height >> (i + 1), .z = 1};
-                            VkImageBlit blit{.srcSubresource =
-                                                 VkImageSubresourceLayers{
-                                                     .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i, .baseArrayLayer = 0, .layerCount = 1},
-                                             .dstSubresource = VkImageSubresourceLayers{.aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-                                                                                        .mipLevel       = (uint32_t)i + 1,
-                                                                                        .baseArrayLayer = 0,
-                                                                                        .layerCount     = 1}};
-                            blit.srcOffsets[1] = srcArea;
-                            blit.dstOffsets[1] = dstArea;
-                            vkCmdBlitImage(cmdBuf.GetCommandBuffer(), image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                           image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
-                        }
-
-                        {
-                            // All mip levels are transfer src optimal after mip creation, fix it
-
-                            VkImageMemoryBarrier2 barrier{
+                            sourceBarrier = VkImageMemoryBarrier2{
                                 .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
                                 .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-                                .srcAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                                .dstStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                .dstAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT,
+                                .srcAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                .dstAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT,
                                 .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                 .image               = image,
-                                .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = 1}};
+                                .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
+                            destBarrier = VkImageMemoryBarrier2{
+                                .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                                .srcStageMask        = VK_PIPELINE_STAGE_2_NONE,
+                                .srcAccessMask       = VK_ACCESS_2_NONE,
+                                .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                .image               = image,
+                                .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1, .layerCount = 1}};
 
                             VkDependencyInfo depInfo{
-                            .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 1U, .pImageMemoryBarriers = &barrier};
+                                .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 2U, .pImageMemoryBarriers = barriers.data()};
 
-                            vkCmdPipelineBarrier2(cmdBuf, &depInfo);
+                            for(int32_t i = 0; i < mipLevelCount - 1; i++)
+                            {
+                                uint32_t sourceMipLevel = (uint32_t)i;
+                                uint32_t destMipLevel   = sourceMipLevel + 1;
+
+                                sourceBarrier.subresourceRange.baseMipLevel = sourceMipLevel;
+                                destBarrier.subresourceRange.baseMipLevel   = destMipLevel;
+
+                                vkCmdPipelineBarrier2(cmdBuf, &depInfo);
+
+                                VkOffset3D  srcArea{.x = (int32_t)extent.width >> i, .y = (int32_t)extent.height >> i, .z = 1};
+                                VkOffset3D  dstArea{.x = (int32_t)extent.width >> (i + 1), .y = (int32_t)extent.height >> (i + 1), .z = 1};
+                                VkImageBlit blit{
+                                    .srcSubresource =
+                                        VkImageSubresourceLayers{
+                                            .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i, .baseArrayLayer = 0, .layerCount = 1},
+                                    .dstSubresource = VkImageSubresourceLayers{
+                                        .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i + 1, .baseArrayLayer = 0, .layerCount = 1}};
+                                blit.srcOffsets[1] = srcArea;
+                                blit.dstOffsets[1] = dstArea;
+                                vkCmdBlitImage(cmdBuf.GetCommandBuffer(), image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, image,
+                                               VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VkFilter::VK_FILTER_LINEAR);
+                            }
+
+                            {
+                                // All mip levels are transfer src optimal after mip creation, fix it
+
+                                VkImageMemoryBarrier2 barrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                                                              .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                                                              .srcAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                                                              .dstStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                              .dstAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT,
+                                                              .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                              .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                                              .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                              .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                                                              .image               = image,
+                                                              .subresourceRange    = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+                                                                                                             .levelCount = VK_REMAINING_MIP_LEVELS,
+                                                                                                             .layerCount = 1}};
+
+                                VkDependencyInfo depInfo{
+                                    .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 1U, .pImageMemoryBarriers = &barrier};
+
+                                vkCmdPipelineBarrier2(cmdBuf, &depInfo);
+                            }
+
+                            cmdBuf.SubmitAndWait();
                         }
-
-                        cmdBuf.SubmitAndWait();
-
-                        VkSamplerCreateInfo samplerCI{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-                                                      .magFilter               = VkFilter::VK_FILTER_LINEAR,
-                                                      .minFilter               = VkFilter::VK_FILTER_LINEAR,
-                                                      .addressModeU            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                                      .addressModeV            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                                      .addressModeW            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
-                                                      .mipLodBias              = 0.5f,
-                                                      .anisotropyEnable        = VK_TRUE,
-                                                      .maxAnisotropy           = 4,
-                                                      .compareEnable           = VK_FALSE,
-                                                      .compareOp               = {},
-                                                      .minLod                  = 0,
-                                                      .maxLod                  = VK_LOD_CLAMP_NONE,
-                                                      .borderColor             = {},
-                                                      .unnormalizedCoordinates = VK_FALSE};
-                        if(gltfTexture.sampler >= 0)
-                        {
-                            ModelConverter::sTranslateSampler(args.GltfModel.samplers[gltfTexture.sampler], samplerCI);
-                        }
-                        texture.GetSampler().Init(args.Context, samplerCI);
                     }
                 }
                 catch(const std::exception& ex)
@@ -239,9 +241,9 @@ namespace foray::gltf {
         std::vector<std::thread> threads(threadCount);
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
-        int32_t baseTexIndex = (int32_t)mTextures.GetTextures().size();
-        auto& textureCollection = mTextures.GetTextures();
-        for (int32_t i = 0; i < mGltfModel.textures.size(); i++)
+        int32_t baseTexIndex      = (int32_t)mTextures.GetTextures().size();
+        auto&   textureCollection = mTextures.GetTextures();
+        for(int32_t i = 0; i < mGltfModel.textures.size(); i++)
         {
             mTextures.PrepareTexture(i + baseTexIndex);
         }
@@ -312,25 +314,77 @@ namespace foray::gltf {
         }
     }
 
-    void ModelConverter::sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI)
+    const int MIP_SKIP         = 0b000;
+    const int MIP_GENERATE     = 0b100;
+    const int MIPMODE_NEAREST  = MIP_GENERATE | 0b000;
+    const int MIPMODE_LINEAR   = MIP_GENERATE | 0b010;
+    const int FILTER_NEAREST   = 0b000;
+    const int FILTER_LINEAR    = 0b001;
+    const int MASK_GENERATEMIP = 0b100;
+    const int MASK_MIPMODE     = 0b010;
+    const int MASK_FILTER      = 0b001;
+
+    enum EMinFilter
+    {
+        FilterNearestNoMip      = FILTER_NEAREST | MIP_SKIP,
+        FilterLinearNoMip       = FILTER_LINEAR | MIP_SKIP,
+        FilterNearestMipNearest = FILTER_NEAREST | MIPMODE_NEAREST,
+        FilterNearestMipLinear  = FILTER_NEAREST | MIPMODE_LINEAR,
+        FilterLinearMipNearest  = FILTER_LINEAR | MIPMODE_NEAREST,
+        FilterLinearMipLinear   = FILTER_LINEAR | MIPMODE_LINEAR,
+    };
+
+    void ModelConverter::sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& createMipMaps)
     {
         // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-sampler
-        std::map<int, VkFilter>             filterMap({{9728, VkFilter::VK_FILTER_NEAREST}, {9729, VkFilter::VK_FILTER_LINEAR}});
-        std::map<int, VkSamplerAddressMode> addressMap({{33071, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE},
-                                                        {33648, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT},
-                                                        {10497, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT}});
+        std::unordered_map<int, VkFilter>             magFilterMap({{9728, VkFilter::VK_FILTER_NEAREST}, {9729, VkFilter::VK_FILTER_LINEAR}});
+        std::unordered_map<int, EMinFilter>           minFilterMap({
+                      {9728, EMinFilter::FilterNearestNoMip},
+                      {9729, EMinFilter::FilterLinearNoMip},
+                      {9984, EMinFilter::FilterNearestMipNearest},
+                      {9985, EMinFilter::FilterNearestMipLinear},
+                      {9986, EMinFilter::FilterLinearMipNearest},
+                      {9987, EMinFilter::FilterLinearMipLinear},
+        });
+        std::unordered_map<int, VkSamplerAddressMode> addressMap({{33071, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE},
+                                                                  {33648, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT},
+                                                                  {10497, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT}});
         {  // Magfilter
-            auto find = filterMap.find(tinygltfSampler.magFilter);
-            if(find != filterMap.end())
+            auto find = magFilterMap.find(tinygltfSampler.magFilter);
+            if(find != magFilterMap.end())
             {
                 outsamplerCI.magFilter = find->second;
             }
         }
         {  // Minfilter
-            auto find = filterMap.find(tinygltfSampler.minFilter);
-            if(find != filterMap.end())
+            auto find = minFilterMap.find(tinygltfSampler.minFilter);
+            if(find != minFilterMap.end())
             {
-                outsamplerCI.minFilter = find->second;
+                int filter  = find->second & MASK_FILTER;
+                int genMip  = find->second & MASK_GENERATEMIP;
+                int mipMode = find->second & MASK_MIPMODE;
+                switch(filter)
+                {
+                    case FILTER_NEAREST:
+                        outsamplerCI.minFilter = VkFilter::VK_FILTER_NEAREST;
+                        break;
+                    case FILTER_LINEAR:
+                        outsamplerCI.minFilter = VkFilter::VK_FILTER_LINEAR;
+                        break;
+                }
+                createMipMaps = genMip == MIP_GENERATE;
+                if(createMipMaps)
+                {
+                    switch(mipMode)
+                    {
+                        case MIPMODE_NEAREST:
+                            outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                            break;
+                        case MIPMODE_LINEAR:
+                            outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR;
+                            break;
+                    }
+                }
             }
         }
         {  // AddressMode U
