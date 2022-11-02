@@ -46,7 +46,7 @@ namespace foray::as {
         }
         return nullptr;
     }
-    uint64_t Tlas::AddBlasInstanceAuto(scene::MeshInstance* meshInstance)
+    uint64_t Tlas::AddBlasInstanceAuto(scene::ncomp::MeshInstance* meshInstance)
     {
         auto        transform = meshInstance->GetNode()->GetTransform();
         const auto& blas      = meshInstance->GetMesh()->GetBlas();

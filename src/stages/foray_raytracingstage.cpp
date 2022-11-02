@@ -1,8 +1,9 @@
 #include "foray_raytracingstage.hpp"
+#include "../core/foray_samplercollection.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../core/foray_shadermodule.hpp"
-#include "../scene/foray_scene.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
+#include "../scene/foray_scene.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
 #include "../scene/globalcomponents/foray_geometrystore.hpp"
 #include "../scene/globalcomponents/foray_materialbuffer.hpp"
@@ -10,7 +11,6 @@
 #include "../scene/globalcomponents/foray_tlasmanager.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
-#include "../core/foray_samplercollection.hpp"
 #include <array>
 
 namespace foray::stages {
@@ -66,8 +66,8 @@ namespace foray::stages {
         VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
 
-        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, imageUsageFlags, colorFormat,
-                                       VK_IMAGE_ASPECT_COLOR_BIT, RaytracingRenderTargetName);
+        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, imageUsageFlags, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT,
+                                       RaytracingRenderTargetName);
         core::ManagedImage::QuickTransition transition{.SrcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                                                        .DstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
                                                        .NewLayout    = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL};
@@ -78,7 +78,12 @@ namespace foray::stages {
 
     void RaytracingStage::SetupDescriptors()
     {
-        as::Tlas& tlas = mScene->GetComponent<scene::TlasManager>()->GetTlas();
+        as::Tlas& tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
+        auto      materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
+        auto      textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto      cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto      geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
+
 
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
@@ -87,16 +92,15 @@ namespace foray::stages {
         mDescriptorSet.SetDescriptorAt(0, &mDescriptorAccelerationStructureInfo, 1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, RTSTAGEFLAGS);
 
         mDescriptorSet.SetDescriptorAt(1, mRaytracingRenderTarget, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
-        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                       RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(2, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, RTSTAGEFLAGS);
 
-        mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::GeometryStore>()->GetVerticesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(3, geometryStore->GetVerticesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
-        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::GeometryStore>()->GetIndicesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(4, geometryStore->GetIndicesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
-        mDescriptorSet.SetDescriptorAt(5, mScene->GetComponent<scene::MaterialBuffer>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(5, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
-        mDescriptorSet.SetDescriptorAt(6, mScene->GetComponent<scene::TextureStore>()->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(6, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
         as::GeometryMetaBuffer& metaBuffer = tlas.GetMetaBuffer();
         mDescriptorSet.SetDescriptorAt(7, metaBuffer.GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
@@ -153,8 +157,7 @@ namespace foray::stages {
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
 
         mPushConstant.RngSeed = renderInfo.GetFrameNumber();
-        vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, 0,
-                           sizeof(mPushConstant), &mPushConstant);
+        vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, 0, sizeof(mPushConstant), &mPushConstant);
 
         VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry = mPipeline.GetRaygenSbt().GetAddressRegion();
 

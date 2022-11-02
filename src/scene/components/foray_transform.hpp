@@ -2,7 +2,7 @@
 #include "../../foray_glm.hpp"
 #include "../foray_component.hpp"
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     class Transform : public NodeComponent
     {
       public:

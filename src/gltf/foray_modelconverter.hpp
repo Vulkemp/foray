@@ -69,16 +69,16 @@ namespace foray::gltf {
 
         scene::Scene* mScene = nullptr;
 
-        scene::MaterialBuffer& mMaterialBuffer;
-        scene::GeometryStore&  mGeo;
-        scene::TextureStore&   mTextures;
+        scene::gcomp::MaterialBuffer& mMaterialBuffer;
+        scene::gcomp::GeometryStore&  mGeo;
+        scene::gcomp::TextureStore&   mTextures;
         bench::HostBenchmark   mBenchmark;
 
         void RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent = nullptr);
 
         // void LoadMesh
 
-        void InitTransformFromGltf(scene::Transform*          transform,
+        void InitTransformFromGltf(scene::ncomp::Transform*          transform,
                                    const std::vector<double>& matrix,
                                    const std::vector<double>& translation,
                                    const std::vector<double>& rotation,
@@ -95,6 +95,8 @@ namespace foray::gltf {
                                        int32_t                                                           samplerIndex,
                                        const std::map<std::string_view, scene::EAnimationInterpolation>& interpolationMap,
                                        std::map<int, int>&                                               samplerIndexMap);
+
+        void TranslateLight(scene::ncomp::PunctualLight* component, const tinygltf::Light& light);
 
         void DetectAnimatedNodes();
 

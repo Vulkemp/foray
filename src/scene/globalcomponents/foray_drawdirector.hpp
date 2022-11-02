@@ -2,14 +2,14 @@
 #include "../../util/foray_dualbuffer.hpp"
 #include "../foray_component.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     struct DrawOp
     {
       public:
         uint64_t                   Order           = 0;
         Mesh*                      Target          = nullptr;
-        std::vector<MeshInstance*> Instances       = {};
+        std::vector<ncomp::MeshInstance*> Instances       = {};
         uint32_t                   TransformOffset = 0;
     };
 
@@ -33,8 +33,8 @@ namespace foray::scene {
 
         inline VkDescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
         inline VkDescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer.GetVkDescriptorBufferInfo(); }
-        inline VkBuffer GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetBuffer(); }
-        inline VkBuffer GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer.GetBuffer(); }
+        inline VkBuffer               GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetBuffer(); }
+        inline VkBuffer               GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer.GetBuffer(); }
 
         FORAY_PROPERTY_CGET(TotalCount)
 
@@ -48,4 +48,4 @@ namespace foray::scene {
         GeometryStore*      mGeo        = nullptr;
         uint32_t            mTotalCount = 0;
     };
-}  // namespace foray::scene
+}  // namespace foray::scene::gcomp

@@ -1,13 +1,13 @@
 #include "foray_camera.hpp"
 #include "../../osi/foray_event.hpp"
+#include "../foray_camerauboblock.hpp"
 #include "../foray_scene.hpp"
 #include <spdlog/fmt/fmt.h>
-#include "../foray_camerauboblock.hpp"
 
 #undef near
 #undef far
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     void Camera::InitDefault()
     {
         SetViewMatrix();
@@ -73,4 +73,4 @@ namespace foray::scene {
         mAspect = CalculateAspect(extent);
         SetProjectionMatrix();
     }
-}  // namespace foray
+}  // namespace foray::scene::ncomp

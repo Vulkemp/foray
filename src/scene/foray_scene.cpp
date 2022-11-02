@@ -1,13 +1,7 @@
 #include "foray_scene.hpp"
-#include "components/foray_camera.hpp"
-#include "components/foray_freecameracontroller.hpp"
+#include "components/foray_node_components.hpp"
 #include "foray_node.hpp"
-#include "globalcomponents/foray_cameramanager.hpp"
-#include "globalcomponents/foray_drawdirector.hpp"
-#include "globalcomponents/foray_geometrystore.hpp"
-#include "globalcomponents/foray_materialbuffer.hpp"
-#include "globalcomponents/foray_texturestore.hpp"
-#include "globalcomponents/foray_tlasmanager.hpp"
+#include "globalcomponents/foray_global_components.hpp"
 
 
 namespace foray::scene {
@@ -18,11 +12,11 @@ namespace foray::scene {
 
     void Scene::InitDefaultGlobals()
     {
-        MakeComponent<MaterialBuffer>(mContext);
-        MakeComponent<GeometryStore>();
-        MakeComponent<TextureStore>();
-        MakeComponent<DrawDirector>();
-        MakeComponent<CameraManager>(mContext);
+        MakeComponent<gcomp::MaterialBuffer>(mContext);
+        MakeComponent<gcomp::GeometryStore>();
+        MakeComponent<gcomp::TextureStore>();
+        MakeComponent<gcomp::DrawDirector>();
+        MakeComponent<gcomp::CameraManager>(mContext);
     }
 
     void Scene::Update(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index)
@@ -73,10 +67,10 @@ namespace foray::scene {
     {
         Node* cameraNode = MakeNode();
 
-        Camera* camera = cameraNode->MakeComponent<foray::scene::Camera>();
+        ncomp::Camera* camera = cameraNode->MakeComponent<foray::scene::ncomp::Camera>();
         camera->InitDefault();
-        cameraNode->MakeComponent<FreeCameraController>();
-        CameraManager* cameraManager = GetComponent<CameraManager>();
+        cameraNode->MakeComponent<ncomp::FreeCameraController>();
+        gcomp::CameraManager* cameraManager = GetComponent<gcomp::CameraManager>();
 
         cameraManager->RefreshCameraList();
         cameraManager->SelectCamera(camera);
@@ -84,12 +78,22 @@ namespace foray::scene {
 
     void Scene::UpdateTlasManager()
     {
-        TlasManager* tlasManager = GetComponent<TlasManager>();
+        gcomp::TlasManager* tlasManager = GetComponent<gcomp::TlasManager>();
         if(!tlasManager)
         {
-            tlasManager = MakeComponent<TlasManager>();
+            tlasManager = MakeComponent<gcomp::TlasManager>();
         }
         tlasManager->CreateOrUpdate();
+    }
+
+    void Scene::UpdateLightManager()
+    {
+        gcomp::LightManager* lightManager = GetComponent<gcomp::LightManager>();
+        if(!lightManager)
+        {
+            lightManager = MakeComponent<gcomp::LightManager>();
+        }
+        lightManager->CreateOrUpdate();
     }
 
     void Scene::Destroy(bool reinitialize)

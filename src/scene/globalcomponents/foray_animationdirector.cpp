@@ -1,6 +1,6 @@
 #include "foray_animationdirector.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     void AnimationDirector::Update(SceneUpdateInfo& updateInfo)
     {
         if(mPlaybackConfig.Enable)

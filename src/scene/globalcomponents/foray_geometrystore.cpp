@@ -1,7 +1,7 @@
 #include "foray_geometrystore.hpp"
 #include "../foray_scene.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     bool GeometryStore::CmdBindBuffers(VkCommandBuffer commandBuffer)
     {

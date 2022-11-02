@@ -5,20 +5,24 @@ namespace foray::scene {
     class Component;
     class Node;
     class Scene;
-    class Transform;
-    class MeshInstance;
     class Mesh;
     class Primitive;
-    class GeometryStore;
-    class MaterialBuffer;
-    class TextureStore;
+    namespace ncomp {
+        class Camera;
+        class Transform;
+        class MeshInstance;
+        class PunctualLight;
+    }  // namespace ncomp
+    namespace gcomp {
+        class GeometryStore;
+        class MaterialBuffer;
+        class TextureStore;
+        class AnimationDirector;
+    }  // namespace gcomp
+    struct SceneDrawInfo;
     class Animation;
     struct AnimationSampler;
     struct AnimationChannel;
     struct PlaybackConfig;
-    class AnimationDirector;
     struct CameraUboBlock;
-    class Camera;
-    struct SceneDrawInfo;
-    class SampledTexture;
-}  // namespace foray
+}  // namespace foray::scene

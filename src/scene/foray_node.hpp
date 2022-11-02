@@ -10,7 +10,7 @@ namespace foray::scene {
         FORAY_PROPERTY_ALL(Parent);
         FORAY_PROPERTY_ALL(Children);
 
-        Transform* GetTransform();
+        ncomp::Transform* GetTransform();
 
         template <typename TComponent>
         inline int32_t FindChildrenWithComponent(std::vector<Node*>& outnodes);

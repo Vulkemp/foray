@@ -4,7 +4,7 @@
 #include "../foray_component.hpp"
 #include <array>
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
 
     class Camera : public NodeComponent, public Component::OnResizedCallback
     {

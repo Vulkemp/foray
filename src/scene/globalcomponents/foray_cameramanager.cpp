@@ -2,7 +2,7 @@
 #include "../components/foray_camera.hpp"
 #include "../foray_scene.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     void CameraManager::Update(SceneUpdateInfo& updateInfo)
     {
@@ -24,10 +24,10 @@ namespace foray::scene {
         mCameras.clear();
 
         std::vector<Node*> nodesWithCamera;
-        GetScene()->FindNodesWithComponent<Camera>(nodesWithCamera);
+        GetScene()->FindNodesWithComponent<ncomp::Camera>(nodesWithCamera);
         for(auto node : nodesWithCamera)
         {
-            mCameras.emplace(node->GetComponent<Camera>());
+            mCameras.emplace(node->GetComponent<ncomp::Camera>());
         }
 
         if(!mSelectedCamera || !mCameras.contains(mSelectedCamera))
@@ -42,7 +42,7 @@ namespace foray::scene {
             }
         }
     }
-    void CameraManager::SelectCamera(Camera* camera)
+    void CameraManager::SelectCamera(ncomp::Camera* camera)
     {
         Assert(mCameras.contains(camera),
                "CameraManager::SelectCamera: Parameter 'camera' was not a tracked camera! Check parameter and consider running CameraManager::RefreshCameraList() before!");

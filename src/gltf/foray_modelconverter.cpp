@@ -3,22 +3,16 @@
 #include "../foray_glm.hpp"
 #include "../foray_logger.hpp"
 #include "../osi/foray_env.hpp"
-#include "../scene/components/foray_meshinstance.hpp"
-#include "../scene/components/foray_transform.hpp"
-#include "../scene/globalcomponents/foray_animationdirector.hpp"
-#include "../scene/globalcomponents/foray_cameramanager.hpp"
-#include "../scene/globalcomponents/foray_drawdirector.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
-#include "../scene/globalcomponents/foray_materialbuffer.hpp"
-#include "../scene/globalcomponents/foray_texturestore.hpp"
+#include "../scene/components/foray_node_components.hpp"
+#include "../scene/globalcomponents/foray_global_components.hpp"
 #include <filesystem>
 
 namespace foray::gltf {
     ModelConverter::ModelConverter(scene::Scene* scene)
         : mScene(scene)
-        , mMaterialBuffer(*(scene->GetComponent<scene::MaterialBuffer>()))
-        , mGeo(*(scene->GetComponent<scene::GeometryStore>()))
-        , mTextures(*(scene->GetComponent<scene::TextureStore>()))
+        , mMaterialBuffer(*(scene->GetComponent<scene::gcomp::MaterialBuffer>()))
+        , mGeo(*(scene->GetComponent<scene::gcomp::GeometryStore>()))
+        , mTextures(*(scene->GetComponent<scene::gcomp::TextureStore>()))
     {
     }
 
@@ -94,13 +88,13 @@ namespace foray::gltf {
 
         mIndexBindings.Meshes.resize(mGltfModel.meshes.size());
         std::vector<scene::Node*> nodesWithMeshInstances{};
-        mScene->FindNodesWithComponent<scene::MeshInstance>(nodesWithMeshInstances);
+        mScene->FindNodesWithComponent<scene::ncomp::MeshInstance>(nodesWithMeshInstances);
         mNextMeshInstanceIndex = 0;
         if(nodesWithMeshInstances.size())
         {
             for(scene::Node* node : nodesWithMeshInstances)
             {
-                mNextMeshInstanceIndex = std::max(mNextMeshInstanceIndex, node->GetComponent<scene::MeshInstance>()->GetInstanceIndex());
+                mNextMeshInstanceIndex = std::max(mNextMeshInstanceIndex, node->GetComponent<scene::ncomp::MeshInstance>()->GetInstanceIndex());
             }
             mNextMeshInstanceIndex++;
         }
@@ -178,10 +172,18 @@ namespace foray::gltf {
 
         if(gltfNode.mesh >= 0)
         {
-            auto meshInstance = node->MakeComponent<scene::MeshInstance>();
+            auto meshInstance = node->MakeComponent<scene::ncomp::MeshInstance>();
             meshInstance->SetMesh(mIndexBindings.Meshes[gltfNode.mesh]);
             meshInstance->SetInstanceIndex(mNextMeshInstanceIndex);
             mNextMeshInstanceIndex++;
+        }
+
+        auto lightIter = gltfNode.extensions.find("KHR_lights_punctual");
+        if (lightIter != gltfNode.extensions.cend())
+        {
+            int32_t lightIdx = lightIter->second.Get("light").GetNumberAsInt();
+            scene::ncomp::PunctualLight* light = node->MakeComponent<scene::ncomp::PunctualLight>();
+            TranslateLight(light, mGltfModel.lights[lightIdx]);
         }
 
         for(int32_t childIndex : gltfNode.children)
@@ -190,7 +192,7 @@ namespace foray::gltf {
         }
     }
 
-    void ModelConverter::InitTransformFromGltf(scene::Transform*          transform,
+    void ModelConverter::InitTransformFromGltf(scene::ncomp::Transform*          transform,
                                                const std::vector<double>& matrix,
                                                const std::vector<double>& translation,
                                                const std::vector<double>& rotation,
@@ -273,6 +275,13 @@ namespace foray::gltf {
         }
     }
 
+    void ModelConverter::TranslateLight(scene::ncomp::PunctualLight* component, const tinygltf::Light& light)
+    {
+        component->SetColor(glm::vec3(light.color[0], light.color[1], light.color[2]));
+        component->SetIntensity(light.intensity);
+        component->SetType(light.type == "directional" ? scene::ELightType::Directional : scene::ELightType::Point);
+    }
+
     void MarkNodeRecursively(scene::Node* node, bool parentAnimated, std::unordered_set<scene::Node*>& animationTargets)
     {
         bool isAnimated = parentAnimated;
@@ -294,7 +303,7 @@ namespace foray::gltf {
 
     void ModelConverter::DetectAnimatedNodes()
     {
-        scene::AnimationDirector* animDirector = mScene->GetComponent<scene::AnimationDirector>();
+        scene::gcomp::AnimationDirector* animDirector = mScene->GetComponent<scene::gcomp::AnimationDirector>();
 
         std::unordered_set<scene::Node*> animationTargets;
 
@@ -322,8 +331,8 @@ namespace foray::gltf {
             node->GetTransform()->RecalculateGlobalMatrix(nullptr);
         }
 
-        mScene->GetComponent<scene::DrawDirector>()->InitOrUpdate();
-        mScene->GetComponent<scene::CameraManager>()->RefreshCameraList();
+        mScene->GetComponent<scene::gcomp::DrawDirector>()->InitOrUpdate();
+        mScene->GetComponent<scene::gcomp::CameraManager>()->RefreshCameraList();
 
         mMaterialBuffer.UpdateDeviceLocal();
     }

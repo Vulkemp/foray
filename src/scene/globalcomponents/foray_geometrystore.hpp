@@ -5,7 +5,7 @@
 #include "../foray_mesh.hpp"
 #include <set>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     class GeometryStore : public GlobalComponent
     {

@@ -7,7 +7,7 @@
 namespace foray::gltf {
     void ModelConverter::LoadAnimations()
     {
-        scene::AnimationDirector* animDirector = mScene->GetComponent<scene::AnimationDirector>();
+        scene::gcomp::AnimationDirector* animDirector = mScene->GetComponent<scene::gcomp::AnimationDirector>();
 
         std::map<std::string_view, scene::EAnimationInterpolation> interpolationMap = {
             {"LINEAR", scene::EAnimationInterpolation::Linear}, {"STEP", scene::EAnimationInterpolation::Step}, {"CUBICSPLINE", scene::EAnimationInterpolation::Cubicspline}};
@@ -21,7 +21,7 @@ namespace foray::gltf {
 
         if(mGltfModel.animations.size() && !animDirector)
         {
-            animDirector = mScene->MakeComponent<scene::AnimationDirector>();
+            animDirector = mScene->MakeComponent<scene::gcomp::AnimationDirector>();
         }
         for(int32_t i = 0; i < mGltfModel.animations.size(); i++)
         {

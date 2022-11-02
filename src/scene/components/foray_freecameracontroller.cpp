@@ -3,7 +3,7 @@
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     void FreeCameraController::OnEvent(const osi::Event* event)
     {
         auto binaryInputEvent = dynamic_cast<const osi::EventInputBinary*>(event);

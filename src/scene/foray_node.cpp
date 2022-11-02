@@ -3,13 +3,13 @@
 #include "foray_scene.hpp"
 
 namespace foray::scene {
-    Transform* Node::GetTransform()
+    ncomp::Transform* Node::GetTransform()
     {
-        return GetComponent<Transform>();
+        return GetComponent<ncomp::Transform>();
     }
 
     Node::Node(Scene* scene, Node* parent) : Registry(scene), mParent(parent)
     {
-        MakeComponent<Transform>();
+        MakeComponent<ncomp::Transform>();
     }
 }  // namespace foray

@@ -15,7 +15,7 @@ namespace foray::as {
 
         inline virtual std::string_view GetTypeName() const override { return "Bottom-Level AS"; }
 
-        virtual void CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::GeometryStore* store, bench::HostBenchmark* benchmark = nullptr);
+        virtual void CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::gcomp::GeometryStore* store, bench::HostBenchmark* benchmark = nullptr);
 
         inline virtual bool Exists() const override { return !mAccelerationStructure; }
         virtual void        Destroy() override;

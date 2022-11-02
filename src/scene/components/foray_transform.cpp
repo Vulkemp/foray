@@ -1,7 +1,7 @@
 #include "foray_transform.hpp"
 #include "../foray_node.hpp"
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     void Transform::RecalculateLocalMatrix()
     {
         mLocalMatrix = glm::translate(glm::mat4(1.0f), mTranslation) * glm::mat4(mRotation) * glm::scale(glm::mat4(1.0f), mScale);

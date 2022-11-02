@@ -4,7 +4,7 @@
 #include "../foray_component.hpp"
 #include <vector>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     class AnimationDirector : public GlobalComponent, public Component::UpdateCallback
     {

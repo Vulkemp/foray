@@ -1,6 +1,6 @@
 #include "foray_materialbuffer.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     MaterialBuffer::MaterialBuffer(core::Context* context) : mBuffer(context, false)
     {
         mBuffer.GetBuffer().SetName("MaterialBuffer");

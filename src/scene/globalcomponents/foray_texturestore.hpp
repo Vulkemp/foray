@@ -4,7 +4,7 @@
 #include "../foray_component.hpp"
 #include <unordered_map>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     class TextureStore : public GlobalComponent
     {
       public:

@@ -51,7 +51,7 @@ namespace foray::scene {
         virtual void CmdDraw(SceneDrawInfo& drawInfo);
         virtual void CmdDrawInstanced(SceneDrawInfo& drawInfo, uint32_t instanceCount);
 
-        virtual void BuildAccelerationStructure(core::Context* context, GeometryStore* store) { mBlas.CreateOrUpdate(context, this, store); }
+        virtual void BuildAccelerationStructure(core::Context* context, gcomp::GeometryStore* store) { mBlas.CreateOrUpdate(context, this, store); }
 
         FORAY_PROPERTY_ALL(Primitives)
         FORAY_PROPERTY_GET(Blas)

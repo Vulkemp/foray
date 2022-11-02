@@ -46,7 +46,7 @@ namespace foray::as {
         const BlasInstance* GetBlasInstance(uint64_t id) const;
         /// @brief Add a BLAS instance from meshInstance component
         /// @remark TLAS will be marked Dirty!
-        uint64_t AddBlasInstanceAuto(scene::MeshInstance* meshInstance);
+        uint64_t AddBlasInstanceAuto(scene::ncomp::MeshInstance* meshInstance);
         /// @brief Add an animated BLAS instance
         /// @remark TLAS will be marked Dirty!
         uint64_t AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc);

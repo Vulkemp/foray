@@ -5,7 +5,7 @@
 #include "../foray_scene_declares.hpp"
 #include <unordered_map>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     class TlasManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
@@ -23,7 +23,7 @@ namespace foray::scene {
 
       private:
         as::Tlas                                    mTlas;
-        std::unordered_map<uint64_t, MeshInstance*> mMeshInstances;
-        std::unordered_map<MeshInstance*, uint64_t> mBlasInstanceIds;
+        std::unordered_map<uint64_t, ncomp::MeshInstance*> mMeshInstances;
+        std::unordered_map<ncomp::MeshInstance*, uint64_t> mBlasInstanceIds;
     };
 }  // namespace foray::scene

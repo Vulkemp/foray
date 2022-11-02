@@ -14,7 +14,7 @@ namespace foray::gltf {
             /// @brief Gltf Model to load textures of
             tinygltf::Model& GltfModel;
             /// @brief Texture store to give textures to
-            scene::TextureStore& Textures;
+            scene::gcomp::TextureStore& Textures;
             /// @brief Base directory to look for textures relative to
             std::string BaseDir;
             /// @brief Context used for GPU stuff
@@ -54,7 +54,7 @@ namespace foray::gltf {
 
                     logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
-                    scene::TextureStore::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
+                    scene::gcomp::TextureStore::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
 
                     const unsigned char* buffer     = nullptr;
                     VkDeviceSize         bufferSize = 0;

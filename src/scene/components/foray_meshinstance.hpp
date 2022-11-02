@@ -3,7 +3,7 @@
 #include "../foray_component.hpp"
 #include "../foray_scene_declares.hpp"
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     class MeshInstance : public NodeComponent
     {
       public:

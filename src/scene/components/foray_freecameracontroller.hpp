@@ -2,9 +2,9 @@
 #include "../../foray_glm.hpp"
 #include "../../osi/foray_event.hpp"
 #include "../foray_component.hpp"
-#include <map>
+#include <unordered_map>
 
-namespace foray::scene {
+namespace foray::scene::ncomp {
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:
@@ -39,7 +39,7 @@ namespace foray::scene {
         bool                          mUseMouse                     = false;
         bool                          mInvertYAxis                  = false;
 
-        std::map<osi::EButton, bool&> mMapping = {{osi::EButton::Keyboard_W, mInputStates.Forward},       {osi::EButton::Keyboard_S, mInputStates.Backward},
+        std::unordered_map<osi::EButton, bool&> mMapping = {{osi::EButton::Keyboard_W, mInputStates.Forward},       {osi::EButton::Keyboard_S, mInputStates.Backward},
                                                   {osi::EButton::Keyboard_LShift, mInputStates.StrafeUp}, {osi::EButton::Keyboard_LCtrl, mInputStates.StrafeDown},
                                                   {osi::EButton::Keyboard_A, mInputStates.StrafeLeft},    {osi::EButton::Keyboard_D, mInputStates.StrafeRight},
                                                   {osi::EButton::Keyboard_Up, mInputStates.PitchUp},      {osi::EButton::Keyboard_Down, mInputStates.PitchDown},

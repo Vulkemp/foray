@@ -49,6 +49,8 @@ namespace foray::scene {
 
         void UpdateTlasManager();        
 
+        void UpdateLightManager();
+
       protected:
         core::Context* mContext;
         /// @brief Buffer holding ownership of all nodes

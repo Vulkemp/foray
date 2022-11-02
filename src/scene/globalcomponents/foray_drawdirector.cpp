@@ -8,24 +8,24 @@
 #include <map>
 #include <spdlog/fmt/fmt.h>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     void DrawDirector::InitOrUpdate()
     {
         auto scene = GetScene();
         mGeo       = scene->GetComponent<GeometryStore>();
         std::vector<Node*> meshInstanceNodes;
-        scene->FindNodesWithComponent<MeshInstance>(meshInstanceNodes);
-        std::map<Mesh*, std::vector<MeshInstance*>> meshMaps;
+        scene->FindNodesWithComponent<ncomp::MeshInstance>(meshInstanceNodes);
+        std::map<Mesh*, std::vector<ncomp::MeshInstance*>> meshMaps;
 
         for(auto node : meshInstanceNodes)
         {
-            MeshInstance* meshInstance = node->GetComponent<MeshInstance>();
+            ncomp::MeshInstance* meshInstance = node->GetComponent<ncomp::MeshInstance>();
 
             auto iter = meshMaps.find(meshInstance->GetMesh());
 
             if(iter == meshMaps.end())
             {
-                meshMaps[meshInstance->GetMesh()] = std::initializer_list<MeshInstance*>({meshInstance});
+                meshMaps[meshInstance->GetMesh()] = std::initializer_list<ncomp::MeshInstance*>({meshInstance});
             }
             else
             {
@@ -61,8 +61,8 @@ namespace foray::scene {
         size += size / 4;  // Add a bit of extra capacity
 
         core::ManagedBuffer::ManagedBufferCreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                                                      | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                                  size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Current Transforms");
+                                                            | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                                        size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Current Transforms");
         mCurrentTransformBuffer.Create(GetContext(), ci);
         ci.Name = "Previous Transforms";
         mPreviousTransformBuffer.Create(GetContext(), ci);
@@ -120,7 +120,7 @@ namespace foray::scene {
             for(uint32_t i = 0; i < drawop.Instances.size(); i++)
             {
                 auto& transformState = transformStates[drawop.TransformOffset + i];
-                auto  transform      = drawop.Instances[i]->GetNode()->GetComponent<Transform>();
+                auto  transform      = drawop.Instances[i]->GetNode()->GetComponent<ncomp::Transform>();
                 transformState       = transform->GetGlobalMatrix();
             }
         }
@@ -128,11 +128,11 @@ namespace foray::scene {
         mCurrentTransformBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
 
         util::DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-                                             .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                             .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
+                                                   .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                   .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
         util::DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-                                            .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                            .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
+                                                  .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                                  .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
 
         mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer, before, after);
     }
@@ -151,4 +151,4 @@ namespace foray::scene {
             drawop.Target->CmdDrawInstanced(drawInfo, drawop.Instances.size());
         }
     }
-}  // namespace foray::scene
+}  // namespace foray::scene::gcomp

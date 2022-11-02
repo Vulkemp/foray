@@ -4,7 +4,7 @@
 #include <functional>
 #include <spdlog/fmt/fmt.h>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
     void TextureStore::Destroy()
     {
         mTextures.clear();

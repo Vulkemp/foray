@@ -3,7 +3,7 @@
 #include "../foray_component.hpp"
 #include "../foray_material.hpp"
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     /// @brief Manages a device local storage buffer providing material information for rendering
     class MaterialBuffer : public GlobalComponent

@@ -8,7 +8,7 @@
 
 namespace foray::as {
 
-    void Blas::CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::GeometryStore* store, bench::HostBenchmark* benchmark)
+    void Blas::CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::gcomp::GeometryStore* store, bench::HostBenchmark* benchmark)
     {
         // STEP #0    Reset state
         if(!!benchmark)

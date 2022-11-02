@@ -3,7 +3,7 @@
 #include "../foray_scene.hpp"
 #include <unordered_set>
 
-namespace foray::scene {
+namespace foray::scene::gcomp {
 
     void TlasManager::CreateOrUpdate()
     {
@@ -12,11 +12,11 @@ namespace foray::scene {
         mMeshInstances.clear();
 
         std::vector<Node*> nodesWithMeshInstances;
-        GetScene()->FindNodesWithComponent<MeshInstance>(nodesWithMeshInstances);
+        GetScene()->FindNodesWithComponent<ncomp::MeshInstance>(nodesWithMeshInstances);
 
         for(auto node : nodesWithMeshInstances)
         {
-            auto     meshInstance          = node->GetComponent<MeshInstance>();
+            auto     meshInstance          = node->GetComponent<ncomp::MeshInstance>();
             uint64_t id                    = mTlas.AddBlasInstanceAuto(meshInstance);
             mBlasInstanceIds[meshInstance] = id;
             mMeshInstances[id]             = meshInstance;

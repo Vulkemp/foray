@@ -1,13 +1,14 @@
-#include "foray_simplifiedlightcomponent.hpp"
+#include "foray_punctuallight.hpp"
 #include "../foray_node.hpp"
 #include "foray_transform.hpp"
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace foray::scene {
-    void SimplifiedLightComponent::UpdateStruct(SimplifiedLight& simplifiedlight)
+namespace foray::scene::ncomp {
+    void PunctualLight::UpdateStruct(SimpleLight& simplifiedlight)
     {
-        simplifiedlight.RadiantFluxRgb = mRadiantFlux;
-        simplifiedlight.Type           = (uint32_t)mType;
+        simplifiedlight.Color     = mColor;
+        simplifiedlight.Intensity = mIntensity;
+        simplifiedlight.Type      = mType;
 
         glm::mat4 globalMat = GetNode()->GetTransform()->GetGlobalMatrix();
         glm::vec3 scale;
@@ -24,17 +25,17 @@ namespace foray::scene {
 
         switch(mType)
         {
-            case EType::Directional: {
+            case ELightType::Directional: {
                 glm::vec4 dir(0.f, 0.f, 1.f, 1.f);
                 dir                      = glm::mat4(rot) * dir;
                 simplifiedlight.PosOrDir = dir;
                 break;
             }
-            case EType::Point:
+            case ELightType::Point:
             default: {
                 simplifiedlight.PosOrDir = pos;
                 break;
             }
         }
     }
-}  // namespace foray::scene
+}  // namespace foray::scene::ncomp

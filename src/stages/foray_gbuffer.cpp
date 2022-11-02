@@ -290,13 +290,17 @@ namespace foray::stages {
 
     void GBufferStage::SetupDescriptors()
     {
-        mDescriptorSet.SetDescriptorAt(0, mScene->GetComponent<scene::MaterialBuffer>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(1, mScene->GetComponent<scene::TextureStore>()->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
+        auto textureStore = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto drawDirector = mScene->GetComponent<scene::gcomp::DrawDirector>();
+        mDescriptorSet.SetDescriptorAt(0, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(1, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                        VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(2, mScene->GetComponent<scene::CameraManager>()->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(3, mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        mDescriptorSet.SetDescriptorAt(2, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(3, drawDirector->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                        VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(4, mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        mDescriptorSet.SetDescriptorAt(4, drawDirector->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                        VK_SHADER_STAGE_VERTEX_BIT);
     }
 
@@ -503,13 +507,17 @@ namespace foray::stages {
                                              .offset              = 0,
                                              .size                = VK_WHOLE_SIZE};
 
-        bufferBarrier.buffer = mScene->GetComponent<scene::MaterialBuffer>()->GetBuffer().GetBuffer().GetBuffer();
+        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
+        auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto drawDirector = mScene->GetComponent<scene::gcomp::DrawDirector>();
+
+        bufferBarrier.buffer = materialBuffer->GetVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
-        bufferBarrier.buffer = mScene->GetComponent<scene::CameraManager>()->GetUbo().GetUboBuffer().GetDeviceBuffer().GetBuffer();
+        bufferBarrier.buffer = cameraManager->GetUbo().GetDeviceBuffer()->GetBuffer();
         bufferBarriers.push_back(bufferBarrier);
-        bufferBarrier.buffer = mScene->GetComponent<scene::DrawDirector>()->GetCurrentTransformBuffer().GetDeviceBuffer().GetBuffer();
+        bufferBarrier.buffer = drawDirector->GetCurrentTransformsVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
-        bufferBarrier.buffer = mScene->GetComponent<scene::DrawDirector>()->GetPreviousTransformBuffer().GetBuffer();
+        bufferBarrier.buffer = drawDirector->GetPreviousTransformsVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
 
         VkDependencyInfo depInfo{
