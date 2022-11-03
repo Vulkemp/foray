@@ -65,7 +65,7 @@ namespace foray::base {
         InitSyncObjects();
 
         mSamplerCollection.Init(&mContext);
-        mContext.SamplerCollection = &mSamplerCollection;
+        mContext.SamplerCol = &mSamplerCollection;
 
         ApiInit();
     }

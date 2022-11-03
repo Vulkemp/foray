@@ -26,8 +26,7 @@ namespace foray::stages {
     {
         VkImageUsageFlags usage =
             VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        VkExtent3D                     extent{mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
-        core::ManagedImage::CreateInfo ci(OutputName, usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, extent);
+        core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mContext->GetSwapchainSize(), OutputName);
         mOutput.Create(mContext, ci);
         mImageOutputs[mOutput.GetName()] = &mOutput;
     }
@@ -40,7 +39,7 @@ namespace foray::stages {
         }
         {  // Create Pipette Buffer
             VkBufferUsageFlags usage = VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            core::ManagedBuffer::ManagedBufferCreateInfo ci(usage, sizeof(PipetteValue), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+            core::ManagedBuffer::CreateInfo ci(usage, sizeof(PipetteValue), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
                                                             VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "Comparer.Pipette.Device");
             mPipetteBuffer.Create(mContext, ci);
             mPipetteBuffer.Map(mPipetteMap);
@@ -139,7 +138,7 @@ namespace foray::stages {
             substage.DescriptorSet.Destroy();
         }
         substage.InputSampled.Destroy();
-        substage.Input = Input{};
+        substage.Input = InputInfo{};
     }
 
     void ComparerStage::Destroy()
@@ -154,7 +153,7 @@ namespace foray::stages {
 
 #pragma endregion
 #pragma region Runtime Update
-    void ComparerStage::SetInput(uint32_t index, const Input& input)
+    void ComparerStage::SetInput(uint32_t index, const InputInfo& input)
     {
         DestroySubStage(mSubStages[index], false);
         if(input.Image == nullptr)

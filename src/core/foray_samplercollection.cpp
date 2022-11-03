@@ -48,7 +48,7 @@ namespace foray::core {
     CombinedImageSampler::CombinedImageSampler(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
     {
         mManagedImage = image;
-        mCollection   = context->SamplerCollection;
+        mCollection   = context->SamplerCol;
         if(!!mCollection)
         {
             mCollection->GetSampler(*this, samplerCi);
@@ -57,7 +57,7 @@ namespace foray::core {
     void CombinedImageSampler::Init(core::Context* context, const VkSamplerCreateInfo& samplerCi)
     {
         Destroy();
-        mCollection   = context->SamplerCollection;
+        mCollection   = context->SamplerCol;
         if(!!mCollection)
         {
             mCollection->GetSampler(*this, samplerCi);
@@ -67,7 +67,7 @@ namespace foray::core {
     {
         Destroy();
         mManagedImage = image;
-        mCollection   = context->SamplerCollection;
+        mCollection   = context->SamplerCol;
         if(!!mCollection)
         {
             mCollection->GetSampler(*this, samplerCi);
@@ -123,6 +123,7 @@ namespace foray::core {
     }
     uint64_t SamplerCollection::GetHash(const VkSamplerCreateInfo& samplerCi)
     {
+        Assert(samplerCi.pNext == nullptr, "Cannot hash .pNext values!");
         size_t hash = 0;
         util::AccumulateHash(hash, samplerCi.flags);
         util::AccumulateHash(hash, samplerCi.magFilter);

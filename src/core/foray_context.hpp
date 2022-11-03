@@ -3,8 +3,8 @@
 #include "../foray_vma.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_osi_declares.hpp"
-#include "foray_swapchainimageinfo.hpp"
 #include "foray_core_declares.hpp"
+#include "foray_swapchainimageinfo.hpp"
 
 namespace foray::core {
 
@@ -27,7 +27,7 @@ namespace foray::core {
         uint32_t                        QueueFamilyIndex  = VK_QUEUE_FAMILY_IGNORED;
         VkCommandPool                   CommandPool       = nullptr;
         VkPipelineCache                 PipelineCache     = nullptr;
-        SamplerCollection*        SamplerCollection = nullptr;
+        SamplerCollection*              SamplerCol = nullptr;
 
         inline operator VkInstance() const { return VkbInstance->instance; }
         inline operator VkPhysicalDevice() const { return VkbPhysicalDevice->physical_device; }

@@ -13,28 +13,47 @@ namespace foray::core {
         static inline std::unordered_set<ManagedResource*> sAllocatedRessources{};
 
       public:
+        /// @brief Print a list of all registered existing resources
+        /// @param printAsWarning If true, a non-zero amount is logged as a warning
         static void sPrintAllocatedResources(bool printAsWarning);
         static const std::unordered_set<ManagedResource*>* GetTotalAllocatedResources() { return &sAllocatedRessources; }
 
+        /// @brief Return a hint for the type of resource managed by the instantiation
+        /// @return 
         virtual std::string_view GetTypeName() const;
+        /// @brief Return true, if the managed resource is allocated
+        /// @details Example: Vulkan object stored could be nullptr or instantiated
         virtual bool             Exists() const = 0;
+        /// @brief Destroy the resource.
+        /// @remark This method must be callable even if the resource has not been initialized yet.
+        /// This method must call any Destroy() overloads of child objects and of base classes
         virtual void             Destroy()      = 0;
 
+        /// @brief Default constructor registers the resource
         ManagedResource();
+        /// @brief Registers the resource and sets its name
         explicit ManagedResource(std::string_view name);
+        /// @brief Unregisters the resource
         virtual ~ManagedResource();
 
+        /// @brief Return a custom name for the object
         std::string_view         GetName() const { return mName; }
+        /// @brief Set a custom name for the object
         virtual void SetName(std::string_view name);
 
+        /// @brief Print name and type in one string
         std::string Print() const;
 
       protected:
+        /// @brief This objects custom name
         std::string mName;
     };
 
+    /// @brief Uses nameof.hpp's NAMEOF_ENUM function to stringify VkObjectType
     std::string_view PrintVkObjectType(VkObjectType objecType);
 
+    /// @brief ManagedResource variant which automates GetTypeName() overloading by returning a stringified version of VkObjectType
+    /// @tparam OBJECT_TYPE Object type managed by the inheriting class
     template <VkObjectType OBJECT_TYPE>
     class VulkanResource : public ManagedResource
     {
@@ -42,9 +61,15 @@ namespace foray::core {
         inline VulkanResource() : ManagedResource() {}
         inline explicit VulkanResource(std::string_view name) : ManagedResource(name) {}
 
+        /// @brief Returns <OBJECT_TYPE> stringified
         inline virtual std::string_view GetTypeName() const;
 
       protected:
+        /// @brief Set the object name. Sets both ManagedResource::mName aswell as vulkan debug object name
+        /// @param context Requires DispatchTable
+        /// @param handle Object handle
+        /// @param name Name
+        /// @param updateResourceName If true, sets ManagedResource::mName
         inline virtual void SetObjectName(core::Context* context, const void* handle, std::string_view name, bool updateResourceName = true);
     };
 

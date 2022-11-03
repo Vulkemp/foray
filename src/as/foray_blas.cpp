@@ -30,7 +30,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->LogTimestamp("Reset");
+            benchmark->LogTimestamp(BENCH_RESET);
         }
 
         VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
@@ -98,7 +98,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->LogTimestamp("Create Build Structs");
+            benchmark->LogTimestamp(BENCH_CREATESTRUCTS);
         }
 
         // STEP #2    Fetch build sizes, (re)create buffers
@@ -116,7 +116,7 @@ namespace foray::as {
 
         core::ManagedBuffer                          scratchBuffer;
         std::string                                  scratchName = fmt::format("{} scratch", name);
-        core::ManagedBuffer::ManagedBufferCreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
+        core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
                                                         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
         ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
         scratchBuffer.Create(mContext, ci);
@@ -124,7 +124,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->LogTimestamp("Get Build Sizes");
+            benchmark->LogTimestamp(BENCH_GETSIZES);
         }
 
         // STEP #3    Create the Blas
@@ -143,7 +143,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->LogTimestamp("Create");
+            benchmark->LogTimestamp(BENCH_CREATE);
         }
 
         // STEP #4   Build the Blas
@@ -157,7 +157,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->LogTimestamp("Build");
+            benchmark->LogTimestamp(BENCH_BUILD);
         }
 
         // STEP #5    Get device address
@@ -165,11 +165,6 @@ namespace foray::as {
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
         mBlasAddress                                           = mContext->VkbDispatchTable->getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
-
-        if(!!benchmark)
-        {
-            benchmark->LogTimestamp("Get Address");
-        }
 
         if(!!benchmark)
         {

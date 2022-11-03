@@ -87,7 +87,7 @@ namespace foray::core {
         std::vector<VkDescriptorBufferInfo> bufferInfos(count);
         for(size_t i = 0; i < count; i++)
         {
-            buffers[i]->FillVkDescriptorBufferInfo(&bufferInfos[i]);
+            buffers[i]->FillVkDescriptorBufferInfo(bufferInfos[i]);
             AssertHandleNotNull(bufferInfos[i].buffer, binding);
         }
 

@@ -151,7 +151,7 @@ namespace foray::as {
         {
             VkDeviceSize instanceBufferCapacity = instanceBufferSize + instanceBufferSize / 4;
             mInstanceBuffer.Destroy();
-            core::ManagedBuffer::ManagedBufferCreateInfo instanceBufferCI(
+            core::ManagedBuffer::CreateInfo instanceBufferCI(
                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
                 instanceBufferCapacity, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
             mInstanceBuffer.Create(mContext, instanceBufferCI);
@@ -213,7 +213,7 @@ namespace foray::as {
         if(sizeInfo.buildScratchSize > mScratchBuffer.GetSize())
         {
             mScratchBuffer.Destroy();
-            core::ManagedBuffer::ManagedBufferCreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
+            core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
                                                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
             ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
             mScratchBuffer.Create(mContext, ci);

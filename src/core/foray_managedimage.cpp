@@ -5,41 +5,25 @@
 
 namespace foray::core {
     ManagedImage::CreateInfo::CreateInfo()
+        : ImageCI{.sType       = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+                  .imageType   = VkImageType::VK_IMAGE_TYPE_2D,
+                  .mipLevels   = 1U,
+                  .arrayLayers = 1U,
+                  .samples     = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+                  .tiling      = VkImageTiling::VK_IMAGE_TILING_OPTIMAL}
+        , ImageViewCI{.sType            = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                      .viewType         = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+                      .subresourceRange = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1U, .layerCount = 1U}}
+        , AllocCI{.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE}
     {
-        // required: initial layout, usage flags, the format (also for the view) and the
-        // extent
-        // others as needed.
-
-        ImageCI.sType     = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        ImageViewCI.sType = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        AllocCI.flags     = 0;
-        AllocCI.usage     = VMA_MEMORY_USAGE_AUTO;
-
-        ImageCI.imageType     = VK_IMAGE_TYPE_2D;
-        ImageCI.format        = VK_FORMAT_UNDEFINED;
-        ImageCI.mipLevels     = 1;
-        ImageCI.arrayLayers   = 1;
-        ImageCI.samples       = VK_SAMPLE_COUNT_1_BIT;
-        ImageCI.tiling        = VK_IMAGE_TILING_OPTIMAL;
-        ImageCI.usage         = 0;
-        ImageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-        ImageViewCI.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-        ImageViewCI.format                          = VK_FORMAT_UNDEFINED;
-        ImageViewCI.subresourceRange                = {};
-        ImageViewCI.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-        ImageViewCI.subresourceRange.baseMipLevel   = 0;
-        ImageViewCI.subresourceRange.levelCount     = 1;
-        ImageViewCI.subresourceRange.baseArrayLayer = 0;
-        ImageViewCI.subresourceRange.layerCount     = 1;
     }
 
-    ManagedImage::CreateInfo::CreateInfo(std::string_view name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent) : CreateInfo()
+    ManagedImage::CreateInfo::CreateInfo(VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name) : CreateInfo()
     {
         ImageCI.usage      = usage;
         ImageCI.format     = format;
         ImageViewCI.format = format;
-        ImageCI.extent     = extent;
+        ImageCI.extent     = VkExtent3D{.width = extent.width, .height = extent.height, .depth = 1};
         Name               = name;
     }
 
@@ -76,7 +60,14 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedImage::Resize(VkExtent3D newExtent)
+    void ManagedImage::Resize(const VkExtent2D& newExtent)
+    {
+        Assert(Exists(), "Attempted to resize image before initial creation!");
+        mCreateInfo.ImageCI.extent = VkExtent3D{.width = newExtent.width, .height = newExtent.height, .depth = 1};
+        Destroy();
+        Create(mContext, mCreateInfo);
+    }
+    void ManagedImage::Resize(const VkExtent3D& newExtent)
     {
         Assert(Exists(), "Attempted to resize image before initial creation!");
         mCreateInfo.ImageCI.extent = newExtent;
@@ -85,37 +76,9 @@ namespace foray::core {
     }
 
     void ManagedImage::Create(Context*                 context,
-                              VmaMemoryUsage           memoryUsage,
-                              VmaAllocationCreateFlags flags,
-                              VkExtent3D               extent,
-                              VkImageUsageFlags        usage,
-                              VkFormat                 format,
-                              VkImageAspectFlags       aspectMask,
-                              std::string_view         name)
+                              VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
     {
-        CreateInfo createInfo;
-        createInfo.AllocCI.flags = flags;
-        createInfo.AllocCI.usage = memoryUsage;
-
-        createInfo.ImageCI.imageType     = VK_IMAGE_TYPE_2D;
-        createInfo.ImageCI.format        = format;
-        createInfo.ImageCI.extent        = extent;
-        createInfo.ImageCI.mipLevels     = 1;
-        createInfo.ImageCI.arrayLayers   = 1;
-        createInfo.ImageCI.samples       = VK_SAMPLE_COUNT_1_BIT;
-        createInfo.ImageCI.tiling        = VK_IMAGE_TILING_OPTIMAL;
-        createInfo.ImageCI.usage         = usage;
-
-        createInfo.ImageViewCI.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.ImageViewCI.format                          = format;
-        createInfo.ImageViewCI.subresourceRange                = {};
-        createInfo.ImageViewCI.subresourceRange.aspectMask     = aspectMask;
-        createInfo.ImageViewCI.subresourceRange.baseMipLevel   = 0;
-        createInfo.ImageViewCI.subresourceRange.levelCount     = 1;
-        createInfo.ImageViewCI.subresourceRange.baseArrayLayer = 0;
-        createInfo.ImageViewCI.subresourceRange.layerCount     = 1;
-
-        createInfo.Name = name == "UnnamedImage" ? GetName() : name;
+        CreateInfo createInfo(usage, format, extent, name);
 
         Create(context, createInfo);
     }
@@ -244,12 +207,12 @@ namespace foray::core {
     void ManagedImage::UpdateDebugNames()
     {
         {  // Image
-            std::string                   debugName = fmt::format("ManImg \"{}\" ({})", mName, util::PrintSize(mSize));
+            std::string debugName = fmt::format("ManImg \"{}\" ({})", mName, util::PrintSize(mSize));
             SetObjectName(mContext, mImage, debugName, false);
             vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         }
         {  // Image View
-            std::string                   debugName = fmt::format("ManImgView \"{}\"", mName);
+            std::string debugName = fmt::format("ManImgView \"{}\"", mName);
             SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW, mImageView, debugName);
         }
     }

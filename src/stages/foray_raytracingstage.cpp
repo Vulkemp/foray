@@ -60,14 +60,8 @@ namespace foray::stages {
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-        VkExtent3D               extent                = {mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
-        VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        VmaAllocationCreateFlags allocationCreateFlags = 0;
-        VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
 
-
-        mRaytracingRenderTarget.Create(mContext, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, allocationCreateFlags, extent, imageUsageFlags, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT,
-                                       RaytracingRenderTargetName);
+        mRaytracingRenderTarget.Create(mContext, imageUsageFlags, colorFormat, mContext->GetSwapchainSize(), RaytracingRenderTargetName);
         core::ManagedImage::QuickTransition transition{.SrcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                                                        .DstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
                                                        .NewLayout    = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL};

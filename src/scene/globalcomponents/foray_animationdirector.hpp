@@ -6,6 +6,7 @@
 
 namespace foray::scene::gcomp {
 
+    
     class AnimationDirector : public GlobalComponent, public Component::UpdateCallback
     {
       public:

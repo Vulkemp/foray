@@ -5,7 +5,7 @@ namespace foray::util {
     void ManagedUboBase::Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount)
     {
         Destroy();
-        core::ManagedBuffer::ManagedBufferCreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, size,
+        core::ManagedBuffer::CreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, size,
                                                         VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
         mUboBuffer.Create(context, ci, stageBufferCount);
     }

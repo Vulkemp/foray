@@ -7,23 +7,54 @@
 #include <optional>
 
 namespace foray::core {
+
+    /// @brief Wraps allocation and lifetime functionality of VkImage
     class ManagedImage : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_IMAGE>
     {
       public:
         inline ManagedImage() : VulkanResource("Unnamed Image") {}
         inline virtual ~ManagedImage() { Destroy(); }
 
+        /// @brief Combines all structs used for initialization
         struct CreateInfo
         {
-            VkImageCreateInfo       ImageCI{};
-            VkImageViewCreateInfo   ImageViewCI{};
+            /// @brief Vulkan Image CreateInfo
+            VkImageCreateInfo ImageCI{};
+            /// @brief Vulkan ImageView CreateInfo
+            VkImageViewCreateInfo ImageViewCI{};
+            /// @brief Vma Allocation CreateInfo
             VmaAllocationCreateInfo AllocCI{};
-            std::string             Name{"UnnamedImage"};
+            /// @brief Debug object name
+            std::string Name{"Unnamed Image"};
 
+            /// @brief Initiliazes .sType fields, chooses common defaults for everything else
             CreateInfo();
-            CreateInfo(std::string_view name, VkImageUsageFlags usage, VkFormat format, const VkExtent3D& extent);
+            /// @brief Shorthand for initializing commonly set values
+            /// @param usage Image usage determines how vulkan can utilize/access the image
+            /// @param format Pixel format
+            /// @param extent 2D Size (depth = 1)
+            /// @param name Debug object name
+            CreateInfo(VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name = "Unnamed Image");
         };
 
+        /// @brief Allocates image, creates image, creates imageview
+        /// @param context Requires Allocator, DispatchTable, Device
+        virtual void Create(Context* context, CreateInfo createInfo);
+
+        /// @brief Uses stored create info to recreate vulkan image with a new size.
+        virtual void Resize(const VkExtent3D& newextent);
+        /// @brief Uses stored create info to recreate vulkan image with a new size.
+        virtual void Resize(const VkExtent2D& newextent);
+
+        /// @brief Shorthand using common values. See CreateInfo for information
+        /// @param context Requires Allocator, DispatchTable, Device
+        virtual void Create(Context*           context,
+                            VkImageUsageFlags  usage,
+                            VkFormat           format,
+                            const VkExtent2D&  extent,
+                            std::string_view   name       = "Unnamed Image");
+
+        /// @brief Helper struct translated to a VkImageMemoryBarrier2 struct for one-time layout transitions
         struct QuickTransition
         {
             VkPipelineStageFlags SrcStageMask{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
@@ -35,31 +66,16 @@ namespace foray::core {
             VkImageAspectFlags   AspectMask{VK_IMAGE_ASPECT_COLOR_BIT};
         };
 
-        virtual void Create(Context* context, CreateInfo createInfo);
-
-        /// @brief Uses stored create info to recreate vulkan image.
-        virtual void Resize(VkExtent3D newextent);
-
-        virtual void Create(Context*                 context,
-                            VmaMemoryUsage           memoryUsage,
-                            VmaAllocationCreateFlags flags,
-                            VkExtent3D               extent,
-                            VkImageUsageFlags        usage,
-                            VkFormat                 format,
-                            VkImageAspectFlags       aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                            std::string_view         name       = "UnnamedImage");
-
         /// @brief Simple layout transition.
-        /// @param newLayout - The new layout for the image.
+        /// @param commandBuffer If set, writes the transition to the commandbuffer. If not set, uses host synchronized temporary command buffer instead (slow)
         virtual void TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
         /// @brief Creates a staging buffer, writes staging buffer, transitions image layout to transfer destination optimal,
         /// copies staging buffer to device local memory, transforms layout back to layoutAfterWrite parameter.
-        /// The functions assumes you are writing the complete image, with n
-        /// @param data - The data to write,
-        /// @param size - Size of the image
-        /// @param layoutAfterWrite - The layout that the image is transitioned to after it has been written.
-        /// @param imageCopy - Specify how exactly the image is copied.
+        /// @param data The data to write
+        /// @param size Size of the image
+        /// @param layoutAfterWrite The layout that the image is transitioned to after it has been written.
+        /// @param imageCopy Specify how exactly the image is copied.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
         void WriteDeviceLocalData(HostCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy);
 
@@ -77,7 +93,6 @@ namespace foray::core {
         FORAY_PROPERTY_CGET(AllocInfo)
         FORAY_PROPERTY_CGET(Format)
         FORAY_PROPERTY_CGET(Extent3D)
-        FORAY_PROPERTY_GET(Name)
         FORAY_PROPERTY_CGET(Name)
 
         virtual void SetName(std::string_view name) override;

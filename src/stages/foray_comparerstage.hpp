@@ -26,7 +26,7 @@ namespace foray::stages {
             Uint
         };
 
-        struct Input
+        struct InputInfo
         {
             core::ManagedImage* Image;
             uint32_t            ChannelCount;
@@ -42,7 +42,7 @@ namespace foray::stages {
             glm::ivec2 TexelPos;
         };
 
-        virtual void SetInput(uint32_t index, const Input& input);
+        virtual void SetInput(uint32_t index, const InputInfo& input);
 
         FORAY_PROPERTY_ALL(MixValue)
         FORAY_PROPERTY_CGET(PipetteValue)
@@ -51,7 +51,7 @@ namespace foray::stages {
         struct SubStage
         {
             uint32_t                   Index;
-            Input         Input;
+            InputInfo         Input;
             core::CombinedImageSampler InputSampled;
             core::ShaderModule*        Shader;
             core::DescriptorSet        DescriptorSet;

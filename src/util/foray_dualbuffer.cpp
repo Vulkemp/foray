@@ -2,7 +2,7 @@
 //#include "foray_hash.hpp"
 
 namespace foray::util {
-    void DualBuffer::Create(core::Context* context, const core::ManagedBuffer::ManagedBufferCreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
+    void DualBuffer::Create(core::Context* context, const core::ManagedBuffer::CreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
     {
         Destroy();
 
@@ -11,7 +11,7 @@ namespace foray::util {
         mBufferCopies.resize(stageBufferCount);
 
         // Init staging buffers
-        core::ManagedBuffer::ManagedBufferCreateInfo stagingCI(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, devicebufferCreateInfo.BufferCreateInfo.size,
+        core::ManagedBuffer::CreateInfo stagingCI(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, devicebufferCreateInfo.BufferCreateInfo.size,
                                                                VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
                                                                VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
         for(int32_t i = 0; i < static_cast<int32_t>(stageBufferCount); i++)

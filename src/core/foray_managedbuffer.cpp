@@ -6,7 +6,14 @@
 
 namespace foray::core {
 
-    void ManagedBuffer::Create(Context* context, const ManagedBufferCreateInfo& createInfo)
+    ManagedBuffer::CreateInfo::CreateInfo() : BufferCreateInfo{.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO} {}
+
+    ManagedBuffer::CreateInfo::CreateInfo(VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+        : BufferCreateInfo{.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, .size = size, .usage = usage}, AllocationCreateInfo{.flags = flags, .usage = memoryUsage}, Name(name)
+    {
+    }
+
+    void ManagedBuffer::Create(Context* context, const CreateInfo& createInfo)
     {
         mContext   = context;
         mSize      = createInfo.BufferCreateInfo.size;
@@ -54,22 +61,20 @@ namespace foray::core {
 
     void ManagedBuffer::Create(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
     {
-        ManagedBufferCreateInfo createInfo(usage, size, memoryUsage, flags, name);
+        CreateInfo createInfo(usage, size, memoryUsage, flags, name);
         Create(context, createInfo);
     }
 
     void ManagedBuffer::Map(void*& data)
     {
+        Assert(!!mAllocation);
         AssertVkResult(vmaMapMemory(mContext->Allocator, mAllocation, &data));
         mIsMapped = true;
     }
 
     void ManagedBuffer::Unmap()
     {
-        if(!mAllocation)
-        {
-            logger()->warn("VmaBuffer::Unmap called on uninitialized buffer!");
-        }
+        Assert(!!mAllocation);
         vmaUnmapMemory(mContext->Allocator, mAllocation);
         mIsMapped = false;
     }
@@ -106,11 +111,11 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo* bufferInfo) const
+    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo& bufferInfo) const
     {
-        bufferInfo->buffer = mBuffer;
-        bufferInfo->offset = 0;
-        bufferInfo->range  = mSize;
+        bufferInfo.buffer = mBuffer;
+        bufferInfo.offset = 0;
+        bufferInfo.range  = mSize;
     }
 
     void ManagedBuffer::UpdateDebugNames()
@@ -122,7 +127,7 @@ namespace foray::core {
 
     void ManagedBuffer::Destroy()
     {
-        if(mIsMapped)
+        if(!!mAllocation && mIsMapped)
         {
             logger()->warn("ManagedBuffer::Destroy called before Unmap!");
             Unmap();
@@ -164,21 +169,4 @@ namespace foray::core {
         vkCmdCopyBuffer(cmdBuffer, stagingBuffer.GetBuffer(), mBuffer, 1, &copy);
         cmdBuffer.SubmitAndWait();
     }
-
-    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo()
-    {
-        BufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    }
-
-    ManagedBuffer::ManagedBufferCreateInfo::ManagedBufferCreateInfo(
-        VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
-    {
-        BufferCreateInfo.sType     = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        BufferCreateInfo.size      = size;
-        BufferCreateInfo.usage     = usage;
-        AllocationCreateInfo.usage = memoryUsage;
-        AllocationCreateInfo.flags = flags;
-        Name                       = name;
-    }
-
 }  // namespace foray::core

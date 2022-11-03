@@ -66,10 +66,7 @@ namespace foray::stages {
         static const VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        VkExtent3D               extent                = {mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height, 1};
-        VmaMemoryUsage           memoryUsage           = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-        VmaAllocationCreateFlags allocationCreateFlags = 0;
-        VkImageAspectFlags       aspectMask            = VK_IMAGE_ASPECT_COLOR_BIT;
+        VkExtent2D extent = mContext->GetSwapchainSize();
 
         VkClearValue defaultClearValue = {0, 0, 0, 0};
 
@@ -77,50 +74,40 @@ namespace foray::stages {
         {
             PerImageInfo& info                         = mImageInfos[i];
             info.Output                                = (EOutput)i;
+            info.ClearValue = defaultClearValue;
             mImageOutputs[std::string(OutputNames[i])] = &(info.Image);
         }
 
         {  // Position
-            mImageInfos[(size_t)EOutput::Position].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, geometryFormat, aspectMask,
-                                                                OutputNames[(size_t)EOutput::Position]);
-            mImageInfos[(size_t)EOutput::Position].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::Position].Image.Create(mContext, imageUsageFlags, geometryFormat, extent, OutputNames[(size_t)EOutput::Position]);
         }
 
         {  // Normal
-            mImageInfos[(size_t)EOutput::Normal].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, geometryFormat, aspectMask,
-                                                              OutputNames[(size_t)EOutput::Normal]);
-            mImageInfos[(size_t)EOutput::Normal].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::Normal].Image.Create(mContext, imageUsageFlags, geometryFormat, extent, OutputNames[(size_t)EOutput::Normal]);
         }
 
         {  // Albedo
-            mImageInfos[(size_t)EOutput::Albedo].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, colorFormat, aspectMask,
-                                                              OutputNames[(size_t)EOutput::Albedo]);
-            mImageInfos[(size_t)EOutput::Albedo].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::Albedo].Image.Create(mContext, imageUsageFlags, geometryFormat, extent, OutputNames[(size_t)EOutput::Albedo]);
         }
 
         {  // Motion
-            mImageInfos[(size_t)EOutput::Motion].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, aspectMask,
-                                                              OutputNames[(size_t)EOutput::Motion]);
-            mImageInfos[(size_t)EOutput::Motion].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::Motion].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, extent, OutputNames[(size_t)EOutput::Motion]);
         }
 
         {  // Material
-            mImageInfos[(size_t)EOutput::MaterialIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_SINT, aspectMask,
-                                                                   OutputNames[(size_t)EOutput::MaterialIdx]);
-            mImageInfos[(size_t)EOutput::MaterialIdx].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::MaterialIdx].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32_SINT, extent, OutputNames[(size_t)EOutput::MaterialIdx]);
         }
 
         {  // MeshId
-            mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, imageUsageFlags, VK_FORMAT_R32_UINT, aspectMask,
-                                                                       OutputNames[(size_t)EOutput::MeshInstanceIdx]);
-            mImageInfos[(size_t)EOutput::MeshInstanceIdx].ClearValue = defaultClearValue;
+            mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32_UINT, extent, OutputNames[(size_t)EOutput::MeshInstanceIdx]);
         }
 
         {  // Depth
             VkImageUsageFlags depthUsage =
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-            mImageInfos[(size_t)EOutput::Depth].Image.Create(mContext, memoryUsage, allocationCreateFlags, extent, depthUsage, VK_FORMAT_D32_SFLOAT, VK_IMAGE_ASPECT_DEPTH_BIT,
-                                                             OutputNames[(size_t)EOutput::Depth]);
+            core::ManagedImage::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, extent, OutputNames[(size_t)EOutput::Depth]);
+            ci.ImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
+            mImageInfos[(size_t)EOutput::Depth].Image.Create(mContext, ci);
             mImageInfos[(size_t)EOutput::Depth].ClearValue = {1.f, 0};
         }
 
@@ -291,17 +278,14 @@ namespace foray::stages {
     void GBufferStage::SetupDescriptors()
     {
         auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
-        auto textureStore = mScene->GetComponent<scene::gcomp::TextureStore>();
-        auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
-        auto drawDirector = mScene->GetComponent<scene::gcomp::DrawDirector>();
+        auto textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto drawDirector   = mScene->GetComponent<scene::gcomp::DrawDirector>();
         mDescriptorSet.SetDescriptorAt(0, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
-        mDescriptorSet.SetDescriptorAt(1, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                       VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(1, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT);
         mDescriptorSet.SetDescriptorAt(2, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(3, drawDirector->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                       VK_SHADER_STAGE_VERTEX_BIT);
-        mDescriptorSet.SetDescriptorAt(4, drawDirector->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                       VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(3, drawDirector->GetCurrentTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
+        mDescriptorSet.SetDescriptorAt(4, drawDirector->GetPreviousTransformsDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT);
     }
 
     void GBufferStage::CreateDescriptorSets()
@@ -508,8 +492,8 @@ namespace foray::stages {
                                              .size                = VK_WHOLE_SIZE};
 
         auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
-        auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
-        auto drawDirector = mScene->GetComponent<scene::gcomp::DrawDirector>();
+        auto cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto drawDirector   = mScene->GetComponent<scene::gcomp::DrawDirector>();
 
         bufferBarrier.buffer = materialBuffer->GetVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
