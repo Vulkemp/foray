@@ -34,10 +34,10 @@ namespace foray::base {
 
         AssertVkResult(mContext->VkbDispatchTable->createFence(&fenceCI, nullptr, &mPrimaryCompletedFence));
         mPrimaryCommandBuffer.SetFence(mPrimaryCompletedFence);
-        mPrimaryCommandBuffer.AddSignalSemaphore(core::SemaphoreSubmit::Binary(mPrimaryCompletedSemaphore));
+        mPrimaryCommandBuffer.AddSignalSemaphore(core::SemaphoreReference::Binary(mPrimaryCompletedSemaphore));
         if(auxCommandBufferCount == 0)
         {
-            mPrimaryCommandBuffer.AddWaitSemaphore(core::SemaphoreSubmit::Binary(mSwapchainImageReady));
+            mPrimaryCommandBuffer.AddWaitSemaphore(core::SemaphoreReference::Binary(mSwapchainImageReady));
         }
     }
 
@@ -220,10 +220,10 @@ namespace foray::base {
     void InFlightFrame::SubmitAll()
     {
         std::vector<VkSubmitInfo2> submitInfos;
-        mPrimaryCommandBuffer.ExternalSubmit(submitInfos);
+        mPrimaryCommandBuffer.WriteToSubmitInfo(submitInfos);
         for (std::unique_ptr<core::DeviceCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
         {
-            auxCommandBuffer->ExternalSubmit(submitInfos);
+            auxCommandBuffer->WriteToSubmitInfo(submitInfos);
         }
         mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, (uint32_t)submitInfos.size(), submitInfos.data(), mPrimaryCompletedFence);
     }

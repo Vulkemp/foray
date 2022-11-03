@@ -56,7 +56,7 @@ namespace foray::base {
         /// @brief Resets the frames host synchronization fence
         void ResetFence();
 
-        /// @brief Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::ExternalSubmit(...) 
+        /// @brief Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::WriteToSubmitInfo(...) 
         /// and submitting them in a single vkQueueSubmit2(...) call
         void SubmitAll();
 

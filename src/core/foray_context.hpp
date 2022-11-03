@@ -14,20 +14,34 @@ namespace foray::core {
     /// Individual fields can be shared between many context objects, and changed at will
     struct Context
     {
-        osi::OsManager*                 OsManager         = nullptr;
-        vkb::Instance*                  VkbInstance       = nullptr;
-        vkb::PhysicalDevice*            VkbPhysicalDevice = nullptr;
-        vkb::Device*                    VkbDevice         = nullptr;
-        vkb::DispatchTable*             VkbDispatchTable  = nullptr;
-        vkb::Swapchain*                 Swapchain         = nullptr;
-        std::vector<SwapchainImageInfo> SwapchainImages   = {};
-        osi::Window*                    Window            = nullptr;
-        VmaAllocator                    Allocator         = nullptr;
-        VkQueue                         Queue             = nullptr;
-        uint32_t                        QueueFamilyIndex  = VK_QUEUE_FAMILY_IGNORED;
-        VkCommandPool                   CommandPool       = nullptr;
-        VkPipelineCache                 PipelineCache     = nullptr;
-        SamplerCollection*              SamplerCol = nullptr;
+        /// @brief The OsManager can be used to access windows, events, input devices
+        osi::OsManager* OsManager = nullptr;
+        /// @brief A window
+        osi::Window* Window = nullptr;
+        /// @brief A Vkb Instance
+        vkb::Instance* VkbInstance = nullptr;
+        /// @brief A Vkb PhysicalDevice
+        vkb::PhysicalDevice* VkbPhysicalDevice = nullptr;
+        /// @brief A Vkb Device
+        vkb::Device* VkbDevice = nullptr;
+        /// @brief A Vkb DispatchTable
+        vkb::DispatchTable* VkbDispatchTable = nullptr;
+        /// @brief A Vkb Swapchain
+        vkb::Swapchain* Swapchain = nullptr;
+        /// @brief Swapchain image infos (VkImage, VkImageView, Name, ...)
+        std::vector<SwapchainImageInfo> SwapchainImages = {};
+        /// @brief Vma Allocator
+        VmaAllocator Allocator = nullptr;
+        /// @brief Queue (in default setups used for all commands)
+        VkQueue Queue = nullptr;
+        /// @brief Queue Family Index
+        uint32_t QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        /// @brief Command Pool
+        VkCommandPool CommandPool = nullptr;
+        /// @brief Pipeline Cache
+        VkPipelineCache PipelineCache = nullptr;
+        /// @brief Sampler Collection
+        SamplerCollection* SamplerCol = nullptr;
 
         inline operator VkInstance() const { return VkbInstance->instance; }
         inline operator VkPhysicalDevice() const { return VkbPhysicalDevice->physical_device; }

@@ -114,26 +114,26 @@ namespace foray::core {
         CommandBuffer::Destroy();
     }
 
-    SemaphoreSubmit SemaphoreSubmit::Binary(VkSemaphore semaphore, VkPipelineStageFlags2 waitStage)
+    SemaphoreReference SemaphoreReference::Binary(VkSemaphore semaphore, VkPipelineStageFlags2 waitStage)
     {
-        return SemaphoreSubmit{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_BINARY, .TimelineValue = 0, .Semaphore = semaphore, .WaitStage = waitStage};
+        return SemaphoreReference{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_BINARY, .TimelineValue = 0, .Semaphore = semaphore, .WaitStage = waitStage};
     }
-    SemaphoreSubmit SemaphoreSubmit::Timeline(VkSemaphore semaphore, uint64_t value, VkPipelineStageFlags2 waitStage)
+    SemaphoreReference SemaphoreReference::Timeline(VkSemaphore semaphore, uint64_t value, VkPipelineStageFlags2 waitStage)
     {
-        return SemaphoreSubmit{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE, .TimelineValue = value, .Semaphore = semaphore, .WaitStage = waitStage};
+        return SemaphoreReference{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE, .TimelineValue = value, .Semaphore = semaphore, .WaitStage = waitStage};
     }
 
-    SemaphoreSubmit::operator VkSemaphoreSubmitInfo() const
+    SemaphoreReference::operator VkSemaphoreSubmitInfo() const
     {
         return VkSemaphoreSubmitInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO, .semaphore = Semaphore, .value = TimelineValue, .stageMask = WaitStage};
     }
 
-    DeviceCommandBuffer& DeviceCommandBuffer::AddWaitSemaphore(const SemaphoreSubmit& semaphore)
+    DeviceCommandBuffer& DeviceCommandBuffer::AddWaitSemaphore(const SemaphoreReference& semaphore)
     {
         mWaitSemaphores.push_back(semaphore);
         return *this;
     }
-    DeviceCommandBuffer& DeviceCommandBuffer::AddSignalSemaphore(const SemaphoreSubmit& semaphore)
+    DeviceCommandBuffer& DeviceCommandBuffer::AddSignalSemaphore(const SemaphoreReference& semaphore)
     {
         mSignalSemaphores.push_back(semaphore);
         return *this;
@@ -152,12 +152,12 @@ namespace foray::core {
         std::vector<VkSemaphoreSubmitInfo> waitSemaphores;
 
         signalSemaphores.reserve(mSignalSemaphores.size());
-        for(const SemaphoreSubmit& submit : mSignalSemaphores)
+        for(const SemaphoreReference& submit : mSignalSemaphores)
         {
             signalSemaphores.push_back(submit);
         }
         waitSemaphores.reserve(mWaitSemaphores.size());
-        for(const SemaphoreSubmit& submit : mWaitSemaphores)
+        for(const SemaphoreReference& submit : mWaitSemaphores)
         {
             waitSemaphores.push_back(submit);
         }
@@ -178,7 +178,7 @@ namespace foray::core {
         AssertVkResult(mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, 1, &submitInfo, mFence));
     }
 
-    void DeviceCommandBuffer::ExternalSubmit(std::vector<VkSubmitInfo2>& submitInfos)
+    void DeviceCommandBuffer::WriteToSubmitInfo(std::vector<VkSubmitInfo2>& submitInfos)
     {
         Assert(!!mCommandBuffer, "Cannot submit uninitialized command buffer");
 
@@ -191,12 +191,12 @@ namespace foray::core {
         std::vector<VkSemaphoreSubmitInfo> waitSemaphores;
 
         signalSemaphores.reserve(mSignalSemaphores.size());
-        for(const SemaphoreSubmit& submit : mSignalSemaphores)
+        for(const SemaphoreReference& submit : mSignalSemaphores)
         {
             signalSemaphores.push_back(submit);
         }
         waitSemaphores.reserve(mWaitSemaphores.size());
-        for(const SemaphoreSubmit& submit : mWaitSemaphores)
+        for(const SemaphoreReference& submit : mWaitSemaphores)
         {
             waitSemaphores.push_back(submit);
         }
