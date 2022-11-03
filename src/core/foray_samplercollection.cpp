@@ -3,40 +3,71 @@
 #include "foray_context.hpp"
 
 namespace foray::core {
-    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other)
-        : mManagedImage(other.mManagedImage), mSampler(other.mSampler), mHash(other.mHash), mCollection(other.mCollection)
+    SamplerReference::SamplerReference(const SamplerReference& other) : mSampler(other.mSampler), mHash(other.mHash), mCollection(other.mCollection)
     {
         if(!!mSampler && !!mCollection)
         {
             mCollection->Register(*this);
         }
     }
-    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other)
-        : mManagedImage(other.mManagedImage), mSampler(other.mSampler), mHash(other.mHash), mCollection(other.mCollection)
+    SamplerReference::SamplerReference(SamplerReference&& other) : mSampler(other.mSampler), mHash(other.mHash), mCollection(other.mCollection)
     {
         if(!!mSampler && !!mCollection)
         {
             mCollection->Register(*this);
         }
     }
-    CombinedImageSampler& CombinedImageSampler::operator=(const CombinedImageSampler& other)
+    SamplerReference& SamplerReference::operator=(const SamplerReference& other)
     {
         Destroy();
-        mManagedImage = other.mManagedImage;
-        mSampler      = other.mSampler;
-        mHash         = other.mHash;
-        mCollection   = other.mCollection;
+        mSampler    = other.mSampler;
+        mHash       = other.mHash;
+        mCollection = other.mCollection;
         if(!!mSampler && !!mCollection)
         {
             mCollection->Register(*this);
         }
         return *this;
     }
-    CombinedImageSampler::~CombinedImageSampler()
+    SamplerReference::~SamplerReference()
     {
         Destroy();
     }
-    void CombinedImageSampler::Destroy()
+    SamplerReference::SamplerReference(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi)
+    {
+        mCollection = collection;
+        if(!!mCollection)
+        {
+            mCollection->GetSampler(*this, samplerCi);
+        }
+    }
+    SamplerReference::SamplerReference(Context* context, const VkSamplerCreateInfo& samplerCi)
+    {
+        mCollection = context->SamplerCol;
+        if(!!mCollection)
+        {
+            mCollection->GetSampler(*this, samplerCi);
+        }
+    }
+    void SamplerReference::Init(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi)
+    {
+        Destroy();
+        mCollection = collection;
+        if(!!mCollection)
+        {
+            mCollection->GetSampler(*this, samplerCi);
+        }
+    }
+    void SamplerReference::Init(Context* context, const VkSamplerCreateInfo& samplerCi)
+    {
+        Destroy();
+        mCollection = context->SamplerCol;
+        if(!!mCollection)
+        {
+            mCollection->GetSampler(*this, samplerCi);
+        }
+    }
+    void SamplerReference::Destroy()
     {
         if(!!mSampler && !!mCollection)
         {
@@ -45,36 +76,29 @@ namespace foray::core {
             mCollection = nullptr;
         }
     }
-    CombinedImageSampler::CombinedImageSampler(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
+    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : mManagedImage(other.mManagedImage), SamplerReference(other) {}
+    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : mManagedImage(other.mManagedImage), SamplerReference(other) {}
+    CombinedImageSampler& CombinedImageSampler::operator=(const CombinedImageSampler& other)
     {
-        mManagedImage = image;
-        mCollection   = context->SamplerCol;
-        if(!!mCollection)
-        {
-            mCollection->GetSampler(*this, samplerCi);
-        }
+        SamplerReference::operator=(other);
+        mManagedImage = other.mManagedImage;
+        return *this;
+    }
+    CombinedImageSampler::CombinedImageSampler(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
+        : SamplerReference(context, samplerCi), mManagedImage(image)
+    {
     }
     void CombinedImageSampler::Init(core::Context* context, const VkSamplerCreateInfo& samplerCi)
     {
-        Destroy();
-        mCollection   = context->SamplerCol;
-        if(!!mCollection)
-        {
-            mCollection->GetSampler(*this, samplerCi);
-        }
+        SamplerReference::Init(context, samplerCi);
     }
     void CombinedImageSampler::Init(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
     {
-        Destroy();
         mManagedImage = image;
-        mCollection   = context->SamplerCol;
-        if(!!mCollection)
-        {
-            mCollection->GetSampler(*this, samplerCi);
-        }
+        SamplerReference::Init(context, samplerCi);
     }
 
-    void SamplerCollection::GetSampler(CombinedImageSampler& imageSampler, const VkSamplerCreateInfo& samplerCi)
+    void SamplerCollection::GetSampler(SamplerReference& samplerRef, const VkSamplerCreateInfo& samplerCi)
     {
         uint64_t hash = GetHash(samplerCi);
         auto     iter = mSamplerInstances.find(hash);
@@ -82,25 +106,25 @@ namespace foray::core {
         {
             SamplerInstance& instance = iter->second;
             instance.RefCount++;
-            imageSampler.mHash    = hash;
-            imageSampler.mSampler = instance.Sampler;
+            samplerRef.mHash    = hash;
+            samplerRef.mSampler = instance.Sampler;
         }
         else
         {
             SamplerInstance instance{.SamplerHash = hash, .RefCount = 1};
             AssertVkResult(mContext->VkbDispatchTable->createSampler(&samplerCi, nullptr, &(instance.Sampler)));
             mSamplerInstances[hash] = instance;
-            imageSampler.mHash      = hash;
-            imageSampler.mSampler   = instance.Sampler;
+            samplerRef.mHash      = hash;
+            samplerRef.mSampler   = instance.Sampler;
         }
     }
-    void SamplerCollection::Register(CombinedImageSampler& imageSampler)
+    void SamplerCollection::Register(SamplerReference& samplerRef)
     {
-        mSamplerInstances[imageSampler.mHash].RefCount++;
+        mSamplerInstances[samplerRef.mHash].RefCount++;
     }
-    void SamplerCollection::Unregister(CombinedImageSampler& imageSampler)
+    void SamplerCollection::Unregister(SamplerReference& samplerRef)
     {
-        auto iter = mSamplerInstances.find(imageSampler.mHash);
+        auto iter = mSamplerInstances.find(samplerRef.mHash);
         if(iter != mSamplerInstances.end())
         {
             SamplerInstance& instance = iter->second;

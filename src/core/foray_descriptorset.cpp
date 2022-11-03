@@ -74,7 +74,7 @@ namespace foray::core {
             mDescriptorPool = VK_NULL_HANDLE;
             mDescriptorSet  = VK_NULL_HANDLE;
         }
-        if(mDescriptorSetLayout != VK_NULL_HANDLE && mExternalLayout)
+        if(mDescriptorSetLayout != VK_NULL_HANDLE && !mExternalLayout)
         {
             vkDestroyDescriptorSetLayout(mContext->Device(), mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = VK_NULL_HANDLE;
