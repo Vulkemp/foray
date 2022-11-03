@@ -209,7 +209,7 @@ namespace foray::base {
         // The previous time this frame was used would now have query results available
         if(mRenderedFrameCount > INFLIGHT_FRAME_COUNT)
         {
-            ApiQueryResultsAvailable(mRenderedFrameCount - INFLIGHT_FRAME_COUNT);
+            ApiFrameFinishedExecuting(mRenderedFrameCount - INFLIGHT_FRAME_COUNT);
         }
 
         // Acquire the swapchain image

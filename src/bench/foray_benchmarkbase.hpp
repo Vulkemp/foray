@@ -37,6 +37,7 @@ namespace foray::bench {
         void PrintImGui(bool omitTimestamps = true);
     };
 
+    /// @brief Base class for all benchmark types
     class BenchmarkBase
     {
       public:
@@ -45,8 +46,11 @@ namespace foray::bench {
         FORAY_PROPERTY_CGET(Logs)
 
       protected:
+        /// @brief Begins a new benchmark and records the "Begin" timestamp
         virtual void Begin(fp64_t timestamp);
+        /// @brief Logs timestamp of id
         virtual void LogTimestamp(const char* id, fp64_t timestamp);
+        /// @brief Records the "End" timestamp and finalizes the benchmark
         virtual void End(fp64_t timestamp);
 
         std::vector<BenchmarkLog> mLogs;
