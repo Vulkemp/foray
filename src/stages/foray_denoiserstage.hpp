@@ -16,7 +16,7 @@ namespace foray::stages {
         /// @brief The GBuffers Motion Image
         core::ManagedImage* MotionInput = nullptr;
         /// @brief Misc. input Images (e.g. Mesh Id, Material Id, History data)
-        std::vector<core::ManagedImage*> AuxiliaryInputs;
+        std::unordered_map<std::string, core::ManagedImage*> AuxiliaryInputs;
         /// @brief The primary output. Denoised Image from the denoiser
         core::ManagedImage* PrimaryOutput = nullptr;
         /// @brief Customizable pointer to auxiliary data
