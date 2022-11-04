@@ -87,6 +87,7 @@ namespace foray::core {
         virtual void Destroy() override;
         virtual bool Exists() const override { return mAllocation; }
 
+        FORAY_PROPERTY_CGET(CreateInfo)
         FORAY_PROPERTY_CGET(Image)
         FORAY_PROPERTY_CGET(ImageView)
         FORAY_PROPERTY_CGET(Allocation)
