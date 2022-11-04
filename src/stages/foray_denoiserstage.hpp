@@ -1,5 +1,6 @@
 #pragma once
 #include "../util/foray_externalsemaphore.hpp"
+#include "foray_gbuffer.hpp"
 #include "foray_renderstage.hpp"
 
 namespace foray::stages {
@@ -9,12 +10,8 @@ namespace foray::stages {
     {
         /// @brief The primary input. Noisy linear radiance data, usually from the raytracer directly.
         core::ManagedImage* PrimaryInput = nullptr;
-        /// @brief The GBuffers Albedo Image
-        core::ManagedImage* AlbedoInput = nullptr;
-        /// @brief The GBuffers Normal Image
-        core::ManagedImage* NormalInput = nullptr;
-        /// @brief The GBuffers Motion Image
-        core::ManagedImage* MotionInput = nullptr;
+        /// @brief GBuffer Output images
+        std::array<core::ManagedImage*, (size_t)GBufferStage::EOutput::MaxEnum> GBufferOutputs;
         /// @brief Misc. input Images (e.g. Mesh Id, Material Id, History data)
         std::unordered_map<std::string, core::ManagedImage*> AuxiliaryInputs;
         /// @brief The primary output. Denoised Image from the denoiser
@@ -25,7 +22,16 @@ namespace foray::stages {
         util::ExternalSemaphore* Semaphore = nullptr;
 
         inline DenoiserConfig() {}
-        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut) {}
+        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut, GBufferStage* gbuffer) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut)
+        {
+            if(!!gbuffer)
+            {
+                GBufferOutputs = {gbuffer->GetImageOutput(GBufferStage::PositionOutputName),    gbuffer->GetImageOutput(GBufferStage::NormalOutputName),
+                                  gbuffer->GetImageOutput(GBufferStage::AlbedoOutputName),      gbuffer->GetImageOutput(GBufferStage::MotionOutputName),
+                                  gbuffer->GetImageOutput(GBufferStage::MaterialIdxOutputName), gbuffer->GetImageOutput(GBufferStage::MeshInstanceIdOutputName),
+                                  gbuffer->GetImageOutput(GBufferStage::LinearZOutputName),     gbuffer->GetImageOutput(GBufferStage::DepthOutputName)};
+            }
+        }
     };
 
     /// @brief Base class for denoiser implementations
