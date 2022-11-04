@@ -11,14 +11,14 @@ namespace foray::core {
     {
       public:
         /// @brief Get the currently cached layout of image identified by imageName
-        VkImageLayout Get(std::string_view imageName) const;
+        VkImageLayout Get(VkImage image) const;
         /// @brief Get the currently cached layout of image
         VkImageLayout Get(const ManagedImage& image) const;
         /// @brief Get the currently cached layout of image
         VkImageLayout Get(const ManagedImage* image) const;
 
-        /// @brief Set the cached layout of image identified by imageName
-        void Set(std::string_view imageName, VkImageLayout layout);
+        /// @brief Set the cached layout of image
+        void Set(VkImage image, VkImageLayout layout);
         /// @brief Set the cached layout of image
         void Set(const ManagedImage& image, VkImageLayout layout);
         /// @brief Set the cached layout of image
@@ -52,7 +52,7 @@ namespace foray::core {
         /// @param name Name of the image
         /// @param image Image
         /// @param barrier Layout Transition Barrier information
-        VkImageMemoryBarrier  Set(std::string_view name, VkImage image, const Barrier& barrier);
+        VkImageMemoryBarrier  Set(VkImage image, const Barrier& barrier);
         /// @brief Constructs a VkImageMemoryBarrier struct
         /// @param image Image
         /// @param barrier Layout Transition Barrier information
@@ -65,7 +65,7 @@ namespace foray::core {
         /// @param name Name of the image
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
-        VkImageMemoryBarrier2 Set(std::string_view name, VkImage image, const Barrier2& barrier);
+        VkImageMemoryBarrier2 Set(VkImage image, const Barrier2& barrier);
         /// @brief Constructs a VkImageMemoryBarrier2 struct
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
@@ -84,7 +84,6 @@ namespace foray::core {
         /// @param dstStageMask Dest Stage Mask
         /// @param depFlags DependencyFlags
         void CmdBarrier(VkCommandBuffer      cmdBuffer,
-                        std::string_view     name,
                         VkImage              image,
                         const Barrier&       barrier,
                         VkPipelineStageFlags srcStageMask,
@@ -122,7 +121,7 @@ namespace foray::core {
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
         /// @param depFlags DependencyFlags
-        void CmdBarrier(VkCommandBuffer cmdBuffer, std::string_view name, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags = 0);
+        void CmdBarrier(VkCommandBuffer cmdBuffer, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags = 0);
         /// @brief Writes a dedicated vkCmdPipelineBarrier2 command
         /// @param cmdBuffer Command Buffer
         /// @param image Image
@@ -137,6 +136,6 @@ namespace foray::core {
         void CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage& image, const Barrier2& barrier, VkDependencyFlags depFlags = 0);
 
       protected:
-        std::unordered_map<std::string, VkImageLayout> mLayoutCache;
+        std::unordered_map<VkImage, VkImageLayout> mLayoutCache;
     };
 }  // namespace foray::core

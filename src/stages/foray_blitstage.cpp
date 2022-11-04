@@ -45,7 +45,7 @@ namespace foray::stages {
         }
         else
         {
-            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mSrcImageName, mSrcVkImage, srcImgMemBarrier));
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mSrcVkImage, srcImgMemBarrier));
         }
         if(!!mDstImage_)
         {
@@ -53,7 +53,7 @@ namespace foray::stages {
         }
         else
         {
-            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mDstImageName, mDstVkImage, dstImgMemBarrier));
+            barriers.push_back(renderInfo.GetImageLayoutCache().Set(mDstVkImage, dstImgMemBarrier));
         }
 
         VkDependencyInfo depInfo{

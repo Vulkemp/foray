@@ -4,10 +4,9 @@
 // #include <nameof/nameof.hpp>
 
 namespace foray::core {
-    VkImageLayout ImageLayoutCache::Get(std::string_view name) const
+    VkImageLayout ImageLayoutCache::Get(VkImage image) const
     {
-        std::string namecopy(name);
-        const auto  iter = mLayoutCache.find(namecopy);
+        const auto  iter = mLayoutCache.find(image);
         if(iter != mLayoutCache.cend())
         {
             return iter->second;
@@ -15,46 +14,36 @@ namespace foray::core {
         return VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
+    void ImageLayoutCache::Set(VkImage image, VkImageLayout layout)
+    {
+        Assert(!!image, "Cannot track imagelayout for nullptr!");
+        mLayoutCache[image] = layout;
+    }
+
     VkImageLayout ImageLayoutCache::Get(const ManagedImage& image) const
     {
-        return Get(image.GetName());
+        return Get(image.GetImage());
     }
 
     VkImageLayout ImageLayoutCache::Get(const ManagedImage* image) const
     {
-        return Get(image->GetName());
+        return Get(image->GetImage());
     }
 
-    void ImageLayoutCache::Set(std::string_view name, VkImageLayout layout)
-    {
-        if (name.size() == 0)
-        {
-            Exception::Throw("[ImageLayoutCache::Set] Image name must not be empty!");
-        }
-        std::string namecopy(name);
-        // if(layout < NAMEOF_ENUM_RANGE_MAX)
-        // {
-        //     logger()->debug("Layout [{}]: {}", name, NAMEOF_ENUM(layout));
-        // }
-        // else{
-        //     logger()->debug("Layout [{}]: {}", name, "Unknown");
-        // }
-        mLayoutCache[namecopy] = layout;
-    }
     void ImageLayoutCache::Set(const ManagedImage& image, VkImageLayout layout)
     {
-        Set(image.GetName(), layout);
+        Set(image.GetImage(), layout);
     }
 
     void ImageLayoutCache::Set(const ManagedImage* image, VkImageLayout layout)
     {
-        Set(image->GetName(), layout);
+        Set(image->GetImage(), layout);
     }
 
-    VkImageMemoryBarrier ImageLayoutCache::Set(std::string_view name, VkImage image, const Barrier& barrier)
+    VkImageMemoryBarrier ImageLayoutCache::Set(VkImage image, const Barrier& barrier)
     {
-        VkImageLayout oldLayout = Get(name);
-        Set(name, barrier.NewLayout);
+        VkImageLayout oldLayout = Get(image);
+        Set(image, barrier.NewLayout);
         return VkImageMemoryBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
                                     .srcAccessMask       = barrier.SrcAccessMask,
                                     .dstAccessMask       = barrier.DstAccessMask,
@@ -68,18 +57,18 @@ namespace foray::core {
 
     VkImageMemoryBarrier ImageLayoutCache::Set(const ManagedImage* image, const Barrier& barrier)
     {
-        return Set(image->GetName(), image->GetImage(), barrier);
+        return Set(image->GetImage(), barrier);
     }
 
     VkImageMemoryBarrier ImageLayoutCache::Set(const ManagedImage& image, const Barrier& barrier)
     {
-        return Set(image.GetName(), image.GetImage(), barrier);
+        return Set(image.GetImage(), barrier);
     }
 
-    VkImageMemoryBarrier2 ImageLayoutCache::Set(std::string_view name, VkImage image, const Barrier2& barrier)
+    VkImageMemoryBarrier2 ImageLayoutCache::Set(VkImage image, const Barrier2& barrier)
     {
-        VkImageLayout oldLayout = Get(name);
-        Set(name, barrier.NewLayout);
+        VkImageLayout oldLayout = Get(image);
+        Set(image, barrier.NewLayout);
         return VkImageMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
                                      .srcStageMask        = barrier.SrcStageMask,
                                      .srcAccessMask       = barrier.SrcAccessMask,
@@ -95,23 +84,22 @@ namespace foray::core {
 
     VkImageMemoryBarrier2 ImageLayoutCache::Set(const ManagedImage* image, const Barrier2& barrier)
     {
-        return Set(image->GetName(), image->GetImage(), barrier);
+        return Set(image->GetImage(), barrier);
     }
 
     VkImageMemoryBarrier2 ImageLayoutCache::Set(const ManagedImage& image, const Barrier2& barrier)
     {
-        return Set(image.GetName(), image.GetImage(), barrier);
+        return Set(image.GetImage(), barrier);
     }
 
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
-                                      std::string_view     name,
                                       VkImage              image,
                                       const Barrier&       barrier,
                                       VkPipelineStageFlags srcStageMask,
                                       VkPipelineStageFlags dstStageMask,
                                       VkDependencyFlags    depFlags)
     {
-        VkImageMemoryBarrier vkBarrier = Set(name, image, barrier);
+        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
@@ -134,9 +122,9 @@ namespace foray::core {
         VkImageMemoryBarrier vkBarrier = Set(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
-    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, std::string_view name, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
-        VkImageMemoryBarrier2 vkBarrier = Set(name, image, barrier);
+        VkImageMemoryBarrier2 vkBarrier = Set(image, barrier);
         VkDependencyInfo      depInfo
         {
             .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
@@ -148,11 +136,11 @@ namespace foray::core {
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage* image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
-        CmdBarrier(cmdBuffer, image->GetName(), image->GetImage(), barrier, depFlags);
+        CmdBarrier(cmdBuffer, image->GetImage(), barrier, depFlags);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage& image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
-        CmdBarrier(cmdBuffer, image.GetName(), image.GetImage(), barrier, depFlags);
+        CmdBarrier(cmdBuffer, image.GetImage(), barrier, depFlags);
     }
 
 }  // namespace foray::core

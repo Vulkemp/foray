@@ -12,7 +12,7 @@ namespace foray::util {
     {
         const uint32_t EDGE = 2048u;
 
-        VkImageUsageFlags usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT;
+        VkImageUsageFlags usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT;
 
         core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32_UINT, VkExtent2D{.width = EDGE, .height = EDGE}, "Noise Source");
 
