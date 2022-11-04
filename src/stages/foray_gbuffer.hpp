@@ -29,6 +29,7 @@ namespace foray::stages {
             Motion,
             MaterialIdx,
             MeshInstanceIdx,
+            LinearZ,
             Depth,
             MaxEnum
         };
@@ -39,6 +40,7 @@ namespace foray::stages {
         inline static constexpr std::string_view MotionOutputName         = "Gbuf.Motion";
         inline static constexpr std::string_view MaterialIdxOutputName    = "Gbuf.MaterialIdx";
         inline static constexpr std::string_view MeshInstanceIdOutputName = "Gbuf.MeshInstanceIdx";
+        inline static constexpr std::string_view LinearZOutputName        = "Gbuf.LinearZ";
         inline static constexpr std::string_view DepthOutputName          = "Gbuf.Depth";
 
         core::ManagedImage* GetImageEOutput(EOutput output, bool noThrow = false);

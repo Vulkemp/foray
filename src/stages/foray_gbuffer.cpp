@@ -22,7 +22,7 @@ const uint32_t GBUFFER_SHADER_FRAG[] =
 
 namespace foray::stages {
     inline constexpr std::string_view OutputNames[] = {GBufferStage::PositionOutputName, GBufferStage::NormalOutputName,      GBufferStage::AlbedoOutputName,
-                                                       GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName,
+                                                       GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName, GBufferStage::LinearZOutputName,
                                                        GBufferStage::DepthOutputName};
 
 #pragma region Init
@@ -100,6 +100,10 @@ namespace foray::stages {
 
         {  // MeshId
             mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32_UINT, extent, OutputNames[(size_t)EOutput::MeshInstanceIdx]);
+        }
+
+        {  // LinearZ
+            mImageInfos[(size_t)EOutput::LinearZ].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32G32_SFLOAT, extent, OutputNames[(size_t)EOutput::LinearZ]);
         }
 
         {  // Depth

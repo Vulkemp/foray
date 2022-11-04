@@ -117,7 +117,7 @@ namespace foray::base {
     {
         const osi::EventWindowResized* resizeEvent = dynamic_cast<const osi::EventWindowResized*>(event);
 
-        if(!!resizeEvent && resizeEvent->Source == &mWindow)
+        if(!!resizeEvent && resizeEvent->Source == &mWindow && (resizeEvent->Current.width != mSwapchain.extent.width || resizeEvent->Current.height != mSwapchain.extent.height))
         {
             RecreateSwapchain();
         }

@@ -17,6 +17,7 @@ layout(location = 2) out vec4 outAlbedo;          // Fragment raw albedo
 layout(location = 3) out vec2 outMotion;          // Fragment screenspace motion delta
 layout(location = 4) out int outMaterialIndex;    // Material Index
 layout(location = 5) out uint outMeshInstanceId;  // Fragment mesh id
+layout(location = 6) out vec2 outLinearZ;         // LinearZ (linear depth, depth 'gradient')
 
 #include "bindpoints.glsl"
 #include "../common/gltf_pushc.glsl"
@@ -49,4 +50,8 @@ void main()
     vec2 screenPos     = inDevicePos.xy / inDevicePos.w;
     vec2 old_screenPos = inOldDevicePos.xy / inOldDevicePos.w;
     outMotion          = (old_screenPos - screenPos) * 0.5;
+
+    // *magic*
+    const float linearZ = inDevicePos.z * inDevicePos.w;
+    outLinearZ = vec2(linearZ, max(abs(dFdx(linearZ)), abs(dFdy(linearZ))));
 }

@@ -7,12 +7,17 @@
 #include <functional>
 
 namespace foray::base {
+    /// @brief Combines Window, Surface and Swapchain into one managing object
     class VulkanWindowSwapchain
     {
       public:
-        using BeforeWindowCreateFunctionPointer     = std::function<void(osi::Window&)>;
-        using BeforeSwapchainBuildFunctionPointer   = std::function<void(vkb::SwapchainBuilder&)>;
-        using OnResizedFunctionPointer              = std::function<void(VkExtent2D)>;
+        /// @brief Function called before window is created
+        using BeforeWindowCreateFunctionPointer = std::function<void(osi::Window&)>;
+        /// @brief Function called before the swapchain is created
+        using BeforeSwapchainBuildFunctionPointer = std::function<void(vkb::SwapchainBuilder&)>;
+        /// @brief Function called when a resize occurs
+        using OnResizedFunctionPointer = std::function<void(VkExtent2D)>;
+        /// @brief Function called for naming swapchain images.
         using MakeSwapchainImageNameFunctionPointer = std::function<std::string(uint32_t)>;
 
         VulkanWindowSwapchain() = default;
@@ -35,14 +40,16 @@ namespace foray::base {
         FORAY_PROPERTY_ALLGET(SwapchainImages)
         FORAY_PROPERTY_ALL(Context)
 
+        /// @brief Create the Window
         void        CreateWindow();
+        /// @brief Create the Swapchain
         void        CreateSwapchain();
         inline bool Exists() const { return !!mSwapchain.swapchain; }
         void        Destroy();
 
         /// @brief Listens for WindowSizeChanged events to preemptively resize the swapchain
-        /// @param event
         void HandleEvent(const osi::Event* event);
+        /// @brief Call to recreate the swapchain
         void RecreateSwapchain();
 
       protected:
