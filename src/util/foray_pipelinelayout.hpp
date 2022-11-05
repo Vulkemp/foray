@@ -28,7 +28,7 @@ namespace foray::util {
         void AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges);
 
         template <typename TPushC>
-        inline void AddPushConstantRange(VkShaderStageFlags stageFlags, uint32_t offset = 0U);
+        inline void AddPushConstantRange(VkShaderStageFlags stageFlags, uint32_t offset = ~0U);
 
         VkPipelineLayout Build(core::Context* context, VkPipelineLayoutCreateFlags flags = 0, void* pNext = nullptr);
 
@@ -48,11 +48,17 @@ namespace foray::util {
 
         std::vector<VkDescriptorSetLayout> mDescriptorSetLayouts;
         std::vector<VkPushConstantRange>   mPushConstantRanges;
+        uint32_t mPushConstantOffset = 0U;
     };
 
     template <typename TPushC>
     inline void PipelineLayout::AddPushConstantRange(VkShaderStageFlags stageFlags, uint32_t offset)
     {
+        if (offset == ~0U)
+        {
+            offset = mPushConstantOffset;
+        }
+        mPushConstantOffset += sizeof(TPushC);
         VkPushConstantRange range{
             .stageFlags = stageFlags,
             .offset     = offset,

@@ -35,12 +35,8 @@ namespace foray::stages {
         mVertexShaderPath   = vertexShaderPath;
         mFragmentShaderPath = fragmentShaderPath;
 
-        CreateResolutionDependentComponents();
-        CreateFixedSizeComponents();
-    }
-
-    void GBufferStage::CreateFixedSizeComponents()
-    {
+        CreateImages();
+        PrepareRenderpass();
 #ifdef ENABLE_GBUFFER_BENCH
         std::vector<const char*> timestampNames(
             {bench::BenchmarkTimestamp::BEGIN, TIMESTAMP_VERT_BEGIN, TIMESTAMP_VERT_END, TIMESTAMP_FRAG_BEGIN, TIMESTAMP_FRAG_END, bench::BenchmarkTimestamp::END});
@@ -50,12 +46,6 @@ namespace foray::stages {
         CreateDescriptorSets();
         CreatePipelineLayout();
         CreatePipeline();
-    }
-
-    void GBufferStage::CreateResolutionDependentComponents()
-    {
-        CreateImages();
-        PrepareRenderpass();
     }
 
     void GBufferStage::CreateImages()
@@ -352,7 +342,7 @@ namespace foray::stages {
 #pragma endregion
 #pragma region Destroy
 
-    void GBufferStage::DestroyFixedComponents()
+    void GBufferStage::Destroy()
     {
 #ifdef ENABLE_GBUFFER_BENCH
         mBenchmark.Destroy();
@@ -367,37 +357,12 @@ namespace foray::stages {
         mDescriptorSet.Destroy();
         mVertexShaderModule.Destroy();
         mFragmentShaderModule.Destroy();
+        RenderStage::DestroyOutputImages();
+        DestroyFrameBufferAndRenderpass();
     }
 
-    void GBufferStage::DestroyResolutionDependentComponents()
+    void GBufferStage::DestroyFrameBufferAndRenderpass()
     {
-        VkDevice device = mContext->Device();
-        for(PerImageInfo& info : mImageInfos)
-        {
-            info.Image.Destroy();
-        }
-        if(mFrameBuffer)
-        {
-            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-        if(mRenderpass)
-        {
-            vkDestroyRenderPass(device, mRenderpass, nullptr);
-            mRenderpass = nullptr;
-        }
-    }
-
-#pragma endregion
-#pragma region Runtime Update
-
-    void GBufferStage::OnResized(const VkExtent2D& extent)
-    {
-        VkExtent3D imageExtent{.width = extent.width, .height = extent.height, .depth = 1};
-        for(PerImageInfo& info : mImageInfos)
-        {
-            info.Image.Resize(imageExtent);
-        }
         if(mFrameBuffer)
         {
             vkDestroyFramebuffer(mContext->Device(), mFrameBuffer, nullptr);
@@ -408,22 +373,20 @@ namespace foray::stages {
             vkDestroyRenderPass(mContext->Device(), mRenderpass, nullptr);
             mRenderpass = nullptr;
         }
-        PrepareRenderpass();
     }
 
-    void GBufferStage::OnShadersRecompiled()
+#pragma endregion
+#pragma region Runtime Update
+
+    void GBufferStage::Resize(const VkExtent2D& extent)
     {
-        // check if shaders have been recompiled
-        //bool needsPipelineUpdate = shaderCompiler->HasShaderBeenRecompiled(mVertexShaderPath) || shaderCompiler->HasShaderBeenRecompiled(mFragmentShaderPath);
-        bool needsPipelineUpdate =
-            core::ShaderManager::Instance().HasShaderBeenRecompiled(mVertexShaderPath) || core::ShaderManager::Instance().HasShaderBeenRecompiled(mFragmentShaderPath);
-
-        if(!needsPipelineUpdate)
-            return;
-
-        vkDeviceWaitIdle(mContext->Device());
-        // rebuild pipeline and its dependencies.
-        CreatePipeline();
+        DestroyFrameBufferAndRenderpass();
+        VkExtent3D imageExtent{.width = extent.width, .height = extent.height, .depth = 1};
+        for(PerImageInfo& info : mImageInfos)
+        {
+            info.Image.Resize(imageExtent);
+        }
+        PrepareRenderpass();
     }
 
 #pragma endregion

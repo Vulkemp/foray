@@ -15,7 +15,7 @@ namespace foray::stages {
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         virtual void HandleEvent(const osi::Event* event);
-        virtual void OnResized(const VkExtent2D& extent) override;
+        virtual void Resize(const VkExtent2D& extent) override;
 
         virtual void Destroy() override;
 
@@ -63,6 +63,11 @@ namespace foray::stages {
         void DispatchSubStage(SubStage& substage, VkCommandBuffer buffer, base::FrameRenderInfo& renderInfo);
         void DestroySubStage(SubStage& substage, bool final);
 
+        void CreateOutputImage();
+
+        void LoadShaders();
+        void CreatePipetteBuffer();
+
         struct PushConstant
         {
             glm::vec4  Scale;
@@ -72,11 +77,6 @@ namespace foray::stages {
             uint32_t   WriteOffset;
             VkBool32   WriteLeft;
         };
-
-        virtual void CreateFixedSizeComponents() override;
-        virtual void DestroyFixedComponents() override;
-        virtual void CreateResolutionDependentComponents() override;
-        virtual void DestroyResolutionDependentComponents() override;
 
         std::array<SubStage, 2> mSubStages;
 

@@ -9,29 +9,28 @@ namespace foray::core {
 
     namespace fs = std::filesystem;
 
-    const void ShaderManager::GetShaderBinary(std::string_view filePath, std::vector<uint8_t>& out)
+    const void ShaderManager::GetShaderBinary(osi::Utf8Path filePath, std::vector<uint8_t>& out)
     {
-        osi::Utf8Path sourceFilePath(filePath);
-        if(sourceFilePath.IsRelative())
+        if(filePath.IsRelative())
         {
-            sourceFilePath = sourceFilePath.MakeAbsolute();
+            filePath = filePath.MakeAbsolute();
         }
 
-        bool exists = fs::exists(sourceFilePath);
-        bool isFile = !fs::is_directory(sourceFilePath);
-        FORAY_ASSERTFMT(exists && isFile, "[ShaderManager::GetShaderBinary] Shader source file \"{}\" does not exist or is not a file!", (const std::string&)sourceFilePath);
+        bool exists = fs::exists((fs::path)filePath);
+        bool isFile = !fs::is_directory((fs::path)filePath);
+        FORAY_ASSERTFMT(exists && isFile, "[ShaderManager::GetShaderBinary] Shader source file \"{}\" does not exist or is not a file!", (const std::string&)filePath);
 
-        if(Cache.LookupTrackedIncluders.find(sourceFilePath) == Cache.LookupTrackedIncluders.end())
+        if(Cache.LookupTrackedIncluders.find(filePath) == Cache.LookupTrackedIncluders.end())
         {
-            AddShaderIncludeesToModificationTracking(sourceFilePath);
+            AddShaderIncludeesToModificationTracking(filePath);
 
             // add includers to tracking
-            Cache.AddTrackedIncluder(sourceFilePath);
+            Cache.AddTrackedIncluder(filePath);
 
             CheckAndUpdateShaders();
         }
 
-        osi::Utf8Path outputFilePath = GetFileOutputPath(sourceFilePath);
+        osi::Utf8Path outputFilePath = GetFileOutputPath(filePath);
 
         std::ifstream file(outputFilePath.GetPath(), std::ios::binary | std::ios::in | std::ios::ate);
 
@@ -111,19 +110,18 @@ namespace foray::core {
     }
 #endif
 
-    bool ShaderManager::HasShaderBeenRecompiled(std::string_view filePath)
+    bool ShaderManager::HasShaderBeenRecompiled(osi::Utf8Path filePath)
     {
-        if(filePath.empty())
+        if(filePath.GetPath().empty())
         {
             return false;
         }
-        osi::Utf8Path sourceFilePath(filePath);
-        if(sourceFilePath.IsRelative())
+        if(filePath.IsRelative())
         {
-            sourceFilePath = sourceFilePath.MakeAbsolute();
+            filePath = filePath.MakeAbsolute();
         }
 
-        return mRecompiledShaders.find(sourceFilePath) != mRecompiledShaders.end();
+        return mRecompiledShaders.find(filePath) != mRecompiledShaders.end();
     }
 
     void ShaderManager::ScanIncludes(std::vector<osi::Utf8Path>& outIncludes, const osi::Utf8Path& fileToScanPath, uint32_t recursionDepth)

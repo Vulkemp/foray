@@ -28,5 +28,5 @@ namespace foray::api {
     using GBufferStage          = foray::stages::GBufferStage;
     using ImguiStage            = foray::stages::ImguiStage;
     using ImageToSwapchainStage = foray::stages::ImageToSwapchainStage;
-    using RaytracingStage       = foray::stages::RaytracingStage;
+    using ExtRaytracingStage       = foray::stages::ExtRaytracingStage;
 }  // namespace foray::api

@@ -15,155 +15,176 @@
 
 namespace foray::stages {
 
-    void RaytracingStage::Init()
+    void BasicRaytracingStage::Init(core::Context* context)
     {
-        CreateResolutionDependentComponents();
-        CreateFixedSizeComponents();
-    }
-
-    void RaytracingStage::OnResized(const VkExtent2D& extent)
-    {
-        mRaytracingRenderTarget.Resize(VkExtent3D{extent.width, extent.height, 1});
-        UpdateDescriptors();
-    }
-
-    void RaytracingStage::CreateFixedSizeComponents()
-    {
-        SetupDescriptors();
-        CreateDescriptorSets();
+        Destroy();
+        mContext = context;
+        CreateOutputImages();
+        CreateOrUpdateDescriptors();
         CreatePipelineLayout();
-        CreateRaytraycingPipeline();
+        CreateRtPipeline();
     }
-
-    void RaytracingStage::DestroyFixedComponents()
+    void BasicRaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        DestroyShaders();
-        mDescriptorSet.Destroy();
-        mPipeline.Destroy();
+        RecordFramePrepare(cmdBuffer, renderInfo);
+        RecordFrameBind(cmdBuffer, renderInfo);
+        RecordFrameTraceRays(cmdBuffer, renderInfo);
+    }
+    void BasicRaytracingStage::Resize(const VkExtent2D& extent)
+    {
+        RenderStage::Resize(extent);
+        CreateOrUpdateDescriptors();
+    }
+    void BasicRaytracingStage::Destroy()
+    {
+        DestroyRtPipeline();
         mPipelineLayout.Destroy();
+        DestroyDescriptors();
+        DestroyOutputImages();
+    }
+    void BasicRaytracingStage::ReloadShaders()
+    {
+        DestroyRtPipeline();
+        CreateRtPipeline();
     }
 
-    void RaytracingStage::CreateResolutionDependentComponents()
+    void ExtRaytracingStage::Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
     {
-        CreateOutputImage();
+        Destroy();
+        mScene          = scene;
+        mEnvironmentMap = envMap;
+        mNoiseTexture   = noiseImage;
+        BasicRaytracingStage::Init(context);
     }
-
-    void RaytracingStage::DestroyResolutionDependentComponents()
+    void ExtRaytracingStage::CreateOutputImages()
     {
-        mImageOutputs.clear();
-        mRaytracingRenderTarget.Destroy();
+        VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        mOutput.Create(mContext, imageUsageFlags, VK_FORMAT_R32G32B32A32_SFLOAT, mContext->GetSwapchainSize(), OutputName);
+        mImageOutputs[std::string(OutputName)] = &mOutput;
     }
-
-    void RaytracingStage::CreateOutputImage()
+    void ExtRaytracingStage::CreatePipelineLayout()
     {
-        static const VkFormat          colorFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
-        static const VkImageUsageFlags imageUsageFlags =
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-
-
-        mRaytracingRenderTarget.Create(mContext, imageUsageFlags, colorFormat, mContext->GetSwapchainSize(), RaytracingRenderTargetName);
-        core::ManagedImage::QuickTransition transition{.SrcStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                                                       .DstStageMask = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                                                       .NewLayout    = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL};
-        mRaytracingRenderTarget.TransitionLayout(transition);
-
-        mImageOutputs[std::string(RaytracingRenderTargetName)] = &mRaytracingRenderTarget;
+        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        if(mRngSeedPushCOffset != ~0U)
+        {
+            mPipelineLayout.AddPushConstantRange<uint32_t>(RTSTAGEFLAGS, mRngSeedPushCOffset);
+        }
+        mPipelineLayout.Build(mContext);
     }
-
-    void RaytracingStage::SetupDescriptors()
+    void ExtRaytracingStage::CreateOrUpdateDescriptors()
     {
-        as::Tlas& tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
-        auto      materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
-        auto      textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
-        auto      cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
-        auto      geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
+        using namespace rtbindpoints;
 
+        as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
+        as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
+        auto                    materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
+        auto                    textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto                    cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto                    geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
 
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
         mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &(tlas.GetAccelerationStructure());
 
-        mDescriptorSet.SetDescriptorAt(0, &mDescriptorAccelerationStructureInfo, 1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_TLAS, &mDescriptorAccelerationStructureInfo, 1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_OUT_IMAGE, mOutput, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_CAMERA_UBO, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_VERTICES, geometryStore->GetVerticesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_INDICES, geometryStore->GetIndicesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_MATERIAL_BUFFER, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_TEXTURES_ARRAY, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_GEOMETRYMETA, metaBuffer.GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
-        mDescriptorSet.SetDescriptorAt(1, mRaytracingRenderTarget, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
-        mDescriptorSet.SetDescriptorAt(2, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, RTSTAGEFLAGS);
-
-        mDescriptorSet.SetDescriptorAt(3, geometryStore->GetVerticesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
-
-        mDescriptorSet.SetDescriptorAt(4, geometryStore->GetIndicesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
-
-        mDescriptorSet.SetDescriptorAt(5, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
-
-        mDescriptorSet.SetDescriptorAt(6, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
-        as::GeometryMetaBuffer& metaBuffer = tlas.GetMetaBuffer();
-        mDescriptorSet.SetDescriptorAt(7, metaBuffer.GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
-
-        if(!!mEnvMap)
+        if(!!mEnvironmentMap)
         {
-            mDescriptorSet.SetDescriptorAt(9, mEnvMap->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+            mDescriptorSet.SetDescriptorAt(BIND_ENVMAP_SPHERESAMPLER, mEnvironmentMap->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
         }
-        if(!!mNoiseSource)
+        if(!!mNoiseTexture)
         {
-            mDescriptorSet.SetDescriptorAt(10, mNoiseSource->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
+            mDescriptorSet.SetDescriptorAt(BIND_NOISETEX, mNoiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
+        }
+
+        if(mDescriptorSet.Exists())
+        {
+            mDescriptorSet.Update();
+        }
+        else
+        {
+            mDescriptorSet.Create(mContext, "RaytracingStageDescriptorSet");
         }
     }
-
-    void RaytracingStage::CreateDescriptorSets()
+    void ExtRaytracingStage::DestroyDescriptors()
     {
-        mDescriptorSet.Create(mContext, "RaytraycingPipelineDescriptorSet");
+        mDescriptorSet.Destroy();
     }
-
-    void RaytracingStage::UpdateDescriptors()
+    void ExtRaytracingStage::RecordFramePrepare(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        VkShaderStageFlags rtShaderStages = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
-                                            | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
-        mDescriptorSet.SetDescriptorAt(1, mRaytracingRenderTarget, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, rtShaderStages);
-        mDescriptorSet.Update();
-    }
+        std::vector<VkImageMemoryBarrier2>  imageBarriers;
+        std::vector<VkBufferMemoryBarrier2> bufferBarriers;
 
-    void RaytracingStage::CreatePipelineLayout()
-    {
-        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
-        mPipelineLayout.AddPushConstantRange<PushConstant>(RTSTAGEFLAGS);
-        mPipelineLayout.Build(mContext);
-    }
-
-    void RaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
-    {
-        std::vector<VkImageMemoryBarrier2> vkBarriers;
-        {
-            core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                     .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
-                                                     .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                     .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                     .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL};
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mRaytracingRenderTarget, barrier));
+        {  // Image Memory Barriers
+            imageBarriers.push_back(
+                renderInfo.GetImageLayoutCache().MakeBarrier(mOutput, core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                                                                       .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+                                                                                                       .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+                                                                                                       .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                                                                       .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
+            if(!!mNoiseTexture)
+            {
+                imageBarriers.push_back(
+                    renderInfo.GetImageLayoutCache().MakeBarrier(mNoiseTexture, core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                                                                                 .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                                                                                 .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+                                                                                                                 .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
+                                                                                                                 .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
+            }
+            if(!!mEnvironmentMap)
+            {
+                imageBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(
+                    mEnvironmentMap->GetManagedImage(), core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                                                         .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                                                         .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+                                                                                         .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
+                                                                                         .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}));
+            }
         }
-        if (!!mNoiseSource)
         {
-            core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                     .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                     .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                     .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-                                                     .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mNoiseSource->GetManagedImage(), barrier));
+            auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
+
+            bufferBarriers.push_back(VkBufferMemoryBarrier2{.sType         = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
+                                                            .srcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                            .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                            .dstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+                                                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+                                                            .buffer        = cameraManager->GetUbo().GetVkBuffer(),
+                                                            .offset        = 0,
+                                                            .size          = VK_WHOLE_SIZE});
         }
 
         VkDependencyInfo depInfo{
-            .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-            .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-            .imageMemoryBarrierCount = (uint32_t)vkBarriers.size(),
-            .pImageMemoryBarriers    = vkBarriers.data(),
+            .sType                    = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .dependencyFlags          = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+            .bufferMemoryBarrierCount = (uint32_t)bufferBarriers.size(),
+            .pBufferMemoryBarriers    = bufferBarriers.data(),
+            .imageMemoryBarrierCount  = (uint32_t)imageBarriers.size(),
+            .pImageMemoryBarriers     = imageBarriers.data(),
         };
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
-
+    }
+    void ExtRaytracingStage::RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    {
         mPipeline.CmdBindPipeline(cmdBuffer);
-
-        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
-
-        mPushConstant.RngSeed = renderInfo.GetFrameNumber();
-        vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, 0, sizeof(mPushConstant), &mPushConstant);
+        vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0U, 1U, &(mDescriptorSet.GetDescriptorSet()), 0U, nullptr);
+    }
+    void ExtRaytracingStage::RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    {
+        if(mRngSeedPushCOffset != ~0U)
+        {
+            uint32_t pushC = renderInfo.GetFrameNumber();
+            vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, mRngSeedPushCOffset, sizeof(pushC), &pushC);
+        }
 
         VkStridedDeviceAddressRegionKHR raygen_shader_sbt_entry = mPipeline.GetRaygenSbt().GetAddressRegion();
 
@@ -173,22 +194,8 @@ namespace foray::stages {
 
         VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry = mPipeline.GetCallablesSbt().GetAddressRegion();
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->GetSwapchainSize().width, mContext->GetSwapchainSize().height}};
-        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry,
-                                                    scissor.extent.width, scissor.extent.height, 1);
-    }
+        VkExtent2D extent{mOutput.GetExtent3D().width, mOutput.GetExtent3D().height};
 
-    void RaytracingStage::ReloadShaders()
-    {
-        vkDeviceWaitIdle(mContext->Device());
-
-        DestroyShaders();
-        mPipeline.Destroy();
-        CreateRaytraycingPipeline();
-    }
-
-    void RaytracingStage::CreateRaytraycingPipeline()
-    {
-        mPipeline.Build(mContext, mPipelineLayout);
+        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width, extent.height, 1U);
     }
 }  // namespace foray::stages

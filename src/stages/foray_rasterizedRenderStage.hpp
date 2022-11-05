@@ -6,8 +6,7 @@ namespace foray::stages {
     class RasterizedRenderStage : public RenderStage
     {
       public:
-        RasterizedRenderStage(){};
-        ~RasterizedRenderStage() { Destroy(); };
+        RasterizedRenderStage() = default;
 
         FORAY_PROPERTY_CGET(FrameBuffer)
         FORAY_PROPERTY_CGET(Renderpass)
@@ -18,9 +17,6 @@ namespace foray::stages {
         virtual void CreateDescriptorSets(){};
         virtual void UpdateDescriptors(){};
         virtual void CreatePipelineLayout(){};
-
-        virtual void OnResized(const VkExtent2D& extent) override;
-        virtual void Destroy() override;
 
       protected:
         VkFramebuffer        mFrameBuffer   = nullptr;

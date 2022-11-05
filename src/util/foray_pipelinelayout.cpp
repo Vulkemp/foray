@@ -12,6 +12,7 @@ namespace foray::util {
         }
         mDescriptorSetLayouts.clear();
         mPushConstantRanges.clear();
+        mPushConstantOffset = 0U;
     }
 
     void PipelineLayout::AddDescriptorSetLayout(VkDescriptorSetLayout layout)
@@ -27,6 +28,12 @@ namespace foray::util {
     }
     void PipelineLayout::AddPushConstantRange(VkPushConstantRange range)
     {
+        if(range.offset == ~0U)
+        {
+            range.offset = mPushConstantOffset;
+        }
+        mPushConstantOffset += range.size;
+
         mPushConstantRanges.push_back(range);
     }
     void PipelineLayout::AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges)
@@ -69,10 +76,10 @@ namespace foray::util {
     }
 
     VkPipelineLayout PipelineLayout::Build(core::Context*                            context,
-                                            const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
-                                            const std::vector<VkPushConstantRange>&   pushConstantRanges,
-                                            VkPipelineLayoutCreateFlags               flags,
-                                            void*                                     pNext)
+                                           const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
+                                           const std::vector<VkPushConstantRange>&   pushConstantRanges,
+                                           VkPipelineLayoutCreateFlags               flags,
+                                           void*                                     pNext)
     {
         AddDescriptorSetLayouts(descriptorLayouts);
         AddPushConstantRanges(pushConstantRanges);

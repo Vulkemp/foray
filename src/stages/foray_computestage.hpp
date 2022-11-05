@@ -12,6 +12,7 @@ namespace foray::stages {
 
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
+        virtual void Destroy() override;
       protected:
         core::ShaderModule mShader;
 
@@ -21,12 +22,11 @@ namespace foray::stages {
         VkPipeline mPipeline = nullptr;
 
         inline virtual void ApiInitShader(){};
-        inline virtual void ApiCreateDescriptorSetLayout(){};
+        inline virtual void ApiCreateDescriptorSet(){};
         inline virtual void ApiCreatePipelineLayout(){};
         inline virtual void ApiBeforeFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
         inline virtual void ApiBeforeDispatch(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo, glm::uvec3& groupSize){};
 
-        virtual void CreateFixedSizeComponents() override;
-        virtual void DestroyFixedComponents() override;
+        virtual void CreatePipeline();
     };
 }  // namespace foray::stages

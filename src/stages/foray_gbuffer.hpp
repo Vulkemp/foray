@@ -17,9 +17,10 @@ namespace foray::stages {
 
         virtual void Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath = "", std::string_view fragmentShaderPath = "");
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-        virtual void OnShadersRecompiled() override;
 
-        virtual void OnResized(const VkExtent2D& extent) override;
+        virtual void Resize(const VkExtent2D& extent) override;
+
+        virtual void Destroy() override;
 
         enum class EOutput
         {
@@ -66,10 +67,7 @@ namespace foray::stages {
         core::ShaderModule mVertexShaderModule;
         core::ShaderModule mFragmentShaderModule;
 
-        virtual void CreateFixedSizeComponents() override;
-        virtual void DestroyFixedComponents() override;
-        virtual void CreateResolutionDependentComponents() override;
-        virtual void DestroyResolutionDependentComponents() override;
+        virtual void DestroyFrameBufferAndRenderpass();
 
 
         void         CreateImages();

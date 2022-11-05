@@ -26,13 +26,13 @@ namespace foray::core {
 
         /// @brief Get the shaders SpirV binary code. Automatically recompiles shader if outdated.
         /// @param shaderSourceFilePath - The path to the source code that you wish to retrieve the SpirV binary for.
-        const void GetShaderBinary(std::string_view filePath, std::vector<uint8_t>& out);
+        const void GetShaderBinary(osi::Utf8Path filePath, std::vector<uint8_t>& out);
 
         /// @brief Returns true if any shader was updated.
         /// Will check all tracked shader files for modifications and recompile the includers accordingly.
         virtual bool CheckAndUpdateShaders();
 
-        virtual bool HasShaderBeenRecompiled(std::string_view filePath);
+        virtual bool HasShaderBeenRecompiled(osi::Utf8Path filePath);
 
         /// @brief Number of recursive include lookups.
         uint32_t mMaxRecursionDepth = 10;

@@ -5,8 +5,10 @@ namespace foray::stages {
     {
         Destroy();
         mContext = context;
-        CreateResolutionDependentComponents();
-        CreateFixedSizeComponents();
+        ApiCreateDescriptorSet();
+        ApiCreatePipelineLayout();
+        ApiInitShader();
+        CreatePipeline();
     }
 
     void ComputeStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -25,15 +27,8 @@ namespace foray::stages {
         mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, groupSize.z);
     }
 
-    void ComputeStage::CreateFixedSizeComponents()
+    void ComputeStage::CreatePipeline()
     {
-        // Descriptor Set Layout
-        ApiCreateDescriptorSetLayout();
-
-        ApiCreatePipelineLayout();
-
-        ApiInitShader();
-
         VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
                                                       .module = mShader,
@@ -48,15 +43,15 @@ namespace foray::stages {
 
         AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
     }
-    void ComputeStage::DestroyFixedComponents() 
+    void ComputeStage::Destroy() 
     {
         if (!!mPipeline)
         {
             mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
         }
-        mPipelineLayout.Destroy();
-        mDescriptorSet.Destroy();
         mShader.Destroy();
+        mDescriptorSet.Destroy();
+        mPipelineLayout.Destroy();
     }
 }  // namespace foray::stages

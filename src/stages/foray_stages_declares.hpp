@@ -4,7 +4,8 @@ namespace foray::stages
 {
     class RenderStage;
     class RasterizedRenderStage;
-    class RaytracingStage;
+    class BasicRaytracingStage;
+    class ExtRaytracingStage;
     class ImguiStage;
     class ImageToSwapchainStage;
     class GBufferStage;

@@ -18,10 +18,12 @@ namespace foray::util {
         virtual void Destroy() override;
 
         core::ManagedBuffer* GetDeviceBuffer() { return &(mUboBuffer.GetDeviceBuffer()); }
-        
-                             operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
-        
+
+        operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
+
         VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const;
+
+        VkBuffer GetVkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
 
       protected:
         DualBuffer mUboBuffer;

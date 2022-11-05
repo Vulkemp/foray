@@ -258,7 +258,7 @@ namespace foray::base {
         ApiOnResized(size);
         for(stages::RenderStage* stage : mRegisteredStages)
         {
-            stage->OnResized(size);
+            stage->Resize(size);
         }
     }
 
