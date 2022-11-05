@@ -229,7 +229,7 @@ namespace foray::stages {
                                                          .DstAccessMask    = VK_ACCESS_2_SHADER_READ_BIT,
                                                          .NewLayout        = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                                          .SubresourceRange = VkImageSubresourceRange{.aspectMask = substage.Input.Aspect, .levelCount = 1, .layerCount = 1}};
-                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().Set(substage.Input.Image, barrier));
+                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().MakeBarrier(substage.Input.Image, barrier));
             }
             {
                 core::ImageLayoutCache::Barrier2 barrier{
@@ -239,7 +239,7 @@ namespace foray::stages {
                     .DstAccessMask = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT,
                     .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
                 };
-                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().Set(mOutput, barrier));
+                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().MakeBarrier(mOutput, barrier));
             }
 
             VkDependencyInfo depInfo{

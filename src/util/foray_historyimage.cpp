@@ -20,7 +20,7 @@ namespace foray::util {
     void HistoryImage::CmdCopySourceToHistory(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         std::array<VkImageMemoryBarrier2, 2U> vkBarriers({
-            renderInfo.GetImageLayoutCache().Set(mSource,
+            renderInfo.GetImageLayoutCache().MakeBarrier(mSource,
                                                  core::ImageLayoutCache::Barrier2{
                                                      .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                      .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
@@ -28,7 +28,7 @@ namespace foray::util {
                                                      .DstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT,
                                                      .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                  }),
-            renderInfo.GetImageLayoutCache().Set(mHistory,
+            renderInfo.GetImageLayoutCache().MakeBarrier(mHistory,
                                                  core::ImageLayoutCache::Barrier2{
                                                      .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                      .SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT,
@@ -74,14 +74,14 @@ namespace foray::util {
 
         for(HistoryImage* image : historyImages)
         {
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().Set(image->mSource, core::ImageLayoutCache::Barrier2{
+            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(image->mSource, core::ImageLayoutCache::Barrier2{
                                                                                           .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                                                           .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                                                           .DstStageMask  = VK_PIPELINE_STAGE_2_COPY_BIT,
                                                                                           .DstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT,
                                                                                           .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                                                       }));
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().Set(image->mHistory, core::ImageLayoutCache::Barrier2{
+            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(image->mHistory, core::ImageLayoutCache::Barrier2{
                                                                                            .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                                                            .SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT,
                                                                                            .DstStageMask  = VK_PIPELINE_STAGE_2_COPY_BIT,

@@ -40,7 +40,7 @@ namespace foray::core {
         Set(image->GetImage(), layout);
     }
 
-    VkImageMemoryBarrier ImageLayoutCache::Set(VkImage image, const Barrier& barrier)
+    VkImageMemoryBarrier ImageLayoutCache::MakeBarrier(VkImage image, const Barrier& barrier)
     {
         VkImageLayout oldLayout = Get(image);
         Set(image, barrier.NewLayout);
@@ -55,17 +55,17 @@ namespace foray::core {
                                     .subresourceRange    = barrier.SubresourceRange};
     }
 
-    VkImageMemoryBarrier ImageLayoutCache::Set(const ManagedImage* image, const Barrier& barrier)
+    VkImageMemoryBarrier ImageLayoutCache::MakeBarrier(const ManagedImage* image, const Barrier& barrier)
     {
-        return Set(image->GetImage(), barrier);
+        return MakeBarrier(image->GetImage(), barrier);
     }
 
-    VkImageMemoryBarrier ImageLayoutCache::Set(const ManagedImage& image, const Barrier& barrier)
+    VkImageMemoryBarrier ImageLayoutCache::MakeBarrier(const ManagedImage& image, const Barrier& barrier)
     {
-        return Set(image.GetImage(), barrier);
+        return MakeBarrier(image.GetImage(), barrier);
     }
 
-    VkImageMemoryBarrier2 ImageLayoutCache::Set(VkImage image, const Barrier2& barrier)
+    VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(VkImage image, const Barrier2& barrier)
     {
         VkImageLayout oldLayout = Get(image);
         Set(image, barrier.NewLayout);
@@ -82,14 +82,14 @@ namespace foray::core {
                                      .subresourceRange    = barrier.SubresourceRange};
     }
 
-    VkImageMemoryBarrier2 ImageLayoutCache::Set(const ManagedImage* image, const Barrier2& barrier)
+    VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(const ManagedImage* image, const Barrier2& barrier)
     {
-        return Set(image->GetImage(), barrier);
+        return MakeBarrier(image->GetImage(), barrier);
     }
 
-    VkImageMemoryBarrier2 ImageLayoutCache::Set(const ManagedImage& image, const Barrier2& barrier)
+    VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(const ManagedImage& image, const Barrier2& barrier)
     {
-        return Set(image.GetImage(), barrier);
+        return MakeBarrier(image.GetImage(), barrier);
     }
 
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
@@ -99,7 +99,7 @@ namespace foray::core {
                                       VkPipelineStageFlags dstStageMask,
                                       VkDependencyFlags    depFlags)
     {
-        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
+        VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
@@ -109,7 +109,7 @@ namespace foray::core {
                                       VkPipelineStageFlags dstStageMask,
                                       VkDependencyFlags    depFlags)
     {
-        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
+        VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
@@ -119,12 +119,12 @@ namespace foray::core {
                                       VkPipelineStageFlags dstStageMask,
                                       VkDependencyFlags    depFlags)
     {
-        VkImageMemoryBarrier vkBarrier = Set(image, barrier);
+        VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
-        VkImageMemoryBarrier2 vkBarrier = Set(image, barrier);
+        VkImageMemoryBarrier2 vkBarrier = MakeBarrier(image, barrier);
         VkDependencyInfo      depInfo
         {
             .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,

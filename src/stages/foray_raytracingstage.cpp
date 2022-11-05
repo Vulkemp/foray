@@ -137,7 +137,7 @@ namespace foray::stages {
                                                      .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
                                                      .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                      .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL};
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().Set(mRaytracingRenderTarget, barrier));
+            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mRaytracingRenderTarget, barrier));
         }
         if (!!mNoiseSource)
         {
@@ -146,7 +146,7 @@ namespace foray::stages {
                                                      .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
                                                      .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
                                                      .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-            vkBarriers.push_back(renderInfo.GetImageLayoutCache().Set(mNoiseSource->GetManagedImage(), barrier));
+            vkBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mNoiseSource->GetManagedImage(), barrier));
         }
 
         VkDependencyInfo depInfo{

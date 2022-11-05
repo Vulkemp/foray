@@ -48,32 +48,32 @@ namespace foray::core {
             VkImageSubresourceRange SubresourceRange = VkImageSubresourceRange{.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .levelCount = 1U, .layerCount = 1U};
         };
 
-        /// @brief Constructs a VkImageMemoryBarrier struct
+        /// @brief Constructs a VkImageMemoryBarrier struct and updates the stored layout
         /// @param name Name of the image
         /// @param image Image
         /// @param barrier Layout Transition Barrier information
-        VkImageMemoryBarrier  Set(VkImage image, const Barrier& barrier);
-        /// @brief Constructs a VkImageMemoryBarrier struct
+        VkImageMemoryBarrier  MakeBarrier(VkImage image, const Barrier& barrier);
+        /// @brief Constructs a VkImageMemoryBarrier struct and updates the stored layout
         /// @param image Image
         /// @param barrier Layout Transition Barrier information
-        VkImageMemoryBarrier  Set(const ManagedImage* image, const Barrier& barrier);
-        /// @brief Constructs a VkImageMemoryBarrier struct
+        VkImageMemoryBarrier  MakeBarrier(const ManagedImage* image, const Barrier& barrier);
+        /// @brief Constructs a VkImageMemoryBarrier struct and updates the stored layout
         /// @param image Image
         /// @param barrier Layout Transition Barrier information
-        VkImageMemoryBarrier  Set(const ManagedImage& image, const Barrier& barrier);
-        /// @brief Constructs a VkImageMemoryBarrier2 struct
+        VkImageMemoryBarrier  MakeBarrier(const ManagedImage& image, const Barrier& barrier);
+        /// @brief Constructs a VkImageMemoryBarrier2 struct and updates the stored layout
         /// @param name Name of the image
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
-        VkImageMemoryBarrier2 Set(VkImage image, const Barrier2& barrier);
-        /// @brief Constructs a VkImageMemoryBarrier2 struct
+        VkImageMemoryBarrier2 MakeBarrier(VkImage image, const Barrier2& barrier);
+        /// @brief Constructs a VkImageMemoryBarrier2 struct and updates the stored layout
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
-        VkImageMemoryBarrier2 Set(const ManagedImage* image, const Barrier2& barrier);
-        /// @brief Constructs a VkImageMemoryBarrier2 struct
+        VkImageMemoryBarrier2 MakeBarrier(const ManagedImage* image, const Barrier2& barrier);
+        /// @brief Constructs a VkImageMemoryBarrier2 struct and updates the stored layout
         /// @param image Image
         /// @param barrier Layout Transition Barrier2 information
-        VkImageMemoryBarrier2 Set(const ManagedImage& image, const Barrier2& barrier);
+        VkImageMemoryBarrier2 MakeBarrier(const ManagedImage& image, const Barrier2& barrier);
 
         /// @brief Writes a dedicated vkCmdPipelineBarrier command
         /// @param cmdBuffer Command Buffer

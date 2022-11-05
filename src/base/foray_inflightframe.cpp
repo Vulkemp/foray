@@ -121,7 +121,7 @@ namespace foray::base {
                                                  .DstStageMask  = VK_PIPELINE_STAGE_2_NONE,
                                                  .DstAccessMask = 0,
                                                  .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_PRESENT_SRC_KHR};
-        VkImageMemoryBarrier2            vkBarrier = imgLayoutCache.Set(swapchainImage.Image, barrier);
+        VkImageMemoryBarrier2            vkBarrier = imgLayoutCache.MakeBarrier(swapchainImage.Image, barrier);
 
         VkDependencyInfo depInfo{
             .sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
@@ -144,7 +144,7 @@ namespace foray::base {
             .DstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
             .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         };
-        VkImageMemoryBarrier2 vkBarrier = imgLayoutCache.Set(swapchainImage.Image, barrier);
+        VkImageMemoryBarrier2 vkBarrier = imgLayoutCache.MakeBarrier(swapchainImage.Image, barrier);
 
         VkDependencyInfo depInfo{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
                                  .dependencyFlags         = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
