@@ -70,6 +70,7 @@ namespace foray::core {
     {
         if(mDescriptorPool != VK_NULL_HANDLE)
         {
+            mMapBindingToDescriptorInfo.clear();
             vkDestroyDescriptorPool(mContext->Device(), mDescriptorPool, nullptr);
             mDescriptorPool = VK_NULL_HANDLE;
             mDescriptorSet  = VK_NULL_HANDLE;
