@@ -27,29 +27,25 @@ namespace foray::core {
         Name               = name;
     }
 
-    void ManagedImage::Create(Context* context, CreateInfo createInfo)
+    void ManagedImage::Create(Context* context, const CreateInfo& createInfo)
     {
-        if(mContext == nullptr)
-        {
-            // store create info during first creation
-            mCreateInfo = createInfo;
-        }
-        mContext = context;
+        mContext    = context;
+        mCreateInfo = createInfo;
 
         // extract import image infos
-        mName     = createInfo.Name;
-        mFormat   = createInfo.ImageCI.format;
-        mExtent3D = createInfo.ImageCI.extent;
+        mName     = mCreateInfo.Name;
+        mFormat   = mCreateInfo.ImageCI.format;
+        mExtent3D = mCreateInfo.ImageCI.extent;
 
-        CheckImageFormatSupport(createInfo);
+        CheckImageFormatSupport(mCreateInfo);
 
         // create image
-        AssertVkResult(vmaCreateImage(mContext->Allocator, &createInfo.ImageCI, &createInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
+        AssertVkResult(vmaCreateImage(mContext->Allocator, &mCreateInfo.ImageCI, &mCreateInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
         mSize = mAllocInfo.size;
 
         // update image in image view create info
-        createInfo.ImageViewCI.image = mImage;
-        AssertVkResult(mContext->VkbDispatchTable->createImageView(&createInfo.ImageViewCI, nullptr, &mImageView));
+        mCreateInfo.ImageViewCI.image = mImage;
+        AssertVkResult(mContext->VkbDispatchTable->createImageView(&mCreateInfo.ImageViewCI, nullptr, &mImageView));
 
 #if FORAY_DEBUG
         // attach debug information to iamge
@@ -75,8 +71,7 @@ namespace foray::core {
         Create(mContext, mCreateInfo);
     }
 
-    void ManagedImage::Create(Context*                 context,
-                              VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
+    void ManagedImage::Create(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
     {
         CreateInfo createInfo(usage, format, extent, name);
 
@@ -185,7 +180,7 @@ namespace foray::core {
         }
     }
 
-    void ManagedImage::CheckImageFormatSupport(CreateInfo& createInfo)
+    void ManagedImage::CheckImageFormatSupport(const CreateInfo& createInfo)
     {
         VkImageFormatProperties props{};
         // check if image format together with required flags and usage is supported.

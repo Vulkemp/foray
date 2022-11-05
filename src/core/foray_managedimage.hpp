@@ -39,7 +39,7 @@ namespace foray::core {
 
         /// @brief Allocates image, creates image, creates imageview
         /// @param context Requires Allocator, DispatchTable, Device
-        virtual void Create(Context* context, CreateInfo createInfo);
+        virtual void Create(Context* context, const CreateInfo& createInfo);
 
         /// @brief Uses stored create info to recreate vulkan image with a new size.
         virtual void Resize(const VkExtent3D& newextent);
@@ -111,7 +111,7 @@ namespace foray::core {
         VkDeviceSize      mSize{};
         VkExtent3D        mExtent3D{};
 
-        void CheckImageFormatSupport(CreateInfo& createInfo);
+        void CheckImageFormatSupport(const CreateInfo& createInfo);
         void UpdateDebugNames();
     };
 }  // namespace foray::core
