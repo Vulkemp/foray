@@ -10,6 +10,7 @@
 #endif  // ENABLE_GBUFFER_BENCH
 
 namespace foray::stages {
+    
     class GBufferStage : public RasterizedRenderStage
     {
       public:

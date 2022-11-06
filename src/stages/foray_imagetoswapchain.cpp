@@ -3,7 +3,8 @@
 namespace foray::stages {
     void ImageToSwapchainStage::Init(core::Context* context, core::ManagedImage* srcImage)
     {
-        BlitStage::Init(context, srcImage, nullptr);
+        mContext = context;
+        BlitStage::Init(srcImage, nullptr);
     }
 
     void ImageToSwapchainStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -14,7 +15,7 @@ namespace foray::stages {
 
         VkExtent2D swapChainSize = mContext->GetSwapchainSize();
 
-        SetDstImage(swapImage.Image, swapImage.Name, swapChainSize);
+        SetDstImage(swapImage.Image, swapChainSize);
 
         BlitStage::RecordFrame(cmdBuffer, renderInfo);
     }
