@@ -234,6 +234,11 @@ namespace foray::core {
 
         AssertVkResult(vkAllocateDescriptorSets(mContext->Device(), &descriptorSetAllocInfo, &mDescriptorSet));
 
+        if (mName.size() > 0)
+        {
+            SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_DESCRIPTOR_SET, mDescriptorSet, mName);
+        }
+
         // --------------------------------------------------------------------------------------------
         // connect the descriptor sets with the descriptors
         Update();
