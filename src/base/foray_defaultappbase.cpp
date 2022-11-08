@@ -264,6 +264,7 @@ namespace foray::base {
 
     void DefaultAppBase::OnShadersRecompiled()
     {
+        AssertVkResult(mContext.VkbDispatchTable->deviceWaitIdle());
         ApiOnShadersRecompiled();
         for(stages::RenderStage* stage : mRegisteredStages)
         {

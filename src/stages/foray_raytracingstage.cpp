@@ -78,10 +78,10 @@ namespace foray::stages {
 
         const as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
         const as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
-        auto                    materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
-        auto                    textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
-        auto                    cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
-        auto                    geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
+        auto                          materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
+        auto                          textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
+        auto                          cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
+        auto                          geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
 
         VkAccelerationStructureKHR accelStructure = tlas.GetAccelerationStructure();
 
@@ -132,24 +132,6 @@ namespace foray::stages {
                                                                                                        .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
                                                                                                        .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                                                                        .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
-            if(!!mNoiseTexture)
-            {
-                imageBarriers.push_back(
-                    renderInfo.GetImageLayoutCache().MakeBarrier(mNoiseTexture, core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                                                                                 .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                                                                                 .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                                                                                 .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-                                                                                                                 .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
-            }
-            if(!!mEnvironmentMap)
-            {
-                imageBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(
-                    mEnvironmentMap->GetManagedImage(), core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                                                         .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                                                         .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                                                         .DstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-                                                                                         .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}));
-            }
         }
         {
             auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
@@ -201,6 +183,7 @@ namespace foray::stages {
 
         VkExtent2D extent{mOutput.GetExtent3D().width, mOutput.GetExtent3D().height};
 
-        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width, extent.height, 1U);
+        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width,
+                                                    extent.height, 1U);
     }
 }  // namespace foray::stages

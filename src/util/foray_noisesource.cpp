@@ -14,6 +14,7 @@ namespace foray::util {
         mImage.Destroy();
         mImage.Create(context, ci);
 
+        Regenerate();
     }
     void NoiseSource::Regenerate()
     {
@@ -27,7 +28,7 @@ namespace foray::util {
         {
             values[i + 0] = static_cast<uint32_t>(rngEngine() % max);
         }
-        mImage.WriteDeviceLocalData(values.data(), sizeof(float) * (size_t)valueCount, VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        mImage.WriteDeviceLocalData(values.data(), sizeof(float) * (size_t)valueCount, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL);
     }
     void NoiseSource::Destroy()
     {
