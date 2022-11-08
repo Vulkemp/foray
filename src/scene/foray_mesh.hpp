@@ -53,8 +53,8 @@ namespace foray::scene {
 
         virtual void BuildAccelerationStructure(core::Context* context, gcomp::GeometryStore* store) { mBlas.CreateOrUpdate(context, this, store); }
 
-        FORAY_PROPERTY_ALL(Primitives)
-        FORAY_PROPERTY_GET(Blas)
+        FORAY_PROPERTY_R(Primitives)
+        FORAY_GETTER_MR(Blas)
 
 
       protected:

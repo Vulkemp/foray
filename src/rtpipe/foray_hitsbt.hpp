@@ -26,7 +26,7 @@ namespace foray::rtpipe {
         virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const override;
 
 
-        FORAY_PROPERTY_CGET(Groups)
+        FORAY_GETTER_CR(Groups)
 
         virtual void Destroy() override;
 

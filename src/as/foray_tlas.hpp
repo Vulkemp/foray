@@ -31,11 +31,11 @@ namespace foray::as {
         inline virtual bool Exists() const override { return !!mAccelerationStructure; }
         virtual void        Destroy() override;
 
-        FORAY_PROPERTY_CGET(AccelerationStructure)
-        FORAY_PROPERTY_CGET(TlasMemory)
-        FORAY_PROPERTY_CGET(TlasAddress)
-        FORAY_PROPERTY_ALLGET(MetaBuffer)
-        FORAY_PROPERTY_CGET(Dirty)
+        FORAY_GETTER_V(AccelerationStructure)
+        FORAY_GETTER_CR(TlasMemory)
+        FORAY_GETTER_V(TlasAddress)
+        FORAY_GETTER_CR(MetaBuffer)
+        FORAY_GETTER_V(Dirty)
 
         operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
 
@@ -58,8 +58,8 @@ namespace foray::as {
         /// @remark TLAS will be marked Dirty!
         void ClearBlasInstances();
 
-        FORAY_PROPERTY_CGET(AnimatedBlasInstances)
-        FORAY_PROPERTY_CGET(StaticBlasInstances)
+        FORAY_GETTER_CR(AnimatedBlasInstances)
+        FORAY_GETTER_CR(StaticBlasInstances)
 
       protected:
         core::Context*                   mContext               = nullptr;

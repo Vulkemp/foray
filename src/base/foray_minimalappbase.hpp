@@ -16,9 +16,9 @@ namespace foray::base {
         /// @brief Runs through the entire lifetime of the app
         int32_t Run();
 
-        FORAY_PROPERTY_ALLGET(RenderLoop)
-        FORAY_PROPERTY_ALLGET(OsManager)
-        FORAY_PROPERTY_ALLGET(Instance)
+        FORAY_GETTER_MR(RenderLoop)
+        FORAY_GETTER_MR(OsManager)
+        FORAY_GETTER_MR(Instance)
 
       protected:
         /// @brief Inits the applications basic vulkan objects

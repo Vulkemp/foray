@@ -38,9 +38,9 @@ namespace foray::scene {
 
         inline virtual ~Scene() { Destroy(); }
 
-        FORAY_PROPERTY_ALL(Context)
-        FORAY_PROPERTY_ALL(NodeBuffer)
-        FORAY_PROPERTY_ALL(RootNodes)
+        FORAY_PROPERTY_R(NodeBuffer)
+        FORAY_PROPERTY_R(RootNodes)
+        FORAY_PROPERTY_V(Context)
 
         template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);

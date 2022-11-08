@@ -19,7 +19,7 @@ namespace foray::rtpipe {
         /// @brief Get index of a module in the ShaderStageCi vector
         uint32_t IndexOf(core::ShaderModule* module) const;
 
-        FORAY_PROPERTY_CGET(ShaderStageCis)
+        FORAY_GETTER_R(ShaderStageCis)
 
       protected:
         struct Entry

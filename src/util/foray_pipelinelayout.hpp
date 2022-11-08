@@ -60,7 +60,7 @@ namespace foray::util {
                                 VkPipelineLayoutCreateFlags               flags = 0,
                                 void*                                     pNext = nullptr);
 
-        FORAY_PROPERTY_GET(PipelineLayout)
+        FORAY_GETTER_V(PipelineLayout)
 
         inline operator VkPipelineLayout() const { return mPipelineLayout; }
 

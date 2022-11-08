@@ -46,9 +46,9 @@ namespace foray::rtpipe {
         /// @param handles Vector of pointers to handles. Indices in this vector have to match shadergroup indices of the SBT. The caller must guarantee that any memory area pointed to is of pipelineProperties.shaderGroupHandleSize size (bytes)
         virtual void Build(core::Context* context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties, const std::vector<const uint8_t*>& handles);
 
-        FORAY_PROPERTY_CGET(EntryDataSize)
-        FORAY_PROPERTY_ALLGET(AddressRegion)
-        FORAY_PROPERTY_ALLGET(Buffer)
+        FORAY_GETTER_V(EntryDataSize)
+        FORAY_GETTER_V(AddressRegion)
+        FORAY_GETTER_CR(Buffer)
 
         /// @brief Access the custom data entry for a group
         std::vector<uint8_t>& GroupDataAt(GroupIndex groupIndex);

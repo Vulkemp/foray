@@ -59,7 +59,7 @@ namespace foray::stages {
 
         core::ManagedImage* GetImageEOutput(EOutput output, bool noThrow = false);
 
-        FORAY_PROPERTY_ALLGET(Benchmark)
+        FORAY_GETTER_CR(Benchmark)
       protected:
         scene::Scene* mScene;
 

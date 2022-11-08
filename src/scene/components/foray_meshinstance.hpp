@@ -10,8 +10,8 @@ namespace foray::scene::ncomp {
       public:
         inline virtual ~MeshInstance() {}
 
-        FORAY_PROPERTY_ALL(InstanceIndex)
-        FORAY_PROPERTY_ALL(Mesh)
+        FORAY_PROPERTY_V(InstanceIndex)
+        FORAY_PROPERTY_V(Mesh)
       protected:
         int32_t   mInstanceIndex       = 0;
         Mesh*     mMesh                = nullptr;

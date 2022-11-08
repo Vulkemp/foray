@@ -19,20 +19,23 @@ namespace foray::scene::gcomp {
             inline Texture() : mImage(), mSampler() { mSampler.SetManagedImage(&mImage); }
             virtual ~Texture() = default;
 
-            FORAY_PROPERTY_ALLGET(Image)
+            FORAY_GETTER_CR(Image)
+            FORAY_GETTER_MR(Image)
+
             inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
             {
                 return mSampler.GetVkDescriptorInfo();
             }
 
-            FORAY_PROPERTY_ALL(Sampler)
+            FORAY_PROPERTY_R(Sampler)
 
           protected:
             core::ManagedImage         mImage;
             core::CombinedImageSampler mSampler;
         };
 
-        FORAY_PROPERTY_ALLGET(Textures)
+        FORAY_GETTER_CR(Textures)
+        FORAY_GETTER_MR(Textures)
 
         std::vector<VkDescriptorImageInfo> GetDescriptorInfos(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

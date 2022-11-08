@@ -75,12 +75,13 @@ namespace foray::core {
             }
         }
 
-        FORAY_PROPERTY_CGET(Buffer);
-        FORAY_PROPERTY_CGET(IsMapped);
-        FORAY_PROPERTY_CGET(Allocation);
-        FORAY_PROPERTY_CGET(AllocationInfo);
-        FORAY_PROPERTY_CGET(Name);
-        FORAY_PROPERTY_CGET(Size);
+        FORAY_GETTER_V(Buffer);
+        FORAY_GETTER_V(IsMapped);
+        FORAY_GETTER_V(Allocation);
+        FORAY_GETTER_CR(AllocationInfo);
+        FORAY_GETTER_V(Name);
+        FORAY_GETTER_V(Size);
+        FORAY_GETTER_V(Alignment);
 
         /// @brief Gets the buffers device address
         VkDeviceAddress GetDeviceAddress() const;

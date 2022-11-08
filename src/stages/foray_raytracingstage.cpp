@@ -76,16 +76,18 @@ namespace foray::stages {
     {
         using namespace rtbindpoints;
 
-        as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
-        as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
+        const as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
+        const as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
         auto                    materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
         auto                    textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
         auto                    cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
         auto                    geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
 
+        VkAccelerationStructureKHR accelStructure = tlas.GetAccelerationStructure();
+
         mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
         mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &(tlas.GetAccelerationStructure());
+        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &accelStructure;
 
         mDescriptorSet.SetDescriptorAt(BIND_TLAS, &mDescriptorAccelerationStructureInfo, 1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_OUT_IMAGE, mOutput, VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
@@ -176,7 +178,10 @@ namespace foray::stages {
     void ExtRaytracingStage::RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         mPipeline.CmdBindPipeline(cmdBuffer);
-        vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0U, 1U, &(mDescriptorSet.GetDescriptorSet()), 0U, nullptr);
+
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
+
+        vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
     }
     void ExtRaytracingStage::RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {

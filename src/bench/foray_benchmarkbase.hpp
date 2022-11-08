@@ -43,7 +43,7 @@ namespace foray::bench {
       public:
         BenchmarkBase();
 
-        FORAY_PROPERTY_CGET(Logs)
+        FORAY_GETTER_CR(Logs)
 
       protected:
         /// @brief Begins a new benchmark and records the "Begin" timestamp

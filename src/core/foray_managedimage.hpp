@@ -48,11 +48,7 @@ namespace foray::core {
 
         /// @brief Shorthand using common values. See CreateInfo for information
         /// @param context Requires Allocator, DispatchTable, Device
-        virtual void Create(Context*           context,
-                            VkImageUsageFlags  usage,
-                            VkFormat           format,
-                            const VkExtent2D&  extent,
-                            std::string_view   name       = "Unnamed Image");
+        virtual void Create(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name = "Unnamed Image");
 
         /// @brief Helper struct translated to a VkImageMemoryBarrier2 struct for one-time layout transitions
         struct QuickTransition
@@ -87,14 +83,14 @@ namespace foray::core {
         virtual void Destroy() override;
         virtual bool Exists() const override { return mAllocation; }
 
-        FORAY_PROPERTY_CGET(CreateInfo)
-        FORAY_PROPERTY_CGET(Image)
-        FORAY_PROPERTY_CGET(ImageView)
-        FORAY_PROPERTY_CGET(Allocation)
-        FORAY_PROPERTY_CGET(AllocInfo)
-        FORAY_PROPERTY_CGET(Format)
-        FORAY_PROPERTY_CGET(Extent3D)
-        FORAY_PROPERTY_CGET(Name)
+        FORAY_GETTER_CR(CreateInfo)
+        FORAY_GETTER_V(Image)
+        FORAY_GETTER_V(ImageView)
+        FORAY_GETTER_V(Allocation)
+        FORAY_GETTER_CR(AllocInfo)
+        FORAY_GETTER_V(Format)
+        FORAY_GETTER_CR(Extent3D)
+        inline VkExtent2D GetExtent2D() const { return VkExtent2D{mExtent3D.width, mExtent3D.height}; }
 
         virtual void SetName(std::string_view name) override;
 

@@ -19,7 +19,7 @@ namespace foray::scene::gcomp {
 
         inline virtual ~MaterialManager() { Destroy(); }
 
-        FORAY_PROPERTY_ALLGET(Buffer)
+        FORAY_GETTER_CR(Buffer)
 
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer().GetVkDescriptorBufferInfo(); }
         inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer().GetBuffer(); }

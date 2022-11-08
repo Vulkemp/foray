@@ -24,10 +24,10 @@ namespace foray::base {
         /// @brief Set the function receiving vulkan validation messages
         VulkanInstance& SetDebugCallbackFunc(PFN_vkDebugUtilsMessengerCallbackEXT debugCallbackFunc);
         
-        FORAY_PROPERTY_ALL(DebugUserData)
-        FORAY_PROPERTY_ALL(EnableDebugLayersAndCallbacks)
-        FORAY_PROPERTY_ALL(Instance)
-        FORAY_PROPERTY_ALL(Context)
+        FORAY_PROPERTY_V(DebugUserData)
+        FORAY_PROPERTY_V(EnableDebugLayersAndCallbacks)
+        FORAY_PROPERTY_R(Instance)
+        FORAY_PROPERTY_V(Context)
 
         inline operator bool() const { return !!mInstance.instance; }
         inline operator VkInstance() const { return mInstance.instance; }
@@ -52,6 +52,9 @@ namespace foray::base {
 
         /// @brief If true, validation layers are enabled, and if mDebugCallbackFunc or mDebugUserData are set they are passed on to the builder respectively
         bool mEnableDebugLayersAndCallbacks = true;
+
+        // TODO Joseph: Add shader printf support
+        bool mEnableShaderPrintf = false;
 
         core::Context* mContext = nullptr;
 

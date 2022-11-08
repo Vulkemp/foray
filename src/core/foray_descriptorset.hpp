@@ -85,8 +85,8 @@ namespace foray::core {
 
         bool Exists() const override { return mDescriptorSet != VK_NULL_HANDLE; }
 
-        FORAY_PROPERTY_GET(DescriptorSet)
-        FORAY_PROPERTY_GET(DescriptorSetLayout)
+        FORAY_GETTER_V(DescriptorSet)
+        FORAY_GETTER_V(DescriptorSetLayout)
 
       protected:
         struct DescriptorInfo

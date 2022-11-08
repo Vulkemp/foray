@@ -20,12 +20,11 @@ namespace foray::base {
         DefaultAppBase();
         virtual ~DefaultAppBase() = default;
 
-        FORAY_PROPERTY_ALLGET(RenderLoop)
-        FORAY_PROPERTY_ALLGET(OsManager)
-        FORAY_PROPERTY_ALLGET(Instance)
-        FORAY_PROPERTY_ALLGET(Device)
-        FORAY_PROPERTY_ALLGET(WindowSwapchain)
-        FORAY_PROPERTY_SET(Context)
+        FORAY_GETTER_MR(RenderLoop)
+        FORAY_GETTER_MR(OsManager)
+        FORAY_GETTER_MR(Instance)
+        FORAY_GETTER_MR(Device)
+        FORAY_GETTER_MR(WindowSwapchain)
 
         /// @brief Runs through the entire application lifetime
         int32_t Run();

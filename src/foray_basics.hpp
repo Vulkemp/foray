@@ -38,40 +38,21 @@ namespace foray {
 #endif
 }  // namespace foray
 
-#define FORAY_PROPERTY_GET(member)                                                                                                                                                   \
-    inline auto& Get##member()                                                                                                                                                     \
-    {                                                                                                                                                                              \
-        return m##member;                                                                                                                                                          \
-    }
-#define FORAY_PROPERTY_CGET(member)                                                                                                                                                  \
-    inline const auto& Get##member() const                                                                                                                                         \
-    {                                                                                                                                                                              \
-        return m##member;                                                                                                                                                          \
-    }
-#define FORAY_PROPERTY_SET(member)                                                                                                                                                   \
-    template <typename TIn>                                                                                                                                                        \
-    inline auto& Set##member(const TIn& value)                                                                                                                                     \
-    {                                                                                                                                                                              \
-        m##member = value;                                                                                                                                                         \
-        return *this;                                                                                                                                                              \
-    }
-
-#define FORAY_PROPERTY_ALL(member)                                                                                                                                                   \
-    FORAY_PROPERTY_GET(member)                                                                                                                                                       \
-    FORAY_PROPERTY_CGET(member)                                                                                                                                                      \
-    FORAY_PROPERTY_SET(member)
-
-#define FORAY_PROPERTY_ALLGET(member)                                                                                                                                                \
-    FORAY_PROPERTY_GET(member)                                                                                                                                                       \
-    FORAY_PROPERTY_CGET(member)
-
-#ifdef FORAY_ALTERNATIVE_PROPERTY_MACROS
 /// @brief Return value
 #define FORAY_GETTER_V(member)                                                                                                                                                     \
     inline auto Get##member() const                                                                                                                                                \
     {                                                                                                                                                                              \
         return m##member;                                                                                                                                                          \
     }
+/// @brief set by passing a value
+#define FORAY_SETTER_V(member)                                                                                                                                                     \
+    template <typename TIn>                                                                                                                                                        \
+    inline auto& Set##member(TIn value)                                                                                                                                            \
+    {                                                                                                                                                                              \
+        m##member = value;                                                                                                                                                         \
+        return *this;                                                                                                                                                              \
+    }
+
 /// @brief Return mutable reference
 #define FORAY_GETTER_MR(member)                                                                                                                                                    \
     inline auto& Get##member()                                                                                                                                                     \
@@ -92,24 +73,20 @@ namespace foray {
         m##member = value;                                                                                                                                                         \
         return *this;                                                                                                                                                              \
     }
-/// @brief set by passing a value
-#define FORAY_SETTER_V(member)                                                                                                                                                     \
-    template <typename TIn>                                                                                                                                                        \
-    inline auto& Set##member(TIn value)                                                                                                                                            \
-    {                                                                                                                                                                              \
-        m##member = value;                                                                                                                                                         \
-        return *this;                                                                                                                                                              \
-    }
+
+/// @brief Shorthand for mutable & constant reference getters
+#define FORAY_GETTER_R(member)                                                                                                                                                     \
+    FORAY_GETTER_MR(member)                                                                                                                                                        \
+    FORAY_GETTER_CR(member)
+
 
 /// @brief Getter+Setter shorthand for value types
-#define FORAY_PROPERTY_V(member)\
-    FORAY_GETTER_V(member)\
+#define FORAY_PROPERTY_V(member)                                                                                                                                                   \
+    FORAY_GETTER_V(member)                                                                                                                                                         \
     FORAY_SETTER_V(member)
 
 /// @brief Getter+Setter shorthand for reference types
-#define FORAY_PROPERTY_R(member)\
-    FORAY_GETTER_MR(member)\
-    FORAY_GETTER_CR(member)\
+#define FORAY_PROPERTY_R(member)                                                                                                                                                   \
+    FORAY_GETTER_MR(member)                                                                                                                                                        \
+    FORAY_GETTER_CR(member)                                                                                                                                                        \
     FORAY_SETTER_R(member)
-
-#endif

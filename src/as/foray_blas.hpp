@@ -36,10 +36,10 @@ namespace foray::as {
         inline virtual bool Exists() const override { return !mAccelerationStructure; }
         virtual void        Destroy() override;
 
-        FORAY_PROPERTY_CGET(AccelerationStructure)
-        FORAY_PROPERTY_CGET(BlasAddress)
-        FORAY_PROPERTY_CGET(BlasMemory)
-        FORAY_PROPERTY_CGET(Mesh)
+        FORAY_GETTER_V(AccelerationStructure)
+        FORAY_GETTER_V(BlasAddress)
+        FORAY_GETTER_CR(BlasMemory)
+        FORAY_GETTER_V(Mesh)
 
       protected:
         core::Context*             mContext = nullptr;

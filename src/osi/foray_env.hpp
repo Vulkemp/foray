@@ -66,8 +66,8 @@ namespace foray::osi {
         bool     IsRelative() const;
         Utf8Path MakeAbsolute() const;
 
-        FORAY_PROPERTY_CGET(Path)
-        FORAY_PROPERTY_CGET(PathSections)
+        FORAY_GETTER_V(Path)
+        FORAY_GETTER_CR(PathSections)
     };
 }  // namespace foray::osi
 

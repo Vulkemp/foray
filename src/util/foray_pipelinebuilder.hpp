@@ -18,20 +18,20 @@ namespace foray::util {
 
         VkPipeline Build();
 
-        FORAY_PROPERTY_SET(Context)
-        FORAY_PROPERTY_SET(RenderPass)
-        FORAY_PROPERTY_SET(CullMode)
-        FORAY_PROPERTY_SET(DynamicStates)
-        FORAY_PROPERTY_SET(PipelineLayout)
-        FORAY_PROPERTY_SET(DepthTestEnable)
-        FORAY_PROPERTY_SET(DepthWriteEnable)
-        FORAY_PROPERTY_SET(ColorBlendAttachmentStates)
-        FORAY_PROPERTY_SET(SampleCountFlags)
-        FORAY_PROPERTY_SET(VertexInputStateBuilder)
-        FORAY_PROPERTY_SET(PrimitiveTopology)
-        FORAY_PROPERTY_SET(ShaderStageCreateInfos)
-        FORAY_PROPERTY_SET(PipelineCache)
-        FORAY_PROPERTY_SET(ColorAttachmentBlendCount)
+        FORAY_PROPERTY_V(Context)
+        FORAY_PROPERTY_V(RenderPass)
+        FORAY_PROPERTY_V(CullMode)
+        FORAY_PROPERTY_V(DynamicStates)
+        FORAY_PROPERTY_V(PipelineLayout)
+        FORAY_PROPERTY_V(DepthTestEnable)
+        FORAY_PROPERTY_V(DepthWriteEnable)
+        FORAY_PROPERTY_V(ColorBlendAttachmentStates)
+        FORAY_PROPERTY_V(SampleCountFlags)
+        FORAY_PROPERTY_V(VertexInputStateBuilder)
+        FORAY_PROPERTY_V(PrimitiveTopology)
+        FORAY_PROPERTY_V(ShaderStageCreateInfos)
+        FORAY_PROPERTY_V(PipelineCache)
+        FORAY_PROPERTY_V(ColorAttachmentBlendCount)
 
       protected:
         core::Context* mContext{};

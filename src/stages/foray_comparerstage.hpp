@@ -60,8 +60,8 @@ namespace foray::stages {
         virtual void SetInput(uint32_t index, const InputInfo& input);
 
         /// @brief Value between 0...1 defining the split value
-        FORAY_PROPERTY_ALL(MixValue)
-        FORAY_PROPERTY_CGET(PipetteValue)
+        FORAY_PROPERTY_V(MixValue)
+        FORAY_GETTER_CR(PipetteValue)
 
       protected:
         struct SubStage

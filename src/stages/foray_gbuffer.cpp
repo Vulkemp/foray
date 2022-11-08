@@ -329,7 +329,7 @@ namespace foray::stages {
             // This is important, as color write mask will otherwise be 0x0 and you
             // won't see anything rendered to the attachment
             .SetColorAttachmentBlendCount((size_t)EOutput::MaxEnum - 1)
-            .SetPipelineLayout(mPipelineLayout)
+            .SetPipelineLayout(mPipelineLayout.GetPipelineLayout())
             .SetVertexInputStateBuilder(&vertexInputStateBuilder)
             .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
             .SetPipelineCache(mContext->PipelineCache)
@@ -508,8 +508,9 @@ namespace foray::stages {
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
         // Instanced object
-        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
+        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
         auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         if(!!mBenchmark)

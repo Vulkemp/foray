@@ -29,7 +29,7 @@ namespace foray::stages {
             VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mContext->GetSwapchainSize(), OutputName);
         mOutput.Create(mContext, ci);
-        mImageOutputs[mOutput.GetName()] = &mOutput;
+        mImageOutputs[std::string(mOutput.GetName())] = &mOutput;
     }
     void ComparerStage::LoadShaders()
     {

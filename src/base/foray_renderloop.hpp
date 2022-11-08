@@ -124,10 +124,10 @@ namespace foray::base {
         RenderLoop& SetPollEventsFunc(PollEventsFunctionPointer func);
         RenderLoop& SetOnStateChangedFunc(OnStateChangedFunctionPointer func);
 
-        FORAY_PROPERTY_CGET(State)
+        FORAY_GETTER_V(State)
 
-        FORAY_PROPERTY_GET(FrameTiming)
-        FORAY_PROPERTY_ALL(MaxFrameTimeAge)
+        FORAY_GETTER_MR(FrameTiming)
+        FORAY_PROPERTY_V(MaxFrameTimeAge)
 
       protected:
         void AdvanceState();

@@ -6,7 +6,7 @@ namespace foray::scene::gcomp {
         if(mPlaybackConfig.Enable)
         {
             base::FrameRenderInfo animationUpdateInfo(updateInfo.RenderInfo);
-            animationUpdateInfo.GetFrameTime() *= mPlaybackConfig.PlaybackSpeed;
+            animationUpdateInfo.SetFrameTime(animationUpdateInfo.GetFrameTime() * mPlaybackConfig.PlaybackSpeed);
 
             for(auto& animation : mAnimations)
             {

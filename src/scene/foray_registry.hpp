@@ -55,16 +55,12 @@ namespace foray::scene {
         inline virtual ~Registry() { Destroy(); }
 
         /// @brief The root registry manages global callbacks invokable on the components
-        FORAY_PROPERTY_GET(CallbackDispatcher)
-        /// @brief The root registry manages global callbacks invokable on the components
-        FORAY_PROPERTY_CGET(CallbackDispatcher)
+        FORAY_GETTER_V(CallbackDispatcher)
 
         inline Registry& SetCallbackDispatcher(CallbackDispatcher* rootRegistry);
 
         /// @brief All components attached to the registry
-        FORAY_PROPERTY_GET(Components)
-        /// @brief All components attached to the registry
-        FORAY_PROPERTY_CGET(Components)
+        FORAY_GETTER_CR(Components)
 
       protected:
         CallbackDispatcher*     mCallbackDispatcher = nullptr;

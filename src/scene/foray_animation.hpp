@@ -90,12 +90,12 @@ namespace foray::scene {
     class Animation
     {
       public:
-        FORAY_PROPERTY_ALL(Name)
-        FORAY_PROPERTY_ALLGET(Samplers)
-        FORAY_PROPERTY_ALLGET(Channels)
-        FORAY_PROPERTY_ALL(Start)
-        FORAY_PROPERTY_ALL(End)
-        FORAY_PROPERTY_ALL(PlaybackConfig)
+        FORAY_PROPERTY_R(Name)
+        FORAY_PROPERTY_R(Samplers)
+        FORAY_PROPERTY_R(Channels)
+        FORAY_PROPERTY_V(Start)
+        FORAY_PROPERTY_V(End)
+        FORAY_PROPERTY_V(PlaybackConfig)
 
         void Update(const base::FrameRenderInfo&);
 

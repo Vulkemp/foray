@@ -18,14 +18,14 @@ namespace foray::scene::gcomp {
 
         void Destroy();
 
-        FORAY_PROPERTY_ALL(Indices)
-        FORAY_PROPERTY_ALL(Vertices)
-        FORAY_PROPERTY_ALL(IndicesBuffer)
-        FORAY_PROPERTY_ALL(VerticesBuffer)
+        FORAY_PROPERTY_R(Indices)
+        FORAY_PROPERTY_R(Vertices)
+        FORAY_PROPERTY_R(IndicesBuffer)
+        FORAY_PROPERTY_R(VerticesBuffer)
 
         virtual ~GeometryStore() { Destroy(); }
 
-        FORAY_PROPERTY_ALL(Meshes)
+        FORAY_PROPERTY_R(Meshes)
 
         bool                   CmdBindBuffers(VkCommandBuffer commandBuffer);
         VkDescriptorBufferInfo GetVertexBufferDescriptorInfo() const { return mVerticesBuffer.GetVkDescriptorBufferInfo(); }

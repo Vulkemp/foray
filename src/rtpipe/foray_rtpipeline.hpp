@@ -17,12 +17,12 @@ namespace foray::rtpipe {
       public:
         RtPipeline();
 
-        FORAY_PROPERTY_ALLGET(RaygenSbt)
-        FORAY_PROPERTY_ALLGET(HitSbt)
-        FORAY_PROPERTY_ALLGET(MissSbt)
-        FORAY_PROPERTY_ALLGET(CallablesSbt)
-        FORAY_PROPERTY_ALLGET(Pipeline)
-        FORAY_PROPERTY_ALLGET(PipelineLayout)
+        FORAY_GETTER_R(RaygenSbt)
+        FORAY_GETTER_R(HitSbt)
+        FORAY_GETTER_R(MissSbt)
+        FORAY_GETTER_R(CallablesSbt)
+        FORAY_GETTER_V(Pipeline)
+        FORAY_PROPERTY_V(PipelineLayout)
 
         /// @brief Builds RtPipeline with shaders and shadergroups as defined in Sbt wrappers and builds Sbts.
         void Build(core::Context* context, VkPipelineLayout pipelineLayout);

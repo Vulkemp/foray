@@ -9,7 +9,7 @@ namespace foray::util {
       public:
         inline size_t SizeOfUbo() const { return mUboBuffer.GetDeviceBuffer().GetSize(); }
 
-        FORAY_PROPERTY_ALLGET(UboBuffer)
+        FORAY_PROPERTY_R(UboBuffer)
 
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
@@ -17,7 +17,7 @@ namespace foray::util {
         virtual bool Exists() const override;
         virtual void Destroy() override;
 
-        core::ManagedBuffer* GetDeviceBuffer() { return &(mUboBuffer.GetDeviceBuffer()); }
+        const core::ManagedBuffer* GetDeviceBuffer() const { return &(mUboBuffer.GetDeviceBuffer()); }
 
         operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
 
@@ -49,7 +49,7 @@ namespace foray::util {
         virtual void UpdateTo(uint32_t frameIndex) override;
 
 
-        FORAY_PROPERTY_ALL(Data)
+        FORAY_PROPERTY_R(Data)
     };
 
     template <typename T_UBO>

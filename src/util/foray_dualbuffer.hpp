@@ -48,14 +48,14 @@ namespace foray::util {
 
         inline bool Exists() const { return mDeviceBuffer.Exists(); }
 
-        inline std::string_view GetName() const { return mDeviceBuffer.GetName(); }
+        inline std::string GetName() const { return mDeviceBuffer.GetName(); }
         DualBuffer& SetName(std::string_view name);
 
         void Destroy();
 
         inline virtual ~DualBuffer() { Destroy(); }
 
-        FORAY_PROPERTY_ALLGET(DeviceBuffer)
+        FORAY_GETTER_CR(DeviceBuffer)
 
       protected:
         /// @brief Memory locations the permanently mapped staging buffers are mapped to

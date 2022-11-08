@@ -11,7 +11,7 @@ namespace foray::scene::gcomp {
     class CameraManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
-        FORAY_PROPERTY_ALLGET(Ubo)
+        FORAY_GETTER_CR(Ubo)
 
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mUbo.GetVkDescriptorBufferInfo(); }
 

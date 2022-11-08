@@ -43,9 +43,9 @@ namespace foray::core {
 
         inline operator VkSampler() const { return mSampler; }
 
-        FORAY_PROPERTY_CGET(Sampler)
-        FORAY_PROPERTY_CGET(Hash)
-        FORAY_PROPERTY_CGET(Collection)
+        FORAY_GETTER_V(Sampler)
+        FORAY_GETTER_V(Hash)
+        FORAY_GETTER_V(Collection)
       protected:
         /// @brief Sampler (owned by SamplerCollection, this is a loan)
         VkSampler mSampler = nullptr;
@@ -87,7 +87,7 @@ namespace foray::core {
             return VkDescriptorImageInfo{.sampler = mSampler, .imageView = (!!mManagedImage) ? mManagedImage->GetImageView() : nullptr, .imageLayout = layout};
         }
 
-        FORAY_PROPERTY_ALL(ManagedImage)
+        FORAY_PROPERTY_V(ManagedImage)
       protected:
         /// @brief Reference used only for descriptor image info filling
         core::ManagedImage* mManagedImage = nullptr;

@@ -34,11 +34,11 @@ namespace foray::base {
         {
         }
 
-        FORAY_PROPERTY_ALLGET(Window)
-        FORAY_PROPERTY_ALLGET(Surface)
-        FORAY_PROPERTY_ALLGET(Swapchain)
-        FORAY_PROPERTY_ALLGET(SwapchainImages)
-        FORAY_PROPERTY_ALL(Context)
+        FORAY_PROPERTY_R(Window)
+        FORAY_PROPERTY_V(Surface)
+        FORAY_PROPERTY_R(Swapchain)
+        FORAY_PROPERTY_R(SwapchainImages)
+        FORAY_PROPERTY_V(Context)
 
         /// @brief Create the Window
         void        CreateWindow();

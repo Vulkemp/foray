@@ -57,8 +57,8 @@ namespace foray::util {
 
         virtual inline ~ImageLoader() { Destroy(); }
 
-        FORAY_PROPERTY_ALLGET(Info)
-        FORAY_PROPERTY_ALLGET(RawData)
+        FORAY_GETTER_CR(Info)
+        FORAY_GETTER_CR(RawData)
 
         inline void InitManagedImage(core::Context*          context,
                                      core::ManagedImage*             image,
