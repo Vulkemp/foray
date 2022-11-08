@@ -14,7 +14,7 @@ namespace foray::stages {
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 
-        virtual void SetTargetImage(core::ManagedImage* newTargetImage);
+        virtual void SetBackgroundImage(core::ManagedImage* backgroundImage);
 
         /// @brief Add a function that renders an imgui window. Example:
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }

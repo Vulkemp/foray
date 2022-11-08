@@ -29,6 +29,12 @@ namespace foray::util {
         DualBuffer mUboBuffer;
     };
 
+    /// @brief Template class for managing a UBO. For Host -> Device synchronization this utilises a DualBuffer
+    /// @details
+    /// # Usage
+    ///  * GetData() / mData can be used like any normal object
+    ///  * Every frame, call UpdateTo() to copy the entire UBO to the staging buffer, and CmdCopyToDevice to later copy from staging to device
+    /// @tparam T_UBO 
     template <typename T_UBO>
     class ManagedUbo : public ManagedUboBase
     {

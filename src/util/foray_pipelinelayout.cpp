@@ -38,9 +38,9 @@ namespace foray::util {
     }
     void PipelineLayout::AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges)
     {
-        for(VkPushConstantRange range : ranges)
+        for(const VkPushConstantRange& range : ranges)
         {
-            mPushConstantRanges.push_back(range);
+            AddPushConstantRange(range);
         }
     }
 
@@ -70,7 +70,7 @@ namespace foray::util {
             ci.pSetLayouts    = mDescriptorSetLayouts.data();
         }
 
-        AssertVkResult(vkCreatePipelineLayout(mContext->Device(), &ci, nullptr, &mPipelineLayout));
+        AssertVkResult(mContext->VkbDispatchTable->createPipelineLayout(&ci, nullptr, &mPipelineLayout));
 
         return mPipelineLayout;
     }

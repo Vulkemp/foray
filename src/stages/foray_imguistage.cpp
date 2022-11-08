@@ -184,7 +184,7 @@ namespace foray::stages {
         PrepareRenderpass();
     }
 
-    void ImguiStage::SetTargetImage(core::ManagedImage* newTargetImage)
+    void ImguiStage::SetBackgroundImage(core::ManagedImage* newTargetImage)
     {
         mTargetImage = newTargetImage;
         DestroyFrameBufferAndRenderPass();

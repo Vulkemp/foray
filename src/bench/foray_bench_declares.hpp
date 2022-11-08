@@ -5,4 +5,5 @@ namespace foray::bench {
     class BenchmarkLog;
     class BenchmarkBase;
     class HostBenchmark;
+    class DeviceBenchmark;
 }  // namespace foray

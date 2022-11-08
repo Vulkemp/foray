@@ -25,21 +25,18 @@ namespace foray {
 
         inline virtual const char* what() const noexcept override { return mReason.c_str(); }
 
-        // /// @brief Throws an exception (by value, catch via "const std::exception& ex") with a generic error message. Avoid use.
-        // [[ noreturn ]] static void Throw();
-        // /// @brief Throws an exception (by value, catch via "const std::exception& ex") with a user defined error message
-        // [[ noreturn ]] static void Throw(std::string_view reason);
-        // /// @brief Throws an exception (by value, catch via "const std::exception& ex") with a user defined error message
-        // template <typename... Args>
-        // [[ noreturn ]] inline static void Throw(const char* const format, Args&&... args)
-        // {
-        //     std::string reason = fmt::vformat(format, fmt::make_format_args(std::forward<Args>(args)...));
-        //     Throw(reason);
-        // }
-
-        /// @brief Throws an exception (by value, catch via "const std::exception& ex") including location information with a user defined error message
+        /// @brief Throws an exception 
+        /// @details 
+        /// All throwing should be values, catch via "const std::exception& ex".
+        /// @param reason User defined error message
+        /// @param location Automatically generated source location
         [[ noreturn ]] static void Throw(std::string_view reason, const source_location location = source_location::current());
-        /// @brief Throws an exception (by value, catch via "const std::exception& ex") including location information with a user defined error message
+        /// @brief Throws an exception 
+        /// @details 
+        /// All throwing should be values, catch via "const std::exception& ex".
+        /// @param reason User defined error message
+        /// @param location source location
+        /// @param args format args
         template <typename... Args>
         [[ noreturn ]] inline static void Throw(const source_location location, const char* const format, Args&&... args)
         {

@@ -19,6 +19,10 @@ namespace foray::util {
     };
 
     /// @brief General purpose image loader
+    /// @details
+    /// # Supported File Types
+    ///  * PNG, JPG, BMP, HDR via StbImage (plus a few other, see <tinygltf/stb_image.h>)
+    ///  * EXR via TinyExr
     template <VkFormat FORMAT>
     class ImageLoader
     {
@@ -28,8 +32,6 @@ namespace foray::util {
         class ImageInfo : public NoMoveDefaults
         {
           public:
-            using FORMAT_TRAITS = ImageFormatTraits<FORMAT>;
-
             bool                       Valid     = false;
             std::string                Utf8Path  = "";
             std::string                Extension = "";

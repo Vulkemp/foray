@@ -1,4 +1,5 @@
 #include "foray_gbuffer.hpp"
+#include "../bench/foray_devicebenchmark.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
@@ -9,10 +10,6 @@
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
 
-#ifdef ENABLE_GBUFFER_BENCH
-#pragma message "Gbuffer Benching enabled. Added synchronisation scopes may cause reduced performance!"
-#endif  // ENABLE_GBUFFER_BENCH
-
 const uint32_t GBUFFER_SHADER_VERT[] =
 #include "foray_gbuffer.vert.spv.h"
     ;
@@ -22,13 +19,13 @@ const uint32_t GBUFFER_SHADER_FRAG[] =
 
 namespace foray::stages {
     inline constexpr std::string_view OutputNames[] = {GBufferStage::PositionOutputName, GBufferStage::NormalOutputName,      GBufferStage::AlbedoOutputName,
-                                                       GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName, GBufferStage::LinearZOutputName,
-                                                       GBufferStage::DepthOutputName};
+                                                       GBufferStage::MotionOutputName,   GBufferStage::MaterialIdxOutputName, GBufferStage::MeshInstanceIdOutputName,
+                                                       GBufferStage::LinearZOutputName,  GBufferStage::DepthOutputName};
 
 #pragma region Init
 
     // Heavily inspired from Sascha Willems' "deferred" vulkan example
-    void GBufferStage::Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath, std::string_view fragmentShaderPath)
+    void GBufferStage::Init(core::Context* context, scene::Scene* scene, std::string_view vertexShaderPath, std::string_view fragmentShaderPath, bench::DeviceBenchmark* benchmark)
     {
         mContext            = context;
         mScene              = scene;
@@ -37,11 +34,13 @@ namespace foray::stages {
 
         CreateImages();
         PrepareRenderpass();
-#ifdef ENABLE_GBUFFER_BENCH
-        std::vector<const char*> timestampNames(
-            {bench::BenchmarkTimestamp::BEGIN, TIMESTAMP_VERT_BEGIN, TIMESTAMP_VERT_END, TIMESTAMP_FRAG_BEGIN, TIMESTAMP_FRAG_END, bench::BenchmarkTimestamp::END});
-        mBenchmark.Create(mContext, timestampNames);
-#endif  // ENABLE_GBUFFER_BENCH
+        if(!!benchmark)
+        {
+            mBenchmark = benchmark;
+            std::vector<const char*> timestampNames(
+                {bench::BenchmarkTimestamp::BEGIN, TIMESTAMP_VERT_BEGIN, TIMESTAMP_VERT_END, TIMESTAMP_FRAG_BEGIN, TIMESTAMP_FRAG_END, bench::BenchmarkTimestamp::END});
+            mBenchmark->Create(mContext, timestampNames);
+        }
         SetupDescriptors();
         CreateDescriptorSets();
         CreatePipelineLayout();
@@ -64,7 +63,7 @@ namespace foray::stages {
         {
             PerImageInfo& info                         = mImageInfos[i];
             info.Output                                = (EOutput)i;
-            info.ClearValue = defaultClearValue;
+            info.ClearValue                            = defaultClearValue;
             mImageOutputs[std::string(OutputNames[i])] = &(info.Image);
         }
 
@@ -344,9 +343,10 @@ namespace foray::stages {
 
     void GBufferStage::Destroy()
     {
-#ifdef ENABLE_GBUFFER_BENCH
-        mBenchmark.Destroy();
-#endif  // ENABLE_GBUFFER_BENCH
+        if(!!mBenchmark)
+        {
+            mBenchmark->Destroy();
+        }
         VkDevice device = mContext->Device();
         if(mPipeline)
         {
@@ -402,11 +402,12 @@ namespace foray::stages {
     void GBufferStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
 
-#ifdef ENABLE_GBUFFER_BENCH
         uint32_t frameNum = renderInfo.GetFrameNumber();
-        mBenchmark.CmdResetQuery(commandBuffer, frameNum);
-        mBenchmark.CmdWriteTimestamp(commandBuffer, frameNum, bench::BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-#endif  // ENABLE_GBUFFER_BENCH
+        if(!!mBenchmark)
+        {
+            mBenchmark->CmdResetQuery(cmdBuffer, frameNum);
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, bench::BenchmarkTimestamp::BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+        }
 
         VkImageMemoryBarrier2 attachmentMemBarrier{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
@@ -511,19 +512,21 @@ namespace foray::stages {
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &mDescriptorSet.GetDescriptorSet(), 0, nullptr);
 
         auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-#ifdef ENABLE_GBUFFER_BENCH
-        mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_VERT_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-        mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_VERT_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
-        mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-        mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-#endif  // ENABLE_GBUFFER_BENCH
+        if(!!mBenchmark)
+        {
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_VERT_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_VERT_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT);
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+        }
 
         mScene->Draw(renderInfo, mPipelineLayout, cmdBuffer);
 
         vkCmdEndRenderPass(cmdBuffer);
-#ifdef ENABLE_GBUFFER_BENCH
-        mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, bench::BenchmarkTimestamp::END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-#endif  // ENABLE_GBUFFER_BENCH
+        if(!!mBenchmark)
+        {
+            mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, bench::BenchmarkTimestamp::END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+        }
 
         // The GBuffer determines the images layouts
 
