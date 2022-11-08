@@ -6,10 +6,11 @@
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
-
+    /// @brief Maintains a list of PunctualLight components
     class LightManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
+        /// @brief Collects lights and reuploads to device
         void CreateOrUpdate();
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
@@ -17,8 +18,8 @@ namespace foray::scene::gcomp {
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
       protected:
-        std::vector<SimpleLight>                                   mSimplifiedlights;
+        std::vector<SimpleLight>                            mSimplifiedlights;
         std::unordered_map<ncomp::PunctualLight*, uint32_t> mComponentArrayBindings;
-        util::DualBuffer                                               mBuffer;
+        util::DualBuffer                                    mBuffer;
     };
 }  // namespace foray::scene::gcomp

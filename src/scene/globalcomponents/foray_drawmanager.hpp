@@ -13,17 +13,16 @@ namespace foray::scene::gcomp {
         uint32_t                   TransformOffset = 0;
     };
 
+    /// @brief Manages a collection of mesh instances, current and previous model matrices
     class DrawDirector : public GlobalComponent, public Component::UpdateCallback, public Component::DrawCallback
     {
       public:
         inline DrawDirector() {}
 
+        /// @brief Collects mesh instances and rebuilds transform buffers
         void InitOrUpdate();
 
         virtual int32_t GetOrder() const override { return ORDER_TRANSFORM; }
-
-        void CreateBuffers(size_t transformCount);
-        void DestroyBuffers();
 
         virtual void Update(SceneUpdateInfo&) override;
         virtual void Draw(SceneDrawInfo&) override;
@@ -41,6 +40,9 @@ namespace foray::scene::gcomp {
       protected:
         util::DualBuffer    mCurrentTransformBuffer;
         core::ManagedBuffer mPreviousTransformBuffer;
+
+        void CreateBuffers(size_t transformCount);
+        void DestroyBuffers();
 
         /// @brief Draw Op structs store draw operation
         std::vector<DrawOp> mDrawOps    = {};

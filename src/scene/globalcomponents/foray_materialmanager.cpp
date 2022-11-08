@@ -1,11 +1,11 @@
-#include "foray_materialbuffer.hpp"
+#include "foray_materialmanager.hpp"
 
 namespace foray::scene::gcomp {
-    MaterialBuffer::MaterialBuffer(core::Context* context) : mBuffer(context, false)
+    MaterialManager::MaterialManager(core::Context* context) : mBuffer(context, false)
     {
-        mBuffer.GetBuffer().SetName("MaterialBuffer");
+        mBuffer.GetBuffer().SetName("MaterialManager");
     }
-    void MaterialBuffer::UpdateDeviceLocal()
+    void MaterialManager::UpdateDeviceLocal()
     {
         if(!mBuffer.GetVector().size())
         {
@@ -14,7 +14,7 @@ namespace foray::scene::gcomp {
         }
         mBuffer.InitOrUpdate();
     }
-    void MaterialBuffer::Destroy()
+    void MaterialManager::Destroy()
     {
         mBuffer.Destroy();
     }

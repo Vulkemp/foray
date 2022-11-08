@@ -15,9 +15,9 @@ namespace foray::scene {
     }  // namespace ncomp
     namespace gcomp {
         class GeometryStore;
-        class MaterialBuffer;
-        class TextureStore;
-        class AnimationDirector;
+        class MaterialManager;
+        class TextureManager;
+        class AnimationManager;
     }  // namespace gcomp
     struct SceneDrawInfo;
     class Animation;

@@ -1,5 +1,5 @@
 #include "../foray_logger.hpp"
-#include "../scene/globalcomponents/foray_animationdirector.hpp"
+#include "../scene/globalcomponents/foray_animationmanager.hpp"
 #include "foray_modelconverter.hpp"
 #include <map>
 #include <spdlog/fmt/fmt.h>
@@ -7,7 +7,7 @@
 namespace foray::gltf {
     void ModelConverter::LoadAnimations()
     {
-        scene::gcomp::AnimationDirector* animDirector = mScene->GetComponent<scene::gcomp::AnimationDirector>();
+        scene::gcomp::AnimationManager* animDirector = mScene->GetComponent<scene::gcomp::AnimationManager>();
 
         std::map<std::string_view, scene::EAnimationInterpolation> interpolationMap = {
             {"LINEAR", scene::EAnimationInterpolation::Linear}, {"STEP", scene::EAnimationInterpolation::Step}, {"CUBICSPLINE", scene::EAnimationInterpolation::Cubicspline}};
@@ -21,7 +21,7 @@ namespace foray::gltf {
 
         if(mGltfModel.animations.size() && !animDirector)
         {
-            animDirector = mScene->MakeComponent<scene::gcomp::AnimationDirector>();
+            animDirector = mScene->MakeComponent<scene::gcomp::AnimationManager>();
         }
         for(int32_t i = 0; i < mGltfModel.animations.size(); i++)
         {

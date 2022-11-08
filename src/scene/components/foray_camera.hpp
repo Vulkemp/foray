@@ -5,7 +5,9 @@
 #include <array>
 
 namespace foray::scene::ncomp {
+    /// TODO: Get view matrix from node transform
 
+    /// @brief Defines a camera with projection matrix
     class Camera : public NodeComponent, public Component::OnResizedCallback
     {
       public:

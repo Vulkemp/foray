@@ -6,6 +6,7 @@
 #include <vector>
 
 namespace foray::scene {
+    /// @brief Interpolation mode defines how values are interpolated between keyframes
     enum class EAnimationInterpolation
     {
         Linear,
@@ -13,6 +14,7 @@ namespace foray::scene {
         Cubicspline
     };
 
+    /// @brief Target path defines which aspect of a nodes transforms the animation channel targets
     enum class EAnimationTargetPath
     {
         Translation,
@@ -20,6 +22,7 @@ namespace foray::scene {
         Scale
     };
 
+    /// @brief A set of values at a time point
     struct AnimationKeyframe
     {
       public:
@@ -36,10 +39,17 @@ namespace foray::scene {
         glm::vec4 OutTangent;
     };
 
+    /// @brief A collection of keyframes
     struct AnimationSampler
     {
       public:
+        /// @brief Get an interpolated sample
+        /// @param time Timepoint
+        /// @return Translation or Scale vector
         glm::vec3 SampleVec(float time) const;
+        /// @brief Get an interpolated sample
+        /// @param time Timepoint
+        /// @return Rotation quaternion
         glm::quat SampleQuat(float time) const;
 
         static glm::vec4 InterpolateStep(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper);
@@ -54,6 +64,8 @@ namespace foray::scene {
       protected:
         void SelectKeyframe(float time, const AnimationKeyframe*& lower, const AnimationKeyframe*& upper) const;
     };
+
+    /// @brief A channel is the animation of a single node property
     struct AnimationChannel
     {
       public:

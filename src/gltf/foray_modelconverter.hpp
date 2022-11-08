@@ -69,9 +69,9 @@ namespace foray::gltf {
 
         scene::Scene* mScene = nullptr;
 
-        scene::gcomp::MaterialBuffer& mMaterialBuffer;
+        scene::gcomp::MaterialManager& mMaterialBuffer;
         scene::gcomp::GeometryStore&  mGeo;
-        scene::gcomp::TextureStore&   mTextures;
+        scene::gcomp::TextureManager&   mTextures;
         bench::HostBenchmark   mBenchmark;
 
         void RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent = nullptr);

@@ -1,4 +1,4 @@
-#include "../scene/globalcomponents/foray_materialbuffer.hpp"
+#include "../scene/globalcomponents/foray_materialmanager.hpp"
 #include "foray_modelconverter.hpp"
 
 namespace foray::gltf {

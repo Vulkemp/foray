@@ -10,9 +10,9 @@
 namespace foray::gltf {
     ModelConverter::ModelConverter(scene::Scene* scene)
         : mScene(scene)
-        , mMaterialBuffer(*(scene->GetComponent<scene::gcomp::MaterialBuffer>()))
+        , mMaterialBuffer(*(scene->GetComponent<scene::gcomp::MaterialManager>()))
         , mGeo(*(scene->GetComponent<scene::gcomp::GeometryStore>()))
-        , mTextures(*(scene->GetComponent<scene::gcomp::TextureStore>()))
+        , mTextures(*(scene->GetComponent<scene::gcomp::TextureManager>()))
     {
     }
 
@@ -303,7 +303,7 @@ namespace foray::gltf {
 
     void ModelConverter::DetectAnimatedNodes()
     {
-        scene::gcomp::AnimationDirector* animDirector = mScene->GetComponent<scene::gcomp::AnimationDirector>();
+        scene::gcomp::AnimationManager* animDirector = mScene->GetComponent<scene::gcomp::AnimationManager>();
 
         std::unordered_set<scene::Node*> animationTargets;
 

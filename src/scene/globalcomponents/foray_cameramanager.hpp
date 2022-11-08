@@ -7,6 +7,7 @@
 
 namespace foray::scene::gcomp {
 
+    /// @brief Manages the Camera matrix buffer and maintains a list of cameras in the scene
     class CameraManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:

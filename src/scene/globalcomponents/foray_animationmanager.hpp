@@ -6,8 +6,8 @@
 
 namespace foray::scene::gcomp {
 
-    
-    class AnimationDirector : public GlobalComponent, public Component::UpdateCallback
+    /// @brief Handles storage and playback of animations
+    class AnimationManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
         FORAY_PROPERTY_ALLGET(Animations)

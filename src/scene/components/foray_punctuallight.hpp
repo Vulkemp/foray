@@ -5,6 +5,7 @@
 #include "../foray_lights.hpp"
 
 namespace foray::scene::ncomp {
+    /// @brief Defines a simple punctual light (directional or point)
     class PunctualLight : public NodeComponent
     {
       public:

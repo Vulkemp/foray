@@ -7,11 +7,13 @@
 
 namespace foray::scene::gcomp {
 
+    /// @brief Stores all geometry in a single set of index and vertex buffers
     class GeometryStore : public GlobalComponent
     {
       public:
         GeometryStore();
 
+        /// @brief Rewrites Indices and Vertices from CPU side storage to the GPU buffers
         void InitOrUpdate();
 
         void Destroy();

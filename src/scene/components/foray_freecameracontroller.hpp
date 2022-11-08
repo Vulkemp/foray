@@ -5,6 +5,16 @@
 #include <unordered_map>
 
 namespace foray::scene::ncomp {
+
+    /// @brief A simple camera controller for free flight
+    /// @details
+    /// Controls:
+    ///  * W/S                      Forwards/Backwards
+    ///  * A/D Strafe               Left/Right
+    ///  * LCtrl/LShift Strafe      Up/Down
+    ///  * ScrollWheel/Numpad+/-    Increase / decrease movement speed (exponentially)
+    ///  * Arrow Keys               Pitch & Yaw
+    ///  * Space                    Toggle mouse capture for pitch & yaw
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:

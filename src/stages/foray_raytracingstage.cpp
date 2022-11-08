@@ -5,9 +5,9 @@
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/foray_scene.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
-#include "../scene/globalcomponents/foray_materialbuffer.hpp"
-#include "../scene/globalcomponents/foray_texturestore.hpp"
+#include "../scene/globalcomponents/foray_geometrymanager.hpp"
+#include "../scene/globalcomponents/foray_materialmanager.hpp"
+#include "../scene/globalcomponents/foray_texturemanager.hpp"
 #include "../scene/globalcomponents/foray_tlasmanager.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
@@ -78,8 +78,8 @@ namespace foray::stages {
 
         as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
         as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
-        auto                    materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
-        auto                    textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto                    materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
+        auto                    textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
         auto                    cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
         auto                    geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
 

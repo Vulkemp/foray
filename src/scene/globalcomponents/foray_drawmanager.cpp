@@ -1,10 +1,10 @@
-#include "foray_drawdirector.hpp"
+#include "foray_drawmanager.hpp"
 #include "../components/foray_camera.hpp"
 #include "../components/foray_meshinstance.hpp"
 #include "../components/foray_transform.hpp"
 #include "../foray_node.hpp"
 #include "../foray_scene.hpp"
-#include "../globalcomponents/foray_geometrystore.hpp"
+#include "../globalcomponents/foray_geometrymanager.hpp"
 #include <map>
 #include <spdlog/fmt/fmt.h>
 

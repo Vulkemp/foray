@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
+    /// @brief Manages a Tlas for a scene
     class TlasManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:

@@ -2,10 +2,10 @@
 #include "../core/foray_shadermanager.hpp"
 #include "../scene/components/foray_meshinstance.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
-#include "../scene/globalcomponents/foray_drawdirector.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
-#include "../scene/globalcomponents/foray_materialbuffer.hpp"
-#include "../scene/globalcomponents/foray_texturestore.hpp"
+#include "../scene/globalcomponents/foray_drawmanager.hpp"
+#include "../scene/globalcomponents/foray_geometrymanager.hpp"
+#include "../scene/globalcomponents/foray_materialmanager.hpp"
+#include "../scene/globalcomponents/foray_texturemanager.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
 
@@ -271,8 +271,8 @@ namespace foray::stages {
 
     void GBufferStage::SetupDescriptors()
     {
-        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
-        auto textureStore   = mScene->GetComponent<scene::gcomp::TextureStore>();
+        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
+        auto textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
         auto cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
         auto drawDirector   = mScene->GetComponent<scene::gcomp::DrawDirector>();
         mDescriptorSet.SetDescriptorAt(0, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT);
@@ -458,7 +458,7 @@ namespace foray::stages {
                                              .offset              = 0,
                                              .size                = VK_WHOLE_SIZE};
 
-        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialBuffer>();
+        auto materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
         auto cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
         auto drawDirector   = mScene->GetComponent<scene::gcomp::DrawDirector>();
 
@@ -518,7 +518,7 @@ namespace foray::stages {
         mBenchmark.CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_FRAG_END, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
 #endif  // ENABLE_GBUFFER_BENCH
 
-        mScene->Draw(renderInfo, mPipelineLayout, cmdBuffer);  // TODO: does pipeline has to be passed? Technically a scene could build pipelines themselves.
+        mScene->Draw(renderInfo, mPipelineLayout, cmdBuffer);
 
         vkCmdEndRenderPass(cmdBuffer);
 #ifdef ENABLE_GBUFFER_BENCH

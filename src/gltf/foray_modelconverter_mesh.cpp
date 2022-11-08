@@ -1,5 +1,5 @@
 #include "../foray_logger.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
+#include "../scene/globalcomponents/foray_geometrymanager.hpp"
 #include "foray_modelconverter.hpp"
 
 namespace foray::gltf {

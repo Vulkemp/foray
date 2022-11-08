@@ -5,12 +5,13 @@
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
-    class TextureStore : public GlobalComponent
+    /// @brief Manages textures and samplers
+    class TextureManager : public GlobalComponent
     {
       public:
         void Destroy();
 
-        virtual ~TextureStore() { Destroy(); }
+        virtual ~TextureManager() { Destroy(); }
 
         struct Texture
         {

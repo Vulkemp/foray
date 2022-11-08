@@ -3,6 +3,8 @@
 #include "../foray_component.hpp"
 
 namespace foray::scene::ncomp {
+
+    /// @brief Defines a nodes transform relative to its parent (or world origin, if no parent is set)
     class Transform : public NodeComponent
     {
       public:

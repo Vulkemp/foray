@@ -4,6 +4,7 @@
 #include "../foray_scene_declares.hpp"
 
 namespace foray::scene::ncomp {
+    /// @brief Defines an instance of a mesh
     class MeshInstance : public NodeComponent
     {
       public:
@@ -14,6 +15,5 @@ namespace foray::scene::ncomp {
       protected:
         int32_t   mInstanceIndex       = 0;
         Mesh*     mMesh                = nullptr;
-        glm::mat4 mPreviousWorldMatrix = glm::mat4(1);
     };
 }  // namespace foray
