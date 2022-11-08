@@ -19,7 +19,7 @@ namespace foray::util {
         virtual void Destroy() override;
         virtual bool Exists() const override;
 
-        FORAY_GETTER_CR(Image)
+        FORAY_GETTER_R(Image)
 
       protected:
         core::ManagedImage mImage;

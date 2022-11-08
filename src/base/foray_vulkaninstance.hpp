@@ -1,7 +1,7 @@
 #pragma once
 #include "../foray_basics.hpp"
-#include <functional>
 #include "../foray_vkb.hpp"
+#include <functional>
 
 namespace foray::base {
     /// @brief Wraps creation and lifetime of a vulkan instance. Includes default debug callback logging setup.
@@ -13,17 +13,18 @@ namespace foray::base {
 
         VulkanInstance() = default;
         /// @param beforeInstanceBuildFunc Function called after default callback configuration and before action of the instance builder
-        /// @param enableDebugLayersAndCallbacks If true, validation layers are enabled, and if mDebugCallbackFunc isn't null sets debug layers callback
+        /// @param enableDebugLayersAndCallbacks If true, validation layers are enabled, and if mDebugMessengerFunc isn't null sets debug layers callback
         inline VulkanInstance(core::Context* context, BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc, bool enableDebugLayersAndCallbacks)
             : mBeforeInstanceBuildFunc{beforeInstanceBuildFunc}, mEnableDebugLayersAndCallbacks{enableDebugLayersAndCallbacks}, mContext{context}
         {
         }
 
         /// @brief Set the function called after default callback configuration and before action of the instance builder
-        VulkanInstance& SetBeforeInstanceBuildFunc(BeforeInstanceBuildFunctionPointer beforeInstanceBuildFunc);
+        FORAY_SETTER_V(BeforeInstanceBuildFunc);
         /// @brief Set the function receiving vulkan validation messages
-        VulkanInstance& SetDebugCallbackFunc(PFN_vkDebugUtilsMessengerCallbackEXT debugCallbackFunc);
-        
+        FORAY_SETTER_V(DebugMessengerFunc);
+        FORAY_SETTER_V(DebugReportFunc);
+
         FORAY_PROPERTY_V(DebugUserData)
         FORAY_PROPERTY_V(EnableDebugLayersAndCallbacks)
         FORAY_PROPERTY_R(Instance)
@@ -41,20 +42,30 @@ namespace foray::base {
         ~VulkanInstance();
 
       protected:
-        static VkBool32 DefaultDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-                                             VkDebugUtilsMessageTypeFlagsEXT             messageTypes,
-                                             const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                             void*                                       pUserData);
+        static VkBool32 DefaultDebugMessengerCallback(VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+                                                      VkDebugUtilsMessageTypeFlagsEXT             messageTypes,
+                                                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                                      void*                                       pUserData);
 
-        BeforeInstanceBuildFunctionPointer   mBeforeInstanceBuildFunc = nullptr;
-        PFN_vkDebugUtilsMessengerCallbackEXT mDebugCallbackFunc       = &DefaultDebugCallback;
-        void*                                mDebugUserData           = nullptr;
+        static VkBool32 DefaultDebugReportCallback(VkDebugReportFlagsEXT      flags,
+                                                   VkDebugReportObjectTypeEXT objectType,
+                                                   uint64_t                   object,
+                                                   size_t                     location,
+                                                   int32_t                    messageCode,
+                                                   const char*                pLayerPrefix,
+                                                   const char*                pMessage,
+                                                   void*                      pUserData);
 
-        /// @brief If true, validation layers are enabled, and if mDebugCallbackFunc or mDebugUserData are set they are passed on to the builder respectively
+        BeforeInstanceBuildFunctionPointer   mBeforeInstanceBuildFunc   = nullptr;
+        PFN_vkDebugUtilsMessengerCallbackEXT mDebugMessengerFunc        = &DefaultDebugMessengerCallback;
+        void*                                mDebugUserData             = nullptr;
+        PFN_vkDebugReportCallbackEXT         mDebugReportFunc           = &DefaultDebugReportCallback;
+        VkDebugReportCallbackEXT             mDebugReportCallbackHandle = nullptr;
+
+        /// @brief If true, validation layers are enabled, and if mDebugMessengerFunc or mDebugUserData are set they are passed on to the builder respectively
         bool mEnableDebugLayersAndCallbacks = true;
 
-        // TODO Joseph: Add shader printf support
-        bool mEnableShaderPrintf = false;
+        bool mEnableDebugReport = true;
 
         core::Context* mContext = nullptr;
 
