@@ -1,8 +1,8 @@
 #pragma once
+#include "../base/foray_framerenderinfo.hpp"
 #include "../foray_basics.hpp"
 #include "../foray_glm.hpp"
 #include "foray_scene_declares.hpp"
-#include "../base/foray_framerenderinfo.hpp"
 #include <vector>
 
 namespace foray::scene {
@@ -87,6 +87,7 @@ namespace foray::scene {
         float Cursor = 0.f;
     };
 
+    /// @brief Represents an animation, defined by atleast one channel affecting one node property each
     class Animation
     {
       public:
@@ -97,15 +98,22 @@ namespace foray::scene {
         FORAY_PROPERTY_V(End)
         FORAY_PROPERTY_V(PlaybackConfig)
 
+        /// @brief Applies current playback state
         void Update(const base::FrameRenderInfo&);
 
       protected:
-        std::string                   mName;
+        /// @brief Animation name
+        std::string mName;
+        /// @brief Collection of samplers. These contain raw keyframe values
         std::vector<AnimationSampler> mSamplers;
+        /// @brief Collection of channels. These bind keyframe values from samplers to node properties
         std::vector<AnimationChannel> mChannels;
-        float                         mStart = {};
-        float                         mEnd   = {};
-        PlaybackConfig                mPlaybackConfig;
+        /// @brief The lowest keyframe time value
+        float mStart = {};
+        /// @brief The highest keyframe time value
+        float mEnd = {};
+        /// @brief Configuration representing current playback state
+        PlaybackConfig mPlaybackConfig;
     };
 
-}  // namespace foray
+}  // namespace foray::scene

@@ -136,14 +136,7 @@ namespace foray::stages {
         {
             auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
 
-            bufferBarriers.push_back(VkBufferMemoryBarrier2{.sType         = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
-                                                            .srcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                            .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                            .dstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-                                                            .buffer        = cameraManager->GetUbo().GetVkBuffer(),
-                                                            .offset        = 0,
-                                                            .size          = VK_WHOLE_SIZE});
+            bufferBarriers.push_back(cameraManager->GetUbo().MakeBarrierPrepareForRead(VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR, VK_ACCESS_SHADER_READ_BIT));
         }
 
         VkDependencyInfo depInfo{

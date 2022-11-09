@@ -465,8 +465,7 @@ namespace foray::stages {
 
         bufferBarrier.buffer = materialBuffer->GetVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
-        bufferBarrier.buffer = cameraManager->GetUbo().GetDeviceBuffer()->GetBuffer();
-        bufferBarriers.push_back(bufferBarrier);
+        bufferBarriers.push_back(cameraManager->GetUbo().MakeBarrierPrepareForRead(VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT));
         bufferBarrier.buffer = drawDirector->GetCurrentTransformsVkBuffer();
         bufferBarriers.push_back(bufferBarrier);
         bufferBarrier.buffer = drawDirector->GetPreviousTransformsVkBuffer();

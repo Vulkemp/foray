@@ -13,6 +13,8 @@ namespace foray::util {
 
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
+        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
+        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
         virtual void Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
         virtual bool Exists() const override;
         virtual void Destroy() override;

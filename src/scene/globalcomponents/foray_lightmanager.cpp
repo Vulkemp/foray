@@ -33,10 +33,8 @@ namespace foray::scene::gcomp {
         core::HostCommandBuffer cmdBuf;
         cmdBuf.Create(GetContext());
         cmdBuf.Begin();
-        util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
-                                                           .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
-                                                           .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        mBuffer.CmdCopyToDevice(0, cmdBuf, beforeAndAfter, beforeAndAfter);
+
+        mBuffer.CmdCopyToDevice(0, cmdBuf);
 
         cmdBuf.SubmitAndWait();
     }
@@ -53,10 +51,7 @@ namespace foray::scene::gcomp {
 
         mBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), mSimplifiedlights.data(), 0, sizeof(SimpleLight) * mSimplifiedlights.size());
 
-        util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
-                                                           .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
-                                                           .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        mBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer, beforeAndAfter, beforeAndAfter);
+        mBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
 
 }  // namespace foray::scene::gcomp

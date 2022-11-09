@@ -127,14 +127,7 @@ namespace foray::scene::gcomp {
 
         mCurrentTransformBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
 
-        util::DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-                                                   .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                   .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        util::DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-                                                  .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                  .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-
-        mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer, before, after);
+        mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer);
     }
 
     void DrawDirector::Draw(SceneDrawInfo& drawInfo)

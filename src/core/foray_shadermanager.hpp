@@ -25,7 +25,7 @@ namespace foray::core {
         static void SetInstance(ShaderManager* instance) { sInstance = instance; }
 
         /// @brief Get the shaders SpirV binary code. Automatically recompiles shader if outdated.
-        /// @param shaderSourceFilePath - The path to the source code that you wish to retrieve the SpirV binary for.
+        /// @param filePath - The path to the source code that you wish to retrieve the SpirV binary for.
         const void GetShaderBinary(osi::Utf8Path filePath, std::vector<uint8_t>& out);
 
         /// @brief Returns true if any shader was updated.
