@@ -27,6 +27,7 @@ namespace foray::base {
 
         FORAY_PROPERTY_V(DebugUserData)
         FORAY_PROPERTY_V(EnableDebugLayersAndCallbacks)
+        FORAY_PROPERTY_V(EnableDebugReport)
         FORAY_PROPERTY_R(Instance)
         FORAY_PROPERTY_V(Context)
 
