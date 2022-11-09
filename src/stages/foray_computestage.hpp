@@ -45,5 +45,7 @@ namespace foray::stages {
         inline virtual void ApiBeforeDispatch(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo, glm::uvec3& groupSize){};
 
         virtual void CreatePipeline();
+
+        virtual void ReloadShaders() override;
     };
 }  // namespace foray::stages

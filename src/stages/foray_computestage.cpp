@@ -43,6 +43,17 @@ namespace foray::stages {
 
         AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
     }
+    void ComputeStage::ReloadShaders()
+    {
+        if (!!mPipeline)
+        {
+            mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
+            mPipeline = nullptr;
+            mShader.Destroy();
+            ApiInitShader();
+            CreatePipeline();
+        }
+    } 
     void ComputeStage::Destroy() 
     {
         if (!!mPipeline)
