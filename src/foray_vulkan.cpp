@@ -3,9 +3,13 @@
 #include "core/foray_context.hpp"
 
 namespace foray {
-    std::string_view PrintVkResult(VkResult result)
+    std::string PrintVkResult(VkResult result)
     {
-        return NAMEOF_ENUM(result);
+        if (result > NAMEOF_ENUM_RANGE_MAX)
+        {
+            return fmt::format("VkResult.{}", (int32_t)result);
+        }
+        return std::string(NAMEOF_ENUM(result));
     }
 
     void SetVulkanObjectName(core::Context* context, VkObjectType objectType, const void* objectHandle, std::string_view name)

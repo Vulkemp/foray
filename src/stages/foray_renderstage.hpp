@@ -4,43 +4,59 @@
 #include "../core/foray_descriptorset.hpp"
 #include "../core/foray_managedimage.hpp"
 #include "../foray_basics.hpp"
+#include "../osi/foray_env.hpp"
+#include "../core/foray_core_declares.hpp"
 #include <unordered_map>
 
 namespace foray::stages {
 
+    /// @brief Render stage base class giving a common interface for rendering processes
     class RenderStage
     {
       public:
-        RenderStage(){};
+        RenderStage() = default;
+
+        /// @brief Records a frame to cmdBuffer.
+        /// @param cmdBuffer Command buffer to record to
+        /// @param renderInfo Additional information about the current frame being rendered
+        /// @details
+        /// # Inheriting
+        ///  * Any resources accessed (images, buffers) must be protected by pipeline barriers, unless the providing entity defines them as constants
+        ///  * All commands must be submitted to cmdBuffer
         inline virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) {}
 
-        inline virtual void Destroy()
-        {
-            DestroyResolutionDependentComponents();
-            DestroyFixedComponents();
-        }
+        /// @brief Destroy the render stage. Finalizes all components
+        inline virtual void Destroy() {}
 
-
-        virtual void OnResized(const VkExtent2D& extent)
-        {
-            DestroyResolutionDependentComponents();
-            CreateResolutionDependentComponents();
-        };
+        /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
+        /// @param extent New render size
+        /// @remark Inheriting stages may override to update descriptor sets
+        virtual void Resize(const VkExtent2D& extent);
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         std::vector<core::ManagedImage*> GetImageOutputs();
-        core::ManagedImage*              GetImageOutput(std::string_view name, bool noThrow = false);
+        /// @brief Gets an image output
+        /// @param name Identifier
+        /// @param noThrow If set, will return nullptr instead of throwing std::exception if no match is found
+        core::ManagedImage* GetImageOutput(std::string_view name, bool noThrow = false);
 
-        /// @brief After a shader recompilation has happened, the stage might want to rebuild their pipelines.
-        inline virtual void OnShadersRecompiled(){};
+        /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
+        /// @details Implementation will check through shaders registered in 'mShaders'. If any of them have been marked as recompiled, calls ReloadShaders()
+        virtual void OnShadersRecompiled();
+
+        virtual ~RenderStage(){}
 
       protected:
-        std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;
-        core::Context*                                       mContext{};
+        /// @brief Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.
+        virtual void ReloadShaders() {}
+        /// @brief Calls Destroy() on any image in mImageOutputs and clears mImageOutputs
+        virtual void DestroyOutputImages();
 
-        virtual void CreateFixedSizeComponents(){};
-        virtual void DestroyFixedComponents(){};
-        virtual void CreateResolutionDependentComponents(){};
-        virtual void DestroyResolutionDependentComponents(){};
+        /// @brief Inheriting types should emplace their images onto this collection to provide them in GetImageOutput interface
+        std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;
+        /// @brief Inheriting types should emplace their images into this collection to get invocations of ReloadShaders() when a shader has been recompiled
+        std::vector<osi::Utf8Path> mShaderSourcePaths;
+        /// @brief Context object the renderstage is built upon
+        core::Context* mContext = nullptr;
     };
 }  // namespace foray::stages

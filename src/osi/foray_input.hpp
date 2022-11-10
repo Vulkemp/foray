@@ -7,11 +7,11 @@ namespace foray::osi {
     {
       public:
         /// @brief Device providing this input
-        FORAY_PROPERTY_ALLGET(Device)
+        FORAY_GETTER_V(Device)
         /// @brief Device-unique Id of the input
-        FORAY_PROPERTY_ALLGET(Id)
+        FORAY_GETTER_V(Id)
         /// @brief Human readable name of the input
-        FORAY_PROPERTY_ALLGET(Name)
+        FORAY_GETTER_CR(Name)
 
       protected:
         InputDevice* mDevice = {};
@@ -27,7 +27,7 @@ namespace foray::osi {
     {
       public:
         /// @brief Axis id of the input
-        FORAY_PROPERTY_ALLGET(AxisId)
+        FORAY_GETTER_V(AxisId)
 
         /// @brief Fetches the inputs current state
         virtual int16_t State() const = 0;
@@ -44,7 +44,7 @@ namespace foray::osi {
     {
       public:
         /// @brief Button id of the input
-        FORAY_PROPERTY_ALLGET(ButtonId)
+        FORAY_GETTER_V(ButtonId)
 
         /// @brief Fetches the inputs current state
         virtual bool State() const = 0;
@@ -61,7 +61,7 @@ namespace foray::osi {
     {
       public:
         /// @brief Directional input id of the inptu
-        FORAY_PROPERTY_CGET(DirectionalId)
+        FORAY_GETTER_V(DirectionalId)
 
       protected:
         EDirectional mDirectionalId;

@@ -52,6 +52,9 @@ namespace foray::core {
                              VkSampler                               sampler,
                              VkDescriptorType                        descriptorType,
                              VkShaderStageFlags                      shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler& sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler* sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<const CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (image)
         /// @param binding binding index
         /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
@@ -85,8 +88,8 @@ namespace foray::core {
 
         bool Exists() const override { return mDescriptorSet != VK_NULL_HANDLE; }
 
-        FORAY_PROPERTY_GET(DescriptorSet)
-        FORAY_PROPERTY_GET(DescriptorSetLayout)
+        FORAY_GETTER_V(DescriptorSet)
+        FORAY_GETTER_V(DescriptorSetLayout)
 
       protected:
         struct DescriptorInfo

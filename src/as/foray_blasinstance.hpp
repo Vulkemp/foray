@@ -19,10 +19,10 @@ namespace foray::as {
         /// @brief Initialize as static
         BlasInstance(uint64_t instanceId, const Blas* blas, const glm::mat4& globalTransform);
 
-        FORAY_PROPERTY_CGET(InstanceId)
-        FORAY_PROPERTY_ALLGET(AsInstance)
-        FORAY_PROPERTY_CGET(Blas)
-        FORAY_PROPERTY_ALL(GetUpdatedGlobalTransformFunc)
+        FORAY_GETTER_V(InstanceId)
+        FORAY_GETTER_CR(AsInstance)
+        FORAY_GETTER_V(Blas)
+        FORAY_PROPERTY_V(GetUpdatedGlobalTransformFunc)
 
         bool IsAnimated() const { return !!mGetUpdatedGlobalTransformFunc; }
 

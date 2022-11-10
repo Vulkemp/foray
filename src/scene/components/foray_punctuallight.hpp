@@ -5,12 +5,13 @@
 #include "../foray_lights.hpp"
 
 namespace foray::scene::ncomp {
+    /// @brief Defines a simple punctual light (directional or point)
     class PunctualLight : public NodeComponent
     {
       public:
-        FORAY_PROPERTY_ALL(Type)
-        FORAY_PROPERTY_ALL(Color)
-        FORAY_PROPERTY_ALL(Intensity)
+        FORAY_PROPERTY_V(Type)
+        FORAY_PROPERTY_R(Color)
+        FORAY_PROPERTY_V(Intensity)
 
         void UpdateStruct(SimpleLight& simplifiedlight);
 

@@ -38,17 +38,18 @@ namespace foray::scene {
 
         inline virtual ~Scene() { Destroy(); }
 
-        FORAY_PROPERTY_ALL(Context)
-        FORAY_PROPERTY_ALL(NodeBuffer)
-        FORAY_PROPERTY_ALL(RootNodes)
+        FORAY_PROPERTY_R(NodeBuffer)
+        FORAY_PROPERTY_R(RootNodes)
+        FORAY_PROPERTY_V(Context)
 
         template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
 
+        /// @brief Adds a default camera to the scene (standard perspective + freecameracontroller) and selects it in the cameramanager
         void UseDefaultCamera();
-
+        /// @brief Rebuilds the Tlas. If your project requires a Tlas this must be called after altering the scene
         void UpdateTlasManager();        
-
+        /// @brief Updates lights. If your project requires punctual lights, this must be called after altering the scene
         void UpdateLightManager();
 
       protected:

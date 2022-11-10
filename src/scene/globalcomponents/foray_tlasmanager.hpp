@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
+    /// @brief Manages a Tlas for a scene
     class TlasManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
@@ -17,9 +18,9 @@ namespace foray::scene::gcomp {
 
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
-        FORAY_PROPERTY_ALLGET(Tlas)
-        FORAY_PROPERTY_ALLGET(MeshInstances)
-        FORAY_PROPERTY_ALLGET(BlasInstanceIds)
+        FORAY_GETTER_CR(Tlas)
+        FORAY_GETTER_CR(MeshInstances)
+        FORAY_GETTER_CR(BlasInstanceIds)
 
       private:
         as::Tlas                                    mTlas;

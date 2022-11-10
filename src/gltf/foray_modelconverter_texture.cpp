@@ -1,5 +1,5 @@
 #include "../core/foray_commandbuffer.hpp"
-#include "../scene/globalcomponents/foray_texturestore.hpp"
+#include "../scene/globalcomponents/foray_texturemanager.hpp"
 #include "../util/foray_imageloader.hpp"
 #include "foray_modelconverter.hpp"
 #include <mutex>
@@ -14,7 +14,7 @@ namespace foray::gltf {
             /// @brief Gltf Model to load textures of
             tinygltf::Model& GltfModel;
             /// @brief Texture store to give textures to
-            scene::gcomp::TextureStore& Textures;
+            scene::gcomp::TextureManager& Textures;
             /// @brief Base directory to look for textures relative to
             std::string BaseDir;
             /// @brief Context used for GPU stuff
@@ -54,7 +54,7 @@ namespace foray::gltf {
 
                     logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
-                    scene::gcomp::TextureStore::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
+                    scene::gcomp::TextureManager::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
 
                     const unsigned char* buffer     = nullptr;
                     VkDeviceSize         bufferSize = 0;

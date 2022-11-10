@@ -77,10 +77,10 @@ namespace foray::base {
         /// @param index If PRIMARY_COMMAND_BUFFER, the primary is returned. Auxiliary command buffer index otherwise
         const core::DeviceCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const;
 
-        FORAY_PROPERTY_CGET(SwapchainImageIndex)
-        FORAY_PROPERTY_ALLGET(SwapchainImageReady)
-        FORAY_PROPERTY_ALLGET(PrimaryCompletedSemaphore)
-        FORAY_PROPERTY_ALLGET(PrimaryCompletedFence)
+        FORAY_GETTER_V(SwapchainImageIndex)
+        FORAY_GETTER_V(SwapchainImageReady)
+        FORAY_GETTER_V(PrimaryCompletedSemaphore)
+        FORAY_GETTER_V(PrimaryCompletedFence)
 
       protected:
         core::Context* mContext = nullptr;

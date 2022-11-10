@@ -1,4 +1,4 @@
-#include "foray_geometrystore.hpp"
+#include "foray_geometrymanager.hpp"
 #include "../foray_scene.hpp"
 
 namespace foray::scene::gcomp {

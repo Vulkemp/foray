@@ -5,7 +5,9 @@
 #include <array>
 
 namespace foray::scene::ncomp {
+    /// TODO: Get view matrix from node transform
 
+    /// @brief Defines a camera with projection matrix
     class Camera : public NodeComponent, public Component::OnResizedCallback
     {
       public:
@@ -25,12 +27,9 @@ namespace foray::scene::ncomp {
 
         inline static float CalculateAspect(const VkExtent2D extent);
 
-        FORAY_PROPERTY_GET(EyePosition)
-        FORAY_PROPERTY_CGET(EyePosition)
-        FORAY_PROPERTY_GET(LookatPosition)
-        FORAY_PROPERTY_CGET(LookatPosition)
-        FORAY_PROPERTY_GET(UpDirection)
-        FORAY_PROPERTY_CGET(UpDirection)
+        FORAY_PROPERTY_R(EyePosition)
+        FORAY_PROPERTY_R(LookatPosition)
+        FORAY_PROPERTY_R(UpDirection)
 
       protected:
         float     mVerticalFov      = 0;

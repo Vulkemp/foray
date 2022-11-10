@@ -11,8 +11,8 @@ namespace foray::util {
         inline virtual bool Exists() const override { return !!mSemaphore; }
         virtual void        Destroy() override;
 
-        FORAY_PROPERTY_CGET(Semaphore)
-        FORAY_PROPERTY_CGET(Handle)
+        FORAY_GETTER_V(Semaphore)
+        FORAY_GETTER_V(Handle)
 
       protected:
         core::Context* mContext   = nullptr;

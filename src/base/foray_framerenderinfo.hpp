@@ -13,11 +13,11 @@ namespace foray::base {
     class FrameRenderInfo
     {
       public:
-        FORAY_PROPERTY_ALL(FrameTime)
-        FORAY_PROPERTY_ALL(SinceStart)
-        FORAY_PROPERTY_ALL(FrameNumber)
-        FORAY_PROPERTY_ALL(InFlightFrame)
-        FORAY_PROPERTY_ALL(ImageLayoutCache)
+        FORAY_PROPERTY_V(FrameTime)
+        FORAY_PROPERTY_V(SinceStart)
+        FORAY_PROPERTY_V(FrameNumber)
+        FORAY_PROPERTY_R(InFlightFrame)
+        FORAY_PROPERTY_R(ImageLayoutCache)
 
         inline core::DeviceCommandBuffer&       GetAuxCommandBuffer(int32_t index) { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
         inline const core::DeviceCommandBuffer& GetAuxCommandBuffer(int32_t index) const { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }

@@ -14,13 +14,13 @@ namespace foray::stages {
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 
-        virtual void SetTargetImage(core::ManagedImage* newTargetImage);
+        virtual void SetBackgroundImage(core::ManagedImage* backgroundImage);
 
         /// @brief Add a function that renders an imgui window. Example:
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }
 
         /// @brief When the window has been resized, update the target image.
-        virtual void OnResized(const VkExtent2D& extent) override;
+        virtual void Resize(const VkExtent2D& extent) override;
 
         /// @brief Allows imgui to handle input events.
         void ProcessSdlEvent(const SDL_Event* sdlEvent);
@@ -31,9 +31,7 @@ namespace foray::stages {
         VkDescriptorPool                   mImguiPool{};
         std::vector<std::function<void()>> mWindowDraws;
 
-        virtual void CreateFixedSizeComponents() override;
-        virtual void CreateResolutionDependentComponents() override;
-        virtual void DestroyResolutionDependentComponents() override;
+        virtual void DestroyFrameBufferAndRenderPass();
 
         void PrepareRenderpass();
     };

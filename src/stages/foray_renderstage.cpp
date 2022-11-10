@@ -1,11 +1,13 @@
 #include "foray_renderstage.hpp"
+#include "../core/foray_shadermanager.hpp"
+#include "../core/foray_shadermodule.hpp"
 
 namespace foray::stages {
     std::vector<core::ManagedImage*> RenderStage::GetImageOutputs()
     {
         std::vector<core::ManagedImage*> result;
         result.reserve(mImageOutputs.size());
-        for (auto& output : mImageOutputs)
+        for(auto& output : mImageOutputs)
         {
             result.push_back(output.second);
         }
@@ -14,8 +16,8 @@ namespace foray::stages {
     core::ManagedImage* RenderStage::GetImageOutput(const std::string_view name, bool noThrow)
     {
         std::string namecopy(name);
-        auto iter = mImageOutputs.find(namecopy);
-        if (iter != mImageOutputs.end())
+        auto        iter = mImageOutputs.find(namecopy);
+        if(iter != mImageOutputs.end())
         {
             return iter->second;
         }
@@ -25,4 +27,38 @@ namespace foray::stages {
         }
         return nullptr;
     }
-}  // namespace foray
+    void RenderStage::Resize(const VkExtent2D& extent)
+    {
+        for(auto& pair : mImageOutputs)
+        {
+            if(pair.second->Exists())
+            {
+                pair.second->Resize(extent);
+            }
+        }
+    }
+    void RenderStage::DestroyOutputImages()
+    {
+        for(auto& pair : mImageOutputs)
+        {
+            pair.second->Destroy();
+        }
+        mImageOutputs.clear();
+    }
+    void RenderStage::OnShadersRecompiled()
+    {
+        core::ShaderManager& instance = core::ShaderManager::Instance();
+
+        bool needReload = false;
+
+        for(osi::Utf8Path& path : mShaderSourcePaths)
+        {
+            needReload |= instance.HasShaderBeenRecompiled(path);
+        }
+        
+        if (needReload)
+        {
+            ReloadShaders();
+        }
+    }
+}  // namespace foray::stages

@@ -66,8 +66,7 @@ namespace foray::scene {
         /// @brief Destructor. Provide virtual constructors in inheriting classes, to make sure they get finalized correctly.
         inline virtual ~Component() {}
 
-        FORAY_PROPERTY_CGET(Registry)
-        FORAY_PROPERTY_GET(Registry)
+        FORAY_GETTER_V(Registry)
 
         virtual Scene*         GetScene()   = 0;
         virtual Registry*      GetGlobals() = 0;

@@ -226,15 +226,7 @@ namespace foray::as {
         cmdBuffer.Create(mContext);
         cmdBuffer.Begin();
 
-        // copy previously staged instance data
-        util::DualBuffer::DeviceBufferState before{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-                                                   .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                                   .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        util::DualBuffer::DeviceBufferState after{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR,
-                                                  .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                                  .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-
-        mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer, before, after);
+        mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer);
 
         VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -289,10 +281,7 @@ namespace foray::as {
         // STEP #2 Configure upload from host to device buffer for animated instances
 
         // copy previously staged instance data
-        util::DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT,
-                                                           .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-                                                           .QueueFamilyIndex   = VK_QUEUE_FAMILY_IGNORED};
-        mInstanceBuffer.CmdCopyToDevice(frameIndex, cmdBuffer, beforeAndAfter, beforeAndAfter);
+        mInstanceBuffer.CmdCopyToDevice(frameIndex, cmdBuffer);
 
         // STEP #3 Rebuild/Update TLAS
 

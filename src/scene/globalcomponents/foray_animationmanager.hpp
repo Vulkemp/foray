@@ -6,12 +6,12 @@
 
 namespace foray::scene::gcomp {
 
-    
-    class AnimationDirector : public GlobalComponent, public Component::UpdateCallback
+    /// @brief Handles storage and playback of animations
+    class AnimationManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
-        FORAY_PROPERTY_ALLGET(Animations)
-        FORAY_PROPERTY_ALL(PlaybackConfig)
+        FORAY_PROPERTY_R(Animations)
+        FORAY_PROPERTY_R(PlaybackConfig)
 
         virtual void Update(SceneUpdateInfo&) override;
 

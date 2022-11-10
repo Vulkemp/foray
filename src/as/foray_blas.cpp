@@ -3,7 +3,7 @@
 #include "../core/foray_commandbuffer.hpp"
 #include "../scene/foray_geo.hpp"
 #include "../scene/foray_mesh.hpp"
-#include "../scene/globalcomponents/foray_geometrystore.hpp"
+#include "../scene/globalcomponents/foray_geometrymanager.hpp"
 #include <algorithm>
 
 namespace foray::as {

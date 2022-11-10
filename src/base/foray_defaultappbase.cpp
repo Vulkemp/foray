@@ -258,12 +258,13 @@ namespace foray::base {
         ApiOnResized(size);
         for(stages::RenderStage* stage : mRegisteredStages)
         {
-            stage->OnResized(size);
+            stage->Resize(size);
         }
     }
 
     void DefaultAppBase::OnShadersRecompiled()
     {
+        AssertVkResult(mContext.VkbDispatchTable->deviceWaitIdle());
         ApiOnShadersRecompiled();
         for(stages::RenderStage* stage : mRegisteredStages)
         {

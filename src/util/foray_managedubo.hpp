@@ -9,24 +9,34 @@ namespace foray::util {
       public:
         inline size_t SizeOfUbo() const { return mUboBuffer.GetDeviceBuffer().GetSize(); }
 
-        FORAY_PROPERTY_ALLGET(UboBuffer)
+        FORAY_PROPERTY_R(UboBuffer)
 
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
+        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
+        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
         virtual void Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
         virtual bool Exists() const override;
         virtual void Destroy() override;
 
-        core::ManagedBuffer* GetDeviceBuffer() { return &(mUboBuffer.GetDeviceBuffer()); }
-        
-                             operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
-        
+        const core::ManagedBuffer* GetDeviceBuffer() const { return &(mUboBuffer.GetDeviceBuffer()); }
+
+        operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
+
         VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const;
+
+        VkBuffer GetVkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
 
       protected:
         DualBuffer mUboBuffer;
     };
 
+    /// @brief Template class for managing a UBO. For Host -> Device synchronization this utilises a DualBuffer
+    /// @details
+    /// # Usage
+    ///  * GetData() / mData can be used like any normal object
+    ///  * Every frame, call UpdateTo() to copy the entire UBO to the staging buffer, and CmdCopyToDevice to later copy from staging to device
+    /// @tparam T_UBO 
     template <typename T_UBO>
     class ManagedUbo : public ManagedUboBase
     {
@@ -41,7 +51,7 @@ namespace foray::util {
         virtual void UpdateTo(uint32_t frameIndex) override;
 
 
-        FORAY_PROPERTY_ALL(Data)
+        FORAY_PROPERTY_R(Data)
     };
 
     template <typename T_UBO>

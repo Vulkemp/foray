@@ -13,8 +13,10 @@
 #endif
 
 namespace foray {
-    std::string_view PrintVkResult(VkResult result);
+    /// @brief Prints a VkResult. If outside of NAMEF_ENUM_RANGE_MAX, will only print number
+    std::string PrintVkResult(VkResult result);
 
+    /// @brief Asserts a VkResult (Fails if not VK_SUCCESS)
     inline void AssertVkResult(VkResult result, const source_location location = source_location::current())
     {
         if(result != VK_SUCCESS)
@@ -23,6 +25,11 @@ namespace foray {
         }
     }
 
+    /// @brief Set a vulkan object name (Will show up in validation errors, NSight, RenderDoc, ...)
+    /// @param context Requires DispatchTable
+    /// @param objectType Object Type passed as objectHandle
+    /// @param objectHandle Vulkan Handle
+    /// @param name Debug name
     void SetVulkanObjectName(core::Context* context, VkObjectType objectType, const void* objectHandle, std::string_view name);
 
 }  // namespace foray

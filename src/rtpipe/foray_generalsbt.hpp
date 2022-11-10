@@ -23,8 +23,8 @@ namespace foray::rtpipe {
         /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
         void SetGroup(GroupIndex groupIndex, core::ShaderModule* shader, const void* data);
 
-        FORAY_PROPERTY_CGET(Groups)
-        FORAY_PROPERTY_CGET(ShaderGroupType)
+        FORAY_GETTER_CR(Groups)
+        FORAY_GETTER_V(ShaderGroupType)
 
         virtual void        WriteToShaderCollection(RtShaderCollection& collection) const override;
         virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const override;

@@ -28,7 +28,7 @@ namespace foray::core {
 
         inline operator VkCommandBuffer() const { return mCommandBuffer; }
 
-        FORAY_PROPERTY_CGET(CommandBuffer)
+        FORAY_GETTER_V(CommandBuffer)
       protected:
         core::Context* mContext = nullptr;
 
@@ -94,9 +94,9 @@ namespace foray::core {
         /// @brief Adds a semaphore to signal after execution of commandbuffer has finished
         virtual DeviceCommandBuffer& AddSignalSemaphore(const SemaphoreReference& semaphore);
 
-        FORAY_PROPERTY_ALL(WaitSemaphores)
-        FORAY_PROPERTY_ALL(SignalSemaphores)
-        FORAY_PROPERTY_ALL(Fence)
+        FORAY_PROPERTY_R(WaitSemaphores)
+        FORAY_PROPERTY_R(SignalSemaphores)
+        FORAY_PROPERTY_V(Fence)
 
         /// @brief Submits the commandbuffer
         virtual void Submit();

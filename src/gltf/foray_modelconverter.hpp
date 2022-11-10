@@ -26,11 +26,11 @@ namespace foray::gltf {
 
         void LoadGltfModel(osi::Utf8Path utf8Path, core::Context* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
 
-        FORAY_PROPERTY_ALL(Scene)
+        FORAY_GETTER_V(Scene)
 
         static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
 
-        FORAY_PROPERTY_CGET(Benchmark)
+        FORAY_GETTER_CR(Benchmark)
 
       protected:
         core::Context* mContext = nullptr;
@@ -69,9 +69,9 @@ namespace foray::gltf {
 
         scene::Scene* mScene = nullptr;
 
-        scene::gcomp::MaterialBuffer& mMaterialBuffer;
+        scene::gcomp::MaterialManager& mMaterialBuffer;
         scene::gcomp::GeometryStore&  mGeo;
-        scene::gcomp::TextureStore&   mTextures;
+        scene::gcomp::TextureManager&   mTextures;
         bench::HostBenchmark   mBenchmark;
 
         void RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent = nullptr);

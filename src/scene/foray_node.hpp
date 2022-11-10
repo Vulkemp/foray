@@ -7,8 +7,8 @@ namespace foray::scene {
       public:
         Node(Scene* scene, Node* parent = nullptr);
 
-        FORAY_PROPERTY_ALL(Parent);
-        FORAY_PROPERTY_ALL(Children);
+        FORAY_PROPERTY_V(Parent);
+        FORAY_PROPERTY_R(Children);
 
         ncomp::Transform* GetTransform();
 

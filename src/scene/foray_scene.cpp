@@ -12,9 +12,9 @@ namespace foray::scene {
 
     void Scene::InitDefaultGlobals()
     {
-        MakeComponent<gcomp::MaterialBuffer>(mContext);
+        MakeComponent<gcomp::MaterialManager>(mContext);
         MakeComponent<gcomp::GeometryStore>();
-        MakeComponent<gcomp::TextureStore>();
+        MakeComponent<gcomp::TextureManager>();
         MakeComponent<gcomp::DrawDirector>();
         MakeComponent<gcomp::CameraManager>(mContext);
     }

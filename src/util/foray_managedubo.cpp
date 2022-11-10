@@ -11,15 +11,19 @@ namespace foray::util {
     }
     void ManagedUboBase::CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer)
     {
-        DualBuffer::DeviceBufferState beforeAndAfter{.AccessFlags        = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
-                                                     .PipelineStageFlags = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT
-                                                                           | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
-                                                     .QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED};
-        mUboBuffer.CmdCopyToDevice(frameIndex, cmdBuffer, beforeAndAfter, beforeAndAfter);
+        mUboBuffer.CmdCopyToDevice(frameIndex, cmdBuffer);
+    }
+    void ManagedUboBase::CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    {
+        mUboBuffer.CmdPrepareForRead(cmdBuffer, dstStageMask, dstAccessMask);
+    }
+    VkBufferMemoryBarrier2 ManagedUboBase::MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    {
+        return mUboBuffer.MakeBarrierPrepareForRead(dstStageMask, dstAccessMask);
     }
     VkDescriptorBufferInfo ManagedUboBase::GetVkDescriptorBufferInfo() const
     {
-        return mUboBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo();
+        return mUboBuffer.GetVkDescriptorInfo();
     }
     bool ManagedUboBase::Exists() const
     {

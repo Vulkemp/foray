@@ -63,9 +63,9 @@ namespace foray::scene::ncomp {
 
         float deltaTime = updateInfo.RenderInfo.GetFrameTime();
         float speed     = exp2f(mSpeedExponent) * deltaTime;
-        auto& pos       = camera->GetEyePosition();
-        auto& lookAt    = camera->GetLookatPosition();
-        auto& upDir     = camera->GetUpDirection();
+        glm::vec3& pos       = camera->GetEyePosition();
+        glm::vec3& lookAt    = camera->GetLookatPosition();
+        glm::vec3& upDir     = camera->GetUpDirection();
 
         if(mInputStates.PitchUp)
             mPitch += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);

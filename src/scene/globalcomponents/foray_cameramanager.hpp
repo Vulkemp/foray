@@ -7,10 +7,11 @@
 
 namespace foray::scene::gcomp {
 
+    /// @brief Manages the Camera matrix buffer and maintains a list of cameras in the scene
     class CameraManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
-        FORAY_PROPERTY_ALLGET(Ubo)
+        FORAY_GETTER_CR(Ubo)
 
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mUbo.GetVkDescriptorBufferInfo(); }
 

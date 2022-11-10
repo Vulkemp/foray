@@ -12,4 +12,6 @@ namespace foray::core {
     class ImageLayoutCache;
     class CombinedImageSampler;
     class SamplerCollection;
+    class ShaderManager;
+    class ShaderModule;
 }  // namespace foray::core

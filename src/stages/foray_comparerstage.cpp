@@ -18,32 +18,32 @@ namespace foray::stages {
     void ComparerStage::Init(core::Context* context)
     {
         mContext = context;
-        CreateResolutionDependentComponents();
-        CreateFixedSizeComponents();
+        CreateOutputImage();
+        LoadShaders();
+        CreatePipetteBuffer();
     }
 
-    void ComparerStage::CreateResolutionDependentComponents()
+    void ComparerStage::CreateOutputImage()
     {
         VkImageUsageFlags usage =
             VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mContext->GetSwapchainSize(), OutputName);
         mOutput.Create(mContext, ci);
-        mImageOutputs[mOutput.GetName()] = &mOutput;
+        mImageOutputs[std::string(mOutput.GetName())] = &mOutput;
     }
-    void ComparerStage::CreateFixedSizeComponents()
+    void ComparerStage::LoadShaders()
     {
-        {  // Load Shaders
-            mShaders[(size_t)EInputType::Float].LoadFromBinary(mContext, SHADER_F, sizeof(SHADER_F));
-            mShaders[(size_t)EInputType::Int].LoadFromBinary(mContext, SHADER_I, sizeof(SHADER_I));
-            mShaders[(size_t)EInputType::Uint].LoadFromBinary(mContext, SHADER_U, sizeof(SHADER_U));
-        }
-        {  // Create Pipette Buffer
-            VkBufferUsageFlags usage = VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-            core::ManagedBuffer::CreateInfo ci(usage, sizeof(PipetteValue), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
-                                                            VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "Comparer.Pipette.Device");
-            mPipetteBuffer.Create(mContext, ci);
-            mPipetteBuffer.Map(mPipetteMap);
-        }
+        mShaders[(size_t)EInputType::Float].LoadFromBinary(mContext, SHADER_F, sizeof(SHADER_F));
+        mShaders[(size_t)EInputType::Int].LoadFromBinary(mContext, SHADER_I, sizeof(SHADER_I));
+        mShaders[(size_t)EInputType::Uint].LoadFromBinary(mContext, SHADER_U, sizeof(SHADER_U));
+    }
+    void ComparerStage::CreatePipetteBuffer()
+    {
+        VkBufferUsageFlags              usage = VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        core::ManagedBuffer::CreateInfo ci(usage, sizeof(PipetteValue), VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+                                           VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "Comparer.Pipette.Device");
+        mPipetteBuffer.Create(mContext, ci);
+        mPipetteBuffer.Map(mPipetteMap);
     }
     void ComparerStage::CreateSubStage(SubStage& substage)
     {
@@ -106,23 +106,6 @@ namespace foray::stages {
             AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &substage.Pipeline));
         }
     }
-    void ComparerStage::DestroyFixedComponents()
-    {
-        for(core::ShaderModule& shader : mShaders)
-        {
-            shader.Destroy();
-        }
-        if(mPipetteBuffer.Exists())
-        {
-            mPipetteBuffer.Unmap();
-        }
-        mPipetteBuffer.Destroy();
-    }
-
-    void ComparerStage::DestroyResolutionDependentComponents()
-    {
-        mOutput.Destroy();
-    }
 
     void ComparerStage::DestroySubStage(SubStage& substage, bool final)
     {
@@ -147,8 +130,16 @@ namespace foray::stages {
         {
             DestroySubStage(substage, true);
         }
-        DestroyFixedComponents();
-        DestroyResolutionDependentComponents();
+        for(core::ShaderModule& shader : mShaders)
+        {
+            shader.Destroy();
+        }
+        if(mPipetteBuffer.Exists())
+        {
+            mPipetteBuffer.Unmap();
+        }
+        mPipetteBuffer.Destroy();
+        RenderStage::DestroyOutputImages();
     }
 
 #pragma endregion
@@ -181,9 +172,9 @@ namespace foray::stages {
         }
     }
 
-    void ComparerStage::OnResized(const VkExtent2D& extent)
+    void ComparerStage::Resize(const VkExtent2D& extent)
     {
-        mOutput.Resize(VkExtent3D{extent.width, extent.height, 1});
+        RenderStage::Resize(extent);
         for(SubStage& substage : mSubStages)
         {
             if(substage.DescriptorSet.Exists())
@@ -202,7 +193,7 @@ namespace foray::stages {
 
     void ComparerStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        {  // Get Pipette value (which might be up to 1 frame out of date, but since it's for UI purposes only this is fine)
+        {  // Get Pipette value (which might be very much out of date, but since it's for UI purposes only this is fine)
             memcpy(&mPipetteValue, mPipetteMap, sizeof(mPipetteValue));
         }
         if(!!mSubStages[0].Input.Image)

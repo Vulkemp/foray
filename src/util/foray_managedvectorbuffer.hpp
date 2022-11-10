@@ -30,18 +30,18 @@ namespace foray::util {
         virtual void Destroy() override;
         virtual bool Exists() const override { return mBuffer.Exists(); }
 
-        inline virtual std::string_view   GetName() const { return mBuffer.GetName(); }
+        inline virtual std::string   GetName() const { return mBuffer.GetName(); }
         inline virtual void SetName(std::string_view name) override;
 
         inline virtual ~ManagedVectorBuffer() { Destroy(); }
 
-        FORAY_PROPERTY_ALL(Context)
-        FORAY_PROPERTY_GET(Vector)
-        FORAY_PROPERTY_CGET(Vector)
-        FORAY_PROPERTY_GET(Buffer)
-        FORAY_PROPERTY_CGET(Buffer)
-        FORAY_PROPERTY_CGET(DeviceCount)
-        FORAY_PROPERTY_CGET(DeviceCapacity)
+        FORAY_PROPERTY_V(Context)
+        FORAY_GETTER_MR(Vector)
+        FORAY_GETTER_CR(Vector)
+        FORAY_GETTER_MR(Buffer)
+        FORAY_GETTER_CR(Buffer)
+        FORAY_GETTER_V(DeviceCount)
+        FORAY_GETTER_V(DeviceCapacity)
 
         inline VkDeviceSize GetDeviceSize() { return mDeviceCapacity * sizeof(TClass); }
 

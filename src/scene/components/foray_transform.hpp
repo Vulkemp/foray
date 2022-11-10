@@ -3,18 +3,20 @@
 #include "../foray_component.hpp"
 
 namespace foray::scene::ncomp {
+
+    /// @brief Defines a nodes transform relative to its parent (or world origin, if no parent is set)
     class Transform : public NodeComponent
     {
       public:
         inline Transform() {}
 
-        FORAY_PROPERTY_ALL(Translation)
-        FORAY_PROPERTY_ALL(Rotation)
-        FORAY_PROPERTY_ALL(Scale)
-        FORAY_PROPERTY_ALL(LocalMatrix)
-        FORAY_PROPERTY_ALL(Static)
-        FORAY_PROPERTY_CGET(GlobalMatrix)
-        FORAY_PROPERTY_ALL(LocalMatrixFixed)
+        FORAY_PROPERTY_R(Translation)
+        FORAY_PROPERTY_R(Rotation)
+        FORAY_PROPERTY_R(Scale)
+        FORAY_PROPERTY_R(LocalMatrix)
+        FORAY_PROPERTY_V(Static)
+        FORAY_GETTER_CR(GlobalMatrix)
+        FORAY_PROPERTY_V(LocalMatrixFixed)
 
         void RecalculateLocalMatrix();
         void RecalculateGlobalMatrix(Transform* parentTransform = nullptr);

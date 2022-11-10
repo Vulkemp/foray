@@ -9,29 +9,28 @@
 namespace foray::rtpipe {
 
     /// @brief Shader Binding Table base class, providing functions to manage custom generic shader group data and SBT building, aswell as buffer management
+    /// @details
+    /// A shader binding table stores entries in the following layout
+    ///
+    /// | Entry0                      | Entry1                      | ...
+    /// |-----------------------------|-----------------------------|-------
+    /// | GroupHandle | Custom Data   | GroupHandle | Custom Data   | ...
+    ///
+    /// Where the GroupHandle is a vulkan driver specific memory block (all currently known drivers use 
+    /// 32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize
+    /// It is essentially a reference to a ShaderGroup as defined in the CreateInfo passed to 'createRayTracingPipelinesKHR' 
+    ///
+    /// Custom Data is an optional memory area of user defined size, used to initialize indices. It allows pairing
+    /// shaders with different configuration parameters.
+    ///
+    /// ShaderBindingTable classes Usage:
+    ///
+    ///   1. If you use custom data, best use SetEntryDataSize(...) first
+    ///   2. Define all shader groups. Make sure that all indices from 0 to the highest used are defined!
+    ///   3. If you didn't already when defining the shader groups, set custom data now
+    ///   4. Use Build(...) to build the SBT. If you use the RtPipeline class, use RtPipeline::Build(...) instead!
     class ShaderBindingTableBase
     {
-        /*
-          A shader binding table stores entries in the following layout
-
-          | Entry0                      | Entry1                      | ...
-          |-----------------------------|-----------------------------|-------
-          | GroupHandle | Custom Data   | GroupHandle | Custom Data   | ...
-
-          Where the GroupHandle is a vulkan driver specific memory block (all currently known drivers use 
-          32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize
-          It is essentially a reference to a ShaderGroup as defined in the CreateInfo passed to 'createRayTracingPipelinesKHR' 
-
-          Custom Data is an optional memory area of user defined size, used to initialize indices. It allows pairing
-          shaders with different configuration parameters.
-
-          ShaderBindingTable classes Usage:
-
-            1. If you use custom data, best use SetEntryDataSize(...) first
-            2. Define all shader groups. Make sure that all indices from 0 to the highest used are defined!
-            3. If you didn't already when defining the shader groups, set custom data now
-            4. Use Build(...) to build the SBT. If you use the RtPipeline class, use RtPipeline::Build(...) instead!
-        */
       public:
         explicit ShaderBindingTableBase(VkDeviceSize entryDataSize = 0);
 
@@ -47,9 +46,9 @@ namespace foray::rtpipe {
         /// @param handles Vector of pointers to handles. Indices in this vector have to match shadergroup indices of the SBT. The caller must guarantee that any memory area pointed to is of pipelineProperties.shaderGroupHandleSize size (bytes)
         virtual void Build(core::Context* context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties, const std::vector<const uint8_t*>& handles);
 
-        FORAY_PROPERTY_CGET(EntryDataSize)
-        FORAY_PROPERTY_ALLGET(AddressRegion)
-        FORAY_PROPERTY_ALLGET(Buffer)
+        FORAY_GETTER_V(EntryDataSize)
+        FORAY_GETTER_V(AddressRegion)
+        FORAY_GETTER_CR(Buffer)
 
         /// @brief Access the custom data entry for a group
         std::vector<uint8_t>& GroupDataAt(GroupIndex groupIndex);

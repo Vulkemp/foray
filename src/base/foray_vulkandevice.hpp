@@ -32,12 +32,12 @@ namespace foray::base {
         /// @brief Set the function called after default configuration and before action with device builder
         VulkanDevice& SetBeforeDeviceBuildFunc(BeforeDeviceBuildFunctionPointer beforeDeviceBuildFunc);
 
-        FORAY_PROPERTY_ALL(SetDefaultCapabilitiesToDeviceSelector)
-        FORAY_PROPERTY_ALL(EnableDefaultDeviceFeatures)
-        FORAY_PROPERTY_ALL(PhysicalDevice)
-        FORAY_PROPERTY_ALL(Device)
-        FORAY_PROPERTY_ALL(DispatchTable)
-        FORAY_PROPERTY_ALL(Context)
+        FORAY_PROPERTY_V(SetDefaultCapabilitiesToDeviceSelector)
+        FORAY_PROPERTY_V(EnableDefaultDeviceFeatures)
+        FORAY_PROPERTY_R(PhysicalDevice)
+        FORAY_PROPERTY_R(Device)
+        FORAY_PROPERTY_R(DispatchTable)
+        FORAY_PROPERTY_V(Context)
 
         /// @brief Create logical device by invoking SelectPhysicalDevice(..,) and BuildDevice()
         /// @remark Will throw std::exception on selection or build failure

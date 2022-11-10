@@ -19,8 +19,7 @@ namespace foray::stages {
         if(mTargetImage == nullptr)
             throw Exception("Imgui stage can only init when the background image is set!");
 
-        CreateResolutionDependentComponents();
-        CreateFixedSizeComponents();
+        PrepareRenderpass();
 
         // Clear values for all attachments written in the fragment shader
         mClearValues.resize(mImageOutputs.size() + 1);
@@ -82,14 +81,7 @@ namespace foray::stages {
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    void ImguiStage::CreateFixedSizeComponents() {}
-
-    void ImguiStage::CreateResolutionDependentComponents()
-    {
-        PrepareRenderpass();
-    }
-
-    void ImguiStage::DestroyResolutionDependentComponents()
+    void ImguiStage::DestroyFrameBufferAndRenderPass()
     {
         if (!mContext)
         {
@@ -175,28 +167,28 @@ namespace foray::stages {
 
     void ImguiStage::Destroy()
     {
+        DestroyFrameBufferAndRenderPass();
         if(mImguiPool != nullptr)
         {
             ImGui_ImplVulkan_Shutdown();
             ImGui_ImplSDL2_Shutdown();
             ImGui::DestroyContext();
-            RasterizedRenderStage::Destroy();
             vkDestroyDescriptorPool(mContext->Device(), mImguiPool, nullptr);
             mImguiPool = nullptr;
         }
-        RasterizedRenderStage::Destroy();
     }
 
-    void ImguiStage::OnResized(const VkExtent2D& extent)
+    void ImguiStage::Resize(const VkExtent2D& extent)
     {
-        RasterizedRenderStage::OnResized(extent);
+        DestroyFrameBufferAndRenderPass();
+        PrepareRenderpass();
     }
 
-    void ImguiStage::SetTargetImage(core::ManagedImage* newTargetImage)
+    void ImguiStage::SetBackgroundImage(core::ManagedImage* newTargetImage)
     {
         mTargetImage = newTargetImage;
-        DestroyResolutionDependentComponents();
-        CreateResolutionDependentComponents();
+        DestroyFrameBufferAndRenderPass();
+        PrepareRenderpass();
     }
 
     void ImguiStage::ProcessSdlEvent(const SDL_Event* sdlEvent)

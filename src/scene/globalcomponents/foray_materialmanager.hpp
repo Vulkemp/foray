@@ -6,10 +6,10 @@
 namespace foray::scene::gcomp {
 
     /// @brief Manages a device local storage buffer providing material information for rendering
-    class MaterialBuffer : public GlobalComponent
+    class MaterialManager : public GlobalComponent
     {
       public:
-        explicit MaterialBuffer(core::Context* context);
+        explicit MaterialManager(core::Context* context);
 
         std::vector<DefaultMaterialEntry>& GetVector() { return mBuffer.GetVector(); }
 
@@ -17,9 +17,9 @@ namespace foray::scene::gcomp {
         void UpdateDeviceLocal();
         void Destroy();
 
-        inline virtual ~MaterialBuffer() { Destroy(); }
+        inline virtual ~MaterialManager() { Destroy(); }
 
-        FORAY_PROPERTY_ALLGET(Buffer)
+        FORAY_GETTER_CR(Buffer)
 
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer().GetVkDescriptorBufferInfo(); }
         inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer().GetBuffer(); }

@@ -49,8 +49,8 @@ namespace foray::as {
         /// @brief (re)creates the meta buffer
         const std::unordered_map<const Blas*, uint32_t>& CreateOrUpdate(core::Context* context, const std::unordered_set<const Blas*>& entries);
 
-        FORAY_PROPERTY_ALLGET(Buffer)
-        FORAY_PROPERTY_CGET(BufferOffsets)
+        FORAY_GETTER_CR(Buffer)
+        FORAY_GETTER_MR(BufferOffsets)
 
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetVkDescriptorBufferInfo(); }
 
