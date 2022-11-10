@@ -8,6 +8,7 @@
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindowswapchain.hpp"
+#include "../bench/foray_hostbenchmark.hpp"
 #include <array>
 #include <vector>
 
@@ -25,6 +26,7 @@ namespace foray::base {
         FORAY_GETTER_MR(Instance)
         FORAY_GETTER_MR(Device)
         FORAY_GETTER_MR(WindowSwapchain)
+        FORAY_GETTER_MR(HostFrameRecordBenchmark)
 
         /// @brief Runs through the entire application lifetime
         int32_t Run();
@@ -113,5 +115,13 @@ namespace foray::base {
         std::vector<stages::RenderStage*> mRegisteredStages;
 
         fp64_t mLastShadersCheckedTimestamp = 0.0;
+
+        inline static const char* const FRAMERECORDBENCH_WAITONFENCE = "Wait On Fence";
+        inline static const char* const FRAMERECORDBENCH_ACQUIRESWAPIMAGE = "Acquire Swapimage";
+        inline static const char* const FRAMERECORDBENCH_RECORDCMDBUFFERS = "Record CmdBuffers";
+        inline static const char* const FRAMERECORDBENCH_PRESENT = "Present";
+
+        bool mEnableFrameRecordBenchmark = false;
+        bench::HostBenchmark mHostFrameRecordBenchmark;
     };
 }  // namespace foray::base

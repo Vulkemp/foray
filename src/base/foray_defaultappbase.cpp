@@ -200,6 +200,11 @@ namespace foray::base {
             }
         }
 
+        if(mEnableFrameRecordBenchmark)
+        {
+            mHostFrameRecordBenchmark.Begin();
+        }
+
         // Fetch next in flight frame
         InFlightFrame& currentFrame = mInFlightFrames[mInFlightFrameIndex];
 
@@ -212,13 +217,29 @@ namespace foray::base {
             ApiFrameFinishedExecuting(mRenderedFrameCount - INFLIGHT_FRAME_COUNT);
         }
 
+        if(mEnableFrameRecordBenchmark)
+        {
+            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_WAITONFENCE);
+        }
+
         // Acquire the swapchain image
         uint32_t                 swapChainImageIndex = 0;
         ESwapchainInteractResult result              = currentFrame.AcquireSwapchainImage();
 
+        if(mEnableFrameRecordBenchmark)
+        {
+            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_ACQUIRESWAPIMAGE);
+        }
+
         if(result == ESwapchainInteractResult::Resized)
         {  // Recreate swapchain
             RecreateSwapchain();
+            if(mEnableFrameRecordBenchmark)
+            {
+                mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
+                mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_PRESENT);
+                mHostFrameRecordBenchmark.End();
+            }
             return;
         }
 
@@ -235,6 +256,11 @@ namespace foray::base {
         //      - Prepare swapchain image for use, write to it, and prepare it for submit
         ApiRender(frameRenderInfo);
 
+        if(mEnableFrameRecordBenchmark)
+        {
+            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
+        }
+
         // Present the swapchain image
         result = currentFrame.Present();
 
@@ -246,6 +272,12 @@ namespace foray::base {
             {
                 RecreateSwapchain();
             }
+        }
+
+        if(mEnableFrameRecordBenchmark)
+        {
+            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_PRESENT);
+            mHostFrameRecordBenchmark.End();
         }
 
         // Advance frame index

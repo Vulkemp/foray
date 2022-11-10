@@ -3,7 +3,7 @@
 
 namespace foray::bench {
 
-    /// @brief A host (CPU time) benchmark based on std::chrono::high_resolution_clock
+    /// @brief A host (CPU time) benchmark based on std::chrono::high_resolution_clock. Timestamps are recorded in milliseconds
     class HostBenchmark : public BenchmarkBase
     {
       public:

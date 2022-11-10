@@ -111,7 +111,7 @@ namespace foray::bench {
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted(ts.Id);
                 ImGui::TableNextColumn();
-                ImGui::Text("%f", delta);
+                ImGui::Text("%f millis", delta);
                 if(!omitTimestamps)
                 {
                     ImGui::TableNextColumn();
@@ -124,11 +124,7 @@ namespace foray::bench {
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("Total");
                 ImGui::TableNextColumn();
-                if(!omitTimestamps)
-                {
-                    ImGui::Text("%f", End - Begin);
-                    ImGui::TableNextColumn();
-                }
+                ImGui::Text("%f millis", End - Begin);
             }
 
             ImGui::EndTable();
@@ -139,23 +135,25 @@ namespace foray::bench {
 
     void BenchmarkBase::Begin(fp64_t timestamp)
     {
-        Assert(!mCurrentLog, "Can not begin new benchmark when a benchmark is already running! End previous benchmark with BenchmarkBase::End() first!");
-        mCurrentLog        = &(mLogs.emplace_back(BenchmarkLog{}));
-        mCurrentLog->Begin = timestamp;
-        mCurrentLog->Timestamps.emplace_back(BenchmarkTimestamp{.Id = BenchmarkTimestamp::BEGIN, .Timestamp = timestamp});
+        Assert(!mRecording, "Can not begin new benchmark when a benchmark is already running! End previous benchmark with BenchmarkBase::End() first!");
+        mRecording = true;
+        mCurrentLog        = BenchmarkLog{};
+        mCurrentLog.Begin = timestamp;
+        mCurrentLog.Timestamps.emplace_back(BenchmarkTimestamp{.Id = BenchmarkTimestamp::BEGIN, .Timestamp = timestamp});
     }
     void BenchmarkBase::LogTimestamp(const char* id, fp64_t timestamp)
     {
-        Assert(!!mCurrentLog, "Cannot log timestamp with no benchmark in progress! Call BenchmarkBase::Begin() first!");
-        fp64_t prev = mCurrentLog->Timestamps.back().Timestamp;
-        mCurrentLog->Timestamps.emplace_back(BenchmarkTimestamp{.Id = id, .Timestamp = timestamp});
-        mCurrentLog->Deltas.emplace_back(timestamp - prev);
+        Assert(mRecording, "Cannot log timestamp with no benchmark in progress! Call BenchmarkBase::Begin() first!");
+        fp64_t prev = mCurrentLog.Timestamps.back().Timestamp;
+        mCurrentLog.Timestamps.emplace_back(BenchmarkTimestamp{.Id = id, .Timestamp = timestamp});
+        mCurrentLog.Deltas.emplace_back(timestamp - prev);
     }
     void BenchmarkBase::End(fp64_t timestamp)
     {
-        Assert(!!mCurrentLog, "Cannot end benchmark with no benchmark in progress! Call BenchmarkBase::Begin() first!");
+        Assert(mRecording, "Cannot end benchmark with no benchmark in progress! Call BenchmarkBase::Begin() first!");
         LogTimestamp(BenchmarkTimestamp::END, timestamp);
-        mCurrentLog->End = timestamp;
-        mCurrentLog      = nullptr;
+        mCurrentLog.End = timestamp;
+        mRecording = false;
+        mLogs.emplace_back(mCurrentLog);
     }
 }  // namespace foray::bench

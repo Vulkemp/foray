@@ -43,6 +43,7 @@ namespace foray::bench {
       public:
         BenchmarkBase();
 
+        FORAY_GETTER_MR(Logs)
         FORAY_GETTER_CR(Logs)
 
       protected:
@@ -54,6 +55,7 @@ namespace foray::bench {
         virtual void End(fp64_t timestamp);
 
         std::vector<BenchmarkLog> mLogs;
-        BenchmarkLog*             mCurrentLog = nullptr;
+        BenchmarkLog              mCurrentLog;
+        bool                      mRecording = false;
     };
-}  // namespace foray
+}  // namespace foray::bench
