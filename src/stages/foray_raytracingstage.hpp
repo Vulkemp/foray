@@ -71,6 +71,9 @@ namespace foray::stages {
         /// @brief Destroys mPipeline and all shaders registered to RenderStage::mShaders
         virtual void DestroyRtPipeline() = 0;
 
+        virtual void CustomObjectsCreate() {}
+        virtual void CustomObjectsDestroy() {}
+
         /// @brief Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets
         virtual void CreateOrUpdateDescriptors() {}
         /// @brief Inheriting types should destroy all descriptor sets used here

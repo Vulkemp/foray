@@ -19,6 +19,7 @@ namespace foray::stages {
     {
         Destroy();
         mContext = context;
+        CustomObjectsCreate();
         CreateOutputImages();
         CreateOrUpdateDescriptors();
         CreatePipelineLayout();
@@ -41,6 +42,7 @@ namespace foray::stages {
         mPipelineLayout.Destroy();
         DestroyDescriptors();
         DestroyOutputImages();
+        CustomObjectsDestroy();
     }
     void BasicRaytracingStage::ReloadShaders()
     {
