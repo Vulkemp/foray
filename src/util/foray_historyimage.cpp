@@ -10,13 +10,19 @@ namespace foray::util {
         ci.Name                           = fmt::format("History.{}", ci.Name);
         ci.ImageCI.usage |= VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | additionalUsageFlags;
         mHistory.Create(context, ci);
+        mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     void HistoryImage::Resize(const VkExtent2D& size)
     {
         mHistory.Resize(size);
+        mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
+    void HistoryImage::ApplyToLayoutCache(core::ImageLayoutCache& layoutCache)
+    {
+        layoutCache.Set(mHistory, mHistoricLayout);
+    }
     void HistoryImage::CmdCopySourceToHistory(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         {  // Pipeline Barrier
@@ -38,6 +44,8 @@ namespace foray::util {
                                                                  .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                              }),
             });
+
+            mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
             VkDependencyInfo depInfo{
                 .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = (uint32_t)vkBarriers.size(), .pImageMemoryBarriers = vkBarriers.data()};
@@ -93,6 +101,8 @@ namespace foray::util {
                                                                                                        .DstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
                                                                                                        .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                                                                    }));
+
+                image->SetHistoricLayout(VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
             }
 
             VkDependencyInfo depInfo{
@@ -134,6 +144,7 @@ namespace foray::util {
     {
         mSource = nullptr;
         mHistory.Destroy();
+        mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
 }  // namespace foray::util

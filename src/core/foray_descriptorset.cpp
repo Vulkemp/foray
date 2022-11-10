@@ -1,4 +1,5 @@
 #include "foray_descriptorset.hpp"
+#include "foray_samplercollection.hpp"
 
 namespace foray::core {
 
@@ -10,7 +11,7 @@ namespace foray::core {
         if(predefinedLayout)
         {
             mDescriptorSetLayout = predefinedLayout;
-            mExternalLayout = true;
+            mExternalLayout      = true;
         }
         else
         {
@@ -29,7 +30,7 @@ namespace foray::core {
             uint32_t              binding        = pairBindingDescriptorInfo.first;
             const DescriptorInfo& descriptorInfo = pairBindingDescriptorInfo.second;
 
-            if (descriptorInfo.DescriptorCount == 0)
+            if(descriptorInfo.DescriptorCount == 0)
             {
                 continue;
             }
@@ -190,6 +191,27 @@ namespace foray::core {
         AssertBindingInUse(binding);
         AssertHandleNotNull(pNext, binding);
         mMapBindingToDescriptorInfo[binding] = {.pNext = pNext, .DescriptorType = descriptorType, .DescriptorCount = DescriptorCount, .ShaderStageFlags = shaderStageFlags};
+    }
+
+    void DescriptorSet::SetDescriptorAt(
+        uint32_t binding, const CombinedImageSampler& sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        SetDescriptorAt(binding, sampledImage.GetVkDescriptorInfo(layout), descriptorType, shaderStageFlags);
+    }
+    void DescriptorSet::SetDescriptorAt(
+        uint32_t binding, const CombinedImageSampler* sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        SetDescriptorAt(binding, sampledImage->GetVkDescriptorInfo(layout), descriptorType, shaderStageFlags);
+    }
+    void DescriptorSet::SetDescriptorAt(
+        uint32_t binding, const std::vector<const CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        std::vector<VkDescriptorImageInfo> imageInfos;
+        for (const CombinedImageSampler* sampledImage : sampledImages)
+        {
+            imageInfos.push_back(sampledImage->GetVkDescriptorInfo(layout));
+        }
+        SetDescriptorAt(binding, imageInfos, descriptorType, shaderStageFlags);
     }
 
     void DescriptorSet::CreateDescriptorSet()

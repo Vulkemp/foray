@@ -16,6 +16,8 @@ namespace foray::util {
 
         void Resize(const VkExtent2D& size);
 
+        void ApplyToLayoutCache(core::ImageLayoutCache& layoutCache);
+
         /// @brief Pipeline barriers, cmdCopyImage from source -> history
         void CmdCopySourceToHistory(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
 
@@ -31,8 +33,11 @@ namespace foray::util {
         inline operator core::ManagedImage&() { return mHistory; }
         inline operator const core::ManagedImage&() const { return mHistory; }
 
+        FORAY_PROPERTY_V(HistoricLayout)
+
       protected:
         core::ManagedImage* mSource = nullptr;
         core::ManagedImage  mHistory;
+        VkImageLayout mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     };
 }  // namespace foray::util
