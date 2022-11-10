@@ -52,9 +52,6 @@ namespace foray::core {
                              VkSampler                               sampler,
                              VkDescriptorType                        descriptorType,
                              VkShaderStageFlags                      shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler& sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler* sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        void SetDescriptorAt(uint32_t binding, const std::vector<const CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (image)
         /// @param binding binding index
         /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
@@ -80,11 +77,25 @@ namespace foray::core {
         /// @brief Set a binding (buffer info)
         /// @param binding binding index
         void SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-
         /// @brief Set a binding (custom / .pNext)
         /// @param binding binding index
         /// @param pNext address assigned to VkDescriptorWrite::pNext
         void SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        /// @brief Set a binding (CombinedImageSampler)
+        /// @param binding binding index
+        /// @param sampledImage Image + Sampler combo
+        /// @param layout ImageLayout
+        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler& sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        /// @brief Set a binding (CombinedImageSampler)
+        /// @param binding binding index
+        /// @param sampledImage Image + Sampler combo
+        /// @param layout ImageLayout
+        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler* sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        /// @brief Set a binding (CombinedImageSampler)
+        /// @param binding binding index
+        /// @param sampledImage Image + Sampler vector (shared layout)
+        /// @param layout ImageLayout
+        void SetDescriptorAt(uint32_t binding, const std::vector<const CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
         bool Exists() const override { return mDescriptorSet != VK_NULL_HANDLE; }
 

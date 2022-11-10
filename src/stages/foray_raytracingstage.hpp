@@ -42,7 +42,7 @@ namespace foray::stages {
     class BasicRaytracingStage : public RenderStage
     {
       public:
-        /// @brief Destroys, assigns context, calls CreateOutputImages(), CreateOrUpdateDescriptors(), CreatePipelineLayout(), CreateRtPipeline() in this order
+        /// @brief Destroys, assigns context, calls CreateOutputImages(), CustomObjectsCreate(), CreateOrUpdateDescriptors(), CreatePipelineLayout(), CreateRtPipeline() in this order
         virtual void Init(core::Context* context);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
@@ -51,7 +51,7 @@ namespace foray::stages {
         /// @param extent New render extent
         virtual void Resize(const VkExtent2D& extent) override;
 
-        /// @brief Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), DestroyOutputImages() in this order
+        /// @brief Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), CustomObjectsDestroy() DestroyOutputImages() in this order
         virtual void Destroy() override;
 
         /// @brief All shaderstage flags usable in a raytracing pipeline
@@ -71,7 +71,9 @@ namespace foray::stages {
         /// @brief Destroys mPipeline and all shaders registered to RenderStage::mShaders
         virtual void DestroyRtPipeline() = 0;
 
+        /// @brief Inheriting types may use this function to initialize stage specific objects such as configuration Ubo buffers
         virtual void CustomObjectsCreate() {}
+        /// @brief Inheriting types may use this function to destroy options created during CustomObjectsCreate()
         virtual void CustomObjectsDestroy() {}
 
         /// @brief Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets
