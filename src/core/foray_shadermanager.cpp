@@ -118,6 +118,7 @@ namespace foray::core {
         }
         if(filePath.IsRelative())
         {
+            osi::Utf8Path test = filePath.MakeAbsolute();
             filePath = filePath.MakeAbsolute();
         }
 
