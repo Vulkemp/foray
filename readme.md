@@ -1,8 +1,10 @@
 Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan Hardware **Ray** tracing Demos
+# ⚠️ Notice
+* This library is still under heavy development. The Api is still subject to frequent breaking changes.
 # Useful Links
 * [foray-examples](https://github.com/Vulkemp/foray-examples): Examples demonstrating GBuffer, minimal raytracer, complex raytracer (WIP)
 * [foray-denoising](https://github.com/Vulkemp/foray-denoising): Project demonstrating and comparing denoiser implementations: OptiX, ASVGF (WIP), BMFR (WIP)
-* [foray_restir](https://github.com/Vulkemp/foray_restir): ReStir demo implementation
+* [foray_restir](https://github.com/Vulkemp/foray_restir): ReStir demo implementation (WIP)
 # Features
 ## Quick Setup or Custom Setup
 * Inherit from base types to get a very quick and easy start
