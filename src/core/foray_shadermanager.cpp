@@ -144,7 +144,7 @@ namespace foray::core {
             outIncludes.push_back(includeeFullPath);
 
             // get includee's includes
-            ScanIncludes(outIncludes, includeeFullPath, ++recursionDepth);
+            ScanIncludes(outIncludes, includeeFullPath, recursionDepth + 1);
         }
     }
 
