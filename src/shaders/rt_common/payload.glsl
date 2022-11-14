@@ -16,6 +16,7 @@ struct HitPayload
     vec3 Attenuation;
     /// @brief Seed is a per ray generated seed value for random number generation
     uint Seed;
+    uint Depth;
 };
 
 /// @brief HitPayload default constructor
@@ -25,6 +26,7 @@ HitPayload ConstructHitPayload()
     result.Radiance = vec3(0.f);
     result.Attenuation = vec3(1.f);
     result.Seed = 0;
+    result.Depth = 0;
     return result;
 }
 

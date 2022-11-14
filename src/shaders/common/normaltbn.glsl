@@ -38,7 +38,7 @@ vec3 ApplyNormalMap(in mat3 tbn, in MaterialProbe probe)
     }
     else
     {
-        return tbn * normalize(probe.Normal * 2.0 - vec3(1.0));
+        return normalize(tbn * normalize(probe.Normal * 2.0 - vec3(1.0)));
     }
 }
 
