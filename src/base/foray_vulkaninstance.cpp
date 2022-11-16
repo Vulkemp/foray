@@ -57,7 +57,7 @@ namespace foray::base {
             // Populate the VkDebugReportCallbackCreateInfoEXT
             VkDebugReportCallbackCreateInfoEXT ci = {};
             ci.sType                              = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-            ci.pfnCallback                        = DefaultDebugReportCallback;
+            ci.pfnCallback                        = mDebugReportFunc;
             ci.flags                              = VK_DEBUG_REPORT_INFORMATION_BIT_EXT;
             ci.pUserData                          = nullptr;
 
