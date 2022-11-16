@@ -1,8 +1,8 @@
 #pragma once
+#include "../bench/foray_bench_declares.hpp"
 #include "../util/foray_externalsemaphore.hpp"
 #include "foray_gbuffer.hpp"
 #include "foray_renderstage.hpp"
-#include "../bench/foray_bench_declares.hpp"
 
 namespace foray::stages {
 
@@ -21,7 +21,7 @@ namespace foray::stages {
         void* AuxiliaryData = nullptr;
         /// @brief Semaphore for synchronisation of externally computing denoisers (e.g. OptiX Denoiser)
         util::ExternalSemaphore* Semaphore = nullptr;
-        bench::DeviceBenchmark* Benchmark = nullptr;
+        bench::DeviceBenchmark*  Benchmark = nullptr;
 
         inline DenoiserConfig() {}
         inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut, GBufferStage* gbuffer) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut)
@@ -54,6 +54,7 @@ namespace foray::stages {
     /// @remark The Semaphore member of DenoiserConfig is expected to be used for synchronization
     class ExternalDenoiserStage : public DenoiserStage
     {
+      public:
         /// @brief Vulkan side work to be computed before doing external work
         virtual void BeforeDenoise(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
         /// @brief Vulkan side work to be computed after doing external work
