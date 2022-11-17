@@ -66,7 +66,7 @@ namespace foray::base {
         /// @brief If true, validation layers are enabled, and if mDebugMessengerFunc or mDebugUserData are set they are passed on to the builder respectively
         bool mEnableDebugLayersAndCallbacks = true;
 
-        bool mEnableDebugReport = true;
+        bool mEnableDebugReport = false;
 
         core::Context* mContext = nullptr;
 
