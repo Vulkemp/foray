@@ -13,9 +13,10 @@ struct HitPayload
     /// @brief Radiance in Watt per steradian per square meter
     vec3 Radiance;
     /// @brief Attenuation is a multiplier for the contribution of the current ray to its originally generated ray
-    float Attenuation;
+    vec3 Attenuation;
     /// @brief Seed is a per ray generated seed value for random number generation
     uint Seed;
+    uint Depth;
 };
 
 /// @brief HitPayload default constructor
@@ -23,8 +24,9 @@ HitPayload ConstructHitPayload()
 {
     HitPayload result;
     result.Radiance = vec3(0.f);
-    result.Attenuation = 1.f;
+    result.Attenuation = vec3(1.f);
     result.Seed = 0;
+    result.Depth = 0;
     return result;
 }
 

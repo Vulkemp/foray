@@ -38,6 +38,9 @@ namespace foray::osi {
         Utf8Path(const std::vector<std::string_view>& sections, bool relative);
 
       public:
+        inline Utf8Path(const Utf8Path& other) : mPath(other.mPath) { VerifyPath(); }
+        inline Utf8Path(Utf8Path&& other) : mPath(other.mPath) { VerifyPath(); }
+        Utf8Path& operator=(const Utf8Path& other);
         /// @brief Default constructs with empty relative path
         Utf8Path();
         template <typename StringViewLike>

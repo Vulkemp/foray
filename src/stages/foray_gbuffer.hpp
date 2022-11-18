@@ -10,13 +10,13 @@ namespace foray::stages {
     /// @brief Utilizes rasterization to render a GBuffer output
     /// @details
     /// # Outputs
-    ///  * Position         rgba32f     Worldspace positions of fragments 
-    ///  * Normal           rgba32f     Worldspace normals
-    ///  * Albedo           rgba32f     Fragment Albedo
-    ///  * Motion           rg32f       Motion vectors. Translates Current -> Previous in UV coordinates
+    ///  * Position         rgba16f     Worldspace positions of fragments 
+    ///  * Normal           rgba16f     Worldspace normals
+    ///  * Albedo           rgba16f     Fragment Albedo
+    ///  * Motion           rg16f       Motion vectors. Translates Current -> Previous in UV coordinates
     ///  * MaterialIdx      r32i        Material Indices. -1 indicates no material set.
     ///  * MeshInstanceIdx  r32u        Mesh Instance Index. Unique for every ncomp::MeshInstance component
-    ///  * LinearZ          rg32f       Linear Depth (projected.z * projected.w), absolute linear depth Gradient
+    ///  * LinearZ          rg16f       Linear Depth (projected.z * projected.w), absolute linear depth Gradient
     ///  * Depth            d32f        Vulkan Depth output
     class GBufferStage : public RasterizedRenderStage
     {

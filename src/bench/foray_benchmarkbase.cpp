@@ -39,7 +39,7 @@ namespace foray::bench {
         {
             const auto& ts    = Timestamps[i];
             const auto& delta = Deltas[i - 1];
-            out << "  " << std::setw(tsLen) << ts.Id << " | " << std::setw(16) << delta;
+            out << "  " << std::setw(tsLen) << ts.Id << " | " << std::setw(16) << delta << " ms";
             if(!omitTimestamps)
             {
                 out << " | " << std::setw(16) << ts.Timestamp;
@@ -49,7 +49,7 @@ namespace foray::bench {
 
         {
             out << std::setw(tsLen + 2) << "Total"
-                << " | " << std::setw(16) << End - Begin;
+                << " | " << std::setw(16) << End - Begin << " ms";
             if(!omitTimestamps)
             {
                 out << " | " << std::setw(16) << "";
@@ -111,7 +111,7 @@ namespace foray::bench {
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted(ts.Id);
                 ImGui::TableNextColumn();
-                ImGui::Text("%f millis", delta);
+                ImGui::Text("%f ms", delta);
                 if(!omitTimestamps)
                 {
                     ImGui::TableNextColumn();
@@ -124,7 +124,7 @@ namespace foray::bench {
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted("Total");
                 ImGui::TableNextColumn();
-                ImGui::Text("%f millis", End - Begin);
+                ImGui::Text("%f ms", End - Begin);
             }
 
             ImGui::EndTable();

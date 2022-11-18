@@ -17,6 +17,8 @@ namespace foray::scene::gcomp {
 
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
+        FORAY_PROPERTY_R(Buffer)
+
       protected:
         std::vector<SimpleLight>                            mSimplifiedlights;
         std::unordered_map<ncomp::PunctualLight*, uint32_t> mComponentArrayBindings;

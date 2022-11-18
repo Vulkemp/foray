@@ -118,6 +118,7 @@ namespace foray::core {
         }
         if(filePath.IsRelative())
         {
+            osi::Utf8Path test = filePath.MakeAbsolute();
             filePath = filePath.MakeAbsolute();
         }
 
@@ -143,7 +144,7 @@ namespace foray::core {
             outIncludes.push_back(includeeFullPath);
 
             // get includee's includes
-            ScanIncludes(outIncludes, includeeFullPath, ++recursionDepth);
+            ScanIncludes(outIncludes, includeeFullPath, recursionDepth + 1);
         }
     }
 

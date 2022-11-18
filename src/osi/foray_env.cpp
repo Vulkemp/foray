@@ -98,6 +98,13 @@ namespace foray::osi {
         BuildSectionVector();
     }
 
+    Utf8Path& Utf8Path::operator=(const Utf8Path& other)
+    {
+        mPath = other.mPath;
+        VerifyPath();
+        return *this;
+    }
+
     void Utf8Path::VerifyPath()
     {
         Assert(!mPath.empty(), "Invalid Path Initializer: path argument may not be empty!");

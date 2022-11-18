@@ -14,6 +14,8 @@ namespace foray::util {
         FORAY_GETTER_V(Semaphore)
         FORAY_GETTER_V(Handle)
 
+        inline operator VkSemaphore() const { return mSemaphore; }
+
       protected:
         core::Context* mContext   = nullptr;
         VkSemaphore    mSemaphore = nullptr;
