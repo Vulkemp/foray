@@ -43,10 +43,13 @@ namespace foray::scene {
         FORAY_PROPERTY_V(Context)
 
         template <typename TComponent>
+        int32_t FindComponents(std::vector<TComponent*>& outcomponents);
+
+        template <typename TComponent>
         int32_t FindNodesWithComponent(std::vector<Node*>& outnodes);
 
         /// @brief Adds a default camera to the scene (standard perspective + freecameracontroller) and selects it in the cameramanager
-        void UseDefaultCamera();
+        void UseDefaultCamera(bool invertAll = false);
         /// @brief Rebuilds the Tlas. If your project requires a Tlas this must be called after altering the scene
         void UpdateTlasManager();        
         /// @brief Updates lights. If your project requires punctual lights, this must be called after altering the scene
@@ -65,6 +68,17 @@ namespace foray::scene {
     };
 
     template <typename TComponent>
+    int32_t Scene::FindComponents(std::vector<TComponent*>& outnodes)
+    {
+        int32_t found = 0;
+        for(Node* rootnode : mRootNodes)
+        {
+            found += rootnode->FindComponentsRecursive<TComponent>(outnodes);
+        }
+        return found;
+    }
+
+    template <typename TComponent>
     int32_t Scene::FindNodesWithComponent(std::vector<Node*>& outnodes)
     {
         int32_t found = 0;
@@ -79,5 +93,4 @@ namespace foray::scene {
         }
         return found;
     }
-
 }  // namespace foray::scene

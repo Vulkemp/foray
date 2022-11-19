@@ -15,7 +15,10 @@ namespace foray::scene {
         template <typename TComponent>
         inline int32_t FindChildrenWithComponent(std::vector<Node*>& outnodes);
 
-        inline virtual ~Node(){}
+        template <typename TComponent>
+        inline int32_t FindComponentsRecursive(std::vector<TComponent*>& outnodes);
+
+        inline virtual ~Node() {}
 
       protected:
         Node*              mParent   = nullptr;
@@ -24,16 +27,31 @@ namespace foray::scene {
 
 
     template <typename TComponent>
-    inline int32_t Node::FindChildrenWithComponent(std::vector<Node*>& outnodes){
-      int32_t found = 0;
-      for (Node* child : mChildren){
-        if (child->HasComponent<TComponent>()){
-          found++;
-          outnodes.push_back(child);
+    inline int32_t Node::FindChildrenWithComponent(std::vector<Node*>& outnodes)
+    {
+        int32_t found = 0;
+        for(Node* child : mChildren)
+        {
+            if(child->HasComponent<TComponent>())
+            {
+                found++;
+                outnodes.push_back(child);
+            }
+            found += child->FindChildrenWithComponent<TComponent>(outnodes);
         }
-        found += child->FindChildrenWithComponent<TComponent>(outnodes);
-      }
-      return found;
+        return found;
     }
 
-}  // namespace foray
+    template <typename TComponent>
+    inline int32_t Node::FindComponentsRecursive(std::vector<TComponent*>& outnodes)
+    {
+        int32_t found = 0;
+        found += GetComponents<TComponent>(outnodes);
+        for(Node* child : mChildren)
+        {
+            found += child->FindComponentsRecursive<TComponent>(outnodes);
+        }
+        return found;
+    }
+
+}  // namespace foray::scene

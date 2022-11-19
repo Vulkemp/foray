@@ -61,6 +61,8 @@ namespace foray::scene::ncomp {
             return;
         }
 
+        fp32_t invertMulti = mInvertAll ? -1.f : 1.f;
+
         float deltaTime = updateInfo.RenderInfo.GetFrameTime();
         float speed     = exp2f(mSpeedExponent) * deltaTime;
         glm::vec3& pos       = camera->GetEyePosition();
@@ -68,13 +70,13 @@ namespace foray::scene::ncomp {
         glm::vec3& upDir     = camera->GetUpDirection();
 
         if(mInputStates.PitchUp)
-            mPitch += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
+            mPitch += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
         if(mInputStates.PitchDown)
-            mPitch += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
+            mPitch += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
         if(mInputStates.YawLeft)
-            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
+            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
         if(mInputStates.YawRight)
-            mYaw += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
+            mYaw += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
 
         mPitch = std::clamp(mPitch, -89.f, 89.f);
 
@@ -86,13 +88,13 @@ namespace foray::scene::ncomp {
         if(mInputStates.Backward)
             pos += -1.f * speed * lookDir;
         if(mInputStates.StrafeLeft)
-            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir));
+            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir)) * invertMulti;
         if(mInputStates.StrafeRight)
-            pos += speed * glm::normalize(glm::cross(lookDir, upDir));
+            pos += speed * glm::normalize(glm::cross(lookDir, upDir)) * invertMulti;
         if(mInputStates.StrafeUp)
-            pos += speed * upDir;
+            pos += speed * upDir * invertMulti;
         if(mInputStates.StrafeDown)
-            pos += -1.f * speed * upDir;
+            pos += -1.f * speed * upDir * invertMulti;
 
 
         lookAt = pos + lookDir;
@@ -107,11 +109,13 @@ namespace foray::scene::ncomp {
             return;
         }
 
+        fp32_t invertMulti = mInvertAll ? -1.f : 1.f;
+
         float xoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeX;
         float yoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeY;
 
-        mYaw += xoffset;
-        mPitch += yoffset * (mInvertYAxis ? -1.f : 1.f);
+        mYaw += xoffset * invertMulti;
+        mPitch += yoffset * (mInvertYAxis ? -1.f : 1.f) * invertMulti;
 
         // make sure that when pitch is out of bounds, screen doesn't get flipped
         mPitch = std::clamp(mPitch, -89.f, 89.f);
