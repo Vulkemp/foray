@@ -23,6 +23,9 @@ namespace foray::scene::ncomp {
         virtual void           Update(SceneUpdateInfo&) override;
         inline virtual int32_t GetOrder() const override { return 0; }
 
+        FORAY_PROPERTY_V(InvertYAxis)
+        FORAY_PROPERTY_V(InvertAll)
+
       protected:
         virtual void ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event);
 
@@ -47,12 +50,14 @@ namespace foray::scene::ncomp {
         float                         mYaw                          = 0;
         inline static constexpr float MOUSE_ROTATION_SENSIBILITY    = .05f;
         bool                          mUseMouse                     = false;
-        bool                          mInvertYAxis                  = false;
+
+        bool mInvertYAxis = false;
+        bool mInvertAll   = false;
 
         std::unordered_map<osi::EButton, bool&> mMapping = {{osi::EButton::Keyboard_W, mInputStates.Forward},       {osi::EButton::Keyboard_S, mInputStates.Backward},
-                                                  {osi::EButton::Keyboard_LShift, mInputStates.StrafeUp}, {osi::EButton::Keyboard_LCtrl, mInputStates.StrafeDown},
-                                                  {osi::EButton::Keyboard_A, mInputStates.StrafeLeft},    {osi::EButton::Keyboard_D, mInputStates.StrafeRight},
-                                                  {osi::EButton::Keyboard_Up, mInputStates.PitchUp},      {osi::EButton::Keyboard_Down, mInputStates.PitchDown},
-                                                  {osi::EButton::Keyboard_Left, mInputStates.YawLeft},    {osi::EButton::Keyboard_Right, mInputStates.YawRight}};
+                                                            {osi::EButton::Keyboard_LShift, mInputStates.StrafeUp}, {osi::EButton::Keyboard_LCtrl, mInputStates.StrafeDown},
+                                                            {osi::EButton::Keyboard_A, mInputStates.StrafeLeft},    {osi::EButton::Keyboard_D, mInputStates.StrafeRight},
+                                                            {osi::EButton::Keyboard_Up, mInputStates.PitchUp},      {osi::EButton::Keyboard_Down, mInputStates.PitchDown},
+                                                            {osi::EButton::Keyboard_Left, mInputStates.YawLeft},    {osi::EButton::Keyboard_Right, mInputStates.YawRight}};
     };
-}  // namespace foray::scene
+}  // namespace foray::scene::ncomp

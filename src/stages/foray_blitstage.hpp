@@ -26,6 +26,9 @@ namespace foray::stages {
         /// @brief Set destination Image (nullptr allowed)
         virtual void SetDstImage(VkImage image, VkExtent2D size);
 
+        FORAY_PROPERTY_V(FlipX)
+        FORAY_PROPERTY_V(FlipY)
+
       protected:
         /// @brief If set, preferred over mSrcVkImage member. Allows for recreated ManagedImage instances.
         core::ManagedImage* mSrcImage = nullptr;

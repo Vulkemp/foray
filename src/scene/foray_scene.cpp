@@ -63,13 +63,13 @@ namespace foray::scene {
         return node;
     }
 
-    void Scene::UseDefaultCamera()
+    void Scene::UseDefaultCamera(bool invertAll)
     {
         Node* cameraNode = MakeNode();
 
         ncomp::Camera* camera = cameraNode->MakeComponent<foray::scene::ncomp::Camera>();
         camera->InitDefault();
-        cameraNode->MakeComponent<ncomp::FreeCameraController>();
+        cameraNode->MakeComponent<ncomp::FreeCameraController>()->SetInvertAll(invertAll);
         gcomp::CameraManager* cameraManager = GetComponent<gcomp::CameraManager>();
 
         cameraManager->RefreshCameraList();
