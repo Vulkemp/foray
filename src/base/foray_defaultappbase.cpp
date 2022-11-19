@@ -248,7 +248,7 @@ namespace foray::base {
 
 
         FrameRenderInfo frameRenderInfo(renderInfo, &currentFrame);
-        frameRenderInfo.SetFrameNumber(mRenderedFrameCount);
+        frameRenderInfo.SetFrameNumber(mRenderedFrameCount).SetRenderSize(mWindowSwapchain.GetSwapchain().extent);
 
         // Record command buffer
         // The user is expected in here to

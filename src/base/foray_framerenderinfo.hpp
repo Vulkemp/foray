@@ -16,6 +16,7 @@ namespace foray::base {
         FORAY_PROPERTY_V(FrameTime)
         FORAY_PROPERTY_V(SinceStart)
         FORAY_PROPERTY_V(FrameNumber)
+        FORAY_PROPERTY_V(RenderSize)
         FORAY_PROPERTY_R(InFlightFrame)
         FORAY_PROPERTY_R(ImageLayoutCache)
 
@@ -51,6 +52,8 @@ namespace foray::base {
         fp64_t mSinceStart = 0.0;
         /// @brief Number of complete frames rendered since application startup
         uint64_t mFrameNumber = 0;
+        /// @brief Render Resolution
+        VkExtent2D mRenderSize = {};
         /// @brief In Flight Frame contains command buffers and synchronization primitives for the current frame
         InFlightFrame*         mInFlightFrame = nullptr;
         /// @brief ImageLayoutCache is used to maintain Images layouts throughout the recording of the frame.
