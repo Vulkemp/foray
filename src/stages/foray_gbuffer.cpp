@@ -85,14 +85,17 @@ namespace foray::stages {
 
         {  // Material
             mImageInfos[(size_t)EOutput::MaterialIdx].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32_SINT, extent, OutputNames[(size_t)EOutput::MaterialIdx]);
+            mImageInfos[(size_t)EOutput::MaterialIdx].ClearValue.color = VkClearColorValue{.int32={-1, 0, 0, 0}};
         }
 
         {  // MeshId
             mImageInfos[(size_t)EOutput::MeshInstanceIdx].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R32_UINT, extent, OutputNames[(size_t)EOutput::MeshInstanceIdx]);
+            mImageInfos[(size_t)EOutput::MeshInstanceIdx].ClearValue.color = VkClearColorValue{.uint32{std::numeric_limits<uint32_t>().max(), 0, 0, 0}};
         }
 
         {  // LinearZ
             mImageInfos[(size_t)EOutput::LinearZ].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16_SFLOAT, extent, OutputNames[(size_t)EOutput::LinearZ]);
+            mImageInfos[(size_t)EOutput::LinearZ].ClearValue.color = VkClearColorValue{.float32{std::numeric_limits<fp32_t>().infinity(), 0.f, 0.f, 0.f}};
         }
 
         {  // Depth
