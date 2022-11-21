@@ -14,7 +14,7 @@ namespace foray::stages {
         inline static constexpr std::string_view OutputName = "Comparer.Out";
 
         /// @brief Inits the comparer stage. SetInput() calls afterwards are required for function
-        virtual void Init(core::Context* context);
+        virtual void Init(core::Context* context, bool flipY);
 
         /// @brief Pipeline barriers and compute shader dispatches
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
@@ -106,5 +106,6 @@ namespace foray::stages {
 
         fp32_t     mMixValue = 0.5;
         glm::ivec2 mMousePos = {};
+        bool       mFlipY    = false;
     };
 }  // namespace foray::stages

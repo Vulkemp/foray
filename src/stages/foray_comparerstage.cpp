@@ -15,9 +15,10 @@ const uint32_t SHADER_U[] =
 
 namespace foray::stages {
 #pragma region Init
-    void ComparerStage::Init(core::Context* context)
+    void ComparerStage::Init(core::Context* context, bool flipY)
     {
         mContext = context;
+        mFlipY = flipY;
         CreateOutputImage();
         LoadShaders();
         CreatePipetteBuffer();
@@ -169,6 +170,10 @@ namespace foray::stages {
         if(!!mouseMove)
         {
             mMousePos = glm::ivec2(mouseMove->CurrentX, mouseMove->CurrentY);
+            if (mFlipY)
+            {
+                mMousePos.y = mContext->Swapchain->extent.height - mMousePos.y - 1;
+            }
         }
     }
 
