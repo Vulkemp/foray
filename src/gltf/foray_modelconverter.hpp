@@ -16,7 +16,7 @@ namespace foray::gltf {
         using FpSceneSelect = std::function<int32_t(tinygltf::Model&)>;
 
         FpSceneSelect SceneSelect = nullptr;
-        bool FlipY = true;
+        bool FlipY = false;
     };
 
     class ModelConverter : public NoMoveDefaults
