@@ -2,6 +2,7 @@
 #include "../../osi/foray_event.hpp"
 #include "../foray_camerauboblock.hpp"
 #include "../foray_scene.hpp"
+#include "foray_transform.hpp"
 #include <spdlog/fmt/fmt.h>
 
 #undef near
@@ -16,7 +17,9 @@ namespace foray::scene::ncomp {
 
     void Camera::SetViewMatrix()
     {
-        mViewMatrix = glm::lookAt(mEyePosition, mLookatPosition, mUpDirection);
+        Transform* transform = GetNode()->GetTransform();
+        transform->RecalculateGlobalMatrix();
+        mViewMatrix = glm::inverse(transform->GetGlobalMatrix());
     }
 
     void Camera::SetProjectionMatrix()
@@ -41,13 +44,6 @@ namespace foray::scene::ncomp {
         mProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
     }
 
-    void Camera::SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up)
-    {
-        mEyePosition    = eye;
-        mLookatPosition = lookat;
-        mUpDirection    = up;
-        SetViewMatrix();
-    }
     void Camera::SetProjectionMatrix(float verticalFov, float aspect, float near, float far)
     {
         mVerticalFov = verticalFov;

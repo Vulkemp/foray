@@ -2,6 +2,7 @@
 #include "../../foray_logger.hpp"
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
+#include "foray_transform.hpp"
 
 namespace foray::scene::ncomp {
     void FreeCameraController::OnEvent(const osi::Event* event)
@@ -56,6 +57,7 @@ namespace foray::scene::ncomp {
     void FreeCameraController::Update(SceneUpdateInfo& updateInfo)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
+        Transform* transform = GetNode()->GetTransform();
         if(!camera)
         {
             return;
@@ -65,8 +67,7 @@ namespace foray::scene::ncomp {
 
         float deltaTime = updateInfo.RenderInfo.GetFrameTime();
         float speed     = exp2f(mSpeedExponent) * deltaTime;
-        glm::vec3& pos       = camera->GetEyePosition();
-        glm::vec3& lookAt    = camera->GetLookatPosition();
+        glm::vec3& pos       = transform->GetTranslation();
         glm::vec3& upDir     = camera->GetUpDirection();
 
         if(mInputStates.PitchUp)
@@ -92,18 +93,19 @@ namespace foray::scene::ncomp {
         if(mInputStates.StrafeRight)
             pos += speed * glm::normalize(glm::cross(lookDir, upDir));
         if(mInputStates.StrafeUp)
-            pos += speed * upDir * invertMulti;
+            pos += speed * upDir;
         if(mInputStates.StrafeDown)
-            pos += -1.f * speed * upDir * invertMulti;
+            pos += -1.f * speed * upDir;
 
-
-        lookAt = pos + lookDir;
+        transform->SetTranslation(pos);
+        transform->SetRotation(glm::quatLookAt(lookDir, camera->GetUpDirection()));
         camera->SetViewMatrix();
     }
 
     void FreeCameraController::ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event)
     {
         Camera* camera = GetNode()->GetComponent<Camera>();
+        Transform* transform = GetNode()->GetTransform();
         if(!camera)
         {
             return;
@@ -122,9 +124,8 @@ namespace foray::scene::ncomp {
 
         glm::vec3 lookDir(std::cos(glm::radians(mYaw)) * std::cos(glm::radians(mPitch)), std::sin(glm::radians(mPitch)),
                           std::sin(glm::radians(mYaw)) * std::cos(glm::radians(mPitch)));
-        auto&     pos    = camera->GetEyePosition();
-        auto&     lookAt = camera->GetLookatPosition();
-        lookAt           = pos + lookDir;
+
+        transform->SetRotation(glm::quatLookAt(lookDir, camera->GetUpDirection()));
         camera->SetViewMatrix();
     }
 

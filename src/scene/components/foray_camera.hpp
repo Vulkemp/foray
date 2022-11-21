@@ -19,7 +19,6 @@ namespace foray::scene::ncomp {
         void SetViewMatrix();
         void SetProjectionMatrix();
 
-        void SetViewMatrix(const glm::vec3& eye, const glm::vec3& lookat, const glm::vec3& up);
         void SetProjectionMatrix(float verticalFov, float aspect, float near, float far);
 
         virtual void UpdateUbo(CameraUboBlock& uboblock);
@@ -27,8 +26,6 @@ namespace foray::scene::ncomp {
 
         inline static float CalculateAspect(const VkExtent2D extent);
 
-        FORAY_PROPERTY_R(EyePosition)
-        FORAY_PROPERTY_R(LookatPosition)
         FORAY_PROPERTY_R(UpDirection)
 
       protected:
@@ -36,8 +33,6 @@ namespace foray::scene::ncomp {
         float     mAspect           = 0.f;
         float     mNear             = 0;
         float     mFar              = 0;
-        glm::vec3 mEyePosition      = glm::vec3(0.f, 0.f, -1.f);
-        glm::vec3 mLookatPosition   = glm::vec3(0.f, 0.f, 0.f);
         glm::vec3 mUpDirection      = glm::vec3(0.f, 1.f, 0.f);
         glm::mat4 mViewMatrix       = glm::mat4(1);
         glm::mat4 mProjectionMatrix = glm::mat4(1);
