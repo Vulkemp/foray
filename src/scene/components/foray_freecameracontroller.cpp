@@ -74,9 +74,9 @@ namespace foray::scene::ncomp {
         if(mInputStates.PitchDown)
             mPitch += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
         if(mInputStates.YawLeft)
-            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
+            mYaw += glm::radians(-1.f * KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
         if(mInputStates.YawRight)
-            mYaw += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime) * invertMulti;
+            mYaw += glm::radians(KEYBOARD_ROTATION_SENSIBILITY * deltaTime);
 
         mPitch = std::clamp(mPitch, -89.f, 89.f);
 
@@ -88,9 +88,9 @@ namespace foray::scene::ncomp {
         if(mInputStates.Backward)
             pos += -1.f * speed * lookDir;
         if(mInputStates.StrafeLeft)
-            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir)) * invertMulti;
+            pos += -1.f * speed * glm::normalize(glm::cross(lookDir, upDir));
         if(mInputStates.StrafeRight)
-            pos += speed * glm::normalize(glm::cross(lookDir, upDir)) * invertMulti;
+            pos += speed * glm::normalize(glm::cross(lookDir, upDir));
         if(mInputStates.StrafeUp)
             pos += speed * upDir * invertMulti;
         if(mInputStates.StrafeDown)
@@ -114,7 +114,7 @@ namespace foray::scene::ncomp {
         float xoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeX;
         float yoffset = MOUSE_ROTATION_SENSIBILITY * event->RelativeY;
 
-        mYaw += xoffset * invertMulti;
+        mYaw += xoffset;
         mPitch += yoffset * (mInvertYAxis ? -1.f : 1.f) * invertMulti;
 
         // make sure that when pitch is out of bounds, screen doesn't get flipped
