@@ -148,8 +148,8 @@ namespace foray::util {
         // STEP #1: Get EXR version and header information
 
         bool success = true;
-        success      = success && ParseEXRVersionFromFile(&loaderCache.Version, mInfo.Utf8Path.c_str()) == TINYEXR_SUCCESS;
-        success      = success && ParseEXRHeaderFromFile(&loaderCache.Header, &loaderCache.Version, mInfo.Utf8Path.c_str(), &exrError) == TINYEXR_SUCCESS;
+        success      = success && ParseEXRVersionFromFile(&loaderCache.Version, mInfo.Utf8Path.GetPath().c_str()) == TINYEXR_SUCCESS;
+        success      = success && ParseEXRHeaderFromFile(&loaderCache.Header, &loaderCache.Version, mInfo.Utf8Path.GetPath().c_str(), &exrError) == TINYEXR_SUCCESS;
         if(!success)
         {
             if(!!exrError)
@@ -231,7 +231,7 @@ namespace foray::util {
         auto& header      = loaderCache.Header;
         auto& channelMap  = loaderCache.Channels;
 
-        if(LoadEXRImageFromFile(&image, &header, mInfo.Utf8Path.c_str(), &exrError) != TINYEXR_SUCCESS)
+        if(LoadEXRImageFromFile(&image, &header, mInfo.Utf8Path.GetPath().c_str(), &exrError) != TINYEXR_SUCCESS)
         {
             if(!!exrError)
             {

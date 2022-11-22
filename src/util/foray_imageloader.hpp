@@ -3,6 +3,7 @@
 #include "../core/foray_managedimage.hpp"
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
+#include "../osi/foray_env.hpp"
 #include "foray_imageformattraits.hpp"
 #include <functional>
 
@@ -32,8 +33,8 @@ namespace foray::util {
         class ImageInfo : public NoMoveDefaults
         {
           public:
-            bool                       Valid     = false;
-            std::string                Utf8Path  = "";
+            bool                       Valid = false;
+            osi::Utf8Path              Utf8Path;
             std::string                Extension = "";
             std::string                Name      = "";
             std::vector<EImageChannel> Channels;
@@ -44,7 +45,7 @@ namespace foray::util {
 
         /// @brief Inits the image loader
         /// @return True if the image exists, can be loaded and the data is suitable for the
-        inline bool Init(std::string_view utf8path);
+        inline bool Init(const osi::Utf8Path& utf8path);
 
         /// @brief Checks if format the loader was initialized in supports linear tiling transfer and shader read
         inline static bool sFormatSupported(core::Context* context);
@@ -60,12 +61,12 @@ namespace foray::util {
         FORAY_GETTER_CR(Info)
         FORAY_GETTER_CR(RawData)
 
-        inline void InitManagedImage(core::Context*          context,
+        inline void InitManagedImage(core::Context*                  context,
                                      core::ManagedImage*             image,
                                      core::ManagedImage::CreateInfo& ci,
                                      VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
-        inline void InitManagedImage(core::Context*          context,
-                                     core::HostCommandBuffer&            cmdBuffer,
+        inline void InitManagedImage(core::Context*                  context,
+                                     core::HostCommandBuffer&        cmdBuffer,
                                      core::ManagedImage*             image,
                                      core::ManagedImage::CreateInfo& ci,
                                      VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;

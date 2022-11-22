@@ -22,14 +22,14 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    bool ImageLoader<FORMAT>::Init(std::string_view utf8path)
+    bool ImageLoader<FORMAT>::Init(const osi::Utf8Path& utf8path)
     {
         // Reset all members
         Destroy();
 
         mInfo.Utf8Path = utf8path;
 
-        path fspath = osi::FromUtf8Path(utf8path);
+        path fspath = utf8path;
         if(fspath.has_extension())
         {
             mInfo.Extension = osi::ToUtf8Path(fspath.extension());

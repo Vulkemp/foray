@@ -1,8 +1,8 @@
 #pragma once
+#include "../foray_logger.hpp"
 #include "../osi/foray_env.hpp"
 #include "foray_imageloader.hpp"
 #include <tinygltf/stb_image.h>
-#include "../foray_logger.hpp"
 
 namespace foray::util {
 
@@ -23,7 +23,7 @@ namespace foray::util {
         int  width           = 0;
         int  height          = 0;
         int  component_count = 0;
-        bool gotInfo         = !!stbi_info(mInfo.Utf8Path.c_str(), &width, &height, &component_count);
+        bool gotInfo         = !!stbi_info(mInfo.Utf8Path.GetPath().c_str(), &width, &height, &component_count);
 
         if(!gotInfo)
         {
@@ -35,8 +35,8 @@ namespace foray::util {
         StbLoaderCache& cache = *reinterpret_cast<StbLoaderCache*>(&mCustomLoaderInfo);
         new(&cache) StbLoaderCache();
 
-        cache.Is16bit = !!stbi_is_16_bit(mInfo.Utf8Path.c_str());
-        cache.IsHdr   = !!stbi_is_hdr(mInfo.Utf8Path.c_str());
+        cache.Is16bit = !!stbi_is_16_bit(mInfo.Utf8Path.GetPath().c_str());
+        cache.IsHdr   = !!stbi_is_hdr(mInfo.Utf8Path.GetPath().c_str());
 
         switch(component_count)
         {
@@ -101,7 +101,8 @@ namespace foray::util {
         StbLoaderCache& cache = *reinterpret_cast<StbLoaderCache*>(&mCustomLoaderInfo);
 
         uint8_t*    stbdata = nullptr;
-        const char* name    = mInfo.Utf8Path.c_str();
+        std::string namestr(mInfo.Utf8Path.GetPath());
+        const char* name = namestr.c_str();
 
         int desired_channels = static_cast<int>(FORMAT_TRAITS::COMPONENT_COUNT);
 
@@ -130,4 +131,4 @@ namespace foray::util {
         return true;
     }
 
-}  // namespace foray
+}  // namespace foray::util
