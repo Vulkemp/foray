@@ -95,7 +95,7 @@ namespace foray::stages {
 
         {  // LinearZ
             mImageInfos[(size_t)EOutput::LinearZ].Image.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16_SFLOAT, extent, OutputNames[(size_t)EOutput::LinearZ]);
-            mImageInfos[(size_t)EOutput::LinearZ].ClearValue.color = VkClearColorValue{.float32{std::numeric_limits<fp32_t>().infinity(), 0.f, 0.f, 0.f}};
+            mImageInfos[(size_t)EOutput::LinearZ].ClearValue.color = VkClearColorValue{.float32{std::numeric_limits<fp32_t>().max(), 0.f, 0.f, 0.f}};
         }
 
         {  // Depth
