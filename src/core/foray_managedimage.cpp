@@ -43,9 +43,12 @@ namespace foray::core {
         AssertVkResult(vmaCreateImage(mContext->Allocator, &mCreateInfo.ImageCI, &mCreateInfo.AllocCI, &mImage, &mAllocation, &mAllocInfo));
         mSize = mAllocInfo.size;
 
-        // update image in image view create info
-        mCreateInfo.ImageViewCI.image = mImage;
-        AssertVkResult(mContext->VkbDispatchTable->createImageView(&mCreateInfo.ImageViewCI, nullptr, &mImageView));
+        if(mCreateInfo.CreateImageView)
+        {
+            // update image in image view create info
+            mCreateInfo.ImageViewCI.image = mImage;
+            AssertVkResult(mContext->VkbDispatchTable->createImageView(&mCreateInfo.ImageViewCI, nullptr, &mImageView));
+        }
 
 #if FORAY_DEBUG
         // attach debug information to iamge
@@ -172,7 +175,11 @@ namespace foray::core {
     {
         if(mAllocation)
         {
-            mContext->VkbDispatchTable->destroyImageView(mImageView, nullptr);
+            if(!!mImageView)
+            {
+                mContext->VkbDispatchTable->destroyImageView(mImageView, nullptr);
+                mImageView = nullptr;
+            }
             vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
             mImage      = nullptr;
             mAllocation = nullptr;
@@ -206,7 +213,7 @@ namespace foray::core {
             SetObjectName(mContext, mImage, debugName, false);
             vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         }
-        {  // Image View
+        if (!!mImageView) {  // Image View
             std::string debugName = fmt::format("ManImgView \"{}\"", mName);
             SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW, mImageView, debugName);
         }

@@ -20,6 +20,8 @@ namespace foray::core {
         {
             /// @brief Vulkan Image CreateInfo
             VkImageCreateInfo ImageCI{};
+            /// @brief If set to true, image view is created
+            bool CreateImageView = true;
             /// @brief Vulkan ImageView CreateInfo
             VkImageViewCreateInfo ImageViewCI{};
             /// @brief Vma Allocation CreateInfo
