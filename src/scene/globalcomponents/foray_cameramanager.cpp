@@ -49,6 +49,13 @@ namespace foray::scene::gcomp {
 
         mSelectedCamera = camera;
     }
+    void CameraManager::GetCameras(std::vector<ncomp::Camera*>& cameras)
+    {
+        for (ncomp::Camera* camera : mCameras)
+        {
+            cameras.push_back(camera);
+        }
+    }
     CameraManager::~CameraManager()
     {
         mSelectedCamera = nullptr;

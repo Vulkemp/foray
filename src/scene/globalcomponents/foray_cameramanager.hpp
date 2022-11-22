@@ -24,6 +24,10 @@ namespace foray::scene::gcomp {
 
         virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
+        void GetCameras(std::vector<ncomp::Camera*>& cameras);
+
+        FORAY_GETTER_V(SelectedCamera)
+
       protected:
         util::ManagedUbo<CameraUboBlock> mUbo;
 
