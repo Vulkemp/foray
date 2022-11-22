@@ -115,7 +115,8 @@ namespace foray::scene {
     {
         float dist = upper->Time - lower->Time;
         float t    = (time - lower->Time) / dist;
-        return glm::mix(upper->Value, lower->Value, t);
+        // logger()->info("dist {} t {} ")
+        return glm::mix(lower->Value, upper->Value, t);
     }
 
     glm::quat AnimationSampler::InterpolateLinearQuat(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)
@@ -124,7 +125,7 @@ namespace foray::scene {
         glm::quat upperQuat = ReinterpreteAsQuat(upper->Value);
         float     dist      = upper->Time - lower->Time;
         float     t         = (time - lower->Time) / dist;
-        return glm::normalize(glm::slerp(upperQuat, lowerQuat, t));
+        return glm::normalize(glm::slerp(lowerQuat, upperQuat, t));
     }
 
     glm::vec4 AnimationSampler::InterpolateCubicSpline(float time, const AnimationKeyframe* lower, const AnimationKeyframe* upper)

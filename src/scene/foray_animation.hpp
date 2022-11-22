@@ -98,7 +98,7 @@ namespace foray::scene {
         FORAY_PROPERTY_R(Channels)
         FORAY_PROPERTY_V(Start)
         FORAY_PROPERTY_V(End)
-        FORAY_PROPERTY_V(PlaybackConfig)
+        FORAY_PROPERTY_R(PlaybackConfig)
 
         /// @brief Applies current playback state
         void Update(const base::FrameRenderInfo&);
