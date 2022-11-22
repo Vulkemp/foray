@@ -146,7 +146,16 @@ namespace foray::scene {
     {
         if(mPlaybackConfig.Enable)
         {
-            float delta     = updateInfo.GetFrameTime() * mPlaybackConfig.PlaybackSpeed;
+
+            float delta = mPlaybackConfig.PlaybackSpeed;
+            if(mPlaybackConfig.ConstantDelta != 0.f)
+            {
+                delta *= mPlaybackConfig.ConstantDelta;
+            }
+            else
+            {
+                delta *= updateInfo.GetFrameTime();
+            }
             float newCursor = mPlaybackConfig.Cursor + delta;
             if(newCursor < mStart)
             {

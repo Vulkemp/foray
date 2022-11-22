@@ -83,6 +83,8 @@ namespace foray::scene {
         bool Loop = true;
         /// @brief Speed multiplier
         float PlaybackSpeed = 1.f;
+        /// @brief If non zero, will advance each frame with a constant delta time as opposed to the render engines frametime
+        float ConstantDelta = 0.0f;
         /// @brief Current playback position used for interpolation
         float Cursor = 0.f;
     };
