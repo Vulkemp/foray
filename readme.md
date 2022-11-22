@@ -1,4 +1,4 @@
-Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan Hardware **Ray** tracing Demos
+Rapid Prototyping **F**ramework for **O**pen cross-platform development of Vulkan Hardware **Ray** tracing Demos
 # ⚠️ Notice
 * This library is still under heavy development. The Api is still subject to frequent breaking changes.
 # Useful Links
