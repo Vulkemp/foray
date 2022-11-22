@@ -99,7 +99,6 @@ namespace foray::scene::ncomp {
 
         transform->SetTranslation(pos);
         transform->SetRotation(glm::quatLookAt(lookDir, camera->GetUpDirection()));
-        camera->SetViewMatrix();
     }
 
     void FreeCameraController::ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event)
@@ -126,8 +125,5 @@ namespace foray::scene::ncomp {
                           std::sin(glm::radians(mYaw)) * std::cos(glm::radians(mPitch)));
 
         transform->SetRotation(glm::quatLookAt(lookDir, camera->GetUpDirection()));
-        camera->SetViewMatrix();
     }
-
-
 }  // namespace foray::scene

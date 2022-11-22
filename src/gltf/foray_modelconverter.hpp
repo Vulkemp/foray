@@ -98,6 +98,8 @@ namespace foray::gltf {
 
         void TranslateLight(scene::ncomp::PunctualLight* component, const tinygltf::Light& light);
 
+        void TranslateCamera(scene::ncomp::Camera* component, const tinygltf::Camera& camera);
+
         void DetectAnimatedNodes();
 
         void InitialUpdate();

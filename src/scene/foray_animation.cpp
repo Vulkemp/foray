@@ -157,13 +157,17 @@ namespace foray::scene {
                 delta *= updateInfo.GetFrameTime();
             }
             float newCursor = mPlaybackConfig.Cursor + delta;
-            if(newCursor < mStart)
+            if(mPlaybackConfig.Loop)
             {
-                newCursor = mPlaybackConfig.Loop ? mEnd : mStart;
-            }
-            else if(newCursor > mEnd)
-            {
-                newCursor = mPlaybackConfig.Loop ? mStart : mEnd;
+                float duration = mEnd - mStart;
+                while(newCursor < mStart)
+                {
+                    newCursor += duration;
+                }
+                while(newCursor > mEnd)
+                {
+                    newCursor -= duration;
+                }
             }
             mPlaybackConfig.Cursor = newCursor;
         }

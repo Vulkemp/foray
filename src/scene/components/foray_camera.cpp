@@ -11,15 +11,7 @@
 namespace foray::scene::ncomp {
     void Camera::InitDefault()
     {
-        SetViewMatrix();
         SetProjectionMatrix();
-    }
-
-    void Camera::SetViewMatrix()
-    {
-        Transform* transform = GetNode()->GetTransform();
-        transform->RecalculateGlobalMatrix();
-        mViewMatrix = glm::inverse(transform->GetGlobalMatrix());
     }
 
     void Camera::SetProjectionMatrix()
@@ -55,13 +47,16 @@ namespace foray::scene::ncomp {
 
     void Camera::UpdateUbo(CameraUboBlock& uboblock)
     {
+        Transform* transform = GetNode()->GetTransform();
+        transform->RecalculateGlobalMatrix();
+        glm::mat4 viewMat = glm::inverse(transform->GetGlobalMatrix());
         uboblock.PreviousViewMatrix           = uboblock.ViewMatrix;
         uboblock.PreviousProjectionMatrix     = uboblock.ProjectionMatrix;
         uboblock.PreviousProjectionViewMatrix = uboblock.ProjectionViewMatrix;
-        uboblock.ViewMatrix                   = mViewMatrix;
+        uboblock.ViewMatrix                   = viewMat;
         uboblock.ProjectionMatrix             = mProjectionMatrix;
-        uboblock.ProjectionViewMatrix         = mProjectionMatrix * mViewMatrix;
-        uboblock.InverseViewMatrix            = glm::inverse(mViewMatrix);
+        uboblock.ProjectionViewMatrix         = mProjectionMatrix * viewMat;
+        uboblock.InverseViewMatrix            = transform->GetGlobalMatrix();
         uboblock.InverseProjectionMatrix      = glm::inverse(mProjectionMatrix);
     }
     void Camera::OnResized(VkExtent2D extent)

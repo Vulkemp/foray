@@ -14,9 +14,7 @@ namespace foray::scene::ncomp {
         void InitDefault();
 
         inline glm::mat4& ProjectionMat() { return mProjectionMatrix; }
-        inline glm::mat4& ViewMat() { return mViewMatrix; }
 
-        void SetViewMatrix();
         void SetProjectionMatrix();
 
         void SetProjectionMatrix(float verticalFov, float aspect, float near, float far);
@@ -27,6 +25,10 @@ namespace foray::scene::ncomp {
         inline static float CalculateAspect(const VkExtent2D extent);
 
         FORAY_PROPERTY_R(UpDirection)
+        FORAY_PROPERTY_V(VerticalFov)
+        FORAY_PROPERTY_V(Aspect)
+        FORAY_PROPERTY_V(Near)
+        FORAY_PROPERTY_V(Far)
 
       protected:
         float     mVerticalFov      = 0;
@@ -34,7 +36,6 @@ namespace foray::scene::ncomp {
         float     mNear             = 0;
         float     mFar              = 0;
         glm::vec3 mUpDirection      = glm::vec3(0.f, 1.f, 0.f);
-        glm::mat4 mViewMatrix       = glm::mat4(1);
         glm::mat4 mProjectionMatrix = glm::mat4(1);
     };
 
