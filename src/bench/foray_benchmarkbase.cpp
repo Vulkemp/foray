@@ -57,7 +57,7 @@ namespace foray::bench {
         }
         return out.str();
     }
-    std::string BenchmarkLog::PrintCSVLine(char separator) const
+    std::string BenchmarkLog::PrintCsvLine(char separator, bool includeNewLine) const
     {
         std::stringstream out;
         out << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << std::fixed;
@@ -66,6 +66,25 @@ namespace foray::bench {
             out << Timestamps[i].Timestamp << separator;
         }
         out << Timestamps.back().Timestamp;
+        if (includeNewLine)
+        {
+            out << "\n";
+        }
+        return out.str();
+    }
+    std::string BenchmarkLog::PrintCsvHeader(char separator, bool includeNewLine) const
+    {
+        std::stringstream out;
+        out << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << std::fixed;
+        for(int32_t i = 0; i < Timestamps.size() - 1; i++)
+        {
+            out << Timestamps[i].Id << separator;
+        }
+        out << Timestamps.back().Id;
+        if (includeNewLine)
+        {
+            out << "\n";
+        }
         return out.str();
     }
 

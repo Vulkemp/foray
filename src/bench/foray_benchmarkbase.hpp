@@ -32,7 +32,9 @@ namespace foray::bench {
         /// @brief Prints a table with all timestamps and deltas, aswell as a total delta
         std::string PrintPretty(bool omitTimestamps = true) const;
         /// @brief Prints all timestamps, separated by the separator character
-        std::string PrintCSVLine(char separator = ';') const;
+        std::string PrintCsvLine(char separator = ';', bool includeNewLine = true) const;
+        /// @brief Prints all timestamps, separated by the separator character
+        std::string PrintCsvHeader(char separator = ';', bool includeNewLine = true) const;
         /// @brief Execute imgui command sequence to display the benchmark results
         void PrintImGui(bool omitTimestamps = true);
     };
