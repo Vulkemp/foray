@@ -48,7 +48,6 @@ namespace foray::scene::ncomp {
     void Camera::UpdateUbo(CameraUboBlock& uboblock)
     {
         Transform* transform = GetNode()->GetTransform();
-        transform->RecalculateGlobalMatrix();
         glm::mat4 viewMat = glm::inverse(transform->GetGlobalMatrix());
         uboblock.PreviousViewMatrix           = uboblock.ViewMatrix;
         uboblock.PreviousProjectionMatrix     = uboblock.ProjectionMatrix;

@@ -292,10 +292,7 @@ namespace foray::gltf {
 
     void ModelConverter::TranslateCamera(scene::ncomp::Camera* component, const tinygltf::Camera& camera)
     {
-        component->SetFar(camera.perspective.zfar);
-        component->SetNear(camera.perspective.znear);
-        component->SetVerticalFov(camera.perspective.yfov);
-        component->SetProjectionMatrix();
+        component->InitDefault();
         component->SetName(camera.name);
     }
 
@@ -345,7 +342,7 @@ namespace foray::gltf {
     {
         for(auto node : mScene->GetRootNodes())
         {
-            node->GetTransform()->RecalculateGlobalMatrix(nullptr);
+            node->GetTransform()->RecalculateIfDirty(true);
         }
 
         mScene->GetComponent<scene::gcomp::DrawDirector>()->InitOrUpdate();

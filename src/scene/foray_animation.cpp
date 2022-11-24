@@ -213,7 +213,6 @@ namespace foray::scene {
                 default:
                     continue;
             }
-            transform->RecalculateGlobalMatrix();
         }
     }
 }  // namespace foray::scene

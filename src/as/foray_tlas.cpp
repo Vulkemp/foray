@@ -53,7 +53,6 @@ namespace foray::as {
 
         if(transform->GetStatic())
         {
-            transform->RecalculateGlobalMatrix();
             return AddBlasInstanceStatic(blas, transform->GetGlobalMatrix());
         }
         else
