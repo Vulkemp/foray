@@ -28,7 +28,7 @@ namespace foray::scene::ncomp {
             }
         }
 
-        mGlobalMatrix = mLocalMatrix * parentGlobalMatrix;
+        mGlobalMatrix = parentGlobalMatrix * mLocalMatrix;
 
         for(Node* child : node->GetChildren())
         {

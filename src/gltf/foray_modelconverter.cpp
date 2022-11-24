@@ -167,6 +167,7 @@ namespace foray::gltf {
 
         auto& gltfNode = mGltfModel.nodes[currentIndex];
         node           = mScene->MakeNode(parent);
+        node->SetName(gltfNode.name);
 
         InitTransformFromGltf(node->GetTransform(), gltfNode.matrix, gltfNode.translation, gltfNode.rotation, gltfNode.scale);
 
@@ -286,6 +287,7 @@ namespace foray::gltf {
         component->SetColor(glm::vec3(light.color[0], light.color[1], light.color[2]));
         component->SetIntensity(light.intensity);
         component->SetType(light.type == "directional" ? scene::ELightType::Directional : scene::ELightType::Point);
+        component->SetName(light.name);
     }
 
     void ModelConverter::TranslateCamera(scene::ncomp::Camera* component, const tinygltf::Camera& camera)
@@ -294,6 +296,7 @@ namespace foray::gltf {
         component->SetNear(camera.perspective.znear);
         component->SetVerticalFov(camera.perspective.yfov);
         component->SetProjectionMatrix();
+        component->SetName(camera.name);
     }
 
     void MarkNodeRecursively(scene::Node* node, bool parentAnimated, std::unordered_set<scene::Node*>& animationTargets)

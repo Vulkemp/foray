@@ -1,8 +1,8 @@
 #pragma once
-#include "../foray_basics.hpp"
 #include "../as/foray_blas.hpp"
-#include "foray_scene_declares.hpp"
+#include "../foray_basics.hpp"
 #include "../scene/foray_geo.hpp"
+#include "foray_scene_declares.hpp"
 
 namespace foray::scene {
 
@@ -28,10 +28,11 @@ namespace foray::scene {
         uint32_t HighestReferencedIndex = 0;
 
         std::vector<foray::scene::Vertex> Vertices;
-        std::vector<uint32_t> Indices;
+        std::vector<uint32_t>             Indices;
 
         inline Primitive() {}
-        inline Primitive(EType type, uint32_t first, uint32_t count, int32_t materialIndex, int32_t highestRef, std::vector<foray::scene::Vertex>& vertices, std::vector<uint32_t> indices)
+        inline Primitive(
+            EType type, uint32_t first, uint32_t count, int32_t materialIndex, int32_t highestRef, std::vector<foray::scene::Vertex>& vertices, std::vector<uint32_t> indices)
             : Type(type), First(first), VertexOrIndexCount(count), MaterialIndex(materialIndex), HighestReferencedIndex(highestRef), Vertices(vertices), Indices(indices)
         {
         }
@@ -55,10 +56,11 @@ namespace foray::scene {
 
         FORAY_PROPERTY_R(Primitives)
         FORAY_GETTER_MR(Blas)
-
+        FORAY_PROPERTY_R(Name)
 
       protected:
         std::vector<Primitive> mPrimitives;
-        as::Blas                   mBlas;
+        as::Blas               mBlas;
+        std::string            mName = "";
     };
-}  // namespace foray
+}  // namespace foray::scene

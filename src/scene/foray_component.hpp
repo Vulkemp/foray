@@ -67,6 +67,7 @@ namespace foray::scene {
         inline virtual ~Component() {}
 
         FORAY_GETTER_V(Registry)
+        FORAY_PROPERTY_R(Name)
 
         virtual Scene*         GetScene()   = 0;
         virtual Registry*      GetGlobals() = 0;
@@ -74,6 +75,7 @@ namespace foray::scene {
 
       protected:
         Registry* mRegistry = nullptr;
+        std::string mName = "";
     };
 
     class NodeComponent : public Component

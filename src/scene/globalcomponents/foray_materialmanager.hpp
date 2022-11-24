@@ -11,7 +11,7 @@ namespace foray::scene::gcomp {
       public:
         explicit MaterialManager(core::Context* context);
 
-        std::vector<DefaultMaterialEntry>& GetVector() { return mBuffer.GetVector(); }
+        std::vector<Material>& GetVector() { return mBuffer.GetVector(); }
 
         /// @brief Apply changes made to the cpu local buffer to the device local buffer
         void UpdateDeviceLocal();
@@ -26,6 +26,6 @@ namespace foray::scene::gcomp {
 
 
       protected:
-        util::ManagedVectorBuffer<DefaultMaterialEntry> mBuffer = {};
+        util::ManagedVectorBuffer<Material> mBuffer = {};
     };
 }  // namespace foray::scene

@@ -13,7 +13,7 @@ namespace foray::scene {
     using MaterialFlags = uint32_t;
 
     /// @brief Represents the default gltf pbr material type, capable of representing opaque surfaces with a metallic/roughness model including emission
-    struct alignas(16) DefaultMaterialEntry
+    struct alignas(16) Material
     {
         //0
         glm::vec4 BaseColorFactor = glm::vec4(0.f, 0.f, 0.f, 1.f);  // Base Color / Albedo Factor

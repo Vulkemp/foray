@@ -15,6 +15,7 @@ namespace foray::gltf {
             PushGltfMeshToBuffers(gltfMesh, primitives);
             auto mesh = std::make_unique<scene::Mesh>();
             mesh->SetPrimitives(primitives);
+            mesh->SetName(gltfMesh.name);
             mIndexBindings.Meshes[i] = mesh.get();
             mGeo.GetMeshes().push_back(std::move(mesh));
         }

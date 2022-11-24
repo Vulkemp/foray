@@ -69,6 +69,7 @@ namespace foray::scene {
 
         ncomp::Camera* camera = cameraNode->MakeComponent<foray::scene::ncomp::Camera>();
         camera->InitDefault();
+        camera->SetName("Free Flight Camera");
         cameraNode->MakeComponent<ncomp::FreeCameraController>()->SetInvertAll(invertAll);
         gcomp::CameraManager* cameraManager = GetComponent<gcomp::CameraManager>();
 

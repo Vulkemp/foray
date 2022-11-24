@@ -9,6 +9,7 @@ namespace foray::scene {
 
         FORAY_PROPERTY_V(Parent);
         FORAY_PROPERTY_R(Children);
+        FORAY_PROPERTY_R(Name);
 
         ncomp::Transform* GetTransform();
 
@@ -23,6 +24,7 @@ namespace foray::scene {
       protected:
         Node*              mParent   = nullptr;
         std::vector<Node*> mChildren = {};
+        std::string mName = "";
     };
 
 
