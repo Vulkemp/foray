@@ -301,7 +301,7 @@ namespace foray::stages {
         // shader stages
         if(mVertexShaderPath.size() > 0)
         {
-            mVertexShaderModule.LoadFromSource(mContext, mVertexShaderPath);
+            mShaderKeys.push_back(mContext->ShaderMan->CompileShader(mVertexShaderPath, mVertexShaderModule));
         }
         else
         {
@@ -309,7 +309,7 @@ namespace foray::stages {
         }
         if(mFragmentShaderPath.size() > 0)
         {
-            mFragmentShaderModule.LoadFromSource(mContext, mFragmentShaderPath);
+            mShaderKeys.push_back(mContext->ShaderMan->CompileShader(mFragmentShaderPath, mFragmentShaderModule));
         }
         {
             mFragmentShaderModule.LoadFromBinary(mContext, GBUFFER_SHADER_FRAG, sizeof(GBUFFER_SHADER_FRAG));

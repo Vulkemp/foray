@@ -42,7 +42,7 @@ namespace foray::stages {
 
         /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
         /// @details Implementation will check through shaders registered in 'mShaders'. If any of them have been marked as recompiled, calls ReloadShaders()
-        virtual void OnShadersRecompiled();
+        virtual void OnShadersRecompiled(const std::unordered_set<uint64_t>& recompiled);
 
         virtual ~RenderStage(){}
 
@@ -54,8 +54,8 @@ namespace foray::stages {
 
         /// @brief Inheriting types should emplace their images onto this collection to provide them in GetImageOutput interface
         std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;
-        /// @brief Inheriting types should emplace their images into this collection to get invocations of ReloadShaders() when a shader has been recompiled
-        std::vector<osi::Utf8Path> mShaderSourcePaths;
+        /// @brief Inheriting types should emplace their shader keys onto this collection such that if a shader has been recompiled, ReloadShaders() will be called
+        std::vector<uint64_t> mShaderKeys;
         /// @brief Context object the renderstage is built upon
         core::Context* mContext = nullptr;
     };

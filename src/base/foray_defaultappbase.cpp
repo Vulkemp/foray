@@ -33,7 +33,8 @@ namespace foray::base {
               [this](osi::Window& window) { this->ApiBeforeWindowCreate(window); },
               [this](vkb::SwapchainBuilder& builder) { this->ApiBeforeSwapchainBuilding(builder); },
               [this](VkExtent2D size) { this->OnResized(size); },
-              nullptr)
+              nullptr),
+        mShaderManager(&mContext)
     {
     }
 
@@ -66,6 +67,8 @@ namespace foray::base {
 
         mSamplerCollection.Init(&mContext);
         mContext.SamplerCol = &mSamplerCollection;
+
+        mContext.ShaderMan = &mShaderManager;
 
         ApiInit();
     }
@@ -194,9 +197,10 @@ namespace foray::base {
         if(mLastShadersCheckedTimestamp + 1 < renderInfo.SinceStart)
         {
             mLastShadersCheckedTimestamp = renderInfo.SinceStart;
-            if(core::ShaderManager::Instance().CheckAndUpdateShaders())
+            std::unordered_set<uint64_t> recompiled;
+            if(mShaderManager.CheckAndUpdateShaders(recompiled))
             {
-                OnShadersRecompiled();
+                OnShadersRecompiled(recompiled);
             }
         }
 
@@ -294,13 +298,13 @@ namespace foray::base {
         }
     }
 
-    void DefaultAppBase::OnShadersRecompiled()
+    void DefaultAppBase::OnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys)
     {
         AssertVkResult(mContext.VkbDispatchTable->deviceWaitIdle());
-        ApiOnShadersRecompiled();
+        ApiOnShadersRecompiled(recompiledShaderKeys);
         for(stages::RenderStage* stage : mRegisteredStages)
         {
-            stage->OnShadersRecompiled();
+            stage->OnShadersRecompiled(recompiledShaderKeys);
         }
     }
 

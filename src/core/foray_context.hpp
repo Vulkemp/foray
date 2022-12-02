@@ -42,6 +42,8 @@ namespace foray::core {
         VkPipelineCache PipelineCache = nullptr;
         /// @brief Sampler Collection
         SamplerCollection* SamplerCol = nullptr;
+        /// @brief Shader Manager
+        ShaderManager* ShaderMan = nullptr;
 
         inline operator VkInstance() const { return VkbInstance->instance; }
         inline operator VkPhysicalDevice() const { return VkbPhysicalDevice->physical_device; }

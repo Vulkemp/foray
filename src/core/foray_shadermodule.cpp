@@ -1,31 +1,35 @@
 #include "foray_shadermodule.hpp"
-#include "../osi/foray_env.hpp"
 #include "../foray_exception.hpp"
+#include "../osi/foray_env.hpp"
 #include "foray_shadermanager.hpp"
+#include <filesystem>
 #include <fstream>
 
+namespace fs = std::filesystem;
+
 namespace foray::core {
-    ShaderModule::ShaderModule(Context* context, std::string relativeSpirvPath)
+    void ShaderModule::LoadFromFile(Context* context, const osi::Utf8Path& path)
     {
-        LoadFromSpirv(context, relativeSpirvPath);
+        osi::Utf8Path absolutePath = path.IsRelative() ? path.MakeAbsolute() : path;
+
+        std::ifstream file((fs::path)absolutePath, std::ios::binary | std::ios::in | std::ios::ate);
+
+        FORAY_ASSERTFMT(file.is_open(), "Could not open spirv file: \"{}\"", absolutePath.GetPath());
+
+        std::vector<uint32_t> binaryBuffer;
+
+        size_t fileSize = (size_t)file.tellg();
+        binaryBuffer.resize((fileSize + sizeof(uint32_t) - 1) / sizeof(uint32_t));
+        file.seekg(0);
+        char* readPtr = reinterpret_cast<char*>(binaryBuffer.data());
+        file.read(readPtr, static_cast<std::streamsize>(fileSize));
+        file.close();
+        LoadFromBinary(context, binaryBuffer.data(), fileSize);
     }
 
-    void ShaderModule::LoadFromSpirv(Context* context, std::string relativeSpirvPath)
+    void ShaderModule::LoadFromBinary(Context* context, const uint8_t* binaryBuffer, size_t sizeInBytes)
     {
-        std::vector<uint8_t> binary;
-        ShaderManager::Instance().GetShaderBinary(relativeSpirvPath, binary);
-        LoadFromBinary(context, binary); 
-    }
-
-    void ShaderModule::LoadFromSource(Context* context, std::string relativeSourcePath) {
-        std::vector<uint8_t> binary;
-        ShaderManager::Instance().GetShaderBinary(relativeSourcePath, binary);
-        LoadFromBinary(context, binary); 
-    }
-
-    void ShaderModule::LoadFromBinary(Context* context, const std::vector<uint8_t>& binaryBuffer)
-    {
-        LoadFromBinary(context, reinterpret_cast<const uint32_t*>(binaryBuffer.data()), binaryBuffer.size());
+        LoadFromBinary(context, reinterpret_cast<const uint32_t*>(binaryBuffer), sizeInBytes);
     }
 
     void ShaderModule::LoadFromBinary(Context* context, const uint32_t* binaryBuffer, size_t sizeInBytes)
@@ -53,4 +57,19 @@ namespace foray::core {
         Assert(mShaderModule, "Attempt to access VkShaderModule but shader module is nullptr");
         return mShaderModule;
     }
-}  // namespace foray
+
+    VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCi(VkShaderStageFlagBits stage, const char* entry) const
+    {
+        return
+        VkPipelineShaderStageCreateInfo
+        {
+            .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .stage = stage,
+            .module = mShaderModule,
+            .pName = entry,
+            .pSpecializationInfo = nullptr,
+        };
+    }
+}  // namespace foray::core

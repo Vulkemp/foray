@@ -136,6 +136,12 @@ namespace foray::osi {
                 break;
             }
         }
+        // Fix edgecase: "/mypath/dir" and "/mypath/dir/" should yield the same path object
+        if(mPathSections.size() > 0 && mPathSections.back() == "")
+        {
+            attemptCollapse = true;
+            mPathSections.pop_back();
+        }
 
         if(attemptCollapse)
         {

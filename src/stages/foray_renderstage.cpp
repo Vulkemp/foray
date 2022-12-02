@@ -45,15 +45,15 @@ namespace foray::stages {
         }
         mImageOutputs.clear();
     }
-    void RenderStage::OnShadersRecompiled()
+    void RenderStage::OnShadersRecompiled(const std::unordered_set<uint64_t>& recompiled)
     {
-        core::ShaderManager& instance = core::ShaderManager::Instance();
+        // core::ShaderManager& instance = core::ShaderManager::Instance();
 
         bool needReload = false;
 
-        for(osi::Utf8Path& path : mShaderSourcePaths)
+        for(uint64_t key : mShaderKeys)
         {
-            needReload |= instance.HasShaderBeenRecompiled(path);
+            needReload |= recompiled.contains(key);
         }
         
         if (needReload)

@@ -77,3 +77,7 @@ add_subdirectory("${thirdparty_dir}/glm")
 add_subdirectory("${thirdparty_dir}/tinygltf")
 add_subdirectory("${thirdparty_dir}/tinyexr")
 add_subdirectory("${thirdparty_dir}/imgui")
+
+# Set cache entry to shader dir
+
+SET(FORAY_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders" CACHE PATH "Foray shader directory")

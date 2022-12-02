@@ -1,5 +1,7 @@
 #pragma once
+#include "../bench/foray_hostbenchmark.hpp"
 #include "../core/foray_samplercollection.hpp"
+#include "../core/foray_shadermanager.hpp"
 #include "../foray_vma.hpp"
 #include "../osi/foray_osmanager.hpp"
 #include "../stages/foray_stages_declares.hpp"
@@ -8,7 +10,6 @@
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindowswapchain.hpp"
-#include "../bench/foray_hostbenchmark.hpp"
 #include <array>
 #include <vector>
 
@@ -60,7 +61,8 @@ namespace foray::base {
         /// @param frameIndex Index of the frame that has finished executing
         inline virtual void ApiFrameFinishedExecuting(uint64_t frameIndex) {}
         /// @brief Called whenever the shader compiler has detected a change and shaders have successfully been recompiled
-        inline virtual void ApiOnShadersRecompiled() {}
+        /// @param recompiledShaderKeys Shader compilation keys as provided by the ShaderManager
+        inline virtual void ApiOnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys) {}
         /// @brief Called after the application has been requested to shut down but before DefaultAppBase finalizes itself.
         inline virtual void ApiDestroy() {}
 
@@ -93,7 +95,7 @@ namespace foray::base {
         /// @brief [Internal] Image Acquire, Image Present
         virtual void Render(RenderLoop::RenderInfo& renderInfo);
         /// @brief [Internal] Shader recompile handler
-        virtual void OnShadersRecompiled();
+        virtual void OnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys);
 
         /// @brief [Internal] Finalizer
         virtual void Destroy();
@@ -105,6 +107,7 @@ namespace foray::base {
         VulkanWindowSwapchain   mWindowSwapchain;
         core::SamplerCollection mSamplerCollection;
         core::Context           mContext;
+        core::ShaderManager     mShaderManager;
 
         /// @brief Increase this in an early init method to get auxiliary command buffers
         uint32_t                                        mAuxiliaryCommandBufferCount = 0;
@@ -116,12 +119,12 @@ namespace foray::base {
 
         fp64_t mLastShadersCheckedTimestamp = 0.0;
 
-        inline static const char* const FRAMERECORDBENCH_WAITONFENCE = "Wait On Fence";
+        inline static const char* const FRAMERECORDBENCH_WAITONFENCE      = "Wait On Fence";
         inline static const char* const FRAMERECORDBENCH_ACQUIRESWAPIMAGE = "Acquire Swapimage";
         inline static const char* const FRAMERECORDBENCH_RECORDCMDBUFFERS = "Record CmdBuffers";
-        inline static const char* const FRAMERECORDBENCH_PRESENT = "Present";
+        inline static const char* const FRAMERECORDBENCH_PRESENT          = "Present";
 
-        bool mEnableFrameRecordBenchmark = false;
+        bool                 mEnableFrameRecordBenchmark = false;
         bench::HostBenchmark mHostFrameRecordBenchmark;
     };
 }  // namespace foray::base
