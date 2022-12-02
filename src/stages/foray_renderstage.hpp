@@ -41,7 +41,7 @@ namespace foray::stages {
         core::ManagedImage* GetImageOutput(std::string_view name, bool noThrow = false);
 
         /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
-        /// @details Implementation will check through shaders registered in 'mShaders'. If any of them have been marked as recompiled, calls ReloadShaders()
+        /// @details Implementation will check through shaders registered in 'mShaderKeys'. If any of them have been marked as recompiled, calls ReloadShaders()
         virtual void OnShadersRecompiled(const std::unordered_set<uint64_t>& recompiled);
 
         virtual ~RenderStage(){}
