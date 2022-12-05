@@ -235,7 +235,7 @@ namespace foray::core {
         return false;
     }
 
-    ShaderManager::ECompileCheckResult ShaderManager::ShaderCompilation::NeedsCompile(std::unordered_map<osi::Utf8Path, std::filesystem::file_time_type>& writeTimeLookup)
+    ShaderManager::ECompileCheckResult ShaderManager::ShaderCompilation::NeedsCompile(WriteTimeLookup& writeTimeLookup)
     {
         // Update last compile
         fs::file_time_type lastCompile = std::max({LastCompile, LastFailedCompile, GetWriteTime(SpvPath, writeTimeLookup)});

@@ -248,11 +248,11 @@ namespace foray::osi {
 
     bool Utf8Path::operator==(const Utf8Path& other) const
     {
-        return mRelative == other.mRelative && other.mPath == other.mPath;
+        return mRelative == other.mRelative && mPath == other.mPath;
     }
     bool Utf8Path::operator!=(const Utf8Path& other) const
     {
-        return mRelative != other.mRelative || other.mPath != other.mPath;
+        return mRelative != other.mRelative || mPath != other.mPath;
     }
     bool Utf8Path::operator<(const Utf8Path& other) const
     {

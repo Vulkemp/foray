@@ -1,5 +1,6 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "../foray_logger.hpp"
 #include <filesystem>
 #include <vector>
 
@@ -79,6 +80,10 @@ namespace std {
     template <>
     struct hash<foray::osi::Utf8Path>
     {
-        inline size_t operator()(const foray::osi::Utf8Path& p) const { return std::hash<std::string>()(p.GetPath()); }
+        inline size_t operator()(const foray::osi::Utf8Path& p) const {
+            foray::logger()->info("Path \"{}\": 0x{:x}", p, std::hash<std::string>().operator()(p.GetPath()));
+
+            return std::hash<std::string>()(p.GetPath()); 
+        }
     };
 }  // namespace std
