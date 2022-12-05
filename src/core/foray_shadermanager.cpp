@@ -13,7 +13,7 @@ namespace foray::core {
 
 #pragma region Hashing, File Time
 
-    uint64_t ShaderManager::MakeHash(std::string_view absoluteUniqueSourceFilePath, const CompileConfig& options)
+    uint64_t ShaderManager::MakeHash(std::string_view absoluteUniqueSourceFilePath, const ShaderCompilerConfig& options)
     {
         // Use sets so the order as hashed is consistent
         std::set<std::string_view> includeDirs;
@@ -65,11 +65,11 @@ namespace foray::core {
 #pragma endregion
 #pragma region Compile Shader
 
-    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const CompileConfig& compileOptions, core::Context* context)
+    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& compileOptions, core::Context* context)
     {
         return CompileShader(sourceFilePath, *shaderModule, compileOptions, context);
     }
-    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const CompileConfig& compileOptions, core::Context* context)
+    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const ShaderCompilerConfig& compileOptions, core::Context* context)
     {
         context = !context ? mContext : context;
         if(sourceFilePath.IsRelative())
@@ -186,7 +186,7 @@ namespace foray::core {
 #pragma endregion
 #pragma region ShaderCompilation
 
-    ShaderManager::ShaderCompilation::ShaderCompilation(ShaderManager* manager, const osi::Utf8Path& source, const CompileConfig& options, uint64_t hash)
+    ShaderManager::ShaderCompilation::ShaderCompilation(ShaderManager* manager, const osi::Utf8Path& source, const ShaderCompilerConfig& options, uint64_t hash)
         : Manager(manager), SourcePath(source), Config(options), Hash(hash)
     {
         SpvPath = fmt::format("{}.{:x}.spv", source, hash);

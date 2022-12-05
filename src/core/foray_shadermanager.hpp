@@ -8,8 +8,22 @@
 
 namespace foray::core {
 
+    /// @brief Shader compile Options struct (moved out of class to fix clang & gcc compiler bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165)
+    struct ShaderCompilerConfig
+    {
+        /// @brief Additional include dirs passed to glslc via "-I "INCLUDEDIR"" option
+        std::vector<osi::Utf8Path> IncludeDirs = {};
+        /// @brief Preprocessor definitions passed to glslc via "-DDEFINITION" option
+        std::vector<std::string> Definitions = {};
+        /// @brief Shader Stage entry point passed to gslc via "-fentry-point=NAME". Leave empty to let glslc use default ("main")
+        std::string EntryPoint = "";
+        /// @brief Options in this vector are appended to the option string as-is
+        std::vector<std::string> AdditionalOptions = {};
+    };
+
+
     /// @brief Shader manager maintains a structure of shader compilations
-    /// @details 
+    /// @details
     /// When registering a shader file compilation via CompileShader(..):
     ///  - The shader compilation action is saved and tracked via a key
     ///  - Any changes to the shader source file or files included via #include directives in the shader (recursively resolved) cause attempt of recompiling the shader.
@@ -20,33 +34,20 @@ namespace foray::core {
         /// @param context If set, is used as fallback for CompileShader() context argument
         inline explicit ShaderManager(core::Context* context = nullptr) : mContext(context) {}
 
-        /// @brief Options struct
-        struct CompileConfig
-        {
-            /// @brief Additional include dirs passed to glslc via "-I "INCLUDEDIR"" option
-            std::vector<osi::Utf8Path> IncludeDirs = {};
-            /// @brief Preprocessor definitions passed to glslc via "-DDEFINITION" option
-            std::vector<std::string> Definitions = {};
-            /// @brief Shader Stage entry point passed to gslc via "-fentry-point=NAME". Leave empty to let glslc use default ("main")
-            std::string EntryPoint = "";
-            /// @brief Options in this vector are appended to the option string as-is
-            std::vector<std::string> AdditionalOptions = {};
-        };
-
         /// @brief Accesses sourceFilePath, scans for dependencies, compiles if necessary, loads into shaderModule
         /// @param sourceFilePath Path to the shader source file
         /// @param shaderModule Output shadermodule to initialize
         /// @param config Configure compilation parameters
         /// @param context Context for initialization of ShaderModule. If set to nullptr, will use ShaderManager context
         /// @return Returns the key to this unique shader compilation
-        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const CompileConfig& config = CompileConfig(), core::Context* context = nullptr);
+        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const ShaderCompilerConfig& config = {}, core::Context* context = nullptr);
         /// @brief Accesses sourceFilePath, scans for dependencies, compiles if necessary, loads into shaderModule
         /// @param sourceFilePath Path to the shader source file
         /// @param shaderModule Output shadermodule to initialize
         /// @param config Configure compilation parameters
         /// @param context Context for initialization of ShaderModule. If set to nullptr, will use ShaderManager context
         /// @return Returns the key to this unique shader compilation
-        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const CompileConfig& config = CompileConfig(), core::Context* context = nullptr);
+        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& config = {}, core::Context* context = nullptr);
 
         /// @brief Checks and updates shader compilations for source code changes
         /// @details Will check all tracked shader files for modifications and recompile the shader compilations accordingly
@@ -70,7 +71,7 @@ namespace foray::core {
         core::Context* mContext = nullptr;
 
         /// @brief Calculates a unique hash based on source file path and config
-        virtual uint64_t MakeHash(std::string_view absoluteUniqueSourceFilePath, const CompileConfig& config);
+        virtual uint64_t MakeHash(std::string_view absoluteUniqueSourceFilePath, const ShaderCompilerConfig& config);
 
         /// @brief Get last write time
         /// @param path File path
@@ -103,14 +104,14 @@ namespace foray::core {
             /// @brief List of includes
             std::unordered_set<IncludeFile*> Includes = {};
             /// @brief Configuration of the shader compiler
-            CompileConfig Config = {};
+            ShaderCompilerConfig Config = {};
             /// @brief Hash identifying the compilation
             uint64_t Hash = 0;
             /// @brief Sets SpvPath and updates LastCompile
             /// @param source Absolute source file path
             /// @param config Compiler configuration
             /// @param hash compilation hash
-            ShaderCompilation(ShaderManager* manager, const osi::Utf8Path& source, const CompileConfig& config, uint64_t hash);
+            ShaderCompilation(ShaderManager* manager, const osi::Utf8Path& source, const ShaderCompilerConfig& config, uint64_t hash);
             /// @brief Finds all includes and configures them in the watch of the shader manager
             void FindIncludes();
             /// @brief Invokes the shader compiler
