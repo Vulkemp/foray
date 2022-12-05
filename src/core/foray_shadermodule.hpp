@@ -3,6 +3,7 @@
 #include "../osi/foray_env.hpp"
 #include "foray_context.hpp"
 #include "foray_managedresource.hpp"
+#include "foray_shadermanager.hpp"
 
 namespace foray::core {
     /// @brief Wraps shader code driver handle (VkShaderModule). See ShaderManager for compiling shaders dynamically.
@@ -13,6 +14,12 @@ namespace foray::core {
 
         inline ~ShaderModule() { Destroy(); }
 
+        /// @brief Loads by compiling from source using the ShaderManager
+        /// @param context Requires ShaderMan, DispatchTable
+        /// @param path Path of the source file (glsl or hlsl shader source)
+        /// @param config Optional struct for configuring the shader compiler
+        /// @return The shader compilation key
+        uint64_t CompileFromSource(Context* context, const osi::Utf8Path& path, const ShaderCompilerConfig& config = {});
         /// @brief Loads from a spirv file
         /// @param context Requires DispatchTable
         /// @param path Spirv file path (absolute or relative to current working directory)
