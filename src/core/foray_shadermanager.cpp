@@ -319,7 +319,7 @@ namespace foray::core {
 
         std::vector<osi::Utf8Path> includePaths;
         includePaths.reserve(extraIncludeDirs.size() + 1);
-        includePaths.push_back(((fs::path)path).remove_filename());
+        includePaths.push_back(osi::ToUtf8Path(((fs::path)path).remove_filename()));
         includePaths.insert(includePaths.cend(), extraIncludeDirs.cbegin(), extraIncludeDirs.cend());
 
         for(const osi::Utf8Path& includeDirective : includeDirectives)
@@ -356,7 +356,7 @@ namespace foray::core {
 
         std::vector<osi::Utf8Path> includePaths;
         includePaths.reserve(Config.IncludeDirs.size() + 1);
-        includePaths.push_back(((fs::path)SourcePath).remove_filename());
+        includePaths.push_back(osi::ToUtf8Path(((fs::path)SourcePath).remove_filename()));
         includePaths.insert(includePaths.cend(), Config.IncludeDirs.cbegin(), Config.IncludeDirs.cend());
 
         findIncludeDirectives(SourcePath, includeDirectives);
