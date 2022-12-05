@@ -8,7 +8,7 @@
 namespace fs = std::filesystem;
 
 namespace foray::core {
-    uint64_t ShaderModule::CompileFromSource(Context* context, const osi::Utf8Path& path, const ShaderCompilerConfig& config = {})
+    uint64_t ShaderModule::CompileFromSource(Context* context, const osi::Utf8Path& path, const ShaderCompilerConfig& config)
     {
         return context->ShaderMan->CompileShader(path, this, config, context);
     }
