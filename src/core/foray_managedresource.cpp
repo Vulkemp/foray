@@ -2,6 +2,7 @@
 #include "../foray_logger.hpp"
 #include <nameof/nameof.hpp>
 #include <spdlog/fmt/fmt.h>
+#include <sstream>
 
 namespace foray::core {
     void ManagedResource::sPrintAllocatedResources(bool printAsWarning)
