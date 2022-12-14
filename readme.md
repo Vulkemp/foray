@@ -1,4 +1,4 @@
-Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan Hardware **Ray** tracing Demos
+Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan Hardware **Ray** tracing Demos.
 # ⚠️ Notice
 * This library is still under heavy development. The Api is still subject to frequent breaking changes.
 # Useful Links
@@ -12,9 +12,11 @@ Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan
     * Renderloop integration to manage application lifetime and event handling
     * Builtin support for in flight frame rendering, may your GPU never be idle
 * Utilise the support types manually for a fully customizable setup
-## Scenegraph
-* Fully fledged hierarchical scenegraph
+## Scene Graph
+* Hierarchical scene graph
+* Transformations using glm math library
 * Component system
+* Default component implementations based on glTF format specifications
 ### Loading from glTF
 * The scenegraph is built by loading a glTF file
     * glTFs base material system is well suited for physically based rendering (at the level possible in real time on GPUs). Our Implementation supports `KHR_materials_ior`, `KHR_materials_transmission` and `KHR_materials_volume` extensions to improve it further
@@ -24,10 +26,10 @@ Rapid Prototyping **F**ramework for **O**pen crossplatform development of Vulkan
 * Meshes will automatically generate a BLAS
 * The scenegraph can build a TLAS based on the meshes referenced
 * Material and Primitive buffer information is stored in a BLAS Instance `instanceCustomOffset` property
-* Runtime TLAS rebuilding for animated meshes
+* Runtime TLAS rebuilding for animated scene nodes
 ### Animation Support
 * Animate node transforms (translation, scale, rotation)
-* Interpolate in steps, linearly and glTFs CubicSplines
+* Interpolate in steps, linearly and glTFs cubic splines
 ## Rasterized GBuffer
 The GBuffer provides the basis for denoising
 ### Outputs
@@ -48,12 +50,19 @@ The GBuffer provides the basis for denoising
     *Extra handling required for externally synchronized denoisers such as OptiX
 ## Common Vulkan Helper classes
 * VkBuffer wrapper
-* VkImage + VkImageView wrapper
+* VkImage wrapper
 * DescriptorSet + Layout wrapper
 * ... many more
 ## Device Benchmarking
 * Vulkan QueryPool based for accurate device execution time benchmarking
 * Included methods for printing benchmark results in a CSV compatible format or as a ImGui table
+## Shader Management
+* Shader sources and included files are monitored for changes at runtime, shaders recompiled and reloaded.
+* Shader compilation via glslc executable can be parameterized with additional include directories, macro definitions etc.
+* SPIR-V binaries compiled are handled individually according to the glslc parameters used for compilation.
+
+
+Get an overview of the code in the [./src/ directory](./src/)
 # Usage
 1. Add the library as a submodule to your git repository
 ```sh
