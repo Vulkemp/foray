@@ -12,7 +12,7 @@ var searchData=
   ['loadtextures_9',['LoadTextures',['../classforay_1_1gltf_1_1ModelConverter.html#aaee7874ea4c9cc082e57bdae372af390',1,'foray::gltf::ModelConverter']]],
   ['logger_10',['logger',['../namespaceforay.html#ae47e61a29d6ee05596a4ea6b0980af88',1,'foray']]],
   ['logqueryresults_11',['LogQueryResults',['../classforay_1_1bench_1_1DeviceBenchmark.html#a2573a9ab1d46fb5eb0a449ca825698f5',1,'foray::bench::DeviceBenchmark']]],
-  ['logtimestamp_12',['LogTimestamp',['../classforay_1_1bench_1_1BenchmarkBase.html#a18b4d624fdafe765980e9bf660a54ce7',1,'foray::bench::BenchmarkBase::LogTimestamp()'],['../classforay_1_1bench_1_1HostBenchmark.html#ab079485a2373b95d5e2d8328bd6ba1b4',1,'foray::bench::HostBenchmark::LogTimestamp()']]],
+  ['logtimestamp_12',['LogTimestamp',['../classforay_1_1bench_1_1BenchmarkBase.html#ab02ec3365a76a963e97b444e26dc5654',1,'foray::bench::BenchmarkBase::LogTimestamp()'],['../classforay_1_1bench_1_1HostBenchmark.html#ab079485a2373b95d5e2d8328bd6ba1b4',1,'foray::bench::HostBenchmark::LogTimestamp()']]],
   ['lreadexr_13',['lReadExr',['../namespaceforay_1_1util_1_1impl.html#a9a298fb7bb9d77083fbbfa604b782490',1,'foray::util::impl']]],
   ['lreadstbfp32_14',['lReadStbFp32',['../namespaceforay_1_1util_1_1impl.html#a2227d5a16323a1d9f9c33006a0a1f7bc',1,'foray::util::impl']]],
   ['lreadstbuint16_15',['lReadStbUint16',['../namespaceforay_1_1util_1_1impl.html#aa0298a2be7526e4d14b9950d50e9cefa',1,'foray::util::impl']]],

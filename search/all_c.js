@@ -20,7 +20,7 @@ var searchData=
   ['location_17',['Location',['../structforay_1_1scene_1_1VertexComponentBinding.html#afe9434cca17cfc2630146ad047abe52b',1,'foray::scene::VertexComponentBinding']]],
   ['logger_18',['logger',['../namespaceforay.html#ae47e61a29d6ee05596a4ea6b0980af88',1,'foray']]],
   ['logqueryresults_19',['LogQueryResults',['../classforay_1_1bench_1_1DeviceBenchmark.html#a2573a9ab1d46fb5eb0a449ca825698f5',1,'foray::bench::DeviceBenchmark']]],
-  ['logtimestamp_20',['LogTimestamp',['../classforay_1_1bench_1_1BenchmarkBase.html#a18b4d624fdafe765980e9bf660a54ce7',1,'foray::bench::BenchmarkBase::LogTimestamp()'],['../classforay_1_1bench_1_1HostBenchmark.html#ab079485a2373b95d5e2d8328bd6ba1b4',1,'foray::bench::HostBenchmark::LogTimestamp()']]],
+  ['logtimestamp_20',['LogTimestamp',['../classforay_1_1bench_1_1BenchmarkBase.html#ab02ec3365a76a963e97b444e26dc5654',1,'foray::bench::BenchmarkBase::LogTimestamp()'],['../classforay_1_1bench_1_1HostBenchmark.html#ab079485a2373b95d5e2d8328bd6ba1b4',1,'foray::bench::HostBenchmark::LogTimestamp()']]],
   ['loop_21',['Loop',['../structforay_1_1scene_1_1PlaybackConfig.html#adbac4e6c2b39827532565b43832d20eb',1,'foray::scene::PlaybackConfig']]],
   ['loopframenumber_22',['LoopFrameNumber',['../structforay_1_1base_1_1RenderLoop_1_1RenderInfo.html#ae3084ddbb422aeaaf2e66f41175d446c',1,'foray::base::RenderLoop::RenderInfo']]],
   ['lreadexr_23',['lReadExr',['../namespaceforay_1_1util_1_1impl.html#a9a298fb7bb9d77083fbbfa604b782490',1,'foray::util::impl']]],

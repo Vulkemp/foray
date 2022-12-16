@@ -119,8 +119,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1d86130c075cb45cb1212980e7a70851 inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc213fb6a31be19c73b57cf3f99e9191 inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memItemLeft" align="right" valign="top">virtual VkBufferMemoryBarrier2&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#abc213fb6a31be19c73b57cf3f99e9191">MakeBarrierPrepareForRead</a> (VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const</td></tr>
 <tr class="separator:abc213fb6a31be19c73b57cf3f99e9191 inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48afab0a6823f64acd6ecb77791e4a2e inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a48afab0a6823f64acd6ecb77791e4a2e">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context, VkDeviceSize size, uint32_t stageBufferCount=<a class="el" href="namespaceforay.html#a15b6b3f8d9dc6448821cf9a73ef346a6">INFLIGHT_FRAME_COUNT</a>)</td></tr>
-<tr class="separator:a48afab0a6823f64acd6ecb77791e4a2e inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dda242b3f57b75df1cac91a1eec8ff5 inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a6dda242b3f57b75df1cac91a1eec8ff5">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context, VkDeviceSize size, uint32_t stageBufferCount=<a class="el" href="namespaceforay.html#a15b6b3f8d9dc6448821cf9a73ef346a6">INFLIGHT_FRAME_COUNT</a>)</td></tr>
+<tr class="separator:a6dda242b3f57b75df1cac91a1eec8ff5 inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94798a5113f83e8eb71e6d09c5fbdcdb inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a94798a5113f83e8eb71e6d09c5fbdcdb">Exists</a> () const override</td></tr>
 <tr class="memdesc:a94798a5113f83e8eb71e6d09c5fbdcdb inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true, if the managed resource is allocated.  <a href="classforay_1_1util_1_1ManagedUboBase.html#a94798a5113f83e8eb71e6d09c5fbdcdb">More...</a><br /></td></tr>
 <tr class="separator:a94798a5113f83e8eb71e6d09c5fbdcdb inherit pub_methods_classforay_1_1util_1_1ManagedUboBase"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -197,7 +197,7 @@ Additional Inherited Members</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T_UBO&gt;<br />
 class foray::util::ManagedUbo&lt; T_UBO &gt;</div><p >Template class for managing a UBO. For Host -&gt; Device synchronization this utilises a <a class="el" href="classforay_1_1util_1_1DualBuffer.html" title="Helper class for organizing CPU -&gt; GPU data synchronisation. In flight data is stored on host side,...">DualBuffer</a>. </p>
-<h1><a class="anchor" id="autotoc_md46"></a>
+<h1><a class="anchor" id="autotoc_md49"></a>
 Usage</h1>
 <ul>
 <li>GetData() / mData can be used like any normal object</li>

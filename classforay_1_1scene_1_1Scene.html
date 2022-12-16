@@ -121,9 +121,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acfb1aae2018782b69ea180f5df6dbe40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1scene_1_1Scene.html#acfb1aae2018782b69ea180f5df6dbe40">HandleEvent</a> (const <a class="el" href="classforay_1_1osi_1_1Event.html">osi::Event</a> *event)</td></tr>
 <tr class="memdesc:acfb1aae2018782b69ea180f5df6dbe40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invokes event callbacks (<a class="el" href="classforay_1_1scene_1_1NodeComponent.html">NodeComponent</a>, then <a class="el" href="classforay_1_1scene_1_1GlobalComponent.html">GlobalComponent</a>)  <a href="classforay_1_1scene_1_1Scene.html#acfb1aae2018782b69ea180f5df6dbe40">More...</a><br /></td></tr>
 <tr class="separator:acfb1aae2018782b69ea180f5df6dbe40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10575cb3de82f30973cf8e760b8313e1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1scene_1_1Scene.html#a10575cb3de82f30973cf8e760b8313e1">Destroy</a> (bool reinitialize=false)</td></tr>
-<tr class="memdesc:a10575cb3de82f30973cf8e760b8313e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up all memory, GPU structures, etc...  <a href="classforay_1_1scene_1_1Scene.html#a10575cb3de82f30973cf8e760b8313e1">More...</a><br /></td></tr>
-<tr class="separator:a10575cb3de82f30973cf8e760b8313e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40dcc296cdcfc4d19f8022aa8a4de0ff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1scene_1_1Scene.html#a40dcc296cdcfc4d19f8022aa8a4de0ff">Destroy</a> () override</td></tr>
+<tr class="memdesc:a40dcc296cdcfc4d19f8022aa8a4de0ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up all memory, GPU structures, etc...  <a href="classforay_1_1scene_1_1Scene.html#a40dcc296cdcfc4d19f8022aa8a4de0ff">More...</a><br /></td></tr>
+<tr class="separator:a40dcc296cdcfc4d19f8022aa8a4de0ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dd0682488c9fd702edd1774bd12ab00"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1scene_1_1Scene.html#a0dd0682488c9fd702edd1774bd12ab00">~Scene</a> ()</td></tr>
 <tr class="separator:a0dd0682488c9fd702edd1774bd12ab00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1239478553e1271111537a2ce6be2bd"><td class="memTemplParams" colspan="2">template&lt;typename TComponent &gt; </td></tr>
@@ -316,8 +316,8 @@ Inherits <a class="el" href="classforay_1_1scene_1_1CallbackDispatcher.html" tit
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a10575cb3de82f30973cf8e760b8313e1" name="a10575cb3de82f30973cf8e760b8313e1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a10575cb3de82f30973cf8e760b8313e1">&#9670;&#160;</a></span>Destroy()</h2>
+<a id="a40dcc296cdcfc4d19f8022aa8a4de0ff" name="a40dcc296cdcfc4d19f8022aa8a4de0ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40dcc296cdcfc4d19f8022aa8a4de0ff">&#9670;&#160;</a></span>Destroy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -328,19 +328,20 @@ Inherits <a class="el" href="classforay_1_1scene_1_1CallbackDispatcher.html" tit
         <tr>
           <td class="memname">virtual void foray::scene::Scene::Destroy </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>reinitialize</em> = <code>false</code></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>Cleans up all memory, GPU structures, etc... </p>
+
+<p>Reimplemented from <a class="el" href="classforay_1_1scene_1_1Registry.html#af6b3aab46678ef21781241f02cca9223">foray::scene::Registry</a>.</p>
 
 </div>
 </div>
