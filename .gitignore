@@ -27,4 +27,4 @@ apps/importance_sampling_rt/models/glTF-Sample-Models/*
 *.spv.h
 
 # Doxygen Output
-/docs/
+/docs-build/
