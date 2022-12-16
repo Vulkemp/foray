@@ -4,7 +4,7 @@ var searchData=
   ['value_1',['Value',['../structforay_1_1stages_1_1ComparerStage_1_1PipetteValue.html#ac2092a7fb99398776c6b68675b5be650',1,'foray::stages::ComparerStage::PipetteValue::Value()'],['../structforay_1_1scene_1_1AnimationKeyframe.html#aa0c4cce64b48c0774e17070b83f0e979',1,'foray::scene::AnimationKeyframe::Value()']]],
   ['vectorrange_2',['VectorRange',['../structforay_1_1rtpipe_1_1ShaderBindingTableBase_1_1VectorRange.html',1,'foray::rtpipe::ShaderBindingTableBase']]],
   ['verifypath_3',['VerifyPath',['../classforay_1_1osi_1_1Utf8Path.html#ac6b45479fcc770218f2a1eed9497d883',1,'foray::osi::Utf8Path']]],
-  ['version_4',['Version',['../classforay_1_1util_1_1ExrLoaderCache.html#adc62cbadd6bea48c25a6b01214a5f4f0',1,'foray::util::ExrLoaderCache']]],
+  ['version_4',['Version',['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html#a2b25504630edbca923fc5aa5a8efd25f',1,'foray::util::impl::ExrLoaderCache']]],
   ['vertex_5',['Vertex',['../structforay_1_1scene_1_1Vertex.html',1,'foray::scene::Vertex'],['../structforay_1_1scene_1_1Primitive.html#a2a03c506983177d171309192913e67faab22b929ba52471a02d18bb3a4e4472e6',1,'foray::scene::Primitive::Vertex()']]],
   ['vertexcomponentbinding_6',['VertexComponentBinding',['../structforay_1_1scene_1_1VertexComponentBinding.html',1,'foray::scene']]],
   ['vertexinputstatebuilder_7',['VertexInputStateBuilder',['../structforay_1_1scene_1_1VertexInputStateBuilder.html',1,'foray::scene']]],

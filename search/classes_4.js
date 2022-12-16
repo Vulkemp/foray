@@ -14,7 +14,7 @@ var searchData=
   ['eventwindowfocuschanged_11',['EventWindowFocusChanged',['../classforay_1_1osi_1_1EventWindowFocusChanged.html',1,'foray::osi']]],
   ['eventwindowresized_12',['EventWindowResized',['../classforay_1_1osi_1_1EventWindowResized.html',1,'foray::osi']]],
   ['exception_13',['Exception',['../classforay_1_1Exception.html',1,'foray']]],
-  ['exrloadercache_14',['ExrLoaderCache',['../classforay_1_1util_1_1ExrLoaderCache.html',1,'foray::util']]],
+  ['exrloadercache_14',['ExrLoaderCache',['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html',1,'foray::util::impl']]],
   ['externaldenoiserstage_15',['ExternalDenoiserStage',['../classforay_1_1stages_1_1ExternalDenoiserStage.html',1,'foray::stages']]],
   ['externalsemaphore_16',['ExternalSemaphore',['../classforay_1_1util_1_1ExternalSemaphore.html',1,'foray::util']]],
   ['extraytracingstage_17',['ExtRaytracingStage',['../classforay_1_1stages_1_1ExtRaytracingStage.html',1,'foray::stages']]]

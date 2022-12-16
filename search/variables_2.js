@@ -1,8 +1,8 @@
 var searchData=
 [
   ['channelcount_0',['ChannelCount',['../structforay_1_1stages_1_1ComparerStage_1_1InputInfo.html#a412f0669c6d2c3444a4604fdf62f92ce',1,'foray::stages::ComparerStage::InputInfo']]],
-  ['channelindices_1',['ChannelIndices',['../classforay_1_1util_1_1ExrLoaderCache.html#a7e5540e3d3be4a2bd036d50cb81a3988',1,'foray::util::ExrLoaderCache']]],
-  ['channels_2',['Channels',['../structforay_1_1stages_1_1ComparerStage_1_1PushConstant.html#a4ac0d3e1740c100e95eb4a785e77e516',1,'foray::stages::ComparerStage::PushConstant::Channels()'],['../classforay_1_1util_1_1ImageLoader_1_1ImageInfo.html#a321f828f61ff858e243318b45f03b3fd',1,'foray::util::ImageLoader::ImageInfo::Channels()'],['../classforay_1_1util_1_1ExrLoaderCache.html#a5a59d4df43ccec9e54ab66620542ce5d',1,'foray::util::ExrLoaderCache::Channels()']]],
+  ['channelindices_1',['ChannelIndices',['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html#aeecf31b9088cbbcda9cb9cf1f6af7711',1,'foray::util::impl::ExrLoaderCache']]],
+  ['channels_2',['Channels',['../structforay_1_1stages_1_1ComparerStage_1_1PushConstant.html#a4ac0d3e1740c100e95eb4a785e77e516',1,'foray::stages::ComparerStage::PushConstant::Channels()'],['../classforay_1_1util_1_1ImageLoader_1_1ImageInfo.html#a321f828f61ff858e243318b45f03b3fd',1,'foray::util::ImageLoader::ImageInfo::Channels()'],['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html#a8b3a37a2bb3cad665ff0b06c8f2df21a',1,'foray::util::impl::ExrLoaderCache::Channels()']]],
   ['clearvalue_3',['ClearValue',['../structforay_1_1stages_1_1GBufferStage_1_1PerImageInfo.html#a1564147e57fa582c213b568adb5c891b',1,'foray::stages::GBufferStage::PerImageInfo']]],
   ['closesthitmodule_4',['ClosestHitModule',['../structforay_1_1rtpipe_1_1HitShaderBindingTable_1_1ShaderGroup.html#af02571dd37fabdcea19b7e59e90acc1e',1,'foray::rtpipe::HitShaderBindingTable::ShaderGroup']]],
   ['cmdbuffer_5',['CmdBuffer',['../structforay_1_1scene_1_1SceneUpdateInfo.html#a67c48098d542207bd1830c6ad94ff7f3',1,'foray::scene::SceneUpdateInfo::CmdBuffer()'],['../structforay_1_1scene_1_1SceneDrawInfo.html#afc76a63b09de8e5e70ac8ed06e454e38',1,'foray::scene::SceneDrawInfo::CmdBuffer()']]],

@@ -10,7 +10,7 @@ var searchData=
   ['_7edualbuffer_7',['~DualBuffer',['../classforay_1_1util_1_1DualBuffer.html#ace4dfe6db7d99948f4d77c2f6a96f60b',1,'foray::util::DualBuffer']]],
   ['_7eenvironmentmap_8',['~EnvironmentMap',['../classforay_1_1util_1_1EnvironmentMap.html#a2c7609de6f00564768fc7606a5c72dca',1,'foray::util::EnvironmentMap']]],
   ['_7eevent_9',['~Event',['../classforay_1_1osi_1_1Event.html#ab85dc0feadfef95058fb9db394741902',1,'foray::osi::Event']]],
-  ['_7eexrloadercache_10',['~ExrLoaderCache',['../classforay_1_1util_1_1ExrLoaderCache.html#ae107ff5eaeb811d772a8410c0f88d9ed',1,'foray::util::ExrLoaderCache']]],
+  ['_7eexrloadercache_10',['~ExrLoaderCache',['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html#a131a718dbfb38b2c846b1a5e88a7544a',1,'foray::util::impl::ExrLoaderCache']]],
   ['_7egeometrystore_11',['~GeometryStore',['../classforay_1_1scene_1_1gcomp_1_1GeometryStore.html#aebb96aa18d0f388262177ffbe8d4233c',1,'foray::scene::gcomp::GeometryStore']]],
   ['_7ehostsynccommandbuffer_12',['~HostSyncCommandBuffer',['../classforay_1_1core_1_1HostSyncCommandBuffer.html#a9e98c7ed985d2e5de417fd0381cbc51a',1,'foray::core::HostSyncCommandBuffer']]],
   ['_7eimageloader_13',['~ImageLoader',['../classforay_1_1util_1_1ImageLoader.html#a3f9634eb1e7eef6c4ed790b9c5f4675a',1,'foray::util::ImageLoader']]],
