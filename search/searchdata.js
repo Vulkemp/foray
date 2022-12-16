@@ -8,9 +8,9 @@ var indexSectionsWithContent =
   5: "abcdefghijklmnopqrstuvwy",
   6: "abcdefgimoprstw",
   7: "emr",
-  8: "acdefhijklmnprstuvw",
+  8: "abcdefghijklmnprstuvwy",
   9: "fgo",
-  10: "s"
+  10: "fs"
 };
 
 var indexSectionNames =

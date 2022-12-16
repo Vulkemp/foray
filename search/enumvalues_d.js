@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['raygen_0',['Raygen',['../namespaceforay_1_1rtpipe.html#a4a5f4714c6a9245c34778d984cc54822af6448fbd3c8ba12dba323175d79c5936',1,'foray::rtpipe::Raygen()'],['../namespaceforay_1_1rtpipe.html#a7da6abe7ebd5b606040c0cad2756a21eaf6448fbd3c8ba12dba323175d79c5936',1,'foray::rtpipe::Raygen()']]],
-  ['resized_1',['Resized',['../namespaceforay_1_1base.html#a89fc989cfb59900d60ec831979eaf378a22995988de764d7a8cb4165fbff371cb',1,'foray::base']]],
-  ['rotation_2',['Rotation',['../namespaceforay_1_1scene.html#a11187592f044f1ded220b7e70f96141faf1a42bd417390fc63b030a519624607a',1,'foray::scene']]],
-  ['running_3',['Running',['../namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330a5bda814c4aedb126839228f1a3d92f09',1,'foray::base']]]
+  ['needsrecompile_0',['NeedsRecompile',['../classforay_1_1core_1_1ShaderManager.html#a40132d9d09f2a767ae6ba63caee1942ca5d148b36d308999de791a5f2216fdc43',1,'foray::core::ShaderManager']]],
+  ['nominal_1',['Nominal',['../namespaceforay_1_1base.html#a89fc989cfb59900d60ec831979eaf378a8c28d7c312116b8a46e2f466cb33d5b4',1,'foray::base']]],
+  ['normal_2',['Normal',['../classforay_1_1stages_1_1GBufferStage.html#a9e61d4dfdbfff570d710203e61a55b66a960b44c579bc2f6818d2daaf9e4c16f0',1,'foray::stages::GBufferStage::Normal()'],['../namespaceforay_1_1scene.html#aecd9b83367db02a6bf2f3de2b48528f2a960b44c579bc2f6818d2daaf9e4c16f0',1,'foray::scene::Normal()']]]
 ];

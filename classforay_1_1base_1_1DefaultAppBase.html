@@ -140,10 +140,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a1cd588007f18ff5780f0c80a5428c4ea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#a1cd588007f18ff5780f0c80a5428c4ea">ApiDestroy</a> ()</td></tr>
 <tr class="memdesc:a1cd588007f18ff5780f0c80a5428c4ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called after the application has been requested to shut down but before <a class="el" href="classforay_1_1base_1_1DefaultAppBase.html" title="Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple ...">DefaultAppBase</a> finalizes itself.  <a href="classforay_1_1base_1_1DefaultAppBase.html#a1cd588007f18ff5780f0c80a5428c4ea">More...</a><br /></td></tr>
 <tr class="separator:a1cd588007f18ff5780f0c80a5428c4ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa77bae763cc794a2ccfd8f7337a8ad95"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#aa77bae763cc794a2ccfd8f7337a8ad95">RegisterRenderStage</a> (stages::RenderStage *stage)</td></tr>
+<tr class="memitem:aa77bae763cc794a2ccfd8f7337a8ad95"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#aa77bae763cc794a2ccfd8f7337a8ad95">RegisterRenderStage</a> (<a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a> *stage)</td></tr>
 <tr class="memdesc:aa77bae763cc794a2ccfd8f7337a8ad95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call this with a renderstage for automatic OnResized/OnShadersRecompiled calls. Register order is maintained for callbacks.  <a href="classforay_1_1base_1_1DefaultAppBase.html#aa77bae763cc794a2ccfd8f7337a8ad95">More...</a><br /></td></tr>
 <tr class="separator:aa77bae763cc794a2ccfd8f7337a8ad95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff49ed0199966faf4d6f64471ba75246"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#aff49ed0199966faf4d6f64471ba75246">UnregisterRenderStage</a> (stages::RenderStage *stage)</td></tr>
+<tr class="memitem:aff49ed0199966faf4d6f64471ba75246"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#aff49ed0199966faf4d6f64471ba75246">UnregisterRenderStage</a> (<a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a> *stage)</td></tr>
 <tr class="memdesc:aff49ed0199966faf4d6f64471ba75246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call this with a renderstage to unsubscribe from automatic calls.  <a href="classforay_1_1base_1_1DefaultAppBase.html#aff49ed0199966faf4d6f64471ba75246">More...</a><br /></td></tr>
 <tr class="separator:aff49ed0199966faf4d6f64471ba75246"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad581b4fe420864bb523c339c92d0b47d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#ad581b4fe420864bb523c339c92d0b47d">Init</a> ()</td></tr>
@@ -210,7 +210,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:ab01d37c74ddac3c62a2f306ab033c572"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dca1c6fbae9f9efd21f96fbd5053e9d"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#a0dca1c6fbae9f9efd21f96fbd5053e9d">mRenderedFrameCount</a> = 0</td></tr>
 <tr class="separator:a0dca1c6fbae9f9efd21f96fbd5053e9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10d20f29c80b1157143429c2e5928fd6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; stages::RenderStage * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#a10d20f29c80b1157143429c2e5928fd6">mRegisteredStages</a></td></tr>
+<tr class="memitem:a10d20f29c80b1157143429c2e5928fd6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#a10d20f29c80b1157143429c2e5928fd6">mRegisteredStages</a></td></tr>
 <tr class="separator:a10d20f29c80b1157143429c2e5928fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a627ba183be46a822278b24268aa805b0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceforay.html#a6fac2efe73e0eefdd5541f7f66b363c4">fp64_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#a627ba183be46a822278b24268aa805b0">mLastShadersCheckedTimestamp</a> = 0.0</td></tr>
 <tr class="separator:a627ba183be46a822278b24268aa805b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -973,7 +973,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">void foray::base::DefaultAppBase::RegisterRenderStage </td>
           <td>(</td>
-          <td class="paramtype">stages::RenderStage *&#160;</td>
+          <td class="paramtype"><a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a> *&#160;</td>
           <td class="paramname"><em>stage</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1048,7 +1048,7 @@ Static Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">void foray::base::DefaultAppBase::UnregisterRenderStage </td>
           <td>(</td>
-          <td class="paramtype">stages::RenderStage *&#160;</td>
+          <td class="paramtype"><a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a> *&#160;</td>
           <td class="paramname"><em>stage</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1385,7 +1385,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;stages::RenderStage*&gt; foray::base::DefaultAppBase::mRegisteredStages</td>
+          <td class="memname">std::vector&lt;<a class="el" href="classforay_1_1stages_1_1RenderStage.html">stages::RenderStage</a>*&gt; foray::base::DefaultAppBase::mRegisteredStages</td>
         </tr>
       </table>
   </td>
