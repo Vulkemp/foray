@@ -27,7 +27,7 @@ namespace foray::gltf {
         const std::string extVolume_attenuationColor    = "attenuationColor";
 
 
-        for(int32_t i = 0; i < mGltfModel.materials.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mGltfModel.materials.size(); i++)
         {
             const auto& gltfMaterial = mGltfModel.materials[i];
             auto&       material     = mMaterialBuffer.GetVector()[mIndexBindings.MaterialBufferOffset + i];
@@ -103,7 +103,7 @@ namespace foray::gltf {
                             const tinygltf::Value valueArray = iter->second.Get(extVolume_attenuationColor);
                             if(valueArray.IsArray())
                             {
-                                for(int32_t i = 0; i < valueArray.ArrayLen() && i < 3; i++)
+                                for(int32_t i = 0; i < (int32_t)valueArray.ArrayLen() && i < 3; i++)
                                 {
                                     const tinygltf::Value value = valueArray.Get(i);
                                     if(value.IsNumber())

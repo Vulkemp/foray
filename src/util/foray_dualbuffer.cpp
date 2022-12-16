@@ -129,7 +129,7 @@ namespace foray::util {
     {
         mDeviceBuffer.SetName(name);
         std::string stagingBufferName;
-        for(int32_t i = 0; i < mStagingBuffers.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mStagingBuffers.size(); i++)
         {
             stagingBufferName = fmt::format("Staging for \"{}\" #{}", name, i);
             mStagingBuffers[i]->SetName(stagingBufferName);

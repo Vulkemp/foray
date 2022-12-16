@@ -9,7 +9,9 @@
 #endif
 
 namespace foray {
+    /// @brief stdint.h style 32 bit floating point type alias (float)
     using fp32_t = float;
+    /// @brief stdint.h style 64 bit floating point type alias (double)
     using fp64_t = double;
 
     /// @brief Simple types for supressing automatic definition of duplicating move constructors & operator
@@ -29,13 +31,8 @@ namespace foray {
         virtual void __makeMePolymorphic() {}
     };
 
-#if defined(FORAY_INFLIGHTFRAMECOUNT_OVERRIDE)
-    /// @brief Inflight frame count is the amount of frames 'in flight' aka frames recorded on the host before waiting for the device to finish rendering a previous frame.
-    inline constexpr uint32_t INFLIGHT_FRAME_COUNT = FORAY_INFLIGHTFRAMECOUNT_OVERRIDE;
-#else
     /// @brief Inflight frame count is the amount of frames 'in flight' aka frames recorded on the host before waiting for the device to finish rendering a previous frame.
     inline constexpr uint32_t INFLIGHT_FRAME_COUNT = 2;
-#endif
 }  // namespace foray
 
 /// @brief Return value

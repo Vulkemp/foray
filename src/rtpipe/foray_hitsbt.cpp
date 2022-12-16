@@ -10,7 +10,7 @@ namespace foray::rtpipe {
     {
         Assert(groupIndex >= 0, "ShaderGroup index must be >= 0");
         Assert(data == nullptr || mEntryDataSize > 0, "Set data size before passing data to groups!");
-        if(groupIndex >= mGroups.size())
+        if(groupIndex >= (int32_t)mGroups.size())
         {
             mGroups.resize((size_t)(groupIndex + 1));
             ArrayResized(mGroups.size());

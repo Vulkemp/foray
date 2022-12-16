@@ -8,7 +8,7 @@
 namespace foray::osi {
 #pragma region lifetime
 
-    OsManager::OsManager() : mInputDevices(), mMouse(), mKeyboard()
+    OsManager::OsManager() : mMouse(), mKeyboard(), mInputDevices()
     {
         if(sInstance != nullptr)
         {

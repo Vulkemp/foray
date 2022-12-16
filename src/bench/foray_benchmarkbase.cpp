@@ -35,7 +35,7 @@ namespace foray::bench {
             out << "\n";
         }
 
-        for(int32_t i = 1; i < Timestamps.size(); i++)
+        for(int32_t i = 1; i < (int32_t)Timestamps.size(); i++)
         {
             const auto& ts    = Timestamps[i];
             const auto& delta = Deltas[i - 1];
@@ -61,7 +61,7 @@ namespace foray::bench {
     {
         std::stringstream out;
         out << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << std::fixed;
-        for(int32_t i = 0; i < Timestamps.size() - 1; i++)
+        for(int32_t i = 0; i < (int32_t)Timestamps.size() - 1; i++)
         {
             out << Timestamps[i].Timestamp << separator;
         }
@@ -76,7 +76,7 @@ namespace foray::bench {
     {
         std::stringstream out;
         out << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << std::fixed;
-        for(int32_t i = 0; i < Timestamps.size() - 1; i++)
+        for(int32_t i = 0; i < (int32_t)Timestamps.size() - 1; i++)
         {
             out << Timestamps[i].Id << separator;
         }
@@ -122,7 +122,7 @@ namespace foray::bench {
                 }
             }
 
-            for(int32_t i = 1; i < Timestamps.size(); i++)
+            for(int32_t i = 1; i < (int32_t)Timestamps.size(); i++)
             {
                 const auto& ts    = Timestamps[i];
                 const auto& delta = Deltas[i - 1];

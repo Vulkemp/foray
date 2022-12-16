@@ -42,7 +42,6 @@ namespace foray::base {
             AdvanceState();  // ELifetimeState::Running
 
             clock_t     clock;
-            float       deltaMillis = 0;
             timespan_t  timePerTick(mFrameTiming.GetSecondsPerFrame());
             timepoint_t lastTick = clock.now() - std::chrono::duration_cast<clock_t::duration>(timePerTick);
             timepoint_t start    = clock.now();

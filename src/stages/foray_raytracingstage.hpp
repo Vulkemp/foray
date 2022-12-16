@@ -43,7 +43,7 @@ namespace foray::stages {
     {
       public:
         /// @brief Destroys, assigns context, calls CreateOutputImages(), CustomObjectsCreate(), CreateOrUpdateDescriptors(), CreatePipelineLayout(), CreateRtPipeline() in this order
-        virtual void Init(core::Context* context);
+        void Init(core::Context* context);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
@@ -115,7 +115,7 @@ namespace foray::stages {
         /// @param scene Scene provides Camera, Tlas, Geometry and Materials
         /// @param envMap Environment Map
         /// @param noiseImage Noise Texture
-        virtual void Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
+        void Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
 
         /// @brief Image Output of the Raytracing Stage
         inline static constexpr std::string_view OutputName = "Rt.Output";

@@ -6,14 +6,14 @@ namespace foray::rtpipe {
     std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(int32_t groupIndex)
     {
         Assert(mEntryDataSize != 0, "Entry data size not set!");
-        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range");
+        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range");
         return mGroupData[groupIndex];
     }
 
     const std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(GroupIndex groupIndex) const
     {
         Assert(mEntryDataSize != 0, "Entry data size not set!");
-        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range");
+        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range");
         return mGroupData[groupIndex];
     }
 
@@ -73,7 +73,7 @@ namespace foray::rtpipe {
 
         std::vector<uint8_t> bufferData(bufferSize);
 
-        for(int32_t i = 0; i < entryCount; i++)
+        for(int32_t i = 0; i < (int32_t)entryCount; i++)
         {
             uint8_t*       bufferEntry = bufferData.data() + (i * sbtEntrySize);
             const uint8_t* handle      = handles[i];
@@ -104,7 +104,7 @@ namespace foray::rtpipe {
 
     void ShaderBindingTableBase::SetData(GroupIndex groupIndex, const void* data)
     {
-        Assert(groupIndex >= 0 && groupIndex < GetGroupArrayCount(), "Group Index out of range!");
+        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range!");
         if(mEntryDataSize == 0 || !data)
         {
             return;

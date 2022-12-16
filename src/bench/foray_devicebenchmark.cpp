@@ -10,7 +10,7 @@ namespace foray::bench {
 
         std::vector<const char*> test(queryNames);
         mQueryNames = queryNames;
-        for(int32_t i = 0; i < mQueryNames.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mQueryNames.size(); i++)
         {
             mQueryIds[mQueryNames[i]] = i;
         }
@@ -61,7 +61,7 @@ namespace foray::bench {
         if(std::string_view(BenchmarkTimestamp::BEGIN) == mQueryNames.front() && std::string_view(BenchmarkTimestamp::END) == mQueryNames.back())
         {
             BenchmarkBase::Begin(ConvertQueryResultToMillis(results.front().Timestamp));
-            for(int32_t id = 1; id < results.size() - 1; id++)
+            for(int32_t id = 1; id < (int32_t)results.size() - 1; id++)
             {
                 BenchmarkBase::LogTimestamp(mQueryNames[id], ConvertQueryResultToMillis(results[id].Timestamp));
             }
@@ -70,7 +70,7 @@ namespace foray::bench {
         else
         {
             BenchmarkBase::Begin(ConvertQueryResultToMillis(results.front().Timestamp));
-            for(int32_t id = 0; id < results.size(); id++)
+            for(int32_t id = 0; id < (int32_t)results.size(); id++)
             {
                 BenchmarkBase::LogTimestamp(mQueryNames[id], ConvertQueryResultToMillis(results[id].Timestamp));
             }

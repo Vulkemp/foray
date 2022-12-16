@@ -33,8 +33,8 @@ namespace foray::base {
               [this](osi::Window& window) { this->ApiBeforeWindowCreate(window); },
               [this](vkb::SwapchainBuilder& builder) { this->ApiBeforeSwapchainBuilding(builder); },
               [this](VkExtent2D size) { this->OnResized(size); },
-              nullptr),
-        mShaderManager(&mContext)
+              nullptr)
+        , mShaderManager(&mContext)
     {
     }
 
@@ -56,7 +56,6 @@ namespace foray::base {
 
         mWindowSwapchain.CreateWindow();
         mInstance.Create();
-        VkSurfaceKHR surface = mWindowSwapchain.GetWindow().GetOrCreateSurfaceKHR(mInstance);
         mDevice.Create();
         mWindowSwapchain.CreateSwapchain();
 
@@ -227,8 +226,7 @@ namespace foray::base {
         }
 
         // Acquire the swapchain image
-        uint32_t                 swapChainImageIndex = 0;
-        ESwapchainInteractResult result              = currentFrame.AcquireSwapchainImage();
+        ESwapchainInteractResult result = currentFrame.AcquireSwapchainImage();
 
         if(mEnableFrameRecordBenchmark)
         {

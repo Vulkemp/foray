@@ -12,7 +12,7 @@ namespace foray::stages {
         /// @brief Initialization
         /// @param sourceImage Source Image
         /// @param destImage Destination Image
-        virtual void Init(core::ManagedImage* sourceImage = nullptr, core::ManagedImage* destImage = nullptr);
+        void Init(core::ManagedImage* sourceImage = nullptr, core::ManagedImage* destImage = nullptr);
         /// @brief Records pipeline barriers for source and destination images, and the blit command itself
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 

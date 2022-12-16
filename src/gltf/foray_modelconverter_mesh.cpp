@@ -5,7 +5,7 @@
 namespace foray::gltf {
     void ModelConverter::BuildGeometryBuffer()
     {
-        for(int32_t i = 0; i < mGltfModel.meshes.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mGltfModel.meshes.size(); i++)
         {
             auto&                         gltfMesh = mGltfModel.meshes[i];
             std::vector<scene::Primitive> primitives;
@@ -21,13 +21,12 @@ namespace foray::gltf {
         }
 
         auto& indexBuffer  = *mIndexBuffer;
-        auto& vertexBuffer = *mVertexBuffer;
 
         if(mOptions.FlipY)
         {
             // flip vertex order due to coordinate space translation GLTF (OpenGL) -> Vulkan
             uint32_t swap = {};
-            for(int32_t i = mIndexBindings.IndexBufferStart; i + 2 < indexBuffer.size(); i += 3)
+            for(int32_t i = mIndexBindings.IndexBufferStart; i + 2 < (int32_t)indexBuffer.size(); i += 3)
             {
                 swap               = indexBuffer[i + 2];
                 indexBuffer[i + 2] = indexBuffer[i + 1];
@@ -36,12 +35,10 @@ namespace foray::gltf {
         }
 
         mGeo.InitOrUpdate();
-#ifndef DISABLE_RT_EXTENSIONS
         for(auto& mesh : mIndexBindings.Meshes)
         {
             mesh->BuildAccelerationStructure(mContext, &mGeo);
         }
-#endif
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<scene::Primitive>& outprimitives)
@@ -53,7 +50,7 @@ namespace foray::gltf {
 
         outprimitives.resize(mesh.primitives.size());
 
-        for(int32_t i = 0; i < mesh.primitives.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mesh.primitives.size(); i++)
         {
             std::vector<scene::Vertex> perPrimitiveVertices;
             std::vector<uint32_t>      perPrimitiveIndices;

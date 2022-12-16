@@ -28,7 +28,7 @@ namespace foray::as {
         {
             mBufferOffsets[blas]   = offset;
             const auto& primitives = blas->GetMesh()->GetPrimitives();
-            for(int32_t primitiveIndex = 0; primitiveIndex < primitives.size(); primitiveIndex++)
+            for(int32_t primitiveIndex = 0; primitiveIndex < (int32_t)primitives.size(); primitiveIndex++)
             {
                 const scene::Primitive& primitive   = primitives[primitiveIndex];
                 bufferData[offset + primitiveIndex] = GeometryMeta{.MaterialIndex = primitive.MaterialIndex, .IndexBufferOffset = primitive.First};

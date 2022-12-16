@@ -16,14 +16,13 @@ namespace foray::gltf {
         std::map<std::string_view, scene::EAnimationTargetPath> targetMap = {
             {"translation", scene::EAnimationTargetPath::Translation}, {"rotation", scene::EAnimationTargetPath::Rotation}, {"scale", scene::EAnimationTargetPath::Scale}};
 
-        auto interpolationNoMatch = interpolationMap.end();
         auto targetNoMatch        = targetMap.end();
 
         if(mGltfModel.animations.size() && !animDirector)
         {
             animDirector = mScene->MakeComponent<scene::gcomp::AnimationManager>();
         }
-        for(int32_t i = 0; i < mGltfModel.animations.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mGltfModel.animations.size(); i++)
         {
             scene::Animation animation;
             auto&            gltfAnimation = mGltfModel.animations[i];
@@ -41,12 +40,12 @@ namespace foray::gltf {
 
             auto indexMapNoMatch = samplerIndexMap.end();
 
-            for(int32_t samplerIndex = 0; samplerIndex < gltfAnimation.samplers.size(); samplerIndex++)
+            for(int32_t samplerIndex = 0; samplerIndex < (int32_t)gltfAnimation.samplers.size(); samplerIndex++)
             {
                 TranslateAnimationSampler(animation, gltfAnimation, samplerIndex, interpolationMap, samplerIndexMap);
             }
 
-            for(int32_t channelIndex = 0; channelIndex < gltfAnimation.channels.size(); channelIndex++)
+            for(int32_t channelIndex = 0; channelIndex < (int32_t)gltfAnimation.channels.size(); channelIndex++)
             {
                 scene::AnimationChannel channel;
                 auto&                   gltfChannel = gltfAnimation.channels[channelIndex];
@@ -64,7 +63,7 @@ namespace foray::gltf {
                     continue;
                 }
 
-                if(gltfChannel.target_node >= 0 || gltfChannel.target_node < mIndexBindings.Nodes.size())
+                if(gltfChannel.target_node >= 0 || gltfChannel.target_node < (int32_t)mIndexBindings.Nodes.size())
                 {
                     channel.Target = mIndexBindings.Nodes[gltfChannel.target_node];
                     if(!channel.Target)
@@ -233,7 +232,7 @@ namespace foray::gltf {
                                    samplerIndex);
                     return;
                 }
-                for(int32_t i = 0; i < times.size(); i++)
+                for(int32_t i = 0; i < (int32_t)times.size(); i++)
                 {
                     const glm::vec4& value      = values[(i * 3) + 1];
                     const glm::vec4& intangent  = values[(i * 3) + 0];
@@ -249,7 +248,7 @@ namespace foray::gltf {
                                    samplerIndex);
                     return;
                 }
-                for(int32_t i = 0; i < times.size(); i++)
+                for(int32_t i = 0; i < (int32_t)times.size(); i++)
                 {
                     const glm::vec4& value = values[i];
                     sampler.Keyframes.push_back(scene::AnimationKeyframe(times[i], value));

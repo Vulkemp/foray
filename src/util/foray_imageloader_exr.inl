@@ -42,12 +42,11 @@ namespace foray::util {
                       int32_t               channels[5])
         {
             using component_t          = typename FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
-            const uint32_t strideBytes = FORMAT_TRAITS::BYTESTRIDE;
             const uint32_t stride      = FORMAT_TRAITS::COMPONENT_COUNT;
 
             component_t* writeData = reinterpret_cast<component_t*>(out.data());
 
-            for(int tile_index = 0; tile_index < numTiles; tile_index++)
+            for(int32_t tile_index = 0; tile_index < (int32_t)numTiles; tile_index++)
             {
                 const EXRTile& tile = tiles[tile_index];
                 int            tw   = tile.width;
@@ -194,7 +193,7 @@ namespace foray::util {
             }
         }
 
-        for(uint32_t channelIndex = 0; channelIndex < header.num_channels; channelIndex++)
+        for(uint32_t channelIndex = 0; channelIndex < (uint32_t)header.num_channels; channelIndex++)
         {
             auto& channel = header.channels[channelIndex];
             if(header.pixel_types[channelIndex] != header.pixel_types[0])
@@ -229,7 +228,6 @@ namespace foray::util {
 
         auto& loaderCache = *(reinterpret_cast<ExrLoaderCache*>(mCustomLoaderInfo));
         auto& header      = loaderCache.Header;
-        auto& channelMap  = loaderCache.Channels;
 
         if(LoadEXRImageFromFile(&image, &header, mInfo.Utf8Path.GetPath().c_str(), &exrError) != TINYEXR_SUCCESS)
         {

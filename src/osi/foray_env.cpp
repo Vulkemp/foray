@@ -127,7 +127,7 @@ namespace foray::osi {
         BuildSectionVector();
 
         bool attemptCollapse = false;
-        for(int32_t i = 1; i < mPathSections.size(); i++)
+        for(int32_t i = 1; i < (int32_t)mPathSections.size(); i++)
         {
             std::string_view section = mPathSections[i];
             if(section == "." || section == "..")
@@ -180,7 +180,7 @@ namespace foray::osi {
 
         int32_t pos   = 0;
         int32_t start = 0;
-        for(; pos < mPath.size(); pos++)
+        for(; pos < (int32_t)mPath.size(); pos++)
         {
             char c = mPath[pos];
             if(c == '/')
@@ -197,7 +197,7 @@ namespace foray::osi {
     {
 
         std::stringstream strbuilder;
-        for(int i = 0; i < sections.size() - 1; i++)
+        for(int32_t i = 0; i < (int32_t)sections.size() - 1; i++)
         {
             strbuilder << sections[i] << "/";
         }

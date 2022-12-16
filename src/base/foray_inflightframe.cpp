@@ -13,7 +13,7 @@ namespace foray::base {
         mPrimaryCommandBuffer.Create(context);
         mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
-        for(int32_t i = 0; i < auxCommandBufferCount; i++)
+        for(int32_t i = 0; i < (int32_t)auxCommandBufferCount; i++)
         {
             std::unique_ptr<core::DeviceSyncCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
             buf                                             = std::make_unique<core::DeviceSyncCommandBuffer>();
@@ -160,7 +160,7 @@ namespace foray::base {
         };
 
         // Clear swapchain image
-        VkClearColorValue clearColor = VkClearColorValue{0.7f, 0.1f, 0.3f, 1.f};
+        VkClearColorValue clearColor = VkClearColorValue{{0.7f, 0.1f, 0.3f, 1.f}};
         mContext->VkbDispatchTable->cmdClearColorImage(cmdBuffer, swapchainImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
     }
 

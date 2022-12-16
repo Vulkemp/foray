@@ -144,9 +144,9 @@ namespace foray::osi {
         result->mGuid                        = SDL_JoystickGetGUID(joystick);
 
         int numAxes    = SDL_JoystickNumAxes(joystick);
-        int numBalls   = SDL_JoystickNumBalls(joystick);
+        // int numBalls   = SDL_JoystickNumBalls(joystick);
         int numButtons = SDL_JoystickNumButtons(joystick);
-        int numHats    = SDL_JoystickNumHats(joystick);
+        // int numHats    = SDL_JoystickNumHats(joystick);
 
         result->mJoystickAxes    = new AxisJoystick[numAxes];
         result->mJoystickButtons = new ButtonJoystick[numButtons];
@@ -160,7 +160,7 @@ namespace foray::osi {
 
         for(int i = 0; i < numButtons; i++)
         {
-            EButton buttonId;
+            EButton buttonId = EButton::Undefined;
             if(i < 50)
             {
                 buttonId = static_cast<EButton>(static_cast<int32_t>(EButton::JoystickButton_0) + i);

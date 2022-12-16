@@ -60,13 +60,6 @@ namespace foray::stages {
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
 
-        VkImageSubresourceLayers layers{
-            .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-            .mipLevel       = 0,
-            .baseArrayLayer = 0,
-            .layerCount     = 1,
-        };
-
         VkImageBlit2 imageBlit{};
 
         ConfigureBlitRegion(imageBlit);

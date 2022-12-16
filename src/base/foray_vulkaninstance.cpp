@@ -109,8 +109,6 @@ namespace foray::base {
                                                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                                   void*                                       pUserData)
     {
-        auto severity = vkb::to_string_message_severity(messageSeverity);
-        auto type     = vkb::to_string_message_type(messageTypes);
         switch(messageSeverity)
         {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:

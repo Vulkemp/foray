@@ -57,7 +57,7 @@ namespace foray::stages {
 
         VkExtent2D extent = mContext->GetSwapchainSize();
 
-        VkClearValue defaultClearValue = {0, 0, 0, 0};
+        VkClearValue defaultClearValue = {VkClearColorValue{{0, 0, 0, 0}}};
 
         for(int32_t i = 0; i < (int32_t)EOutput::MaxEnum; i++)
         {
@@ -76,7 +76,7 @@ namespace foray::stages {
         }
 
         {  // Albedo
-            mImageInfos[(size_t)EOutput::Albedo].Image.Create(mContext, imageUsageFlags, geometryFormat, extent, OutputNames[(size_t)EOutput::Albedo]);
+            mImageInfos[(size_t)EOutput::Albedo].Image.Create(mContext, imageUsageFlags, colorFormat, extent, OutputNames[(size_t)EOutput::Albedo]);
         }
 
         {  // Motion
@@ -104,7 +104,7 @@ namespace foray::stages {
             core::ManagedImage::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, extent, OutputNames[(size_t)EOutput::Depth]);
             ci.ImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
             mImageInfos[(size_t)EOutput::Depth].Image.Create(mContext, ci);
-            mImageInfos[(size_t)EOutput::Depth].ClearValue = {1.f, 0};
+            mImageInfos[(size_t)EOutput::Depth].ClearValue.depthStencil = VkClearDepthStencilValue{1.f, 0};
         }
 
         {  // Pre-transfer to correct layout
@@ -514,7 +514,6 @@ namespace foray::stages {
         // Instanced object
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-        auto bit = VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         if(!!mBenchmark)
         {
             mBenchmark->CmdWriteTimestamp(cmdBuffer, frameNum, TIMESTAMP_VERT_BEGIN, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);

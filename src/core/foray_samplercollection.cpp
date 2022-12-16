@@ -76,8 +76,8 @@ namespace foray::core {
             mCollection = nullptr;
         }
     }
-    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : mManagedImage(other.mManagedImage), SamplerReference(other) {}
-    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : mManagedImage(other.mManagedImage), SamplerReference(other) {}
+    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
+    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
     CombinedImageSampler& CombinedImageSampler::operator=(const CombinedImageSampler& other)
     {
         SamplerReference::operator=(other);

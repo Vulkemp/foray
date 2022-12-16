@@ -97,7 +97,7 @@ namespace foray::scene {
         lightManager->CreateOrUpdate();
     }
 
-    void Scene::Destroy(bool reinitialize)
+    void Scene::Destroy()
     {
         // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
         mRootNodes.clear();
@@ -105,10 +105,6 @@ namespace foray::scene {
 
         // Clear global components
         Registry::Destroy();
-        if(reinitialize)
-        {
-            InitDefaultGlobals();
-        }
     }
 
 

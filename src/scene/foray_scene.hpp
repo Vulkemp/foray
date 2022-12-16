@@ -34,7 +34,7 @@ namespace foray::scene {
         void HandleEvent(const osi::Event* event);
 
         /// Cleans up all memory, GPU structures, etc...
-        virtual void Destroy(bool reinitialize = false);
+        virtual void Destroy() override;
 
         inline virtual ~Scene() { Destroy(); }
 

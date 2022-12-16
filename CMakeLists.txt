@@ -6,33 +6,23 @@ project("foray")
 include("cmakescripts/compilerconfig.cmake")
 include("cmakescripts/compileshader.cmake")
 
-# Enable strict mode for own lib
-SET(CMAKE_CXX_FLAGS ${STRICT_FLAGS})
-
 # Gather sources
 file(GLOB_RECURSE src "src/*.cpp")
 
-option(DISABLE_RT_EXTENSIONS "If set, will disable raytracing extensions" OFF)
-if (DISABLE_RT_EXTENSIONS)
-    add_compile_definitions(DISABLE_RT_EXTENSIONS)
-endif()
-option(ENABLE_GBUFFER_BENCH "If enabled, will perform a device level benchmark in the gbuffer stage" OFF)
-if (ENABLE_GBUFFER_BENCH)
-    add_compile_definitions(ENABLE_GBUFFER_BENCH)
-endif()
 add_library(${PROJECT_NAME} STATIC ${src} )
+
+# Set strict mode for project only
+set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${STRICT_FLAGS})
 
 # dependencies
 
 find_package(Vulkan REQUIRED)
 
-set(SDL2_HINT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 include("cmakescripts/locatesdl2.cmake") # Find SDL either by find_package or as a fallback the included version
 
 # manual dependency variables
 
-set(thirdparty_include_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-set(thirdparty_dir "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 
 # link dependency libs
 target_link_libraries(
@@ -50,34 +40,34 @@ target_link_libraries(
 # include directories
 
 include_directories(
-	PUBLIC ${Vulkan_INCLUDE_DIRS}
+    PUBLIC ${Vulkan_INCLUDE_DIRS}
     PUBLIC ${SDL2_INCLUDE_DIRS}
-    PUBLIC ${thirdparty_include_dir}
+    )
+include_directories(SYSTEM
+    PUBLIC ${THIRD_PARTY_DIR}
 )
-
-# target_precompile_headers(${PROJECT_NAME} PRIVATE "src/foray_precompile.hpp")
-
-# Compile Definitions
-if (DISABLE_RT_EXTENSIONS) 
-    target_compile_definitions(${PROJECT_NAME} PUBLIC DISABLE_RT_EXTENSIONS)
-endif ()
-
 
 # subdirectories
 
 add_subdirectory("src/shaders")
 
 # Set nonstrict mode for third party stuff
+set_property(GLOBAL PROPERTY COMPILE_FLAGS ${NONSTRICT_FLAGS})
 
-SET(CMAKE_CXX_FLAGS ${NONSTRICT_FLAGS})
-
-add_subdirectory("${thirdparty_dir}/vma")
-add_subdirectory("${thirdparty_dir}/vkbootstrap")
-add_subdirectory("${thirdparty_dir}/glm")
-add_subdirectory("${thirdparty_dir}/tinygltf")
-add_subdirectory("${thirdparty_dir}/tinyexr")
-add_subdirectory("${thirdparty_dir}/imgui")
+add_subdirectory("${THIRD_PARTY_DIR}/vma")
+add_subdirectory("${THIRD_PARTY_DIR}/vkbootstrap")
+add_subdirectory("${THIRD_PARTY_DIR}/glm")
+add_subdirectory("${THIRD_PARTY_DIR}/tinygltf")
+add_subdirectory("${THIRD_PARTY_DIR}/tinyexr")
+add_subdirectory("${THIRD_PARTY_DIR}/imgui")
 
 # Set cache entry to shader dir
 
-SET(FORAY_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders" CACHE PATH "Foray shader directory")
+set(FORAY_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders" CACHE PATH "Foray shader directory")
+
+# Precompiled header for third party libraries
+
+option(FORAY_PRECOMPILE_THIRDPARTY_HEADERS "Enables packing third party includes into a precompiled header. Helps a little with build times." ON)
+if (FORAY_PRECOMPILE_THIRDPARTY_HEADERS)
+    target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/foray_precompile.hpp")
+endif()

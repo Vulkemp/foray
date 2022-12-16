@@ -86,7 +86,7 @@ namespace foray::scene {
         while(true)
         {
             int32_t nextIndex = lowerIndex + 1;
-            if(nextIndex >= Keyframes.size() || Keyframes[nextIndex].Time > time)
+            if(nextIndex >= (int32_t)Keyframes.size() || Keyframes[nextIndex].Time > time)
             {
                 break;
             }

@@ -324,7 +324,6 @@ namespace foray::core {
 
         for(const osi::Utf8Path& includeDirective : includeDirectives)
         {
-            bool foundInclude = false;
             for(const osi::Utf8Path& dir : includePaths)
             {
                 osi::Utf8Path absIncludePath;
@@ -365,7 +364,6 @@ namespace foray::core {
 
         for(const osi::Utf8Path& includeDirective : includeDirectives)
         {
-            bool foundInclude = false;
             for(const osi::Utf8Path& dir : includePaths)
             {
                 osi::Utf8Path absIncludePath;

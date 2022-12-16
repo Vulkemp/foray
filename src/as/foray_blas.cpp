@@ -45,7 +45,6 @@ namespace foray::as {
 
         VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = store->GetVerticesBuffer().GetDeviceAddress()};
         VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = store->GetIndicesBuffer().GetDeviceAddress()};
-        VkDeviceOrHostAddressConstKHR transform_matrix_device_address{};
 
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos(primitiveCount);  // Counterparts to VkCmdDrawIndexed
         std::vector<uint32_t>                                 primitiveCounts(primitiveCount);  // Counts of vertices per geometry, used to determine build size of the BLAS
@@ -68,7 +67,7 @@ namespace foray::as {
                                                                                  .transformData = {}}},
             .flags = 0};
 
-        for(int32_t i = 0; i < primitiveCount; i++)
+        for(int32_t i = 0; i < (int32_t)primitiveCount; i++)
         {
             const auto& primitive = primitives[i];
 

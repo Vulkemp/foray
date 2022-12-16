@@ -6,7 +6,7 @@ namespace foray::scene {
     class Node;
     class Scene;
     class Mesh;
-    class Primitive;
+    struct Primitive;
     namespace ncomp {
         class Camera;
         class Transform;

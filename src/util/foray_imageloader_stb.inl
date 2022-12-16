@@ -98,7 +98,6 @@ namespace foray::util {
     bool ImageLoader<FORMAT>::Load_Stb()
     {
         using namespace impl;
-        StbLoaderCache& cache = *reinterpret_cast<StbLoaderCache*>(&mCustomLoaderInfo);
 
         uint8_t*    stbdata = nullptr;
         std::string namestr(mInfo.Utf8Path.GetPath());

@@ -242,7 +242,7 @@ namespace foray::util {
 
             VkDependencyInfo depInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 2U, .pImageMemoryBarriers = barriers.data()};
 
-            for(int32_t i = 0; i < mipCount - 1; i++)
+            for(int32_t i = 0; i < (int32_t)mipCount - 1; i++)
             {
                 uint32_t sourceMipLevel = (uint32_t)i;
                 uint32_t destMipLevel   = sourceMipLevel + 1;

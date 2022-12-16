@@ -124,7 +124,7 @@ namespace foray::gltf {
         /// @brief Represents a single thread action for multithreaded image loading
         void lLoadTexturesThreadInstance(MultithreadLambdaArgs args)
         {
-            for(int32_t texIndex = args.ThreadIndex; texIndex < args.GltfModel.textures.size(); texIndex += args.ThreadCount)
+            for(int32_t texIndex = args.ThreadIndex; texIndex < (int32_t)args.GltfModel.textures.size(); texIndex += args.ThreadCount)
             {
                 try
                 {
@@ -145,9 +145,6 @@ namespace foray::gltf {
                     logger()->debug("Model Load: Processing texture #{} \"{}\" on Thread {}/{}", texIndex, textureName, args.ThreadIndex, args.ThreadCount);
 
                     scene::gcomp::TextureManager::Texture& texture = args.Textures.GetTextures()[args.BaseTexIndex + texIndex];
-
-                    const unsigned char* buffer     = nullptr;
-                    VkDeviceSize         bufferSize = 0;
 
                     util::ImageLoader<VkFormat::VK_FORMAT_R8G8B8A8_UNORM> imageLoader;
 
@@ -259,7 +256,7 @@ namespace foray::gltf {
                             VkDependencyInfo depInfo{
                                 .sType = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .imageMemoryBarrierCount = 2U, .pImageMemoryBarriers = barriers.data()};
 
-                            for(int32_t i = 0; i < mipLevelCount - 1; i++)
+                            for(int32_t i = 0; i < (int32_t)mipLevelCount - 1; i++)
                             {
                                 uint32_t sourceMipLevel = (uint32_t)i;
                                 uint32_t destMipLevel   = sourceMipLevel + 1;
@@ -332,8 +329,7 @@ namespace foray::gltf {
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
         int32_t baseTexIndex      = (int32_t)mTextures.GetTextures().size();
-        auto&   textureCollection = mTextures.GetTextures();
-        for(int32_t i = 0; i < mGltfModel.textures.size(); i++)
+        for(int32_t i = 0; i < (int32_t)mGltfModel.textures.size(); i++)
         {
             mTextures.PrepareTexture(i + baseTexIndex);
         }

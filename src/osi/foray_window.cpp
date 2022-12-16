@@ -6,7 +6,7 @@
 namespace foray::osi {
 
     Window::Window()
-        : mTitle(), mDisplayMode(EDisplayMode::WindowedResizable), mDisplayId(), mFullScreenSize{0, 0}, mWindowedSize{1280, 720}, mPosition{WINDOWPOS_AUTO, WINDOWPOS_AUTO}, mHandle(nullptr)
+        : mHandle(nullptr), mTitle(), mDisplayMode(EDisplayMode::WindowedResizable), mDisplayId(), mFullScreenSize{0, 0}, mWindowedSize{1280, 720}, mPosition{WINDOWPOS_AUTO, WINDOWPOS_AUTO}
     {
         sWindows.push_back(this);
     }

@@ -9,11 +9,8 @@ endif()
 # If that fails: Use builtin SDL2 binaries
 if (NOT DEFINED SDL2_INCLUDE_DIRS OR NOT DEFINED SDL2_LIBRARIES)
 
-    if (NOT DEFINED SDL2_HINT_DIR)
-        MESSAGE(FATAL_ERROR "Set SDL2_HINT_DIR to allow manually resolving SDL2")
-    endif()
-    SET(SDL2_BASE_DIR "${SDL2_HINT_DIR}/sdl2")
-    SET(SDL2_INCLUDE_DIRS "${SDL2_HINT_DIR}")
+    SET(SDL2_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/sdl2")
+    SET(SDL2_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 
     # https://stackoverflow.com/questions/39258250/how-to-detect-if-64-bit-msvc-with-cmake
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
