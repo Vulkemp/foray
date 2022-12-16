@@ -187,7 +187,7 @@ namespace foray::gltf {
                         texture.GetSampler().Init(args.Context, samplerCI);
 
                         VkExtent2D extent        = imageLoader.GetInfo().Extent;
-                        uint32_t   mipLevelCount = generateMipMaps ? (uint32_t)(floorf(log2f(std::max(extent.width, extent.height)))) : 1;
+                        uint32_t   mipLevelCount = generateMipMaps ? (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height)))) : 1;
 
                         core::ManagedImage::CreateInfo imageCI;
                         imageCI.AllocCI.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;

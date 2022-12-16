@@ -66,7 +66,7 @@ namespace foray::scene::ncomp {
         fp32_t invertMulti = mInvertAll ? -1.f : 1.f;
 
         float deltaTime = updateInfo.RenderInfo.GetFrameTime();
-        float speed     = exp2f(mSpeedExponent) * deltaTime;
+        float speed     = exp2f((fp32_t)mSpeedExponent) * deltaTime;
         glm::vec3& pos       = transform->GetTranslation();
         glm::vec3& upDir     = camera->GetUpDirection();
 

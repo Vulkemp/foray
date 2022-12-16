@@ -120,15 +120,23 @@ namespace foray::core {
 
 #ifdef _WIN32
 
+    std::wstring lConvertToWide(std::string_view v)
+    {
+        int          wstr_size = MultiByteToWideChar(CP_UTF8, 0, v.data(), (int)v.size(), nullptr, 0);
+        std::wstring wstr(wstr_size, 0);
+        MultiByteToWideChar(CP_UTF8, 0, v.data(), (int)v.size(), &wstr[0], (int)wstr.size());
+        return wstr;
+    }
+
     // @brief calls the glslc.exe on windows and passes the shader file path
     // returns false if the compilation failed
     bool ShaderManager::CallGlslCompiler(std::string_view args)
     {
         // convert paths to wstring
-        std::wstring argsW = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(std::string(args));
+        std::wstring argsW = lConvertToWide(args);
         // query vulkan sdk path
-        auto         pathVariable      = std::string(std::getenv("VULKAN_SDK"));
-        std::wstring pathVariableWStr  = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(pathVariable);
+        std::string  pathVariable      = std::getenv("VULKAN_SDK");
+        std::wstring pathVariableWStr  = lConvertToWide(pathVariable);
         std::wstring executable        = (pathVariableWStr + L"/Bin/glslc.exe");
         LPCWSTR      lpApplicationName = executable.c_str();
         //SPIRV_COMPILER_CMD_NAME_W;

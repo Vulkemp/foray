@@ -250,10 +250,10 @@ namespace foray::osi {
     {
         SDL_MouseMotionEvent mevent    = sdl_event.motion;
         Window*              window    = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
-        fp32_t               currentx  = mevent.x;
-        fp32_t               currenty  = mevent.y;
-        fp32_t               relativeX = mevent.xrel;
-        fp32_t               relativeY = mevent.yrel;
+        fp32_t               currentx  = (fp32_t)mevent.x;
+        fp32_t               currenty  = (fp32_t)mevent.y;
+        fp32_t               relativeX = (fp32_t)mevent.xrel;
+        fp32_t               relativeY = (fp32_t)mevent.yrel;
 
         return new EventInputMouseMoved(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
     }
@@ -262,8 +262,8 @@ namespace foray::osi {
     {
         SDL_MouseWheelEvent mevent  = sdl_event.wheel;
         Window*             window  = GetWindowPtr<SDL_MouseWheelEvent>(mevent);
-        fp32_t              offsetx = mevent.x;
-        fp32_t              offsety = mevent.y;
+        int32_t             offsetx = mevent.x;
+        int32_t             offsety = mevent.y;
 
         return new EventInputDirectional(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
     }
@@ -358,4 +358,4 @@ namespace foray::osi {
 
 #pragma endregion
 #pragma endregion
-}  // namespace foray
+}  // namespace foray::osi

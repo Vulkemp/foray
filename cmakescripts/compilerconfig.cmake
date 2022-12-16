@@ -21,8 +21,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # using Visual Studio C++
     # See https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-by-category?view=msvc-170
     
-    set(NONSTRICT_FLAGS "$/w") # Disables all warnings
-    set(STRICT_FLAGS "$/Wall") # Maximum warning level
+    set(NONSTRICT_FLAGS "/w") # Disables all warnings
+    set(STRICT_FLAGS "/W2") # Maximum warning level
 
 endif()
 

@@ -27,7 +27,7 @@ namespace foray::util {
         foray::core::ManagedImage::CreateInfo ci(params.Usage, format, extent, params.Name);
         if(params.Final)
         {
-            uint32_t mipCount                          = (uint32_t)(floorf(log2f(std::max(extent.width, extent.height))));
+            uint32_t mipCount                          = (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height))));
             ci.ImageCI.mipLevels                       = mipCount;
             ci.ImageViewCI.subresourceRange.levelCount = mipCount;
         }
@@ -138,7 +138,7 @@ namespace foray::util {
             lLoad(loadFormat, params);
 
             extent   = temporaryImage.GetExtent2D();
-            mipCount = (uint32_t)(floorf(log2f(std::max(extent.width, extent.height))));
+            mipCount = (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height))));
             core::ManagedImage::CreateInfo ci(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, storeFormat, extent, name);
             ci.ImageCI.mipLevels                       = mipCount;
             ci.ImageViewCI.subresourceRange.levelCount = mipCount;
