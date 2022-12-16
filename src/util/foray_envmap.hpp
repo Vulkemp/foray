@@ -5,6 +5,8 @@
 #include "../osi/foray_env.hpp"
 
 namespace foray::util {
+
+    /// @brief Experimental type loading an environment map in spherical representation, also generates mip maps
     class EnvironmentMap
     {
       public:
@@ -12,6 +14,9 @@ namespace foray::util {
         void Destroy();
 
         virtual ~EnvironmentMap() {Destroy();}
+
+        FORAY_GETTER_CR(Sampler)
+        FORAY_GETTER_CR(Image)
 
       protected:
         core::ManagedImage mImage;

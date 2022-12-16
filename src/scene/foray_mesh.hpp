@@ -42,6 +42,9 @@ namespace foray::scene {
         void CmdDrawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
     };
 
+    /// @brief Type describing a single mesh object, described by multiple Primitive objects
+    /// @details
+    /// Includes a BLAS (built by default)
     class Mesh
     {
       public:

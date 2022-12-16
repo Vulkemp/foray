@@ -2,6 +2,8 @@
 #include "foray_registry.hpp"
 
 namespace foray::scene {
+
+    /// @brief A scene node. Extends the registry with hierarchical information
     class Node : public Registry
     {
       public:

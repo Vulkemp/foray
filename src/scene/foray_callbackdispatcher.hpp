@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace foray::scene {
+    /// @brief Type maintaining callback lists for event distribution
     class CallbackDispatcher
     {
       public:

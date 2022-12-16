@@ -3,6 +3,8 @@
 #include "../util/foray_pipelinelayout.hpp"
 
 namespace foray::stages {
+
+    /// @brief Base class for rasterized render stages (no built-in functionality)
     class RasterizedRenderStage : public RenderStage
     {
       public:

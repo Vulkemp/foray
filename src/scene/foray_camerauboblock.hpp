@@ -2,6 +2,7 @@
 #include "../foray_glm.hpp"
 
 namespace foray::scene {
+    /// @brief Uniform buffer object layout for camera matrices
     struct CameraUboBlock
     {
         glm::mat4 ProjectionMatrix             = {};

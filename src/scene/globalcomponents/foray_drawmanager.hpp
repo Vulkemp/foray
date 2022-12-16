@@ -4,13 +4,14 @@
 
 namespace foray::scene::gcomp {
 
+    /// @brief Represents instanced draw operation of a single mesh
     struct DrawOp
     {
       public:
-        uint64_t                   Order           = 0;
-        Mesh*                      Target          = nullptr;
+        uint64_t                          Order           = 0;
+        Mesh*                             Target          = nullptr;
         std::vector<ncomp::MeshInstance*> Instances       = {};
-        uint32_t                   TransformOffset = 0;
+        uint32_t                          TransformOffset = 0;
     };
 
     /// @brief Manages a collection of mesh instances, current and previous model matrices
@@ -24,7 +25,9 @@ namespace foray::scene::gcomp {
 
         virtual int32_t GetOrder() const override { return ORDER_TRANSFORM; }
 
+        /// @brief Updates and uploads transform buffers
         virtual void Update(SceneUpdateInfo&) override;
+        /// @brief Draws the scene using the currently bound pipeline and renderpass. Vertex and Index buffers must be bound
         virtual void Draw(SceneDrawInfo&) override;
 
         FORAY_GETTER_CR(CurrentTransformBuffer)

@@ -1,35 +1,35 @@
 #pragma once
+#include "../foray_logger.hpp"
 #include "../osi/foray_env.hpp"
 #include "foray_imageloader.hpp"
 #include <tinyexr/tinyexr.h>
-#include "../foray_logger.hpp"
 
 // Disclaimer: Most of the code here is heavily inspired or copied from how Godot engine incorporates the tinyexr image loader
 
 namespace foray::util {
 
-    class ExrLoaderCache
-    {
-      public:
-        EXRVersion                                Version{};
-        EXRHeader                                 Header{};
-        int32_t                                   ChannelIndices[5];
-        std::unordered_map<std::string, uint32_t> Channels;
-
-        inline ExrLoaderCache()
-        {
-            InitEXRHeader(&Header);
-            for(int32_t i = 0; i < 5; i++)
-            {
-                ChannelIndices[i] = -1;
-            }
-        }
-        inline explicit ExrLoaderCache(EXRHeader& header) { Header = header; }
-
-        inline ~ExrLoaderCache() { FreeEXRHeader(&Header); }
-    };
-
     namespace impl {
+        class ExrLoaderCache
+        {
+          public:
+            EXRVersion                                Version{};
+            EXRHeader                                 Header{};
+            int32_t                                   ChannelIndices[5];
+            std::unordered_map<std::string, uint32_t> Channels;
+
+            inline ExrLoaderCache()
+            {
+                InitEXRHeader(&Header);
+                for(int32_t i = 0; i < 5; i++)
+                {
+                    ChannelIndices[i] = -1;
+                }
+            }
+            inline explicit ExrLoaderCache(EXRHeader& header) { Header = header; }
+
+            inline ~ExrLoaderCache() { FreeEXRHeader(&Header); }
+        };
+
 
         template <typename FORMAT_TRAITS>
         void lReadExr(std::vector<uint8_t>& out,
@@ -41,9 +41,9 @@ namespace foray::util {
                       uint32_t              tileWidth,
                       int32_t               channels[5])
         {
-            using component_t     = typename FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
+            using component_t          = typename FORMAT_TRAITS::COMPONENT_TRAITS::COMPONENT;
             const uint32_t strideBytes = FORMAT_TRAITS::BYTESTRIDE;
-            const uint32_t stride = FORMAT_TRAITS::COMPONENT_COUNT;
+            const uint32_t stride      = FORMAT_TRAITS::COMPONENT_COUNT;
 
             component_t* writeData = reinterpret_cast<component_t*>(out.data());
 
@@ -289,4 +289,4 @@ namespace foray::util {
         return true;
     }
 
-}  // namespace foray
+}  // namespace foray::util

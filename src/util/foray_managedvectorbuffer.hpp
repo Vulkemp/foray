@@ -16,6 +16,7 @@ namespace foray::util {
         }
     };
 
+    /// @brief Class maintaining a resizable array of templated classes in a managed buffer
     template <typename TClass>
     class ManagedVectorBuffer : public core::ManagedResource
     {

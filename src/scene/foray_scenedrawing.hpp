@@ -7,6 +7,7 @@
 #include "foray_scene_declares.hpp"
 
 namespace foray::scene {
+    /// @brief Push Constant helper type
     struct DrawPushConstant
     {
       public:
@@ -43,6 +44,7 @@ namespace foray::scene {
                            &MaterialIndex);
     }
 
+    /// @brief Temporary type passed to components when updating the scene
     struct SceneUpdateInfo
     {
       public:
@@ -56,6 +58,7 @@ namespace foray::scene {
     SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index) : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)) {}
     SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer) : RenderInfo(renderInfo), CmdBuffer(cmdBuffer) {}
 
+    /// @brief Temporary type passed to components when drawing the scene
     struct SceneDrawInfo
     {
       public:

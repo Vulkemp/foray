@@ -8,6 +8,7 @@
 
 namespace foray::scene {
 
+    /// @brief Vertex Components
     enum class EVertexComponent
     {
         Position,
@@ -16,12 +17,14 @@ namespace foray::scene {
         Uv
     };
 
+    /// @brief Binding of component to shader input location
     struct VertexComponentBinding
     {
         EVertexComponent Component;
         uint32_t         Location;
     };
 
+    /// @brief Helper for building a VkPipelineVertexInputStateCreateInfo struct
     struct VertexInputStateBuilder
     {
         std::vector<VertexComponentBinding> Components;
@@ -36,6 +39,7 @@ namespace foray::scene {
         void                     Build();
     };
 
+    /// @brief Vertex
     struct Vertex
     {
         glm::vec3 Pos     = {};
