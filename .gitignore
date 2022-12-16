@@ -25,3 +25,6 @@ apps/importance_sampling_rt/models/glTF-Sample-Models/*
 
 # Packed SpirV header files
 *.spv.h
+
+# Doxygen Output
+/docs/
