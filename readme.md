@@ -1,7 +1,11 @@
 Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos.
-# ⚠️ Notice
-* This library is still under heavy development. The Api is still subject to frequent breaking changes.
+
+`Version: 1.0.0`
+
 # Useful Links
+## Documentation
+[Doxygen hosted on GH Pages](https://vulkemp.github.io/foray/index.html)
+## Projects Using Foray
 * [foray-examples](https://github.com/Vulkemp/foray-examples): Examples demonstrating GBuffer, minimal raytracer, complex raytracer
 * [foray-denoising](https://github.com/Vulkemp/foray-denoising): Project demonstrating and comparing denoiser implementations: OptiX, ASVGF, BMFR (WIP)
 * [foray_restir](https://github.com/Vulkemp/foray_restir): ReStir demo implementation
@@ -109,3 +113,12 @@ target_include_directories(
 * [tinygltf](https://github.com/syoyo/tinygltf): glTF loader library (MIT License)
 * [vk-bootstrap](https://github.com/charles-lunarg/vk-bootstrap): Utility library for instance creation, device selection and building, queue selection and swapchain creation (MIT License)
 * [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator): Simplified Vulkan memory allocation (MIT License)
+
+# Versioning
+## Major
+* API may be subject to breaking changes between major versions
+## Minor
+* API is guaranteed compatible
+* Features may be added
+## Patch
+* Fully compatible, fixes only

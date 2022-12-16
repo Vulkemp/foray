@@ -12,15 +12,17 @@ namespace foray::rtpipe {
     /// @details
     /// A shader binding table stores entries in the following layout
     ///
+    /// ```
     /// | Entry0                      | Entry1                      | ...
     /// |-----------------------------|-----------------------------|-------
     /// | GroupHandle | Custom Data   | GroupHandle | Custom Data   | ...
+    /// ```
     ///
     /// Where the GroupHandle is a vulkan driver specific memory block (all currently known drivers use 
     /// 32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize
     /// It is essentially a reference to a ShaderGroup as defined in the CreateInfo passed to 'createRayTracingPipelinesKHR' 
     ///
-    /// Custom Data is an optional memory area of user defined size, used to initialize indices. It allows pairing
+    /// Custom Data is an optional memory area of user defined size. It allows pairing
     /// shaders with different configuration parameters.
     ///
     /// ShaderBindingTable classes Usage:

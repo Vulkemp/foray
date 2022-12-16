@@ -20,20 +20,26 @@ namespace foray::as {
     ///
     /// initialize with a set of BLAS. BLAS are assigned sections in the buffer consecutively:
     ///
+    ///```
     ///   | BLAS #0           | BLAS #1      | BLAS #2                     | // Unique BLAS
+    ///```
     ///
     /// The amount of space assigned per BLAS is GeometryCount * sizeof(GeometryMeta)
     ///
+    ///```
     ///   | BLAS #0           | BLAS #1      | BLAS #2                     | // Unique BLAS
     ///   | G0 | G1 | G2 | G3 | G0 | G1 | G2 | G0 | G1 | G2 | G3 | G4 | G5 | // Geometry Meta structs (1x per Geometry per BLAS)
+    ///```
     ///
     /// The buffer maintains the offsets into this buffer for each BLAS
     ///
+    ///```
     ///   | BLAS #0           | BLAS #1      | BLAS #2                     | // Unique BLAS
     ///   | G0 | G1 | G2 | G3 | G0 | G1 | G2 | G0 | G1 | G2 | G3 | G4 | G5 | // Geometry Meta structs (1x per Geometry per BLAS)
     ///     ^                   ^              ^
     ///     |                   |              |
     ///     0                   4              7                             // Offset per BLAS into the Geometry Meta Array
+    ///```
     ///
     /// These offsets are the return value of GeometryMetaBuffer::CreateOrUpdate and can be later retrieved via GeometryMetaBuffer::GetBufferOffsets()
     ///

@@ -7,8 +7,8 @@ namespace foray::core {
     class ManagedBuffer;
     class CommandBuffer;
     class DescriptorSet;
-    class HostCommandBuffer;
-    class DeviceCommandBuffer;
+    class HostSyncCommandBuffer;
+    class DeviceSyncCommandBuffer;
     class ImageLayoutCache;
     class CombinedImageSampler;
     class SamplerCollection;

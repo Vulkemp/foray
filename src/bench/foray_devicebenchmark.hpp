@@ -8,7 +8,7 @@ namespace foray::bench {
 
     struct VkContext;
 
-    /// @brief A device benchmark based on Vulkans DeviceQuery Api
+    /// @brief A device benchmark based on Vulkans DeviceQuery Api. Timestamps are recorded in milliseconds. Timestamp names must be set in advance.
     class DeviceBenchmark : public BenchmarkBase, public core::ManagedResource
     {
       public:

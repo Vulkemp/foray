@@ -8,7 +8,7 @@
 
 namespace foray::base {
 
-    /// @brief FrameRenderInfo used for most render processes. This object is rebuilt for every frame. 
+    /// @brief Context used for render processes. This object is rebuilt for every frame. 
     //// @remark Care should be taken if passed as value instead of reference because the ImageLayoutCache cannot work on multiple instances for a single render process
     class FrameRenderInfo
     {
@@ -20,14 +20,14 @@ namespace foray::base {
         FORAY_PROPERTY_R(InFlightFrame)
         FORAY_PROPERTY_R(ImageLayoutCache)
 
-        inline core::DeviceCommandBuffer&       GetAuxCommandBuffer(int32_t index) { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
-        inline const core::DeviceCommandBuffer& GetAuxCommandBuffer(int32_t index) const { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
+        inline core::DeviceSyncCommandBuffer&       GetAuxCommandBuffer(int32_t index) { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
+        inline const core::DeviceSyncCommandBuffer& GetAuxCommandBuffer(int32_t index) const { return mInFlightFrame->GetAuxiliaryCommandBuffer(index); }
 
-        inline core::DeviceCommandBuffer&       GetPrimaryCommandBuffer() { return mInFlightFrame->GetPrimaryCommandBuffer(); }
-        inline const core::DeviceCommandBuffer& GetPrimaryCommandBuffer() const { return mInFlightFrame->GetPrimaryCommandBuffer(); }
+        inline core::DeviceSyncCommandBuffer&       GetPrimaryCommandBuffer() { return mInFlightFrame->GetPrimaryCommandBuffer(); }
+        inline const core::DeviceSyncCommandBuffer& GetPrimaryCommandBuffer() const { return mInFlightFrame->GetPrimaryCommandBuffer(); }
 
-        inline core::DeviceCommandBuffer&       GetCommandBuffer(CmdBufferIndex index) { return mInFlightFrame->GetCommandBuffer(index); }
-        inline const core::DeviceCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const { return mInFlightFrame->GetCommandBuffer(index); }
+        inline core::DeviceSyncCommandBuffer&       GetCommandBuffer(CmdBufferIndex index) { return mInFlightFrame->GetCommandBuffer(index); }
+        inline const core::DeviceSyncCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const { return mInFlightFrame->GetCommandBuffer(index); }
 
         /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
         inline void ClearSwapchainImage(VkCommandBuffer cmdBuffer) { mInFlightFrame->ClearSwapchainImage(cmdBuffer, mImageLayoutCache); }

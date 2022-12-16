@@ -56,7 +56,7 @@ namespace foray::core {
         /// @param data data
         /// @param size size
         /// @param offset write offset into buffer
-        void WriteDataDeviceLocal(HostCommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
+        void WriteDataDeviceLocal(HostSyncCommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offset = 0);
 
         /// @brief Maps the buffer to memory address data
         void Map(void*& data);

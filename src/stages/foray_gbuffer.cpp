@@ -108,7 +108,7 @@ namespace foray::stages {
         }
 
         {  // Pre-transfer to correct layout
-            core::HostCommandBuffer commandBuffer;
+            core::HostSyncCommandBuffer commandBuffer;
             commandBuffer.Create(mContext);
             commandBuffer.Begin();
 

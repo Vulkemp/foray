@@ -32,7 +32,7 @@ namespace foray::scene::gcomp {
         uint32_t count = mSimplifiedlights.size();
         mBuffer.StageSection(0, &count, 0, sizeof(count));
 
-        core::HostCommandBuffer cmdBuf;
+        core::HostSyncCommandBuffer cmdBuf;
         cmdBuf.Create(GetContext());
         cmdBuf.Begin();
 

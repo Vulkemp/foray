@@ -148,7 +148,7 @@ namespace foray::as {
 
         // STEP #4   Build the Blas
 
-        core::HostCommandBuffer commandBuffer;
+        core::HostSyncCommandBuffer commandBuffer;
         commandBuffer.Create(context);
         commandBuffer.Begin();
         VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfosPtr = buildRangeInfos.data();

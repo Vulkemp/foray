@@ -6,7 +6,7 @@ namespace foray::util {
 
     struct LoadParams
     {
-        core::HostCommandBuffer& CmdBuffer;
+        core::HostSyncCommandBuffer& CmdBuffer;
         core::Context*           Context;
         const osi::Utf8Path&     Path;
         core::ManagedImage*      Image;
@@ -86,7 +86,7 @@ namespace foray::util {
 
     void EnvironmentMap::Create(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat, VkFormat storeFormat)
     {
-        core::HostCommandBuffer cmdBuffer;
+        core::HostSyncCommandBuffer cmdBuffer;
         cmdBuffer.Create(context);
 
         VkExtent2D extent   = {};

@@ -15,8 +15,8 @@ namespace foray::base {
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
         for(int32_t i = 0; i < auxCommandBufferCount; i++)
         {
-            std::unique_ptr<core::DeviceCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
-            buf                                             = std::make_unique<core::DeviceCommandBuffer>();
+            std::unique_ptr<core::DeviceSyncCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
+            buf                                             = std::make_unique<core::DeviceSyncCommandBuffer>();
             buf->Create(context);
             buf->SetName(fmt::format("Auxiliary CommandBuffer #{}", i));
         }
@@ -164,15 +164,15 @@ namespace foray::base {
         mContext->VkbDispatchTable->cmdClearColorImage(cmdBuffer, swapchainImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
     }
 
-    core::DeviceCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index)
+    core::DeviceSyncCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index)
     {
         return *mAuxiliaryCommandBuffers[index];
     }
-    core::DeviceCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer()
+    core::DeviceSyncCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer()
     {
         return mPrimaryCommandBuffer;
     }
-    core::DeviceCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index)
+    core::DeviceSyncCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index)
     {
         if(index == PRIMARY_COMMAND_BUFFER)
         {
@@ -180,15 +180,15 @@ namespace foray::base {
         }
         return *mAuxiliaryCommandBuffers[index];
     }
-    const core::DeviceCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index) const
+    const core::DeviceSyncCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index) const
     {
         return *mAuxiliaryCommandBuffers[index];
     }
-    const core::DeviceCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer() const
+    const core::DeviceSyncCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer() const
     {
         return mPrimaryCommandBuffer;
     }
-    const core::DeviceCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index) const
+    const core::DeviceSyncCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index) const
     {
         if(index == PRIMARY_COMMAND_BUFFER)
         {
@@ -221,7 +221,7 @@ namespace foray::base {
     {
         std::vector<VkSubmitInfo2> submitInfos;
         mPrimaryCommandBuffer.WriteToSubmitInfo(submitInfos);
-        for (std::unique_ptr<core::DeviceCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
+        for (std::unique_ptr<core::DeviceSyncCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
         {
             auxCommandBuffer->WriteToSubmitInfo(submitInfos);
         }

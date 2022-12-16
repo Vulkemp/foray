@@ -221,7 +221,7 @@ namespace foray::as {
 
         // STEP #6    Build acceleration structure
 
-        core::HostCommandBuffer cmdBuffer;
+        core::HostSyncCommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
         cmdBuffer.Begin();
 

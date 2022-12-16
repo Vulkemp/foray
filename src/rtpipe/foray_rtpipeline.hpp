@@ -7,13 +7,12 @@
 namespace foray::rtpipe {
 
     /// @brief Helper class wrapping 4 SBTs (Raygen, Miss, Callable, Hitgroup) and a raytracing pipeline
+    /// @details
+    /// Usage:
+    ///   1. Configure Sbts, by accessing them via GetRaygenSbt(), ... . Refer to ShaderBindingTableBase class definition for more information on shader binding tables.
+    ///   2. Call Build(...) to build the Pipeline and Sbts
     class RtPipeline
     {
-        /*
-        Usage:
-          1. Configure Sbts, by accessing them via GetRaygenSbt(), ... . Refer to ShaderBindingTableBase class definition.
-          2. Call Build(...) to build the Pipeline and Sbts
-      */
       public:
         RtPipeline();
 

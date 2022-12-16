@@ -18,7 +18,12 @@ namespace foray::osi {
 
     std::string MakeRelativePath(const std::string_view relative);
 
-    /// @brief Utf8 encoded path wrapper. Unlike std::filesystem::path uses the same encoding regardless of compile target and path / additions automatically resolves navigator
+    /// @brief Utf8 encoded path wrapper. 
+    /// @details 
+    /// Versus std::filesystem::path:
+    ///  - Uses the same encoding regardless of platform.
+    ///  - When concatenating paths, automatically resolves ./ and ../ 
+    ///  - Absolute paths can be used as unique keys for a single file in maps and sets (ignoring existence of filesystem links)
     class Utf8Path
     {
       protected:
@@ -36,6 +41,9 @@ namespace foray::osi {
         /// @brief Builds a new path string (stored to path parameter) from sections
         static void sBuildFromSections(std::string& path, const std::vector<std::string_view>& sections);
 
+        /// @brief Builds mPath member by concatenating mPathSections
+        /// @param sections mPathSections
+        /// @param relative mRelative
         Utf8Path(const std::vector<std::string_view>& sections, bool relative);
 
       public:
@@ -67,7 +75,13 @@ namespace foray::osi {
         bool operator<(const Utf8Path& other) const;
         bool operator>(const Utf8Path& other) const;
 
+        /// @brief Returns true, if the path is detected to be relative
+        /// @details
+        /// Detection:
+        ///  - Unix: Absolute paths begin with '/' or '~/'
+        ///  - Windows: Absolute Paths begin with '?:\\' where ? is a single character wildcard
         bool     IsRelative() const;
+        /// @brief Returns this path appended to the current working directory
         Utf8Path MakeAbsolute() const;
 
         FORAY_GETTER_V(Path)

@@ -3,6 +3,7 @@
 #include "foray_osi_declares.hpp"
 
 namespace foray::osi {
+    /// @brief Base class for a single input channel of an input device
     class InputBase
     {
       public:

@@ -66,13 +66,13 @@ namespace foray::util {
                                      core::ManagedImage::CreateInfo& ci,
                                      VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
         inline void InitManagedImage(core::Context*                  context,
-                                     core::HostCommandBuffer&        cmdBuffer,
+                                     core::HostSyncCommandBuffer&        cmdBuffer,
                                      core::ManagedImage*             image,
                                      core::ManagedImage::CreateInfo& ci,
                                      VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
         inline void UpdateManagedImageCI(core::ManagedImage::CreateInfo& ci) const;
         inline void WriteManagedImageData(core::ManagedImage* image, VkImageLayout afterwrite) const;
-        inline void WriteManagedImageData(core::HostCommandBuffer& cmdBuffer, core::ManagedImage* image, VkImageLayout afterwrite) const;
+        inline void WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, VkImageLayout afterwrite) const;
 
       protected:
         ImageInfo                  mInfo;

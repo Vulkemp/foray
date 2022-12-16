@@ -4,6 +4,8 @@
 #include <vector>
 
 namespace foray::rtpipe {
+
+    /// @brief Shader binding table implementation for storing hit groups (Consist of optional closesthit, anyhit and intersect shaders)
     class HitShaderBindingTable : public ShaderBindingTableBase
     {
       public:

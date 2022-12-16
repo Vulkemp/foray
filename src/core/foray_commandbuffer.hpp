@@ -37,7 +37,7 @@ namespace foray::core {
     };
 
     /// @brief Extension of the commandbuffer wrapper for temporary host synchronized command buffer execution
-    class HostCommandBuffer : public CommandBuffer
+    class HostSyncCommandBuffer : public CommandBuffer
     {
       public:
         /// @brief Create based on the contexts device, command pool and queue.
@@ -54,7 +54,7 @@ namespace foray::core {
 
         virtual void Destroy() override;
 
-        inline virtual ~HostCommandBuffer() { Destroy(); }
+        inline virtual ~HostSyncCommandBuffer() { Destroy(); }
 
       protected:
         VkFence mFence = nullptr;
@@ -86,13 +86,13 @@ namespace foray::core {
     };
 
     /// @brief Extension of the commandbuffer wrapper for device and/or host synchronized command buffer execution
-    class DeviceCommandBuffer : public CommandBuffer
+    class DeviceSyncCommandBuffer : public CommandBuffer
     {
       public:
         /// @brief Adds a semaphore to wait for before execution of the commandbuffer
-        virtual DeviceCommandBuffer& AddWaitSemaphore(const SemaphoreReference& semaphore);
+        virtual DeviceSyncCommandBuffer& AddWaitSemaphore(const SemaphoreReference& semaphore);
         /// @brief Adds a semaphore to signal after execution of commandbuffer has finished
-        virtual DeviceCommandBuffer& AddSignalSemaphore(const SemaphoreReference& semaphore);
+        virtual DeviceSyncCommandBuffer& AddSignalSemaphore(const SemaphoreReference& semaphore);
 
         FORAY_PROPERTY_R(WaitSemaphores)
         FORAY_PROPERTY_R(SignalSemaphores)

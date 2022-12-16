@@ -104,7 +104,7 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::HostCommandBuffer& cmdBuffer, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
+    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
     {
         if(!mInfo.Valid || !mRawData.size())
         {
@@ -134,7 +134,7 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::WriteManagedImageData(core::HostCommandBuffer& cmdBuffer, core::ManagedImage* image,  VkImageLayout afterwrite) const
+    inline void ImageLoader<FORMAT>::WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image,  VkImageLayout afterwrite) const
     {
         image->WriteDeviceLocalData(cmdBuffer, mRawData.data(), mRawData.size(), afterwrite);
     }

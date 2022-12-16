@@ -94,7 +94,7 @@ namespace foray::core {
             .image               = mImage,
             .subresourceRange = VkImageSubresourceRange{.aspectMask = quickTransition.AspectMask, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS}};
 
-        core::HostCommandBuffer hostCmdBuffer;
+        core::HostSyncCommandBuffer hostCmdBuffer;
 
         if(!commandBuffer)
         {
@@ -112,11 +112,11 @@ namespace foray::core {
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
-        HostCommandBuffer cmdBuffer;
+        HostSyncCommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, imageCopy);
     }
-    void ManagedImage::WriteDeviceLocalData(HostCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
+    void ManagedImage::WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
         // create staging buffer
         ManagedBuffer stagingBuffer;
@@ -151,11 +151,11 @@ namespace foray::core {
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
-        HostCommandBuffer cmdBuffer;
+        HostSyncCommandBuffer cmdBuffer;
         cmdBuffer.Create(mContext);
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite);
     }
-    void ManagedImage::WriteDeviceLocalData(HostCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite)
+    void ManagedImage::WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
         // specify default copy region
         VkBufferImageCopy region{};

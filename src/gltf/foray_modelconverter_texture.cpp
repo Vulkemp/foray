@@ -8,6 +8,96 @@
 namespace foray::gltf {
 
     namespace impl {
+
+        const int MIP_SKIP         = 0b000;
+        const int MIP_GENERATE     = 0b100;
+        const int MIPMODE_NEAREST  = MIP_GENERATE | 0b000;
+        const int MIPMODE_LINEAR   = MIP_GENERATE | 0b010;
+        const int FILTER_NEAREST   = 0b000;
+        const int FILTER_LINEAR    = 0b001;
+        const int MASK_GENERATEMIP = 0b100;
+        const int MASK_MIPMODE     = 0b010;
+        const int MASK_FILTER      = 0b001;
+
+        enum EMinFilter
+        {
+            FilterNearestNoMip      = FILTER_NEAREST | MIP_SKIP,
+            FilterLinearNoMip       = FILTER_LINEAR | MIP_SKIP,
+            FilterNearestMipNearest = FILTER_NEAREST | MIPMODE_NEAREST,
+            FilterNearestMipLinear  = FILTER_NEAREST | MIPMODE_LINEAR,
+            FilterLinearMipNearest  = FILTER_LINEAR | MIPMODE_NEAREST,
+            FilterLinearMipLinear   = FILTER_LINEAR | MIPMODE_LINEAR,
+        };
+
+        void lTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& createMipMaps)
+        {
+            // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-sampler
+            std::unordered_map<int, VkFilter>             magFilterMap({{9728, VkFilter::VK_FILTER_NEAREST}, {9729, VkFilter::VK_FILTER_LINEAR}});
+            std::unordered_map<int, EMinFilter>           minFilterMap({
+                {9728, EMinFilter::FilterNearestNoMip},
+                {9729, EMinFilter::FilterLinearNoMip},
+                {9984, EMinFilter::FilterNearestMipNearest},
+                {9985, EMinFilter::FilterNearestMipLinear},
+                {9986, EMinFilter::FilterLinearMipNearest},
+                {9987, EMinFilter::FilterLinearMipLinear},
+            });
+            std::unordered_map<int, VkSamplerAddressMode> addressMap({{33071, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE},
+                                                                      {33648, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT},
+                                                                      {10497, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT}});
+            {  // Magfilter
+                auto find = magFilterMap.find(tinygltfSampler.magFilter);
+                if(find != magFilterMap.end())
+                {
+                    outsamplerCI.magFilter = find->second;
+                }
+            }
+            {  // Minfilter
+                auto find = minFilterMap.find(tinygltfSampler.minFilter);
+                if(find != minFilterMap.end())
+                {
+                    int filter  = find->second & MASK_FILTER;
+                    int genMip  = find->second & MASK_GENERATEMIP;
+                    int mipMode = find->second & MASK_MIPMODE;
+                    switch(filter)
+                    {
+                        case FILTER_NEAREST:
+                            outsamplerCI.minFilter = VkFilter::VK_FILTER_NEAREST;
+                            break;
+                        case FILTER_LINEAR:
+                            outsamplerCI.minFilter = VkFilter::VK_FILTER_LINEAR;
+                            break;
+                    }
+                    createMipMaps = genMip == MIP_GENERATE;
+                    if(createMipMaps)
+                    {
+                        switch(mipMode)
+                        {
+                            case MIPMODE_NEAREST:
+                                outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                                break;
+                            case MIPMODE_LINEAR:
+                                outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR;
+                                break;
+                        }
+                    }
+                }
+            }
+            {  // AddressMode U
+                auto find = addressMap.find(tinygltfSampler.wrapS);
+                if(find != addressMap.end())
+                {
+                    outsamplerCI.addressModeU = find->second;
+                }
+            }
+            {  // AddressMode V
+                auto find = addressMap.find(tinygltfSampler.wrapT);
+                if(find != addressMap.end())
+                {
+                    outsamplerCI.addressModeV = find->second;
+                }
+            }
+        }
+
         /// @brief Used in the lambda method executing
         struct MultithreadLambdaArgs
         {
@@ -95,7 +185,7 @@ namespace foray::gltf {
                                                       .unnormalizedCoordinates = VK_FALSE};
                         if(gltfTexture.sampler >= 0)
                         {
-                            ModelConverter::sTranslateSampler(args.GltfModel.samplers[gltfTexture.sampler], samplerCI, generateMipMaps);
+                            lTranslateSampler(args.GltfModel.samplers[gltfTexture.sampler], samplerCI, generateMipMaps);
                         }
                         texture.GetSampler().Init(args.Context, samplerCI);
 
@@ -133,7 +223,7 @@ namespace foray::gltf {
 
                         if(generateMipMaps)
                         {
-                            core::HostCommandBuffer cmdBuf;
+                            core::HostSyncCommandBuffer cmdBuf;
                             cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
                             cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
@@ -237,7 +327,7 @@ namespace foray::gltf {
     {
         using namespace impl;
 
-        int32_t threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
+        int32_t                  threadCount = (int32_t)std::min(std::thread::hardware_concurrency(), (uint32_t)mGltfModel.textures.size());
         std::vector<std::thread> threads(threadCount);
         std::vector<uint8_t>     done(threadCount);  // Not a vector<bool>, because these are a specialisation in form of a bit vector, which disallows references!
 
@@ -314,93 +404,5 @@ namespace foray::gltf {
         }
     }
 
-    const int MIP_SKIP         = 0b000;
-    const int MIP_GENERATE     = 0b100;
-    const int MIPMODE_NEAREST  = MIP_GENERATE | 0b000;
-    const int MIPMODE_LINEAR   = MIP_GENERATE | 0b010;
-    const int FILTER_NEAREST   = 0b000;
-    const int FILTER_LINEAR    = 0b001;
-    const int MASK_GENERATEMIP = 0b100;
-    const int MASK_MIPMODE     = 0b010;
-    const int MASK_FILTER      = 0b001;
-
-    enum EMinFilter
-    {
-        FilterNearestNoMip      = FILTER_NEAREST | MIP_SKIP,
-        FilterLinearNoMip       = FILTER_LINEAR | MIP_SKIP,
-        FilterNearestMipNearest = FILTER_NEAREST | MIPMODE_NEAREST,
-        FilterNearestMipLinear  = FILTER_NEAREST | MIPMODE_LINEAR,
-        FilterLinearMipNearest  = FILTER_LINEAR | MIPMODE_NEAREST,
-        FilterLinearMipLinear   = FILTER_LINEAR | MIPMODE_LINEAR,
-    };
-
-    void ModelConverter::sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& createMipMaps)
-    {
-        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-sampler
-        std::unordered_map<int, VkFilter>             magFilterMap({{9728, VkFilter::VK_FILTER_NEAREST}, {9729, VkFilter::VK_FILTER_LINEAR}});
-        std::unordered_map<int, EMinFilter>           minFilterMap({
-                      {9728, EMinFilter::FilterNearestNoMip},
-                      {9729, EMinFilter::FilterLinearNoMip},
-                      {9984, EMinFilter::FilterNearestMipNearest},
-                      {9985, EMinFilter::FilterNearestMipLinear},
-                      {9986, EMinFilter::FilterLinearMipNearest},
-                      {9987, EMinFilter::FilterLinearMipLinear},
-        });
-        std::unordered_map<int, VkSamplerAddressMode> addressMap({{33071, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE},
-                                                                  {33648, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT},
-                                                                  {10497, VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT}});
-        {  // Magfilter
-            auto find = magFilterMap.find(tinygltfSampler.magFilter);
-            if(find != magFilterMap.end())
-            {
-                outsamplerCI.magFilter = find->second;
-            }
-        }
-        {  // Minfilter
-            auto find = minFilterMap.find(tinygltfSampler.minFilter);
-            if(find != minFilterMap.end())
-            {
-                int filter  = find->second & MASK_FILTER;
-                int genMip  = find->second & MASK_GENERATEMIP;
-                int mipMode = find->second & MASK_MIPMODE;
-                switch(filter)
-                {
-                    case FILTER_NEAREST:
-                        outsamplerCI.minFilter = VkFilter::VK_FILTER_NEAREST;
-                        break;
-                    case FILTER_LINEAR:
-                        outsamplerCI.minFilter = VkFilter::VK_FILTER_LINEAR;
-                        break;
-                }
-                createMipMaps = genMip == MIP_GENERATE;
-                if(createMipMaps)
-                {
-                    switch(mipMode)
-                    {
-                        case MIPMODE_NEAREST:
-                            outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST;
-                            break;
-                        case MIPMODE_LINEAR:
-                            outsamplerCI.mipmapMode = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR;
-                            break;
-                    }
-                }
-            }
-        }
-        {  // AddressMode U
-            auto find = addressMap.find(tinygltfSampler.wrapS);
-            if(find != addressMap.end())
-            {
-                outsamplerCI.addressModeU = find->second;
-            }
-        }
-        {  // AddressMode V
-            auto find = addressMap.find(tinygltfSampler.wrapT);
-            if(find != addressMap.end())
-            {
-                outsamplerCI.addressModeV = find->second;
-            }
-        }
-    }
 
 }  // namespace foray::gltf

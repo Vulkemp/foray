@@ -5,8 +5,10 @@
 
 namespace foray::core {
     /// @brief Tracks ImageLayouts over the course of a frame rendering process
-    /// @remark Why is the use of this necessary? If passing VkImageLayout::UNDEFINED as the old image layout in a layout transition,
-    /// the driver is free to decide wether it wants to transition the old data or simply discard it instead.
+    /// @details
+    /// - Why is the use of this necessary: If passing VkImageLayout::UNDEFINED as the old image layout in a layout transition, the driver is free to decide wether it wants to transition the old data or simply discard it instead.
+    /// - Individual array layers and mip map levels can be in differing layouts, this requires manual setup, as this class only tracks layout of a complete image
+    /// - The FrameRenderInfo's Image Layout Cache is a new object every frame. Frame Buffers from the previous frame which need to be read in the current frame must be manually set in the new object.
     class ImageLayoutCache
     {
       public:

@@ -57,7 +57,7 @@ namespace foray::core {
     }
 
     /// @brief Create based on the contexts device, command pool and queue.
-    VkCommandBuffer HostCommandBuffer::Create(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+    VkCommandBuffer HostSyncCommandBuffer::Create(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
     {
         CommandBuffer::Create(context, cmdBufferLvl, begin);
 
@@ -67,7 +67,7 @@ namespace foray::core {
         return mCommandBuffer;
     }
 
-    void HostCommandBuffer::Submit()
+    void HostSyncCommandBuffer::Submit()
     {
         if(mIsRecording)
         {
@@ -82,12 +82,12 @@ namespace foray::core {
         // Submit to the queue
         AssertVkResult(mContext->VkbDispatchTable->queueSubmit(mContext->Queue, 1, &submitInfo, mFence));
     }
-    void HostCommandBuffer::SubmitAndWait()
+    void HostSyncCommandBuffer::SubmitAndWait()
     {
         Submit();
         WaitForCompletion();
     }
-    bool HostCommandBuffer::HasCompleted()
+    bool HostSyncCommandBuffer::HasCompleted()
     {
         VkResult result = mContext->VkbDispatchTable->getFenceStatus(mFence);
         if(result == VK_NOT_READY)
@@ -97,14 +97,14 @@ namespace foray::core {
         AssertVkResult(result);
         return true;
     }
-    void HostCommandBuffer::WaitForCompletion()
+    void HostSyncCommandBuffer::WaitForCompletion()
     {
         // Wait for the fence to signal that command buffer has finished executing
         AssertVkResult(mContext->VkbDispatchTable->waitForFences(1, &mFence, VK_TRUE, UINT64_MAX));
         AssertVkResult(mContext->VkbDispatchTable->resetFences(1, &mFence));
     }
 
-    void HostCommandBuffer::Destroy()
+    void HostSyncCommandBuffer::Destroy()
     {
         if(!!mFence)
         {
@@ -128,18 +128,18 @@ namespace foray::core {
         return VkSemaphoreSubmitInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO, .semaphore = Semaphore, .value = TimelineValue, .stageMask = WaitStage};
     }
 
-    DeviceCommandBuffer& DeviceCommandBuffer::AddWaitSemaphore(const SemaphoreReference& semaphore)
+    DeviceSyncCommandBuffer& DeviceSyncCommandBuffer::AddWaitSemaphore(const SemaphoreReference& semaphore)
     {
         mWaitSemaphores.push_back(semaphore);
         return *this;
     }
-    DeviceCommandBuffer& DeviceCommandBuffer::AddSignalSemaphore(const SemaphoreReference& semaphore)
+    DeviceSyncCommandBuffer& DeviceSyncCommandBuffer::AddSignalSemaphore(const SemaphoreReference& semaphore)
     {
         mSignalSemaphores.push_back(semaphore);
         return *this;
     }
 
-    void DeviceCommandBuffer::Submit()
+    void DeviceSyncCommandBuffer::Submit()
     {
         Assert(!!mCommandBuffer, "Cannot submit uninitialized command buffer");
 
@@ -178,7 +178,7 @@ namespace foray::core {
         AssertVkResult(mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, 1, &submitInfo, mFence));
     }
 
-    void DeviceCommandBuffer::WriteToSubmitInfo(std::vector<VkSubmitInfo2>& submitInfos)
+    void DeviceSyncCommandBuffer::WriteToSubmitInfo(std::vector<VkSubmitInfo2>& submitInfos)
     {
         Assert(!!mCommandBuffer, "Cannot submit uninitialized command buffer");
 

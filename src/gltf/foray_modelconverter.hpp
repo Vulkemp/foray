@@ -11,24 +11,40 @@
 
 namespace foray::gltf {
 
+    /// @brief Options for converting glTF models to the integrated scene graph (foray::scene::Scene)
     struct ModelConverterOptions
     {
-        using FpSceneSelect = std::function<int32_t(tinygltf::Model&)>;
+        using SceneSelectFunctionPointer = std::function<int32_t(tinygltf::Model&)>;
 
-        FpSceneSelect SceneSelect = nullptr;
+        /// @brief A model can define multiple scenes. Index 0 is selected automatically, set this function pointer to override this behavior
+        SceneSelectFunctionPointer SceneSelect = nullptr;
+        /// @brief Flip the model in the Y direction on loading (experimental)
+        /// @details
+        /// If true:
+        ///  - Y translation is inverted
+        ///  - Y Vertex positions and normals are inverted
+        ///  - Vertex order is flipped
+        /// 
+        /// Problems:
+        ///  - Rotations are likely to break
+        ///
+        /// It is recommended to instead flip the viewport at some point later in the pipeline (for example when blitting to swapchain)
         bool FlipY = false;
     };
 
+    /// @brief Type which reads glTF files and merges a scene of the file into the scene graph
     class ModelConverter : public NoMoveDefaults
     {
       public:
         explicit ModelConverter(scene::Scene* scene);
 
+        /// @brief Loads glTF model and integrates it into the scene set in constructor
+        /// @param utf8Path Relative or absolute path to a .gltf or .glb file
+        /// @param context Set this to override use of the scene's context
+        /// @param options Set this to customize default behavior
         void LoadGltfModel(osi::Utf8Path utf8Path, core::Context* context = nullptr, const ModelConverterOptions& options = ModelConverterOptions());
 
         FORAY_GETTER_V(Scene)
-
-        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
 
         FORAY_GETTER_CR(Benchmark)
 
@@ -73,6 +89,8 @@ namespace foray::gltf {
         scene::gcomp::GeometryStore&  mGeo;
         scene::gcomp::TextureManager&   mTextures;
         bench::HostBenchmark   mBenchmark;
+
+        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
 
         void RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent = nullptr);
 

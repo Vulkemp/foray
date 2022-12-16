@@ -7,7 +7,8 @@
 namespace foray::core {
 
     /// @brief Helps with the creation of a VkDescriptorSetLayout and VkDescriptorSet.
-    /// Not supported
+    /// @details
+    /// Not supported:
     /// - immutable samplers
     /// - descriptorSetLayout pNext
     class DescriptorSet : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_DESCRIPTOR_SET>

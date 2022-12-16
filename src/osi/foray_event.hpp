@@ -8,7 +8,7 @@
 #include <sdl2/SDL.h>
 
 namespace foray::osi {
-    /// @brief Event Base class
+    /// @brief Base class for operating system events
     class Event : public Polymorphic
     {
       public:
@@ -56,6 +56,7 @@ namespace foray::osi {
         SDL_Event RawSdlEventData = {};
     };
 
+    /// @brief Base class for events originating from input devices
     class EventInput : public Event
     {
       public:
@@ -66,6 +67,7 @@ namespace foray::osi {
         InputDevice* SourceDevice = nullptr;
     };
 
+    /// @brief Event type describing input devices being added or removed
     class EventInputDeviceAvailability : public EventInput
     {
       public:
@@ -78,6 +80,7 @@ namespace foray::osi {
         bool Added = false;
     };
 
+    /// @brief Event type for an analogue input
     class EventInputAnalogue : public EventInput
     {
       public:
@@ -93,6 +96,7 @@ namespace foray::osi {
         int16_t State = 0;
     };
 
+    /// @brief Event type describing a binary input event
     class EventInputBinary : public EventInput
     {
       public:
@@ -108,6 +112,7 @@ namespace foray::osi {
         bool State = 0;
     };
 
+    /// @brief Event type describing a directional input event
     class EventInputDirectional : public EventInput
     {
       public:
@@ -125,6 +130,7 @@ namespace foray::osi {
         int32_t OffsetY = 0;
     };
 
+    /// @brief Event type describing a mouse cursor movement event
     class EventInputMouseMoved : public EventInput
     {
       public:
@@ -144,6 +150,7 @@ namespace foray::osi {
         fp32_t RelativeY = 0.f;
     };
 
+    /// @brief Event type fired when a window is resized
     class EventWindowResized : public Event
     {
       public:
@@ -154,6 +161,7 @@ namespace foray::osi {
         VkExtent2D Current = {};
     };
 
+    /// @brief Event type fired when a window gains or loses focus
     class EventWindowFocusChanged : public Event
     {
       public:
@@ -169,20 +177,11 @@ namespace foray::osi {
         bool InputFocus = false;
     };
 
+    /// @brief Event type fired when the windows closure is requested (by OS or user through OS)
     class EventWindowCloseRequested : public Event
     {
       public:
         inline EventWindowCloseRequested() = default;
         inline EventWindowCloseRequested(Window* const source, const uint32_t timestamp) : Event(source, timestamp, EType::WindowCloseRequested) {}
-    };
-
-    class EventWindowItemDropped : public Event
-    {
-      public:
-        inline EventWindowItemDropped() = default;
-        inline EventWindowItemDropped(Window* const source, const uint32_t timestamp, std::string_view path) : Event(source, timestamp, EType::WindowItemDropped), Path(path) {}
-
-        /// @brief Path to the file dropped
-        std::string Path = nullptr;
     };
 }  // namespace foray

@@ -18,19 +18,18 @@ namespace foray::base {
     static const CmdBufferIndex PRIMARY_COMMAND_BUFFER = -1;
 
     /// @brief Wraps synchronization primitives and command buffers for an inflight frame
+    /// @details
+    /// USAGE (SINGLE CMD BUFFER PER FRAME):
+    ///   - Use the primary command buffer. Submit it before presenting
+    /// 
+    /// USAGE (MULTIPLE)
+    ///   - The Primary command buffer should be used for swapchain interaction aswell as host synchronization
+    ///     - InflightFrame's methods respect this
+    ///   - The user must synchronize all commandbuffers themselves, so the primary commandbuffer functions properly:
+    ///     - Add the SwapchainImageReady Semaphore as a waitsemaphore to one of the command buffers
+    ///     - Use semaphores to synchronise your command buffers as needed
     class InFlightFrame
     {
-        /*
-        USAGE (SINGLE CMD BUFFER PER FRAME):
-          - Use the primary command buffer. Submit it before presenting
-        
-        USAGE (MULTIPLE)
-          - The Primary command buffer should be used for swapchain interaction aswell as host synchronization
-            - InflightFrame's methods respect this
-          - The user must synchronize all commandbuffers themselves, so the primary commandbuffer functions properly:
-            - Add the SwapchainImageReady Semaphore as a waitsemaphore to one of the command buffers
-            - Use semaphores to synchronise your command buffers as needed
-      */
       public:
         void Create(core::Context* context, uint32_t auxCommandBufferCount = 0);
         void Destroy();
@@ -56,26 +55,26 @@ namespace foray::base {
         /// @brief Resets the frames host synchronization fence
         void ResetFence();
 
-        /// @brief Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::WriteToSubmitInfo(...) 
+        /// @brief Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceSyncCommandBuffer::WriteToSubmitInfo(...) 
         /// and submitting them in a single vkQueueSubmit2(...) call
         void SubmitAll();
 
         /// @brief Get an auxiliary command buffer
         /// @param index Command buffer index to return
-        core::DeviceCommandBuffer&       GetAuxiliaryCommandBuffer(uint32_t index);
+        core::DeviceSyncCommandBuffer&       GetAuxiliaryCommandBuffer(uint32_t index);
         /// @brief Get primary command buffer
-        core::DeviceCommandBuffer&       GetPrimaryCommandBuffer();
+        core::DeviceSyncCommandBuffer&       GetPrimaryCommandBuffer();
         /// @brief Get a command buffer
         /// @param index If PRIMARY_COMMAND_BUFFER, the primary is returned. Auxiliary command buffer index otherwise
-        core::DeviceCommandBuffer&       GetCommandBuffer(CmdBufferIndex index);
+        core::DeviceSyncCommandBuffer&       GetCommandBuffer(CmdBufferIndex index);
         /// @brief Get an auxiliary command buffer
         /// @param index Command buffer index to return
-        const core::DeviceCommandBuffer& GetAuxiliaryCommandBuffer(uint32_t index) const;
+        const core::DeviceSyncCommandBuffer& GetAuxiliaryCommandBuffer(uint32_t index) const;
         /// @brief Get primary command buffer
-        const core::DeviceCommandBuffer& GetPrimaryCommandBuffer() const;
+        const core::DeviceSyncCommandBuffer& GetPrimaryCommandBuffer() const;
         /// @brief Get a command buffer
         /// @param index If PRIMARY_COMMAND_BUFFER, the primary is returned. Auxiliary command buffer index otherwise
-        const core::DeviceCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const;
+        const core::DeviceSyncCommandBuffer& GetCommandBuffer(CmdBufferIndex index) const;
 
         FORAY_GETTER_V(SwapchainImageIndex)
         FORAY_GETTER_V(SwapchainImageReady)
@@ -86,9 +85,9 @@ namespace foray::base {
         core::Context* mContext = nullptr;
 
         /// @brief Auxiliary command buffers
-        std::vector<std::unique_ptr<core::DeviceCommandBuffer>> mAuxiliaryCommandBuffers;
+        std::vector<std::unique_ptr<core::DeviceSyncCommandBuffer>> mAuxiliaryCommandBuffers;
         /// @brief Primary command buffer
-        core::DeviceCommandBuffer                               mPrimaryCommandBuffer;
+        core::DeviceSyncCommandBuffer                               mPrimaryCommandBuffer;
         /// @brief Semaphore signalled by the device when the swapchain image becomes ready
         VkSemaphore mSwapchainImageReady       = nullptr;
         /// @brief Semaphore signalled by the primary command buffer when execution has finished
