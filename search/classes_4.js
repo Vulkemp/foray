@@ -12,11 +12,10 @@ var searchData=
   ['eventinputmousemoved_9',['EventInputMouseMoved',['../classforay_1_1osi_1_1EventInputMouseMoved.html',1,'foray::osi']]],
   ['eventwindowcloserequested_10',['EventWindowCloseRequested',['../classforay_1_1osi_1_1EventWindowCloseRequested.html',1,'foray::osi']]],
   ['eventwindowfocuschanged_11',['EventWindowFocusChanged',['../classforay_1_1osi_1_1EventWindowFocusChanged.html',1,'foray::osi']]],
-  ['eventwindowitemdropped_12',['EventWindowItemDropped',['../classforay_1_1osi_1_1EventWindowItemDropped.html',1,'foray::osi']]],
-  ['eventwindowresized_13',['EventWindowResized',['../classforay_1_1osi_1_1EventWindowResized.html',1,'foray::osi']]],
-  ['exception_14',['Exception',['../classforay_1_1Exception.html',1,'foray']]],
-  ['exrloadercache_15',['ExrLoaderCache',['../classforay_1_1util_1_1ExrLoaderCache.html',1,'foray::util']]],
-  ['externaldenoiserstage_16',['ExternalDenoiserStage',['../classforay_1_1stages_1_1ExternalDenoiserStage.html',1,'foray::stages']]],
-  ['externalsemaphore_17',['ExternalSemaphore',['../classforay_1_1util_1_1ExternalSemaphore.html',1,'foray::util']]],
-  ['extraytracingstage_18',['ExtRaytracingStage',['../classforay_1_1stages_1_1ExtRaytracingStage.html',1,'foray::stages']]]
+  ['eventwindowresized_12',['EventWindowResized',['../classforay_1_1osi_1_1EventWindowResized.html',1,'foray::osi']]],
+  ['exception_13',['Exception',['../classforay_1_1Exception.html',1,'foray']]],
+  ['exrloadercache_14',['ExrLoaderCache',['../classforay_1_1util_1_1ExrLoaderCache.html',1,'foray::util']]],
+  ['externaldenoiserstage_15',['ExternalDenoiserStage',['../classforay_1_1stages_1_1ExternalDenoiserStage.html',1,'foray::stages']]],
+  ['externalsemaphore_16',['ExternalSemaphore',['../classforay_1_1util_1_1ExternalSemaphore.html',1,'foray::util']]],
+  ['extraytracingstage_17',['ExtRaytracingStage',['../classforay_1_1stages_1_1ExtRaytracingStage.html',1,'foray::stages']]]
 ];

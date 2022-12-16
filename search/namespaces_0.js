@@ -8,7 +8,7 @@ var searchData=
   ['foray_5',['foray',['../namespaceforay.html',1,'']]],
   ['gcomp_6',['gcomp',['../namespaceforay_1_1scene_1_1gcomp.html',1,'foray::scene']]],
   ['gltf_7',['gltf',['../namespaceforay_1_1gltf.html',1,'foray']]],
-  ['impl_8',['impl',['../namespaceforay_1_1gltf_1_1impl.html',1,'foray::gltf::impl'],['../namespaceforay_1_1util_1_1impl.html',1,'foray::util::impl']]],
+  ['impl_8',['impl',['../namespaceforay_1_1util_1_1impl.html',1,'foray::util']]],
   ['ncomp_9',['ncomp',['../namespaceforay_1_1scene_1_1ncomp.html',1,'foray::scene']]],
   ['osi_10',['osi',['../namespaceforay_1_1osi.html',1,'foray']]],
   ['rtbindpoints_11',['rtbindpoints',['../namespaceforay_1_1stages_1_1rtbindpoints.html',1,'foray::stages']]],

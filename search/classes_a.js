@@ -14,6 +14,5 @@ var searchData=
   ['meshinstance_11',['MeshInstance',['../classforay_1_1scene_1_1ncomp_1_1MeshInstance.html',1,'foray::scene::ncomp']]],
   ['minimalappbase_12',['MinimalAppBase',['../classforay_1_1base_1_1MinimalAppBase.html',1,'foray::base']]],
   ['modelconverter_13',['ModelConverter',['../classforay_1_1gltf_1_1ModelConverter.html',1,'foray::gltf']]],
-  ['modelconverteroptions_14',['ModelConverterOptions',['../structforay_1_1gltf_1_1ModelConverterOptions.html',1,'foray::gltf']]],
-  ['multithreadlambdaargs_15',['MultithreadLambdaArgs',['../structforay_1_1gltf_1_1impl_1_1MultithreadLambdaArgs.html',1,'foray::gltf::impl']]]
+  ['modelconverteroptions_14',['ModelConverterOptions',['../structforay_1_1gltf_1_1ModelConverterOptions.html',1,'foray::gltf']]]
 ];

@@ -123,6 +123,10 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Helper class wrapping 4 SBTs (Raygen, Miss, Callable, Hitgroup) and a raytracing pipeline. </p>
+<p >Usage:</p><ol type="1">
+<li>Configure Sbts, by accessing them via GetRaygenSbt(), ... . Refer to <a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html" title="Shader Binding Table base class, providing functions to manage custom generic shader group data and S...">ShaderBindingTableBase</a> class definition for more information on shader binding tables.</li>
+<li>Call Build(...) to build the Pipeline and Sbts </li>
+</ol>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a3849bc28ee14d3cbeb9724a37c94b584" name="a3849bc28ee14d3cbeb9724a37c94b584"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3849bc28ee14d3cbeb9724a37c94b584">&#9670;&#160;</a></span>RtPipeline()</h2>
@@ -194,11 +198,6 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Builds <a class="el" href="classforay_1_1rtpipe_1_1RtPipeline.html" title="Helper class wrapping 4 SBTs (Raygen, Miss, Callable, Hitgroup) and a raytracing pipeline.">RtPipeline</a> with shaders and shadergroups as defined in Sbt wrappers and builds Sbts. </p>
-<p >STEP # 0 Reset, get physical device properties</p>
-<p >STEP # 1 Rebuild shader collection</p>
-<p >STEP # 2 Collect ShaderGroup, build sorted vector</p>
-<p >STEP # 3 Build RT pipeline</p>
-<p >STEP # 4 Get shader handles, build SBTs</p>
 
 </div>
 </div>
@@ -416,9 +415,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/rtpipe/<a class="el" href="foray__rtpipeline_8hpp_source.html">foray_rtpipeline.hpp</a></li>
-<li>src/rtpipe/<a class="el" href="foray__rtpipeline_8cpp.html">foray_rtpipeline.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -161,7 +161,11 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Tracks ImageLayouts over the course of a frame rendering process. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Why is the use of this necessary? If passing VkImageLayout::UNDEFINED as the old image layout in a layout transition, the driver is free to decide wether it wants to transition the old data or simply discard it instead. </dd></dl>
+<ul>
+<li>Why is the use of this necessary: If passing VkImageLayout::UNDEFINED as the old image layout in a layout transition, the driver is free to decide wether it wants to transition the old data or simply discard it instead.</li>
+<li>Individual array layers and mip map levels can be in differing layouts, this requires manual setup, as this class only tracks layout of a complete image</li>
+<li>The FrameRenderInfo's Image Layout Cache is a new object every frame. Frame Buffers from the previous frame which need to be read in the current frame must be manually set in the new object. </li>
+</ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a43766470eaa08ca900160c78b7211975" name="a43766470eaa08ca900160c78b7211975"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a43766470eaa08ca900160c78b7211975">&#9670;&#160;</a></span>CmdBarrier() <span class="overload">[1/6]</span></h2>
@@ -910,9 +914,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/core/<a class="el" href="foray__imagelayoutcache_8hpp_source.html">foray_imagelayoutcache.hpp</a></li>
-<li>src/core/<a class="el" href="foray__imagelayoutcache_8cpp.html">foray_imagelayoutcache.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

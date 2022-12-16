@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Foray Library: foray::core::DeviceCommandBuffer Class Reference</title>
+<title>Foray Library: foray::core::HostSyncCommandBuffer Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,28 +70,28 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceforay.html">foray</a></li><li class="navelem"><a class="el" href="namespaceforay_1_1core.html">core</a></li><li class="navelem"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceforay.html">foray</a></li><li class="navelem"><a class="el" href="namespaceforay_1_1core.html">core</a></li><li class="navelem"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html">HostSyncCommandBuffer</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="classforay_1_1core_1_1DeviceCommandBuffer-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">foray::core::DeviceCommandBuffer Class Reference</div></div>
+<a href="classforay_1_1core_1_1HostSyncCommandBuffer-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">foray::core::HostSyncCommandBuffer Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Extension of the commandbuffer wrapper for device and/or host synchronized command buffer execution.  
- <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#details">More...</a></p>
+<p>Extension of the commandbuffer wrapper for temporary host synchronized command buffer execution.  
+ <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="foray__commandbuffer_8hpp_source.html">foray_commandbuffer.hpp</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for foray::core::DeviceCommandBuffer:</div>
+Inheritance diagram for foray::core::HostSyncCommandBuffer:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="classforay_1_1core_1_1DeviceCommandBuffer.png" usemap="#foray::core::DeviceCommandBuffer_map" alt=""/>
-  <map id="foray::core::DeviceCommandBuffer_map" name="foray::core::DeviceCommandBuffer_map">
+  <img src="classforay_1_1core_1_1HostSyncCommandBuffer.png" usemap="#foray::core::HostSyncCommandBuffer_map" alt=""/>
+  <map id="foray::core::HostSyncCommandBuffer_map" name="foray::core::HostSyncCommandBuffer_map">
 <area href="classforay_1_1core_1_1CommandBuffer.html" title="VkCommandBuffer wrapper." alt="foray::core::CommandBuffer" shape="rect" coords="0,168,525,192"/>
 <area href="classforay_1_1core_1_1VulkanResource.html" alt="foray::core::VulkanResource&lt; VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER &gt;" shape="rect" coords="0,112,525,136"/>
 <area href="classforay_1_1core_1_1ManagedResource.html" title="Base class enforcing common interface for all classes wrapping a device resource." alt="foray::core::ManagedResource" shape="rect" coords="0,56,525,80"/>
@@ -101,44 +101,52 @@ Inheritance diagram for foray::core::DeviceCommandBuffer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1b2bfefe5e0cfe3eaee24343d766ca22"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#a1b2bfefe5e0cfe3eaee24343d766ca22">AddWaitSemaphore</a> (const <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &amp;semaphore)</td></tr>
-<tr class="memdesc:a1b2bfefe5e0cfe3eaee24343d766ca22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a semaphore to wait for before execution of the commandbuffer.  <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#a1b2bfefe5e0cfe3eaee24343d766ca22">More...</a><br /></td></tr>
-<tr class="separator:a1b2bfefe5e0cfe3eaee24343d766ca22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdf29d0b27fe8e614cba98599dce2fab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#afdf29d0b27fe8e614cba98599dce2fab">AddSignalSemaphore</a> (const <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &amp;semaphore)</td></tr>
-<tr class="memdesc:afdf29d0b27fe8e614cba98599dce2fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a semaphore to signal after execution of commandbuffer has finished.  <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#afdf29d0b27fe8e614cba98599dce2fab">More...</a><br /></td></tr>
-<tr class="separator:afdf29d0b27fe8e614cba98599dce2fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a572617357f4241ca694bf4c8afae5455"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#a572617357f4241ca694bf4c8afae5455">Submit</a> ()</td></tr>
-<tr class="memdesc:a572617357f4241ca694bf4c8afae5455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Submits the commandbuffer.  <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#a572617357f4241ca694bf4c8afae5455">More...</a><br /></td></tr>
-<tr class="separator:a572617357f4241ca694bf4c8afae5455"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc5f02fd4328b3b92d06b685928f8d34"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#afc5f02fd4328b3b92d06b685928f8d34">WriteToSubmitInfo</a> (std::vector&lt; VkSubmitInfo2 &gt; &amp;submitInfos)</td></tr>
-<tr class="memdesc:afc5f02fd4328b3b92d06b685928f8d34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Appends a suitable submitinfo to the vector.  <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#afc5f02fd4328b3b92d06b685928f8d34">More...</a><br /></td></tr>
-<tr class="separator:afc5f02fd4328b3b92d06b685928f8d34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72f87c73e4da49b7bce6c5b2c5573608"><td class="memItemLeft" align="right" valign="top">virtual VkCommandBuffer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a72f87c73e4da49b7bce6c5b2c5573608">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">Context</a> *context, VkCommandBufferLevel cmdBufferLvl=VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin=false) override</td></tr>
+<tr class="memdesc:a72f87c73e4da49b7bce6c5b2c5573608"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create based on the contexts device, command pool and queue.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a72f87c73e4da49b7bce6c5b2c5573608">More...</a><br /></td></tr>
+<tr class="separator:a72f87c73e4da49b7bce6c5b2c5573608"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86713f50344efb4730e6f3e92e4d0dc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a86713f50344efb4730e6f3e92e4d0dc2">Submit</a> ()</td></tr>
+<tr class="memdesc:a86713f50344efb4730e6f3e92e4d0dc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Submits but doesn't synchronize. Use <a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#ad226104ecb25e43dd0b06f938ffeb5b4" title="Checks the fence for completion (non-blocking)">HasCompleted()</a> and/or <a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a70c2f5b5cb9fa3be41313181338b3735" title="Blocks CPU thread until commandbuffer has completed.">WaitForCompletion()</a> to synchronize.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a86713f50344efb4730e6f3e92e4d0dc2">More...</a><br /></td></tr>
+<tr class="separator:a86713f50344efb4730e6f3e92e4d0dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8232f3e0547b2730cf0ea0ffc94a7557"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a8232f3e0547b2730cf0ea0ffc94a7557">SubmitAndWait</a> ()</td></tr>
+<tr class="memdesc:a8232f3e0547b2730cf0ea0ffc94a7557"><td class="mdescLeft">&#160;</td><td class="mdescRight">Submits and waits for the commandbuffer to be completed.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a8232f3e0547b2730cf0ea0ffc94a7557">More...</a><br /></td></tr>
+<tr class="separator:a8232f3e0547b2730cf0ea0ffc94a7557"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad226104ecb25e43dd0b06f938ffeb5b4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#ad226104ecb25e43dd0b06f938ffeb5b4">HasCompleted</a> ()</td></tr>
+<tr class="memdesc:ad226104ecb25e43dd0b06f938ffeb5b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks the fence for completion (non-blocking)  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#ad226104ecb25e43dd0b06f938ffeb5b4">More...</a><br /></td></tr>
+<tr class="separator:ad226104ecb25e43dd0b06f938ffeb5b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70c2f5b5cb9fa3be41313181338b3735"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a70c2f5b5cb9fa3be41313181338b3735">WaitForCompletion</a> ()</td></tr>
+<tr class="memdesc:a70c2f5b5cb9fa3be41313181338b3735"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocks CPU thread until commandbuffer has completed.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a70c2f5b5cb9fa3be41313181338b3735">More...</a><br /></td></tr>
+<tr class="separator:a70c2f5b5cb9fa3be41313181338b3735"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affa326fae4e8a7a62e28d74942722a65"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#affa326fae4e8a7a62e28d74942722a65">Destroy</a> () override</td></tr>
+<tr class="memdesc:affa326fae4e8a7a62e28d74942722a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the associated resources.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#affa326fae4e8a7a62e28d74942722a65">More...</a><br /></td></tr>
+<tr class="separator:affa326fae4e8a7a62e28d74942722a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e98c7ed985d2e5de417fd0381cbc51a"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a9e98c7ed985d2e5de417fd0381cbc51a">~HostSyncCommandBuffer</a> ()</td></tr>
+<tr class="separator:a9e98c7ed985d2e5de417fd0381cbc51a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classforay_1_1core_1_1CommandBuffer"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classforay_1_1core_1_1CommandBuffer')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classforay_1_1core_1_1CommandBuffer.html">foray::core::CommandBuffer</a></td></tr>
 <tr class="memitem:aa92d6740d6413a67d56603782e5cee9b inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#aa92d6740d6413a67d56603782e5cee9b">CommandBuffer</a> ()=default</td></tr>
 <tr class="separator:aa92d6740d6413a67d56603782e5cee9b inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bef5babd8cfb99e72f41a65f6161d79 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a3bef5babd8cfb99e72f41a65f6161d79">~CommandBuffer</a> ()</td></tr>
 <tr class="separator:a3bef5babd8cfb99e72f41a65f6161d79 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae47275cfc2c78be5cf02f15e4fbab999 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual VkCommandBuffer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae47275cfc2c78be5cf02f15e4fbab999">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">Context</a> *context, VkCommandBufferLevel cmdBufferLvl=VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin=false)</td></tr>
-<tr class="memdesc:ae47275cfc2c78be5cf02f15e4fbab999 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create based on the contexts device, command pool and queue.  <a href="classforay_1_1core_1_1CommandBuffer.html#ae47275cfc2c78be5cf02f15e4fbab999">More...</a><br /></td></tr>
-<tr class="separator:ae47275cfc2c78be5cf02f15e4fbab999 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a903947edb3cf1ea9f9138cd465e3c911 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a903947edb3cf1ea9f9138cd465e3c911">Begin</a> ()</td></tr>
-<tr class="memdesc:a903947edb3cf1ea9f9138cd465e3c911 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkBeginCommandBuffer();  <a href="classforay_1_1core_1_1CommandBuffer.html#a903947edb3cf1ea9f9138cd465e3c911">More...</a><br /></td></tr>
-<tr class="separator:a903947edb3cf1ea9f9138cd465e3c911 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94663f484aa133455a8d51867bcfaa01 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a94663f484aa133455a8d51867bcfaa01">End</a> ()</td></tr>
-<tr class="memdesc:a94663f484aa133455a8d51867bcfaa01 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkEndCommandBuffer()  <a href="classforay_1_1core_1_1CommandBuffer.html#a94663f484aa133455a8d51867bcfaa01">More...</a><br /></td></tr>
-<tr class="separator:a94663f484aa133455a8d51867bcfaa01 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a014704ffdad0da5c0afd4cf1d32747b6 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a014704ffdad0da5c0afd4cf1d32747b6">Reset</a> (VkCommandBufferResetFlags flags=0)</td></tr>
-<tr class="memdesc:a014704ffdad0da5c0afd4cf1d32747b6 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkResetCommandBuffer()  <a href="classforay_1_1core_1_1CommandBuffer.html#a014704ffdad0da5c0afd4cf1d32747b6">More...</a><br /></td></tr>
-<tr class="separator:a014704ffdad0da5c0afd4cf1d32747b6 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53c069df6e5feffaf3f1fe9928f42b8f inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a53c069df6e5feffaf3f1fe9928f42b8f">Destroy</a> () override</td></tr>
-<tr class="memdesc:a53c069df6e5feffaf3f1fe9928f42b8f inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the associated resources.  <a href="classforay_1_1core_1_1CommandBuffer.html#a53c069df6e5feffaf3f1fe9928f42b8f">More...</a><br /></td></tr>
-<tr class="separator:a53c069df6e5feffaf3f1fe9928f42b8f inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8d2e5183de1b2eb61262f1c1831ab35 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual VkCommandBuffer&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae8d2e5183de1b2eb61262f1c1831ab35">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">Context</a> *context, VkCommandBufferLevel cmdBufferLvl=VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin=false)</td></tr>
+<tr class="memdesc:ae8d2e5183de1b2eb61262f1c1831ab35 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create based on the contexts device, command pool and queue.  <a href="classforay_1_1core_1_1CommandBuffer.html#ae8d2e5183de1b2eb61262f1c1831ab35">More...</a><br /></td></tr>
+<tr class="separator:ae8d2e5183de1b2eb61262f1c1831ab35 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c0912a66f940e9edb5d18b94b33ee60 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a6c0912a66f940e9edb5d18b94b33ee60">Begin</a> ()</td></tr>
+<tr class="memdesc:a6c0912a66f940e9edb5d18b94b33ee60 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkBeginCommandBuffer();  <a href="classforay_1_1core_1_1CommandBuffer.html#a6c0912a66f940e9edb5d18b94b33ee60">More...</a><br /></td></tr>
+<tr class="separator:a6c0912a66f940e9edb5d18b94b33ee60 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30d3294c4d8b364afd9980ec87eeb83b inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a30d3294c4d8b364afd9980ec87eeb83b">End</a> ()</td></tr>
+<tr class="memdesc:a30d3294c4d8b364afd9980ec87eeb83b inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkEndCommandBuffer()  <a href="classforay_1_1core_1_1CommandBuffer.html#a30d3294c4d8b364afd9980ec87eeb83b">More...</a><br /></td></tr>
+<tr class="separator:a30d3294c4d8b364afd9980ec87eeb83b inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7936f2784e16e17037e8397ee85b47a inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ac7936f2784e16e17037e8397ee85b47a">Reset</a> (VkCommandBufferResetFlags flags=0)</td></tr>
+<tr class="memdesc:ac7936f2784e16e17037e8397ee85b47a inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">vkResetCommandBuffer()  <a href="classforay_1_1core_1_1CommandBuffer.html#ac7936f2784e16e17037e8397ee85b47a">More...</a><br /></td></tr>
+<tr class="separator:ac7936f2784e16e17037e8397ee85b47a inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae52fbac94e09dc97c1db71c1b5a106da inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae52fbac94e09dc97c1db71c1b5a106da">Destroy</a> () override</td></tr>
+<tr class="memdesc:ae52fbac94e09dc97c1db71c1b5a106da inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the associated resources.  <a href="classforay_1_1core_1_1CommandBuffer.html#ae52fbac94e09dc97c1db71c1b5a106da">More...</a><br /></td></tr>
+<tr class="separator:ae52fbac94e09dc97c1db71c1b5a106da inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32f755e127cf62a4fce3cd8ee1ec2043 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a32f755e127cf62a4fce3cd8ee1ec2043">Exists</a> () const override</td></tr>
 <tr class="memdesc:a32f755e127cf62a4fce3cd8ee1ec2043 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true, if the managed resource is allocated.  <a href="classforay_1_1core_1_1CommandBuffer.html#a32f755e127cf62a4fce3cd8ee1ec2043">More...</a><br /></td></tr>
 <tr class="separator:a32f755e127cf62a4fce3cd8ee1ec2043 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18a469cea69529b25c311b568fb678ea inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a18a469cea69529b25c311b568fb678ea">SetName</a> (std::string_view name) override</td></tr>
-<tr class="memdesc:a18a469cea69529b25c311b568fb678ea inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1CommandBuffer.html#a18a469cea69529b25c311b568fb678ea">More...</a><br /></td></tr>
-<tr class="separator:a18a469cea69529b25c311b568fb678ea inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e9ee954eaa469f99c3bf711218d8d47 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a1e9ee954eaa469f99c3bf711218d8d47">SetName</a> (std::string_view name) override</td></tr>
+<tr class="memdesc:a1e9ee954eaa469f99c3bf711218d8d47 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1CommandBuffer.html#a1e9ee954eaa469f99c3bf711218d8d47">More...</a><br /></td></tr>
+<tr class="separator:a1e9ee954eaa469f99c3bf711218d8d47 inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17e850a6705725a0fa01b46f2bd63c8f inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a17e850a6705725a0fa01b46f2bd63c8f">operator VkCommandBuffer</a> () const</td></tr>
 <tr class="separator:a17e850a6705725a0fa01b46f2bd63c8f inherit pub_methods_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classforay_1_1core_1_1VulkanResource"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classforay_1_1core_1_1VulkanResource')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classforay_1_1core_1_1VulkanResource.html">foray::core::VulkanResource&lt; VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER &gt;</a></td></tr>
@@ -150,9 +158,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a0495c7f093e078030a123281a776008b inherit pub_methods_classforay_1_1core_1_1VulkanResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns &lt;OBJECT_TYPE&gt; stringified.  <a href="classforay_1_1core_1_1VulkanResource.html#a0495c7f093e078030a123281a776008b">More...</a><br /></td></tr>
 <tr class="separator:a0495c7f093e078030a123281a776008b inherit pub_methods_classforay_1_1core_1_1VulkanResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classforay_1_1core_1_1ManagedResource"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classforay_1_1core_1_1ManagedResource')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classforay_1_1core_1_1ManagedResource.html">foray::core::ManagedResource</a></td></tr>
-<tr class="memitem:a7b2a8a3ea271748da713d40709f578ff inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a7b2a8a3ea271748da713d40709f578ff">GetTypeName</a> () const</td></tr>
-<tr class="memdesc:a7b2a8a3ea271748da713d40709f578ff inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a hint for the type of resource managed by the instantiation.  <a href="classforay_1_1core_1_1ManagedResource.html#a7b2a8a3ea271748da713d40709f578ff">More...</a><br /></td></tr>
-<tr class="separator:a7b2a8a3ea271748da713d40709f578ff inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8cbd2b14d112b80c8ba29659a174ebd inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#aa8cbd2b14d112b80c8ba29659a174ebd">GetTypeName</a> () const</td></tr>
+<tr class="memdesc:aa8cbd2b14d112b80c8ba29659a174ebd inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a hint for the type of resource managed by the instantiation.  <a href="classforay_1_1core_1_1ManagedResource.html#aa8cbd2b14d112b80c8ba29659a174ebd">More...</a><br /></td></tr>
+<tr class="separator:aa8cbd2b14d112b80c8ba29659a174ebd inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42782c849bc60eeddaa0baa1c26f1015 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a42782c849bc60eeddaa0baa1c26f1015">Exists</a> () const =0</td></tr>
 <tr class="memdesc:a42782c849bc60eeddaa0baa1c26f1015 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true, if the managed resource is allocated.  <a href="classforay_1_1core_1_1ManagedResource.html#a42782c849bc60eeddaa0baa1c26f1015">More...</a><br /></td></tr>
 <tr class="separator:a42782c849bc60eeddaa0baa1c26f1015 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,15 +173,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a34f97448f78e2c04b18dee2f2a365be3 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a34f97448f78e2c04b18dee2f2a365be3">ManagedResource</a> (std::string_view name)</td></tr>
 <tr class="memdesc:a34f97448f78e2c04b18dee2f2a365be3 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the resource and sets its name.  <a href="classforay_1_1core_1_1ManagedResource.html#a34f97448f78e2c04b18dee2f2a365be3">More...</a><br /></td></tr>
 <tr class="separator:a34f97448f78e2c04b18dee2f2a365be3 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68dc62774cbbe2150df0a47a290d2803 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a68dc62774cbbe2150df0a47a290d2803">~ManagedResource</a> ()</td></tr>
-<tr class="memdesc:a68dc62774cbbe2150df0a47a290d2803 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters the resource.  <a href="classforay_1_1core_1_1ManagedResource.html#a68dc62774cbbe2150df0a47a290d2803">More...</a><br /></td></tr>
-<tr class="separator:a68dc62774cbbe2150df0a47a290d2803 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3340e3dad7246b5a3c89b84a8b2574d7 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a3340e3dad7246b5a3c89b84a8b2574d7">~ManagedResource</a> ()</td></tr>
+<tr class="memdesc:a3340e3dad7246b5a3c89b84a8b2574d7 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters the resource.  <a href="classforay_1_1core_1_1ManagedResource.html#a3340e3dad7246b5a3c89b84a8b2574d7">More...</a><br /></td></tr>
+<tr class="separator:a3340e3dad7246b5a3c89b84a8b2574d7 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae136aeb38e128e015b73cdd805619b45 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#ae136aeb38e128e015b73cdd805619b45">GetName</a> () const</td></tr>
 <tr class="memdesc:ae136aeb38e128e015b73cdd805619b45 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#ae136aeb38e128e015b73cdd805619b45">More...</a><br /></td></tr>
 <tr class="separator:ae136aeb38e128e015b73cdd805619b45 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a372a0b44b28ea48791b14a639469819d inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a372a0b44b28ea48791b14a639469819d">SetName</a> (std::string_view name)</td></tr>
-<tr class="memdesc:a372a0b44b28ea48791b14a639469819d inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#a372a0b44b28ea48791b14a639469819d">More...</a><br /></td></tr>
-<tr class="separator:a372a0b44b28ea48791b14a639469819d inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9ebbb104ff3d56a8b853d5c53324b84 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#ac9ebbb104ff3d56a8b853d5c53324b84">SetName</a> (std::string_view name)</td></tr>
+<tr class="memdesc:ac9ebbb104ff3d56a8b853d5c53324b84 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#ac9ebbb104ff3d56a8b853d5c53324b84">More...</a><br /></td></tr>
+<tr class="separator:ac9ebbb104ff3d56a8b853d5c53324b84 inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57fb4991b95534201ad82cf05174d21f inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a57fb4991b95534201ad82cf05174d21f">Print</a> () const</td></tr>
 <tr class="memdesc:a57fb4991b95534201ad82cf05174d21f inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print name and type in one string.  <a href="classforay_1_1core_1_1ManagedResource.html#a57fb4991b95534201ad82cf05174d21f">More...</a><br /></td></tr>
 <tr class="separator:a57fb4991b95534201ad82cf05174d21f inherit pub_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -189,12 +197,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:aeecbbfd6feb2d76dc3525f84329ee409"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#aeecbbfd6feb2d76dc3525f84329ee409">mWaitSemaphores</a></td></tr>
-<tr class="separator:aeecbbfd6feb2d76dc3525f84329ee409"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14212736559a9f33f97cec4faa38a74f"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#a14212736559a9f33f97cec4faa38a74f">mSignalSemaphores</a></td></tr>
-<tr class="separator:a14212736559a9f33f97cec4faa38a74f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ccb86f0d0dce02c49267925da6bbfc0"><td class="memItemLeft" align="right" valign="top">VkFence&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html#a5ccb86f0d0dce02c49267925da6bbfc0">mFence</a> = nullptr</td></tr>
-<tr class="separator:a5ccb86f0d0dce02c49267925da6bbfc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7255feade3372785f31ce50451b8128"><td class="memItemLeft" align="right" valign="top">VkFence&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#ac7255feade3372785f31ce50451b8128">mFence</a> = nullptr</td></tr>
+<tr class="separator:ac7255feade3372785f31ce50451b8128"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classforay_1_1core_1_1CommandBuffer"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classforay_1_1core_1_1CommandBuffer')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classforay_1_1core_1_1CommandBuffer.html">foray::core::CommandBuffer</a></td></tr>
 <tr class="memitem:a03c91c2a7cf1c4cc24c3a4e8af94b550 inherit pro_attribs_classforay_1_1core_1_1CommandBuffer"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a03c91c2a7cf1c4cc24c3a4e8af94b550">mContext</a> = nullptr</td></tr>
 <tr class="separator:a03c91c2a7cf1c4cc24c3a4e8af94b550 inherit pro_attribs_classforay_1_1core_1_1CommandBuffer"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -210,9 +214,9 @@ Protected Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_static_methods_classforay_1_1core_1_1ManagedResource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classforay_1_1core_1_1ManagedResource')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classforay_1_1core_1_1ManagedResource.html">foray::core::ManagedResource</a></td></tr>
-<tr class="memitem:a93efedde9ed9c013f3e8183198e53c65 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a93efedde9ed9c013f3e8183198e53c65">sPrintAllocatedResources</a> (bool printAsWarning)</td></tr>
-<tr class="memdesc:a93efedde9ed9c013f3e8183198e53c65 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a list of all registered existing resources.  <a href="classforay_1_1core_1_1ManagedResource.html#a93efedde9ed9c013f3e8183198e53c65">More...</a><br /></td></tr>
-<tr class="separator:a93efedde9ed9c013f3e8183198e53c65 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e2f66fc49930f9438577f620d0fb338 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a7e2f66fc49930f9438577f620d0fb338">sPrintAllocatedResources</a> (bool printAsWarning)</td></tr>
+<tr class="memdesc:a7e2f66fc49930f9438577f620d0fb338 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a list of all registered existing resources.  <a href="classforay_1_1core_1_1ManagedResource.html#a7e2f66fc49930f9438577f620d0fb338">More...</a><br /></td></tr>
+<tr class="separator:a7e2f66fc49930f9438577f620d0fb338 inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803f55c4b15b8e0cda6e0aa90f233d8e inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memItemLeft" align="right" valign="top">static const std::unordered_set&lt; <a class="el" href="classforay_1_1core_1_1ManagedResource.html">ManagedResource</a> * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a803f55c4b15b8e0cda6e0aa90f233d8e">GetTotalAllocatedResources</a> ()</td></tr>
 <tr class="separator:a803f55c4b15b8e0cda6e0aa90f233d8e inherit pub_static_methods_classforay_1_1core_1_1ManagedResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classforay_1_1core_1_1VulkanResource"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classforay_1_1core_1_1VulkanResource')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classforay_1_1core_1_1VulkanResource.html">foray::core::VulkanResource&lt; VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER &gt;</a></td></tr>
@@ -221,10 +225,10 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a76e40b755c68eac2858cd150917ca7c3 inherit pro_methods_classforay_1_1core_1_1VulkanResource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >Extension of the commandbuffer wrapper for device and/or host synchronized command buffer execution. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="afdf29d0b27fe8e614cba98599dce2fab" name="afdf29d0b27fe8e614cba98599dce2fab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afdf29d0b27fe8e614cba98599dce2fab">&#9670;&#160;</a></span>AddSignalSemaphore()</h2>
+<div class="textblock"><p >Extension of the commandbuffer wrapper for temporary host synchronized command buffer execution. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a9e98c7ed985d2e5de417fd0381cbc51a" name="a9e98c7ed985d2e5de417fd0381cbc51a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e98c7ed985d2e5de417fd0381cbc51a">&#9670;&#160;</a></span>~HostSyncCommandBuffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -233,63 +237,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a> &amp; foray::core::DeviceCommandBuffer::AddSignalSemaphore </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &amp;&#160;</td>
-          <td class="paramname"><em>semaphore</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Adds a semaphore to signal after execution of commandbuffer has finished. </p>
-
-</div>
-</div>
-<a id="a1b2bfefe5e0cfe3eaee24343d766ca22" name="a1b2bfefe5e0cfe3eaee24343d766ca22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b2bfefe5e0cfe3eaee24343d766ca22">&#9670;&#160;</a></span>AddWaitSemaphore()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a> &amp; foray::core::DeviceCommandBuffer::AddWaitSemaphore </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a> &amp;&#160;</td>
-          <td class="paramname"><em>semaphore</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Adds a semaphore to wait for before execution of the commandbuffer. </p>
-
-</div>
-</div>
-<a id="a572617357f4241ca694bf4c8afae5455" name="a572617357f4241ca694bf4c8afae5455"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a572617357f4241ca694bf4c8afae5455">&#9670;&#160;</a></span>Submit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void foray::core::DeviceCommandBuffer::Submit </td>
+          <td class="memname">virtual foray::core::HostSyncCommandBuffer::~HostSyncCommandBuffer </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -297,17 +245,16 @@ Additional Inherited Members</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Submits the commandbuffer. </p>
-
 </div>
 </div>
-<a id="afc5f02fd4328b3b92d06b685928f8d34" name="afc5f02fd4328b3b92d06b685928f8d34"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afc5f02fd4328b3b92d06b685928f8d34">&#9670;&#160;</a></span>WriteToSubmitInfo()</h2>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a72f87c73e4da49b7bce6c5b2c5573608" name="a72f87c73e4da49b7bce6c5b2c5573608"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72f87c73e4da49b7bce6c5b2c5573608">&#9670;&#160;</a></span>Create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -316,27 +263,150 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::core::DeviceCommandBuffer::WriteToSubmitInfo </td>
+          <td class="memname">virtual VkCommandBuffer foray::core::HostSyncCommandBuffer::Create </td>
           <td>(</td>
-          <td class="paramtype">std::vector&lt; VkSubmitInfo2 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>submitInfos</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="structforay_1_1core_1_1Context.html">Context</a> *&#160;</td>
+          <td class="paramname"><em>context</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VkCommandBufferLevel&#160;</td>
+          <td class="paramname"><em>cmdBufferLvl</em> = <code>VK_COMMAND_BUFFER_LEVEL_PRIMARY</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>begin</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create based on the contexts device, command pool and queue. </p>
+
+<p>Reimplemented from <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae8d2e5183de1b2eb61262f1c1831ab35">foray::core::CommandBuffer</a>.</p>
+
+</div>
+</div>
+<a id="affa326fae4e8a7a62e28d74942722a65" name="affa326fae4e8a7a62e28d74942722a65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affa326fae4e8a7a62e28d74942722a65">&#9670;&#160;</a></span>Destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void foray::core::HostSyncCommandBuffer::Destroy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Appends a suitable submitinfo to the vector. </p>
+<p>Destroys the associated resources. </p>
+
+<p>Reimplemented from <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae52fbac94e09dc97c1db71c1b5a106da">foray::core::CommandBuffer</a>.</p>
+
+</div>
+</div>
+<a id="ad226104ecb25e43dd0b06f938ffeb5b4" name="ad226104ecb25e43dd0b06f938ffeb5b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad226104ecb25e43dd0b06f938ffeb5b4">&#9670;&#160;</a></span>HasCompleted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool foray::core::HostSyncCommandBuffer::HasCompleted </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks the fence for completion (non-blocking) </p>
+
+</div>
+</div>
+<a id="a86713f50344efb4730e6f3e92e4d0dc2" name="a86713f50344efb4730e6f3e92e4d0dc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86713f50344efb4730e6f3e92e4d0dc2">&#9670;&#160;</a></span>Submit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void foray::core::HostSyncCommandBuffer::Submit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Submits but doesn't synchronize. Use <a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#ad226104ecb25e43dd0b06f938ffeb5b4" title="Checks the fence for completion (non-blocking)">HasCompleted()</a> and/or <a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#a70c2f5b5cb9fa3be41313181338b3735" title="Blocks CPU thread until commandbuffer has completed.">WaitForCompletion()</a> to synchronize. </p>
+
+</div>
+</div>
+<a id="a8232f3e0547b2730cf0ea0ffc94a7557" name="a8232f3e0547b2730cf0ea0ffc94a7557"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8232f3e0547b2730cf0ea0ffc94a7557">&#9670;&#160;</a></span>SubmitAndWait()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void foray::core::HostSyncCommandBuffer::SubmitAndWait </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Submits and waits for the commandbuffer to be completed. </p>
+
+</div>
+</div>
+<a id="a70c2f5b5cb9fa3be41313181338b3735" name="a70c2f5b5cb9fa3be41313181338b3735"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70c2f5b5cb9fa3be41313181338b3735">&#9670;&#160;</a></span>WaitForCompletion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void foray::core::HostSyncCommandBuffer::WaitForCompletion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Blocks CPU thread until commandbuffer has completed. </p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a5ccb86f0d0dce02c49267925da6bbfc0" name="a5ccb86f0d0dce02c49267925da6bbfc0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ccb86f0d0dce02c49267925da6bbfc0">&#9670;&#160;</a></span>mFence</h2>
+<a id="ac7255feade3372785f31ce50451b8128" name="ac7255feade3372785f31ce50451b8128"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7255feade3372785f31ce50451b8128">&#9670;&#160;</a></span>mFence</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -345,7 +415,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">VkFence foray::core::DeviceCommandBuffer::mFence = nullptr</td>
+          <td class="memname">VkFence foray::core::HostSyncCommandBuffer::mFence = nullptr</td>
         </tr>
       </table>
   </td>
@@ -357,53 +427,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="a14212736559a9f33f97cec4faa38a74f" name="a14212736559a9f33f97cec4faa38a74f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14212736559a9f33f97cec4faa38a74f">&#9670;&#160;</a></span>mSignalSemaphores</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a>&gt; foray::core::DeviceCommandBuffer::mSignalSemaphores</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aeecbbfd6feb2d76dc3525f84329ee409" name="aeecbbfd6feb2d76dc3525f84329ee409"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeecbbfd6feb2d76dc3525f84329ee409">&#9670;&#160;</a></span>mWaitSemaphores</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="structforay_1_1core_1_1SemaphoreReference.html">SemaphoreReference</a>&gt; foray::core::DeviceCommandBuffer::mWaitSemaphores</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/core/<a class="el" href="foray__commandbuffer_8hpp_source.html">foray_commandbuffer.hpp</a></li>
-<li>src/core/<a class="el" href="foray__commandbuffer_8cpp.html">foray_commandbuffer.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

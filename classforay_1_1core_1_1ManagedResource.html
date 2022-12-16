@@ -105,7 +105,7 @@ Inheritance diagram for foray::core::ManagedResource:</div>
 <area href="classforay_1_1core_1_1VulkanResource.html" alt="foray::core::VulkanResource&lt; VkObjectType::VK_OBJECT_TYPE_PIPELINE_LAYOUT &gt;" shape="rect" coords="618,560,1226,584"/>
 <area href="classforay_1_1util_1_1ManagedVectorBuffer.html" alt="foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;" shape="rect" coords="618,616,1226,640"/>
 <area href="classforay_1_1as_1_1Tlas.html" title="Describes a top level accerlation structure. A tlas usually holds multiple Blas. A blas is an object/..." alt="foray::as::Tlas" shape="rect" coords="618,672,1226,696"/>
-<area href="classforay_1_1bench_1_1DeviceBenchmark.html" title="A device benchmark based on Vulkans DeviceQuery Api." alt="foray::bench::DeviceBenchmark" shape="rect" coords="618,728,1226,752"/>
+<area href="classforay_1_1bench_1_1DeviceBenchmark.html" title="A device benchmark based on Vulkans DeviceQuery Api. Timestamps are recorded in milliseconds...." alt="foray::bench::DeviceBenchmark" shape="rect" coords="618,728,1226,752"/>
 <area href="classforay_1_1core_1_1VulkanResource.html" title="ManagedResource variant which automates GetTypeName() overloading by returning a stringified version ..." alt="foray::core::VulkanResource&lt; OBJECT_TYPE &gt;" shape="rect" coords="618,784,1226,808"/>
 <area href="classforay_1_1util_1_1ManagedUboBase.html" alt="foray::util::ManagedUboBase" shape="rect" coords="618,840,1226,864"/>
 <area href="classforay_1_1util_1_1ManagedVectorBuffer.html" alt="foray::util::ManagedVectorBuffer&lt; TClass &gt;" shape="rect" coords="618,896,1226,920"/>
@@ -115,9 +115,9 @@ Inheritance diagram for foray::core::ManagedResource:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7b2a8a3ea271748da713d40709f578ff"><td class="memItemLeft" align="right" valign="top">virtual std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a7b2a8a3ea271748da713d40709f578ff">GetTypeName</a> () const</td></tr>
-<tr class="memdesc:a7b2a8a3ea271748da713d40709f578ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a hint for the type of resource managed by the instantiation.  <a href="classforay_1_1core_1_1ManagedResource.html#a7b2a8a3ea271748da713d40709f578ff">More...</a><br /></td></tr>
-<tr class="separator:a7b2a8a3ea271748da713d40709f578ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8cbd2b14d112b80c8ba29659a174ebd"><td class="memItemLeft" align="right" valign="top">virtual std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#aa8cbd2b14d112b80c8ba29659a174ebd">GetTypeName</a> () const</td></tr>
+<tr class="memdesc:aa8cbd2b14d112b80c8ba29659a174ebd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a hint for the type of resource managed by the instantiation.  <a href="classforay_1_1core_1_1ManagedResource.html#aa8cbd2b14d112b80c8ba29659a174ebd">More...</a><br /></td></tr>
+<tr class="separator:aa8cbd2b14d112b80c8ba29659a174ebd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42782c849bc60eeddaa0baa1c26f1015"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a42782c849bc60eeddaa0baa1c26f1015">Exists</a> () const =0</td></tr>
 <tr class="memdesc:a42782c849bc60eeddaa0baa1c26f1015"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true, if the managed resource is allocated.  <a href="classforay_1_1core_1_1ManagedResource.html#a42782c849bc60eeddaa0baa1c26f1015">More...</a><br /></td></tr>
 <tr class="separator:a42782c849bc60eeddaa0baa1c26f1015"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -130,15 +130,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a34f97448f78e2c04b18dee2f2a365be3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a34f97448f78e2c04b18dee2f2a365be3">ManagedResource</a> (std::string_view name)</td></tr>
 <tr class="memdesc:a34f97448f78e2c04b18dee2f2a365be3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the resource and sets its name.  <a href="classforay_1_1core_1_1ManagedResource.html#a34f97448f78e2c04b18dee2f2a365be3">More...</a><br /></td></tr>
 <tr class="separator:a34f97448f78e2c04b18dee2f2a365be3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68dc62774cbbe2150df0a47a290d2803"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a68dc62774cbbe2150df0a47a290d2803">~ManagedResource</a> ()</td></tr>
-<tr class="memdesc:a68dc62774cbbe2150df0a47a290d2803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters the resource.  <a href="classforay_1_1core_1_1ManagedResource.html#a68dc62774cbbe2150df0a47a290d2803">More...</a><br /></td></tr>
-<tr class="separator:a68dc62774cbbe2150df0a47a290d2803"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3340e3dad7246b5a3c89b84a8b2574d7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a3340e3dad7246b5a3c89b84a8b2574d7">~ManagedResource</a> ()</td></tr>
+<tr class="memdesc:a3340e3dad7246b5a3c89b84a8b2574d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unregisters the resource.  <a href="classforay_1_1core_1_1ManagedResource.html#a3340e3dad7246b5a3c89b84a8b2574d7">More...</a><br /></td></tr>
+<tr class="separator:a3340e3dad7246b5a3c89b84a8b2574d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae136aeb38e128e015b73cdd805619b45"><td class="memItemLeft" align="right" valign="top">std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#ae136aeb38e128e015b73cdd805619b45">GetName</a> () const</td></tr>
 <tr class="memdesc:ae136aeb38e128e015b73cdd805619b45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#ae136aeb38e128e015b73cdd805619b45">More...</a><br /></td></tr>
 <tr class="separator:ae136aeb38e128e015b73cdd805619b45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a372a0b44b28ea48791b14a639469819d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a372a0b44b28ea48791b14a639469819d">SetName</a> (std::string_view name)</td></tr>
-<tr class="memdesc:a372a0b44b28ea48791b14a639469819d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#a372a0b44b28ea48791b14a639469819d">More...</a><br /></td></tr>
-<tr class="separator:a372a0b44b28ea48791b14a639469819d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9ebbb104ff3d56a8b853d5c53324b84"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#ac9ebbb104ff3d56a8b853d5c53324b84">SetName</a> (std::string_view name)</td></tr>
+<tr class="memdesc:ac9ebbb104ff3d56a8b853d5c53324b84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a custom name for the object.  <a href="classforay_1_1core_1_1ManagedResource.html#ac9ebbb104ff3d56a8b853d5c53324b84">More...</a><br /></td></tr>
+<tr class="separator:ac9ebbb104ff3d56a8b853d5c53324b84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57fb4991b95534201ad82cf05174d21f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a57fb4991b95534201ad82cf05174d21f">Print</a> () const</td></tr>
 <tr class="memdesc:a57fb4991b95534201ad82cf05174d21f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print name and type in one string.  <a href="classforay_1_1core_1_1ManagedResource.html#a57fb4991b95534201ad82cf05174d21f">More...</a><br /></td></tr>
 <tr class="separator:a57fb4991b95534201ad82cf05174d21f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,9 +154,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a93efedde9ed9c013f3e8183198e53c65"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a93efedde9ed9c013f3e8183198e53c65">sPrintAllocatedResources</a> (bool printAsWarning)</td></tr>
-<tr class="memdesc:a93efedde9ed9c013f3e8183198e53c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a list of all registered existing resources.  <a href="classforay_1_1core_1_1ManagedResource.html#a93efedde9ed9c013f3e8183198e53c65">More...</a><br /></td></tr>
-<tr class="separator:a93efedde9ed9c013f3e8183198e53c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e2f66fc49930f9438577f620d0fb338"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a7e2f66fc49930f9438577f620d0fb338">sPrintAllocatedResources</a> (bool printAsWarning)</td></tr>
+<tr class="memdesc:a7e2f66fc49930f9438577f620d0fb338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a list of all registered existing resources.  <a href="classforay_1_1core_1_1ManagedResource.html#a7e2f66fc49930f9438577f620d0fb338">More...</a><br /></td></tr>
+<tr class="separator:a7e2f66fc49930f9438577f620d0fb338"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803f55c4b15b8e0cda6e0aa90f233d8e"><td class="memItemLeft" align="right" valign="top">static const std::unordered_set&lt; <a class="el" href="classforay_1_1core_1_1ManagedResource.html">ManagedResource</a> * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ManagedResource.html#a803f55c4b15b8e0cda6e0aa90f233d8e">GetTotalAllocatedResources</a> ()</td></tr>
 <tr class="separator:a803f55c4b15b8e0cda6e0aa90f233d8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -216,8 +216,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a68dc62774cbbe2150df0a47a290d2803" name="a68dc62774cbbe2150df0a47a290d2803"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68dc62774cbbe2150df0a47a290d2803">&#9670;&#160;</a></span>~ManagedResource()</h2>
+<a id="a3340e3dad7246b5a3c89b84a8b2574d7" name="a3340e3dad7246b5a3c89b84a8b2574d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3340e3dad7246b5a3c89b84a8b2574d7">&#9670;&#160;</a></span>~ManagedResource()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -226,7 +226,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">foray::core::ManagedResource::~ManagedResource </td>
+          <td class="memname">virtual foray::core::ManagedResource::~ManagedResource </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -270,7 +270,7 @@ Protected Attributes</h2></td></tr>
 <p>Destroy the resource. </p>
 <dl class="section remark"><dt>Remarks</dt><dd>This method must be callable even if the resource has not been initialized yet. This method must call any <a class="el" href="classforay_1_1core_1_1ManagedResource.html#a1284a3fe356f39d84752058615859205" title="Destroy the resource.">Destroy()</a> overloads of child objects and of base classes </dd></dl>
 
-<p>Implemented in <a class="el" href="classforay_1_1bench_1_1DeviceBenchmark.html#a4397ef34c409c1b9e004366d3541f236">foray::bench::DeviceBenchmark</a>, <a class="el" href="classforay_1_1util_1_1PipelineLayout.html#afc1d396ebe7a94d018a695713cecd672">foray::util::PipelineLayout</a>, <a class="el" href="classforay_1_1as_1_1Blas.html#a8b1f2bdab25aa01dcbdf3d5dd4cb553b">foray::as::Blas</a>, <a class="el" href="classforay_1_1as_1_1Tlas.html#aee8808433c64cbc9a5978dc4ab9b15c9">foray::as::Tlas</a>, <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a53c069df6e5feffaf3f1fe9928f42b8f">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1HostCommandBuffer.html#ac60b0f1cf507ca1be7a2d1ef900d08f0">foray::core::HostCommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1DescriptorSet.html#aad31b6e8474213a72a10f25d940d5524">foray::core::DescriptorSet</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#a1a9992c92d35ae3e19097891a3ca6722">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#a757930b962ef3c6d16d0f1b512970b95">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1core_1_1SamplerCollection.html#af8d5db372fc27a6419b4107f68b7bf24">foray::core::SamplerCollection</a>, <a class="el" href="classforay_1_1core_1_1ShaderModule.html#ae81f693a865564b916b59852d8e80c69">foray::core::ShaderModule</a>, <a class="el" href="classforay_1_1util_1_1ExternalSemaphore.html#a43a759e75142499dc87574262d45628b">foray::util::ExternalSemaphore</a>, <a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#adae396ef776c0044841d0d5ebf2bc55f">foray::util::ManagedUboBase</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#aebec4d1933fa88889507cdc10d152ce8">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#aebec4d1933fa88889507cdc10d152ce8">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>, and <a class="el" href="classforay_1_1util_1_1NoiseSource.html#a5ea401cdb30d328774a3b9dc519f4d77">foray::util::NoiseSource</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1bench_1_1DeviceBenchmark.html#afc08ba4c0ff797559b5a6a7e6a0eadaa">foray::bench::DeviceBenchmark</a>, <a class="el" href="classforay_1_1util_1_1PipelineLayout.html#ae2ea924c48c647121c7b716c6dae236f">foray::util::PipelineLayout</a>, <a class="el" href="classforay_1_1as_1_1Blas.html#a7fce76856ae95801f30880d178a50713">foray::as::Blas</a>, <a class="el" href="classforay_1_1as_1_1Tlas.html#ac7028f78aeb9716dd7692c753d2e6100">foray::as::Tlas</a>, <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#ae52fbac94e09dc97c1db71c1b5a106da">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html#affa326fae4e8a7a62e28d74942722a65">foray::core::HostSyncCommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1DescriptorSet.html#a99ef6a9fdff7f49c3e8c91f964466645">foray::core::DescriptorSet</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#a0b917612be24ac66a3f9f898b19962e9">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#aca80218d0df05c61145f48a42e9a383a">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1core_1_1SamplerCollection.html#af8d5db372fc27a6419b4107f68b7bf24">foray::core::SamplerCollection</a>, <a class="el" href="classforay_1_1core_1_1ShaderModule.html#a58963351881924218c96d689fe78d948">foray::core::ShaderModule</a>, <a class="el" href="classforay_1_1util_1_1ExternalSemaphore.html#a392fde31861d7c89513a08837b791f90">foray::util::ExternalSemaphore</a>, <a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a90a781f18ebaa3c3020c1f6e7367bf35">foray::util::ManagedUboBase</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#aebec4d1933fa88889507cdc10d152ce8">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#aebec4d1933fa88889507cdc10d152ce8">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>, and <a class="el" href="classforay_1_1util_1_1NoiseSource.html#a4477f7201d93a74c6174c194a7fabe5e">foray::util::NoiseSource</a>.</p>
 
 </div>
 </div>
@@ -300,7 +300,7 @@ Protected Attributes</h2></td></tr>
 <p>Return true, if the managed resource is allocated. </p>
 <p >Example: Vulkan object stored could be nullptr or instantiated </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1bench_1_1DeviceBenchmark.html#ad31725beff0f554e2c9e555d886ab76e">foray::bench::DeviceBenchmark</a>, <a class="el" href="classforay_1_1util_1_1PipelineLayout.html#a32f43532a62172026229b2f86c236e34">foray::util::PipelineLayout</a>, <a class="el" href="classforay_1_1as_1_1Blas.html#acd2df981bb75f293b767a053ddd1cf81">foray::as::Blas</a>, <a class="el" href="classforay_1_1as_1_1Tlas.html#abb7269b3e86fa4d907823a463a3365ef">foray::as::Tlas</a>, <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a32f755e127cf62a4fce3cd8ee1ec2043">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1DescriptorSet.html#a6570280f637ab9bd1befcbf94e21eb7c">foray::core::DescriptorSet</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#aef0199983915383c4709000acfcb69d6">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#a51d1da37675b2c8fcab2a411a16bc1f8">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1core_1_1SamplerCollection.html#a2ad9348959c1dc0cdb4b0d0c71e0c04a">foray::core::SamplerCollection</a>, <a class="el" href="classforay_1_1core_1_1ShaderModule.html#a3a9d8a3c10f4385d911b02883af7fcb7">foray::core::ShaderModule</a>, <a class="el" href="classforay_1_1util_1_1ExternalSemaphore.html#a550f2cac381dba80472e38fd2dad5dd4">foray::util::ExternalSemaphore</a>, <a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a73414f18b6ff07bff1101bff16b75e13">foray::util::ManagedUboBase</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a94ed5b91c75b2ffc72ebcded9f38198f">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a94ed5b91c75b2ffc72ebcded9f38198f">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>, and <a class="el" href="classforay_1_1util_1_1NoiseSource.html#a7399dd06972e0ddefff67cea17df99fa">foray::util::NoiseSource</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1bench_1_1DeviceBenchmark.html#ad31725beff0f554e2c9e555d886ab76e">foray::bench::DeviceBenchmark</a>, <a class="el" href="classforay_1_1util_1_1PipelineLayout.html#a32f43532a62172026229b2f86c236e34">foray::util::PipelineLayout</a>, <a class="el" href="classforay_1_1as_1_1Blas.html#acd2df981bb75f293b767a053ddd1cf81">foray::as::Blas</a>, <a class="el" href="classforay_1_1as_1_1Tlas.html#abb7269b3e86fa4d907823a463a3365ef">foray::as::Tlas</a>, <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a32f755e127cf62a4fce3cd8ee1ec2043">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1DescriptorSet.html#a6570280f637ab9bd1befcbf94e21eb7c">foray::core::DescriptorSet</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#aef0199983915383c4709000acfcb69d6">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#a51d1da37675b2c8fcab2a411a16bc1f8">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1core_1_1SamplerCollection.html#a2ad9348959c1dc0cdb4b0d0c71e0c04a">foray::core::SamplerCollection</a>, <a class="el" href="classforay_1_1core_1_1ShaderModule.html#a3a9d8a3c10f4385d911b02883af7fcb7">foray::core::ShaderModule</a>, <a class="el" href="classforay_1_1util_1_1ExternalSemaphore.html#a550f2cac381dba80472e38fd2dad5dd4">foray::util::ExternalSemaphore</a>, <a class="el" href="classforay_1_1util_1_1ManagedUboBase.html#a94798a5113f83e8eb71e6d09c5fbdcdb">foray::util::ManagedUboBase</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a94ed5b91c75b2ffc72ebcded9f38198f">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a94ed5b91c75b2ffc72ebcded9f38198f">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>, and <a class="el" href="classforay_1_1util_1_1NoiseSource.html#a67b0096b061a2b00ae762bbff7d07512">foray::util::NoiseSource</a>.</p>
 
 </div>
 </div>
@@ -356,8 +356,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a7b2a8a3ea271748da713d40709f578ff" name="a7b2a8a3ea271748da713d40709f578ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b2a8a3ea271748da713d40709f578ff">&#9670;&#160;</a></span>GetTypeName()</h2>
+<a id="aa8cbd2b14d112b80c8ba29659a174ebd" name="aa8cbd2b14d112b80c8ba29659a174ebd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8cbd2b14d112b80c8ba29659a174ebd">&#9670;&#160;</a></span>GetTypeName()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -366,7 +366,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::string_view foray::core::ManagedResource::GetTypeName </td>
+          <td class="memname">virtual std::string_view foray::core::ManagedResource::GetTypeName </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -406,8 +406,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a372a0b44b28ea48791b14a639469819d" name="a372a0b44b28ea48791b14a639469819d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a372a0b44b28ea48791b14a639469819d">&#9670;&#160;</a></span>SetName()</h2>
+<a id="ac9ebbb104ff3d56a8b853d5c53324b84" name="ac9ebbb104ff3d56a8b853d5c53324b84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9ebbb104ff3d56a8b853d5c53324b84">&#9670;&#160;</a></span>SetName()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -416,7 +416,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::core::ManagedResource::SetName </td>
+          <td class="memname">virtual void foray::core::ManagedResource::SetName </td>
           <td>(</td>
           <td class="paramtype">std::string_view&#160;</td>
           <td class="paramname"><em>name</em></td><td>)</td>
@@ -432,12 +432,12 @@ Protected Attributes</h2></td></tr>
 
 <p>Set a custom name for the object. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a18a469cea69529b25c311b568fb678ea">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#adf9fdf17bbf1dd44b5f552c196ef6762">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#a189b03ab7739802ce03928cf8c4fae14">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a5c5fdf73b46ab0c2e378880aba7bd00d">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, and <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a5c5fdf73b46ab0c2e378880aba7bd00d">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1core_1_1CommandBuffer.html#a1e9ee954eaa469f99c3bf711218d8d47">foray::core::CommandBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedBuffer.html#ac0bb390e8a3d4b6391d2572a82fd26e3">foray::core::ManagedBuffer</a>, <a class="el" href="classforay_1_1core_1_1ManagedImage.html#a363518868856d91854ef6a119d23a9b4">foray::core::ManagedImage</a>, <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a5c5fdf73b46ab0c2e378880aba7bd00d">foray::util::ManagedVectorBuffer&lt; TClass &gt;</a>, and <a class="el" href="classforay_1_1util_1_1ManagedVectorBuffer.html#a5c5fdf73b46ab0c2e378880aba7bd00d">foray::util::ManagedVectorBuffer&lt; foray::scene::Material &gt;</a>.</p>
 
 </div>
 </div>
-<a id="a93efedde9ed9c013f3e8183198e53c65" name="a93efedde9ed9c013f3e8183198e53c65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93efedde9ed9c013f3e8183198e53c65">&#9670;&#160;</a></span>sPrintAllocatedResources()</h2>
+<a id="a7e2f66fc49930f9438577f620d0fb338" name="a7e2f66fc49930f9438577f620d0fb338"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e2f66fc49930f9438577f620d0fb338">&#9670;&#160;</a></span>sPrintAllocatedResources()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -446,7 +446,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::core::ManagedResource::sPrintAllocatedResources </td>
+          <td class="memname">static void foray::core::ManagedResource::sPrintAllocatedResources </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>printAsWarning</em></td><td>)</td>
@@ -495,9 +495,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/core/<a class="el" href="foray__managedresource_8hpp_source.html">foray_managedresource.hpp</a></li>
-<li>src/core/<a class="el" href="foray__managedresource_8cpp.html">foray_managedresource.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

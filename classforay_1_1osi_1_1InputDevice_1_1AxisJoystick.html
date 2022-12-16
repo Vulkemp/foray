@@ -90,7 +90,7 @@ Inheritance diagram for foray::osi::InputDevice::AxisJoystick:</div>
   <img src="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.png" usemap="#foray::osi::InputDevice::AxisJoystick_map" alt=""/>
   <map id="foray::osi::InputDevice::AxisJoystick_map" name="foray::osi::InputDevice::AxisJoystick_map">
 <area href="classforay_1_1osi_1_1InputAnalogue.html" title="Represents a single input with a state represented by a signed 16bit integer." alt="foray::osi::InputAnalogue" shape="rect" coords="0,56,213,80"/>
-<area href="classforay_1_1osi_1_1InputBase.html" alt="foray::osi::InputBase" shape="rect" coords="0,0,213,24"/>
+<area href="classforay_1_1osi_1_1InputBase.html" title="Base class for a single input channel of an input device." alt="foray::osi::InputBase" shape="rect" coords="0,0,213,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -100,9 +100,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a8a28bf4e521c261be7533feedc9b728c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16270709ffafca6c047c8d54e41914cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.html#a16270709ffafca6c047c8d54e41914cb">AxisJoystick</a> (<a class="el" href="classforay_1_1osi_1_1InputDevice.html">InputDevice</a> *device, int32_t id, std::string_view name, SDL_Joystick *joystick)</td></tr>
 <tr class="separator:a16270709ffafca6c047c8d54e41914cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36b35e2f8c88687a156e36b043c4a349"><td class="memItemLeft" align="right" valign="top">virtual int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.html#a36b35e2f8c88687a156e36b043c4a349">State</a> () const override</td></tr>
-<tr class="memdesc:a36b35e2f8c88687a156e36b043c4a349"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.html#a36b35e2f8c88687a156e36b043c4a349">More...</a><br /></td></tr>
-<tr class="separator:a36b35e2f8c88687a156e36b043c4a349"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a685451320bc50c6bf77c5cfc226ba8"><td class="memItemLeft" align="right" valign="top">virtual int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.html#a0a685451320bc50c6bf77c5cfc226ba8">State</a> () const override</td></tr>
+<tr class="memdesc:a0a685451320bc50c6bf77c5cfc226ba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1AxisJoystick.html#a0a685451320bc50c6bf77c5cfc226ba8">More...</a><br /></td></tr>
+<tr class="separator:a0a685451320bc50c6bf77c5cfc226ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d4118e83190cb26f4ebc58e5acfbee7"><td class="memItemLeft" align="right" valign="top">virtual int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputAnalogue.html#a1d4118e83190cb26f4ebc58e5acfbee7">State</a> () const =0</td></tr>
 <tr class="memdesc:a1d4118e83190cb26f4ebc58e5acfbee7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis id of the input.  <a href="classforay_1_1osi_1_1InputAnalogue.html#a1d4118e83190cb26f4ebc58e5acfbee7">More...</a><br /></td></tr>
 <tr class="separator:a1d4118e83190cb26f4ebc58e5acfbee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,8 +211,8 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a36b35e2f8c88687a156e36b043c4a349" name="a36b35e2f8c88687a156e36b043c4a349"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36b35e2f8c88687a156e36b043c4a349">&#9670;&#160;</a></span>State()</h2>
+<a id="a0a685451320bc50c6bf77c5cfc226ba8" name="a0a685451320bc50c6bf77c5cfc226ba8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a685451320bc50c6bf77c5cfc226ba8">&#9670;&#160;</a></span>State()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -221,7 +221,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int16_t foray::osi::InputDevice::AxisJoystick::State </td>
+          <td class="memname">virtual int16_t foray::osi::InputDevice::AxisJoystick::State </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -256,9 +256,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/osi/<a class="el" href="foray__inputdevice_8hpp_source.html">foray_inputdevice.hpp</a></li>
-<li>src/osi/<a class="el" href="foray__inputdevice_8cpp.html">foray_inputdevice.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

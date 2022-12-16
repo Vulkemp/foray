@@ -78,8 +78,7 @@ $(function() {
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">foray::base Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -93,7 +92,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intended as base class for demo applications. Compared to <a class="el" href="classforay_1_1base_1_1MinimalAppBase.html" title="Application base providing bare minimum of functionality (app lifetime, event handling,...">MinimalAppBase</a> it offers a complete simple vulkan setup.  <a href="classforay_1_1base_1_1DefaultAppBase.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">FrameRenderInfo</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html" title="FrameRenderInfo used for most render processes. This object is rebuilt for every frame....">FrameRenderInfo</a> used for most render processes. This object is rebuilt for every frame. /.  <a href="classforay_1_1base_1_1FrameRenderInfo.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Context used for render processes. This object is rebuilt for every frame. /.  <a href="classforay_1_1base_1_1FrameRenderInfo.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html">InFlightFrame</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps synchronization primitives and command buffers for an inflight frame.  <a href="classforay_1_1base_1_1InFlightFrame.html#details">More...</a><br /></td></tr>
@@ -118,12 +117,6 @@ Classes</h2></td></tr>
 Typedefs</h2></td></tr>
 <tr class="memitem:af67581d2f9156753e5fb9811660f7945"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a> = int32_t</td></tr>
 <tr class="separator:af67581d2f9156753e5fb9811660f7945"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55114eaec457ca219852f0a86338c057"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a55114eaec457ca219852f0a86338c057">clock_t</a> = std::chrono::steady_clock</td></tr>
-<tr class="separator:a55114eaec457ca219852f0a86338c057"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07505461a5d56645663e90d731c2e264"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a07505461a5d56645663e90d731c2e264">timepoint_t</a> = std::chrono::steady_clock::time_point</td></tr>
-<tr class="separator:a07505461a5d56645663e90d731c2e264"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00e36b96bb73a85669d633e54614c696"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a00e36b96bb73a85669d633e54614c696">timespan_t</a> = std::chrono::duration&lt; float &gt;</td></tr>
-<tr class="separator:a00e36b96bb73a85669d633e54614c696"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -147,31 +140,10 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a24da949a0339adddb335a4696750cdef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a24da949a0339adddb335a4696750cdef">lPrintStateChange</a> (<a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a> oldState, <a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a> newState)</td></tr>
-<tr class="separator:a24da949a0339adddb335a4696750cdef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14fabeba078bf44fe0fcf23a3e76aa9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a14fabeba078bf44fe0fcf23a3e76aa9b">PrintStateChange</a> (<a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a> oldState, <a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a> newState)</td></tr>
 <tr class="separator:a14fabeba078bf44fe0fcf23a3e76aa9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a0d58c3bf7210225cc7589e08fceaee3c"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; VkDebugReportFlagsEXT, spdlog::level::level_enum &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1base.html#a0d58c3bf7210225cc7589e08fceaee3c">levelMap</a></td></tr>
-<tr class="separator:a0d58c3bf7210225cc7589e08fceaee3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="a55114eaec457ca219852f0a86338c057" name="a55114eaec457ca219852f0a86338c057"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55114eaec457ca219852f0a86338c057">&#9670;&#160;</a></span>clock_t</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespaceforay_1_1base.html#a55114eaec457ca219852f0a86338c057">foray::base::clock_t</a> = typedef std::chrono::steady_clock</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="af67581d2f9156753e5fb9811660f7945" name="af67581d2f9156753e5fb9811660f7945"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af67581d2f9156753e5fb9811660f7945">&#9670;&#160;</a></span>CmdBufferIndex</h2>
 
@@ -180,34 +152,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">using <a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">foray::base::CmdBufferIndex</a> = typedef int32_t</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a07505461a5d56645663e90d731c2e264" name="a07505461a5d56645663e90d731c2e264"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07505461a5d56645663e90d731c2e264">&#9670;&#160;</a></span>timepoint_t</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespaceforay_1_1base.html#a07505461a5d56645663e90d731c2e264">foray::base::timepoint_t</a> = typedef std::chrono::steady_clock::time_point</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a00e36b96bb73a85669d633e54614c696" name="a00e36b96bb73a85669d633e54614c696"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00e36b96bb73a85669d633e54614c696">&#9670;&#160;</a></span>timespan_t</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespaceforay_1_1base.html#a00e36b96bb73a85669d633e54614c696">foray::base::timespan_t</a> = typedef std::chrono::duration&lt;float&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -278,34 +222,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a24da949a0339adddb335a4696750cdef" name="a24da949a0339adddb335a4696750cdef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24da949a0339adddb335a4696750cdef">&#9670;&#160;</a></span>lPrintStateChange()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void foray::base::lPrintStateChange </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a>&#160;</td>
-          <td class="paramname"><em>oldState</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespaceforay_1_1base.html#ac9a9a5bbe3cc041fa0668b8078181330">ELifetimeState</a>&#160;</td>
-          <td class="paramname"><em>newState</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a14fabeba078bf44fe0fcf23a3e76aa9b" name="a14fabeba078bf44fe0fcf23a3e76aa9b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a14fabeba078bf44fe0fcf23a3e76aa9b">&#9670;&#160;</a></span>PrintStateChange()</h2>
 
@@ -332,28 +248,6 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<h2 class="groupheader">Variable Documentation</h2>
-<a id="a0d58c3bf7210225cc7589e08fceaee3c" name="a0d58c3bf7210225cc7589e08fceaee3c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d58c3bf7210225cc7589e08fceaee3c">&#9670;&#160;</a></span>levelMap</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::unordered_map&lt;VkDebugReportFlagsEXT, spdlog::level::level_enum&gt; foray::base::levelMap</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">        {VK_DEBUG_REPORT_INFORMATION_BIT_EXT, spdlog::level::info},</div>
-<div class="line">        {VK_DEBUG_REPORT_WARNING_BIT_EXT, spdlog::level::warn},</div>
-<div class="line">        {VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT, spdlog::level::warn},</div>
-<div class="line">        {VK_DEBUG_REPORT_ERROR_BIT_EXT, spdlog::level::err},</div>
-<div class="line">        {VK_DEBUG_REPORT_DEBUG_BIT_EXT, spdlog::level::info},</div>
-<div class="line">    }</div>
-</div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->

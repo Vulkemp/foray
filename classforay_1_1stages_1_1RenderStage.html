@@ -117,18 +117,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abc330f08d8b46b7f2e38085295f4106d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">Destroy</a> ()</td></tr>
 <tr class="memdesc:abc330f08d8b46b7f2e38085295f4106d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the render stage. Finalizes all components.  <a href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">More...</a><br /></td></tr>
 <tr class="separator:abc330f08d8b46b7f2e38085295f4106d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7476ba05a4cd53256ee18299a8089bff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff">Resize</a> (const VkExtent2D &amp;extent)</td></tr>
-<tr class="memdesc:a7476ba05a4cd53256ee18299a8089bff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image.  <a href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff">More...</a><br /></td></tr>
-<tr class="separator:a7476ba05a4cd53256ee18299a8089bff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae969a77e824f304e57bedbf7385e49c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5">Resize</a> (const VkExtent2D &amp;extent)</td></tr>
+<tr class="memdesc:ae969a77e824f304e57bedbf7385e49c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image.  <a href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5">More...</a><br /></td></tr>
+<tr class="separator:ae969a77e824f304e57bedbf7385e49c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9e261703198a03dbd7ca8c7a5def74a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#aa9e261703198a03dbd7ca8c7a5def74a">GetImageOutputs</a> ()</td></tr>
 <tr class="memdesc:aa9e261703198a03dbd7ca8c7a5def74a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.  <a href="classforay_1_1stages_1_1RenderStage.html#aa9e261703198a03dbd7ca8c7a5def74a">More...</a><br /></td></tr>
 <tr class="separator:aa9e261703198a03dbd7ca8c7a5def74a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3e27cd599baf6f5925cacad3569a0dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ad3e27cd599baf6f5925cacad3569a0dd">GetImageOutput</a> (std::string_view name, bool noThrow=false)</td></tr>
 <tr class="memdesc:ad3e27cd599baf6f5925cacad3569a0dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets an image output.  <a href="classforay_1_1stages_1_1RenderStage.html#ad3e27cd599baf6f5925cacad3569a0dd">More...</a><br /></td></tr>
 <tr class="separator:ad3e27cd599baf6f5925cacad3569a0dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fc5e7bc74d5fed99d80c62f133d7020"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a4fc5e7bc74d5fed99d80c62f133d7020">OnShadersRecompiled</a> (const std::unordered_set&lt; uint64_t &gt; &amp;recompiled)</td></tr>
-<tr class="memdesc:a4fc5e7bc74d5fed99d80c62f133d7020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notifies the stage that the shader compiler instance has recompiled a shader.  <a href="classforay_1_1stages_1_1RenderStage.html#a4fc5e7bc74d5fed99d80c62f133d7020">More...</a><br /></td></tr>
-<tr class="separator:a4fc5e7bc74d5fed99d80c62f133d7020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace99f389c890a0638e4aaddeaf4b0d49"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ace99f389c890a0638e4aaddeaf4b0d49">OnShadersRecompiled</a> (const std::unordered_set&lt; uint64_t &gt; &amp;recompiled)</td></tr>
+<tr class="memdesc:ace99f389c890a0638e4aaddeaf4b0d49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notifies the stage that the shader compiler instance has recompiled a shader.  <a href="classforay_1_1stages_1_1RenderStage.html#ace99f389c890a0638e4aaddeaf4b0d49">More...</a><br /></td></tr>
+<tr class="separator:ace99f389c890a0638e4aaddeaf4b0d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12455956a8eb06819944d3b24722fc94"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a12455956a8eb06819944d3b24722fc94">~RenderStage</a> ()</td></tr>
 <tr class="separator:a12455956a8eb06819944d3b24722fc94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -137,9 +137,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:aee119ed5b7cb441465432fdce0533f1c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">ReloadShaders</a> ()</td></tr>
 <tr class="memdesc:aee119ed5b7cb441465432fdce0533f1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.  <a href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">More...</a><br /></td></tr>
 <tr class="separator:aee119ed5b7cb441465432fdce0533f1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68f8745308508c3048d45299a8023c5e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e">DestroyOutputImages</a> ()</td></tr>
-<tr class="memdesc:a68f8745308508c3048d45299a8023c5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d" title="Destroy the render stage. Finalizes all components.">Destroy()</a> on any image in mImageOutputs and clears mImageOutputs.  <a href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e">More...</a><br /></td></tr>
-<tr class="separator:a68f8745308508c3048d45299a8023c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b72b8d474073be00957431591c3c85f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f">DestroyOutputImages</a> ()</td></tr>
+<tr class="memdesc:a5b72b8d474073be00957431591c3c85f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d" title="Destroy the render stage. Finalizes all components.">Destroy()</a> on any image in mImageOutputs and clears mImageOutputs.  <a href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f">More...</a><br /></td></tr>
+<tr class="separator:a5b72b8d474073be00957431591c3c85f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -232,12 +232,12 @@ Protected Attributes</h2></td></tr>
 
 <p>Destroy the render stage. Finalizes all components. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a8b5e49bdb801d9f97a8b59e610b69f4a">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#ae7593b09f50f67871212c6daab0de93e">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#aa5dc7da2355909d2b85e63bcac13c3c9">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a360011182d20b7ae6425e2b09fd693df">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adadca8e959464b9cf7621576d090a693">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a4d7cdd35cd2fd36a42986537eae89203">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a880a5ca46fbb9a9dca46a1c95cd6fbcb">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a688246290318f1ce4b2167c594a64bb9">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#ab99b9d052b9d7c43b4d6f84951826af6">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adc5c459a83c46f6d60649035e94b0edd">foray::stages::BasicRaytracingStage</a>.</p>
 
 </div>
 </div>
-<a id="a68f8745308508c3048d45299a8023c5e" name="a68f8745308508c3048d45299a8023c5e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68f8745308508c3048d45299a8023c5e">&#9670;&#160;</a></span>DestroyOutputImages()</h2>
+<a id="a5b72b8d474073be00957431591c3c85f" name="a5b72b8d474073be00957431591c3c85f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b72b8d474073be00957431591c3c85f">&#9670;&#160;</a></span>DestroyOutputImages()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -246,7 +246,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::RenderStage::DestroyOutputImages </td>
+          <td class="memname">virtual void foray::stages::RenderStage::DestroyOutputImages </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -319,8 +319,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a4fc5e7bc74d5fed99d80c62f133d7020" name="a4fc5e7bc74d5fed99d80c62f133d7020"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fc5e7bc74d5fed99d80c62f133d7020">&#9670;&#160;</a></span>OnShadersRecompiled()</h2>
+<a id="ace99f389c890a0638e4aaddeaf4b0d49" name="ace99f389c890a0638e4aaddeaf4b0d49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace99f389c890a0638e4aaddeaf4b0d49">&#9670;&#160;</a></span>OnShadersRecompiled()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -329,7 +329,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::RenderStage::OnShadersRecompiled </td>
+          <td class="memname">virtual void foray::stages::RenderStage::OnShadersRecompiled </td>
           <td>(</td>
           <td class="paramtype">const std::unordered_set&lt; uint64_t &gt; &amp;&#160;</td>
           <td class="paramname"><em>recompiled</em></td><td>)</td>
@@ -390,14 +390,14 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<h1><a class="anchor" id="autotoc_md42"></a>
 Inheriting</h1>
 <ul>
 <li>Any resources accessed (images, buffers) must be protected by pipeline barriers, unless the providing entity defines them as constants</li>
 <li>All commands must be submitted to cmdBuffer </li>
 </ul>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1BlitStage.html#aad992e51bb11e9e7771d05934260559b">foray::stages::BlitStage</a>, <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a54e2f871d5b0c0177c26d90daaa91d49">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#ac2a9d12913694801bacdc15864fa2be1">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#ae2a7c7c3db84118b02aa6de84d48bf76">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImageToSwapchainStage.html#a79ff87d4bb23ca266c82bb542507a5ac">foray::stages::ImageToSwapchainStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a60672a65c14293cc3f3b1b77dc315402">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a742ec1142baef92d678a2d1e10838e09">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1BlitStage.html#a55833431072a4ec91c634007eadc8d71">foray::stages::BlitStage</a>, <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a46e1944e52a023157537457e4ec5cfbd">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a9c034edc206bf2fa0688875e75898028">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a0241a03897165fdd92717cc76d7cbd9d">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImageToSwapchainStage.html#a78a7b603add0b472f2e576a9a71af321">foray::stages::ImageToSwapchainStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a0d203bdc46ae1ec3207444c5a11831bf">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac22bea55b128482959d22956b48994a1">foray::stages::BasicRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -426,12 +426,12 @@ Inheriting</h1>
 
 <p>Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#afe836299bf6f8611a71d943cfbe55d65">foray::stages::ComputeStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a42f0350bd425d8ae5613e617a07adf3d">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a68abce1fa498796e0c406beea6e87d7c">foray::stages::ComputeStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a16f46da2c805a1c4e706bb9a823c9d4a">foray::stages::BasicRaytracingStage</a>.</p>
 
 </div>
 </div>
-<a id="a7476ba05a4cd53256ee18299a8089bff" name="a7476ba05a4cd53256ee18299a8089bff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7476ba05a4cd53256ee18299a8089bff">&#9670;&#160;</a></span>Resize()</h2>
+<a id="ae969a77e824f304e57bedbf7385e49c5" name="ae969a77e824f304e57bedbf7385e49c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae969a77e824f304e57bedbf7385e49c5">&#9670;&#160;</a></span>Resize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -440,7 +440,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::RenderStage::Resize </td>
+          <td class="memname">virtual void foray::stages::RenderStage::Resize </td>
           <td>(</td>
           <td class="paramtype">const VkExtent2D &amp;&#160;</td>
           <td class="paramname"><em>extent</em></td><td>)</td>
@@ -463,7 +463,7 @@ Inheriting</h1>
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd>Inheriting stages may override to update descriptor sets </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a2df60aaf7369574373bc4ba768eda5a9">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#abb2a2c014641368b0204ab914f84e845">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#ac1e7805e2fb37df172f5acdff220335a">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a3e5aeacb46fe9502d9c0334e6f33f500">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a24844d3785289d6f99384d9a7d51258e">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a4128930767b0e39446f4cccf6ec8ff46">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a5b897c46a9c7b73d4e2f2f19ee045bbc">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aebc68f2358ec8eb4576ebe4d0254cb86">foray::stages::BasicRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -540,9 +540,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/stages/<a class="el" href="foray__renderstage_8hpp_source.html">foray_renderstage.hpp</a></li>
-<li>src/stages/<a class="el" href="foray__renderstage_8cpp.html">foray_renderstage.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

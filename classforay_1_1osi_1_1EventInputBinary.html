@@ -82,6 +82,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classforay_1_1osi_1_1Event.html" title="Base class for operating system events.">Event</a> type describing a binary input event.  
+ <a href="classforay_1_1osi_1_1EventInputBinary.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="foray__event_8hpp_source.html">foray_event.hpp</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for foray::osi::EventInputBinary:</div>
@@ -89,8 +92,8 @@ Inheritance diagram for foray::osi::EventInputBinary:</div>
  <div class="center">
   <img src="classforay_1_1osi_1_1EventInputBinary.png" usemap="#foray::osi::EventInputBinary_map" alt=""/>
   <map id="foray::osi::EventInputBinary_map" name="foray::osi::EventInputBinary_map">
-<area href="classforay_1_1osi_1_1EventInput.html" alt="foray::osi::EventInput" shape="rect" coords="0,112,166,136"/>
-<area href="classforay_1_1osi_1_1Event.html" title="Event Base class." alt="foray::osi::Event" shape="rect" coords="0,56,166,80"/>
+<area href="classforay_1_1osi_1_1EventInput.html" title="Base class for events originating from input devices." alt="foray::osi::EventInput" shape="rect" coords="0,112,166,136"/>
+<area href="classforay_1_1osi_1_1Event.html" title="Base class for operating system events." alt="foray::osi::Event" shape="rect" coords="0,56,166,80"/>
 <area href="classforay_1_1Polymorphic.html" title="Simple type for forcing a type to be polymorphic." alt="foray::Polymorphic" shape="rect" coords="0,0,166,24"/>
   </map>
 </div></div>
@@ -136,7 +139,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a34f96c77fc8215d28bb61270c30b28de inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timestamp when the action was recorded.  <a href="classforay_1_1osi_1_1Event.html#a34f96c77fc8215d28bb61270c30b28de">More...</a><br /></td></tr>
 <tr class="separator:a34f96c77fc8215d28bb61270c30b28de inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8aeb72e3338309a30d42e2425ad7b468 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1osi_1_1Event.html#ab9f78bda82d54ca15dec7346c6a00d9a">EType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1Event.html#a8aeb72e3338309a30d42e2425ad7b468">Type</a> = <a class="el" href="classforay_1_1osi_1_1Event.html#ab9f78bda82d54ca15dec7346c6a00d9aaec0fc0100c4fc1ce4eea230c3dc10360">EType::Undefined</a></td></tr>
-<tr class="memdesc:a8aeb72e3338309a30d42e2425ad7b468 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classforay_1_1osi_1_1Event.html" title="Event Base class.">Event</a> type.  <a href="classforay_1_1osi_1_1Event.html#a8aeb72e3338309a30d42e2425ad7b468">More...</a><br /></td></tr>
+<tr class="memdesc:a8aeb72e3338309a30d42e2425ad7b468 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classforay_1_1osi_1_1Event.html" title="Base class for operating system events.">Event</a> type.  <a href="classforay_1_1osi_1_1Event.html#a8aeb72e3338309a30d42e2425ad7b468">More...</a><br /></td></tr>
 <tr class="separator:a8aeb72e3338309a30d42e2425ad7b468 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22f8b6e648a96f91b74be1c24df62f99 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1Event.html#a22f8b6e648a96f91b74be1c24df62f99">CustomType</a> = 0</td></tr>
 <tr class="memdesc:a22f8b6e648a96f91b74be1c24df62f99 inherit pub_attribs_classforay_1_1osi_1_1Event"><td class="mdescLeft">&#160;</td><td class="mdescRight">For custom event type overloads, this value may be set.  <a href="classforay_1_1osi_1_1Event.html#a22f8b6e648a96f91b74be1c24df62f99">More...</a><br /></td></tr>
@@ -165,13 +168,15 @@ Additional Inherited Members</h2></td></tr>
 , <a class="el" href="classforay_1_1osi_1_1Event.html#ab9f78bda82d54ca15dec7346c6a00d9aa57bf742db8608b05d1f2d2b38332c38d">ENUM_MAX</a>
 <br />
  }</td></tr>
-<tr class="memdesc:ab9f78bda82d54ca15dec7346c6a00d9a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classforay_1_1osi_1_1Event.html" title="Event Base class.">Event</a> type enum, allows handling events in switch structures.  <a href="classforay_1_1osi_1_1Event.html#ab9f78bda82d54ca15dec7346c6a00d9a">More...</a><br /></td></tr>
+<tr class="memdesc:ab9f78bda82d54ca15dec7346c6a00d9a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classforay_1_1osi_1_1Event.html" title="Base class for operating system events.">Event</a> type enum, allows handling events in switch structures.  <a href="classforay_1_1osi_1_1Event.html#ab9f78bda82d54ca15dec7346c6a00d9a">More...</a><br /></td></tr>
 <tr class="separator:ab9f78bda82d54ca15dec7346c6a00d9a inherit pub_types_classforay_1_1osi_1_1Event"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classforay_1_1Polymorphic"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classforay_1_1Polymorphic')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classforay_1_1Polymorphic.html">foray::Polymorphic</a></td></tr>
 <tr class="memitem:a990797d68ef4e8c5b29c9b640f9a5c17 inherit pro_methods_classforay_1_1Polymorphic"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1Polymorphic.html#a990797d68ef4e8c5b29c9b640f9a5c17">__makeMePolymorphic</a> ()</td></tr>
 <tr class="separator:a990797d68ef4e8c5b29c9b640f9a5c17 inherit pro_methods_classforay_1_1Polymorphic"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p ><a class="el" href="classforay_1_1osi_1_1Event.html" title="Base class for operating system events.">Event</a> type describing a binary input event. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aada338042b14f2866553850ce12dbe4d" name="aada338042b14f2866553850ce12dbe4d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aada338042b14f2866553850ce12dbe4d">&#9670;&#160;</a></span>EventInputBinary() <span class="overload">[1/2]</span></h2>
 

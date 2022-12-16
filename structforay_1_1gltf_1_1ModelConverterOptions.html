@@ -82,29 +82,36 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Options for converting glTF models to the integrated scene graph (<a class="el" href="classforay_1_1scene_1_1Scene.html" title="Provides registries and methods as the anchor of a component based scene.">foray::scene::Scene</a>)  
+ <a href="structforay_1_1gltf_1_1ModelConverterOptions.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="foray__modelconverter_8hpp_source.html">foray_modelconverter.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a88f4a44530fa430a4ee5a6128cc8dbf6"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a88f4a44530fa430a4ee5a6128cc8dbf6">FpSceneSelect</a> = std::function&lt; int32_t(tinygltf::Model &amp;)&gt;</td></tr>
-<tr class="separator:a88f4a44530fa430a4ee5a6128cc8dbf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aded066376232a9075bf54ab5932c62e4"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#aded066376232a9075bf54ab5932c62e4">SceneSelectFunctionPointer</a> = std::function&lt; int32_t(tinygltf::Model &amp;)&gt;</td></tr>
+<tr class="separator:aded066376232a9075bf54ab5932c62e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a062a97b0dc3a9814d92ad7758ffaf416"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a88f4a44530fa430a4ee5a6128cc8dbf6">FpSceneSelect</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a062a97b0dc3a9814d92ad7758ffaf416">SceneSelect</a> = nullptr</td></tr>
-<tr class="separator:a062a97b0dc3a9814d92ad7758ffaf416"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34c0a8a5f000655436df172c5df2c5ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#aded066376232a9075bf54ab5932c62e4">SceneSelectFunctionPointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a34c0a8a5f000655436df172c5df2c5ed">SceneSelect</a> = nullptr</td></tr>
+<tr class="memdesc:a34c0a8a5f000655436df172c5df2c5ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">A model can define multiple scenes. Index 0 is selected automatically, set this function pointer to override this behavior.  <a href="structforay_1_1gltf_1_1ModelConverterOptions.html#a34c0a8a5f000655436df172c5df2c5ed">More...</a><br /></td></tr>
+<tr class="separator:a34c0a8a5f000655436df172c5df2c5ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab76f08d2b4ee7f8e8d031da8b0db098a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#ab76f08d2b4ee7f8e8d031da8b0db098a">FlipY</a> = false</td></tr>
+<tr class="memdesc:ab76f08d2b4ee7f8e8d031da8b0db098a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flip the model in the Y direction on loading (experimental)  <a href="structforay_1_1gltf_1_1ModelConverterOptions.html#ab76f08d2b4ee7f8e8d031da8b0db098a">More...</a><br /></td></tr>
 <tr class="separator:ab76f08d2b4ee7f8e8d031da8b0db098a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Typedef Documentation</h2>
-<a id="a88f4a44530fa430a4ee5a6128cc8dbf6" name="a88f4a44530fa430a4ee5a6128cc8dbf6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88f4a44530fa430a4ee5a6128cc8dbf6">&#9670;&#160;</a></span>FpSceneSelect</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p >Options for converting glTF models to the integrated scene graph (<a class="el" href="classforay_1_1scene_1_1Scene.html" title="Provides registries and methods as the anchor of a component based scene.">foray::scene::Scene</a>) </p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="aded066376232a9075bf54ab5932c62e4" name="aded066376232a9075bf54ab5932c62e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aded066376232a9075bf54ab5932c62e4">&#9670;&#160;</a></span>SceneSelectFunctionPointer</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a88f4a44530fa430a4ee5a6128cc8dbf6">foray::gltf::ModelConverterOptions::FpSceneSelect</a> =  std::function&lt;int32_t(tinygltf::Model&amp;)&gt;</td>
+          <td class="memname">using <a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#aded066376232a9075bf54ab5932c62e4">foray::gltf::ModelConverterOptions::SceneSelectFunctionPointer</a> =  std::function&lt;int32_t(tinygltf::Model&amp;)&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -124,19 +131,32 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Flip the model in the Y direction on loading (experimental) </p>
+<p >If true:</p><ul>
+<li>Y translation is inverted</li>
+<li>Y Vertex positions and normals are inverted</li>
+<li>Vertex order is flipped</li>
+</ul>
+<p >Problems:</p><ul>
+<li>Rotations are likely to break</li>
+</ul>
+<p >It is recommended to instead flip the viewport at some point later in the pipeline (for example when blitting to swapchain) </p>
+
 </div>
 </div>
-<a id="a062a97b0dc3a9814d92ad7758ffaf416" name="a062a97b0dc3a9814d92ad7758ffaf416"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a062a97b0dc3a9814d92ad7758ffaf416">&#9670;&#160;</a></span>SceneSelect</h2>
+<a id="a34c0a8a5f000655436df172c5df2c5ed" name="a34c0a8a5f000655436df172c5df2c5ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34c0a8a5f000655436df172c5df2c5ed">&#9670;&#160;</a></span>SceneSelect</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#a88f4a44530fa430a4ee5a6128cc8dbf6">FpSceneSelect</a> foray::gltf::ModelConverterOptions::SceneSelect = nullptr</td>
+          <td class="memname"><a class="el" href="structforay_1_1gltf_1_1ModelConverterOptions.html#aded066376232a9075bf54ab5932c62e4">SceneSelectFunctionPointer</a> foray::gltf::ModelConverterOptions::SceneSelect = nullptr</td>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>A model can define multiple scenes. Index 0 is selected automatically, set this function pointer to override this behavior. </p>
 
 </div>
 </div>

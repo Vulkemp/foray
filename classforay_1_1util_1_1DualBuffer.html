@@ -101,21 +101,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae046fc821df5c34879274a6b3affbfe9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ae046fc821df5c34879274a6b3affbfe9">Create</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context, const <a class="el" href="structforay_1_1core_1_1ManagedBuffer_1_1CreateInfo.html">core::ManagedBuffer::CreateInfo</a> &amp;devicebufferCreateInfo, uint32_t stageBufferCount=<a class="el" href="namespaceforay.html#a15b6b3f8d9dc6448821cf9a73ef346a6">INFLIGHT_FRAME_COUNT</a>)</td></tr>
 <tr class="memdesc:ae046fc821df5c34879274a6b3affbfe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the dualbuffer setup.  <a href="classforay_1_1util_1_1DualBuffer.html#ae046fc821df5c34879274a6b3affbfe9">More...</a><br /></td></tr>
 <tr class="separator:ae046fc821df5c34879274a6b3affbfe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab991ef8ad4a1a11f9b1513b011f9d0a4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ab991ef8ad4a1a11f9b1513b011f9d0a4">StageFullBuffer</a> (uint32_t frameIndex, const void *data)</td></tr>
-<tr class="memdesc:ab991ef8ad4a1a11f9b1513b011f9d0a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the entire staging buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#ab991ef8ad4a1a11f9b1513b011f9d0a4">More...</a><br /></td></tr>
-<tr class="separator:ab991ef8ad4a1a11f9b1513b011f9d0a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8316c111445aaffa5d80e8bd5426be9c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#a8316c111445aaffa5d80e8bd5426be9c">StageSection</a> (uint32_t frameIndex, const void *data, size_t destOffset, size_t size)</td></tr>
-<tr class="memdesc:a8316c111445aaffa5d80e8bd5426be9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates a section of a staging buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#a8316c111445aaffa5d80e8bd5426be9c">More...</a><br /></td></tr>
-<tr class="separator:a8316c111445aaffa5d80e8bd5426be9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8173b0f800e18c453d599c8b86be767"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ab8173b0f800e18c453d599c8b86be767">CmdCopyToDevice</a> (uint32_t frameIndex, VkCommandBuffer cmdBuffer)</td></tr>
-<tr class="memdesc:ab8173b0f800e18c453d599c8b86be767"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes commands required to copy the changes recorded in the indexed staging buffer to the device buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#ab8173b0f800e18c453d599c8b86be767">More...</a><br /></td></tr>
-<tr class="separator:ab8173b0f800e18c453d599c8b86be767"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b4b1966a48c53e5fdf968ab0aa74382"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#a0b4b1966a48c53e5fdf968ab0aa74382">CmdPrepareForRead</a> (VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const</td></tr>
-<tr class="memdesc:a0b4b1966a48c53e5fdf968ab0aa74382"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares the device buffer for read access with a pipeline barrier (must be called before read access happens to the buffer)  <a href="classforay_1_1util_1_1DualBuffer.html#a0b4b1966a48c53e5fdf968ab0aa74382">More...</a><br /></td></tr>
-<tr class="separator:a0b4b1966a48c53e5fdf968ab0aa74382"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3ae8f36dc5f6305087c783addab0305"><td class="memItemLeft" align="right" valign="top">virtual VkBufferMemoryBarrier2&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ab3ae8f36dc5f6305087c783addab0305">MakeBarrierPrepareForRead</a> (VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const</td></tr>
-<tr class="memdesc:ab3ae8f36dc5f6305087c783addab0305"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a barrier which prepares the device buffer for read access.  <a href="classforay_1_1util_1_1DualBuffer.html#ab3ae8f36dc5f6305087c783addab0305">More...</a><br /></td></tr>
-<tr class="separator:ab3ae8f36dc5f6305087c783addab0305"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0efab9223216bc4e7c865157287f8e23"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#a0efab9223216bc4e7c865157287f8e23">StageFullBuffer</a> (uint32_t frameIndex, const void *data)</td></tr>
+<tr class="memdesc:a0efab9223216bc4e7c865157287f8e23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the entire staging buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#a0efab9223216bc4e7c865157287f8e23">More...</a><br /></td></tr>
+<tr class="separator:a0efab9223216bc4e7c865157287f8e23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b25a6592c7a39b1a500428575919bdd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#a7b25a6592c7a39b1a500428575919bdd">StageSection</a> (uint32_t frameIndex, const void *data, size_t destOffset, size_t size)</td></tr>
+<tr class="memdesc:a7b25a6592c7a39b1a500428575919bdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates a section of a staging buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#a7b25a6592c7a39b1a500428575919bdd">More...</a><br /></td></tr>
+<tr class="separator:a7b25a6592c7a39b1a500428575919bdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeea3a09a161b08038e4788fe4ba05d05"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#aeea3a09a161b08038e4788fe4ba05d05">CmdCopyToDevice</a> (uint32_t frameIndex, VkCommandBuffer cmdBuffer)</td></tr>
+<tr class="memdesc:aeea3a09a161b08038e4788fe4ba05d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes commands required to copy the changes recorded in the indexed staging buffer to the device buffer.  <a href="classforay_1_1util_1_1DualBuffer.html#aeea3a09a161b08038e4788fe4ba05d05">More...</a><br /></td></tr>
+<tr class="separator:aeea3a09a161b08038e4788fe4ba05d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16509bc97b78457b76f6b7581b3b7bf2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#a16509bc97b78457b76f6b7581b3b7bf2">CmdPrepareForRead</a> (VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const</td></tr>
+<tr class="memdesc:a16509bc97b78457b76f6b7581b3b7bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares the device buffer for read access with a pipeline barrier (must be called before read access happens to the buffer)  <a href="classforay_1_1util_1_1DualBuffer.html#a16509bc97b78457b76f6b7581b3b7bf2">More...</a><br /></td></tr>
+<tr class="separator:a16509bc97b78457b76f6b7581b3b7bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba3677f684e9f7bce7ab67e2c18790d0"><td class="memItemLeft" align="right" valign="top">virtual VkBufferMemoryBarrier2&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#aba3677f684e9f7bce7ab67e2c18790d0">MakeBarrierPrepareForRead</a> (VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const</td></tr>
+<tr class="memdesc:aba3677f684e9f7bce7ab67e2c18790d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a barrier which prepares the device buffer for read access.  <a href="classforay_1_1util_1_1DualBuffer.html#aba3677f684e9f7bce7ab67e2c18790d0">More...</a><br /></td></tr>
+<tr class="separator:aba3677f684e9f7bce7ab67e2c18790d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad07ebb277b8267b2aa31ee9cc4a071da"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ad07ebb277b8267b2aa31ee9cc4a071da">Exists</a> () const</td></tr>
 <tr class="separator:ad07ebb277b8267b2aa31ee9cc4a071da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad563e6e05511ecab34c94db7b498ebce"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1DualBuffer.html#ad563e6e05511ecab34c94db7b498ebce">GetName</a> () const</td></tr>
@@ -158,13 +158,13 @@ Protected Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Helper class for organizing CPU -&gt; GPU data synchronisation. In flight data is stored on host side, and copied to GPU right before being used. </p>
 <p >Temporarily stores CPU-calculated states in staging buffers (1x per frame in flight) The GPU can retrieve the CPU-side data as needed via a copy command </p>
-<h1><a class="anchor" id="autotoc_md38"></a>
+<h1><a class="anchor" id="autotoc_md43"></a>
 Uploading Data</h1>
 <ul>
 <li>Stage sections or full buffer</li>
 <li>Record CmdCopyToDevice </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md39"></a>
+<h1><a class="anchor" id="autotoc_md44"></a>
 Reading data</h1>
 <ul>
 <li>Record CmdPrepareForRead</li>
@@ -197,8 +197,8 @@ Reading data</h1>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab8173b0f800e18c453d599c8b86be767" name="ab8173b0f800e18c453d599c8b86be767"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8173b0f800e18c453d599c8b86be767">&#9670;&#160;</a></span>CmdCopyToDevice()</h2>
+<a id="aeea3a09a161b08038e4788fe4ba05d05" name="aeea3a09a161b08038e4788fe4ba05d05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeea3a09a161b08038e4788fe4ba05d05">&#9670;&#160;</a></span>CmdCopyToDevice()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -207,7 +207,7 @@ Reading data</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::util::DualBuffer::CmdCopyToDevice </td>
+          <td class="memname">virtual void foray::util::DualBuffer::CmdCopyToDevice </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>frameIndex</em>, </td>
@@ -236,8 +236,8 @@ Reading data</h1>
 
 </div>
 </div>
-<a id="a0b4b1966a48c53e5fdf968ab0aa74382" name="a0b4b1966a48c53e5fdf968ab0aa74382"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b4b1966a48c53e5fdf968ab0aa74382">&#9670;&#160;</a></span>CmdPrepareForRead()</h2>
+<a id="a16509bc97b78457b76f6b7581b3b7bf2" name="a16509bc97b78457b76f6b7581b3b7bf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16509bc97b78457b76f6b7581b3b7bf2">&#9670;&#160;</a></span>CmdPrepareForRead()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -246,7 +246,7 @@ Reading data</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::util::DualBuffer::CmdPrepareForRead </td>
+          <td class="memname">virtual void foray::util::DualBuffer::CmdPrepareForRead </td>
           <td>(</td>
           <td class="paramtype">VkCommandBuffer&#160;</td>
           <td class="paramname"><em>cmdBuffer</em>, </td>
@@ -439,8 +439,8 @@ Reading data</h1>
 
 </div>
 </div>
-<a id="ab3ae8f36dc5f6305087c783addab0305" name="ab3ae8f36dc5f6305087c783addab0305"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3ae8f36dc5f6305087c783addab0305">&#9670;&#160;</a></span>MakeBarrierPrepareForRead()</h2>
+<a id="aba3677f684e9f7bce7ab67e2c18790d0" name="aba3677f684e9f7bce7ab67e2c18790d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba3677f684e9f7bce7ab67e2c18790d0">&#9670;&#160;</a></span>MakeBarrierPrepareForRead()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -449,7 +449,7 @@ Reading data</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">VkBufferMemoryBarrier2 foray::util::DualBuffer::MakeBarrierPrepareForRead </td>
+          <td class="memname">virtual VkBufferMemoryBarrier2 foray::util::DualBuffer::MakeBarrierPrepareForRead </td>
           <td>(</td>
           <td class="paramtype">VkPipelineStageFlags2&#160;</td>
           <td class="paramname"><em>dstStageMask</em>, </td>
@@ -495,8 +495,8 @@ Reading data</h1>
 
 </div>
 </div>
-<a id="ab991ef8ad4a1a11f9b1513b011f9d0a4" name="ab991ef8ad4a1a11f9b1513b011f9d0a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab991ef8ad4a1a11f9b1513b011f9d0a4">&#9670;&#160;</a></span>StageFullBuffer()</h2>
+<a id="a0efab9223216bc4e7c865157287f8e23" name="a0efab9223216bc4e7c865157287f8e23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0efab9223216bc4e7c865157287f8e23">&#9670;&#160;</a></span>StageFullBuffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -505,7 +505,7 @@ Reading data</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::util::DualBuffer::StageFullBuffer </td>
+          <td class="memname">virtual void foray::util::DualBuffer::StageFullBuffer </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>frameIndex</em>, </td>
@@ -533,8 +533,8 @@ Reading data</h1>
 
 </div>
 </div>
-<a id="a8316c111445aaffa5d80e8bd5426be9c" name="a8316c111445aaffa5d80e8bd5426be9c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8316c111445aaffa5d80e8bd5426be9c">&#9670;&#160;</a></span>StageSection()</h2>
+<a id="a7b25a6592c7a39b1a500428575919bdd" name="a7b25a6592c7a39b1a500428575919bdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b25a6592c7a39b1a500428575919bdd">&#9670;&#160;</a></span>StageSection()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -543,7 +543,7 @@ Reading data</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::util::DualBuffer::StageSection </td>
+          <td class="memname">virtual void foray::util::DualBuffer::StageSection </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>frameIndex</em>, </td>
@@ -680,9 +680,8 @@ Reading data</h1>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/util/<a class="el" href="foray__dualbuffer_8hpp_source.html">foray_dualbuffer.hpp</a></li>
-<li>src/util/<a class="el" href="foray__dualbuffer_8cpp.html">foray_dualbuffer.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

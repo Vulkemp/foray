@@ -117,37 +117,37 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac88a2b6e5afd28593e7e07c32de36748"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the frames host synchronization fence.  <a href="classforay_1_1base_1_1InFlightFrame.html#ac88a2b6e5afd28593e7e07c32de36748">More...</a><br /></td></tr>
 <tr class="separator:ac88a2b6e5afd28593e7e07c32de36748"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3e5c4678413ea44ad8106083bca5c6f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#aa3e5c4678413ea44ad8106083bca5c6f">SubmitAll</a> ()</td></tr>
-<tr class="memdesc:aa3e5c4678413ea44ad8106083bca5c6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::WriteToSubmitInfo(...) and submitting them in a single vkQueueSubmit2(...) call.  <a href="classforay_1_1base_1_1InFlightFrame.html#aa3e5c4678413ea44ad8106083bca5c6f">More...</a><br /></td></tr>
+<tr class="memdesc:aa3e5c4678413ea44ad8106083bca5c6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceSyncCommandBuffer::WriteToSubmitInfo(...) and submitting them in a single vkQueueSubmit2(...) call.  <a href="classforay_1_1base_1_1InFlightFrame.html#aa3e5c4678413ea44ad8106083bca5c6f">More...</a><br /></td></tr>
 <tr class="separator:aa3e5c4678413ea44ad8106083bca5c6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d20f32d2eaeebdcf3b1adf05f892f21"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a5d20f32d2eaeebdcf3b1adf05f892f21">GetAuxiliaryCommandBuffer</a> (uint32_t index)</td></tr>
-<tr class="memdesc:a5d20f32d2eaeebdcf3b1adf05f892f21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an auxiliary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a5d20f32d2eaeebdcf3b1adf05f892f21">More...</a><br /></td></tr>
-<tr class="separator:a5d20f32d2eaeebdcf3b1adf05f892f21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27a9b2dcc5d43c7f83c50b60fe9f3b70"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a27a9b2dcc5d43c7f83c50b60fe9f3b70">GetPrimaryCommandBuffer</a> ()</td></tr>
-<tr class="memdesc:a27a9b2dcc5d43c7f83c50b60fe9f3b70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a27a9b2dcc5d43c7f83c50b60fe9f3b70">More...</a><br /></td></tr>
-<tr class="separator:a27a9b2dcc5d43c7f83c50b60fe9f3b70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a518a408e925de04d26c65d6e15856cbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a518a408e925de04d26c65d6e15856cbe">GetCommandBuffer</a> (<a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a> index)</td></tr>
-<tr class="memdesc:a518a408e925de04d26c65d6e15856cbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a518a408e925de04d26c65d6e15856cbe">More...</a><br /></td></tr>
-<tr class="separator:a518a408e925de04d26c65d6e15856cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2ba5f67a321693eb435b680ed38a368"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#ad2ba5f67a321693eb435b680ed38a368">GetAuxiliaryCommandBuffer</a> (uint32_t index) const</td></tr>
-<tr class="memdesc:ad2ba5f67a321693eb435b680ed38a368"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an auxiliary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#ad2ba5f67a321693eb435b680ed38a368">More...</a><br /></td></tr>
-<tr class="separator:ad2ba5f67a321693eb435b680ed38a368"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a158c4e63f6ed3fc6794059cc9253f5c2"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a158c4e63f6ed3fc6794059cc9253f5c2">GetPrimaryCommandBuffer</a> () const</td></tr>
-<tr class="memdesc:a158c4e63f6ed3fc6794059cc9253f5c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a158c4e63f6ed3fc6794059cc9253f5c2">More...</a><br /></td></tr>
-<tr class="separator:a158c4e63f6ed3fc6794059cc9253f5c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab176a00623b66ec7687f01f2a94489bf"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#ab176a00623b66ec7687f01f2a94489bf">GetCommandBuffer</a> (<a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a> index) const</td></tr>
-<tr class="memdesc:ab176a00623b66ec7687f01f2a94489bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#ab176a00623b66ec7687f01f2a94489bf">More...</a><br /></td></tr>
-<tr class="separator:ab176a00623b66ec7687f01f2a94489bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad00534c3ff188efda71f6f399b6016f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#ad00534c3ff188efda71f6f399b6016f8">GetAuxiliaryCommandBuffer</a> (uint32_t index)</td></tr>
+<tr class="memdesc:ad00534c3ff188efda71f6f399b6016f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an auxiliary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#ad00534c3ff188efda71f6f399b6016f8">More...</a><br /></td></tr>
+<tr class="separator:ad00534c3ff188efda71f6f399b6016f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77ffb0516492b0a175655968aecf9a75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a77ffb0516492b0a175655968aecf9a75">GetPrimaryCommandBuffer</a> ()</td></tr>
+<tr class="memdesc:a77ffb0516492b0a175655968aecf9a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a77ffb0516492b0a175655968aecf9a75">More...</a><br /></td></tr>
+<tr class="separator:a77ffb0516492b0a175655968aecf9a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d6a4bcf30a36d2c4a4b427aaec64e37"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a9d6a4bcf30a36d2c4a4b427aaec64e37">GetCommandBuffer</a> (<a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a> index)</td></tr>
+<tr class="memdesc:a9d6a4bcf30a36d2c4a4b427aaec64e37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a9d6a4bcf30a36d2c4a4b427aaec64e37">More...</a><br /></td></tr>
+<tr class="separator:a9d6a4bcf30a36d2c4a4b427aaec64e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ef57a038bdc33a5f954ca10a50e8890"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a2ef57a038bdc33a5f954ca10a50e8890">GetAuxiliaryCommandBuffer</a> (uint32_t index) const</td></tr>
+<tr class="memdesc:a2ef57a038bdc33a5f954ca10a50e8890"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an auxiliary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a2ef57a038bdc33a5f954ca10a50e8890">More...</a><br /></td></tr>
+<tr class="separator:a2ef57a038bdc33a5f954ca10a50e8890"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e3468bbfd04da9ca34299bc58319074"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a3e3468bbfd04da9ca34299bc58319074">GetPrimaryCommandBuffer</a> () const</td></tr>
+<tr class="memdesc:a3e3468bbfd04da9ca34299bc58319074"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a3e3468bbfd04da9ca34299bc58319074">More...</a><br /></td></tr>
+<tr class="separator:a3e3468bbfd04da9ca34299bc58319074"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad36022b37a79b7845763336bba25c90c"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#ad36022b37a79b7845763336bba25c90c">GetCommandBuffer</a> (<a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a> index) const</td></tr>
+<tr class="memdesc:ad36022b37a79b7845763336bba25c90c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#ad36022b37a79b7845763336bba25c90c">More...</a><br /></td></tr>
+<tr class="separator:ad36022b37a79b7845763336bba25c90c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
 <tr class="memitem:a96d5fe584dc99d28b7cfeea886e69397"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a96d5fe584dc99d28b7cfeea886e69397">mContext</a> = nullptr</td></tr>
 <tr class="separator:a96d5fe584dc99d28b7cfeea886e69397"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27245706a16bb09d5ce9d225567add60"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::unique_ptr&lt; <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a27245706a16bb09d5ce9d225567add60">mAuxiliaryCommandBuffers</a></td></tr>
-<tr class="memdesc:a27245706a16bb09d5ce9d225567add60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auxiliary command buffers.  <a href="classforay_1_1base_1_1InFlightFrame.html#a27245706a16bb09d5ce9d225567add60">More...</a><br /></td></tr>
-<tr class="separator:a27245706a16bb09d5ce9d225567add60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a550eb8f8d6302bf834bdd2cd3e42e3c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a550eb8f8d6302bf834bdd2cd3e42e3c0">mPrimaryCommandBuffer</a></td></tr>
-<tr class="memdesc:a550eb8f8d6302bf834bdd2cd3e42e3c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#a550eb8f8d6302bf834bdd2cd3e42e3c0">More...</a><br /></td></tr>
-<tr class="separator:a550eb8f8d6302bf834bdd2cd3e42e3c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a733eeb5c6f730b14558bb452046e2f37"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::unique_ptr&lt; <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a733eeb5c6f730b14558bb452046e2f37">mAuxiliaryCommandBuffers</a></td></tr>
+<tr class="memdesc:a733eeb5c6f730b14558bb452046e2f37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auxiliary command buffers.  <a href="classforay_1_1base_1_1InFlightFrame.html#a733eeb5c6f730b14558bb452046e2f37">More...</a><br /></td></tr>
+<tr class="separator:a733eeb5c6f730b14558bb452046e2f37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad489fa2a811f8bd1dcee35361848ad72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#ad489fa2a811f8bd1dcee35361848ad72">mPrimaryCommandBuffer</a></td></tr>
+<tr class="memdesc:ad489fa2a811f8bd1dcee35361848ad72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primary command buffer.  <a href="classforay_1_1base_1_1InFlightFrame.html#ad489fa2a811f8bd1dcee35361848ad72">More...</a><br /></td></tr>
+<tr class="separator:ad489fa2a811f8bd1dcee35361848ad72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0febc5e5339709f872dfc24076540cc4"><td class="memItemLeft" align="right" valign="top">VkSemaphore&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1InFlightFrame.html#a0febc5e5339709f872dfc24076540cc4">mSwapchainImageReady</a> = nullptr</td></tr>
 <tr class="memdesc:a0febc5e5339709f872dfc24076540cc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Semaphore signalled by the device when the swapchain image becomes ready.  <a href="classforay_1_1base_1_1InFlightFrame.html#a0febc5e5339709f872dfc24076540cc4">More...</a><br /></td></tr>
 <tr class="separator:a0febc5e5339709f872dfc24076540cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,6 +162,20 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Wraps synchronization primitives and command buffers for an inflight frame. </p>
+<p >USAGE (SINGLE CMD BUFFER PER FRAME):</p><ul>
+<li>Use the primary command buffer. Submit it before presenting</li>
+</ul>
+<p >USAGE (MULTIPLE)</p><ul>
+<li>The Primary command buffer should be used for swapchain interaction aswell as host synchronization<ul>
+<li>InflightFrame's methods respect this</li>
+</ul>
+</li>
+<li>The user must synchronize all commandbuffers themselves, so the primary commandbuffer functions properly:<ul>
+<li>Add the SwapchainImageReady Semaphore as a waitsemaphore to one of the command buffers</li>
+<li>Use semaphores to synchronise your command buffers as needed </li>
+</ul>
+</li>
+</ul>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4f4917a8a13d1f357706acbb4339e3ca" name="a4f4917a8a13d1f357706acbb4339e3ca"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4f4917a8a13d1f357706acbb4339e3ca">&#9670;&#160;</a></span>~InFlightFrame()</h2>
@@ -284,14 +298,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a5d20f32d2eaeebdcf3b1adf05f892f21" name="a5d20f32d2eaeebdcf3b1adf05f892f21"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d20f32d2eaeebdcf3b1adf05f892f21">&#9670;&#160;</a></span>GetAuxiliaryCommandBuffer() <span class="overload">[1/2]</span></h2>
+<a id="ad00534c3ff188efda71f6f399b6016f8" name="ad00534c3ff188efda71f6f399b6016f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad00534c3ff188efda71f6f399b6016f8">&#9670;&#160;</a></span>GetAuxiliaryCommandBuffer() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetAuxiliaryCommandBuffer </td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetAuxiliaryCommandBuffer </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -310,14 +324,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ad2ba5f67a321693eb435b680ed38a368" name="ad2ba5f67a321693eb435b680ed38a368"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2ba5f67a321693eb435b680ed38a368">&#9670;&#160;</a></span>GetAuxiliaryCommandBuffer() <span class="overload">[2/2]</span></h2>
+<a id="a2ef57a038bdc33a5f954ca10a50e8890" name="a2ef57a038bdc33a5f954ca10a50e8890"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ef57a038bdc33a5f954ca10a50e8890">&#9670;&#160;</a></span>GetAuxiliaryCommandBuffer() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetAuxiliaryCommandBuffer </td>
+          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetAuxiliaryCommandBuffer </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -336,14 +350,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a518a408e925de04d26c65d6e15856cbe" name="a518a408e925de04d26c65d6e15856cbe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a518a408e925de04d26c65d6e15856cbe">&#9670;&#160;</a></span>GetCommandBuffer() <span class="overload">[1/2]</span></h2>
+<a id="a9d6a4bcf30a36d2c4a4b427aaec64e37" name="a9d6a4bcf30a36d2c4a4b427aaec64e37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d6a4bcf30a36d2c4a4b427aaec64e37">&#9670;&#160;</a></span>GetCommandBuffer() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetCommandBuffer </td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetCommandBuffer </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a>&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -362,14 +376,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ab176a00623b66ec7687f01f2a94489bf" name="ab176a00623b66ec7687f01f2a94489bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab176a00623b66ec7687f01f2a94489bf">&#9670;&#160;</a></span>GetCommandBuffer() <span class="overload">[2/2]</span></h2>
+<a id="ad36022b37a79b7845763336bba25c90c" name="ad36022b37a79b7845763336bba25c90c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad36022b37a79b7845763336bba25c90c">&#9670;&#160;</a></span>GetCommandBuffer() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetCommandBuffer </td>
+          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetCommandBuffer </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="namespaceforay_1_1base.html#af67581d2f9156753e5fb9811660f7945">CmdBufferIndex</a>&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -388,14 +402,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a27a9b2dcc5d43c7f83c50b60fe9f3b70" name="a27a9b2dcc5d43c7f83c50b60fe9f3b70"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27a9b2dcc5d43c7f83c50b60fe9f3b70">&#9670;&#160;</a></span>GetPrimaryCommandBuffer() <span class="overload">[1/2]</span></h2>
+<a id="a77ffb0516492b0a175655968aecf9a75" name="a77ffb0516492b0a175655968aecf9a75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77ffb0516492b0a175655968aecf9a75">&#9670;&#160;</a></span>GetPrimaryCommandBuffer() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetPrimaryCommandBuffer </td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetPrimaryCommandBuffer </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -407,14 +421,14 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a158c4e63f6ed3fc6794059cc9253f5c2" name="a158c4e63f6ed3fc6794059cc9253f5c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a158c4e63f6ed3fc6794059cc9253f5c2">&#9670;&#160;</a></span>GetPrimaryCommandBuffer() <span class="overload">[2/2]</span></h2>
+<a id="a3e3468bbfd04da9ca34299bc58319074" name="a3e3468bbfd04da9ca34299bc58319074"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e3468bbfd04da9ca34299bc58319074">&#9670;&#160;</a></span>GetPrimaryCommandBuffer() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> &amp; foray::base::InFlightFrame::GetPrimaryCommandBuffer </td>
+          <td class="memname">const <a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> &amp; foray::base::InFlightFrame::GetPrimaryCommandBuffer </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -529,7 +543,7 @@ Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceCommandBuffer::WriteToSubmitInfo(...) and submitting them in a single vkQueueSubmit2(...) call. </p>
+<p>Submits all command buffers by getting all VkSubmitInfo2{} structures from DeviceSyncCommandBuffer::WriteToSubmitInfo(...) and submitting them in a single vkQueueSubmit2(...) call. </p>
 
 </div>
 </div>
@@ -553,8 +567,8 @@ Protected Attributes</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a27245706a16bb09d5ce9d225567add60" name="a27245706a16bb09d5ce9d225567add60"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27245706a16bb09d5ce9d225567add60">&#9670;&#160;</a></span>mAuxiliaryCommandBuffers</h2>
+<a id="a733eeb5c6f730b14558bb452046e2f37" name="a733eeb5c6f730b14558bb452046e2f37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a733eeb5c6f730b14558bb452046e2f37">&#9670;&#160;</a></span>mAuxiliaryCommandBuffers</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -563,7 +577,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;std::unique_ptr&lt;<a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a>&gt; &gt; foray::base::InFlightFrame::mAuxiliaryCommandBuffers</td>
+          <td class="memname">std::vector&lt;std::unique_ptr&lt;<a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a>&gt; &gt; foray::base::InFlightFrame::mAuxiliaryCommandBuffers</td>
         </tr>
       </table>
   </td>
@@ -599,8 +613,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a550eb8f8d6302bf834bdd2cd3e42e3c0" name="a550eb8f8d6302bf834bdd2cd3e42e3c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a550eb8f8d6302bf834bdd2cd3e42e3c0">&#9670;&#160;</a></span>mPrimaryCommandBuffer</h2>
+<a id="ad489fa2a811f8bd1dcee35361848ad72" name="ad489fa2a811f8bd1dcee35361848ad72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad489fa2a811f8bd1dcee35361848ad72">&#9670;&#160;</a></span>mPrimaryCommandBuffer</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -609,7 +623,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">core::DeviceCommandBuffer</a> foray::base::InFlightFrame::mPrimaryCommandBuffer</td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">core::DeviceSyncCommandBuffer</a> foray::base::InFlightFrame::mPrimaryCommandBuffer</td>
         </tr>
       </table>
   </td>
@@ -717,9 +731,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/base/<a class="el" href="foray__inflightframe_8hpp_source.html">foray_inflightframe.hpp</a></li>
-<li>src/base/<a class="el" href="foray__inflightframe_8cpp.html">foray_inflightframe.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -9,7 +9,7 @@ var indexSectionsWithContent =
   6: "abcdefgimoprstw",
   7: "emr",
   8: "abcdefghijklmnprstuvwy",
-  9: "fgo",
+  9: "fg",
   10: "fs"
 };
 

@@ -95,7 +95,7 @@ Inheritance diagram for foray::rtpipe::ShaderBindingTableBase:</div>
   <img src="classforay_1_1rtpipe_1_1ShaderBindingTableBase.png" usemap="#foray::rtpipe::ShaderBindingTableBase_map" alt=""/>
   <map id="foray::rtpipe::ShaderBindingTableBase_map" name="foray::rtpipe::ShaderBindingTableBase_map">
 <area href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html" title="Shader binding table for storing raygen, miss and callable shader groups." alt="foray::rtpipe::GeneralShaderBindingTable" shape="rect" coords="0,56,245,80"/>
-<area href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html" alt="foray::rtpipe::HitShaderBindingTable" shape="rect" coords="255,56,500,80"/>
+<area href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html" title="Shader binding table implementation for storing hit groups (Consist of optional closesthit,..." alt="foray::rtpipe::HitShaderBindingTable" shape="rect" coords="255,56,500,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -108,9 +108,9 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a73fba99a8eb450b083e82b7077e8969a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a73fba99a8eb450b083e82b7077e8969a">ShaderBindingTableBase</a> (VkDeviceSize entryDataSize=0)</td></tr>
 <tr class="separator:a73fba99a8eb450b083e82b7077e8969a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90decec8fff4aa54eb4f800c2dab4980"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a90decec8fff4aa54eb4f800c2dab4980">Build</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR &amp;pipelineProperties, const std::vector&lt; const uint8_t * &gt; &amp;handles)</td></tr>
-<tr class="memdesc:a90decec8fff4aa54eb4f800c2dab4980"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuilds the SBT buffer according to the pipeline properties and matching indices.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a90decec8fff4aa54eb4f800c2dab4980">More...</a><br /></td></tr>
-<tr class="separator:a90decec8fff4aa54eb4f800c2dab4980"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea718fe8628a6bcc07bbdca9dcb458ee"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#aea718fe8628a6bcc07bbdca9dcb458ee">Build</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context, const VkPhysicalDeviceRayTracingPipelinePropertiesKHR &amp;pipelineProperties, const std::vector&lt; const uint8_t * &gt; &amp;handles)</td></tr>
+<tr class="memdesc:aea718fe8628a6bcc07bbdca9dcb458ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuilds the SBT buffer according to the pipeline properties and matching indices.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#aea718fe8628a6bcc07bbdca9dcb458ee">More...</a><br /></td></tr>
+<tr class="separator:aea718fe8628a6bcc07bbdca9dcb458ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93e3fbcac19828bf8fa57443beed7aa3"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a93e3fbcac19828bf8fa57443beed7aa3">GroupDataAt</a> (<a class="el" href="namespaceforay_1_1rtpipe.html#aad8b5c546b1a53f27e2014669bdec0a8">GroupIndex</a> groupIndex)</td></tr>
 <tr class="memdesc:a93e3fbcac19828bf8fa57443beed7aa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the custom data entry for a group.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a93e3fbcac19828bf8fa57443beed7aa3">More...</a><br /></td></tr>
 <tr class="separator:a93e3fbcac19828bf8fa57443beed7aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,17 +132,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5e32ffa88e9459bfd62fe68aefdfee20"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a5e32ffa88e9459bfd62fe68aefdfee20">SetData</a> (<a class="el" href="namespaceforay_1_1rtpipe.html#aad8b5c546b1a53f27e2014669bdec0a8">GroupIndex</a> groupIndex, const TData &amp;data)</td></tr>
 <tr class="memdesc:a5e32ffa88e9459bfd62fe68aefdfee20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the custom data entry for a group.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a5e32ffa88e9459bfd62fe68aefdfee20">More...</a><br /></td></tr>
 <tr class="separator:a5e32ffa88e9459bfd62fe68aefdfee20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78ff3bf250dba6f3903c17c0e4240b6b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html">ShaderBindingTableBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a78ff3bf250dba6f3903c17c0e4240b6b">SetEntryDataSize</a> (VkDeviceSize newSize)</td></tr>
-<tr class="memdesc:a78ff3bf250dba6f3903c17c0e4240b6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the custom entry data size. Any non-zero custom data is resized according to std::vector&lt;uint8_t&gt;::resize(newSize)!  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a78ff3bf250dba6f3903c17c0e4240b6b">More...</a><br /></td></tr>
-<tr class="separator:a78ff3bf250dba6f3903c17c0e4240b6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af66b6a024e8b13fbc6dee44ac042286e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html">ShaderBindingTableBase</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#af66b6a024e8b13fbc6dee44ac042286e">SetEntryDataSize</a> (VkDeviceSize newSize)</td></tr>
+<tr class="memdesc:af66b6a024e8b13fbc6dee44ac042286e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the custom entry data size. Any non-zero custom data is resized according to std::vector&lt;uint8_t&gt;::resize(newSize)!  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#af66b6a024e8b13fbc6dee44ac042286e">More...</a><br /></td></tr>
+<tr class="separator:af66b6a024e8b13fbc6dee44ac042286e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4dcdf1f49c7f083a24dbe21c53a43746"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a4dcdf1f49c7f083a24dbe21c53a43746">WriteToShaderCollection</a> (<a class="el" href="classforay_1_1rtpipe_1_1RtShaderCollection.html">RtShaderCollection</a> &amp;collection) const =0</td></tr>
 <tr class="memdesc:a4dcdf1f49c7f083a24dbe21c53a43746"><td class="mdescLeft">&#160;</td><td class="mdescRight">For any shader group defined, register it with the collection.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a4dcdf1f49c7f083a24dbe21c53a43746">More...</a><br /></td></tr>
 <tr class="separator:a4dcdf1f49c7f083a24dbe21c53a43746"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a539e5c173819d89ec0b22b96d80fb463"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structforay_1_1rtpipe_1_1ShaderBindingTableBase_1_1VectorRange.html">VectorRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a539e5c173819d89ec0b22b96d80fb463">WriteToShaderGroupCiVector</a> (std::vector&lt; VkRayTracingShaderGroupCreateInfoKHR &gt; &amp;groupCis, const <a class="el" href="classforay_1_1rtpipe_1_1RtShaderCollection.html">RtShaderCollection</a> &amp;shaderCollection) const =0</td></tr>
 <tr class="memdesc:a539e5c173819d89ec0b22b96d80fb463"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the shader groups to groupCis vector.  <a href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#a539e5c173819d89ec0b22b96d80fb463">More...</a><br /></td></tr>
 <tr class="separator:a539e5c173819d89ec0b22b96d80fb463"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0c786d16ce59b0f638c17fe374ed54e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#aa0c786d16ce59b0f638c17fe374ed54e">Destroy</a> ()</td></tr>
-<tr class="separator:aa0c786d16ce59b0f638c17fe374ed54e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa02bc5bb4962c9cc9741dec4b3815bd4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#aa02bc5bb4962c9cc9741dec4b3815bd4">Destroy</a> ()</td></tr>
+<tr class="separator:aa02bc5bb4962c9cc9741dec4b3815bd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3fa1afcef643ee78df573215c4f0196"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html#ac3fa1afcef643ee78df573215c4f0196">~ShaderBindingTableBase</a> ()</td></tr>
 <tr class="separator:ac3fa1afcef643ee78df573215c4f0196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -167,9 +167,11 @@ Protected Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Shader Binding Table base class, providing functions to manage custom generic shader group data and SBT building, aswell as buffer management. </p>
 <p >A shader binding table stores entries in the following layout</p>
-<p >| Entry0 | Entry1 | ... |--------------------------&mdash;|--------------------------&mdash;|----&mdash; | GroupHandle | Custom Data | GroupHandle | Custom Data | ...</p>
-<p >Where the GroupHandle is a vulkan driver specific memory block (all currently known drivers use 32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize It is essentially a reference to a ShaderGroup as defined in the CreateInfo passed to 'createRayTracingPipelinesKHR'</p>
-<p >Custom Data is an optional memory area of user defined size, used to initialize indices. It allows pairing shaders with different configuration parameters.</p>
+<div class="fragment"><div class="line">| Entry0                      | Entry1                      | ...</div>
+<div class="line">|-----------------------------|-----------------------------|-------</div>
+<div class="line">| GroupHandle | Custom Data   | GroupHandle | Custom Data   | ...</div>
+</div><!-- fragment --><p >Where the GroupHandle is a vulkan driver specific memory block (all currently known drivers use 32 bit values here), as defined by VkPhysicalDeviceRayTracingPipelinePropertiesKHR::shaderGroupHandleSize It is essentially a reference to a ShaderGroup as defined in the CreateInfo passed to 'createRayTracingPipelinesKHR'</p>
+<p >Custom Data is an optional memory area of user defined size. It allows pairing shaders with different configuration parameters.</p>
 <p >ShaderBindingTable classes Usage:</p>
 <ol type="1">
 <li>If you use custom data, best use SetEntryDataSize(...) first</li>
@@ -256,8 +258,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a90decec8fff4aa54eb4f800c2dab4980" name="a90decec8fff4aa54eb4f800c2dab4980"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90decec8fff4aa54eb4f800c2dab4980">&#9670;&#160;</a></span>Build()</h2>
+<a id="aea718fe8628a6bcc07bbdca9dcb458ee" name="aea718fe8628a6bcc07bbdca9dcb458ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea718fe8628a6bcc07bbdca9dcb458ee">&#9670;&#160;</a></span>Build()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -266,7 +268,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::rtpipe::ShaderBindingTableBase::Build </td>
+          <td class="memname">virtual void foray::rtpipe::ShaderBindingTableBase::Build </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td>
           <td class="paramname"><em>context</em>, </td>
@@ -305,15 +307,11 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p >STEP # 0 Calculate entry size</p>
-<p >STEP # 1 Allocate buffer</p>
-<p >STEP # 2 Build buffer data</p>
-<p >STEP # 3 Write buffer data</p>
 
 </div>
 </div>
-<a id="aa0c786d16ce59b0f638c17fe374ed54e" name="aa0c786d16ce59b0f638c17fe374ed54e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0c786d16ce59b0f638c17fe374ed54e">&#9670;&#160;</a></span>Destroy()</h2>
+<a id="aa02bc5bb4962c9cc9741dec4b3815bd4" name="aa02bc5bb4962c9cc9741dec4b3815bd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa02bc5bb4962c9cc9741dec4b3815bd4">&#9670;&#160;</a></span>Destroy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -322,7 +320,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::rtpipe::ShaderBindingTableBase::Destroy </td>
+          <td class="memname">virtual void foray::rtpipe::ShaderBindingTableBase::Destroy </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -335,7 +333,7 @@ Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reimplemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#a720437af6ef73941a2c3d36f7e30724f">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a6aac02928f8e4c79da5cdabb1d5cb815">foray::rtpipe::HitShaderBindingTable</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#aa64286a85ff48b0290be4e179887ddfc">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a4c2011de8ae518bd12ad2e2a1992410a">foray::rtpipe::HitShaderBindingTable</a>.</p>
 
 </div>
 </div>
@@ -536,8 +534,8 @@ template&lt;typename TData &gt; </div>
 
 </div>
 </div>
-<a id="a78ff3bf250dba6f3903c17c0e4240b6b" name="a78ff3bf250dba6f3903c17c0e4240b6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a78ff3bf250dba6f3903c17c0e4240b6b">&#9670;&#160;</a></span>SetEntryDataSize()</h2>
+<a id="af66b6a024e8b13fbc6dee44ac042286e" name="af66b6a024e8b13fbc6dee44ac042286e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af66b6a024e8b13fbc6dee44ac042286e">&#9670;&#160;</a></span>SetEntryDataSize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -546,7 +544,7 @@ template&lt;typename TData &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html">ShaderBindingTableBase</a> &amp; foray::rtpipe::ShaderBindingTableBase::SetEntryDataSize </td>
+          <td class="memname">virtual <a class="el" href="classforay_1_1rtpipe_1_1ShaderBindingTableBase.html">ShaderBindingTableBase</a> &amp; foray::rtpipe::ShaderBindingTableBase::SetEntryDataSize </td>
           <td>(</td>
           <td class="paramtype">VkDeviceSize&#160;</td>
           <td class="paramname"><em>newSize</em></td><td>)</td>
@@ -590,7 +588,7 @@ template&lt;typename TData &gt; </div>
 
 <p>For any shader group defined, register it with the collection. </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#af3dc2822676ff83d5bc58132b3f61ad3">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a784ed344f0282c54392dc84063c7a225">foray::rtpipe::HitShaderBindingTable</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#a55d3856bd425eaa0d86b177812fc0765">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a3c0236ee851445c89034c75bceb23b1b">foray::rtpipe::HitShaderBindingTable</a>.</p>
 
 </div>
 </div>
@@ -637,7 +635,7 @@ template&lt;typename TData &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the range in the groupCis vector used by this Sbts' ShaderGroups </dd></dl>
 
-<p>Implemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#a6e821a335dd0e868126c8b2cc1ceb772">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a9d0bd0b3bb0a1423f4e850a69323d300">foray::rtpipe::HitShaderBindingTable</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1rtpipe_1_1GeneralShaderBindingTable.html#aaee06fca8fc42260eba3df1ab35aa10f">foray::rtpipe::GeneralShaderBindingTable</a>, and <a class="el" href="classforay_1_1rtpipe_1_1HitShaderBindingTable.html#a6a2db5d43014a128fe3002093e6a04cd">foray::rtpipe::HitShaderBindingTable</a>.</p>
 
 </div>
 </div>
@@ -730,9 +728,8 @@ template&lt;typename TData &gt; </div>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/rtpipe/<a class="el" href="foray__basesbt_8hpp_source.html">foray_basesbt.hpp</a></li>
-<li>src/rtpipe/<a class="el" href="foray__basesbt_8cpp.html">foray_basesbt.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

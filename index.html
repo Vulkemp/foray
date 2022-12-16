@@ -73,22 +73,23 @@ $(function() {
   <div class="headertitle"><div class="title">Foray Library </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p ><a class="anchor" id="md_readme"></a> Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos. </p>
+<div class="textblock"><p ><a class="anchor" id="md_readme"></a> Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos.</p>
+<p ><code>Version: 1.0.0</code></p>
 <h1><a class="anchor" id="autotoc_md0"></a>
-⚠️ Notice</h1>
-<ul>
-<li>This library is still under heavy development. The Api is still subject to frequent breaking changes. </li>
-</ul>
-<h1><a class="anchor" id="autotoc_md1"></a>
 Useful Links</h1>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Documentation</h2>
+<p ><a href="https://vulkemp.github.io/foray/index.html">Doxygen hosted on GH Pages</a> </p>
+<h2><a class="anchor" id="autotoc_md2"></a>
+Projects Using Foray</h2>
 <ul>
 <li><a href="https://github.com/Vulkemp/foray-examples">foray-examples</a>: Examples demonstrating GBuffer, minimal raytracer, complex raytracer</li>
 <li><a href="https://github.com/Vulkemp/foray-denoising">foray-denoising</a>: Project demonstrating and comparing denoiser implementations: OptiX, ASVGF, BMFR (WIP)</li>
 <li><a href="https://github.com/Vulkemp/foray_restir">foray_restir</a>: ReStir demo implementation </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md3"></a>
 Features</h1>
-<h2><a class="anchor" id="autotoc_md3"></a>
+<h2><a class="anchor" id="autotoc_md4"></a>
 Quick Setup or Custom Setup</h2>
 <ul>
 <li>Inherit from base types to get a very quick and easy start<ul>
@@ -99,7 +100,7 @@ Quick Setup or Custom Setup</h2>
 </li>
 <li>Utilise the support types manually for a fully customizable setup </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md5"></a>
 Scene Graph</h2>
 <ul>
 <li>Hierarchical scene graph</li>
@@ -107,7 +108,7 @@ Scene Graph</h2>
 <li>Component system</li>
 <li>Default component implementations based on glTF format specifications </li>
 </ul>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md6"></a>
 Loading from glTF</h3>
 <ul>
 <li>The scenegraph is built by loading a glTF file<ul>
@@ -117,7 +118,7 @@ Loading from glTF</h3>
 </li>
 <li>Multiple scenes can be merged into one </li>
 </ul>
-<h3><a class="anchor" id="autotoc_md6"></a>
+<h3><a class="anchor" id="autotoc_md7"></a>
 Integration with Acceleration Structures</h3>
 <ul>
 <li>Meshes will automatically generate a BLAS</li>
@@ -125,16 +126,16 @@ Integration with Acceleration Structures</h3>
 <li>Material and Primitive buffer information is stored in a BLAS Instance <code>instanceCustomOffset</code> property</li>
 <li>Runtime TLAS rebuilding for animated scene nodes </li>
 </ul>
-<h3><a class="anchor" id="autotoc_md7"></a>
+<h3><a class="anchor" id="autotoc_md8"></a>
 Animation Support</h3>
 <ul>
 <li>Animate node transforms (translation, scale, rotation)</li>
 <li>Interpolate in steps, linearly and glTFs cubic splines </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Rasterized GBuffer</h2>
 <p >The GBuffer provides the basis for denoising </p>
-<h3><a class="anchor" id="autotoc_md9"></a>
+<h3><a class="anchor" id="autotoc_md10"></a>
 Outputs</h3>
 <ul>
 <li><code>Position</code>: Fragment positions in Worldspace</li>
@@ -146,19 +147,19 @@ Outputs</h3>
 <li><code>LinearZ</code>: Linear depth information and depth derivative</li>
 <li><code>Depth</code>: Default Vulkan Depth output </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 Shader Binding Table and Ray tracing Pipeline Helper classes</h2>
 <ul>
 <li>Very little code required for complex shader binding table setup</li>
 <li>Ability to set custom data for shader binding table entries</li>
 <li>Integration into a builder class for Ray tracing Pipeline </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Generalized Denoiser Interface</h2>
 <ul>
 <li>Simple interface for integrating denoisers into custom render system *Extra handling required for externally synchronized denoisers such as OptiX </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 Common Vulkan Helper classes</h2>
 <ul>
 <li>VkBuffer wrapper</li>
@@ -166,13 +167,13 @@ Common Vulkan Helper classes</h2>
 <li>DescriptorSet + Layout wrapper</li>
 <li>... many more </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md14"></a>
 Device Benchmarking</h2>
 <ul>
 <li>Vulkan QueryPool based for accurate device execution time benchmarking</li>
 <li>Included methods for printing benchmark results in a CSV compatible format or as a ImGui table </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Shader Management</h2>
 <ul>
 <li>Shader sources and included files are monitored for changes at runtime, shaders recompiled and reloaded.</li>
@@ -180,7 +181,7 @@ Shader Management</h2>
 <li>SPIR-V binaries compiled are handled individually according to the glslc parameters used for compilation.</li>
 </ul>
 <p >Get an overview of the code in the <a href="./src/">./src/ directory</a> </p>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md16"></a>
 Usage</h1>
 <ol type="1">
 <li>Add the library as a submodule to your git repository <div class="fragment"><div class="line">git submodule add https://github.com/Vulkemp/foray</div>
@@ -213,7 +214,7 @@ Usage</h1>
 <div class="line">)</div>
 </div><!-- fragment --> </li>
 </ol>
-<h1><a class="anchor" id="autotoc_md16"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 Third Party Dependencies</h1>
 <ul>
 <li><a href="https://github.com/g-truc/glm">GLM</a>: GLSL-like mathematics library (MIT License)</li>
@@ -224,7 +225,25 @@ Third Party Dependencies</h1>
 <li><a href="https://github.com/syoyo/tinyexr">tinyexr</a>: Loading library for EXR high dynamic range image file format (Custom License)</li>
 <li><a href="https://github.com/syoyo/tinygltf">tinygltf</a>: glTF loader library (MIT License)</li>
 <li><a href="https://github.com/charles-lunarg/vk-bootstrap">vk-bootstrap</a>: Utility library for instance creation, device selection and building, queue selection and swapchain creation (MIT License)</li>
-<li><a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">Vulkan Memory Allocator</a>: Simplified Vulkan memory allocation (MIT License) </li>
+<li><a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">Vulkan Memory Allocator</a>: Simplified Vulkan memory allocation (MIT License)</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md18"></a>
+Versioning</h1>
+<h2><a class="anchor" id="autotoc_md19"></a>
+Major</h2>
+<ul>
+<li>API may be subject to breaking changes between major versions </li>
+</ul>
+<h2><a class="anchor" id="autotoc_md20"></a>
+Minor</h2>
+<ul>
+<li>API is guaranteed compatible</li>
+<li>Features may be added </li>
+</ul>
+<h2><a class="anchor" id="autotoc_md21"></a>
+Patch</h2>
+<ul>
+<li>Fully compatible, fixes only </li>
 </ul>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->

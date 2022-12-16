@@ -176,8 +176,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ImageLoader.html">ImageLoader</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">General purpose image loader.  <a href="classforay_1_1util_1_1ImageLoader.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1util_1_1LoadParams.html">LoadParams</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1ManagedUbo.html">ManagedUbo</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template class for managing a UBO. For Host -&gt; Device synchronization this utilises a <a class="el" href="classforay_1_1util_1_1DualBuffer.html" title="Helper class for organizing CPU -&gt; GPU data synchronisation. In flight data is stored on host side,...">DualBuffer</a>.  <a href="classforay_1_1util_1_1ManagedUbo.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -237,11 +235,6 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:af90247e7f0a58ca9e52455043a538146"><td class="memTemplParams" colspan="2">template&lt;VkFormat format&gt; </td></tr>
-<tr class="memitem:af90247e7f0a58ca9e52455043a538146"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1util.html#af90247e7f0a58ca9e52455043a538146">lLoadF</a> (const <a class="el" href="structforay_1_1util_1_1LoadParams.html">LoadParams</a> &amp;params)</td></tr>
-<tr class="separator:af90247e7f0a58ca9e52455043a538146"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4310ecb6c95bc926e07ea2afb2563bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1util.html#af4310ecb6c95bc926e07ea2afb2563bd">lLoad</a> (VkFormat format, const <a class="el" href="structforay_1_1util_1_1LoadParams.html">LoadParams</a> &amp;params)</td></tr>
-<tr class="separator:af4310ecb6c95bc926e07ea2afb2563bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c683bae9a33b3a155f7257fb659d6b1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1util.html#a4c683bae9a33b3a155f7257fb659d6b1">PrintSize</a> (size_t size)</td></tr>
 <tr class="separator:a4c683bae9a33b3a155f7257fb659d6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8452bdba991443a8a4b8d7a3bad3098"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
@@ -473,54 +466,6 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Calculates a hash value for any block of memory. </p>
-
-</div>
-</div>
-<a id="af4310ecb6c95bc926e07ea2afb2563bd" name="af4310ecb6c95bc926e07ea2afb2563bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af4310ecb6c95bc926e07ea2afb2563bd">&#9670;&#160;</a></span>lLoad()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void foray::util::lLoad </td>
-          <td>(</td>
-          <td class="paramtype">VkFormat&#160;</td>
-          <td class="paramname"><em>format</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structforay_1_1util_1_1LoadParams.html">LoadParams</a> &amp;&#160;</td>
-          <td class="paramname"><em>params</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="af90247e7f0a58ca9e52455043a538146" name="af90247e7f0a58ca9e52455043a538146"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af90247e7f0a58ca9e52455043a538146">&#9670;&#160;</a></span>lLoadF()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;VkFormat format&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">void foray::util::lLoadF </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structforay_1_1util_1_1LoadParams.html">LoadParams</a> &amp;&#160;</td>
-          <td class="paramname"><em>params</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>

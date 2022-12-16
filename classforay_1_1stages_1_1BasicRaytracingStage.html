@@ -101,18 +101,18 @@ Inheritance diagram for foray::stages::BasicRaytracingStage:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3ed2fa953494c184905352cb7d7df191"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a3ed2fa953494c184905352cb7d7df191">Init</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context)</td></tr>
-<tr class="memdesc:a3ed2fa953494c184905352cb7d7df191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys, assigns context, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a0807b08f5b7e65ce12d4f7a277803ca7" title="Inheriting types should setup their Output Images here and push them onto the RenderStage::mImageOutp...">CreateOutputImages()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ab73b8fe12221fd383fd3d6a647dd1cee" title="Inheriting types may use this function to initialize stage specific objects such as configuration Ubo...">CustomObjectsCreate()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a257b4cd206fc23040805e7160f12c856" title="Inheriting types should create mPipelineLayout here (add descriptorsetlayouts, add pushconstants,...">CreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a5f4f379b6a1563f08d50e3815c73cc3f" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">CreateRtPipeline()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#a3ed2fa953494c184905352cb7d7df191">More...</a><br /></td></tr>
-<tr class="separator:a3ed2fa953494c184905352cb7d7df191"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a742ec1142baef92d678a2d1e10838e09"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a742ec1142baef92d678a2d1e10838e09">RecordFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo) override</td></tr>
-<tr class="memdesc:a742ec1142baef92d678a2d1e10838e09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aef6be82c2c734e66270138459ceac3db" title="Inheriting types should use this for pipeline barriers and stage specific buffer actions.">RecordFramePrepare()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac0a298de4fce44ffc8ef6dfca650be46" title="Inheriting types should use this to bind the RtPipeline and all descriptor sets.">RecordFrameBind()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adf86274fd803077b2ff590329a979e3d" title="Inheriting types should use this to push constants and invoke tracerays.">RecordFrameTraceRays()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#a742ec1142baef92d678a2d1e10838e09">More...</a><br /></td></tr>
-<tr class="separator:a742ec1142baef92d678a2d1e10838e09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e5aeacb46fe9502d9c0334e6f33f500"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a3e5aeacb46fe9502d9c0334e6f33f500">Resize</a> (const VkExtent2D &amp;extent) override</td></tr>
-<tr class="memdesc:a3e5aeacb46fe9502d9c0334e6f33f500"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff" title="Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image...">RenderStage::Resize</a>(..) which resizes any image registered to mImageOutputs, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a> afterwards.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#a3e5aeacb46fe9502d9c0334e6f33f500">More...</a><br /></td></tr>
-<tr class="separator:a3e5aeacb46fe9502d9c0334e6f33f500"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adadca8e959464b9cf7621576d090a693"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adadca8e959464b9cf7621576d090a693">Destroy</a> () override</td></tr>
-<tr class="memdesc:adadca8e959464b9cf7621576d090a693"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a1ad898250a9301b6adf124b7893aff7a" title="Inheriting types should destroy all descriptor sets used here.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#abc8f98eee47fe3958ed8d162ce4e8ea3" title="Inheriting types may use this function to destroy options created during CustomObjectsCreate()">CustomObjectsDestroy()</a> <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#adadca8e959464b9cf7621576d090a693">More...</a><br /></td></tr>
-<tr class="separator:adadca8e959464b9cf7621576d090a693"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee9e41f5b2a920d2fab0e66cec7b77a9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aee9e41f5b2a920d2fab0e66cec7b77a9">Init</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context)</td></tr>
+<tr class="memdesc:aee9e41f5b2a920d2fab0e66cec7b77a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys, assigns context, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a0807b08f5b7e65ce12d4f7a277803ca7" title="Inheriting types should setup their Output Images here and push them onto the RenderStage::mImageOutp...">CreateOutputImages()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ab73b8fe12221fd383fd3d6a647dd1cee" title="Inheriting types may use this function to initialize stage specific objects such as configuration Ubo...">CustomObjectsCreate()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a257b4cd206fc23040805e7160f12c856" title="Inheriting types should create mPipelineLayout here (add descriptorsetlayouts, add pushconstants,...">CreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a5f4f379b6a1563f08d50e3815c73cc3f" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">CreateRtPipeline()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#aee9e41f5b2a920d2fab0e66cec7b77a9">More...</a><br /></td></tr>
+<tr class="separator:aee9e41f5b2a920d2fab0e66cec7b77a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac22bea55b128482959d22956b48994a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac22bea55b128482959d22956b48994a1">RecordFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo) override</td></tr>
+<tr class="memdesc:ac22bea55b128482959d22956b48994a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aef6be82c2c734e66270138459ceac3db" title="Inheriting types should use this for pipeline barriers and stage specific buffer actions.">RecordFramePrepare()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac0a298de4fce44ffc8ef6dfca650be46" title="Inheriting types should use this to bind the RtPipeline and all descriptor sets.">RecordFrameBind()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adf86274fd803077b2ff590329a979e3d" title="Inheriting types should use this to push constants and invoke tracerays.">RecordFrameTraceRays()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac22bea55b128482959d22956b48994a1">More...</a><br /></td></tr>
+<tr class="separator:ac22bea55b128482959d22956b48994a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebc68f2358ec8eb4576ebe4d0254cb86"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aebc68f2358ec8eb4576ebe4d0254cb86">Resize</a> (const VkExtent2D &amp;extent) override</td></tr>
+<tr class="memdesc:aebc68f2358ec8eb4576ebe4d0254cb86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5" title="Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image...">RenderStage::Resize</a>(..) which resizes any image registered to mImageOutputs, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a> afterwards.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#aebc68f2358ec8eb4576ebe4d0254cb86">More...</a><br /></td></tr>
+<tr class="separator:aebc68f2358ec8eb4576ebe4d0254cb86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc5c459a83c46f6d60649035e94b0edd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adc5c459a83c46f6d60649035e94b0edd">Destroy</a> () override</td></tr>
+<tr class="memdesc:adc5c459a83c46f6d60649035e94b0edd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a1ad898250a9301b6adf124b7893aff7a" title="Inheriting types should destroy all descriptor sets used here.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#abc8f98eee47fe3958ed8d162ce4e8ea3" title="Inheriting types may use this function to destroy options created during CustomObjectsCreate()">CustomObjectsDestroy()</a> <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#adc5c459a83c46f6d60649035e94b0edd">More...</a><br /></td></tr>
+<tr class="separator:adc5c459a83c46f6d60649035e94b0edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classforay_1_1stages_1_1RenderStage"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classforay_1_1stages_1_1RenderStage')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classforay_1_1stages_1_1RenderStage.html">foray::stages::RenderStage</a></td></tr>
 <tr class="memitem:a83c95f5f505cf1a829af535e3b1f6df5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a83c95f5f505cf1a829af535e3b1f6df5">RenderStage</a> ()=default</td></tr>
 <tr class="separator:a83c95f5f505cf1a829af535e3b1f6df5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,18 +122,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abc330f08d8b46b7f2e38085295f4106d inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">Destroy</a> ()</td></tr>
 <tr class="memdesc:abc330f08d8b46b7f2e38085295f4106d inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the render stage. Finalizes all components.  <a href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">More...</a><br /></td></tr>
 <tr class="separator:abc330f08d8b46b7f2e38085295f4106d inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7476ba05a4cd53256ee18299a8089bff inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff">Resize</a> (const VkExtent2D &amp;extent)</td></tr>
-<tr class="memdesc:a7476ba05a4cd53256ee18299a8089bff inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image.  <a href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff">More...</a><br /></td></tr>
-<tr class="separator:a7476ba05a4cd53256ee18299a8089bff inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae969a77e824f304e57bedbf7385e49c5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5">Resize</a> (const VkExtent2D &amp;extent)</td></tr>
+<tr class="memdesc:ae969a77e824f304e57bedbf7385e49c5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image.  <a href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5">More...</a><br /></td></tr>
+<tr class="separator:ae969a77e824f304e57bedbf7385e49c5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9e261703198a03dbd7ca8c7a5def74a inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#aa9e261703198a03dbd7ca8c7a5def74a">GetImageOutputs</a> ()</td></tr>
 <tr class="memdesc:aa9e261703198a03dbd7ca8c7a5def74a inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.  <a href="classforay_1_1stages_1_1RenderStage.html#aa9e261703198a03dbd7ca8c7a5def74a">More...</a><br /></td></tr>
 <tr class="separator:aa9e261703198a03dbd7ca8c7a5def74a inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3e27cd599baf6f5925cacad3569a0dd inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ad3e27cd599baf6f5925cacad3569a0dd">GetImageOutput</a> (std::string_view name, bool noThrow=false)</td></tr>
 <tr class="memdesc:ad3e27cd599baf6f5925cacad3569a0dd inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets an image output.  <a href="classforay_1_1stages_1_1RenderStage.html#ad3e27cd599baf6f5925cacad3569a0dd">More...</a><br /></td></tr>
 <tr class="separator:ad3e27cd599baf6f5925cacad3569a0dd inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fc5e7bc74d5fed99d80c62f133d7020 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a4fc5e7bc74d5fed99d80c62f133d7020">OnShadersRecompiled</a> (const std::unordered_set&lt; uint64_t &gt; &amp;recompiled)</td></tr>
-<tr class="memdesc:a4fc5e7bc74d5fed99d80c62f133d7020 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notifies the stage that the shader compiler instance has recompiled a shader.  <a href="classforay_1_1stages_1_1RenderStage.html#a4fc5e7bc74d5fed99d80c62f133d7020">More...</a><br /></td></tr>
-<tr class="separator:a4fc5e7bc74d5fed99d80c62f133d7020 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace99f389c890a0638e4aaddeaf4b0d49 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#ace99f389c890a0638e4aaddeaf4b0d49">OnShadersRecompiled</a> (const std::unordered_set&lt; uint64_t &gt; &amp;recompiled)</td></tr>
+<tr class="memdesc:ace99f389c890a0638e4aaddeaf4b0d49 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notifies the stage that the shader compiler instance has recompiled a shader.  <a href="classforay_1_1stages_1_1RenderStage.html#ace99f389c890a0638e4aaddeaf4b0d49">More...</a><br /></td></tr>
+<tr class="separator:ace99f389c890a0638e4aaddeaf4b0d49 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12455956a8eb06819944d3b24722fc94 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a12455956a8eb06819944d3b24722fc94">~RenderStage</a> ()</td></tr>
 <tr class="separator:a12455956a8eb06819944d3b24722fc94 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -178,16 +178,16 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:adf86274fd803077b2ff590329a979e3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adf86274fd803077b2ff590329a979e3d">RecordFrameTraceRays</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo)=0</td></tr>
 <tr class="memdesc:adf86274fd803077b2ff590329a979e3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inheriting types should use this to push constants and invoke tracerays.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#adf86274fd803077b2ff590329a979e3d">More...</a><br /></td></tr>
 <tr class="separator:adf86274fd803077b2ff590329a979e3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42f0350bd425d8ae5613e617a07adf3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a42f0350bd425d8ae5613e617a07adf3d">ReloadShaders</a> () override</td></tr>
-<tr class="memdesc:a42f0350bd425d8ae5613e617a07adf3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a5f4f379b6a1563f08d50e3815c73cc3f" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">CreateRtPipeline()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#a42f0350bd425d8ae5613e617a07adf3d">More...</a><br /></td></tr>
-<tr class="separator:a42f0350bd425d8ae5613e617a07adf3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16f46da2c805a1c4e706bb9a823c9d4a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a16f46da2c805a1c4e706bb9a823c9d4a">ReloadShaders</a> () override</td></tr>
+<tr class="memdesc:a16f46da2c805a1c4e706bb9a823c9d4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a5f4f379b6a1563f08d50e3815c73cc3f" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">CreateRtPipeline()</a> in this order.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#a16f46da2c805a1c4e706bb9a823c9d4a">More...</a><br /></td></tr>
+<tr class="separator:a16f46da2c805a1c4e706bb9a823c9d4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classforay_1_1stages_1_1RenderStage"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classforay_1_1stages_1_1RenderStage')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classforay_1_1stages_1_1RenderStage.html">foray::stages::RenderStage</a></td></tr>
 <tr class="memitem:aee119ed5b7cb441465432fdce0533f1c inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">ReloadShaders</a> ()</td></tr>
 <tr class="memdesc:aee119ed5b7cb441465432fdce0533f1c inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.  <a href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">More...</a><br /></td></tr>
 <tr class="separator:aee119ed5b7cb441465432fdce0533f1c inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68f8745308508c3048d45299a8023c5e inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e">DestroyOutputImages</a> ()</td></tr>
-<tr class="memdesc:a68f8745308508c3048d45299a8023c5e inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d" title="Destroy the render stage. Finalizes all components.">Destroy()</a> on any image in mImageOutputs and clears mImageOutputs.  <a href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e">More...</a><br /></td></tr>
-<tr class="separator:a68f8745308508c3048d45299a8023c5e inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b72b8d474073be00957431591c3c85f inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f">DestroyOutputImages</a> ()</td></tr>
+<tr class="memdesc:a5b72b8d474073be00957431591c3c85f inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d" title="Destroy the render stage. Finalizes all components.">Destroy()</a> on any image in mImageOutputs and clears mImageOutputs.  <a href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f">More...</a><br /></td></tr>
+<tr class="separator:a5b72b8d474073be00957431591c3c85f inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -210,13 +210,13 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Minimalist setup for a Raytracing Stage. </p>
-<h1><a class="anchor" id="autotoc_md33"></a>
+<h1><a class="anchor" id="autotoc_md38"></a>
 Features</h1>
 <ul>
 <li>Pipeline &amp; Pipeline Layout Members</li>
 <li>Rerouting of Init, RecordFrame, OnResized and Destroy callbacks to appropriate member methods </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md34"></a>
+<h1><a class="anchor" id="autotoc_md39"></a>
 Inheriting</h1>
 <ul>
 <li>Required Override: <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a257b4cd206fc23040805e7160f12c856" title="Inheriting types should create mPipelineLayout here (add descriptorsetlayouts, add pushconstants,...">CreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a5f4f379b6a1563f08d50e3815c73cc3f" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">CreateRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aef6be82c2c734e66270138459ceac3db" title="Inheriting types should use this for pipeline barriers and stage specific buffer actions.">RecordFramePrepare()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac0a298de4fce44ffc8ef6dfca650be46" title="Inheriting types should use this to bind the RtPipeline and all descriptor sets.">RecordFrameBind()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adf86274fd803077b2ff590329a979e3d" title="Inheriting types should use this to push constants and invoke tracerays.">RecordFrameTraceRays()</a></li>
@@ -248,7 +248,7 @@ Inheriting</h1>
 
 <p>Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a61684c47f05de8fdb0b7473c6b2a8753">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#af6dd27be4f8146ddf3cdc5120e5111f7">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -277,7 +277,7 @@ Inheriting</h1>
 
 <p>Inheriting types should setup their Output Images here and push them onto the RenderStage::mImageOutput collection. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a93211d8db89d2758619bd36c431d4503">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a14f3fa86365e2526aa7e84b717d11035">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -306,7 +306,7 @@ Inheriting</h1>
 
 <p>Inheriting types should create mPipelineLayout here (add descriptorsetlayouts, add pushconstants, build) </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a234a03a6dfa03a882da5cbe961b14cda">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a4856ca9b8e9dc88bf8367a30c8598b8c">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -391,8 +391,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="adadca8e959464b9cf7621576d090a693" name="adadca8e959464b9cf7621576d090a693"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adadca8e959464b9cf7621576d090a693">&#9670;&#160;</a></span>Destroy()</h2>
+<a id="adc5c459a83c46f6d60649035e94b0edd" name="adc5c459a83c46f6d60649035e94b0edd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc5c459a83c46f6d60649035e94b0edd">&#9670;&#160;</a></span>Destroy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -401,7 +401,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::BasicRaytracingStage::Destroy </td>
+          <td class="memname">virtual void foray::stages::BasicRaytracingStage::Destroy </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -414,7 +414,7 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a1ad898250a9301b6adf124b7893aff7a" title="Inheriting types should destroy all descriptor sets used here.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#abc8f98eee47fe3958ed8d162ce4e8ea3" title="Inheriting types may use this function to destroy options created during CustomObjectsCreate()">CustomObjectsDestroy()</a> <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a68f8745308508c3048d45299a8023c5e" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order. </p>
+<p>Calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#acdacb5e2ecfacea60fdd40faa17c8619" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">DestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a1ad898250a9301b6adf124b7893aff7a" title="Inheriting types should destroy all descriptor sets used here.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#abc8f98eee47fe3958ed8d162ce4e8ea3" title="Inheriting types may use this function to destroy options created during CustomObjectsCreate()">CustomObjectsDestroy()</a> <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order. </p>
 
 <p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">foray::stages::RenderStage</a>.</p>
 
@@ -445,7 +445,7 @@ Inheriting</h1>
 
 <p>Inheriting types should destroy all descriptor sets used here. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a5e2895fd61f73499bf5317cc89881408">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a1ef0eebc58c808cc4642a38e14f1e82b">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -476,8 +476,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a3ed2fa953494c184905352cb7d7df191" name="a3ed2fa953494c184905352cb7d7df191"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ed2fa953494c184905352cb7d7df191">&#9670;&#160;</a></span>Init()</h2>
+<a id="aee9e41f5b2a920d2fab0e66cec7b77a9" name="aee9e41f5b2a920d2fab0e66cec7b77a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee9e41f5b2a920d2fab0e66cec7b77a9">&#9670;&#160;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -486,7 +486,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::BasicRaytracingStage::Init </td>
+          <td class="memname">virtual void foray::stages::BasicRaytracingStage::Init </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td>
           <td class="paramname"><em>context</em></td><td>)</td>
@@ -504,8 +504,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a742ec1142baef92d678a2d1e10838e09" name="a742ec1142baef92d678a2d1e10838e09"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a742ec1142baef92d678a2d1e10838e09">&#9670;&#160;</a></span>RecordFrame()</h2>
+<a id="ac22bea55b128482959d22956b48994a1" name="ac22bea55b128482959d22956b48994a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac22bea55b128482959d22956b48994a1">&#9670;&#160;</a></span>RecordFrame()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -514,7 +514,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::BasicRaytracingStage::RecordFrame </td>
+          <td class="memname">virtual void foray::stages::BasicRaytracingStage::RecordFrame </td>
           <td>(</td>
           <td class="paramtype">VkCommandBuffer&#160;</td>
           <td class="paramname"><em>cmdBuffer</em>, </td>
@@ -580,7 +580,7 @@ Inheriting</h1>
 
 <p>Inheriting types should use this to bind the RtPipeline and all descriptor sets. </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a5b9dae6adb64678d1aa6d0bd6851bdc9">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#af500154435d43809db1d2864fc2d75ad">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -620,7 +620,7 @@ Inheriting</h1>
 
 <p>Inheriting types should use this for pipeline barriers and stage specific buffer actions. </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a044c7ea1fddec2e65fa1e5a9c52066b9">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a12b31339bd9154fb201b03367fc1dfc6">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
@@ -660,12 +660,12 @@ Inheriting</h1>
 
 <p>Inheriting types should use this to push constants and invoke tracerays. </p>
 
-<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#a71a7470045c2544766ed9d6cbbc9adb0">foray::stages::ExtRaytracingStage</a>.</p>
+<p>Implemented in <a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html#af5bb9ffaa8d8811f140f6d98c4fa854a">foray::stages::ExtRaytracingStage</a>.</p>
 
 </div>
 </div>
-<a id="a42f0350bd425d8ae5613e617a07adf3d" name="a42f0350bd425d8ae5613e617a07adf3d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42f0350bd425d8ae5613e617a07adf3d">&#9670;&#160;</a></span>ReloadShaders()</h2>
+<a id="a16f46da2c805a1c4e706bb9a823c9d4a" name="a16f46da2c805a1c4e706bb9a823c9d4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16f46da2c805a1c4e706bb9a823c9d4a">&#9670;&#160;</a></span>ReloadShaders()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -674,7 +674,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::BasicRaytracingStage::ReloadShaders </td>
+          <td class="memname">virtual void foray::stages::BasicRaytracingStage::ReloadShaders </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -693,8 +693,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a3e5aeacb46fe9502d9c0334e6f33f500" name="a3e5aeacb46fe9502d9c0334e6f33f500"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e5aeacb46fe9502d9c0334e6f33f500">&#9670;&#160;</a></span>Resize()</h2>
+<a id="aebc68f2358ec8eb4576ebe4d0254cb86" name="aebc68f2358ec8eb4576ebe4d0254cb86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebc68f2358ec8eb4576ebe4d0254cb86">&#9670;&#160;</a></span>Resize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -703,7 +703,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void foray::stages::BasicRaytracingStage::Resize </td>
+          <td class="memname">virtual void foray::stages::BasicRaytracingStage::Resize </td>
           <td>(</td>
           <td class="paramtype">const VkExtent2D &amp;&#160;</td>
           <td class="paramname"><em>extent</em></td><td>)</td>
@@ -717,7 +717,7 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff" title="Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image...">RenderStage::Resize</a>(..) which resizes any image registered to mImageOutputs, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a> afterwards. </p>
+<p>Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5" title="Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image...">RenderStage::Resize</a>(..) which resizes any image registered to mImageOutputs, calls <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#af63e2b7fd63bf25bcadd1fd13c55d858" title="Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets.">CreateOrUpdateDescriptors()</a> afterwards. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">extent</td><td>New render extent </td></tr>
@@ -725,7 +725,7 @@ Inheriting</h1>
   </dd>
 </dl>
 
-<p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a7476ba05a4cd53256ee18299a8089bff">foray::stages::RenderStage</a>.</p>
+<p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5">foray::stages::RenderStage</a>.</p>
 
 </div>
 </div>
@@ -806,9 +806,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/stages/<a class="el" href="foray__raytracingstage_8hpp_source.html">foray_raytracingstage.hpp</a></li>
-<li>src/stages/<a class="el" href="foray__raytracingstage_8cpp.html">foray_raytracingstage.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

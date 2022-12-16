@@ -93,13 +93,13 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Non owning context object.  <a href="structforay_1_1core_1_1Context.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DescriptorSet.html">DescriptorSet</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helps with the creation of a VkDescriptorSetLayout and VkDescriptorSet. Not supported.  <a href="classforay_1_1core_1_1DescriptorSet.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helps with the creation of a VkDescriptorSetLayout and VkDescriptorSet.  <a href="classforay_1_1core_1_1DescriptorSet.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceCommandBuffer.html">DeviceCommandBuffer</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extension of the commandbuffer wrapper for device and/or host synchronized command buffer execution.  <a href="classforay_1_1core_1_1DeviceCommandBuffer.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html">DeviceSyncCommandBuffer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extension of the commandbuffer wrapper for device and/or host synchronized command buffer execution.  <a href="classforay_1_1core_1_1DeviceSyncCommandBuffer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostCommandBuffer.html">HostCommandBuffer</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extension of the commandbuffer wrapper for temporary host synchronized command buffer execution.  <a href="classforay_1_1core_1_1HostCommandBuffer.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1HostSyncCommandBuffer.html">HostSyncCommandBuffer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extension of the commandbuffer wrapper for temporary host synchronized command buffer execution.  <a href="classforay_1_1core_1_1HostSyncCommandBuffer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1core_1_1ImageLayoutCache.html">ImageLayoutCache</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tracks ImageLayouts over the course of a frame rendering process.  <a href="classforay_1_1core_1_1ImageLayoutCache.html#details">More...</a><br /></td></tr>
@@ -143,38 +143,8 @@ Functions</h2></td></tr>
 <tr class="memitem:a9d897293bf014f47b8a79d809bf1cde7"><td class="memItemLeft" align="right" valign="top">std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1core.html#a9d897293bf014f47b8a79d809bf1cde7">PrintVkObjectType</a> (VkObjectType objecType)</td></tr>
 <tr class="memdesc:a9d897293bf014f47b8a79d809bf1cde7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uses nameof.hpp's NAMEOF_ENUM function to stringify VkObjectType.  <a href="namespaceforay_1_1core.html#a9d897293bf014f47b8a79d809bf1cde7">More...</a><br /></td></tr>
 <tr class="separator:a9d897293bf014f47b8a79d809bf1cde7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6f8b026989aa4c489a310ea4ab6bee2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1core.html#ae6f8b026989aa4c489a310ea4ab6bee2">findIncludeDirectives</a> (const <a class="el" href="classforay_1_1osi_1_1Utf8Path.html">osi::Utf8Path</a> &amp;path, std::vector&lt; <a class="el" href="classforay_1_1osi_1_1Utf8Path.html">osi::Utf8Path</a> &gt; &amp;outIncludeDirectives)</td></tr>
-<tr class="separator:ae6f8b026989aa4c489a310ea4ab6bee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ae6f8b026989aa4c489a310ea4ab6bee2" name="ae6f8b026989aa4c489a310ea4ab6bee2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6f8b026989aa4c489a310ea4ab6bee2">&#9670;&#160;</a></span>findIncludeDirectives()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void foray::core::findIncludeDirectives </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classforay_1_1osi_1_1Utf8Path.html">osi::Utf8Path</a> &amp;&#160;</td>
-          <td class="paramname"><em>path</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="classforay_1_1osi_1_1Utf8Path.html">osi::Utf8Path</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>outIncludeDirectives</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a9d897293bf014f47b8a79d809bf1cde7" name="a9d897293bf014f47b8a79d809bf1cde7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9d897293bf014f47b8a79d809bf1cde7">&#9670;&#160;</a></span>PrintVkObjectType()</h2>
 
@@ -185,7 +155,7 @@ Functions</h2></td></tr>
           <td class="memname">std::string_view foray::core::PrintVkObjectType </td>
           <td>(</td>
           <td class="paramtype">VkObjectType&#160;</td>
-          <td class="paramname"><em>objectType</em></td><td>)</td>
+          <td class="paramname"><em>objecType</em></td><td>)</td>
           <td></td>
         </tr>
       </table>

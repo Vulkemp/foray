@@ -90,7 +90,7 @@ Inheritance diagram for foray::osi::InputDevice::ButtonJoystick:</div>
   <img src="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.png" usemap="#foray::osi::InputDevice::ButtonJoystick_map" alt=""/>
   <map id="foray::osi::InputDevice::ButtonJoystick_map" name="foray::osi::InputDevice::ButtonJoystick_map">
 <area href="classforay_1_1osi_1_1InputBinary.html" title="Represents a single input with a state represented by a boolean value." alt="foray::osi::InputBinary" shape="rect" coords="0,56,224,80"/>
-<area href="classforay_1_1osi_1_1InputBase.html" alt="foray::osi::InputBase" shape="rect" coords="0,0,224,24"/>
+<area href="classforay_1_1osi_1_1InputBase.html" title="Base class for a single input channel of an input device." alt="foray::osi::InputBase" shape="rect" coords="0,0,224,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -100,9 +100,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ad7a6953a44574b386b4945b2ebe89712"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55636131e56ad162715e3dcc5c9f6446"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.html#a55636131e56ad162715e3dcc5c9f6446">ButtonJoystick</a> (<a class="el" href="classforay_1_1osi_1_1InputDevice.html">InputDevice</a> *device, int32_t id, std::string_view name, <a class="el" href="namespaceforay_1_1osi.html#ae9f719340d0e8a1cdd5fde5c49ed397b">EButton</a> button, SDL_Joystick *joystick)</td></tr>
 <tr class="separator:a55636131e56ad162715e3dcc5c9f6446"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65edc3aa832b5650fdfa92a38799f8c5"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.html#a65edc3aa832b5650fdfa92a38799f8c5">State</a> () const override</td></tr>
-<tr class="memdesc:a65edc3aa832b5650fdfa92a38799f8c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.html#a65edc3aa832b5650fdfa92a38799f8c5">More...</a><br /></td></tr>
-<tr class="separator:a65edc3aa832b5650fdfa92a38799f8c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d75336588b55f7e685eced90f853be6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.html#a9d75336588b55f7e685eced90f853be6">State</a> () const override</td></tr>
+<tr class="memdesc:a9d75336588b55f7e685eced90f853be6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1ButtonJoystick.html#a9d75336588b55f7e685eced90f853be6">More...</a><br /></td></tr>
+<tr class="separator:a9d75336588b55f7e685eced90f853be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputBinary.html#a2c93d2753a43bb5aed26eb5fdf8216c2">State</a> () const =0</td></tr>
 <tr class="memdesc:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputBinary.html#a2c93d2753a43bb5aed26eb5fdf8216c2">More...</a><br /></td></tr>
 <tr class="separator:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,8 +217,8 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a65edc3aa832b5650fdfa92a38799f8c5" name="a65edc3aa832b5650fdfa92a38799f8c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65edc3aa832b5650fdfa92a38799f8c5">&#9670;&#160;</a></span>State()</h2>
+<a id="a9d75336588b55f7e685eced90f853be6" name="a9d75336588b55f7e685eced90f853be6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d75336588b55f7e685eced90f853be6">&#9670;&#160;</a></span>State()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -227,7 +227,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool foray::osi::InputDevice::ButtonJoystick::State </td>
+          <td class="memname">virtual bool foray::osi::InputDevice::ButtonJoystick::State </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -262,9 +262,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/osi/<a class="el" href="foray__inputdevice_8hpp_source.html">foray_inputdevice.hpp</a></li>
-<li>src/osi/<a class="el" href="foray__inputdevice_8cpp.html">foray_inputdevice.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -89,7 +89,7 @@ Inheritance diagram for foray::osi::InputDevice::ButtonMouse:</div>
   <img src="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.png" usemap="#foray::osi::InputDevice::ButtonMouse_map" alt=""/>
   <map id="foray::osi::InputDevice::ButtonMouse_map" name="foray::osi::InputDevice::ButtonMouse_map">
 <area href="classforay_1_1osi_1_1InputBinary.html" title="Represents a single input with a state represented by a boolean value." alt="foray::osi::InputBinary" shape="rect" coords="0,56,216,80"/>
-<area href="classforay_1_1osi_1_1InputBase.html" alt="foray::osi::InputBase" shape="rect" coords="0,0,216,24"/>
+<area href="classforay_1_1osi_1_1InputBase.html" title="Base class for a single input channel of an input device." alt="foray::osi::InputBase" shape="rect" coords="0,0,216,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -99,9 +99,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a42545ed9b6811eb4e14ebe45d52ddbd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a445efd1f287c62802987373e831024b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.html#a445efd1f287c62802987373e831024b0">ButtonMouse</a> (<a class="el" href="classforay_1_1osi_1_1InputDevice.html">InputDevice</a> *device, int32_t id, std::string_view name, <a class="el" href="namespaceforay_1_1osi.html#ae9f719340d0e8a1cdd5fde5c49ed397b">EButton</a> button)</td></tr>
 <tr class="separator:a445efd1f287c62802987373e831024b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41004a8249a789e766a33b292d140e4d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.html#a41004a8249a789e766a33b292d140e4d">State</a> () const override</td></tr>
-<tr class="memdesc:a41004a8249a789e766a33b292d140e4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.html#a41004a8249a789e766a33b292d140e4d">More...</a><br /></td></tr>
-<tr class="separator:a41004a8249a789e766a33b292d140e4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19901c59329f8342e7c1e98af7e47271"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.html#a19901c59329f8342e7c1e98af7e47271">State</a> () const override</td></tr>
+<tr class="memdesc:a19901c59329f8342e7c1e98af7e47271"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputDevice_1_1ButtonMouse.html#a19901c59329f8342e7c1e98af7e47271">More...</a><br /></td></tr>
+<tr class="separator:a19901c59329f8342e7c1e98af7e47271"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1osi_1_1InputBinary.html#a2c93d2753a43bb5aed26eb5fdf8216c2">State</a> () const =0</td></tr>
 <tr class="memdesc:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Button id of the input.  <a href="classforay_1_1osi_1_1InputBinary.html#a2c93d2753a43bb5aed26eb5fdf8216c2">More...</a><br /></td></tr>
 <tr class="separator:a2c93d2753a43bb5aed26eb5fdf8216c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,8 +205,8 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a41004a8249a789e766a33b292d140e4d" name="a41004a8249a789e766a33b292d140e4d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41004a8249a789e766a33b292d140e4d">&#9670;&#160;</a></span>State()</h2>
+<a id="a19901c59329f8342e7c1e98af7e47271" name="a19901c59329f8342e7c1e98af7e47271"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19901c59329f8342e7c1e98af7e47271">&#9670;&#160;</a></span>State()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -215,7 +215,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool foray::osi::InputDevice::ButtonMouse::State </td>
+          <td class="memname">virtual bool foray::osi::InputDevice::ButtonMouse::State </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -235,9 +235,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/osi/<a class="el" href="foray__inputdevice_8hpp_source.html">foray_inputdevice.hpp</a></li>
-<li>src/osi/<a class="el" href="foray__inputdevice_8cpp.html">foray_inputdevice.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
