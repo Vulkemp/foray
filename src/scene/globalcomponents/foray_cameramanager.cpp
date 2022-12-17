@@ -11,6 +11,10 @@ namespace foray::scene::gcomp {
             mSelectedCamera->UpdateUbo(mUbo.GetData());
             mUbo.UpdateTo(updateInfo.RenderInfo.GetFrameNumber());
         }
+        else
+        {
+            logger()->warn("CameraManager does not have a camera selected. No Image output will be generated. Camera list might have to be refreshed, or the scene does not contain a camera.");
+        }
 
         mUbo.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
