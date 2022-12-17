@@ -1,7 +1,7 @@
 #include "foray_computestage.hpp"
 
 namespace foray::stages {
-    void ComputeStage::Init(core::Context* context)
+    void ComputeStageBase::Init(core::Context* context)
     {
         Destroy();
         mContext = context;
@@ -11,7 +11,7 @@ namespace foray::stages {
         CreatePipeline();
     }
 
-    void ComputeStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    void ComputeStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         ApiBeforeFrame(cmdBuffer, renderInfo);
 
@@ -27,7 +27,7 @@ namespace foray::stages {
         mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, groupSize.z);
     }
 
-    void ComputeStage::CreatePipeline()
+    void ComputeStageBase::CreatePipeline()
     {
         VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
@@ -43,7 +43,7 @@ namespace foray::stages {
 
         AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
     }
-    void ComputeStage::ReloadShaders()
+    void ComputeStageBase::ReloadShaders()
     {
         if (!!mPipeline)
         {
@@ -54,7 +54,7 @@ namespace foray::stages {
             CreatePipeline();
         }
     } 
-    void ComputeStage::Destroy() 
+    void ComputeStageBase::Destroy() 
     {
         if (!!mPipeline)
         {

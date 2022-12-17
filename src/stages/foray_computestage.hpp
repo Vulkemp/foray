@@ -13,12 +13,12 @@ namespace foray::stages {
     /// # Inheriting
     ///  * Required Overrides: ApiInitShader(), ApiCreateDescriptorSet(), ApiCreatePipelineLayout(), ApiBeforeDispatch()
     ///  * Optional Overrides: ApiBeforeFrame()
-    class ComputeStage : public RenderStage
+    class ComputeStageBase : public RenderStage
     {
       public:
         /// @brief Init
         /// @details Calls ApiCreateDescriptorSet(), ApiCreatePipelineLayout(), ApiInitShader(), CreatePipeline() in this order
-        virtual void Init(core::Context* context);
+        void Init(core::Context* context);
 
         /// @brief Calls ApiBeforeFrame(), binds pipeline and descriptor set, calls ApiBeforeDispatch()
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;

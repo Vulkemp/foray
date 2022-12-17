@@ -1,4 +1,4 @@
-#include "foray_raytracingstage.hpp"
+#include "foray_defaultraytracingstage.hpp"
 #include "../core/foray_samplercollection.hpp"
 #include "../core/foray_shadermanager.hpp"
 #include "../core/foray_shadermodule.hpp"
@@ -14,58 +14,51 @@
 #include <array>
 
 namespace foray::stages {
-
-    void BasicRaytracingStage::Init(core::Context* context)
-    {
-        Destroy();
-        mContext = context;
-        CustomObjectsCreate();
-        CreateOutputImages();
-        CreateOrUpdateDescriptors();
-        CreatePipelineLayout();
-        CreateRtPipeline();
-    }
-    void BasicRaytracingStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
-    {
-        RecordFramePrepare(cmdBuffer, renderInfo);
-        RecordFrameBind(cmdBuffer, renderInfo);
-        RecordFrameTraceRays(cmdBuffer, renderInfo);
-    }
-    void BasicRaytracingStage::Resize(const VkExtent2D& extent)
-    {
-        RenderStage::Resize(extent);
-        CreateOrUpdateDescriptors();
-    }
-    void BasicRaytracingStage::Destroy()
-    {
-        DestroyRtPipeline();
-        mPipelineLayout.Destroy();
-        DestroyDescriptors();
-        DestroyOutputImages();
-        CustomObjectsDestroy();
-    }
-    void BasicRaytracingStage::ReloadShaders()
-    {
-        DestroyRtPipeline();
-        CreateRtPipeline();
-    }
-
-    void ExtRaytracingStage::Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
+    void DefaultRaytracingStageBase::Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
     {
         Destroy();
         mScene          = scene;
         mEnvironmentMap = envMap;
         mNoiseTexture   = noiseImage;
-        BasicRaytracingStage::Init(context);
+        mContext = context;
+        ApiCustomObjectsCreate();
+        CreateOutputImages();
+        CreateOrUpdateDescriptors();
+        CreatePipelineLayout();
+        ApiCreateRtPipeline();
     }
-    void ExtRaytracingStage::CreateOutputImages()
+    void DefaultRaytracingStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    {
+        RecordFramePrepare(cmdBuffer, renderInfo);
+        RecordFrameBind(cmdBuffer, renderInfo);
+        RecordFrameTraceRays(cmdBuffer, renderInfo);
+    }
+    void DefaultRaytracingStageBase::Resize(const VkExtent2D& extent)
+    {
+        RenderStage::Resize(extent);
+        CreateOrUpdateDescriptors();
+    }
+    void DefaultRaytracingStageBase::Destroy()
+    {
+        ApiDestroyRtPipeline();
+        mPipelineLayout.Destroy();
+        DestroyDescriptors();
+        DestroyOutputImages();
+        ApiCustomObjectsDestroy();
+    }
+    void DefaultRaytracingStageBase::ReloadShaders()
+    {
+        ApiDestroyRtPipeline();
+        ApiCreateRtPipeline();
+    }
+    void DefaultRaytracingStageBase::CreateOutputImages()
     {
         VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
         mOutput.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mContext->GetSwapchainSize(), OutputName);
         mImageOutputs[std::string(OutputName)] = &mOutput;
     }
-    void ExtRaytracingStage::CreatePipelineLayout()
+    void DefaultRaytracingStageBase::CreatePipelineLayout()
     {
         mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
         if(mRngSeedPushCOffset != ~0U)
@@ -74,7 +67,7 @@ namespace foray::stages {
         }
         mPipelineLayout.Build(mContext);
     }
-    void ExtRaytracingStage::CreateOrUpdateDescriptors()
+    void DefaultRaytracingStageBase::CreateOrUpdateDescriptors()
     {
         using namespace rtbindpoints;
 
@@ -118,11 +111,11 @@ namespace foray::stages {
             mDescriptorSet.Create(mContext, "RaytracingStageDescriptorSet");
         }
     }
-    void ExtRaytracingStage::DestroyDescriptors()
+    void DefaultRaytracingStageBase::DestroyDescriptors()
     {
         mDescriptorSet.Destroy();
     }
-    void ExtRaytracingStage::RecordFramePrepare(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    void DefaultRaytracingStageBase::RecordFramePrepare(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         std::vector<VkImageMemoryBarrier2>  imageBarriers;
         std::vector<VkBufferMemoryBarrier2> bufferBarriers;
@@ -152,7 +145,7 @@ namespace foray::stages {
 
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
     }
-    void ExtRaytracingStage::RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    void DefaultRaytracingStageBase::RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         mPipeline.CmdBindPipeline(cmdBuffer);
 
@@ -160,7 +153,7 @@ namespace foray::stages {
 
         vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
     }
-    void ExtRaytracingStage::RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
+    void DefaultRaytracingStageBase::RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         if(mRngSeedPushCOffset != ~0U)
         {
@@ -181,4 +174,4 @@ namespace foray::stages {
         mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width,
                                                     extent.height, 1U);
     }
-}  // namespace foray::stages
+}
