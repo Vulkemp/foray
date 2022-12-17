@@ -1,6 +1,6 @@
 Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos.
 
-`Version: 1.0.1`
+`Version: 1.0.2`
 
 # Useful Links
 ## Documentation
@@ -114,11 +114,6 @@ target_include_directories(
 * [vk-bootstrap](https://github.com/charles-lunarg/vk-bootstrap): Utility library for instance creation, device selection and building, queue selection and swapchain creation (MIT License)
 * [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator): Simplified Vulkan memory allocation (MIT License)
 
-# Versioning
-## Major
-* API may be subject to breaking changes between major versions
-## Minor
-* API is guaranteed compatible
-* Features may be added
-## Patch
-* Fully compatible, fixes only
+# Versioning and Changelog
+
+See changelog.md document on [Github](./docs/changelog.md) or [Github Pages Doxygen Docs](https://vulkemp.github.io/foray/md_docs_changelog.html)
