@@ -202,13 +202,13 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Minimalist setup for a Raytracing Stage. </p>
-<h1><a class="anchor" id="autotoc_md48"></a>
+<h1><a class="anchor" id="autotoc_md51"></a>
 Features</h1>
 <ul>
 <li>Pipeline &amp; Pipeline Layout Members</li>
 <li>Rerouting of Init, RecordFrame, OnResized and Destroy callbacks to appropriate member methods </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md49"></a>
+<h1><a class="anchor" id="autotoc_md52"></a>
 Inheriting</h1>
 <ul>
 <li>Required Override: <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#a056ddf8febf6a96b96723989ccd81641" title="Inheriting types should create mPipelineLayout here (add descriptorsetlayouts, add pushconstants,...">ApiCreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#ae907960afb366cd6d179dc659b4abbdf" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">ApiCreateRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#a1bd2e2d8f6d416d823ba980bd211f585" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#ab50c632184f4262e54c445e739ff681b" title="Inheriting types should use this to bind the RtPipeline and all descriptor sets.">ApiRecordFrameBind()</a>, <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#aa95bc637a2979486d5e8cd13ec8b288b" title="Inheriting types should use this to push constants and invoke tracerays.">ApiRecordFrameTraceRays()</a></li>
