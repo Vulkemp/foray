@@ -1,10 +1,10 @@
 Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos.
 
-`Version: 1.0.0`
+`Version: 1.0.1`
 
 # Useful Links
 ## Documentation
-[Doxygen hosted on GH Pages](https://vulkemp.github.io/foray/index.html)
+[Doxygen hosted on GH Pages](https://vulkemp.github.io/foray/index.html) (Based on `master` branch)
 ## Projects Using Foray
 * [foray-examples](https://github.com/Vulkemp/foray-examples): Examples demonstrating GBuffer, minimal raytracer, complex raytracer
 * [foray-denoising](https://github.com/Vulkemp/foray-denoising): Project demonstrating and comparing denoiser implementations: OptiX, ASVGF, BMFR (WIP)
