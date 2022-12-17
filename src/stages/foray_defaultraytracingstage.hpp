@@ -17,7 +17,7 @@ namespace foray::stages {
     ///  * Automatically resized output image
     ///  * uint (32bit) seed value provided via push constant (offset adjustable via mRngSeedPushCOffset. Disable entirely by setting to ~0U)
     /// # Inheriting
-    ///  * Required Overrides: CreateRtPipeline(), DestroyRtPipeline()
+    ///  * Required Overrides: ApiCreateRtPipeline(), ApiDestroyRtPipeline()
     class DefaultRaytracingStageBase : public RenderStage
     {
       public:
@@ -33,7 +33,7 @@ namespace foray::stages {
         /// @param extent New render extent
         virtual void Resize(const VkExtent2D& extent) override;
 
-        /// @brief Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), CustomObjectsDestroy() DestroyOutputImages() in this order
+        /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
         virtual void Destroy() override;
 
         /// @brief Image Output of the Raytracing Stage
@@ -55,7 +55,7 @@ namespace foray::stages {
 
         /// @brief Inheriting types may use this function to initialize stage specific objects such as configuration Ubo buffers
         virtual void ApiCustomObjectsCreate() {}
-        /// @brief Inheriting types may use this function to destroy options created during CustomObjectsCreate()
+        /// @brief Inheriting types may use this function to destroy options created during ApiCustomObjectsCreate()
         virtual void ApiCustomObjectsDestroy() {}
 
         /// @brief Creates a fully populated descriptorset. See rtbindpoints and shaders/rt_common/bindpoints.glsl
@@ -63,7 +63,7 @@ namespace foray::stages {
         /// @brief Destroys the descriptor set
         virtual void DestroyDescriptors();
 
-        /// @brief Calls DestroyRtPipeline(), CreateRtPipeline() in this order
+        /// @brief Calls ApiDestroyRtPipeline(), ApiCreateRtPipeline() in this order
         virtual void ReloadShaders() override;
 
         /// @brief Pipeline barriers

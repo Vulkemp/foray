@@ -13,21 +13,21 @@ namespace foray::stages {
     ///  * Pipeline & Pipeline Layout Members
     ///  * Rerouting of Init, RecordFrame, OnResized and Destroy callbacks to appropriate member methods
     /// # Inheriting
-    ///  * Required Override: CreatePipelineLayout(), CreateRtPipeline(), DestroyRtPipeline(), RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays()
-    ///  * Recommended Override: CreateOrUpdateDescriptors(), DestroyDescriptors()
+    ///  * Required Override: ApiCreatePipelineLayout(), ApiCreateRtPipeline(), ApiDestroyRtPipeline(), ApiRecordFrameBind(), ApiRecordFrameTraceRays()
+    ///  * Recommended Override: ApiCreateOrUpdateDescriptors(), ApiDestroyDescriptors()
     class MinimalRaytracingStageBase : public RenderStage
     {
       public:
-        /// @brief Destroys, assigns context, calls CreateOutputImages(), CustomObjectsCreate(), CreateOrUpdateDescriptors(), CreatePipelineLayout(), CreateRtPipeline() in this order
+        /// @brief Destroys, assigns context, calls ApiCreateOutputImages(), ApiCustomObjectsCreate(), ApiCreateOrUpdateDescriptors(), ApiCreatePipelineLayout(), ApiCreateRtPipeline() in this order
         void Init(core::Context* context);
 
-        /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
+        /// @brief Calls ApiRecordFramePrepare(), ApiRecordFrameBind(), ApiRecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls CreateOrUpdateDescriptors() afterwards.
+        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls ApiCreateOrUpdateDescriptors() afterwards.
         /// @param extent New render extent
         virtual void Resize(const VkExtent2D& extent) override;
 
-        /// @brief Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), CustomObjectsDestroy() DestroyOutputImages() in this order
+        /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), ApiDestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
         virtual void Destroy() override;
 
       protected:
@@ -43,7 +43,7 @@ namespace foray::stages {
 
         /// @brief Inheriting types may use this function to initialize stage specific objects such as configuration Ubo buffers
         virtual void ApiCustomObjectsCreate() {}
-        /// @brief Inheriting types may use this function to destroy options created during CustomObjectsCreate()
+        /// @brief Inheriting types may use this function to destroy options created during ApiCustomObjectsCreate()
         virtual void ApiCustomObjectsDestroy() {}
 
         /// @brief Inheriting types should reassign all descriptor bindings and call create / update on descriptor sets
@@ -58,7 +58,7 @@ namespace foray::stages {
         /// @brief Inheriting types should use this to push constants and invoke tracerays
         virtual void ApiRecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) = 0;
 
-        /// @brief Calls DestroyRtPipeline(), CreateRtPipeline() in this order
+        /// @brief Calls ApiDestroyRtPipeline(), ApiCreateRtPipeline() in this order
         virtual void ReloadShaders() override;
 
         /// @brief The pipeline layout manages descriptorset and pushconstant layouts
