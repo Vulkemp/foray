@@ -13,6 +13,7 @@ var searchData=
   ['mesh_10',['Mesh',['../classforay_1_1scene_1_1Mesh.html',1,'foray::scene']]],
   ['meshinstance_11',['MeshInstance',['../classforay_1_1scene_1_1ncomp_1_1MeshInstance.html',1,'foray::scene::ncomp']]],
   ['minimalappbase_12',['MinimalAppBase',['../classforay_1_1base_1_1MinimalAppBase.html',1,'foray::base']]],
-  ['modelconverter_13',['ModelConverter',['../classforay_1_1gltf_1_1ModelConverter.html',1,'foray::gltf']]],
-  ['modelconverteroptions_14',['ModelConverterOptions',['../structforay_1_1gltf_1_1ModelConverterOptions.html',1,'foray::gltf']]]
+  ['minimalraytracingstagebase_13',['MinimalRaytracingStageBase',['../classforay_1_1stages_1_1MinimalRaytracingStageBase.html',1,'foray::stages']]],
+  ['modelconverter_14',['ModelConverter',['../classforay_1_1gltf_1_1ModelConverter.html',1,'foray::gltf']]],
+  ['modelconverteroptions_15',['ModelConverterOptions',['../structforay_1_1gltf_1_1ModelConverterOptions.html',1,'foray::gltf']]]
 ];

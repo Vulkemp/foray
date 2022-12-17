@@ -8,5 +8,5 @@ var searchData=
   ['relativey_5',['RelativeY',['../classforay_1_1osi_1_1EventInputMouseMoved.html#aba36945e5276412ef4083f9c9095da2e',1,'foray::osi::EventInputMouseMoved']]],
   ['renderinfo_6',['RenderInfo',['../structforay_1_1scene_1_1SceneUpdateInfo.html#ad4f8a2ef0d475520227b1fda257416be',1,'foray::scene::SceneUpdateInfo::RenderInfo()'],['../structforay_1_1scene_1_1SceneDrawInfo.html#a7d80b37945a4b45c8e27f47c5eee9ff8',1,'foray::scene::SceneDrawInfo::RenderInfo()']]],
   ['roughnessfactor_7',['RoughnessFactor',['../structforay_1_1scene_1_1Material.html#a53704e47efa3c8db2484d3845695460f',1,'foray::scene::Material']]],
-  ['rtstageflags_8',['RTSTAGEFLAGS',['../classforay_1_1stages_1_1BasicRaytracingStage.html#a149dcd0c1a6e57eb5d557e3d54c77f8b',1,'foray::stages::BasicRaytracingStage']]]
+  ['rtstageflags_8',['RTSTAGEFLAGS',['../namespaceforay_1_1stages.html#a86112f0cedfc7dc97e83981217fba036',1,'foray::stages']]]
 ];

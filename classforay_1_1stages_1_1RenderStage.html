@@ -93,17 +93,14 @@ Inheritance diagram for foray::stages::RenderStage:</div>
  <div class="center">
   <img src="classforay_1_1stages_1_1RenderStage.png" usemap="#foray::stages::RenderStage_map" alt=""/>
   <map id="foray::stages::RenderStage_map" name="foray::stages::RenderStage_map">
-<area href="classforay_1_1stages_1_1BasicRaytracingStage.html" title="Minimalist setup for a Raytracing Stage." alt="foray::stages::BasicRaytracingStage" shape="rect" coords="0,56,231,80"/>
-<area href="classforay_1_1stages_1_1BlitStage.html" title="Stage which performs an image blit (more capable copy from one image to another)" alt="foray::stages::BlitStage" shape="rect" coords="241,56,472,80"/>
-<area href="classforay_1_1stages_1_1ComparerStage.html" title="Displays two images of any type next to each other, and get a &quot;pipette&quot; readout at the mouse location..." alt="foray::stages::ComparerStage" shape="rect" coords="482,56,713,80"/>
-<area href="classforay_1_1stages_1_1ComputeStage.html" title="Base class for compute shaders." alt="foray::stages::ComputeStage" shape="rect" coords="723,56,954,80"/>
-<area href="classforay_1_1stages_1_1DenoiserStage.html" title="Base class for denoiser implementations." alt="foray::stages::DenoiserStage" shape="rect" coords="964,56,1195,80"/>
-<area href="classforay_1_1stages_1_1ImguiStage.html" title="The ImguiStage renders the imgui menu on top of an existing image or the swapchain...." alt="foray::stages::ImguiStage" shape="rect" coords="1205,56,1436,80"/>
-<area href="classforay_1_1stages_1_1RasterizedRenderStage.html" title="Base class for rasterized render stages (no built-in functionality)" alt="foray::stages::RasterizedRenderStage" shape="rect" coords="1446,56,1677,80"/>
-<area href="classforay_1_1stages_1_1ExtRaytracingStage.html" title="Extended version of BasicRaytracingStage limited to a single output image, descriptorset but providin..." alt="foray::stages::ExtRaytracingStage" shape="rect" coords="0,112,231,136"/>
-<area href="classforay_1_1stages_1_1ImageToSwapchainStage.html" title="The only purpose of this class is to copy the image onto the swapchain." alt="foray::stages::ImageToSwapchainStage" shape="rect" coords="241,112,472,136"/>
-<area href="classforay_1_1stages_1_1ExternalDenoiserStage.html" title="Base class for externally computing denoiser implementations (e.g. OptiX Denoiser)" alt="foray::stages::ExternalDenoiserStage" shape="rect" coords="964,112,1195,136"/>
-<area href="classforay_1_1stages_1_1GBufferStage.html" title="Utilizes rasterization to render a GBuffer output." alt="foray::stages::GBufferStage" shape="rect" coords="1446,112,1677,136"/>
+<area href="classforay_1_1stages_1_1BlitStage.html" title="Stage which performs an image blit (more capable copy from one image to another)" alt="foray::stages::BlitStage" shape="rect" coords="264,56,518,80"/>
+<area href="classforay_1_1stages_1_1ComparerStage.html" title="Displays two images of any type next to each other, and get a &quot;pipette&quot; readout at the mouse location..." alt="foray::stages::ComparerStage" shape="rect" coords="264,112,518,136"/>
+<area href="classforay_1_1stages_1_1ComputeStageBase.html" title="Base class for compute shaders." alt="foray::stages::ComputeStageBase" shape="rect" coords="264,168,518,192"/>
+<area href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html" title="Extended version of MinimalRaytracingStageBase limited to a single output image, descriptorset but pr..." alt="foray::stages::DefaultRaytracingStageBase" shape="rect" coords="264,224,518,248"/>
+<area href="classforay_1_1stages_1_1DenoiserStage.html" title="Base class for denoiser implementations." alt="foray::stages::DenoiserStage" shape="rect" coords="264,280,518,304"/>
+<area href="classforay_1_1stages_1_1ImguiStage.html" title="The ImguiStage renders the imgui menu on top of an existing image or the swapchain...." alt="foray::stages::ImguiStage" shape="rect" coords="264,336,518,360"/>
+<area href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html" title="Minimalist setup for a Raytracing Stage." alt="foray::stages::MinimalRaytracingStageBase" shape="rect" coords="264,392,518,416"/>
+<area href="classforay_1_1stages_1_1RasterizedRenderStage.html" title="Base class for rasterized render stages (no built-in functionality)" alt="foray::stages::RasterizedRenderStage" shape="rect" coords="264,448,518,472"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -232,7 +229,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Destroy the render stage. Finalizes all components. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a4d7cdd35cd2fd36a42986537eae89203">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a880a5ca46fbb9a9dca46a1c95cd6fbcb">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a688246290318f1ce4b2167c594a64bb9">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#ab99b9d052b9d7c43b4d6f84951826af6">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#adc5c459a83c46f6d60649035e94b0edd">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a4d7cdd35cd2fd36a42986537eae89203">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a3589a2b4ee8543b060956421348a0bc5">foray::stages::ComputeStageBase</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#af05104f3938db8174570abf75bcd790b">foray::stages::DefaultRaytracingStageBase</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a688246290318f1ce4b2167c594a64bb9">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#ab99b9d052b9d7c43b4d6f84951826af6">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#ae1cf04252c39b0b758db4a51ca0e1af6">foray::stages::MinimalRaytracingStageBase</a>.</p>
 
 </div>
 </div>
@@ -397,7 +394,7 @@ Inheriting</h1>
 <li>All commands must be submitted to cmdBuffer </li>
 </ul>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1BlitStage.html#a55833431072a4ec91c634007eadc8d71">foray::stages::BlitStage</a>, <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a46e1944e52a023157537457e4ec5cfbd">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a9c034edc206bf2fa0688875e75898028">foray::stages::ComputeStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a0241a03897165fdd92717cc76d7cbd9d">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImageToSwapchainStage.html#a78a7b603add0b472f2e576a9a71af321">foray::stages::ImageToSwapchainStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a0d203bdc46ae1ec3207444c5a11831bf">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#ac22bea55b128482959d22956b48994a1">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1BlitStage.html#a55833431072a4ec91c634007eadc8d71">foray::stages::BlitStage</a>, <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a46e1944e52a023157537457e4ec5cfbd">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#acd32a525612434e15a84d5dba7cbdea5">foray::stages::ComputeStageBase</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a22eda256484ab3d7b3121a536e399aa6">foray::stages::DefaultRaytracingStageBase</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a0241a03897165fdd92717cc76d7cbd9d">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImageToSwapchainStage.html#a78a7b603add0b472f2e576a9a71af321">foray::stages::ImageToSwapchainStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a0d203bdc46ae1ec3207444c5a11831bf">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#af69676e34da420062d660e0a564e9b1e">foray::stages::MinimalRaytracingStageBase</a>.</p>
 
 </div>
 </div>
@@ -426,7 +423,7 @@ Inheriting</h1>
 
 <p>Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled. </p>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a68abce1fa498796e0c406beea6e87d7c">foray::stages::ComputeStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#a16f46da2c805a1c4e706bb9a823c9d4a">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#afc8af475df56e502c2001c22c9e41949">foray::stages::ComputeStageBase</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a15167b5c9d1b667bdb4b725aeb54e5c5">foray::stages::DefaultRaytracingStageBase</a>, and <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#a558320901549be1e5ad83d76da9a9831">foray::stages::MinimalRaytracingStageBase</a>.</p>
 
 </div>
 </div>
@@ -463,7 +460,7 @@ Inheriting</h1>
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd>Inheriting stages may override to update descriptor sets </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a24844d3785289d6f99384d9a7d51258e">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a4128930767b0e39446f4cccf6ec8ff46">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a5b897c46a9c7b73d4e2f2f19ee045bbc">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html#aebc68f2358ec8eb4576ebe4d0254cb86">foray::stages::BasicRaytracingStage</a>.</p>
+<p>Reimplemented in <a class="el" href="classforay_1_1stages_1_1ComparerStage.html#a24844d3785289d6f99384d9a7d51258e">foray::stages::ComparerStage</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a3f37822eec3d2b603631f7e6c23d36cf">foray::stages::DefaultRaytracingStageBase</a>, <a class="el" href="classforay_1_1stages_1_1GBufferStage.html#a4128930767b0e39446f4cccf6ec8ff46">foray::stages::GBufferStage</a>, <a class="el" href="classforay_1_1stages_1_1ImguiStage.html#a5b897c46a9c7b73d4e2f2f19ee045bbc">foray::stages::ImguiStage</a>, and <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#aad8702498dbac1e8c1ecac182ac41572">foray::stages::MinimalRaytracingStageBase</a>.</p>
 
 </div>
 </div>

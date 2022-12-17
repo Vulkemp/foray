@@ -76,7 +76,8 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#nested-classes">Classes</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">foray::stages Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -88,17 +89,17 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html">BasicRaytracingStage</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimalist setup for a Raytracing Stage.  <a href="classforay_1_1stages_1_1BasicRaytracingStage.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1BlitStage.html">BlitStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stage which performs an image blit (more capable copy from one image to another)  <a href="classforay_1_1stages_1_1BlitStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComparerStage.html">ComparerStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Displays two images of any type next to each other, and get a "pipette" readout at the mouse location.  <a href="classforay_1_1stages_1_1ComparerStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html">ComputeStage</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for compute shaders.  <a href="classforay_1_1stages_1_1ComputeStage.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html">ComputeStageBase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for compute shaders.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html">DefaultRaytracingStageBase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extended version of <a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html" title="Minimalist setup for a Raytracing Stage.">MinimalRaytracingStageBase</a> limited to a single output image, descriptorset but providing built in support for scene (Camera, Tlas, Geometry, Materials), EnvironmentMap and Noise Texture.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structforay_1_1stages_1_1DenoiserConfig.html">DenoiserConfig</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Config struct for initialization of denoiser stages.  <a href="structforay_1_1stages_1_1DenoiserConfig.html#details">More...</a><br /></td></tr>
@@ -109,9 +110,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ExternalDenoiserStage.html">ExternalDenoiserStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for externally computing denoiser implementations (e.g. OptiX Denoiser)  <a href="classforay_1_1stages_1_1ExternalDenoiserStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ExtRaytracingStage.html">ExtRaytracingStage</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extended version of <a class="el" href="classforay_1_1stages_1_1BasicRaytracingStage.html" title="Minimalist setup for a Raytracing Stage.">BasicRaytracingStage</a> limited to a single output image, descriptorset but providing built in support for scene (Camera, Tlas, Geometry, Materials), EnvironmentMap and Noise Texture.  <a href="classforay_1_1stages_1_1ExtRaytracingStage.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1GBufferStage.html">GBufferStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utilizes rasterization to render a GBuffer output.  <a href="classforay_1_1stages_1_1GBufferStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,13 +119,50 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ImguiStage.html">ImguiStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classforay_1_1stages_1_1ImguiStage.html" title="The ImguiStage renders the imgui menu on top of an existing image or the swapchain....">ImguiStage</a> renders the imgui menu on top of an existing image or the swapchain. This image is passed via the backgroundImage.  <a href="classforay_1_1stages_1_1ImguiStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html">MinimalRaytracingStageBase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimalist setup for a Raytracing Stage.  <a href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RasterizedRenderStage.html">RasterizedRenderStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class for rasterized render stages (no built-in functionality)  <a href="classforay_1_1stages_1_1RasterizedRenderStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html">RenderStage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render stage base class giving a common interface for rendering processes.  <a href="classforay_1_1stages_1_1RenderStage.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a86112f0cedfc7dc97e83981217fba036"><td class="memItemLeft" align="right" valign="top">constexpr VkShaderStageFlags&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceforay_1_1stages.html#a86112f0cedfc7dc97e83981217fba036">RTSTAGEFLAGS</a></td></tr>
+<tr class="memdesc:a86112f0cedfc7dc97e83981217fba036"><td class="mdescLeft">&#160;</td><td class="mdescRight">All shaderstage flags usable in a raytracing pipeline.  <a href="namespaceforay_1_1stages.html#a86112f0cedfc7dc97e83981217fba036">More...</a><br /></td></tr>
+<tr class="separator:a86112f0cedfc7dc97e83981217fba036"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="a86112f0cedfc7dc97e83981217fba036" name="a86112f0cedfc7dc97e83981217fba036"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86112f0cedfc7dc97e83981217fba036">&#9670;&#160;</a></span>RTSTAGEFLAGS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr VkShaderStageFlags foray::stages::RTSTAGEFLAGS</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR</div>
+<div class="line">                                                       | VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR</div>
+<div class="line">                                                       | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR</div>
+</div><!-- fragment -->
+<p>All shaderstage flags usable in a raytracing pipeline. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

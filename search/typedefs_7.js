@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['imagetoswapchainstage_0',['ImageToSwapchainStage',['../namespaceforay_1_1api.html#ae6d95242caad3caf598a767388a3fc98',1,'foray::api']]],
-  ['imguistage_1',['ImguiStage',['../namespaceforay_1_1api.html#ab83f4e318f042a7d4c332b65cc1d68ce',1,'foray::api']]],
-  ['initfunctionpointer_2',['InitFunctionPointer',['../classforay_1_1base_1_1RenderLoop.html#ab645daefebd463ad3b8ee2334f3e2a23',1,'foray::base::RenderLoop']]]
+  ['makeswapchainimagenamefunctionpointer_0',['MakeSwapchainImageNameFunctionPointer',['../classforay_1_1base_1_1VulkanWindowSwapchain.html#ac9e387bc1bd7eb9129a2b51be829f7b4',1,'foray::base::VulkanWindowSwapchain']]],
+  ['managedbuffer_1',['ManagedBuffer',['../namespaceforay_1_1api.html#a38063ff9b991ba22f5ad644d72495677',1,'foray::api']]],
+  ['managedimage_2',['ManagedImage',['../namespaceforay_1_1api.html#a0712d425c02a299920f76fe785fa2f80',1,'foray::api']]],
+  ['materialflags_3',['MaterialFlags',['../namespaceforay_1_1scene.html#a0ccbece59b157ecdb5d7f3efce263d03',1,'foray::scene']]]
 ];

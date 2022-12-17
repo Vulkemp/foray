@@ -15,7 +15,7 @@ var searchData=
   ['comparerstage_12',['ComparerStage',['../classforay_1_1stages_1_1ComparerStage.html',1,'foray::stages']]],
   ['component_13',['Component',['../classforay_1_1scene_1_1Component.html',1,'foray::scene']]],
   ['componenttraits_14',['ComponentTraits',['../classforay_1_1util_1_1ComponentTraits.html',1,'foray::util']]],
-  ['computestage_15',['ComputeStage',['../classforay_1_1stages_1_1ComputeStage.html',1,'foray::stages']]],
+  ['computestagebase_15',['ComputeStageBase',['../classforay_1_1stages_1_1ComputeStageBase.html',1,'foray::stages']]],
   ['context_16',['Context',['../structforay_1_1core_1_1Context.html',1,'foray::core']]],
   ['createinfo_17',['CreateInfo',['../structforay_1_1core_1_1ManagedBuffer_1_1CreateInfo.html',1,'foray::core::ManagedBuffer::CreateInfo'],['../structforay_1_1core_1_1ManagedImage_1_1CreateInfo.html',1,'foray::core::ManagedImage::CreateInfo']]]
 ];

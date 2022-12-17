@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Foray Library: foray::stages::ComputeStage Class Reference</title>
+<title>Foray Library: foray::stages::ComputeStageBase Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,7 +70,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespaceforay.html">foray</a></li><li class="navelem"><a class="el" href="namespaceforay_1_1stages.html">stages</a></li><li class="navelem"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html">ComputeStage</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespaceforay.html">foray</a></li><li class="navelem"><a class="el" href="namespaceforay_1_1stages.html">stages</a></li><li class="navelem"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html">ComputeStageBase</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -78,36 +78,36 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
-<a href="classforay_1_1stages_1_1ComputeStage-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">foray::stages::ComputeStage Class Reference</div></div>
+<a href="classforay_1_1stages_1_1ComputeStageBase-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">foray::stages::ComputeStageBase Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
 <p>Base class for compute shaders.  
- <a href="classforay_1_1stages_1_1ComputeStage.html#details">More...</a></p>
+ <a href="classforay_1_1stages_1_1ComputeStageBase.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="foray__computestage_8hpp_source.html">foray_computestage.hpp</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for foray::stages::ComputeStage:</div>
+Inheritance diagram for foray::stages::ComputeStageBase:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="classforay_1_1stages_1_1ComputeStage.png" usemap="#foray::stages::ComputeStage_map" alt=""/>
-  <map id="foray::stages::ComputeStage_map" name="foray::stages::ComputeStage_map">
-<area href="classforay_1_1stages_1_1RenderStage.html" title="Render stage base class giving a common interface for rendering processes." alt="foray::stages::RenderStage" shape="rect" coords="0,0,171,24"/>
+  <img src="classforay_1_1stages_1_1ComputeStageBase.png" usemap="#foray::stages::ComputeStageBase_map" alt=""/>
+  <map id="foray::stages::ComputeStageBase_map" name="foray::stages::ComputeStageBase_map">
+<area href="classforay_1_1stages_1_1RenderStage.html" title="Render stage base class giving a common interface for rendering processes." alt="foray::stages::RenderStage" shape="rect" coords="0,0,199,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3cc98cb0855f2e64538838c4c96180f1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a3cc98cb0855f2e64538838c4c96180f1">Init</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context)</td></tr>
-<tr class="memdesc:a3cc98cb0855f2e64538838c4c96180f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init.  <a href="classforay_1_1stages_1_1ComputeStage.html#a3cc98cb0855f2e64538838c4c96180f1">More...</a><br /></td></tr>
-<tr class="separator:a3cc98cb0855f2e64538838c4c96180f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c034edc206bf2fa0688875e75898028"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a9c034edc206bf2fa0688875e75898028">RecordFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo) override</td></tr>
-<tr class="memdesc:a9c034edc206bf2fa0688875e75898028"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a39ebd179be5aa80ce93ad650073a74e0" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a>, binds pipeline and descriptor set, calls <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a85aabfbed4f31b4b49d955da65088f85" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a>  <a href="classforay_1_1stages_1_1ComputeStage.html#a9c034edc206bf2fa0688875e75898028">More...</a><br /></td></tr>
-<tr class="separator:a9c034edc206bf2fa0688875e75898028"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a880a5ca46fbb9a9dca46a1c95cd6fbcb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a880a5ca46fbb9a9dca46a1c95cd6fbcb">Destroy</a> () override</td></tr>
-<tr class="memdesc:a880a5ca46fbb9a9dca46a1c95cd6fbcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the render stage. Finalizes all components.  <a href="classforay_1_1stages_1_1ComputeStage.html#a880a5ca46fbb9a9dca46a1c95cd6fbcb">More...</a><br /></td></tr>
-<tr class="separator:a880a5ca46fbb9a9dca46a1c95cd6fbcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88642ce247f8d94209c8c0d570c06e1d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a88642ce247f8d94209c8c0d570c06e1d">Init</a> (<a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *context)</td></tr>
+<tr class="memdesc:a88642ce247f8d94209c8c0d570c06e1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a88642ce247f8d94209c8c0d570c06e1d">More...</a><br /></td></tr>
+<tr class="separator:a88642ce247f8d94209c8c0d570c06e1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd32a525612434e15a84d5dba7cbdea5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#acd32a525612434e15a84d5dba7cbdea5">RecordFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo) override</td></tr>
+<tr class="memdesc:acd32a525612434e15a84d5dba7cbdea5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a030ba0fc6df691e5746f0094f5ad04e4" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a>, binds pipeline and descriptor set, calls <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a728cbb79c011315e165f78c03c7b2bfe" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a>  <a href="classforay_1_1stages_1_1ComputeStageBase.html#acd32a525612434e15a84d5dba7cbdea5">More...</a><br /></td></tr>
+<tr class="separator:acd32a525612434e15a84d5dba7cbdea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3589a2b4ee8543b060956421348a0bc5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a3589a2b4ee8543b060956421348a0bc5">Destroy</a> () override</td></tr>
+<tr class="memdesc:a3589a2b4ee8543b060956421348a0bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the render stage. Finalizes all components.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a3589a2b4ee8543b060956421348a0bc5">More...</a><br /></td></tr>
+<tr class="separator:a3589a2b4ee8543b060956421348a0bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classforay_1_1stages_1_1RenderStage"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classforay_1_1stages_1_1RenderStage')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classforay_1_1stages_1_1RenderStage.html">foray::stages::RenderStage</a></td></tr>
 <tr class="memitem:a83c95f5f505cf1a829af535e3b1f6df5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a83c95f5f505cf1a829af535e3b1f6df5">RenderStage</a> ()=default</td></tr>
 <tr class="separator:a83c95f5f505cf1a829af535e3b1f6df5 inherit pub_methods_classforay_1_1stages_1_1RenderStage"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,26 +134,26 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a6d5ef5cddd342e8f13ec783c8781a808"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a6d5ef5cddd342e8f13ec783c8781a808">ApiInitShader</a> ()</td></tr>
-<tr class="memdesc:a6d5ef5cddd342e8f13ec783c8781a808"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a shader into mShader module.  <a href="classforay_1_1stages_1_1ComputeStage.html#a6d5ef5cddd342e8f13ec783c8781a808">More...</a><br /></td></tr>
-<tr class="separator:a6d5ef5cddd342e8f13ec783c8781a808"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11cfb041182f777fa1e9c1ef06fffd8b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a11cfb041182f777fa1e9c1ef06fffd8b">ApiCreateDescriptorSet</a> ()</td></tr>
-<tr class="memdesc:a11cfb041182f777fa1e9c1ef06fffd8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the descriptor set.  <a href="classforay_1_1stages_1_1ComputeStage.html#a11cfb041182f777fa1e9c1ef06fffd8b">More...</a><br /></td></tr>
-<tr class="separator:a11cfb041182f777fa1e9c1ef06fffd8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae52bfb0539f69fdff8b0660a0bd49339"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#ae52bfb0539f69fdff8b0660a0bd49339">ApiCreatePipelineLayout</a> ()</td></tr>
-<tr class="memdesc:ae52bfb0539f69fdff8b0660a0bd49339"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure and create the pipelinelayout.  <a href="classforay_1_1stages_1_1ComputeStage.html#ae52bfb0539f69fdff8b0660a0bd49339">More...</a><br /></td></tr>
-<tr class="separator:ae52bfb0539f69fdff8b0660a0bd49339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39ebd179be5aa80ce93ad650073a74e0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a39ebd179be5aa80ce93ad650073a74e0">ApiBeforeFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo)</td></tr>
-<tr class="memdesc:a39ebd179be5aa80ce93ad650073a74e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare resources used in the compute shader.  <a href="classforay_1_1stages_1_1ComputeStage.html#a39ebd179be5aa80ce93ad650073a74e0">More...</a><br /></td></tr>
-<tr class="separator:a39ebd179be5aa80ce93ad650073a74e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85aabfbed4f31b4b49d955da65088f85"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a85aabfbed4f31b4b49d955da65088f85">ApiBeforeDispatch</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo, glm::uvec3 &amp;groupSize)</td></tr>
-<tr class="memdesc:a85aabfbed4f31b4b49d955da65088f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push constants and configure the Group size.  <a href="classforay_1_1stages_1_1ComputeStage.html#a85aabfbed4f31b4b49d955da65088f85">More...</a><br /></td></tr>
-<tr class="separator:a85aabfbed4f31b4b49d955da65088f85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ad280990e17654db8afff946c88571e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a0ad280990e17654db8afff946c88571e">CreatePipeline</a> ()</td></tr>
-<tr class="separator:a0ad280990e17654db8afff946c88571e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68abce1fa498796e0c406beea6e87d7c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a68abce1fa498796e0c406beea6e87d7c">ReloadShaders</a> () override</td></tr>
-<tr class="memdesc:a68abce1fa498796e0c406beea6e87d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.  <a href="classforay_1_1stages_1_1ComputeStage.html#a68abce1fa498796e0c406beea6e87d7c">More...</a><br /></td></tr>
-<tr class="separator:a68abce1fa498796e0c406beea6e87d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5423611f8b990c15a7eed789e654ce3b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5423611f8b990c15a7eed789e654ce3b">ApiInitShader</a> ()</td></tr>
+<tr class="memdesc:a5423611f8b990c15a7eed789e654ce3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a shader into mShader module.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a5423611f8b990c15a7eed789e654ce3b">More...</a><br /></td></tr>
+<tr class="separator:a5423611f8b990c15a7eed789e654ce3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f1a7cd6a285d997e0ee676e54fcc254"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a8f1a7cd6a285d997e0ee676e54fcc254">ApiCreateDescriptorSet</a> ()</td></tr>
+<tr class="memdesc:a8f1a7cd6a285d997e0ee676e54fcc254"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the descriptor set.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a8f1a7cd6a285d997e0ee676e54fcc254">More...</a><br /></td></tr>
+<tr class="separator:a8f1a7cd6a285d997e0ee676e54fcc254"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aed0d73af81e1ae4edd556efb8ff41a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5aed0d73af81e1ae4edd556efb8ff41a">ApiCreatePipelineLayout</a> ()</td></tr>
+<tr class="memdesc:a5aed0d73af81e1ae4edd556efb8ff41a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure and create the pipelinelayout.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a5aed0d73af81e1ae4edd556efb8ff41a">More...</a><br /></td></tr>
+<tr class="separator:a5aed0d73af81e1ae4edd556efb8ff41a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a030ba0fc6df691e5746f0094f5ad04e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a030ba0fc6df691e5746f0094f5ad04e4">ApiBeforeFrame</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo)</td></tr>
+<tr class="memdesc:a030ba0fc6df691e5746f0094f5ad04e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare resources used in the compute shader.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a030ba0fc6df691e5746f0094f5ad04e4">More...</a><br /></td></tr>
+<tr class="separator:a030ba0fc6df691e5746f0094f5ad04e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728cbb79c011315e165f78c03c7b2bfe"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a728cbb79c011315e165f78c03c7b2bfe">ApiBeforeDispatch</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo, glm::uvec3 &amp;groupSize)</td></tr>
+<tr class="memdesc:a728cbb79c011315e165f78c03c7b2bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push constants and configure the Group size.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#a728cbb79c011315e165f78c03c7b2bfe">More...</a><br /></td></tr>
+<tr class="separator:a728cbb79c011315e165f78c03c7b2bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6888da47a98151271b9bd25547fe63da"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a6888da47a98151271b9bd25547fe63da">CreatePipeline</a> ()</td></tr>
+<tr class="separator:a6888da47a98151271b9bd25547fe63da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc8af475df56e502c2001c22c9e41949"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#afc8af475df56e502c2001c22c9e41949">ReloadShaders</a> () override</td></tr>
+<tr class="memdesc:afc8af475df56e502c2001c22c9e41949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.  <a href="classforay_1_1stages_1_1ComputeStageBase.html#afc8af475df56e502c2001c22c9e41949">More...</a><br /></td></tr>
+<tr class="separator:afc8af475df56e502c2001c22c9e41949"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classforay_1_1stages_1_1RenderStage"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classforay_1_1stages_1_1RenderStage')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classforay_1_1stages_1_1RenderStage.html">foray::stages::RenderStage</a></td></tr>
 <tr class="memitem:aee119ed5b7cb441465432fdce0533f1c inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">ReloadShaders</a> ()</td></tr>
 <tr class="memdesc:aee119ed5b7cb441465432fdce0533f1c inherit pro_methods_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.  <a href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">More...</a><br /></td></tr>
@@ -164,14 +164,14 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:aee300cf37bac2d9366ba38ebb693581f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1ShaderModule.html">core::ShaderModule</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#aee300cf37bac2d9366ba38ebb693581f">mShader</a></td></tr>
-<tr class="separator:aee300cf37bac2d9366ba38ebb693581f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f89cb4966711cf2215f6a469f2c01f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DescriptorSet.html">core::DescriptorSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a7f89cb4966711cf2215f6a469f2c01f5">mDescriptorSet</a></td></tr>
-<tr class="separator:a7f89cb4966711cf2215f6a469f2c01f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a055afb80c3c6ea09af10422f990332e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1util_1_1PipelineLayout.html">util::PipelineLayout</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a055afb80c3c6ea09af10422f990332e0">mPipelineLayout</a></td></tr>
-<tr class="separator:a055afb80c3c6ea09af10422f990332e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a087e08b68c7aba8d2a8fc35924fa129b"><td class="memItemLeft" align="right" valign="top">VkPipeline&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a087e08b68c7aba8d2a8fc35924fa129b">mPipeline</a> = nullptr</td></tr>
-<tr class="separator:a087e08b68c7aba8d2a8fc35924fa129b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61e93da85af56ba02679d1216ad76797"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1ShaderModule.html">core::ShaderModule</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a61e93da85af56ba02679d1216ad76797">mShader</a></td></tr>
+<tr class="separator:a61e93da85af56ba02679d1216ad76797"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeadd6a6f15cefae7509b0a7aabcf8460"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1DescriptorSet.html">core::DescriptorSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#aeadd6a6f15cefae7509b0a7aabcf8460">mDescriptorSet</a></td></tr>
+<tr class="separator:aeadd6a6f15cefae7509b0a7aabcf8460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3ccd6134d64f06f4ec2f2ad2ea47f0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1util_1_1PipelineLayout.html">util::PipelineLayout</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#ac3ccd6134d64f06f4ec2f2ad2ea47f0d">mPipelineLayout</a></td></tr>
+<tr class="separator:ac3ccd6134d64f06f4ec2f2ad2ea47f0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbe96b4576842915acd1c353c0a7d880"><td class="memItemLeft" align="right" valign="top">VkPipeline&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#acbe96b4576842915acd1c353c0a7d880">mPipeline</a> = nullptr</td></tr>
+<tr class="separator:acbe96b4576842915acd1c353c0a7d880"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classforay_1_1stages_1_1RenderStage"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classforay_1_1stages_1_1RenderStage')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classforay_1_1stages_1_1RenderStage.html">foray::stages::RenderStage</a></td></tr>
 <tr class="memitem:a373a0075d625f58f626f944f2900184b inherit pro_attribs_classforay_1_1stages_1_1RenderStage"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, <a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1RenderStage.html#a373a0075d625f58f626f944f2900184b">mImageOutputs</a></td></tr>
 <tr class="memdesc:a373a0075d625f58f626f944f2900184b inherit pro_attribs_classforay_1_1stages_1_1RenderStage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inheriting types should emplace their images onto this collection to provide them in GetImageOutput interface.  <a href="classforay_1_1stages_1_1RenderStage.html#a373a0075d625f58f626f944f2900184b">More...</a><br /></td></tr>
@@ -194,12 +194,12 @@ Features</h1>
 <h1><a class="anchor" id="autotoc_md39"></a>
 Inheriting</h1>
 <ul>
-<li>Required Overrides: <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a6d5ef5cddd342e8f13ec783c8781a808" title="Load a shader into mShader module.">ApiInitShader()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a11cfb041182f777fa1e9c1ef06fffd8b" title="Create the descriptor set.">ApiCreateDescriptorSet()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#ae52bfb0539f69fdff8b0660a0bd49339" title="Configure and create the pipelinelayout.">ApiCreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a85aabfbed4f31b4b49d955da65088f85" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a></li>
-<li>Optional Overrides: <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a39ebd179be5aa80ce93ad650073a74e0" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a> </li>
+<li>Required Overrides: <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5423611f8b990c15a7eed789e654ce3b" title="Load a shader into mShader module.">ApiInitShader()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a8f1a7cd6a285d997e0ee676e54fcc254" title="Create the descriptor set.">ApiCreateDescriptorSet()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5aed0d73af81e1ae4edd556efb8ff41a" title="Configure and create the pipelinelayout.">ApiCreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a728cbb79c011315e165f78c03c7b2bfe" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a></li>
+<li>Optional Overrides: <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a030ba0fc6df691e5746f0094f5ad04e4" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a> </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a85aabfbed4f31b4b49d955da65088f85" name="a85aabfbed4f31b4b49d955da65088f85"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a85aabfbed4f31b4b49d955da65088f85">&#9670;&#160;</a></span>ApiBeforeDispatch()</h2>
+<a id="a728cbb79c011315e165f78c03c7b2bfe" name="a728cbb79c011315e165f78c03c7b2bfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a728cbb79c011315e165f78c03c7b2bfe">&#9670;&#160;</a></span>ApiBeforeDispatch()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -208,7 +208,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ApiBeforeDispatch </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ApiBeforeDispatch </td>
           <td>(</td>
           <td class="paramtype">VkCommandBuffer&#160;</td>
           <td class="paramname"><em>cmdBuffer</em>, </td>
@@ -248,8 +248,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a39ebd179be5aa80ce93ad650073a74e0" name="a39ebd179be5aa80ce93ad650073a74e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a39ebd179be5aa80ce93ad650073a74e0">&#9670;&#160;</a></span>ApiBeforeFrame()</h2>
+<a id="a030ba0fc6df691e5746f0094f5ad04e4" name="a030ba0fc6df691e5746f0094f5ad04e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a030ba0fc6df691e5746f0094f5ad04e4">&#9670;&#160;</a></span>ApiBeforeFrame()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -258,7 +258,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ApiBeforeFrame </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ApiBeforeFrame </td>
           <td>(</td>
           <td class="paramtype">VkCommandBuffer&#160;</td>
           <td class="paramname"><em>cmdBuffer</em>, </td>
@@ -286,8 +286,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a11cfb041182f777fa1e9c1ef06fffd8b" name="a11cfb041182f777fa1e9c1ef06fffd8b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a11cfb041182f777fa1e9c1ef06fffd8b">&#9670;&#160;</a></span>ApiCreateDescriptorSet()</h2>
+<a id="a8f1a7cd6a285d997e0ee676e54fcc254" name="a8f1a7cd6a285d997e0ee676e54fcc254"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f1a7cd6a285d997e0ee676e54fcc254">&#9670;&#160;</a></span>ApiCreateDescriptorSet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -296,7 +296,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ApiCreateDescriptorSet </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ApiCreateDescriptorSet </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -313,8 +313,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="ae52bfb0539f69fdff8b0660a0bd49339" name="ae52bfb0539f69fdff8b0660a0bd49339"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae52bfb0539f69fdff8b0660a0bd49339">&#9670;&#160;</a></span>ApiCreatePipelineLayout()</h2>
+<a id="a5aed0d73af81e1ae4edd556efb8ff41a" name="a5aed0d73af81e1ae4edd556efb8ff41a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aed0d73af81e1ae4edd556efb8ff41a">&#9670;&#160;</a></span>ApiCreatePipelineLayout()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -323,7 +323,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ApiCreatePipelineLayout </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ApiCreatePipelineLayout </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -340,8 +340,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a6d5ef5cddd342e8f13ec783c8781a808" name="a6d5ef5cddd342e8f13ec783c8781a808"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d5ef5cddd342e8f13ec783c8781a808">&#9670;&#160;</a></span>ApiInitShader()</h2>
+<a id="a5423611f8b990c15a7eed789e654ce3b" name="a5423611f8b990c15a7eed789e654ce3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5423611f8b990c15a7eed789e654ce3b">&#9670;&#160;</a></span>ApiInitShader()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -350,7 +350,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ApiInitShader </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ApiInitShader </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -367,8 +367,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a0ad280990e17654db8afff946c88571e" name="a0ad280990e17654db8afff946c88571e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ad280990e17654db8afff946c88571e">&#9670;&#160;</a></span>CreatePipeline()</h2>
+<a id="a6888da47a98151271b9bd25547fe63da" name="a6888da47a98151271b9bd25547fe63da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6888da47a98151271b9bd25547fe63da">&#9670;&#160;</a></span>CreatePipeline()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -377,7 +377,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::CreatePipeline </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::CreatePipeline </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -392,8 +392,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a880a5ca46fbb9a9dca46a1c95cd6fbcb" name="a880a5ca46fbb9a9dca46a1c95cd6fbcb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a880a5ca46fbb9a9dca46a1c95cd6fbcb">&#9670;&#160;</a></span>Destroy()</h2>
+<a id="a3589a2b4ee8543b060956421348a0bc5" name="a3589a2b4ee8543b060956421348a0bc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3589a2b4ee8543b060956421348a0bc5">&#9670;&#160;</a></span>Destroy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -402,7 +402,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::Destroy </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::Destroy </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -421,37 +421,29 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a3cc98cb0855f2e64538838c4c96180f1" name="a3cc98cb0855f2e64538838c4c96180f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cc98cb0855f2e64538838c4c96180f1">&#9670;&#160;</a></span>Init()</h2>
+<a id="a88642ce247f8d94209c8c0d570c06e1d" name="a88642ce247f8d94209c8c0d570c06e1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88642ce247f8d94209c8c0d570c06e1d">&#9670;&#160;</a></span>Init()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::Init </td>
+          <td class="memname">void foray::stages::ComputeStageBase::Init </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td>
           <td class="paramname"><em>context</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Init. </p>
-<p >Calls <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a11cfb041182f777fa1e9c1ef06fffd8b" title="Create the descriptor set.">ApiCreateDescriptorSet()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#ae52bfb0539f69fdff8b0660a0bd49339" title="Configure and create the pipelinelayout.">ApiCreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a6d5ef5cddd342e8f13ec783c8781a808" title="Load a shader into mShader module.">ApiInitShader()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a0ad280990e17654db8afff946c88571e">CreatePipeline()</a> in this order </p>
+<p >Calls <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a8f1a7cd6a285d997e0ee676e54fcc254" title="Create the descriptor set.">ApiCreateDescriptorSet()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5aed0d73af81e1ae4edd556efb8ff41a" title="Configure and create the pipelinelayout.">ApiCreatePipelineLayout()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a5423611f8b990c15a7eed789e654ce3b" title="Load a shader into mShader module.">ApiInitShader()</a>, <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a6888da47a98151271b9bd25547fe63da">CreatePipeline()</a> in this order </p>
 
 </div>
 </div>
-<a id="a9c034edc206bf2fa0688875e75898028" name="a9c034edc206bf2fa0688875e75898028"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9c034edc206bf2fa0688875e75898028">&#9670;&#160;</a></span>RecordFrame()</h2>
+<a id="acd32a525612434e15a84d5dba7cbdea5" name="acd32a525612434e15a84d5dba7cbdea5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd32a525612434e15a84d5dba7cbdea5">&#9670;&#160;</a></span>RecordFrame()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -460,7 +452,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::RecordFrame </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::RecordFrame </td>
           <td>(</td>
           <td class="paramtype">VkCommandBuffer&#160;</td>
           <td class="paramname"><em>cmdBuffer</em>, </td>
@@ -484,14 +476,14 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Calls <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a39ebd179be5aa80ce93ad650073a74e0" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a>, binds pipeline and descriptor set, calls <a class="el" href="classforay_1_1stages_1_1ComputeStage.html#a85aabfbed4f31b4b49d955da65088f85" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a> </p>
+<p>Calls <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a030ba0fc6df691e5746f0094f5ad04e4" title="Prepare resources used in the compute shader.">ApiBeforeFrame()</a>, binds pipeline and descriptor set, calls <a class="el" href="classforay_1_1stages_1_1ComputeStageBase.html#a728cbb79c011315e165f78c03c7b2bfe" title="Push constants and configure the Group size.">ApiBeforeDispatch()</a> </p>
 
 <p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#ad989ef4e29c352c5f1a01573eb083828">foray::stages::RenderStage</a>.</p>
 
 </div>
 </div>
-<a id="a68abce1fa498796e0c406beea6e87d7c" name="a68abce1fa498796e0c406beea6e87d7c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68abce1fa498796e0c406beea6e87d7c">&#9670;&#160;</a></span>ReloadShaders()</h2>
+<a id="afc8af475df56e502c2001c22c9e41949" name="afc8af475df56e502c2001c22c9e41949"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc8af475df56e502c2001c22c9e41949">&#9670;&#160;</a></span>ReloadShaders()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -500,7 +492,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void foray::stages::ComputeStage::ReloadShaders </td>
+          <td class="memname">virtual void foray::stages::ComputeStageBase::ReloadShaders </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -520,8 +512,8 @@ Inheriting</h1>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="a7f89cb4966711cf2215f6a469f2c01f5" name="a7f89cb4966711cf2215f6a469f2c01f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f89cb4966711cf2215f6a469f2c01f5">&#9670;&#160;</a></span>mDescriptorSet</h2>
+<a id="aeadd6a6f15cefae7509b0a7aabcf8460" name="aeadd6a6f15cefae7509b0a7aabcf8460"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeadd6a6f15cefae7509b0a7aabcf8460">&#9670;&#160;</a></span>mDescriptorSet</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -530,7 +522,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1DescriptorSet.html">core::DescriptorSet</a> foray::stages::ComputeStage::mDescriptorSet</td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1DescriptorSet.html">core::DescriptorSet</a> foray::stages::ComputeStageBase::mDescriptorSet</td>
         </tr>
       </table>
   </td>
@@ -542,8 +534,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a087e08b68c7aba8d2a8fc35924fa129b" name="a087e08b68c7aba8d2a8fc35924fa129b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a087e08b68c7aba8d2a8fc35924fa129b">&#9670;&#160;</a></span>mPipeline</h2>
+<a id="acbe96b4576842915acd1c353c0a7d880" name="acbe96b4576842915acd1c353c0a7d880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbe96b4576842915acd1c353c0a7d880">&#9670;&#160;</a></span>mPipeline</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -552,7 +544,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">VkPipeline foray::stages::ComputeStage::mPipeline = nullptr</td>
+          <td class="memname">VkPipeline foray::stages::ComputeStageBase::mPipeline = nullptr</td>
         </tr>
       </table>
   </td>
@@ -564,8 +556,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="a055afb80c3c6ea09af10422f990332e0" name="a055afb80c3c6ea09af10422f990332e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a055afb80c3c6ea09af10422f990332e0">&#9670;&#160;</a></span>mPipelineLayout</h2>
+<a id="ac3ccd6134d64f06f4ec2f2ad2ea47f0d" name="ac3ccd6134d64f06f4ec2f2ad2ea47f0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3ccd6134d64f06f4ec2f2ad2ea47f0d">&#9670;&#160;</a></span>mPipelineLayout</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -574,7 +566,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1util_1_1PipelineLayout.html">util::PipelineLayout</a> foray::stages::ComputeStage::mPipelineLayout</td>
+          <td class="memname"><a class="el" href="classforay_1_1util_1_1PipelineLayout.html">util::PipelineLayout</a> foray::stages::ComputeStageBase::mPipelineLayout</td>
         </tr>
       </table>
   </td>
@@ -586,8 +578,8 @@ Inheriting</h1>
 
 </div>
 </div>
-<a id="aee300cf37bac2d9366ba38ebb693581f" name="aee300cf37bac2d9366ba38ebb693581f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee300cf37bac2d9366ba38ebb693581f">&#9670;&#160;</a></span>mShader</h2>
+<a id="a61e93da85af56ba02679d1216ad76797" name="a61e93da85af56ba02679d1216ad76797"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61e93da85af56ba02679d1216ad76797">&#9670;&#160;</a></span>mShader</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -596,7 +588,7 @@ Inheriting</h1>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classforay_1_1core_1_1ShaderModule.html">core::ShaderModule</a> foray::stages::ComputeStage::mShader</td>
+          <td class="memname"><a class="el" href="classforay_1_1core_1_1ShaderModule.html">core::ShaderModule</a> foray::stages::ComputeStageBase::mShader</td>
         </tr>
       </table>
   </td>
