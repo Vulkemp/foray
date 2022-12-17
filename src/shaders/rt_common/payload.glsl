@@ -7,6 +7,8 @@
 #ifndef PAYLOAD_GLSL
 #define PAYLOAD_GLSL
 
+#include "../shading/constants.glsl"
+
 /// @brief Hit payload data (passed back to ray generation after ray dispatch)
 struct HitPayload
 {
@@ -16,7 +18,10 @@ struct HitPayload
     vec3 Attenuation;
     /// @brief Seed is a per ray generated seed value for random number generation
     uint Seed;
+    /// @brief Ray Recursion Depth
     uint Depth;
+    /// @brief Ray Distance
+    float Distance;
 };
 
 /// @brief HitPayload default constructor
@@ -27,6 +32,7 @@ HitPayload ConstructHitPayload()
     result.Attenuation = vec3(1.f);
     result.Seed = 0;
     result.Depth = 0;
+    result.Distance = 10000.f;
     return result;
 }
 
