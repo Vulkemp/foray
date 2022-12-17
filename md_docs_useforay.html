@@ -73,7 +73,7 @@ $(function() {
   <div class="headertitle"><div class="title">Notes on how to build upon Foray </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md30"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md38"></a>
 Base Classes</h1>
 <p >While most classes in foray can be extended via inheritance, there are some types which are specifically made to be inherited from.</p><ul>
 <li>The type name ends with <code>Base</code>, example <a class="el" href="classforay_1_1base_1_1DefaultAppBase.html" title="Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple ...">foray::base::DefaultAppBase</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html" title="Extended version of MinimalRaytracingStageBase limited to a single output image, descriptorset but pr...">foray::stages::DefaultRaytracingStageBase</a></li>
@@ -94,10 +94,10 @@ Base Classes</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a class="el" href="classforay_1_1stages_1_1MinimalRaytracingStageBase.html" title="Minimalist setup for a Raytracing Stage.">foray::stages::MinimalRaytracingStageBase</a>   </td><td class="markdownTableBodyNone">Raytracing Stage providing virtual methods well integrated into the RenderStage interface, but no functionality.   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md31"></a>
+<h1><a class="anchor" id="autotoc_md39"></a>
 Context</h1>
 <p >The <a class="el" href="structforay_1_1core_1_1Context.html" title="Non owning context object.">foray::core::Context</a> type is one of the most used types throughout the project. Its purpose is to combine commonly passed initialization and state information into one object. The object itself only represents a loan on its members. This means for a complex setup, the program may maintain multiple sets of the context object. For simple setups, the Context object in the <a class="el" href="classforay_1_1base_1_1DefaultAppBase.html#aee37657af18693ddbfd422ccd00024c0">foray::base::DefaultAppBase::mContext</a> (maintained automatically by the DefaultAppBase) is likely the only instance required.</p>
-<h1><a class="anchor" id="autotoc_md32"></a>
+<h1><a class="anchor" id="autotoc_md40"></a>
 Other Important Types</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">

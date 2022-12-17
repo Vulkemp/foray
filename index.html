@@ -183,14 +183,17 @@ Shader Management</h2>
 <p >Get an overview of the code in the <a href="./src/">./src/ directory</a> </p>
 <h1><a class="anchor" id="autotoc_md16"></a>
 Usage</h1>
-<ol type="1">
-<li>Add the library as a submodule to your git repository <div class="fragment"><div class="line">git submodule add https://github.com/Vulkemp/foray</div>
+<h2><a class="anchor" id="autotoc_md17"></a>
+1. Add the library as a submodule to your git repository</h2>
+<div class="fragment"><div class="line">git submodule add https://github.com/Vulkemp/foray</div>
 <div class="line">git submodule init</div>
 <div class="line">git submodule update</div>
-</div><!-- fragment --></li>
-<li>Add the library directory as a cmake subdirectory <div class="fragment"><div class="line">add_subdirectory(&quot;foray&quot;)</div>
-</div><!-- fragment --></li>
-<li>Setup Include Directories and Linking in your target cmake files <div class="fragment"><div class="line"># Link foray lib</div>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md18"></a>
+2. Add the library directory as a cmake subdirectory</h2>
+<div class="fragment"><div class="line">add_subdirectory(&quot;foray&quot;)</div>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md19"></a>
+3. Setup Include Directories and Linking in your target cmake files</h2>
+<div class="fragment"><div class="line"># Link foray lib</div>
 <div class="line">target_link_libraries(</div>
 <div class="line">    ${PROJECT_NAME}</div>
 <div class="line">    PUBLIC foray</div>
@@ -212,9 +215,13 @@ Usage</h1>
 <div class="line">    PUBLIC &quot;${CMAKE_SOURCE_DIR}/foray/third_party&quot; # Third Party includes</div>
 <div class="line">    PUBLIC ${Vulkan_INCLUDE_DIR}</div>
 <div class="line">)</div>
-</div><!-- fragment --> </li>
-</ol>
-<h1><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
+4. Start building</h2>
+<ul>
+<li>Use the template from <a class="el" href="md_docs_template.html">docs/template.md</a></li>
+<li>or copy an example from <a href="https://github.com/Vulkemp/foray-examples">foray-examples</a></li>
+</ul>
+<h1><a class="anchor" id="autotoc_md21"></a>
 Third Party Dependencies</h1>
 <ul>
 <li><a href="https://github.com/g-truc/glm">GLM</a>: GLSL-like mathematics library (MIT License)</li>
@@ -227,7 +234,7 @@ Third Party Dependencies</h1>
 <li><a href="https://github.com/charles-lunarg/vk-bootstrap">vk-bootstrap</a>: Utility library for instance creation, device selection and building, queue selection and swapchain creation (MIT License)</li>
 <li><a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">Vulkan Memory Allocator</a>: Simplified Vulkan memory allocation (MIT License)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md18"></a>
+<h1><a class="anchor" id="autotoc_md22"></a>
 Versioning and Changelog</h1>
 <p >See <a class="el" href="changelog_8md.html">changelog.md</a> document on <a class="el" href="md_docs_changelog.html">Github</a> or <a href="https://vulkemp.github.io/foray/md_docs_changelog.html">Github Pages Doxygen Docs</a> </p>
 </div></div><!-- PageDoc -->
