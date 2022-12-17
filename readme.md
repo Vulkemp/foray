@@ -68,17 +68,17 @@ The GBuffer provides the basis for denoising
 
 Get an overview of the code in the [./src/ directory](./src/)
 # Usage
-1. Add the library as a submodule to your git repository
+## 1. Add the library as a submodule to your git repository
 ```sh
 git submodule add https://github.com/Vulkemp/foray
 git submodule init
 git submodule update
 ```
-2. Add the library directory as a cmake subdirectory
+## 2. Add the library directory as a cmake subdirectory
 ```cmake
 add_subdirectory("foray")
 ```
-3. Setup Include Directories and Linking in your target cmake files
+## 3. Setup Include Directories and Linking in your target cmake files
 ```cmake
 # Link foray lib
 target_link_libraries(
@@ -103,6 +103,11 @@ target_include_directories(
    	PUBLIC ${Vulkan_INCLUDE_DIR}
 )
 ```
+
+## 4. Start building
+* Use the template from [docs/template.md](./docs/template.md)
+* or copy an example from [foray-examples](https://github.com/Vulkemp/foray-examples)
+
 # Third Party Dependencies
 * [GLM](https://github.com/g-truc/glm): GLSL-like mathematics library (MIT License)
 * [ImGui](https://github.com/ocornut/imgui): Immediate Mode GUI for simple user interfaces (MIT License)
