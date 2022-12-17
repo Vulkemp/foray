@@ -110,7 +110,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3f37822eec3d2b603631f7e6c23d36cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1RenderStage.html#ae969a77e824f304e57bedbf7385e49c5" title="Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image...">RenderStage::Resize</a>(..) which resizes any image registered to mImageOutputs, calls <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a1a60250aeacf57a184cffc1e6fffcdfc" title="Creates a fully populated descriptorset. See rtbindpoints and shaders/rt_common/bindpoints....">CreateOrUpdateDescriptors()</a> afterwards.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a3f37822eec3d2b603631f7e6c23d36cf">More...</a><br /></td></tr>
 <tr class="separator:a3f37822eec3d2b603631f7e6c23d36cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af05104f3938db8174570abf75bcd790b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#af05104f3938db8174570abf75bcd790b">Destroy</a> () override</td></tr>
-<tr class="memdesc:af05104f3938db8174570abf75bcd790b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#aa3c5937575169e39468e941101effc56" title="Destroys the descriptor set.">DestroyDescriptors()</a>, CustomObjectsDestroy() <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#af05104f3938db8174570abf75bcd790b">More...</a><br /></td></tr>
+<tr class="memdesc:af05104f3938db8174570abf75bcd790b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7101e1ff7f3386db839db08029208cbf" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#aa3c5937575169e39468e941101effc56" title="Destroys the descriptor set.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7956e3d267cec2ebd78d3e670e5d371c" title="Inheriting types may use this function to destroy options created during ApiCustomObjectsCreate()">ApiCustomObjectsDestroy()</a> and <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#af05104f3938db8174570abf75bcd790b">More...</a><br /></td></tr>
 <tr class="separator:af05104f3938db8174570abf75bcd790b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac599e74be98436db2d96980ae74647c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classforay_1_1core_1_1ManagedImage.html">core::ManagedImage</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#ac599e74be98436db2d96980ae74647c3">GetRtOutput</a> ()</td></tr>
 <tr class="separator:ac599e74be98436db2d96980ae74647c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,7 +162,7 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:ad800df77c7d568395afc53e86bf24ebe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inheriting types may use this function to initialize stage specific objects such as configuration Ubo buffers.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#ad800df77c7d568395afc53e86bf24ebe">More...</a><br /></td></tr>
 <tr class="separator:ad800df77c7d568395afc53e86bf24ebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7956e3d267cec2ebd78d3e670e5d371c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7956e3d267cec2ebd78d3e670e5d371c">ApiCustomObjectsDestroy</a> ()</td></tr>
-<tr class="memdesc:a7956e3d267cec2ebd78d3e670e5d371c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inheriting types may use this function to destroy options created during CustomObjectsCreate()  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7956e3d267cec2ebd78d3e670e5d371c">More...</a><br /></td></tr>
+<tr class="memdesc:a7956e3d267cec2ebd78d3e670e5d371c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inheriting types may use this function to destroy options created during <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#ad800df77c7d568395afc53e86bf24ebe" title="Inheriting types may use this function to initialize stage specific objects such as configuration Ubo...">ApiCustomObjectsCreate()</a>  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7956e3d267cec2ebd78d3e670e5d371c">More...</a><br /></td></tr>
 <tr class="separator:a7956e3d267cec2ebd78d3e670e5d371c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a60250aeacf57a184cffc1e6fffcdfc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a1a60250aeacf57a184cffc1e6fffcdfc">CreateOrUpdateDescriptors</a> ()</td></tr>
 <tr class="memdesc:a1a60250aeacf57a184cffc1e6fffcdfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a fully populated descriptorset. See rtbindpoints and shaders/rt_common/bindpoints.glsl.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a1a60250aeacf57a184cffc1e6fffcdfc">More...</a><br /></td></tr>
@@ -171,7 +171,7 @@ Protected Member Functions</h2></td></tr>
 <tr class="memdesc:aa3c5937575169e39468e941101effc56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the descriptor set.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#aa3c5937575169e39468e941101effc56">More...</a><br /></td></tr>
 <tr class="separator:aa3c5937575169e39468e941101effc56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15167b5c9d1b667bdb4b725aeb54e5c5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a15167b5c9d1b667bdb4b725aeb54e5c5">ReloadShaders</a> () override</td></tr>
-<tr class="memdesc:a15167b5c9d1b667bdb4b725aeb54e5c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls DestroyRtPipeline(), CreateRtPipeline() in this order.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a15167b5c9d1b667bdb4b725aeb54e5c5">More...</a><br /></td></tr>
+<tr class="memdesc:a15167b5c9d1b667bdb4b725aeb54e5c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7101e1ff7f3386db839db08029208cbf" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a8026dc2b9fda7c10d07fb7ee9d86d7c7" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">ApiCreateRtPipeline()</a> in this order.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a15167b5c9d1b667bdb4b725aeb54e5c5">More...</a><br /></td></tr>
 <tr class="separator:a15167b5c9d1b667bdb4b725aeb54e5c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d43435d813d4c423dd50df6d4a2f8db"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a5d43435d813d4c423dd50df6d4a2f8db">RecordFramePrepare</a> (VkCommandBuffer cmdBuffer, <a class="el" href="classforay_1_1base_1_1FrameRenderInfo.html">base::FrameRenderInfo</a> &amp;renderInfo)</td></tr>
 <tr class="memdesc:a5d43435d813d4c423dd50df6d4a2f8db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pipeline barriers.  <a href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a5d43435d813d4c423dd50df6d4a2f8db">More...</a><br /></td></tr>
@@ -244,7 +244,7 @@ Features</h1>
 <h1><a class="anchor" id="autotoc_md41"></a>
 Inheriting</h1>
 <ul>
-<li>Required Overrides: CreateRtPipeline(), DestroyRtPipeline() </li>
+<li>Required Overrides: <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a8026dc2b9fda7c10d07fb7ee9d86d7c7" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">ApiCreateRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7101e1ff7f3386db839db08029208cbf" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a> </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a8026dc2b9fda7c10d07fb7ee9d86d7c7" name="a8026dc2b9fda7c10d07fb7ee9d86d7c7"></a>
@@ -324,7 +324,7 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Inheriting types may use this function to destroy options created during CustomObjectsCreate() </p>
+<p>Inheriting types may use this function to destroy options created during <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#ad800df77c7d568395afc53e86bf24ebe" title="Inheriting types may use this function to initialize stage specific objects such as configuration Ubo...">ApiCustomObjectsCreate()</a> </p>
 
 </div>
 </div>
@@ -460,7 +460,7 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Calls DestroyRtPipeline(), mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#aa3c5937575169e39468e941101effc56" title="Destroys the descriptor set.">DestroyDescriptors()</a>, CustomObjectsDestroy() <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order. </p>
+<p>Calls <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7101e1ff7f3386db839db08029208cbf" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a>, mPipelineLayout.Destroy(), <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#aa3c5937575169e39468e941101effc56" title="Destroys the descriptor set.">DestroyDescriptors()</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7956e3d267cec2ebd78d3e670e5d371c" title="Inheriting types may use this function to destroy options created during ApiCustomObjectsCreate()">ApiCustomObjectsDestroy()</a> and <a class="el" href="classforay_1_1stages_1_1RenderStage.html#a5b72b8d474073be00957431591c3c85f" title="Calls Destroy() on any image in mImageOutputs and clears mImageOutputs.">DestroyOutputImages()</a> in this order. </p>
 
 <p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#abc330f08d8b46b7f2e38085295f4106d">foray::stages::RenderStage</a>.</p>
 
@@ -745,7 +745,7 @@ Inheriting</h1>
 </table>
 </div><div class="memdoc">
 
-<p>Calls DestroyRtPipeline(), CreateRtPipeline() in this order. </p>
+<p>Calls <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a7101e1ff7f3386db839db08029208cbf" title="Destroys mPipeline and all shaders registered to RenderStage::mShaders.">ApiDestroyRtPipeline()</a>, <a class="el" href="classforay_1_1stages_1_1DefaultRaytracingStageBase.html#a8026dc2b9fda7c10d07fb7ee9d86d7c7" title="Inheriting types should create mPipeline here (load shaders, configure sbts, build)">ApiCreateRtPipeline()</a> in this order. </p>
 
 <p>Reimplemented from <a class="el" href="classforay_1_1stages_1_1RenderStage.html#aee119ed5b7cb441465432fdce0533f1c">foray::stages::RenderStage</a>.</p>
 
