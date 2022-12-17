@@ -14,5 +14,5 @@ var searchData=
   ['normal_11',['Normal',['../structforay_1_1scene_1_1Vertex.html#ac0a759659da830623182cc2a8e7725b0',1,'foray::scene::Vertex::Normal()'],['../classforay_1_1stages_1_1GBufferStage.html#a9e61d4dfdbfff570d710203e61a55b66a960b44c579bc2f6818d2daaf9e4c16f0',1,'foray::stages::GBufferStage::Normal()'],['../namespaceforay_1_1scene.html#aecd9b83367db02a6bf2f3de2b48528f2a960b44c579bc2f6818d2daaf9e4c16f0',1,'foray::scene::Normal()']]],
   ['normaloutputname_12',['NormalOutputName',['../classforay_1_1stages_1_1GBufferStage.html#a29a9210c9d2fa43ca09ec421f2312264',1,'foray::stages::GBufferStage']]],
   ['normaltextureindex_13',['NormalTextureIndex',['../structforay_1_1scene_1_1Material.html#ab4fd7b931466bc90acebc37271860872',1,'foray::scene::Material']]],
-  ['notes_20on_20how_20to_20best_20build_20upon_20foray_14',['Notes on how to best build upon Foray',['../md_docs_useforay.html',1,'']]]
+  ['notes_20on_20how_20to_20build_20upon_20foray_14',['Notes on how to build upon Foray',['../md_docs_useforay.html',1,'']]]
 ];

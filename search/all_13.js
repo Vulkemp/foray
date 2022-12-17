@@ -111,6 +111,6 @@ var searchData=
   ['swapchainimages_108',['SwapchainImages',['../structforay_1_1core_1_1Context.html#a516384c933825cba43beaab12e901f8d',1,'foray::core::Context']]],
   ['swindows_109',['sWindows',['../classforay_1_1osi_1_1Window.html#a98bba54baad7542b76cc9754ebe72ed6',1,'foray::osi::Window']]],
   ['sync2features_110',['Sync2FEatures',['../structforay_1_1base_1_1VulkanDevice_1_1DefaultFeatures.html#af0a359ba52fa5e322d4fbd3a81ce4c81',1,'foray::base::VulkanDevice::DefaultFeatures']]],
-  ['synchronization_20in_20foray_111',['Synchronization in Foray',['../md_docs_synchronization.html',1,'']]],
+  ['synchronization_20in_20foray_20_28and_20vulkan_29_111',['Synchronization in Foray (and Vulkan)',['../md_docs_synchronization.html',1,'']]],
   ['synchronization_2emd_112',['synchronization.md',['../synchronization_8md.html',1,'']]]
 ];
