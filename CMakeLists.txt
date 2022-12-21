@@ -18,13 +18,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS ${STRICT_FLAGS})
 
 find_package(Vulkan REQUIRED)
 
-include("cmakescripts/locatesdl2.cmake") # Find SDL either by find_package or as a fallback the included version
-
 # manual dependency variables
 
-set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party" CACHE PATH "Third party libraries directory")
+
+include("cmakescripts/locatesdl2.cmake") # Find SDL either by find_package or as a fallback the included version
 
 # link dependency libs
+
 target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC ${Vulkan_LIBRARIES}
@@ -54,12 +55,12 @@ add_subdirectory("src/shaders")
 # Set nonstrict mode for third party stuff
 set_property(GLOBAL PROPERTY COMPILE_FLAGS ${NONSTRICT_FLAGS})
 
-add_subdirectory("${THIRD_PARTY_DIR}/vma")
-add_subdirectory("${THIRD_PARTY_DIR}/vkbootstrap")
-add_subdirectory("${THIRD_PARTY_DIR}/glm")
-add_subdirectory("${THIRD_PARTY_DIR}/tinygltf")
-add_subdirectory("${THIRD_PARTY_DIR}/tinyexr")
-add_subdirectory("${THIRD_PARTY_DIR}/imgui")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/vma")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/vkbootstrap")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/glm")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/tinygltf")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/tinyexr")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/imgui")
 
 # Set cache entry to shader dir
 
