@@ -3,7 +3,7 @@
 #include "foray_basics.hpp"
 #include "foray_exception.hpp"
 #include <vulkan/vulkan.h>
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>

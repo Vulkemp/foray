@@ -3,13 +3,13 @@
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #include <stringapiset.h>
 #endif
 
 namespace foray::osi {
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
     std::filesystem::path FromUtf8Path(std::string_view utf8path)
     {
         int          wstr_size = MultiByteToWideChar(CP_UTF8, 0, utf8path.data(), (int)utf8path.size(), nullptr, 0);
@@ -108,7 +108,7 @@ namespace foray::osi {
     void Utf8Path::VerifyPath()
     {
         Assert(!mPath.empty(), "Invalid Path Initializer: path argument may not be empty!");
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         mRelative = !(mPath.size() >= 2 && mPath[1] == ':' && (mPath[2] == '\\' || mPath[2] == '/'));
         // If the path came from std::filesystem::path, it will contain \ characters
         for(char& c : mPath)

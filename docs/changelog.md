@@ -2,6 +2,8 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
+## Version 1.0.4
+* More robust windows host environment detection at compile time
 ## Version 1.0.3
 * Fixed windows SDL locate error
 ## Version 1.0.1, 1.0.2

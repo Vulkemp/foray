@@ -7,7 +7,7 @@ namespace foray::util
     {
         mContext = context;
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         VkExternalSemaphoreHandleTypeFlagBits handleType = VkExternalSemaphoreHandleTypeFlagBits::VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR;
 #else
         VkExternalSemaphoreHandleTypeFlagBits handleType = VkExternalSemaphoreHandleTypeFlagBits::VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
@@ -29,7 +29,7 @@ namespace foray::util
 
         AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCi, nullptr, &mSemaphore));
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         VkSemaphoreGetWin32HandleInfoKHR getWInfo{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, .semaphore = mSemaphore, .handleType = handleType};
 
@@ -47,7 +47,7 @@ namespace foray::util
 
     void ExternalSemaphore::Destroy()
     {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         if(mHandle != INVALID_HANDLE_VALUE)
         {
             CloseHandle(mHandle);

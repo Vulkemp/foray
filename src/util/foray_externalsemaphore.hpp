@@ -19,7 +19,7 @@ namespace foray::util {
       protected:
         core::Context* mContext   = nullptr;
         VkSemaphore    mSemaphore = nullptr;
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         HANDLE mHandle = INVALID_HANDLE_VALUE;
 #else
         int mHandle = -1;

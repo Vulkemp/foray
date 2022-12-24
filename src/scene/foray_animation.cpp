@@ -177,7 +177,7 @@ namespace foray::scene {
             auto  transform = channel.Target->GetTransform();
             auto& sampler   = mSamplers[channel.SamplerIndex];
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define isnanf _isnanf
 #endif
 
