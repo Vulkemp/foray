@@ -11,6 +11,12 @@ namespace foray::core {
 
     namespace fs = std::filesystem;
 
+#ifdef FORAY_DEBUG
+constexpr std::string_view OPTIMIZE = " -O0";
+#else
+constexpr std::string_view OPTIMIZE = " -O";
+#endif
+
 #pragma region Hashing, File Time
 
     uint64_t ShaderManager::MakeHash(std::string_view absoluteUniqueSourceFilePath, const ShaderCompilerConfig& options)
@@ -24,6 +30,7 @@ namespace foray::core {
         additionalOptions.insert(options.AdditionalOptions.cbegin(), options.AdditionalOptions.cend());
 
         size_t hash = {};
+        util::AccumulateHash(hash, OPTIMIZE);
         util::AccumulateHash(hash, absoluteUniqueSourceFilePath);
         util::AccumulateHash(hash, includeDirs.size());
         for(std::string_view path : includeDirs)
@@ -112,12 +119,6 @@ namespace foray::core {
 #pragma endregion
 #pragma region Call GLSL Compiler
 
-#ifdef FORAY_DEBUG
-#define OPTIMIZE "-O0"
-#else
-#define OPTIMIZE "-O"
-#endif
-
 #ifdef _WIN32
 
     std::wstring lConvertToWide(std::string_view v)
@@ -185,7 +186,7 @@ namespace foray::core {
     // returns false if compilation fails
     bool ShaderManager::CallGlslCompiler(std::string_view args)
     {
-        std::string command     = fmt::format("/bin/glslc --target-env=vulkan1.3 --target-spv=spv1.5{} {}", args, OPTIMIZE);
+        std::string command     = fmt::format("/bin/glslc --target-env=vulkan1.3 --target-spv=spv1.5{}", args);
         int         returnvalue = std::system(command.c_str());
         return returnvalue == 0;
     }
@@ -208,6 +209,7 @@ namespace foray::core {
         std::string args;
         {
             std::stringstream strbuilder;
+            strbuilder << OPTIMIZE;
             for(const osi::Utf8Path& includeDir : Config.IncludeDirs)
             {
                 strbuilder << " -I \"" << includeDir << "\"";
