@@ -2,6 +2,9 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
+## Version TODO
+* Fix glslc arguments in release mode
+* Enable CMAKE option for exception catch mode
 ## Version 1.0.4
 * More robust windows host environment detection at compile time
 ## Version 1.0.3

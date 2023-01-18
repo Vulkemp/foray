@@ -72,3 +72,8 @@ option(FORAY_PRECOMPILE_THIRDPARTY_HEADERS "Enables packing third party includes
 if (FORAY_PRECOMPILE_THIRDPARTY_HEADERS)
     target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/foray_precompile.hpp")
 endif()
+
+option(FORAY_CATCH_EXCEPTIONS "Sets exception catch mode: OFF = No central exceptions catcher. Aids live debugging, but won't print error message to console. ON = Catch exceptions centrally and log error message." OFF)
+if (FORAY_CATCH_EXCEPTIONS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC "FORAY_CATCH_EXCEPTIONS=1")
+endif()
