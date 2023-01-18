@@ -3,8 +3,9 @@
 Documents major and minor changes, patches only if critical fixes were applied.
 
 ## Version TODO
-* Fix glslc arguments in release mode
+* Remove 'GL_KHR_vulkan_glsl' from all shader files
 * Enable CMAKE option for exception catch mode
+* Fix glslc arguments in release mode
 ## Version 1.0.4
 * More robust windows host environment detection at compile time
 ## Version 1.0.3

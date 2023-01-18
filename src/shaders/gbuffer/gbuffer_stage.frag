@@ -1,6 +1,5 @@
 #version 450
 #extension GL_GOOGLE_include_directive : enable
-#extension GL_KHR_vulkan_glsl : enable
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec3 inWorldPos;             // Vertex position in world space
