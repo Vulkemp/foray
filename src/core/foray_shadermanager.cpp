@@ -185,7 +185,7 @@ namespace foray::core {
     // returns false if compilation fails
     bool ShaderManager::CallGlslCompiler(std::string_view args)
     {
-        std::string command     = fmt::format("/bin/glslc --target-spv=spv1.5{} {}", args, OPTIMIZE);
+        std::string command     = fmt::format("/bin/glslc --target-env=vulkan1.3 --target-spv=spv1.5{} {}", args, OPTIMIZE);
         int         returnvalue = std::system(command.c_str());
         return returnvalue == 0;
     }
