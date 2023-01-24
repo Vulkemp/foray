@@ -3,6 +3,9 @@
 Documents major and minor changes, patches only if critical fixes were applied.
 
 ## Version TODO
+* Improve Device Selection Process
+    * If multiple suitable devices are detected, the user can choose via a console prompt
+    * Log name of selected device
 * Fix: Material Evaluation on RDNA2 was broken, now works.
 ## Version 1.0.5
 * Fix: shaderc optimization option did not affect compile hash and was not configured on windows

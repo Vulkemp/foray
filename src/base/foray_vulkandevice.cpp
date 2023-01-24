@@ -1,7 +1,11 @@
 #include "foray_vulkandevice.hpp"
 #include "../core/foray_context.hpp"
+#include "../foray_logger.hpp"
 #include "../foray_vulkan.hpp"
 #include "../osi/foray_window.hpp"
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 namespace foray::base {
     VulkanDevice& VulkanDevice::SetBeforePhysicalDeviceSelectFunc(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc)
@@ -26,6 +30,8 @@ namespace foray::base {
 
         // create physical device selector
         vkb::PhysicalDeviceSelector deviceSelector(*(mContext->VkbInstance), mContext->Window->GetOrCreateSurfaceKHR(mContext->Instance()));
+
+        std::vector<std::string> availableDevices = deviceSelector.select_device_names().value();
 
         if(mSetDefaultCapabilitiesToDeviceSelector)
         {
@@ -63,12 +69,38 @@ namespace foray::base {
             mBeforePhysicalDeviceSelectFunc(deviceSelector);
         }
 
-        auto ret = deviceSelector.select();
-        FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::SelectPhysicalDevice] vkb Device Selector failed to find a satisifying device. VkResult: {} Reason: {}",
-                        PrintVkResult(ret.vk_result()), ret.error().message())
-
-        mPhysicalDevice          = *ret;
-        mContext->VkbPhysicalDevice = &mPhysicalDevice;
+        auto ret = deviceSelector.select_devices();
+        if(ret.has_value() && ret->size() > 0)
+        {
+            uint32_t selectIndex = 0;
+            if(ret->size() > 1 && mShowConsoleDeviceSelectionPrompt)
+            {
+                std::stringstream strbuilder;
+                strbuilder << "Device Selector has detected " << ret->size() << " suitable devices:\n";
+                for(int32_t index = 0; index < (int32_t)ret->size(); index++)
+                {
+                    strbuilder << std::setw(3) << index << "  " << ret->at(index).name << "\n";
+                }
+                strbuilder << "Type a number in the range [0..." << (ret->size() - 1) << "]: ";
+                std::cout << strbuilder.str() << std::flush;
+                char in[256] = {};
+                std::cin >> std::setw(255) >> in;
+                selectIndex = (uint32_t)strtoul(in, nullptr, 10);
+                if (selectIndex >= ret->size())
+                {
+                    selectIndex = 0;
+                }
+            }
+            logger()->info("Device Selector chooses \"{}\"", ret->at(selectIndex).name);
+            mPhysicalDevice             = ret->at(selectIndex);
+            mContext->VkbPhysicalDevice = &mPhysicalDevice;
+        }
+        else
+        {
+            logger()->warn("Device Selector failed to find suitable device!");
+            FORAY_THROWFMT("[VulkanDevice::SelectPhysicalDevice] vkb Device Selector failed to find a satisifying device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
+                           ret.error().message())
+        }
     }
     void VulkanDevice::BuildDevice()
     {
@@ -109,8 +141,8 @@ namespace foray::base {
         FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
                         ret.error().message())
 
-        mDevice                 = *ret;
-        mDispatchTable          = mDevice.make_table();
+        mDevice                    = *ret;
+        mDispatchTable             = mDevice.make_table();
         mContext->VkbDevice        = &mDevice;
         mContext->VkbDispatchTable = &mDispatchTable;
     }

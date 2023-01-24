@@ -61,6 +61,8 @@ namespace foray::base {
         bool mSetDefaultCapabilitiesToDeviceSelector = true;
         /// @brief Enables features listed in mDefaultFeatures member
         bool mEnableDefaultDeviceFeatures = true;
+        /// @brief If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index.
+        bool mShowConsoleDeviceSelectionPrompt = false;
 
         core::Context* mContext = nullptr;
 
