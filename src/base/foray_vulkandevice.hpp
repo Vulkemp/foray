@@ -34,6 +34,7 @@ namespace foray::base {
 
         FORAY_PROPERTY_V(SetDefaultCapabilitiesToDeviceSelector)
         FORAY_PROPERTY_V(EnableDefaultDeviceFeatures)
+        FORAY_PROPERTY_V(ShowConsoleDeviceSelectionPrompt)
         FORAY_PROPERTY_R(PhysicalDevice)
         FORAY_PROPERTY_R(Device)
         FORAY_PROPERTY_R(DispatchTable)
