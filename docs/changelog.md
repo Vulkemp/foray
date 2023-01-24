@@ -2,6 +2,8 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
+## Version TODO
+* Fix: Material Evaluation on RDNA2 was broken, now works.
 ## Version 1.0.5
 * Fix: shaderc optimization option did not affect compile hash and was not configured on windows
 * Remove 'GL_KHR_vulkan_glsl' from all shader files

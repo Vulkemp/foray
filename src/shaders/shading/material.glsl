@@ -29,7 +29,9 @@ vec3 diffuseBrdf(vec3 rgb)
 
 vec3 EvaluateMaterial(in HitSample hit, in MaterialBufferObject material, in MaterialProbe probe)
 {
-	float tempVDotH = pow(1 - abs(dot(hit.wOut, hit.wHalf)), 5);
+	float tempVDotH1 = 1 - abs(dot(hit.wOut, hit.wHalf));
+	float signVDotH1 = sign(tempVDotH1);
+	float tempVDotH = pow(abs(tempVDotH1), 5) * signVDotH1; // carry sign over as on RDNA2 pow(-*, 5) yields unexpected result. Since power is always 5th, the sign is preserved anyways.
 
 	vec4 baseColor = probe.BaseColor;
 	float alpha = probe.MetallicRoughness.g * probe.MetallicRoughness.g;
@@ -42,6 +44,7 @@ vec3 EvaluateMaterial(in HitSample hit, in MaterialBufferObject material, in Mat
 
 	vec3 dielectricBrdf = mix(diffuseBrdf(baseColor.rgb), vec3(specular), f0 + (1 - f0) * tempVDotH);
 	return mix(dielectricBrdf, metalBrdf, probe.MetallicRoughness.r);
+	// return vec3(tempVDotH);
 }
 
 #endif // MATERIAL_GLSL
