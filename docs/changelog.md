@@ -3,6 +3,8 @@
 Documents major and minor changes, patches only if critical fixes were applied.
 
 ## Version TODO
+* Fix const-correctness on foray::core::ManagedImage::GetSampleCount()
+* Add option to disable some RT calls
 * Improve Device Selection Process
     * If multiple suitable devices are detected, the user can choose via a console prompt
     * Log name of selected device

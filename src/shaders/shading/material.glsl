@@ -31,7 +31,7 @@ vec3 EvaluateMaterial(in HitSample hit, in MaterialBufferObject material, in Mat
 {
 	float tempVDotH1 = 1 - abs(dot(hit.wOut, hit.wHalf));
 	float signVDotH1 = sign(tempVDotH1);
-	float tempVDotH = pow(abs(tempVDotH1), 5) * signVDotH1; // carry sign over as on RDNA2 pow(-*, 5) yields unexpected result. Since power is always 5th, the sign is preserved anyways.
+	float tempVDotH = pow(abs(tempVDotH1), 5) * signVDotH1; // carry sign over as negative first argument is undefined behaviour (does not work on RDNA2 for example)
 
 	vec4 baseColor = probe.BaseColor;
 	float alpha = probe.MetallicRoughness.g * probe.MetallicRoughness.g;

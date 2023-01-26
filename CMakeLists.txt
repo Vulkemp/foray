@@ -77,3 +77,8 @@ option(FORAY_CATCH_EXCEPTIONS "Sets exception catch mode: OFF = No central excep
 if (FORAY_CATCH_EXCEPTIONS)
     target_compile_definitions(${PROJECT_NAME} PUBLIC "FORAY_CATCH_EXCEPTIONS=1")
 endif()
+
+option(FORAY_DISABLE_RT "Disables calls to RT features in areas which do not strictly need it, such as AS building in scene. For when you want to work on a device which does not support RT." OFF)
+if (FORAY_DISABLE_RT)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC "FORAY_DISABLE_RT=1")
+endif()

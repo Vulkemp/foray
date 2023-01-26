@@ -96,7 +96,7 @@ namespace foray::core {
 
         virtual void SetName(std::string_view name) override;
 
-        VkSampleCountFlagBits GetSampleCount() { return mCreateInfo.ImageCI.samples; }
+        VkSampleCountFlagBits GetSampleCount() const { return mCreateInfo.ImageCI.samples; }
 
       protected:
         Context*          mContext{};

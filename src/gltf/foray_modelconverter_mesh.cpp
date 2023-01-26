@@ -20,7 +20,7 @@ namespace foray::gltf {
             mGeo.GetMeshes().push_back(std::move(mesh));
         }
 
-        auto& indexBuffer  = *mIndexBuffer;
+        auto& indexBuffer = *mIndexBuffer;
 
         if(mOptions.FlipY)
         {
@@ -35,10 +35,12 @@ namespace foray::gltf {
         }
 
         mGeo.InitOrUpdate();
+#if !FORAY_DISABLE_RT
         for(auto& mesh : mIndexBindings.Meshes)
         {
             mesh->BuildAccelerationStructure(mContext, &mGeo);
         }
+#endif
     }
 
     void ModelConverter::PushGltfMeshToBuffers(const tinygltf::Mesh& mesh, std::vector<scene::Primitive>& outprimitives)
