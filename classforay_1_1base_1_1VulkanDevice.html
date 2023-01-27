@@ -153,6 +153,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:af05a52091ca7d8b468d6b151701285f4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#af05a52091ca7d8b468d6b151701285f4">mEnableDefaultDeviceFeatures</a> = true</td></tr>
 <tr class="memdesc:af05a52091ca7d8b468d6b151701285f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables features listed in mDefaultFeatures member.  <br /></td></tr>
 <tr class="separator:af05a52091ca7d8b468d6b151701285f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af148e1bce090b4eb64d18a873aaf5295"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#af148e1bce090b4eb64d18a873aaf5295">mShowConsoleDeviceSelectionPrompt</a> = false</td></tr>
+<tr class="memdesc:af148e1bce090b4eb64d18a873aaf5295"><td class="mdescLeft">&#160;</td><td class="mdescRight">If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index.  <br /></td></tr>
+<tr class="separator:af148e1bce090b4eb64d18a873aaf5295"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73ce313922141ec21abf38acd76ab462"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structforay_1_1core_1_1Context.html">core::Context</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#a73ce313922141ec21abf38acd76ab462">mContext</a> = nullptr</td></tr>
 <tr class="separator:a73ce313922141ec21abf38acd76ab462"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a933b3ef49cc1ac2718fcc729c5e0bf64"><td class="memItemLeft" align="right" valign="top">vkb::PhysicalDevice&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#a933b3ef49cc1ac2718fcc729c5e0bf64">mPhysicalDevice</a></td></tr>
@@ -759,6 +762,30 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Requires present capability, prefers dedicated devices. Enables VK_KHR_ACCELERATION_STRUCTURE, VK_KHR_RAY_TRACING_PIPELINE and VK_KHR_SYNCHRONIZATION_2 extensions (plus extensions those depend on). Enables samplerAnisotropy feature. </p>
+
+</div>
+</div>
+<a id="af148e1bce090b4eb64d18a873aaf5295" name="af148e1bce090b4eb64d18a873aaf5295"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af148e1bce090b4eb64d18a873aaf5295">&#9670;&#160;</a></span>mShowConsoleDeviceSelectionPrompt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool foray::base::VulkanDevice::mShowConsoleDeviceSelectionPrompt = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index. </p>
 
 </div>
 </div>
