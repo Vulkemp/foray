@@ -2,7 +2,7 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
-## Version TODO
+## Version 1.0.6
 * Fix const-correctness on foray::core::ManagedImage::GetSampleCount()
 * Add option to disable some RT calls
 * Improve Device Selection Process
