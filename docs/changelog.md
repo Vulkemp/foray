@@ -2,6 +2,8 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
+## Version 1.1.0
+* Added configurable raster stage
 ## Version 1.0.6
 * Fix const-correctness on foray::core::ManagedImage::GetSampleCount()
 * Add option to disable some RT calls
