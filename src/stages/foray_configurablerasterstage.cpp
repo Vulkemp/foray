@@ -1,13 +1,13 @@
 #include "foray_configurablerasterstage.hpp"
-#include "../scene/foray_scene.hpp"
+#include "../core/foray_shadermanager.hpp"
 #include "../scene/foray_geo.hpp"
+#include "../scene/foray_scene.hpp"
 #include "../scene/globalcomponents/foray_cameramanager.hpp"
 #include "../scene/globalcomponents/foray_drawmanager.hpp"
 #include "../scene/globalcomponents/foray_materialmanager.hpp"
 #include "../scene/globalcomponents/foray_texturemanager.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 #include "../util/foray_shaderstagecreateinfos.hpp"
-#include "../core/foray_shadermanager.hpp"
 
 namespace foray::stages {
 
@@ -258,15 +258,16 @@ namespace foray::stages {
         SetupDescriptors();
         CreateDescriptorSets();
         CreatePipelineLayout();
+        ConfigureAndCompileShaders();
         CreatePipeline();
     }
 
     void ConfigurableRasterStage::CheckDeviceColorAttachmentCount()
     {
-        mMaxColorAttachmentCount = mContext->VkbPhysicalDevice->properties.limits.maxColorAttachments;
-        FORAY_ASSERTFMT(mOutputList.size() <= mMaxColorAttachmentCount,
+        uint32_t max = mContext->VkbPhysicalDevice->properties.limits.maxColorAttachments;
+        FORAY_ASSERTFMT(mOutputList.size() <= max,
                         "Physical Device supports max of {} color attachments! As configured requires {}. See VkPhysicalDeviceLimits::maxColorAttachments.",
-                        mMaxColorAttachmentCount, mOutputList.size())
+                        max, mOutputList.size())
     }
 
     void ConfigurableRasterStage::CreateOutputs(const VkExtent2D& size)
@@ -274,14 +275,14 @@ namespace foray::stages {
         for(auto& pair : mOutputMap)
         {
             core::ManagedImage& image  = pair.second->Image;
-            OutputRecipe&              recipe = pair.second->Recipe;
-            std::string_view           name   = pair.second->Name;
+            OutputRecipe&       recipe = pair.second->Recipe;
+            std::string_view    name   = pair.second->Name;
 
             image.Destroy();
 
             core::ManagedImage::CreateInfo ci(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT
-                                                         | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-                                                     recipe.ImageFormat, size, name);
+                                                  | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+                                              recipe.ImageFormat, size, name);
             image.Create(mContext, ci);
             std::string keycopy(name);
             mImageOutputs[keycopy] = &image;
@@ -396,12 +397,11 @@ namespace foray::stages {
     void ConfigurableRasterStage::CreatePipelineLayout()
     {
         mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
-        mPipelineLayout.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT
-                                                                             | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        mPipelineLayout.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         mPipelineLayout.Build(mContext);
     }
 
-    void ConfigurableRasterStage::CreatePipeline()
+    void ConfigurableRasterStage::ConfigureAndCompileShaders()
     {
         core::ShaderCompilerConfig shaderConfig;
 
@@ -441,8 +441,13 @@ namespace foray::stages {
             shaderConfig.Definitions.push_back(fmt::format("OUT_{}_CALC=\"{}\"", outLocation, recipe.Calculation));
         }
 
-        mShaderKeys.push_back(mContext->ShaderMan->CompileShader("../shaders/crs.vert", mVertexShaderModule, shaderConfig));
-        mShaderKeys.push_back(mContext->ShaderMan->CompileShader("../shaders/crs.frag", mFragmentShaderModule, shaderConfig));
+        mShaderKeys.resize(2);
+        mShaderKeys[0] = mContext->ShaderMan->CompileShader("../shaders/crs.vert", mVertexShaderModule, shaderConfig);
+        mShaderKeys[1] = mContext->ShaderMan->CompileShader("../shaders/crs.frag", mFragmentShaderModule, shaderConfig);
+    }
+
+    void ConfigurableRasterStage::CreatePipeline()
+    {
         util::ShaderStageCreateInfos shaderStageCreateInfos;
         shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule);
 
@@ -651,4 +656,13 @@ namespace foray::stages {
         mOutputMap.clear();
     }
 
-}  // namespace cgbuffer
+    uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::Device* device)
+    {
+        return device->physical_device.properties.limits.maxColorAttachments;
+    }
+    uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::PhysicalDevice* device)
+    {
+        return device->properties.limits.maxColorAttachments;
+    }
+
+}  // namespace foray::stages

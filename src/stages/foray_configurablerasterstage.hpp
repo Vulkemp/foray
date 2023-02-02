@@ -1,7 +1,7 @@
 #pragma once
-#include "foray_rasterizedRenderStage.hpp"
-#include "../scene/foray_scene_declares.hpp"
 #include "../core/foray_shadermodule.hpp"
+#include "../scene/foray_scene_declares.hpp"
+#include "foray_rasterizedRenderStage.hpp"
 
 namespace foray::stages {
 
@@ -158,12 +158,17 @@ namespace foray::stages {
 
         FORAY_PROPERTY_V(FlipY)
 
+        /// @brief Get maximum attachment count that a device supports
+        static uint32_t GetDeviceMaxAttachmentCount(vkb::Device* device);
+        /// @brief Get maximum attachment count that a device supports
+        static uint32_t GetDeviceMaxAttachmentCount(vkb::PhysicalDevice* device);
+
       protected:
         struct Output
         {
-            std::string               Name;
+            std::string        Name;
             core::ManagedImage Image;
-            OutputRecipe              Recipe;
+            OutputRecipe       Recipe;
 
             inline Output(std::string_view name, const OutputRecipe& recipe) : Name(name), Recipe(recipe) {}
             VkAttachmentDescription GetAttachmentDescr() const;
@@ -171,8 +176,8 @@ namespace foray::stages {
         using OutputMap  = std::unordered_map<std::string, std::unique_ptr<Output>>;
         using OutputList = std::vector<Output*>;
 
-        OutputMap                 mOutputMap;
-        OutputList                mOutputList;
+        OutputMap          mOutputMap;
+        OutputList         mOutputList;
         core::ManagedImage mDepthImage;
         scene::Scene*      mScene = nullptr;
 
@@ -185,21 +190,20 @@ namespace foray::stages {
         std::string mDepthOutputName = "";
         std::string mName            = "";
 
-        uint32_t mMaxColorAttachmentCount = 0U;
-
         bool mFlipY = false;
 
         static std::string ToString(FragmentOutputType type);
         static std::string ToString(BuiltInFeaturesFlagBits feature);
         static std::string ToString(FragmentInputFlagBits input);
 
-        void         CheckDeviceColorAttachmentCount();
-        void         CreateOutputs(const VkExtent2D& size);
-        void         CreateRenderPass();
-        void         CreateFrameBuffer();
+        virtual void CheckDeviceColorAttachmentCount();
+        virtual void CreateOutputs(const VkExtent2D& size);
+        virtual void CreateRenderPass();
+        virtual void CreateFrameBuffer();
         virtual void SetupDescriptors() override;
         virtual void CreateDescriptorSets() override;
         virtual void CreatePipelineLayout() override;
-        void         CreatePipeline();
+        virtual void ConfigureAndCompileShaders();
+        virtual void CreatePipeline();
     };
-}  // namespace cgbuffer
+}  // namespace foray::stages
