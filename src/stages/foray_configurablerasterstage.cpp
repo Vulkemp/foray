@@ -442,8 +442,8 @@ namespace foray::stages {
         }
 
         mShaderKeys.resize(2);
-        mShaderKeys[0] = mContext->ShaderMan->CompileShader("../shaders/crs.vert", mVertexShaderModule, shaderConfig);
-        mShaderKeys[1] = mContext->ShaderMan->CompileShader("../shaders/crs.frag", mFragmentShaderModule, shaderConfig);
+        mShaderKeys[0] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.vert", mVertexShaderModule, shaderConfig);
+        mShaderKeys[1] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.frag", mFragmentShaderModule, shaderConfig);
     }
 
     void ConfigurableRasterStage::CreatePipeline()
@@ -473,6 +473,8 @@ namespace foray::stages {
             .SetRenderPass(mRenderpass)
             .Build();
         // clang-format on
+
+        logger()->info("Pipeline 0x{:x}", reinterpret_cast<uint64_t>(mPipeline));
     }
 
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)

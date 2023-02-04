@@ -65,6 +65,7 @@ add_subdirectory("$CACHE{THIRD_PARTY_DIR}/imgui")
 # Set cache entry to shader dir
 
 set(FORAY_SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders" CACHE PATH "Foray shader directory")
+target_compile_definitions(${PROJECT_NAME} PUBLIC "FORAY_SHADER_DIR=\"${FORAY_SHADER_DIR}\"")
 
 # Precompiled header for third party libraries
 

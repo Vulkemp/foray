@@ -4,6 +4,7 @@ Documents major and minor changes, patches only if critical fixes were applied.
 
 ## Version 1.1.0
 * Added configurable raster stage
+* Define FORAY_SHADER_DIR when compiling foray
 ## Version 1.0.6
 * Fix const-correctness on foray::core::ManagedImage::GetSampleCount()
 * Add option to disable some RT calls

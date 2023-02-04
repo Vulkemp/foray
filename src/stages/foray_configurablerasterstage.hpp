@@ -153,6 +153,8 @@ namespace foray::stages {
 
         virtual void Destroy() override;
 
+        virtual ~ConfigurableRasterStage() { Destroy(); }
+
         /// @brief Gets the depth image
         core::ManagedImage* GetDepthImage();
 
