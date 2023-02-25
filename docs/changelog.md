@@ -2,6 +2,9 @@
 
 Documents major and minor changes, patches only if critical fixes were applied.
 
+## Version dev-2.0.0
+* Separated distribution of `foray::osi` events and `SDLEvent` events. Drastic changes to `foray::osi::OsManager` needed.
+    * This was necessary, because third party libs like ImGui rely on more `SDLEvent` types than handled by foray::osi.
 ## Version 1.1.0
 * Added configurable raster stage
 * Define FORAY_SHADER_DIR when compiling foray

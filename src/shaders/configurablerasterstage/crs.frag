@@ -69,15 +69,14 @@ void main()
     #define EXISTS_PROBE 1
 #endif
 #if MATERIALPROBEALPHA || ALPHATEST
-    #if EXISTS_PROBE
-        bool isOpaque = probe.BaseColor.a > 0.f;
-        #define EXISTS_ISOPAQUE 1
-    #else
     #if !EXISTS_MATERIAL
         MaterialBufferObject material = GetMaterialOrFallback(PushConstant.MaterialIndex);
         #define EXISTS_MATERIAL 1
     #endif
-
+    #if EXISTS_PROBE
+        bool isOpaque = probe.BaseColor.a > 0.f;
+        #define EXISTS_ISOPAQUE 1
+    #else
         bool isOpaque = ProbeAlphaOpacity(material, UV);
         #define EXISTS_ISOPAQUE 1
     #endif

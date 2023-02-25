@@ -42,10 +42,7 @@ namespace foray::osi {
     void OsManager::Destroy()
     {
         mInputDevices.clear();
-        if(!!mLastEvent)
-        {
-            delete mLastEvent;
-        }
+        mLastEvent = nullptr;
         SDL_Quit();
     }
 
@@ -62,23 +59,17 @@ namespace foray::osi {
         return out;
     }
 
-    const Event* OsManager::PollEvent()
+    OsManager::EventPollResult OsManager::PollEvent()
     {
-        if(!!mLastEvent)
+        EventPollResult result;
+        mLastEvent = nullptr;
+        if(SDL_PollEvent(&result.Raw.Data) != 0)
         {
-            delete mLastEvent;
-            mLastEvent = nullptr;
+            TranslateSDLEvent(result.Raw.Data);
+            result.Cast = mLastEvent ? mLastEvent.get() : nullptr;
+            result.Any = true;
         }
-        SDL_Event rawevent;
-        if(SDL_PollEvent(&rawevent) != 0)
-        {
-            TranslateSDLEvent(rawevent, mLastEvent);
-            if(!!mLastEvent)
-            {
-                mLastEvent->RawSdlEventData = rawevent;
-            }
-        }
-        return mLastEvent;
+        return result;
     }
 
 #pragma endregion
@@ -95,9 +86,8 @@ namespace foray::osi {
         return nullptr;
     }
 
-    bool OsManager::TranslateSDLEvent(const SDL_Event& sdl_event, Event*& result)
+    bool OsManager::TranslateSDLEvent(const SDL_Event& sdl_event)
     {
-        result = nullptr;
         switch(sdl_event.type)
         {
             case SDL_DROPTEXT:  // TODO Low Priority Handle Droptext/file events
@@ -106,11 +96,11 @@ namespace foray::osi {
             case SDL_KEYUP:
             case SDL_KEYDOWN:
                 // Binary Event
-                result = TranslateEvent_Keyboard(sdl_event);
+                TranslateEvent_Keyboard(sdl_event);
                 break;
             case SDL_JOYAXISMOTION:
                 // Axis Event
-                result = TranslateEvent_JoyAxis(sdl_event);
+                TranslateEvent_JoyAxis(sdl_event);
                 break;
             case SDL_JOYBALLMOTION:
             case SDL_JOYHATMOTION:
@@ -119,23 +109,23 @@ namespace foray::osi {
             case SDL_JOYBUTTONUP:
             case SDL_JOYBUTTONDOWN:
                 // Binary Event
-                result = TranslateEvent_JoyButton(sdl_event.jbutton);
+                TranslateEvent_JoyButton(sdl_event.jbutton);
                 break;
             case SDL_JOYDEVICEADDED:
             case SDL_JOYDEVICEREMOVED:
-                result = TranslateEvent_JoyDevice(sdl_event.jdevice);
+                TranslateEvent_JoyDevice(sdl_event.jdevice);
                 break;
             case SDL_MOUSEMOTION:
                 // Mouse Move Event
-                result = TranslateEvent_MouseMoved(sdl_event);
+                TranslateEvent_MouseMoved(sdl_event);
                 break;
             case SDL_MOUSEBUTTONUP:
             case SDL_MOUSEBUTTONDOWN:
                 // Binary Event
-                result = TranslateEvent_MouseButton(sdl_event);
+                TranslateEvent_MouseButton(sdl_event);
                 break;
             case SDL_MOUSEWHEEL:
-                result = TranslateEvent_MouseScroll(sdl_event);
+                TranslateEvent_MouseScroll(sdl_event);
                 break;
             case SDL_WINDOWEVENT:
                 // Multiple WindowPtr Events
@@ -145,24 +135,24 @@ namespace foray::osi {
                     switch(wevent.event)
                     {
                         case SDL_WINDOWEVENT_CLOSE:
-                            result = TranslateEvent_WindowClosed(window, wevent.timestamp);
+                            TranslateEvent_WindowClosed(window, wevent.timestamp);
                             break;
                         case SDL_WINDOWEVENT_SIZE_CHANGED:
-                            result = TranslateEvent_WindowResized(window, wevent);
+                            TranslateEvent_WindowResized(window, wevent);
                             break;
                         case SDL_WINDOWEVENT_RESTORED:
                             break;
                         case SDL_WINDOWEVENT_ENTER:
-                            result = TranslateEvent_WindowFocus(window, wevent, true, true);
+                            TranslateEvent_WindowFocus(window, wevent, true, true);
                             break;
                         case SDL_WINDOWEVENT_LEAVE:
-                            result = TranslateEvent_WindowFocus(window, wevent, true, false);
+                            TranslateEvent_WindowFocus(window, wevent, true, false);
                             break;
                         case SDL_WINDOWEVENT_FOCUS_GAINED:
-                            result = TranslateEvent_WindowFocus(window, wevent, false, true);
+                            TranslateEvent_WindowFocus(window, wevent, false, true);
                             break;
                         case SDL_WINDOWEVENT_FOCUS_LOST:
-                            result = TranslateEvent_WindowFocus(window, wevent, false, false);
+                            TranslateEvent_WindowFocus(window, wevent, false, false);
                             break;
                         case SDL_WINDOWEVENT_MINIMIZED:
                         case SDL_WINDOWEVENT_MAXIMIZED:
@@ -185,12 +175,12 @@ namespace foray::osi {
                 break;
         }
 
-        if(result)
+        if(!!mLastEvent)
         {
-            if(!!result->Source)
+            if(!!mLastEvent->Source)
             {
-                Window* window = Window::FindBySDLId(result->Source->SDLId());
-                window->HandleEvent(result);
+                Window* window = Window::FindBySDLId(mLastEvent->Source->SDLId());
+                window->HandleEvent(mLastEvent.get());
             }
             return true;
         }
@@ -198,7 +188,7 @@ namespace foray::osi {
     }
 
 #pragma region input
-    Event* OsManager::TranslateEvent_MouseButton(const SDL_Event& sdl_event)
+    void OsManager::TranslateEvent_MouseButton(const SDL_Event& sdl_event)
     {
         SDL_MouseButtonEvent mbevent = sdl_event.button;
         Window*              window  = GetWindowPtr<SDL_MouseButtonEvent>(mbevent);
@@ -226,27 +216,27 @@ namespace foray::osi {
         {
             FORAY_THROWFMT("unable to find button {} from event on mouse!", NAMEOF_ENUM(button))
         }
-        return new EventInputBinary(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
+        mLastEvent = std::make_unique<EventInputBinary>(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
     }
 
-    Event* OsManager::TranslateEvent_Keyboard(const SDL_Event& sdl_event)
+    void OsManager::TranslateEvent_Keyboard(const SDL_Event& sdl_event)
     {
         SDL_KeyboardEvent kbevent = sdl_event.key;
         Window*           window  = GetWindowPtr<SDL_KeyboardEvent>(kbevent);
         EButton           button  = (EButton)(int)kbevent.keysym.scancode;
         if(kbevent.repeat > 0)
         {
-            return nullptr;
+            return;
         }
         const InputBinary* input = mKeyboard->FindButton(button);
         if(!input)
         {
             FORAY_THROWFMT("unable to find button {} from event on keyboard!", NAMEOF_ENUM(button))
         }
-        return new EventInputBinary(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
+        mLastEvent = std::make_unique<EventInputBinary>(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
     }
 
-    Event* OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
+    void OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
     {
         SDL_MouseMotionEvent mevent    = sdl_event.motion;
         Window*              window    = GetWindowPtr<SDL_MouseMotionEvent>(mevent);
@@ -255,20 +245,20 @@ namespace foray::osi {
         fp32_t               relativeX = (fp32_t)mevent.xrel;
         fp32_t               relativeY = (fp32_t)mevent.yrel;
 
-        return new EventInputMouseMoved(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
+        mLastEvent = std::make_unique<EventInputMouseMoved>(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
     }
 
-    Event* OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
+    void OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
     {
         SDL_MouseWheelEvent mevent  = sdl_event.wheel;
         Window*             window  = GetWindowPtr<SDL_MouseWheelEvent>(mevent);
         int32_t             offsetx = mevent.x;
         int32_t             offsety = mevent.y;
 
-        return new EventInputDirectional(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
+        mLastEvent = std::make_unique<EventInputDirectional>(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
     }
 
-    Event* OsManager::TranslateEvent_JoyAxis(const SDL_Event& sdl_event)
+    void OsManager::TranslateEvent_JoyAxis(const SDL_Event& sdl_event)
     {
         SDL_JoyAxisEvent     ev           = sdl_event.jaxis;
         Window*              window       = nullptr;
@@ -292,10 +282,10 @@ namespace foray::osi {
         {
             Exception::Throw("unable to find a device from event!");
         }
-        return new EventInputAnalogue(window, ev.timestamp, sourceDevice, input, ev.value);
+        mLastEvent = std::make_unique<EventInputAnalogue>(window, ev.timestamp, sourceDevice, input, ev.value);
     }
 
-    Event* OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event)
+    void OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event)
     {
         Window*            window       = nullptr;
         InputDevice*       sourceDevice = nullptr;
@@ -319,10 +309,10 @@ namespace foray::osi {
         {
             FORAY_THROWFMT("unable to find button {} from event on a device!", NAMEOF_ENUM(button))
         }
-        return new EventInputBinary(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
+        mLastEvent = std::make_unique<EventInputBinary>(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
     }
 
-    Event* OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event)
+    void OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event)
     {
 
         InputDevice* sourceDevice;
@@ -335,25 +325,25 @@ namespace foray::osi {
             }
         }
         // TODO edit mInputDevices and query new data (low priority)
-        return new EventInputDeviceAvailability(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
+        mLastEvent = std::make_unique<EventInputDeviceAvailability>(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
     }
 
 #pragma endregion
 #pragma region window
 
-    Event* OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
+    void OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
     {
-        return new EventWindowCloseRequested(window, timestamp);
+        mLastEvent = std::make_unique<EventWindowCloseRequested>(window, timestamp);
     }
 
-    Event* OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
+    void OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
     {
-        return new EventWindowFocusChanged(window, wevent.timestamp, focus, focus && !mouseonly);
+        mLastEvent = std::make_unique<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
     }
-    Event* OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
+    void OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
     {
         VkExtent2D newSize{(uint32_t)wevent.data1, (uint32_t)wevent.data2};
-        return new EventWindowResized(window, wevent.timestamp, newSize);
+        mLastEvent = std::make_unique<EventWindowResized>(window, wevent.timestamp, newSize);
     }
 
 #pragma endregion

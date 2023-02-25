@@ -16,6 +16,8 @@ namespace foray::osi {
         enum class EType : int16_t
         {
             Undefined = -1,
+            /// @brief Just raw SDL event data
+            RawSDL,
             /// @brief Analogue inputs, ex. controller stick axis
             InputAnalogue,
             /// @brief Binary inputs, ex. buttons, keys
@@ -52,8 +54,15 @@ namespace foray::osi {
         EType Type = EType::Undefined;
         /// @brief For custom event type overloads, this value may be set
         int16_t CustomType = 0;
-        /// @brief Raw SDL_Event data this event was derived from
-        SDL_Event RawSdlEventData = {};
+    };
+
+    class EventRawSDL : public Event
+    {
+      public:
+        inline EventRawSDL() = default;
+        inline EventRawSDL(const uint32_t timestamp, const SDL_Event& data) : Event(nullptr, timestamp, Event::EType::RawSDL), Data(data) {}
+
+        SDL_Event Data;
     };
 
     /// @brief Base class for events originating from input devices

@@ -45,13 +45,18 @@ namespace foray::base {
 
     void MinimalAppBase::PollEvents()
     {
-        for(const osi::Event* event = mOsManager.PollEvent(); event != nullptr; event = mOsManager.PollEvent())
+        osi::OsManager::EventPollResult pollResult;
+        for(pollResult = mOsManager.PollEvent(); pollResult.Any; pollResult = mOsManager.PollEvent())
         {
-            ApiOnEvent(event);
-            if(event->Source && event->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
+            ApiOnEvent(&pollResult.Raw);
+            if(!!pollResult.Cast)
             {
-                // The last window has been requested to close, oblige by stopping the renderloop
-                mRenderLoop.RequestStop();
+                ApiOnEvent(pollResult.Cast);
+                if(pollResult.Cast->Source && pollResult.Cast->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
+                {
+                    // The last window has been requested to close, oblige by stopping the renderloop
+                    mRenderLoop.RequestStop();
+                }
             }
         }
     }

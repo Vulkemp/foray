@@ -1,5 +1,6 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "foray_event.hpp"
 #include "foray_osi_declares.hpp"
 #include <sdl2/SDL.h>
 #include <vector>
@@ -31,9 +32,16 @@ namespace foray::osi {
         /// @brief Cleans the SDL subsystem
         virtual void Destroy();
 
+        struct EventPollResult
+        {
+            bool         Any = false;
+            EventRawSDL  Raw  = {};
+            const Event* Cast = nullptr;
+        };
+
         /// @brief Polls next event from system event queue. Retuns nullptr if no event present
         /// @remark The pointer returned is valid until the next time PollEvent() is invoked.
-        virtual const Event* PollEvent();
+        virtual EventPollResult PollEvent();
 
       protected:
         /// @brief Mouse input device. Assumed standard and always present
@@ -47,19 +55,19 @@ namespace foray::osi {
         std::vector<std::unique_ptr<InputDevice>> mInputDevices;
 
         /// @brief Translates SDL event structures to Event class objects
-        virtual bool TranslateSDLEvent(const SDL_Event& sdl_event, Event*& out_event);
+        virtual bool TranslateSDLEvent(const SDL_Event& sdl_event);
 
-        virtual Event* TranslateEvent_MouseButton(const SDL_Event& sdl_event);
-        virtual Event* TranslateEvent_Keyboard(const SDL_Event& sdl_event);
-        virtual Event* TranslateEvent_MouseMoved(const SDL_Event& sdl_event);
-        virtual Event* TranslateEvent_MouseScroll(const SDL_Event& sdl_event);
-        virtual Event* TranslateEvent_JoyAxis(const SDL_Event& sdl_event);
-        virtual Event* TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event);
-        virtual Event* TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event);
-        virtual Event* TranslateEvent_WindowClosed(Window* window, uint32_t timestamp);
-        virtual Event* TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent);
-        virtual Event* TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus);
+        virtual void TranslateEvent_MouseButton(const SDL_Event& sdl_event);
+        virtual void TranslateEvent_Keyboard(const SDL_Event& sdl_event);
+        virtual void TranslateEvent_MouseMoved(const SDL_Event& sdl_event);
+        virtual void TranslateEvent_MouseScroll(const SDL_Event& sdl_event);
+        virtual void TranslateEvent_JoyAxis(const SDL_Event& sdl_event);
+        virtual void TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event);
+        virtual void TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event);
+        virtual void TranslateEvent_WindowClosed(Window* window, uint32_t timestamp);
+        virtual void TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent);
+        virtual void TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus);
 
-        Event* mLastEvent = nullptr;
+        std::unique_ptr<Event> mLastEvent = nullptr;
     };
-}  // namespace foray
+}  // namespace foray::osi

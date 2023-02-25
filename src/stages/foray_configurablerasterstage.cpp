@@ -473,8 +473,6 @@ namespace foray::stages {
             .SetRenderPass(mRenderpass)
             .Build();
         // clang-format on
-
-        logger()->info("Pipeline 0x{:x}", reinterpret_cast<uint64_t>(mPipeline));
     }
 
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
