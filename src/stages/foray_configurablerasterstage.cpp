@@ -67,7 +67,7 @@ namespace foray::stages {
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::DEVICEPOS,
          .Type               = FragmentOutputType::VEC2,
          .ImageFormat        = VkFormat::VK_FORMAT_R16G16_SFLOAT,
-         .ClearValue         = {{1.f, 0.f}},
+         .ClearValue         = {{65504.f, 0.f}},
          .Calculation        = "float linearZ = DevicePos.z * DevicePos.w; float derivative = max(abs(dFdx(linearZ)), abs(dFdy(linearZ)));",
          .Result             = "linearZ, derivative"};
     // clang-format on

@@ -129,7 +129,7 @@ namespace foray::stages {
             static const OutputRecipe ScreenMotion;
             /// @brief WorldSpace Motion Vectors, rgba16f, cleared to (0,0,0,0), projects current world position to previous world position
             static const OutputRecipe WorldMotion;
-            /// @brief Linearized depth and derivative, rg16f, cleared to (1,0)
+            /// @brief Linearized depth and derivative, rg16f, cleared to (65504,0)
             static const OutputRecipe DepthAndDerivative;
         };
 
