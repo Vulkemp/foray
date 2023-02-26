@@ -165,6 +165,10 @@ namespace foray::stages {
         /// @brief Get maximum attachment count that a device supports
         static uint32_t GetDeviceMaxAttachmentCount(vkb::PhysicalDevice* device);
 
+        static std::string ToString(FragmentOutputType type);
+        static std::string ToString(BuiltInFeaturesFlagBits feature);
+        static std::string ToString(FragmentInputFlagBits input);
+
       protected:
         struct Output
         {
@@ -193,10 +197,6 @@ namespace foray::stages {
         std::string mName            = "";
 
         bool mFlipY = false;
-
-        static std::string ToString(FragmentOutputType type);
-        static std::string ToString(BuiltInFeaturesFlagBits feature);
-        static std::string ToString(FragmentInputFlagBits input);
 
         virtual void CheckDeviceColorAttachmentCount();
         virtual void CreateOutputs(const VkExtent2D& size);

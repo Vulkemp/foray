@@ -129,6 +129,10 @@ namespace foray::stages {
                 return "vec3";
             case FragmentOutputType::VEC4:
                 return "vec4";
+            case FragmentOutputType::IVEC2:
+                return "ivec2";
+            case FragmentOutputType::IVEC3:
+                return "ivec3";
             case FragmentOutputType::IVEC4:
                 return "ivec4";
             case FragmentOutputType::UVEC2:
