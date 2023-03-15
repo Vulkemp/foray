@@ -1,5 +1,5 @@
 #include "foray_vulkan.hpp"
-#include <nameof/nameof.hpp>
+#include "foray_nameof.hpp"
 #include "core/foray_context.hpp"
 
 namespace foray {

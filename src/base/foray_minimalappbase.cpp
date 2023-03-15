@@ -3,7 +3,7 @@
 #include "../foray_logger.hpp"
 #include "../osi/foray_event.hpp"
 #include "../osi/foray_window.hpp"
-#include <nameof/nameof.hpp>
+#include "../foray_nameof.hpp"
 
 namespace foray::base {
 

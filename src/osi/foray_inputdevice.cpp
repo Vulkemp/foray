@@ -1,6 +1,6 @@
 #include "foray_inputdevice.hpp"
 #include "foray_osi.hpp"
-#include <nameof/nameof.hpp>
+#include "../foray_nameof.hpp"
 #include <sstream>
 
 namespace foray::osi {

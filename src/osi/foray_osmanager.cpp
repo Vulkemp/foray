@@ -2,7 +2,7 @@
 
 #include "../foray_exception.hpp"
 #include "foray_osi.hpp"
-#include <nameof/nameof.hpp>
+#include "../foray_nameof.hpp"
 #include <sdl2/SDL.h>
 
 namespace foray::osi {
