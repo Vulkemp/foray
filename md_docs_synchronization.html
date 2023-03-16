@@ -74,7 +74,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>Vulkan requires the programmer to assure correct synchronization. Any commands submitted via a command buffer are generally allowed to be executed out-of-order. Pipeline barriers are necessary in certain situations to assure data required is in the correct layout and available when the graphics processor accesses it.</p>
-<h1><a class="anchor" id="autotoc_md36"></a>
+<h1><a class="anchor" id="autotoc_md37"></a>
 Resources considered Constants during Rendering</h1>
 <p>The below listed resources are considered constants during rendering, so you are not required to protect access to these with pipeline barriers</p><ul>
 <li>Vertex and Index Buffer</li>
@@ -82,7 +82,7 @@ Resources considered Constants during Rendering</h1>
 <li>Scene Materials</li>
 <li>Geometry Meta Buffer</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md37"></a>
+<h1><a class="anchor" id="autotoc_md38"></a>
 When and what to synchronize</h1>
 <ul>
 <li>Sampled images and storage images require pipeline barriers protecting against read/write <b>before</b> access (unless they are considered constant). Use the ImageLayoutCache (member of FrameRenderInfo struct) to maintain image layout of images when your barriers transition the layout. The image layout <b>must</b> be cached so it can be set in the oldLayout field. If it is not set (left to <code>VK_IMAGELAYOUT_UNDEFINED</code>), the driver may <b>discard all image data on layout transition</b>.</li>
