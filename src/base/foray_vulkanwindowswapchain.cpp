@@ -41,15 +41,12 @@ namespace foray::base {
         // color space: VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
         swapchainBuilder.use_default_format_selection();
 
-        // tell vulkan the swapchain images will be used as color attachments
-        swapchainBuilder.use_default_image_usage_flags();
+        // tell vulkan the swapchain images will be used as color attachments and blit dest
+        swapchainBuilder.add_image_usage_flags(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
         swapchainBuilder.add_image_usage_flags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
         // use mailbox if possible, else fallback to fifo
         swapchainBuilder.use_default_present_mode_selection();
-        swapchainBuilder.use_default_format_feature_flags();
-        swapchainBuilder.add_format_feature_flags(VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_BLIT_DST_BIT | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT
-                                                  | VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
 
         if(!!mBeforeSwapchainBuildFunc)
         {
