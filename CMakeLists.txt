@@ -40,8 +40,6 @@ target_link_libraries(
 
 # include directories
 
-set(FORAY_INCLUDE_DIR_LIST "" CACHE STRING "List of third party include dirs")
-
 include_directories(
     PUBLIC ${Vulkan_INCLUDE_DIRS}
     PUBLIC ${SDL2_INCLUDE_DIRS}
@@ -57,7 +55,12 @@ add_subdirectory("src/shaders")
 # Set nonstrict mode for third party stuff
 set_property(GLOBAL PROPERTY COMPILE_FLAGS ${NONSTRICT_FLAGS})
 
-add_subdirectory("$CACHE{THIRD_PARTY_DIR}")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/vma")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/vkbootstrap")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/glm")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/tinygltf")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/tinyexr")
+add_subdirectory("$CACHE{THIRD_PARTY_DIR}/imgui")
 
 # Set cache entry to shader dir
 

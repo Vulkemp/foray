@@ -1,6 +1,6 @@
 Rapid Prototyping <b>F</b>ramework for <b>O</b>pen crossplatform development of Vulkan Hardware <b>Ray</b> tracing Demos.
 
-`Version: 2.*.*`
+`Version: 1.0.2`
 
 # Useful Links
 ## Documentation

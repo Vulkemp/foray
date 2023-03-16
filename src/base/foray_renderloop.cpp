@@ -1,7 +1,7 @@
 #include "foray_renderloop.hpp"
 #include "../foray_logger.hpp"
 #include <chrono>
-#include "../foray_nameof.hpp"
+#include <nameof/nameof.hpp>
 #include <sdl2/SDL.h>
 
 namespace foray::base {

@@ -1,6 +1,6 @@
 #include "foray_managedresource.hpp"
 #include "../foray_logger.hpp"
-#include "../foray_nameof.hpp"
+#include <nameof/nameof.hpp>
 #include <spdlog/fmt/fmt.h>
 #include <sstream>
 

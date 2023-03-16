@@ -1,5 +1,7 @@
 #include "foray_imagelayoutcache.hpp"
 #include "foray_managedimage.hpp"
+// #include "../foray_logger.hpp"
+// #include <nameof/nameof.hpp>
 
 namespace foray::core {
     VkImageLayout ImageLayoutCache::Get(VkImage image) const

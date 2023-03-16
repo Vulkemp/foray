@@ -7,7 +7,7 @@ using source_location = std::experimental::source_location;
 #include <source_location>
 using source_location = std::source_location;
 #endif
-#include "foray_fmt.hpp"
+#include <spdlog/fmt/fmt.h>
 
 namespace foray {
 
