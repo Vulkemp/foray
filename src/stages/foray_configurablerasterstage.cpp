@@ -320,7 +320,7 @@ namespace foray::stages {
                                                           .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                                           .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                                           .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                          .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
+                                                          .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
                                                           .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
                                                           .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL});
 
@@ -335,16 +335,16 @@ namespace foray::stages {
         subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
         subPassDependencies[0].dstSubpass          = 0;
         subPassDependencies[0].srcStageMask        = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[0].dstStageMask        = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subPassDependencies[0].dstStageMask        = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         subPassDependencies[0].srcAccessMask       = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[0].dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        subPassDependencies[0].dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         subPassDependencies[0].dependencyFlags     = VK_DEPENDENCY_BY_REGION_BIT;
 
         subPassDependencies[1].srcSubpass      = 0;
         subPassDependencies[1].dstSubpass      = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        subPassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         subPassDependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        subPassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         subPassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
         subPassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
@@ -482,44 +482,6 @@ namespace foray::stages {
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         {
-            VkImageMemoryBarrier2 attachmentMemBarrier{
-                .sType         = VkStructureType::VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-                .srcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                .srcAccessMask = VK_ACCESS_2_NONE,
-                .dstStageMask  = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-                .dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                .oldLayout     = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,  // We do not care about the contents of all attachments as they're cleared and rewritten completely
-                .newLayout     = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .subresourceRange =
-                    VkImageSubresourceRange{
-                        .aspectMask     = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-                        .baseMipLevel   = 0,
-                        .levelCount     = 1,
-                        .baseArrayLayer = 0,
-                        .layerCount     = 1,
-                    },
-            };
-
-            std::vector<VkImageMemoryBarrier2> imgBarriers(mOutputList.size() + 1);
-
-            for(uint32_t i = 0; i < mOutputList.size(); i++)
-            {
-                Output&                info    = *mOutputList[i];
-                VkImageMemoryBarrier2& barrier = imgBarriers[i];
-
-                barrier       = attachmentMemBarrier;
-                barrier.image = info.Image.GetImage();
-            }
-            VkImageMemoryBarrier2& depthBarrier      = imgBarriers.back();
-            depthBarrier                             = attachmentMemBarrier;
-            depthBarrier.dstStageMask                = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-            depthBarrier.dstAccessMask               = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT_KHR | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT_KHR;
-            depthBarrier.newLayout                   = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            depthBarrier.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
-            depthBarrier.image                       = mDepthImage.GetImage();
-
             std::vector<VkBufferMemoryBarrier2> bufferBarriers;
 
             VkBufferMemoryBarrier2 bufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
@@ -549,8 +511,6 @@ namespace foray::stages {
                 .dependencyFlags          = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
                 .bufferMemoryBarrierCount = (uint32_t)bufferBarriers.size(),
                 .pBufferMemoryBarriers    = bufferBarriers.data(),
-                .imageMemoryBarrierCount  = (uint32_t)imgBarriers.size(),
-                .pImageMemoryBarriers     = imgBarriers.data(),
             };
 
             vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
@@ -605,6 +565,7 @@ namespace foray::stages {
         {
             renderInfo.GetImageLayoutCache().Set(mOutputList[i]->Image, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
+        renderInfo.GetImageLayoutCache().Set(mDepthImage, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
     }
 
     void ConfigurableRasterStage::Resize(const VkExtent2D& extent)
@@ -658,6 +619,7 @@ namespace foray::stages {
         }
         mOutputList.clear();
         mOutputMap.clear();
+        mContext = nullptr;
     }
 
     uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::Device* device)

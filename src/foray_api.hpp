@@ -9,8 +9,8 @@
 #include "core/foray_core.hpp"
 #include "osi/foray_osi.hpp"
 #include "scene/foray_scenegraph.hpp"
+#include "stages/foray_configurablerasterstage.hpp"
 #include "stages/foray_defaultraytracingstage.hpp"
-#include "stages/foray_gbuffer.hpp"
 #include "stages/foray_imagetoswapchain.hpp"
 #include "stages/foray_imguistage.hpp"
 
@@ -25,7 +25,7 @@ namespace foray::api {
     using ManagedBuffer = foray::core::ManagedBuffer;
     using ManagedImage  = foray::core::ManagedImage;
 
-    using GBufferStage               = foray::stages::GBufferStage;
+    using ConfigurableRasterStage    = foray::stages::ConfigurableRasterStage;
     using ImguiStage                 = foray::stages::ImguiStage;
     using ImageToSwapchainStage      = foray::stages::ImageToSwapchainStage;
     using DefaultRaytracingStageBase = foray::stages::DefaultRaytracingStageBase;
