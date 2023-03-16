@@ -1071,11 +1071,11 @@ PhysicalDevice::Suitable PhysicalDeviceSelector::is_device_suitable(PhysicalDevi
 		return PhysicalDevice::Suitable::no;
 
 	auto required_extensions_supported = detail::check_device_extension_support(pd.extensions, criteria.required_extensions);
-	if (required_extensions_supported.size() != criteria.required_extensions.size())
+	if (required_extensions_supported.size() < criteria.required_extensions.size())
 		return PhysicalDevice::Suitable::no;
 
 	auto desired_extensions_supported = detail::check_device_extension_support(pd.extensions, criteria.desired_extensions);
-	if (desired_extensions_supported.size() != criteria.desired_extensions.size())
+	if (desired_extensions_supported.size() < criteria.desired_extensions.size())
 		suitable = PhysicalDevice::Suitable::partial;
 
 	if (!criteria.defer_surface_initialization && criteria.require_present) {
