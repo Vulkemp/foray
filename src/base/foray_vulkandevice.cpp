@@ -39,6 +39,7 @@ namespace foray::base {
             deviceSelector.require_present();
 
             // Prefer dedicated devices
+            deviceSelector.allow_any_gpu_device_type(false);
             deviceSelector.prefer_gpu_device_type();
 
             deviceSelector.set_minimum_version(1U, 3U);
