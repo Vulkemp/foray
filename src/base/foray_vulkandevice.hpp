@@ -32,8 +32,8 @@ namespace foray::base {
         /// @brief Set the function called after default configuration and before action with device builder
         VulkanDevice& SetBeforeDeviceBuildFunc(BeforeDeviceBuildFunctionPointer beforeDeviceBuildFunc);
 
-        FORAY_PROPERTY_V(SetDefaultCapabilitiesToDeviceSelector)
-        FORAY_PROPERTY_V(EnableDefaultDeviceFeatures)
+        FORAY_PROPERTY_V(EnableDefaultFeaturesAndExtensions)
+        FORAY_PROPERTY_V(EnableRaytracingFeaturesAndExtensions)
         FORAY_PROPERTY_V(ShowConsoleDeviceSelectionPrompt)
         FORAY_PROPERTY_R(PhysicalDevice)
         FORAY_PROPERTY_R(Device)
@@ -58,10 +58,20 @@ namespace foray::base {
         BeforePhysicalDeviceSelectFunctionPointer mBeforePhysicalDeviceSelectFunc = nullptr;
         BeforeDeviceBuildFunctionPointer          mBeforeDeviceBuildFunc          = nullptr;
 
-        /// @brief Requires present capability, prefers dedicated devices. Enables VK_KHR_ACCELERATION_STRUCTURE, VK_KHR_RAY_TRACING_PIPELINE and VK_KHR_SYNCHRONIZATION_2 extensions (plus extensions those depend on). Enables samplerAnisotropy feature.
-        bool mSetDefaultCapabilitiesToDeviceSelector = true;
-        /// @brief Enables features listed in mDefaultFeatures member
-        bool mEnableDefaultDeviceFeatures = true;
+        /// @brief Configures device selector with default extensions and features
+        /// @details 
+        ///   - Requires present capability, prefers dedicated devices. 
+        ///   - Enables VK_KHR_BUFFER_DEVICE_ADDRESS, VK_EXT_DESCRIPTOR_INDEXING, VK_KHR_SPIRV_1_4, VK_KHR_RELAXED_BLOCK_LAYOUT, VK_KHR_SYNCHRONIZATION_2
+        ///         extensions (plus extensions those depend on). 
+        ///   - Enables samplerAnisotropy feature. 
+        ///   - Enables BufferDeviceAddress, DescriptorIndexing and Synchronization2 features
+        bool mEnableDefaultFeaturesAndExtensions = true;
+        /// @brief Configures device selector with default extensions and features
+        /// @details 
+        ///   - Implicitly sets mEnableDefaultFeaturesAndExtensions to true
+        ///   - Enables VK_KHR_ACCELERATION_STRUCTURE and VK_KHR_RAY_TRACING_PIPELINE extensions (plus extensions those depend on)
+        ///   - Enables RayTracingPipelines and AccelerationStructures features
+        bool mEnableRaytracingFeaturesAndExtensions = true;
         /// @brief If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index.
         bool mShowConsoleDeviceSelectionPrompt = false;
 
@@ -71,13 +81,13 @@ namespace foray::base {
         vkb::Device         mDevice;
         vkb::DispatchTable  mDispatchTable;
 
-        struct DefaultFeatures
+        struct
         {
             VkPhysicalDeviceBufferDeviceAddressFeatures      BufferDeviceAdressFeatures    = {};
             VkPhysicalDeviceRayTracingPipelineFeaturesKHR    RayTracingPipelineFeatures    = {};
             VkPhysicalDeviceAccelerationStructureFeaturesKHR AccelerationStructureFeatures = {};
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures    = {};
             VkPhysicalDeviceSynchronization2Features         Sync2FEatures                 = {};
-        } mDefaultFeatures = {};
+        } mFeatures = {};
     };
 }  // namespace foray::base

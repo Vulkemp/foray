@@ -36,6 +36,9 @@ namespace foray::base {
               nullptr)
         , mShaderManager(&mContext)
     {
+#if FORAY_DISABLE_RT
+        mDevice.SetEnableRaytracingFeaturesAndExtensions(false);
+#endif
     }
 
     int32_t DefaultAppBase::Run()
@@ -118,7 +121,7 @@ namespace foray::base {
         allocatorCreateInfo.instance               = mInstance;
         allocatorCreateInfo.pVulkanFunctions       = &vulkanFunctions;
 
-        if(mDevice.GetEnableDefaultDeviceFeatures())
+        if(mDevice.GetEnableDefaultFeaturesAndExtensions())
         {
             allocatorCreateInfo.flags |= VmaAllocatorCreateFlagBits::VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
         }

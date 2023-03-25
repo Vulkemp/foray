@@ -33,7 +33,12 @@ namespace foray::base {
 
         std::vector<std::string> availableDevices = deviceSelector.select_device_names().value();
 
-        if(mSetDefaultCapabilitiesToDeviceSelector)
+        if(mEnableRaytracingFeaturesAndExtensions)
+        {
+            mEnableDefaultFeaturesAndExtensions = true;
+        }
+
+        if(mEnableDefaultFeaturesAndExtensions)
         {
             // Require capability to present to the current windows surface
             deviceSelector.require_present();
@@ -44,13 +49,7 @@ namespace foray::base {
             deviceSelector.set_minimum_version(1U, 3U);
 
             // Set raytracing extensions
-            std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
-                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
-                                                        // dependencies of acceleration structure
-                                                        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-                                                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-                                                        // dependencies of rt pipeline
-                                                        VK_KHR_SPIRV_1_4_EXTENSION_NAME, VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+            std::vector<const char*> requiredExtensions{VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME, VK_KHR_SPIRV_1_4_EXTENSION_NAME,
                                                         // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
                                                         VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME,
                                                         // Better pipeline barrier and submit calls
@@ -62,6 +61,18 @@ namespace foray::base {
             deviceFeatures.samplerAnisotropy = VK_TRUE;
 
             deviceSelector.set_required_features(deviceFeatures);
+        }
+
+        if(mEnableRaytracingFeaturesAndExtensions)
+        {
+            // Set raytracing extensions
+            std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
+                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
+                                                        // dependencies of acceleration structure
+                                                        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+                                                        // dependencies of rt pipeline
+                                                        VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
+            deviceSelector.add_required_extensions(requiredExtensions);
         }
 
         if(!!mBeforePhysicalDeviceSelectFunc)
@@ -86,7 +97,7 @@ namespace foray::base {
                 char in[256] = {};
                 std::cin >> std::setw(255) >> in;
                 selectIndex = (uint32_t)strtoul(in, nullptr, 10);
-                if (selectIndex >= ret->size())
+                if(selectIndex >= ret->size())
                 {
                     selectIndex = 0;
                 }
@@ -108,28 +119,31 @@ namespace foray::base {
 
         vkb::DeviceBuilder deviceBuilder(mPhysicalDevice);
 
-        if(mEnableDefaultDeviceFeatures)
+        mFeatures.BufferDeviceAdressFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES, .bufferDeviceAddress = VK_TRUE};
+
+        mFeatures.RayTracingPipelineFeatures = {.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
+                                                       .rayTracingPipeline = VK_TRUE};
+
+        mFeatures.AccelerationStructureFeatures = {.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
+                                                          .accelerationStructure = VK_TRUE};
+
+        mFeatures.DescriptorIndexingFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
+                                                       .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
+                                                       .runtimeDescriptorArray                    = VK_TRUE};  // enable this for unbound descriptor arrays
+
+        mFeatures.Sync2FEatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES, .synchronization2 = VK_TRUE};
+
+
+        if(mEnableDefaultFeaturesAndExtensions)
         {
-            mDefaultFeatures.BufferDeviceAdressFeatures = {.sType               = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES,
-                                                           .bufferDeviceAddress = VK_TRUE};
-
-            mDefaultFeatures.RayTracingPipelineFeatures = {.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
-                                                           .rayTracingPipeline = VK_TRUE};
-
-            mDefaultFeatures.AccelerationStructureFeatures = {.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
-                                                              .accelerationStructure = VK_TRUE};
-
-            mDefaultFeatures.DescriptorIndexingFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
-                                                           .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
-                                                           .runtimeDescriptorArray                    = VK_TRUE};  // enable this for unbound descriptor arrays
-
-            mDefaultFeatures.Sync2FEatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES, .synchronization2 = VK_TRUE};
-
-            deviceBuilder.add_pNext(&mDefaultFeatures.BufferDeviceAdressFeatures);
-            deviceBuilder.add_pNext(&mDefaultFeatures.RayTracingPipelineFeatures);
-            deviceBuilder.add_pNext(&mDefaultFeatures.AccelerationStructureFeatures);
-            deviceBuilder.add_pNext(&mDefaultFeatures.DescriptorIndexingFeatures);
-            deviceBuilder.add_pNext(&mDefaultFeatures.Sync2FEatures);
+            deviceBuilder.add_pNext(&mFeatures.BufferDeviceAdressFeatures);
+            deviceBuilder.add_pNext(&mFeatures.DescriptorIndexingFeatures);
+            deviceBuilder.add_pNext(&mFeatures.Sync2FEatures);
+        }
+        if (mEnableRaytracingFeaturesAndExtensions)
+        {
+            deviceBuilder.add_pNext(&mFeatures.RayTracingPipelineFeatures);
+            deviceBuilder.add_pNext(&mFeatures.AccelerationStructureFeatures);
         }
 
         if(!!mBeforeDeviceBuildFunc)
