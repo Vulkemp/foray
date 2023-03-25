@@ -22,8 +22,6 @@ namespace foray::scene::gcomp {
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
 
-        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
-
         void GetCameras(std::vector<ncomp::Camera*>& cameras);
 
         FORAY_GETTER_V(SelectedCamera)

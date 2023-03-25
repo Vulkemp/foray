@@ -19,7 +19,7 @@ namespace foray::scene::gcomp {
         mUbo.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
 
-    CameraManager::CameraManager(core::Context* context)
+    CameraManager::CameraManager(core::Context* context) : Component::UpdateCallback(ORDER_DEVICEUPLOAD)
     {
         mUbo.Create(context, "Camera");
     }

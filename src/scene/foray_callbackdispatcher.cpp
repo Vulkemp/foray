@@ -3,14 +3,14 @@
 namespace foray::scene {
     void CallbackDispatcher::InvokeUpdate(SceneUpdateInfo& updateInfo)
     {
-        mUpdate.Invoke(updateInfo);
+        mOnUpdate.Invoke(updateInfo);
     }
     void CallbackDispatcher::InvokeDraw(SceneDrawInfo& drawInfo)
     {
-        mDraw.Invoke(drawInfo);
+        mOnDraw.Invoke(drawInfo);
     }
     void CallbackDispatcher::InvokeOnEvent(const osi::Event* event)
     {
-        mOnEvent.Invoke(event);
+        mOnOsEvent.Invoke(event);
     }
 }  // namespace foray

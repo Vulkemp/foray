@@ -3,6 +3,7 @@
 #include "../foray_node.hpp"
 #include "foray_camera.hpp"
 #include "foray_transform.hpp"
+#include "imgui/imgui.h"
 
 namespace foray::scene::ncomp {
     void FreeCameraController::OnOsEvent(const osi::Event* event)
@@ -39,6 +40,14 @@ namespace foray::scene::ncomp {
                     mUseMouse = !mUseMouse;
                 }
             }
+            if(buttonId == osi::EButton::Keyboard_Home && pressed)
+            {
+                mSpeedExponent       = 0;
+                Transform* transform = GetNode()->GetTransform();
+                transform->SetTranslation(glm::vec3());
+                mPitch = 0;
+                mYaw = 0;
+            }
         }
 
         auto directional = dynamic_cast<const osi::EventInputDirectional*>(event);
@@ -54,9 +63,25 @@ namespace foray::scene::ncomp {
         }
     }
 
+    void FreeCameraController::RenderImguiHelpWindow()
+    {
+        if(ImGui::Begin("Camera Controller Help"))
+        {
+            ImGui::Text("[W, S] Move Forward, Back");
+            ImGui::Text("[A, D] Move Left, Right");
+            ImGui::Text("[Shift, Ctrl] Move Up, Down");
+            ImGui::Text("[Arrow Keys] Rotate Pitch, Yaw");
+            ImGui::Text("[Space] Capture Mouse");
+            ImGui::Text("[Numpad +/-] Adjust Movement Speed");
+            ImGui::Text("[ScrollWheel] Adjust Movement Speed");
+            ImGui::Text("[Home] Reset Position & Speed");
+            ImGui::End();
+        }
+    }
+
     void FreeCameraController::Update(SceneUpdateInfo& updateInfo)
     {
-        Camera* camera = GetNode()->GetComponent<Camera>();
+        Camera*    camera    = GetNode()->GetComponent<Camera>();
         Transform* transform = GetNode()->GetTransform();
         if(!camera)
         {
@@ -65,8 +90,8 @@ namespace foray::scene::ncomp {
 
         fp32_t invertMulti = mInvertAll ? -1.f : 1.f;
 
-        float deltaTime = updateInfo.RenderInfo.GetFrameTime();
-        float speed     = exp2f((fp32_t)mSpeedExponent) * deltaTime;
+        float      deltaTime = updateInfo.RenderInfo.GetFrameTime();
+        float      speed     = exp2f((fp32_t)mSpeedExponent) * deltaTime;
         glm::vec3& pos       = transform->GetTranslation();
         glm::vec3& upDir     = camera->GetUpDirection();
 
@@ -103,7 +128,7 @@ namespace foray::scene::ncomp {
 
     void FreeCameraController::ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event)
     {
-        Camera* camera = GetNode()->GetComponent<Camera>();
+        Camera*    camera    = GetNode()->GetComponent<Camera>();
         Transform* transform = GetNode()->GetTransform();
         if(!camera)
         {
@@ -126,4 +151,4 @@ namespace foray::scene::ncomp {
 
         transform->SetRotation(glm::quatLookAt(lookDir, camera->GetUpDirection()));
     }
-}  // namespace foray::scene
+}  // namespace foray::scene::ncomp

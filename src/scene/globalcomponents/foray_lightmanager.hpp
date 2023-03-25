@@ -10,12 +10,12 @@ namespace foray::scene::gcomp {
     class LightManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
+        inline LightManager() : Component::UpdateCallback(ORDER_DEVICEUPLOAD) {}
+
         /// @brief Collects lights and reuploads to device
         void CreateOrUpdate();
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
-
-        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
         FORAY_PROPERTY_R(Buffer)
 

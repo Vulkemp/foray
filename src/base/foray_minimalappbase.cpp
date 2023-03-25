@@ -58,6 +58,7 @@ namespace foray::base {
     }
     void MinimalAppBase::Destroy()
     {
+        mOsEventReceiver.Destroy();
         mInstance.Destroy();
         mOsManager.Destroy();
         logger()->flush();

@@ -56,7 +56,8 @@ namespace foray::base {
         mContext.OsManager = &mOsManager;
 
         mWindowSwapchain.CreateWindow();
-        mOnSwapchainResized.Set(mWindowSwapchain.OnResized(), [this](VkExtent2D extent) { this->ApiOnSwapchainResized(extent); }, -10000000);
+        mOnSwapchainResized.Set(
+            mWindowSwapchain.OnResized(), [this](VkExtent2D extent) { this->ApiOnSwapchainResized(extent); }, -10000000);
 
         mInstance.Create();
         mDevice.Create();
@@ -139,6 +140,8 @@ namespace foray::base {
 
         ApiDestroy();
 
+        mOnSwapchainResized.Destroy();
+        mOnOsEvent.Destroy();
         mSamplerCollection.Destroy();
 
         for(InFlightFrame& frame : mInFlightFrames)

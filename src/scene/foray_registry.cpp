@@ -30,17 +30,17 @@ namespace foray::scene {
         Component::DrawCallback* drawable = dynamic_cast<Component::DrawCallback*>(component);
         if(drawable)
         {
-            mCallbackDispatcher->mDraw.Add(drawable);
+            drawable->SetDelegate(mCallbackDispatcher->OnDraw());
         }
         Component::UpdateCallback* updatable = dynamic_cast<Component::UpdateCallback*>(component);
         if(updatable)
         {
-            mCallbackDispatcher->mUpdate.Add(updatable);
+            updatable->SetDelegate(mCallbackDispatcher->OnUpdate());
         }
         Component::OnEventCallback* receiver = dynamic_cast<Component::OnEventCallback*>(component);
         if(receiver)
         {
-            mCallbackDispatcher->mOnEvent.Add(receiver);
+            receiver->SetDelegate(mCallbackDispatcher->OnOsEvent());
         }
     }
     void Registry::UnregisterFromRoot(Component* component)
@@ -48,17 +48,17 @@ namespace foray::scene {
         Component::DrawCallback* drawable = dynamic_cast<Component::DrawCallback*>(component);
         if(drawable)
         {
-            mCallbackDispatcher->mDraw.Remove(drawable);
+            drawable->SetDelegate(nullptr);
         }
         Component::UpdateCallback* updatable = dynamic_cast<Component::UpdateCallback*>(component);
         if(updatable)
         {
-            mCallbackDispatcher->mUpdate.Remove(updatable);
+            updatable->SetDelegate(nullptr);
         }
         Component::OnEventCallback* receiver = dynamic_cast<Component::OnEventCallback*>(component);
         if(receiver)
         {
-            mCallbackDispatcher->mOnEvent.Remove(receiver);
+            receiver->SetDelegate(nullptr);
         }
     }
 

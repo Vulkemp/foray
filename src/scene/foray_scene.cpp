@@ -1,4 +1,5 @@
 #include "foray_scene.hpp"
+#include "../osi/foray_osmanager.hpp"
 #include "components/foray_node_components.hpp"
 #include "foray_node.hpp"
 #include "globalcomponents/foray_global_components.hpp"
@@ -8,6 +9,7 @@ namespace foray::scene {
     Scene::Scene(core::Context* context) : Registry(this), mContext(context)
     {
         InitDefaultGlobals();
+        mOnOsEvent.Set(mContext->OsManager->OnEvent(), [this](const osi::Event* event) { this->HandleEvent(event); });
     }
 
     void Scene::InitDefaultGlobals()
@@ -88,6 +90,8 @@ namespace foray::scene {
 
     void Scene::Destroy()
     {
+        mOnOsEvent.Destroy();
+        
         // Clear Nodes (automatically clears attached components via Node deconstructor, called by the deconstructing unique_ptr)
         mRootNodes.clear();
         mNodeBuffer.clear();

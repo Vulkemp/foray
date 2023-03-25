@@ -10,21 +10,25 @@ namespace foray::scene::ncomp {
     /// @details
     /// Controls:
     ///  * W/S                      Forwards/Backwards
-    ///  * A/D Strafe               Left/Right
-    ///  * LCtrl/LShift Strafe      Up/Down
+    ///  * A/D                      Left/Right
+    ///  * LCtrl/LShift             Up/Down
     ///  * ScrollWheel/Numpad+/-    Increase / decrease movement speed (exponentially)
     ///  * Arrow Keys               Pitch & Yaw
     ///  * Space                    Toggle mouse capture for pitch & yaw
+    ///  * Home                     Reset position, rotation and speed
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:
+        inline FreeCameraController() : Component::UpdateCallback(0) {}
+
         virtual void OnOsEvent(const osi::Event* event) override;
 
         virtual void           Update(SceneUpdateInfo&) override;
-        inline virtual int32_t GetOrder() const override { return 0; }
 
         FORAY_PROPERTY_V(InvertYAxis)
         FORAY_PROPERTY_V(InvertAll)
+
+        static void RenderImguiHelpWindow();
 
       protected:
         virtual void ProcessMouseMovedEvent(const osi::EventInputMouseMoved* event);

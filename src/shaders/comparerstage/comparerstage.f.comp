@@ -28,7 +28,7 @@ void main()
     // Calculate texel and uv pos
     ivec2 texelPos = ivec2(gl_GlobalInvocationID.x + PushC.WriteOffset, gl_GlobalInvocationID.y);
     ivec2 texSize = ivec2(imageSize(Output).xy);
-    vec2 uvPos = vec2(texelPos) / vec2(texSize);
+    vec2 uvPos = (vec2(texelPos) + vec2(0.5f, 0.5f)) / vec2(texSize);
 
     // Skip out if outside of output texture bounds
     if (texelPos.x >= texSize.x || texelPos.y >= texSize.y)

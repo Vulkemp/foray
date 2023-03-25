@@ -10,13 +10,11 @@ namespace foray::scene::gcomp {
     class TlasManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
-        TlasManager() = default;
+        inline TlasManager() : Component::UpdateCallback(ORDER_DEVICEUPLOAD) {}
 
         void CreateOrUpdate();
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
-
-        virtual int32_t GetOrder() const override { return ORDER_DEVICEUPLOAD; }
 
         FORAY_GETTER_CR(Tlas)
         FORAY_GETTER_CR(MeshInstances)

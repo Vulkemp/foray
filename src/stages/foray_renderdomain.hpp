@@ -11,8 +11,6 @@ namespace foray::stages {
     class RenderDomain
     {
       public:
-        using ResizeReceiver = event::Receiver<VkExtent2D>;
-
         RenderDomain() = default;
         RenderDomain(std::string_view name, VkExtent2D extent) : mName(name), mExtent(extent) {}
 

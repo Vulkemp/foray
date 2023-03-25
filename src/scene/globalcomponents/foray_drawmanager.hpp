@@ -18,12 +18,10 @@ namespace foray::scene::gcomp {
     class DrawDirector : public GlobalComponent, public Component::UpdateCallback, public Component::DrawCallback
     {
       public:
-        inline DrawDirector() {}
+        inline DrawDirector() : Component::UpdateCallback(ORDER_TRANSFORM) {}
 
         /// @brief Collects mesh instances and rebuilds transform buffers
         void InitOrUpdate();
-
-        virtual int32_t GetOrder() const override { return ORDER_TRANSFORM; }
 
         /// @brief Updates and uploads transform buffers
         virtual void Update(SceneUpdateInfo&) override;

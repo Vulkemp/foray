@@ -1,4 +1,6 @@
 #pragma once
+#include "../osi/foray_osi_declares.hpp"
+
 namespace foray::scene {
     class Registry;
     class CallbackDispatcher;
@@ -19,10 +21,15 @@ namespace foray::scene {
         class TextureManager;
         class AnimationManager;
     }  // namespace gcomp
+    struct SceneUpdateInfo;
     struct SceneDrawInfo;
     class Animation;
     struct AnimationSampler;
     struct AnimationChannel;
     struct PlaybackConfig;
     struct CameraUboBlock;
+
+    using TUpdateMessage  = SceneUpdateInfo&;
+    using TDrawMessage    = SceneDrawInfo&;
+    using TOsEventMessage = const osi::Event*;
 }  // namespace foray::scene

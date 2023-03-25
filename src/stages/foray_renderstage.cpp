@@ -48,8 +48,8 @@ namespace foray::stages {
 
     void RenderStage::Destroy()
     {
-        mOnResized.Unhook();
-        mOnShadersRecompiled.Unhook();
+        mOnResized.Destroy();
+        mOnShadersRecompiled.Destroy();
     }
 
     std::vector<core::ManagedImage*> RenderStage::GetImageOutputs()

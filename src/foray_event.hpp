@@ -9,6 +9,9 @@ namespace foray::event {
     template <class TMessage>
     class Delegate;
 
+    /// @brief A receiver is an object which manages a subscription to a delegation list and invocation of a message handler
+    /// @tparam TMessage The message type passed to invocation methods. Consider a reference depending on complexity.
+    /// @details If both mDelegate and mHandler are set, the event is hooked automatically
     template <class TMessage>
     class Receiver : public NoMoveDefaults
     {
@@ -49,25 +52,37 @@ namespace foray::event {
             return *this;
         }
 
-        inline void Unhook();
+        /// @brief Remove the subscription and reset members
+        inline void Destroy()
+        {
+            Unhook();
+            mHandler  = nullptr;
+            mDelegate = nullptr;
+        }
 
       private:
-        inline void Hook();
+        inline void         Hook();
+        inline void         Unhook();
         inline void Invoke(TMessage message) { mHandler(message); }
 
         Delegate<TMessage>* mDelegate;
         THandler            mHandler;
     };
 
+    /// @brief A delegate manages a list of Receiver instances subscribed to its event. The order of invocation is undefined.
+    /// @tparam TMessage The message type passed to invocation methods. Consider a reference depending on complexity.
     template <class TMessage>
-    class Delegate
+    class Delegate : public NoMoveDefaults
     {
         friend Receiver<TMessage>;
         using TReceiver = Receiver<TMessage>;
 
       public:
+        /// @brief Unsubscribe all Receivers
         void Clear();
 
+        /// @brief Invoke the callback on all receivers (undefined order)
+        /// @param message Message object
         void Invoke(TMessage message);
 
       protected:
@@ -110,6 +125,10 @@ namespace foray::event {
     template <class TMessage>
     void Delegate<TMessage>::Clear()
     {
+        for(TReceiver& receiver : mReceivers)
+        {
+            receiver.Destroy();
+        }
         mReceivers.clear();
     }
 
@@ -122,6 +141,7 @@ namespace foray::event {
         }
     }
 
+/// @brief Define both an accessor member function and a matching delegate field
 #define FORAY_DELEGATE(TMessage, Name)                                                                                                                                             \
   public:                                                                                                                                                                          \
     using TDelegate##Name = foray::event::Delegate<TMessage>;                                                                                                                      \
@@ -139,6 +159,9 @@ namespace foray::event {
     template <class TMessage>
     class PriorityDelegate;
 
+    /// @brief A priority receiver is an object which manages a subscription to a priority delegation list and invocation of a message handler
+    /// @tparam TMessage The message type passed to invocation methods. Consider a reference depending on complexity.
+    /// @details If both mDelegate and mHandler are set, the event is hooked automatically
     template <class TMessage>
     class PriorityReceiver : public NoMoveDefaults
     {
@@ -194,12 +217,19 @@ namespace foray::event {
             return *this;
         }
 
-        inline void Unhook();
-
         int32_t GetPriority() const { return mPriority; }
 
+        inline void Destroy()
+        {
+            Unhook();
+            mDelegate = nullptr;
+            mHandler  = nullptr;
+            mPriority = 0;
+        }
+
       private:
-        inline void Hook();
+        inline void         Unhook();
+        inline void         Hook();
         inline void Invoke(TMessage message) { mHandler(message); }
 
         PriorityDelegate<TMessage>* mDelegate;
@@ -207,8 +237,10 @@ namespace foray::event {
         int32_t                     mPriority;
     };
 
+    /// @brief A priority delegate manages a list of Receiver instances subscribed to its event. Receivers are invocated in order from negative to positive priority.
+    /// @tparam TMessage The message type passed to invocation methods. Consider a reference depending on complexity.
     template <class TMessage>
-    class PriorityDelegate
+    class PriorityDelegate : public NoMoveDefaults
     {
         friend PriorityReceiver<TMessage>;
         using TReceiver = PriorityReceiver<TMessage>;
@@ -279,6 +311,7 @@ namespace foray::event {
         }
     }
 
+/// @brief Define both an accessor member function and a matching priority delegate field
 #define FORAY_PRIORITYDELEGATE(TMessage, Name)                                                                                                                                     \
   public:                                                                                                                                                                          \
     using TDelegate##Name = foray::event::PriorityDelegate<TMessage>;                                                                                                              \

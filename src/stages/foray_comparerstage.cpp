@@ -128,6 +128,7 @@ namespace foray::stages {
 
     void ComparerStage::Destroy()
     {
+        mOnMouseMoved.Destroy();
         for(SubStage& substage : mSubStages)
         {
             DestroySubStage(substage, true);

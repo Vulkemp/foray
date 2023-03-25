@@ -2,6 +2,7 @@
 #include "../base/foray_framerenderinfo.hpp"
 #include "../core/foray_core_declares.hpp"
 #include "../foray_basics.hpp"
+#include "../foray_event.hpp"
 #include "../osi/foray_osi_declares.hpp"
 #include "foray_scene_declares.hpp"
 #include "foray_scenedrawing.hpp"
@@ -15,42 +16,42 @@ namespace foray::scene {
         friend Registry;
 
         /// @brief Base class for implementing the update callback
-        class UpdateCallback : public Polymorphic
+        class UpdateCallback : public Polymorphic, public event::PriorityReceiver<TUpdateMessage>
         {
           public:
-            static const bool ORDERED_EXECUTION = true;
-            using TArg                          = SceneUpdateInfo&;
+            inline UpdateCallback(int32_t priority)
+                : event::PriorityReceiver<TUpdateMessage>(
+                    nullptr, [this](TUpdateMessage msg) { this->Update(msg); }, priority)
+            {
+            }
 
             /// @brief Invoked first each frame. Use for changes to the node hierarchy and transforms
-            inline virtual void Update(TArg updateInfo) = 0;
-            inline void         Invoke(TArg updateInfo) { Update(updateInfo); }
+            inline virtual void Update(TUpdateMessage updateInfo) = 0;
 
             static const int32_t ORDER_TRANSFORM    = 100;
             static const int32_t ORDER_DEVICEUPLOAD = 200;
-
-            virtual inline int32_t GetOrder() const { return 0; }
         };
 
         /// @brief Base class for implementing the draw callback
-        class DrawCallback : public Polymorphic
+        class DrawCallback : public event::Receiver<TDrawMessage>
         {
           public:
-            static const bool ORDERED_EXECUTION = false;
-            using TArg                          = SceneDrawInfo&;
+            inline DrawCallback() : event::Receiver<TDrawMessage>(
+                    nullptr, [this](TDrawMessage msg) { this->Draw(msg); }){}
+
             /// @brief Invoked last each frame. Use to submit draw calls (and related)
-            inline virtual void Draw(TArg drawInfo) = 0;
-            inline void         Invoke(TArg drawInfo) { Draw(drawInfo); }
+            inline virtual void Draw(TDrawMessage drawInfo) = 0;
         };
 
         /// @brief Base class for implementing the onevent callback
-        class OnEventCallback : public Polymorphic
+        class OnEventCallback : public Polymorphic, public event::Receiver<TOsEventMessage>
         {
           public:
-            static const bool ORDERED_EXECUTION = false;
-            using TArg                          = const osi::Event*;
+            inline OnEventCallback() : event::Receiver<TOsEventMessage>(
+                    nullptr, [this](TOsEventMessage msg) { this->OnOsEvent(msg); }){}
+
             /// @brief Invoked with every event received by the application
-            inline virtual void OnOsEvent(TArg event) = 0;
-            inline void         Invoke(TArg event) { OnOsEvent(event); }
+            inline virtual void OnOsEvent(TOsEventMessage event) = 0;
         };
 
         /// @brief Destructor. Provide virtual constructors in inheriting classes, to make sure they get finalized correctly.
@@ -64,8 +65,8 @@ namespace foray::scene {
         virtual core::Context* GetContext() = 0;
 
       protected:
-        Registry* mRegistry = nullptr;
-        std::string mName = "";
+        Registry*   mRegistry = nullptr;
+        std::string mName     = "";
     };
 
     class NodeComponent : public Component

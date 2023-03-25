@@ -10,12 +10,12 @@ namespace foray::scene::gcomp {
     class AnimationManager : public GlobalComponent, public Component::UpdateCallback
     {
       public:
+        inline AnimationManager() : Component::UpdateCallback(0) {}
+
         FORAY_PROPERTY_R(Animations)
         FORAY_PROPERTY_R(PlaybackConfig)
 
         virtual void Update(SceneUpdateInfo&) override;
-
-        virtual int32_t GetOrder() const override { return 0; }
 
       protected:
         std::vector<Animation> mAnimations;

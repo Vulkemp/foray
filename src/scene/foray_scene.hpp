@@ -6,6 +6,7 @@
 #include "foray_registry.hpp"
 #include "foray_scene_declares.hpp"
 #include "foray_scenedrawing.hpp"
+#include "../foray_event.hpp"
 #include "../stages/foray_renderdomain.hpp"
 
 namespace foray::scene {
@@ -28,8 +29,6 @@ namespace foray::scene {
         void Update(VkCommandBuffer cmdBuffer, const base::FrameRenderInfo& renderInfo, stages::RenderDomain* domain);
         /// @brief Draw the scene by invoking the Draw callbacks
         void Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer);
-        /// @brief Invokes event callbacks (NodeComponent, then GlobalComponent)
-        void HandleEvent(const osi::Event* event);
 
         /// Cleans up all memory, GPU structures, etc...
         virtual void Destroy() override;
@@ -62,7 +61,11 @@ namespace foray::scene {
         /// @brief All nodes directly attached to the root
         std::vector<Node*> mRootNodes;
 
+        event::Receiver<const osi::Event*> mOnOsEvent;
+
         void InitDefaultGlobals();
+
+        void HandleEvent(const osi::Event* event);
     };
 
     template <typename TComponent>

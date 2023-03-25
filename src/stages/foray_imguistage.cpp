@@ -28,6 +28,7 @@ namespace foray::stages {
     {
         Destroy();
         RenderStage::InitCallbacks(context, domain, resizeOrder);
+        mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
         mTargetImage = nullptr;
 
         PrepareRenderpass();
@@ -199,6 +200,7 @@ namespace foray::stages {
 
     void ImguiStage::Destroy()
     {
+        mOnSdlEvent.Destroy();
         DestroyFrameBufferAndRenderPass();
         if(mImguiPool != nullptr)
         {
