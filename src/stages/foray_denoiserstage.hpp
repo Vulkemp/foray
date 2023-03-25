@@ -1,7 +1,6 @@
 #pragma once
 #include "../bench/foray_bench_declares.hpp"
 #include "../util/foray_externalsemaphore.hpp"
-#include "foray_gbuffer.hpp"
 #include "foray_renderstage.hpp"
 
 namespace foray::stages {
@@ -9,10 +8,9 @@ namespace foray::stages {
     /// @brief Config struct for initialization of denoiser stages
     struct DenoiserConfig
     {
+        RenderDomain* Domain = nullptr;
         /// @brief The primary input. Noisy linear radiance data, usually from the raytracer directly.
         core::ManagedImage* PrimaryInput = nullptr;
-        /// @brief GBuffer Output images
-        std::array<core::ManagedImage*, (size_t)GBufferStage::EOutput::MaxEnum> GBufferOutputs;
         /// @brief Misc. input Images (e.g. Mesh Id, Material Id, History data)
         std::unordered_map<std::string, core::ManagedImage*> AuxiliaryInputs;
         /// @brief The primary output. Denoised Image from the denoiser
@@ -24,23 +22,14 @@ namespace foray::stages {
         bench::DeviceBenchmark*  Benchmark = nullptr;
 
         inline DenoiserConfig() {}
-        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut, GBufferStage* gbuffer) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut)
-        {
-            if(!!gbuffer)
-            {
-                GBufferOutputs = {gbuffer->GetImageOutput(GBufferStage::PositionOutputName),    gbuffer->GetImageOutput(GBufferStage::NormalOutputName),
-                                  gbuffer->GetImageOutput(GBufferStage::AlbedoOutputName),      gbuffer->GetImageOutput(GBufferStage::MotionOutputName),
-                                  gbuffer->GetImageOutput(GBufferStage::MaterialIdxOutputName), gbuffer->GetImageOutput(GBufferStage::MeshInstanceIdOutputName),
-                                  gbuffer->GetImageOutput(GBufferStage::LinearZOutputName),     gbuffer->GetImageOutput(GBufferStage::DepthOutputName)};
-            }
-        }
+        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut) {}
     };
 
     /// @brief Base class for denoiser implementations
     class DenoiserStage : public RenderStage
     {
       public:
-        virtual void Init(core::Context* context, const DenoiserConfig& config){};
+        virtual void Init(core::Context* context, const DenoiserConfig& config, int32_t resizeOrder = 0) { RenderStage::InitCallbacks(context, config.Domain, resizeOrder); };
         virtual void UpdateConfig(const DenoiserConfig& config){};
         /// @brief Get the UI label used for user facing labelling of the denoiser
         virtual std::string GetUILabel() { return "Unnamed Denoiser"; }

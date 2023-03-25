@@ -15,10 +15,10 @@
 
 namespace foray::stages {
 
-    void MinimalRaytracingStageBase::Init(core::Context* context)
+    void MinimalRaytracingStageBase::Init(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
     {
         Destroy();
-        mContext = context;
+        RenderStage::InitCallbacks(context, domain, resizeOrder);
         ApiCustomObjectsCreate();
         ApiCreateOutputImages();
         ApiCreateOrUpdateDescriptors();
@@ -31,9 +31,9 @@ namespace foray::stages {
         ApiRecordFrameBind(cmdBuffer, renderInfo);
         ApiRecordFrameTraceRays(cmdBuffer, renderInfo);
     }
-    void MinimalRaytracingStageBase::Resize(const VkExtent2D& extent)
+    void MinimalRaytracingStageBase::OnResized(VkExtent2D extent)
     {
-        RenderStage::Resize(extent);
+        RenderStage::OnResized(extent);
         ApiCreateOrUpdateDescriptors();
     }
     void MinimalRaytracingStageBase::Destroy()

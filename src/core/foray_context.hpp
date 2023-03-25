@@ -53,7 +53,5 @@ namespace foray::core {
         inline VkInstance       Instance() const { return VkbInstance->instance; }
         inline VkPhysicalDevice PhysicalDevice() const { return VkbPhysicalDevice->physical_device; }
         inline VkDevice         Device() const { return VkbDevice->device; }
-
-        inline VkExtent2D GetSwapchainSize() const { return Swapchain->extent; }
     };
 }  // namespace foray::core

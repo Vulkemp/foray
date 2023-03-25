@@ -50,13 +50,12 @@ namespace foray::scene {
       public:
         const base::FrameRenderInfo RenderInfo;
         VkCommandBuffer             CmdBuffer;
+        VkExtent2D                  RenderSize;
 
-        inline SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index);
-        inline SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer);
+        inline SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer, VkExtent2D size);
     };
 
-    SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index) : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)) {}
-    SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer) : RenderInfo(renderInfo), CmdBuffer(cmdBuffer) {}
+    SceneUpdateInfo::SceneUpdateInfo(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer, VkExtent2D size) : RenderInfo(renderInfo), CmdBuffer(cmdBuffer), RenderSize(size) {}
 
     /// @brief Temporary type passed to components when drawing the scene
     struct SceneDrawInfo
@@ -67,7 +66,6 @@ namespace foray::scene {
         const VkPipelineLayout      PipelineLayout    = nullptr;
         DrawPushConstant            PushConstantState = {};
 
-        inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index);
         inline SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer);
 
         inline void CmdPushConstant_TransformBufferOffset(uint32_t transformBufferOffset);
@@ -82,14 +80,6 @@ namespace foray::scene {
     void SceneDrawInfo::CmdPushConstant_MaterialIndex(int32_t materialIndex)
     {
         PushConstantState.CmdPushConstant_MaterialIndex(CmdBuffer, PipelineLayout, materialIndex);
-    }
-
-    SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
-
-        : RenderInfo(renderInfo), CmdBuffer(renderInfo.GetCommandBuffer(index)), PipelineLayout(pipelineLayout), PushConstantState()
-    {
-        CmdPushConstant_TransformBufferOffset(0);
-        CmdPushConstant_MaterialIndex(-1);
     }
 
     SceneDrawInfo::SceneDrawInfo(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer)

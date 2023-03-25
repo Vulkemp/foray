@@ -3,6 +3,7 @@
 #include "../foray_logger.hpp"
 #include "../util/foray_hash.hpp"
 #include "foray_shadermodule.hpp"
+#include "../foray_event.hpp"
 #include <codecvt>
 #include <filesystem>
 #include <fstream>
@@ -407,9 +408,9 @@ constexpr std::string_view OPTIMIZE = " -O";
 #pragma endregion
 #pragma region Check and Update
 
-    bool ShaderManager::CheckAndUpdateShaders(std::unordered_set<uint64_t>& out_recompiled)
+    bool ShaderManager::CheckAndUpdateShaders(std::function<void()> beforeCallback)
     {
-        bool result = false;
+        std::unordered_set<uint64_t> recompiled;
 
         WriteTimeLookup lookup;
         for(auto& entry : mTrackedCompilations)
@@ -420,13 +421,18 @@ constexpr std::string_view OPTIMIZE = " -O";
             {
                 if(compilation->Compile())
                 {
-                    out_recompiled.emplace(compilation->Hash);
-                    result = true;
+                    recompiled.emplace(compilation->Hash);
                 }
             }
         }
 
-        return result;
+        if (recompiled.size() > 0)
+        {
+            beforeCallback();
+            mOnShadersRecompiled.Invoke(recompiled);
+        }
+
+        return recompiled.size() > 0;
     }
 
 #pragma endregion

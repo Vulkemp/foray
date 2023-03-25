@@ -1,6 +1,6 @@
 #include "foray_comparerstage.hpp"
-#include "../osi/foray_event.hpp"
 #include "../osi/foray_inputdevice.hpp"
+#include "../osi/foray_osi_event.hpp"
 #include "../osi/foray_osmanager.hpp"
 
 const uint32_t SHADER_F[] =
@@ -15,9 +15,10 @@ const uint32_t SHADER_U[] =
 
 namespace foray::stages {
 #pragma region Init
-    void ComparerStage::Init(core::Context* context, bool flipY)
+    void ComparerStage::Init(core::Context* context, RenderDomain* domain, bool flipY, int32_t resizeOrder)
     {
-        mContext = context;
+        RenderStage::InitCallbacks(context, domain, resizeOrder);
+        mOnMouseMoved.Set(mContext->OsManager->OnEventInputMouseMoved(), [this](const osi::EventInputMouseMoved* event) { this->HandleMouseMovedEvent(event); });
         mFlipY = flipY;
         CreateOutputImage();
         LoadShaders();
@@ -28,7 +29,7 @@ namespace foray::stages {
     {
         VkImageUsageFlags usage =
             VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mContext->GetSwapchainSize(), OutputName);
+        core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mDomain->GetExtent(), OutputName);
         mOutput.Create(mContext, ci);
         mImageOutputs[std::string(mOutput.GetName())] = &mOutput;
     }
@@ -164,22 +165,18 @@ namespace foray::stages {
         }
     }
 
-    void ComparerStage::HandleEvent(const osi::Event* event)
+    void ComparerStage::HandleMouseMovedEvent(const osi::EventInputMouseMoved* event)
     {
-        const osi::EventInputMouseMoved* mouseMove = dynamic_cast<const osi::EventInputMouseMoved*>(event);
-        if(!!mouseMove)
+        mMousePos = glm::ivec2(event->CurrentX, event->CurrentY);
+        if(mFlipY)
         {
-            mMousePos = glm::ivec2(mouseMove->CurrentX, mouseMove->CurrentY);
-            if (mFlipY)
-            {
-                mMousePos.y = mContext->Swapchain->extent.height - mMousePos.y - 1;
-            }
+            mMousePos.y = mContext->Swapchain->extent.height - mMousePos.y - 1;
         }
     }
 
-    void ComparerStage::Resize(const VkExtent2D& extent)
+    void ComparerStage::OnResized(VkExtent2D extent)
     {
-        RenderStage::Resize(extent);
+        RenderStage::OnResized(extent);
         for(SubStage& substage : mSubStages)
         {
             if(substage.DescriptorSet.Exists())
@@ -253,7 +250,7 @@ namespace foray::stages {
         }
         glm::uvec2 groupSize;
         uint32_t   writeOffset;
-        VkExtent2D screenSize = mContext->GetSwapchainSize();
+        VkExtent2D screenSize = mDomain->GetExtent();
         {  // Group size & Write Offset
             const glm::uvec2 localSize = glm::uvec2(16, 16);
 

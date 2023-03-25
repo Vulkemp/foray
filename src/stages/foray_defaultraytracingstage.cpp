@@ -14,13 +14,13 @@
 #include <array>
 
 namespace foray::stages {
-    void DefaultRaytracingStageBase::Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
+    void DefaultRaytracingStageBase::Init(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
     {
         Destroy();
         mScene          = scene;
         mEnvironmentMap = envMap;
         mNoiseTexture   = noiseImage;
-        mContext = context;
+        RenderStage::InitCallbacks(context, domain, resizeOrder);
         ApiCustomObjectsCreate();
         CreateOutputImages();
         CreateOrUpdateDescriptors();
@@ -33,9 +33,9 @@ namespace foray::stages {
         RecordFrameBind(cmdBuffer, renderInfo);
         RecordFrameTraceRays(cmdBuffer, renderInfo);
     }
-    void DefaultRaytracingStageBase::Resize(const VkExtent2D& extent)
+    void DefaultRaytracingStageBase::OnResized(VkExtent2D extent)
     {
-        RenderStage::Resize(extent);
+        RenderStage::OnResized(extent);
         CreateOrUpdateDescriptors();
     }
     void DefaultRaytracingStageBase::Destroy()
@@ -55,7 +55,7 @@ namespace foray::stages {
     {
         VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        mOutput.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mContext->GetSwapchainSize(), OutputName);
+        mOutput.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
         mImageOutputs[std::string(OutputName)] = &mOutput;
     }
     void DefaultRaytracingStageBase::CreatePipelineLayout()

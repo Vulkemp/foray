@@ -16,7 +16,6 @@ namespace foray::scene {
         virtual void InvokeUpdate(SceneUpdateInfo& updateInfo);
         virtual void InvokeDraw(SceneDrawInfo& renderInfo);
         virtual void InvokeOnEvent(const osi::Event* event);
-        virtual void InvokeOnResized(VkExtent2D event);
 
       protected:
         template <typename TCallback, bool Ordered = TCallback::ORDERED_EXECUTION>
@@ -42,7 +41,6 @@ namespace foray::scene {
         CallbackVector<Component::OnEventCallback>   mOnEvent   = {};
         CallbackVector<Component::UpdateCallback>    mUpdate    = {};
         CallbackVector<Component::DrawCallback>      mDraw      = {};
-        CallbackVector<Component::OnResizedCallback> mOnResized = {};
     };
 
     template <typename TCallback, bool Ordered>

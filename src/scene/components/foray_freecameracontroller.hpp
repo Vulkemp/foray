@@ -1,6 +1,6 @@
 #pragma once
 #include "../../foray_glm.hpp"
-#include "../../osi/foray_event.hpp"
+#include "../../osi/foray_osi_event.hpp"
 #include "../foray_component.hpp"
 #include <unordered_map>
 
@@ -18,7 +18,7 @@ namespace foray::scene::ncomp {
     class FreeCameraController : public NodeComponent, public Component::UpdateCallback, public Component::OnEventCallback
     {
       public:
-        virtual void OnEvent(const osi::Event* event) override;
+        virtual void OnOsEvent(const osi::Event* event) override;
 
         virtual void           Update(SceneUpdateInfo&) override;
         inline virtual int32_t GetOrder() const override { return 0; }

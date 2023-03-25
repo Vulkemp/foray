@@ -3,7 +3,7 @@
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
 #include "../foray_vulkan.hpp"
-#include "../osi/foray_event.hpp"
+#include "../osi/foray_osi_event.hpp"
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include <spdlog/fmt/fmt.h>
@@ -58,12 +58,15 @@ namespace foray::base {
                         PrintVkResult(ret.vk_result()), ret.error().message())
 
         mSwapchain = *ret;
+        mExtent = mSwapchain.extent;
         if(!!mContext)
         {
             mContext->Swapchain = &mSwapchain;
         }
 
         ExtractSwapchainImages();
+
+        InvokeResize(mExtent);
     }
     void VulkanWindowSwapchain::ExtractSwapchainImages()
     {
@@ -110,11 +113,9 @@ namespace foray::base {
         }
     }
 
-    void VulkanWindowSwapchain::HandleEvent(const osi::Event* event)
+    void VulkanWindowSwapchain::OnWindowResized(const osi::EventWindowResized* message)
     {
-        const osi::EventWindowResized* resizeEvent = dynamic_cast<const osi::EventWindowResized*>(event);
-
-        if(!!resizeEvent && resizeEvent->Source == &mWindow && (resizeEvent->Current.width != mSwapchain.extent.width || resizeEvent->Current.height != mSwapchain.extent.height))
+        if(message->Source == &mWindow && (message->Current.width != mSwapchain.extent.width || message->Current.height != mSwapchain.extent.height))
         {
             RecreateSwapchain();
         }
@@ -136,9 +137,15 @@ namespace foray::base {
 
         CreateSwapchain();
 
-        if(!!mOnResizedFunc)
+
+        if(mSwapchain.extent.width != mExtent.width || mSwapchain.extent.height != mExtent.height)
         {
-            mOnResizedFunc(mSwapchain.extent);
+            mExtent = mSwapchain.extent;
+            RenderDomain::InvokeResize(mExtent);
+            if(!!mOnResizedFunc)
+            {
+                mOnResizedFunc(mSwapchain.extent);
+            }
         }
     }
 
@@ -160,6 +167,7 @@ namespace foray::base {
             mSwapchain = vkb::Swapchain();
         }
         mContext->Swapchain = nullptr;
+        mExtent             = VkExtent2D{};
     }
 
     void VulkanWindowSwapchain::Destroy()

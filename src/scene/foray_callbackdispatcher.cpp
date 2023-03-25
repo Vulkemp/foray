@@ -13,8 +13,4 @@ namespace foray::scene {
     {
         mOnEvent.Invoke(event);
     }
-    void CallbackDispatcher::InvokeOnResized(VkExtent2D extent)
-    {
-        mOnResized.Invoke(extent);
-    }
 }  // namespace foray

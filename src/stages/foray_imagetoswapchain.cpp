@@ -13,7 +13,7 @@ namespace foray::stages {
 
         const core::SwapchainImageInfo& swapImage = mContext->SwapchainImages[swapChainImageIndex];
 
-        VkExtent2D swapChainSize = mContext->GetSwapchainSize();
+        VkExtent2D swapChainSize = mContext->Swapchain->extent;
 
         SetDstImage(swapImage.Image, swapChainSize);
 

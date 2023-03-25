@@ -8,7 +8,7 @@ namespace foray::scene::gcomp {
     {
         if(!!mSelectedCamera)
         {
-            mSelectedCamera->UpdateUbo(mUbo.GetData());
+            mSelectedCamera->UpdateUbo(mUbo.GetData(), ncomp::Camera::CalculateAspect(updateInfo.RenderSize));
             mUbo.UpdateTo(updateInfo.RenderInfo.GetFrameNumber());
         }
         else

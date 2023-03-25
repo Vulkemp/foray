@@ -248,15 +248,15 @@ namespace foray::stages {
         return &mDepthImage;
     }
 
-    void ConfigurableRasterStage::Build(core::Context* context, scene::Scene* scene, std::string_view name)
+    void ConfigurableRasterStage::Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
     {
         Destroy();
-        mContext = context;
+        RenderStage::InitCallbacks(context, domain, resizeOrder);
         mScene   = scene;
         mName    = std::string(name);
 
         CheckDeviceColorAttachmentCount();
-        CreateOutputs(mContext->GetSwapchainSize());
+        CreateOutputs(mDomain->GetExtent());
         CreateRenderPass();
         CreateFrameBuffer();
         SetupDescriptors();
@@ -374,8 +374,8 @@ namespace foray::stages {
         fbufCreateInfo.renderPass              = mRenderpass;
         fbufCreateInfo.pAttachments            = attachmentViews.data();
         fbufCreateInfo.attachmentCount         = (uint32_t)attachmentViews.size();
-        fbufCreateInfo.width                   = mContext->GetSwapchainSize().width;
-        fbufCreateInfo.height                  = mContext->GetSwapchainSize().height;
+        fbufCreateInfo.width                   = mDomain->GetExtent().width;
+        fbufCreateInfo.height                  = mDomain->GetExtent().height;
         fbufCreateInfo.layers                  = 1;
         AssertVkResult(vkCreateFramebuffer(mContext->Device(), &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
@@ -466,6 +466,7 @@ namespace foray::stages {
         // clang-format off
         mPipeline = util::PipelineBuilder()
             .SetContext(mContext)
+            .SetDomain(mDomain)
             // Blend attachment states required for all color attachments
             // This is important, as color write mask will otherwise be 0x0 and you
             // won't see anything rendered to the attachment
@@ -528,13 +529,13 @@ namespace foray::stages {
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderpass;
         renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent = mContext->GetSwapchainSize();
+        renderPassBeginInfo.renderArea.extent = mDomain->GetExtent();
         renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
         renderPassBeginInfo.pClearValues      = clearValues.data();
 
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkExtent2D renderSize = mContext->GetSwapchainSize();
+        VkExtent2D renderSize = mDomain->GetExtent();
         VkViewport viewport   = {};
         if(mFlipY)
         {
@@ -546,7 +547,7 @@ namespace foray::stages {
         }
         vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mContext->GetSwapchainSize()}};
+        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mDomain->GetExtent()}};
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
@@ -568,7 +569,7 @@ namespace foray::stages {
         renderInfo.GetImageLayoutCache().Set(mDepthImage, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
     }
 
-    void ConfigurableRasterStage::Resize(const VkExtent2D& extent)
+    void ConfigurableRasterStage::OnResized(VkExtent2D extent)
     {
         if(!!mFrameBuffer)
         {

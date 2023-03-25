@@ -19,21 +19,10 @@ namespace foray::scene {
         MakeComponent<gcomp::CameraManager>(mContext);
     }
 
-    void Scene::Update(const base::FrameRenderInfo& renderInfo, base::CmdBufferIndex index)
+    void Scene::Update(VkCommandBuffer cmdBuffer, const base::FrameRenderInfo& renderInfo, stages::RenderDomain* domain)
     {
-        SceneUpdateInfo updateInfo(renderInfo, index);
+        SceneUpdateInfo updateInfo(renderInfo, cmdBuffer, domain->GetExtent());
         this->InvokeUpdate(updateInfo);
-    }
-    void Scene::Update(const base::FrameRenderInfo& renderInfo, VkCommandBuffer cmdBuffer)
-    {
-        SceneUpdateInfo updateInfo(renderInfo, cmdBuffer);
-        this->InvokeUpdate(updateInfo);
-    }
-    void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, base::CmdBufferIndex index)
-    {
-        // Process draw callbacks
-        SceneDrawInfo drawInfo(renderInfo, pipelineLayout, index);
-        this->InvokeDraw(drawInfo);
     }
     void Scene::Draw(const base::FrameRenderInfo& renderInfo, VkPipelineLayout pipelineLayout, VkCommandBuffer cmdBuffer)
     {

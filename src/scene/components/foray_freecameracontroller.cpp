@@ -5,7 +5,7 @@
 #include "foray_transform.hpp"
 
 namespace foray::scene::ncomp {
-    void FreeCameraController::OnEvent(const osi::Event* event)
+    void FreeCameraController::OnOsEvent(const osi::Event* event)
     {
         auto binaryInputEvent = dynamic_cast<const osi::EventInputBinary*>(event);
         if(binaryInputEvent)

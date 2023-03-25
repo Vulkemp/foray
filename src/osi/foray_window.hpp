@@ -3,6 +3,7 @@
 #include "../foray_vulkan.hpp"
 #include "foray_helpers.hpp"
 #include "foray_osi_declares.hpp"
+#include "../foray_event.hpp"
 #include <memory>
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_vulkan.h>
@@ -61,8 +62,6 @@ namespace foray::osi {
 
         virtual VkSurfaceKHR             GetOrCreateSurfaceKHR(VkInstance instance);
         virtual std::vector<const char*> GetVkSurfaceExtensions() const;
-
-        virtual void HandleEvent(const Event* event);
 
       protected:
         inline static std::vector<Window*> sWindows = std::vector<Window*>();

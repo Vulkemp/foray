@@ -14,14 +14,13 @@ namespace foray::stages {
         inline static constexpr std::string_view OutputName = "Comparer.Out";
 
         /// @brief Inits the comparer stage. SetInput() calls afterwards are required for function
-        virtual void Init(core::Context* context, bool flipY);
+        virtual void Init(core::Context* context, RenderDomain* domain, bool flipY, int32_t resizeOrder = 0);
 
         /// @brief Pipeline barriers and compute shader dispatches
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         /// @brief If called the comparer stage will filter for MouseMoved events to update the pipette value returned
-        virtual void HandleEvent(const osi::Event* event);
-        virtual void Resize(const VkExtent2D& extent) override;
+        virtual void HandleMouseMovedEvent(const osi::EventInputMouseMoved* event);
 
         virtual void Destroy() override;
 
@@ -84,6 +83,8 @@ namespace foray::stages {
         void LoadShaders();
         void CreatePipetteBuffer();
 
+        virtual void OnResized(VkExtent2D extent) override;
+
         struct PushConstant
         {
             glm::vec4  Scale;
@@ -107,5 +108,7 @@ namespace foray::stages {
         fp32_t     mMixValue = 0.5;
         glm::ivec2 mMousePos = {};
         bool       mFlipY    = false;
+
+        event::Receiver<const osi::EventInputMouseMoved*> mOnMouseMoved;
     };
 }  // namespace foray::stages

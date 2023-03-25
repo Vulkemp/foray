@@ -28,6 +28,7 @@ namespace foray::base {
         FORAY_PROPERTY_V(DebugUserData)
         FORAY_PROPERTY_V(EnableDebugLayersAndCallbacks)
         FORAY_PROPERTY_V(EnableDebugReport)
+        FORAY_PROPERTY_V(ThrowOnValidationError)
         FORAY_PROPERTY_R(Instance)
         FORAY_PROPERTY_V(Context)
 
@@ -67,6 +68,8 @@ namespace foray::base {
         bool mEnableDebugLayersAndCallbacks = true;
 
         bool mEnableDebugReport = false;
+
+        bool mThrowOnValidationError = true;
 
         core::Context* mContext = nullptr;
 

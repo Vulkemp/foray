@@ -35,13 +35,18 @@ namespace foray::base {
         /// @brief Override this method to render your application
         inline virtual void ApiRender(RenderLoop::RenderInfo& renderInfo) {}
         /// @brief Override this method to react to events
-        inline virtual void ApiOnEvent(const osi::Event* event) {}
+        inline virtual void ApiOnOsEvent(const osi::Event* event) {}
         /// @brief Override this method to cleanup your application
         inline virtual void ApiDestroy() {}
+
+        /// @brief [Internal]
+        inline virtual void OnOsEvent(const osi::Event* event);
 
         RenderLoop     mRenderLoop;
         osi::OsManager mOsManager;
         VulkanInstance mInstance;
         core::Context  mContext;
+
+        event::Receiver<const osi::Event*> mOsEventReceiver;
     };
 }  // namespace foray::base

@@ -1,7 +1,8 @@
 #pragma once
 #include "../foray_basics.hpp"
-#include "foray_event.hpp"
+#include "../foray_event.hpp"
 #include "foray_osi_declares.hpp"
+#include "foray_osi_event.hpp"
 #include <sdl2/SDL.h>
 #include <vector>
 
@@ -32,16 +33,16 @@ namespace foray::osi {
         /// @brief Cleans the SDL subsystem
         virtual void Destroy();
 
-        struct EventPollResult
-        {
-            bool         Any = false;
-            EventRawSDL  Raw  = {};
-            const Event* Cast = nullptr;
-        };
-
         /// @brief Polls next event from system event queue. Retuns nullptr if no event present
         /// @remark The pointer returned is valid until the next time PollEvent() is invoked.
-        virtual EventPollResult PollEvent();
+        virtual bool PollEvent();
+
+#define GET_DELEGATE(eventtype)                                                                                                                                                    \
+    inline event::Delegate<const eventtype*>* GetOn##eventtype()                                                                                                                   \
+    {                                                                                                                                                                              \
+        return &mOn##eventtype;                                                                                                                                                    \
+    }
+#undef GET_DELEGATE
 
       protected:
         /// @brief Mouse input device. Assumed standard and always present
@@ -69,5 +70,16 @@ namespace foray::osi {
         virtual void TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus);
 
         std::unique_ptr<Event> mLastEvent = nullptr;
+
+        FORAY_DELEGATE(const Event*, Event)
+        FORAY_DELEGATE(const EventRawSDL*, EventRawSDL)
+        FORAY_DELEGATE(const EventInputAnalogue*, EventInputAnalogue)
+        FORAY_DELEGATE(const EventInputBinary*, EventInputBinary)
+        FORAY_DELEGATE(const EventInputDirectional*, EventInputDirectional)
+        FORAY_DELEGATE(const EventInputMouseMoved*, EventInputMouseMoved)
+        FORAY_DELEGATE(const EventWindowFocusChanged*, EventWindowFocusChanged)
+        FORAY_DELEGATE(const EventWindowResized*, EventWindowResized)
+        FORAY_DELEGATE(const EventWindowCloseRequested*, EventWindowCloseRequested)
+        FORAY_DELEGATE(const EventInputDeviceAvailability*, EventInputDeviceAvailability)
     };
 }  // namespace foray::osi

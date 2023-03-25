@@ -145,11 +145,9 @@ namespace foray::stages {
         const OutputRecipe& GetOutputRecipe(std::string_view name) const;
 
         /// @brief Builds the GBuffer. Make sure to add all outputs before!
-        virtual void Build(core::Context* context, scene::Scene* scene, std::string_view name = "ConfigurableRasterStage");
+        virtual void Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, std::string_view name = "ConfigurableRasterStage");
 
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-
-        virtual void Resize(const VkExtent2D& extent) override;
 
         virtual void Destroy() override;
 
@@ -207,5 +205,6 @@ namespace foray::stages {
         virtual void CreatePipelineLayout() override;
         virtual void ConfigureAndCompileShaders();
         virtual void CreatePipeline();
+        virtual void OnResized(VkExtent2D extent) override;
     };
 }  // namespace foray::stages

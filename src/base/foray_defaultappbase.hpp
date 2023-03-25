@@ -50,9 +50,9 @@ namespace foray::base {
         inline virtual void ApiInit() {}
         /// @brief Called whenever the swapchain has been resized
         /// @param size New size of the swapchain
-        inline virtual void ApiOnResized(VkExtent2D size) {}
+        inline virtual void ApiOnSwapchainResized(VkExtent2D size) {}
         /// @brief Override this method to react to events
-        inline virtual void ApiOnEvent(const osi::Event* event) {}
+        inline virtual void ApiOnOsEvent(const osi::Event* event) {}
         /// @brief Called once every frame. Render your application here
         /// @param renderInfo Frame specific information
         /// @details Used command buffers must be fully recorded and submitted by the overrider. The swapchain image must be prepared for present In one of these command buffers!
@@ -60,16 +60,8 @@ namespace foray::base {
         /// @brief Called back once the frame of the index has finished executing on the GPU, so QueryResults etc. are ready to be obtained
         /// @param frameIndex Index of the frame that has finished executing
         inline virtual void ApiFrameFinishedExecuting(uint64_t frameIndex) {}
-        /// @brief Called whenever the shader compiler has detected a change and shaders have successfully been recompiled
-        /// @param recompiledShaderKeys Shader compilation keys as provided by the ShaderManager
-        inline virtual void ApiOnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys) {}
         /// @brief Called after the application has been requested to shut down but before DefaultAppBase finalizes itself.
         inline virtual void ApiDestroy() {}
-
-        /// @brief Call this with a renderstage for automatic OnResized/OnShadersRecompiled calls. Register order is maintained for callbacks.
-        virtual void RegisterRenderStage(stages::RenderStage* stage);
-        /// @brief Call this with a renderstage to unsubscribe from automatic calls
-        virtual void UnregisterRenderStage(stages::RenderStage* stage);
 
         /// @brief [Internal] Initializes DefaultAppBase
         virtual void Init();
@@ -84,8 +76,6 @@ namespace foray::base {
 
         /// @brief [Internal] Recreates the swapchain
         virtual void RecreateSwapchain();
-        /// @brief [Internal] Handler for swapchain resize
-        inline void OnResized(VkExtent2D size);
 
         /// @brief [Internal] Polls and distributes events from the SDL subsystem
         virtual void PollEvents();
@@ -95,7 +85,7 @@ namespace foray::base {
         /// @brief [Internal] Image Acquire, Image Present
         virtual void Render(RenderLoop::RenderInfo& renderInfo);
         /// @brief [Internal] Shader recompile handler
-        virtual void OnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys);
+        virtual void OnOsEvent(const osi::Event* event);
 
         /// @brief [Internal] Finalizer
         virtual void Destroy();
@@ -115,8 +105,6 @@ namespace foray::base {
         uint32_t                                        mInFlightFrameIndex = 0;
         uint64_t                                        mRenderedFrameCount = 0;
 
-        std::vector<stages::RenderStage*> mRegisteredStages;
-
         fp64_t mLastShadersCheckedTimestamp = 0.0;
 
         inline static const char* const FRAMERECORDBENCH_WAITONFENCE      = "Wait On Fence";
@@ -126,5 +114,8 @@ namespace foray::base {
 
         bool                 mEnableFrameRecordBenchmark = false;
         bench::HostBenchmark mHostFrameRecordBenchmark;
+
+        event::PriorityReceiver<VkExtent2D> mOnSwapchainResized;
+        event::Receiver<const osi::Event*>  mOnOsEvent;
     };
 }  // namespace foray::base

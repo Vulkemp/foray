@@ -1,5 +1,4 @@
 #include "foray_camera.hpp"
-#include "../../osi/foray_event.hpp"
 #include "../foray_camerauboblock.hpp"
 #include "../foray_scene.hpp"
 #include "foray_transform.hpp"
@@ -11,19 +10,14 @@
 namespace foray::scene::ncomp {
     void Camera::InitDefault()
     {
-        SetProjectionMatrix();
+        SetProjection();
     }
 
-    void Camera::SetProjectionMatrix()
+    void Camera::SetProjection()
     {
         if(mVerticalFov == 0.f)
         {
             mVerticalFov = glm::radians(75.f);
-        }
-        if(mAspect == 0.f)
-        {
-            auto swapchainExtent = GetContext()->GetSwapchainSize();
-            mAspect              = CalculateAspect(swapchainExtent);
         }
         if(mNear == 0.f)
         {
@@ -33,34 +27,27 @@ namespace foray::scene::ncomp {
         {
             mFar = 10000.f;
         }
-        mProjectionMatrix = glm::perspective(mVerticalFov, mAspect, mNear, mFar);
     }
 
-    void Camera::SetProjectionMatrix(float verticalFov, float aspect, float near, float far)
+    void Camera::SetProjection(float verticalFov, float near, float far)
     {
         mVerticalFov = verticalFov;
-        mAspect      = aspect;
         mNear        = near;
         mFar         = far;
-        SetProjectionMatrix();
+        SetProjection();
     }
 
-    void Camera::UpdateUbo(CameraUboBlock& uboblock)
+    void Camera::UpdateUbo(CameraUboBlock& uboblock, float aspect)
     {
-        Transform* transform = GetNode()->GetTransform();
-        glm::mat4 viewMat = glm::inverse(transform->GetGlobalMatrix());
+        Transform* transform                  = GetNode()->GetTransform();
+        glm::mat4  viewMat                    = glm::inverse(transform->GetGlobalMatrix());
         uboblock.PreviousViewMatrix           = uboblock.ViewMatrix;
         uboblock.PreviousProjectionMatrix     = uboblock.ProjectionMatrix;
         uboblock.PreviousProjectionViewMatrix = uboblock.ProjectionViewMatrix;
         uboblock.ViewMatrix                   = viewMat;
-        uboblock.ProjectionMatrix             = mProjectionMatrix;
-        uboblock.ProjectionViewMatrix         = mProjectionMatrix * viewMat;
+        uboblock.ProjectionMatrix             = glm::perspective(mVerticalFov, aspect, mNear, mFar);
+        uboblock.ProjectionViewMatrix         = uboblock.ProjectionMatrix * viewMat;
         uboblock.InverseViewMatrix            = transform->GetGlobalMatrix();
-        uboblock.InverseProjectionMatrix      = glm::inverse(mProjectionMatrix);
-    }
-    void Camera::OnResized(VkExtent2D extent)
-    {
-        mAspect = CalculateAspect(extent);
-        SetProjectionMatrix();
+        uboblock.InverseProjectionMatrix      = glm::inverse(uboblock.ProjectionMatrix);
     }
 }  // namespace foray::scene::ncomp

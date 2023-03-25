@@ -25,13 +25,10 @@ namespace foray::stages {
         /// @param scene Scene provides Camera, Tlas, Geometry and Materials
         /// @param envMap Environment Map
         /// @param noiseImage Noise Texture
-        void Init(core::Context* context, scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
+        void Init(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls CreateOrUpdateDescriptors() afterwards.
-        /// @param extent New render extent
-        virtual void Resize(const VkExtent2D& extent) override;
 
         /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
         virtual void Destroy() override;
@@ -40,6 +37,8 @@ namespace foray::stages {
         inline static constexpr std::string_view OutputName = "Rt.Output";
 
         inline core::ManagedImage* GetRtOutput() { return &mOutput; }
+
+        inline virtual ~DefaultRaytracingStageBase() {}
 
       protected:
         /// @brief Initializes mOutput
@@ -72,6 +71,10 @@ namespace foray::stages {
         virtual void RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
         /// @brief Push constant and Trace rays
         virtual void RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
+
+        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls CreateOrUpdateDescriptors() afterwards.
+        /// @param extent New render extent
+        virtual void OnResized(VkExtent2D extent) override;
 
         /// @brief Provides Camera, Tlas, Geometry and Materials
         scene::Scene* mScene = nullptr;

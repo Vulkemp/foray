@@ -18,7 +18,11 @@ namespace foray::base {
             {
                 instanceBuilder.set_debug_callback(mDebugMessengerFunc);
             }
-            if(!!mDebugUserData)
+            if(mDebugMessengerFunc == &DefaultDebugMessengerCallback)
+            {
+                instanceBuilder.set_debug_callback_user_data_pointer(this);
+            }
+            else if(!!mDebugUserData)
             {
                 instanceBuilder.set_debug_callback_user_data_pointer(mDebugUserData);
             }
@@ -52,7 +56,7 @@ namespace foray::base {
         {
             mContext->VkbInstance = &mInstance;
         }
-        if (mEnableDebugReport)
+        if(mEnableDebugReport)
         {
             // Populate the VkDebugReportCallbackCreateInfoEXT
             VkDebugReportCallbackCreateInfoEXT ci = {};
@@ -62,7 +66,7 @@ namespace foray::base {
             ci.pUserData                          = nullptr;
 
             PFN_vkCreateDebugReportCallbackEXT createDebugReportCallback = VK_NULL_HANDLE;
-            createDebugReportCallback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(mInstance, "vkCreateDebugReportCallbackEXT");
+            createDebugReportCallback                                    = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(mInstance, "vkCreateDebugReportCallbackEXT");
 
             // Create the callback handle
             createDebugReportCallback(mContext->Instance(), &ci, nullptr, &mDebugReportCallbackHandle);
@@ -71,7 +75,7 @@ namespace foray::base {
 
     void VulkanInstance::Destroy()
     {
-        if (!!mDebugReportCallbackHandle)
+        if(!!mDebugReportCallbackHandle)
         {
             PFN_vkDestroyDebugReportCallbackEXT destroyDebugReportCallback = VK_NULL_HANDLE;
             destroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(mInstance, "vkDestroyDebugReportCallbackEXT");
@@ -105,10 +109,16 @@ namespace foray::base {
     }
 
     VkBool32 VulkanInstance::DefaultDebugMessengerCallback(VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-                                                  VkDebugUtilsMessageTypeFlagsEXT             messageTypes,
-                                                  const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                                  void*                                       pUserData)
+                                                           VkDebugUtilsMessageTypeFlagsEXT             messageTypes,
+                                                           const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                                           void*                                       pUserData)
     {
+        bool throwOnError = true;
+        const VulkanInstance* vkinst = (const VulkanInstance*)pUserData;
+        if (!!vkinst)
+        {
+            throwOnError = vkinst->GetThrowOnValidationError();
+        }
         switch(messageSeverity)
         {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -122,7 +132,10 @@ namespace foray::base {
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
                 logger()->error("{}", pCallbackData->pMessage);
-                throw Exception("{}", pCallbackData->pMessage);
+                if(throwOnError)
+                {
+                    throw Exception("{}", pCallbackData->pMessage);
+                }
                 break;
             default:
                 break;
@@ -140,13 +153,13 @@ namespace foray::base {
 
 
     VkBool32 VulkanInstance::DefaultDebugReportCallback(VkDebugReportFlagsEXT      flags,
-                                                   VkDebugReportObjectTypeEXT objectType,
-                                                   uint64_t                   object,
-                                                   size_t                     location,
-                                                   int32_t                    messageCode,
-                                                   const char*                pLayerPrefix,
-                                                   const char*                pMessage,
-                                                   void*                      pUserData)
+                                                        VkDebugReportObjectTypeEXT objectType,
+                                                        uint64_t                   object,
+                                                        size_t                     location,
+                                                        int32_t                    messageCode,
+                                                        const char*                pLayerPrefix,
+                                                        const char*                pMessage,
+                                                        void*                      pUserData)
     {
         spdlog::level::level_enum severity = levelMap.at(flags);
         logger()->log(severity, "DebugReport[{}] {}", pLayerPrefix, pMessage);

@@ -3,6 +3,7 @@
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
 #include "../scene/foray_geo.hpp"
+#include "../stages/foray_renderdomain.hpp"
 #include <vector>
 
 namespace foray::util {
@@ -19,6 +20,7 @@ namespace foray::util {
         VkPipeline Build();
 
         FORAY_PROPERTY_V(Context)
+        FORAY_PROPERTY_V(Domain)
         FORAY_PROPERTY_V(RenderPass)
         FORAY_PROPERTY_V(CullMode)
         FORAY_PROPERTY_V(DynamicStates)
@@ -34,7 +36,8 @@ namespace foray::util {
         FORAY_PROPERTY_V(ColorAttachmentBlendCount)
 
       protected:
-        core::Context* mContext{};
+        core::Context*        mContext{};
+        stages::RenderDomain* mDomain{};
 
         VkPipelineLayout mPipelineLayout{};
 

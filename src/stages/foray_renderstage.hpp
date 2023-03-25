@@ -1,11 +1,14 @@
 #pragma once
 #include "../base/foray_framerenderinfo.hpp"
 #include "../core/foray_context.hpp"
+#include "../core/foray_core_declares.hpp"
 #include "../core/foray_descriptorset.hpp"
 #include "../core/foray_managedimage.hpp"
+#include "../core/foray_shadermanager.hpp"
+#include "../foray_event.hpp"
 #include "../foray_basics.hpp"
 #include "../osi/foray_env.hpp"
-#include "../core/foray_core_declares.hpp"
+#include "foray_renderdomain.hpp"
 #include <unordered_map>
 
 namespace foray::stages {
@@ -14,7 +17,8 @@ namespace foray::stages {
     class RenderStage
     {
       public:
-        RenderStage() = default;
+        RenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0);
+        inline virtual ~RenderStage() {}
 
         /// @brief Records a frame to cmdBuffer.
         /// @param cmdBuffer Command buffer to record to
@@ -26,12 +30,8 @@ namespace foray::stages {
         inline virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) {}
 
         /// @brief Destroy the render stage. Finalizes all components
-        inline virtual void Destroy() {}
+        virtual void Destroy();
 
-        /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
-        /// @param extent New render size
-        /// @remark Inheriting stages may override to update descriptor sets
-        virtual void Resize(const VkExtent2D& extent);
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         std::vector<core::ManagedImage*> GetImageOutputs();
@@ -40,13 +40,21 @@ namespace foray::stages {
         /// @param noThrow If set, will return nullptr instead of throwing std::exception if no match is found
         core::ManagedImage* GetImageOutput(std::string_view name, bool noThrow = false);
 
+        void SetResizeOrder(int32_t priority);
+
+      protected:
+
+        void InitCallbacks(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0);
+
+        /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
+        /// @param extent New render size
+        /// @remark Inheriting stages may override to update descriptor sets
+        virtual void OnResized(VkExtent2D extent);
+
         /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
         /// @details Implementation will check through shaders registered in 'mShaderKeys'. If any of them have been marked as recompiled, calls ReloadShaders()
         virtual void OnShadersRecompiled(const std::unordered_set<uint64_t>& recompiled);
 
-        virtual ~RenderStage(){}
-
-      protected:
         /// @brief Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.
         virtual void ReloadShaders() {}
         /// @brief Calls Destroy() on any image in mImageOutputs and clears mImageOutputs
@@ -58,5 +66,9 @@ namespace foray::stages {
         std::vector<uint64_t> mShaderKeys;
         /// @brief Context object the renderstage is built upon
         core::Context* mContext = nullptr;
+        RenderDomain*  mDomain  = nullptr;
+
+        event::PriorityReceiver<VkExtent2D> mOnResized;
+        event::Receiver<const core::ShaderManager::KeySet&> mOnShadersRecompiled;
     };
 }  // namespace foray::stages

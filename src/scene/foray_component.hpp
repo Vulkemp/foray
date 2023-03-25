@@ -49,18 +49,8 @@ namespace foray::scene {
             static const bool ORDERED_EXECUTION = false;
             using TArg                          = const osi::Event*;
             /// @brief Invoked with every event received by the application
-            inline virtual void OnEvent(TArg event) = 0;
-            inline void         Invoke(TArg event) { OnEvent(event); }
-        };
-
-        class OnResizedCallback : public Polymorphic
-        {
-          public:
-            static const bool ORDERED_EXECUTION = false;
-            using TArg                          = VkExtent2D;
-            /// @brief Invoked when the primary render resolution changes
-            inline virtual void OnResized(TArg extent) = 0;
-            inline void         Invoke(TArg event) { OnResized(event); }
+            inline virtual void OnOsEvent(TArg event) = 0;
+            inline void         Invoke(TArg event) { OnOsEvent(event); }
         };
 
         /// @brief Destructor. Provide virtual constructors in inheriting classes, to make sure they get finalized correctly.

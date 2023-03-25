@@ -59,17 +59,19 @@ namespace foray::osi {
         return out;
     }
 
-    OsManager::EventPollResult OsManager::PollEvent()
+    bool OsManager::PollEvent()
     {
-        EventPollResult result;
         mLastEvent = nullptr;
-        if(SDL_PollEvent(&result.Raw.Data) != 0)
+        SDL_Event event;
+        if(SDL_PollEvent(&event) != 0)
         {
-            TranslateSDLEvent(result.Raw.Data);
-            result.Cast = mLastEvent ? mLastEvent.get() : nullptr;
-            result.Any = true;
+            EventRawSDL raw(event);
+            mOnEventRawSDL.Invoke(&raw);
+            mOnEvent.Invoke(&raw);
+            TranslateSDLEvent(event);
+            return true;
         }
-        return result;
+        return false;
     }
 
 #pragma endregion
@@ -177,11 +179,7 @@ namespace foray::osi {
 
         if(!!mLastEvent)
         {
-            if(!!mLastEvent->Source)
-            {
-                Window* window = Window::FindBySDLId(mLastEvent->Source->SDLId());
-                window->HandleEvent(mLastEvent.get());
-            }
+            mOnEvent.Invoke(mLastEvent.get());
             return true;
         }
         return false;
@@ -217,6 +215,7 @@ namespace foray::osi {
             FORAY_THROWFMT("unable to find button {} from event on mouse!", NAMEOF_ENUM(button))
         }
         mLastEvent = std::make_unique<EventInputBinary>(window, mbevent.timestamp, mMouse, input, mbevent.state == SDL_PRESSED);
+        mOnEventInputBinary.Invoke((const EventInputBinary*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_Keyboard(const SDL_Event& sdl_event)
@@ -234,6 +233,7 @@ namespace foray::osi {
             FORAY_THROWFMT("unable to find button {} from event on keyboard!", NAMEOF_ENUM(button))
         }
         mLastEvent = std::make_unique<EventInputBinary>(window, kbevent.timestamp, mKeyboard, input, kbevent.state == SDL_PRESSED);
+        mOnEventInputBinary.Invoke((const EventInputBinary*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_MouseMoved(const SDL_Event& sdl_event)
@@ -246,6 +246,7 @@ namespace foray::osi {
         fp32_t               relativeY = (fp32_t)mevent.yrel;
 
         mLastEvent = std::make_unique<EventInputMouseMoved>(window, mevent.timestamp, mMouse, currentx, currenty, relativeX, relativeY);
+        mOnEventInputMouseMoved.Invoke((const EventInputMouseMoved*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_MouseScroll(const SDL_Event& sdl_event)
@@ -256,6 +257,7 @@ namespace foray::osi {
         int32_t             offsety = mevent.y;
 
         mLastEvent = std::make_unique<EventInputDirectional>(window, mevent.timestamp, mMouse, mMouse->Directionals().front(), offsetx, offsety);
+        mOnEventInputDirectional.Invoke((const EventInputDirectional*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_JoyAxis(const SDL_Event& sdl_event)
@@ -283,6 +285,7 @@ namespace foray::osi {
             Exception::Throw("unable to find a device from event!");
         }
         mLastEvent = std::make_unique<EventInputAnalogue>(window, ev.timestamp, sourceDevice, input, ev.value);
+        mOnEventInputAnalogue.Invoke((const EventInputAnalogue*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_JoyButton(const SDL_JoyButtonEvent& sdl_event)
@@ -310,6 +313,7 @@ namespace foray::osi {
             FORAY_THROWFMT("unable to find button {} from event on a device!", NAMEOF_ENUM(button))
         }
         mLastEvent = std::make_unique<EventInputBinary>(window, sdl_event.timestamp, sourceDevice, input, sdl_event.state == SDL_PRESSED);
+        mOnEventInputBinary.Invoke((const EventInputBinary*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_JoyDevice(const SDL_JoyDeviceEvent& sdl_event)
@@ -326,6 +330,7 @@ namespace foray::osi {
         }
         // TODO edit mInputDevices and query new data (low priority)
         mLastEvent = std::make_unique<EventInputDeviceAvailability>(sdl_event.timestamp, sourceDevice, sdl_event.which == SDL_JOYDEVICEADDED);
+        mOnEventInputDeviceAvailability.Invoke((const EventInputDeviceAvailability*)mLastEvent.get());
     }
 
 #pragma endregion
@@ -334,16 +339,19 @@ namespace foray::osi {
     void OsManager::TranslateEvent_WindowClosed(Window* window, uint32_t timestamp)
     {
         mLastEvent = std::make_unique<EventWindowCloseRequested>(window, timestamp);
+        mOnEventInputDeviceAvailability.Invoke((const EventInputDeviceAvailability*)mLastEvent.get());
     }
 
     void OsManager::TranslateEvent_WindowFocus(Window* window, const SDL_WindowEvent& wevent, bool mouseonly, bool focus)
     {
         mLastEvent = std::make_unique<EventWindowFocusChanged>(window, wevent.timestamp, focus, focus && !mouseonly);
+        mOnEventWindowFocusChanged.Invoke((const EventWindowFocusChanged*)mLastEvent.get());
     }
     void OsManager::TranslateEvent_WindowResized(Window* window, const SDL_WindowEvent& wevent)
     {
         VkExtent2D newSize{(uint32_t)wevent.data1, (uint32_t)wevent.data2};
         mLastEvent = std::make_unique<EventWindowResized>(window, wevent.timestamp, newSize);
+        mOnEventWindowResized.Invoke((const EventWindowResized*)mLastEvent.get());
     }
 
 #pragma endregion

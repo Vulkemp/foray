@@ -3,7 +3,7 @@
 #include "../core/foray_shadermanager.hpp"
 #include "../foray_exception.hpp"
 #include "../foray_logger.hpp"
-#include "../osi/foray_event.hpp"
+#include "../osi/foray_osi_event.hpp"
 #include "../stages/foray_renderstage.hpp"
 
 namespace foray::base {
@@ -32,7 +32,7 @@ namespace foray::base {
               &mContext,
               [this](osi::Window& window) { this->ApiBeforeWindowCreate(window); },
               [this](vkb::SwapchainBuilder& builder) { this->ApiBeforeSwapchainBuilding(builder); },
-              [this](VkExtent2D size) { this->OnResized(size); },
+              nullptr,
               nullptr)
         , mShaderManager(&mContext)
     {
@@ -52,9 +52,12 @@ namespace foray::base {
 #endif
 
         mOsManager.Init();
+        mOnOsEvent.Set(mOsManager.OnEvent(), [this](const osi::Event* event) { this->OnOsEvent(event); });
         mContext.OsManager = &mOsManager;
 
         mWindowSwapchain.CreateWindow();
+        mOnSwapchainResized.Set(mWindowSwapchain.OnResized(), [this](VkExtent2D extent) { this->ApiOnSwapchainResized(extent); }, -10000000);
+
         mInstance.Create();
         mDevice.Create();
         mWindowSwapchain.CreateSwapchain();
@@ -178,20 +181,17 @@ namespace foray::base {
 
     void DefaultAppBase::PollEvents()
     {
-        osi::OsManager::EventPollResult pollResult;
-        for(pollResult = mOsManager.PollEvent(); pollResult.Any; pollResult = mOsManager.PollEvent())
+        while(mOsManager.PollEvent())
+            ;
+    }
+
+    void DefaultAppBase::OnOsEvent(const osi::Event* event)
+    {
+        ApiOnOsEvent(event);
+        if(event->Type == osi::Event::EType::WindowCloseRequested && event->Source && osi::Window::Windows().size() <= 1)
         {
-            ApiOnEvent(&pollResult.Raw);
-            if(!!pollResult.Cast)
-            {
-                ApiOnEvent(pollResult.Cast);
-                mWindowSwapchain.HandleEvent(pollResult.Cast);
-                if(pollResult.Cast->Source && pollResult.Cast->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
-                {
-                    // The last window has been requested to close, oblige by stopping the renderloop
-                    mRenderLoop.RequestStop();
-                }
-            }
+            // The last window has been requested to close, oblige by stopping the renderloop
+            mRenderLoop.RequestStop();
         }
     }
 
@@ -200,12 +200,13 @@ namespace foray::base {
         // Check for shader recompilation
         if(mLastShadersCheckedTimestamp + 1 < renderInfo.SinceStart)
         {
-            mLastShadersCheckedTimestamp = renderInfo.SinceStart;
-            std::unordered_set<uint64_t> recompiled;
-            if(mShaderManager.CheckAndUpdateShaders(recompiled))
-            {
-                OnShadersRecompiled(recompiled);
-            }
+            mShaderManager.CheckAndUpdateShaders([this]() { AssertVkResult(this->mContext.VkbDispatchTable->deviceWaitIdle()); });
+            // mLastShadersCheckedTimestamp = renderInfo.SinceStart;
+            // std::unordered_set<uint64_t> recompiled;
+            // if()
+            // {
+            //     OnShadersRecompiled(recompiled);
+            // }
         }
 
         if(mEnableFrameRecordBenchmark)
@@ -292,36 +293,4 @@ namespace foray::base {
         mInFlightFrameIndex = (mInFlightFrameIndex + 1) % INFLIGHT_FRAME_COUNT;
     }
 
-    void DefaultAppBase::OnResized(VkExtent2D size)
-    {
-        ApiOnResized(size);
-        for(stages::RenderStage* stage : mRegisteredStages)
-        {
-            stage->Resize(size);
-        }
-    }
-
-    void DefaultAppBase::OnShadersRecompiled(std::unordered_set<uint64_t>& recompiledShaderKeys)
-    {
-        AssertVkResult(mContext.VkbDispatchTable->deviceWaitIdle());
-        ApiOnShadersRecompiled(recompiledShaderKeys);
-        for(stages::RenderStage* stage : mRegisteredStages)
-        {
-            stage->OnShadersRecompiled(recompiledShaderKeys);
-        }
-    }
-
-    void DefaultAppBase::RegisterRenderStage(stages::RenderStage* stage)
-    {
-        mRegisteredStages.push_back(stage);
-    }
-
-    void DefaultAppBase::UnregisterRenderStage(stages::RenderStage* stage)
-    {
-        auto iter = std::find(mRegisteredStages.begin(), mRegisteredStages.end(), stage);
-        if(iter != mRegisteredStages.end())
-        {
-            mRegisteredStages.erase(iter);
-        }
-    }
 }  // namespace foray::base

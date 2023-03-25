@@ -206,20 +206,6 @@ namespace foray::osi {
         return out;
     }
 
-    void Window::HandleEvent(const Event* event)
-    {
-        auto resized = dynamic_cast<const EventWindowResized*>(event);
-        auto closed  = dynamic_cast<const EventWindowCloseRequested*>(event);
-        if(resized)
-        {
-            HandleEvent_Resized(resized);
-        }
-        if(closed)
-        {
-            HandleEvent_Closed(closed);
-        }
-    }
-
     void Window::HandleEvent_Resized(const EventWindowResized* event)
     {
         if(mDisplayMode <= EDisplayMode::WindowedResizable)

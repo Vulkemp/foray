@@ -8,7 +8,7 @@ namespace foray::stages {
     class RasterizedRenderStage : public RenderStage
     {
       public:
-        RasterizedRenderStage() = default;
+        inline RasterizedRenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr) : RenderStage(context, domain) {}
 
         FORAY_GETTER_CR(FrameBuffer)
         FORAY_GETTER_CR(Renderpass)

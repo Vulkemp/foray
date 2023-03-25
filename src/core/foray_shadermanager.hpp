@@ -1,4 +1,5 @@
 #pragma once
+#include "../foray_event.hpp"
 #include "../osi/foray_env.hpp"
 #include "foray_core_declares.hpp"
 #include <set>
@@ -31,6 +32,8 @@ namespace foray::core {
     class ShaderManager
     {
       public:
+        using KeySet = std::unordered_set<uint64_t>;
+
         /// @param context If set, is used as fallback for CompileShader() context argument
         inline explicit ShaderManager(core::Context* context = nullptr) : mContext(context) {}
 
@@ -49,12 +52,6 @@ namespace foray::core {
         /// @return Returns the key to this unique shader compilation
         uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& config = {}, core::Context* context = nullptr);
 
-        /// @brief Checks and updates shader compilations for source code changes
-        /// @details Will check all tracked shader files for modifications and recompile the shader compilations accordingly
-        /// @param out_recompiled Output set for shader compilation keys which have been recompiled
-        /// @return Returns true if any shader was updated
-        virtual bool CheckAndUpdateShaders(std::unordered_set<uint64_t>& out_recompiled);
-
         ShaderManager() = default;
 
         /// @brief Calls glslc in path on linux, glslc.exe (derived from VULKAN_SDK environment variable) on windows
@@ -62,6 +59,11 @@ namespace foray::core {
         /// (OPTIMIZE = -O0 for DEBUG, -O for RELEASE CMake targets)
         /// @return True if glslc compiler exe returns 0 (indicating success), false otherwise
         virtual bool CallGlslCompiler(std::string_view args);
+
+        /// @brief Checks and updates shader compilations for source code changes. Does not dispatch, as device must be set idle first.
+        /// @details Will check all tracked shader files for modifications and recompile the shader compilations accordingly
+        /// @return Returns true if any shader was updated
+        virtual bool CheckAndUpdateShaders(std::function<void()> beforeCallback);
 
       protected:
         /// @brief maps files to last write times
@@ -143,6 +145,7 @@ namespace foray::core {
         /// @brief Map of include file paths to include file structs
         std::unordered_map<osi::Utf8Path, std::unique_ptr<IncludeFile>> mTrackedIncludeFiles;
 
+
         /// @brief Discover and register all includes for a shader compilation
         void DiscoverIncludes(ShaderCompilation* compilation);
         /// @brief Create or return an include file. Recursively processes #include directives to resolve nested includes
@@ -150,6 +153,8 @@ namespace foray::core {
         /// @param extraIncludeDirs Additional include dirs
         /// @return Include File
         IncludeFile* RecursivelyProcessInclude(const osi::Utf8Path& path, const std::vector<osi::Utf8Path>& extraIncludeDirs);
+
+        FORAY_DELEGATE(const KeySet&, ShadersRecompiled)
     };
 
 }  // namespace foray::core

@@ -1,5 +1,6 @@
 #pragma once
 #include "foray_rasterizedRenderStage.hpp"
+#include "../osi/foray_osi_event.hpp"
 #include <functional>
 #include <sdl2/SDL.h>
 
@@ -8,19 +9,15 @@ namespace foray::stages {
     class ImguiStage : public RenderStage
     {
       public:
-        ImguiStage() = default;
+        inline ImguiStage() = default;
 
-        /// @brief Initializes and selects background image mode if set, swapchain mode otherwise
-        /// @param context Requires Device (Swapchain & SwapchainImages if no background image is set)
-        /// @param backgroundImage Managed Image Background Image to render over. If set to nullptr, will use swapchain mode.
-        virtual void Init(core::Context* context, core::ManagedImage* backgroundImage);
         /// @brief Init the imgui stage for rendering over a generic background image
         /// @param context Requires Device
         /// @param backgroundImage Managed Image Background Image to render over
-        virtual void InitForImage(core::Context* context, core::ManagedImage* backgroundImage);
+        virtual void InitForImage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder = 0);
         /// @brief Init the imgui stage for rendering to the swapchain
         /// @param context Requires Device, Swapchain & SwapchainImages
-        virtual void InitForSwapchain(core::Context* context);
+        virtual void InitForSwapchain(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 
@@ -32,10 +29,7 @@ namespace foray::stages {
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }
 
         /// @brief When the window has been resized, update the target images.
-        virtual void Resize(const VkExtent2D& extent) override;
-
-        /// @brief Allows imgui to handle input events.
-        void ProcessSdlEvent(const SDL_Event* sdlEvent);
+        virtual void OnResized(VkExtent2D extent) override;
 
         inline virtual ~ImguiStage() { Destroy(); }
 
@@ -50,8 +44,11 @@ namespace foray::stages {
         virtual void PrepareRenderpass();
         virtual void DestroyFrameBufferAndRenderPass();
 
+        void HandleSdlEvent(const osi::EventRawSDL* event);
 
         std::vector<VkFramebuffer> mFrameBuffers;
         VkRenderPass               mRenderPass = nullptr;
+
+        event::Receiver<const osi::EventRawSDL*> mOnSdlEvent;
     };
 }  // namespace foray::stages

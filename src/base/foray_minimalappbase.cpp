@@ -1,7 +1,7 @@
 #include "foray_minimalappbase.hpp"
 
 #include "../foray_logger.hpp"
-#include "../osi/foray_event.hpp"
+#include "../osi/foray_osi_event.hpp"
 #include "../osi/foray_window.hpp"
 #include <nameof/nameof.hpp>
 
@@ -45,19 +45,15 @@ namespace foray::base {
 
     void MinimalAppBase::PollEvents()
     {
-        osi::OsManager::EventPollResult pollResult;
-        for(pollResult = mOsManager.PollEvent(); pollResult.Any; pollResult = mOsManager.PollEvent())
+        while (mOsManager.PollEvent()) ;
+    }
+
+    void MinimalAppBase::OnOsEvent(const osi::Event* event)
+    {
+        ApiOnOsEvent(event);
+        if (event->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() == 1)
         {
-            ApiOnEvent(&pollResult.Raw);
-            if(!!pollResult.Cast)
-            {
-                ApiOnEvent(pollResult.Cast);
-                if(pollResult.Cast->Source && pollResult.Cast->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() <= 1)
-                {
-                    // The last window has been requested to close, oblige by stopping the renderloop
-                    mRenderLoop.RequestStop();
-                }
-            }
+            mRenderLoop.RequestStop();
         }
     }
     void MinimalAppBase::Destroy()

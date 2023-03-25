@@ -27,14 +27,14 @@ namespace foray::util {
         VkViewport viewport = {};
         viewport.x          = 0.0f;
         viewport.y          = 0.0f;
-        viewport.width      = (float)mContext->GetSwapchainSize().width;
-        viewport.height     = (float)mContext->GetSwapchainSize().height;
+        viewport.width      = (float)mDomain->GetExtent().width;
+        viewport.height     = (float)mDomain->GetExtent().height;
         viewport.minDepth   = 0.0f;
         viewport.maxDepth   = 1.0f;
 
         VkRect2D scissor = {};
         scissor.offset   = {0, 0};
-        scissor.extent   = mContext->GetSwapchainSize();
+        scissor.extent   = mDomain->GetExtent();
 
         VkPipelineViewportStateCreateInfo viewportState = {};
         viewportState.sType                             = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

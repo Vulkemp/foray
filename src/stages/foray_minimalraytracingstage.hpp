@@ -19,13 +19,10 @@ namespace foray::stages {
     {
       public:
         /// @brief Destroys, assigns context, calls ApiCreateOutputImages(), ApiCustomObjectsCreate(), ApiCreateOrUpdateDescriptors(), ApiCreatePipelineLayout(), ApiCreateRtPipeline() in this order
-        void Init(core::Context* context);
+        void Init(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
 
         /// @brief Calls ApiRecordFramePrepare(), ApiRecordFrameBind(), ApiRecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls ApiCreateOrUpdateDescriptors() afterwards.
-        /// @param extent New render extent
-        virtual void Resize(const VkExtent2D& extent) override;
 
         /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), ApiDestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
         virtual void Destroy() override;
@@ -57,6 +54,10 @@ namespace foray::stages {
         virtual void ApiRecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) = 0;
         /// @brief Inheriting types should use this to push constants and invoke tracerays
         virtual void ApiRecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) = 0;
+
+        /// @brief Calls RenderStage::Resize(..) which resizes any image registered to mImageOutputs, calls ApiCreateOrUpdateDescriptors() afterwards.
+        /// @param extent New render extent
+        virtual void OnResized(VkExtent2D extent) override;
 
         /// @brief Calls ApiDestroyRtPipeline(), ApiCreateRtPipeline() in this order
         virtual void ReloadShaders() override;

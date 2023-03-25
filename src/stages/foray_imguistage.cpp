@@ -1,6 +1,7 @@
 #include "foray_imguistage.hpp"
 #include "../core/foray_commandbuffer.hpp"
 #include "../core/foray_shadermodule.hpp"
+#include "../osi/foray_osmanager.hpp"
 #include "../osi/foray_window.hpp"
 #include "../util/foray_pipelinebuilder.hpp"
 
@@ -10,23 +11,12 @@
 
 
 namespace foray::stages {
-    void ImguiStage::Init(core::Context* context, core::ManagedImage* backgroundImage)
-    {
-        if (!!backgroundImage)
-        {
-            InitForImage(context, backgroundImage);
-        }
-        else
-        {
-            InitForSwapchain(context);
-        }
-    }
-
-    void ImguiStage::InitForImage(core::Context* context, core::ManagedImage* backgroundImage)
+    void ImguiStage::InitForImage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder)
     {
         Destroy();
         mContext     = context;
         mTargetImage = backgroundImage;
+        mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
 
         Assert(!!mTargetImage, "Imgui stage can only init when the background image is set!");
 
@@ -34,10 +24,10 @@ namespace foray::stages {
         InitImgui();
     }
 
-    void ImguiStage::InitForSwapchain(core::Context* context)
+    void ImguiStage::InitForSwapchain(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
     {
         Destroy();
-        mContext     = context;
+        RenderStage::InitCallbacks(context, domain, resizeOrder);
         mTargetImage = nullptr;
 
         PrepareRenderpass();
@@ -200,8 +190,8 @@ namespace foray::stages {
             fbufCreateInfo.renderPass              = mRenderPass;
             fbufCreateInfo.pAttachments            = &attachmentView;
             fbufCreateInfo.attachmentCount         = 1U;
-            fbufCreateInfo.width                   = mContext->GetSwapchainSize().width;
-            fbufCreateInfo.height                  = mContext->GetSwapchainSize().height;
+            fbufCreateInfo.width                   = mDomain->GetExtent().width;
+            fbufCreateInfo.height                  = mDomain->GetExtent().height;
             fbufCreateInfo.layers                  = 1;
             AssertVkResult(vkCreateFramebuffer(mContext->Device(), &fbufCreateInfo, nullptr, &frameBuffer));
         }
@@ -220,7 +210,7 @@ namespace foray::stages {
         }
     }
 
-    void ImguiStage::Resize(const VkExtent2D& extent)
+    void ImguiStage::OnResized(VkExtent2D extent)
     {
         DestroyFrameBufferAndRenderPass();
         PrepareRenderpass();
@@ -233,9 +223,9 @@ namespace foray::stages {
         PrepareRenderpass();
     }
 
-    void ImguiStage::ProcessSdlEvent(const SDL_Event* sdlEvent)
+    void ImguiStage::HandleSdlEvent(const osi::EventRawSDL* event)
     {
-        ImGui_ImplSDL2_ProcessEvent(sdlEvent);
+        ImGui_ImplSDL2_ProcessEvent(&event->Data);
     }
 
 
@@ -259,7 +249,7 @@ namespace foray::stages {
         renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass        = mRenderPass;
         renderPassBeginInfo.framebuffer       = frameBuffer;
-        renderPassBeginInfo.renderArea.extent = mContext->GetSwapchainSize();
+        renderPassBeginInfo.renderArea.extent = mDomain->GetExtent();
         // renderPassBeginInfo.clearValueCount   = 1U;
         // renderPassBeginInfo.pClearValues      = &mClearValue;
 

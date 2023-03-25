@@ -3,12 +3,13 @@
 #include "../foray_vkb.hpp"
 #include "../osi/foray_osi_declares.hpp"
 #include "../osi/foray_window.hpp"
+#include "../stages/foray_renderdomain.hpp"
 #include "foray_base_declares.hpp"
 #include <functional>
 
 namespace foray::base {
     /// @brief Combines Window, Surface and Swapchain into one managing object
-    class VulkanWindowSwapchain
+    class VulkanWindowSwapchain : public stages::RenderDomain
     {
       public:
         /// @brief Function called before window is created
@@ -20,13 +21,14 @@ namespace foray::base {
         /// @brief Function called for naming swapchain images.
         using MakeSwapchainImageNameFunctionPointer = std::function<std::string(uint32_t)>;
 
-        VulkanWindowSwapchain() = default;
+        VulkanWindowSwapchain() : stages::RenderDomain() {}
         inline VulkanWindowSwapchain(core::Context*                        context,
                                      BeforeWindowCreateFunctionPointer     beforeWindowCreateFunc,
                                      BeforeSwapchainBuildFunctionPointer   beforeSwapchainBuildFunc,
                                      OnResizedFunctionPointer              onResizedFunc,
                                      MakeSwapchainImageNameFunctionPointer makeSwapchainImageNameFunc)
-            : mBeforeWindowCreateFunc{beforeWindowCreateFunc}
+            : stages::RenderDomain()
+            , mBeforeWindowCreateFunc{beforeWindowCreateFunc}
             , mBeforeSwapchainBuildFunc{beforeSwapchainBuildFunc}
             , mOnResizedFunc{onResizedFunc}
             , mMakeSwapchainImageNameFunc{makeSwapchainImageNameFunc}
@@ -41,14 +43,14 @@ namespace foray::base {
         FORAY_PROPERTY_V(Context)
 
         /// @brief Create the Window
-        void        CreateWindow();
+        void CreateWindow();
         /// @brief Create the Swapchain
         void        CreateSwapchain();
         inline bool Exists() const { return !!mSwapchain.swapchain; }
         void        Destroy();
 
         /// @brief Listens for WindowSizeChanged events to preemptively resize the swapchain
-        void HandleEvent(const osi::Event* event);
+        virtual void OnWindowResized(const osi::EventWindowResized* message);
         /// @brief Call to recreate the swapchain
         void RecreateSwapchain();
 

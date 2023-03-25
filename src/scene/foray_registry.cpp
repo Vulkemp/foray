@@ -42,11 +42,6 @@ namespace foray::scene {
         {
             mCallbackDispatcher->mOnEvent.Add(receiver);
         }
-        Component::OnResizedCallback* resizable = dynamic_cast<Component::OnResizedCallback*>(component);
-        if(resizable)
-        {
-            mCallbackDispatcher->mOnResized.Add(resizable);
-        }
     }
     void Registry::UnregisterFromRoot(Component* component)
     {
@@ -64,11 +59,6 @@ namespace foray::scene {
         if(receiver)
         {
             mCallbackDispatcher->mOnEvent.Remove(receiver);
-        }
-        Component::OnResizedCallback* resizable = dynamic_cast<Component::OnResizedCallback*>(component);
-        if(resizable)
-        {
-            mCallbackDispatcher->mOnResized.Remove(resizable);
         }
     }
 

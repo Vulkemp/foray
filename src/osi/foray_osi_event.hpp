@@ -4,12 +4,13 @@
 #include "foray_helpers.hpp"
 #include "foray_input.hpp"
 #include "foray_osi_declares.hpp"
+#include "../foray_event.hpp"
 #include <memory>
 #include <sdl2/SDL.h>
 
 namespace foray::osi {
     /// @brief Base class for operating system events
-    class Event : public Polymorphic
+    class Event
     {
       public:
         /// @brief Event type enum, allows handling events in switch structures
@@ -42,8 +43,8 @@ namespace foray::osi {
         };
 
         inline Event() = default;
-        inline Event(Window* const source, const uint32_t timestamp, const EType type) : Source(source), Timestamp(timestamp), Type(type), CustomType(0) {}
-        inline Event(Window* const source, const uint32_t timestamp, const int8_t customtype) : Source(source), Timestamp(timestamp), Type(EType::Custom), CustomType(customtype) {}
+        Event(Window* const source, const uint32_t timestamp, const EType type);
+        Event(Window* const source, const uint32_t timestamp, const int8_t customtype);
         inline virtual ~Event() {}
 
         /// @brief Source window that recorded the event, if applicable
@@ -60,7 +61,7 @@ namespace foray::osi {
     {
       public:
         inline EventRawSDL() = default;
-        inline EventRawSDL(const uint32_t timestamp, const SDL_Event& data) : Event(nullptr, timestamp, Event::EType::RawSDL), Data(data) {}
+        EventRawSDL(const SDL_Event& data);
 
         SDL_Event Data;
     };

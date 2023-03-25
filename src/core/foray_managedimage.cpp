@@ -32,6 +32,8 @@ namespace foray::core {
         mContext    = context;
         mCreateInfo = createInfo;
 
+        Assert(createInfo.ImageCI.extent.width > 0 && createInfo.ImageCI.extent.height > 0 && createInfo.ImageCI.extent.depth > 0, "Extent must be > 0");
+
         // extract import image infos
         mName     = mCreateInfo.Name;
         mFormat   = mCreateInfo.ImageCI.format;
