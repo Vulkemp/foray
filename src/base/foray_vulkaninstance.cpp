@@ -14,6 +14,12 @@ namespace foray::base {
         if(mEnableDebugLayersAndCallbacks)
         {
             instanceBuilder.enable_validation_layers();
+            for(auto validation_feature : {
+                    VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+                    VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+                    VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+                })
+                instanceBuilder.add_validation_feature_enable(validation_feature);
             if(!!mDebugMessengerFunc)
             {
                 instanceBuilder.set_debug_callback(mDebugMessengerFunc);
