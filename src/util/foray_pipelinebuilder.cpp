@@ -47,7 +47,7 @@ namespace foray::util {
         rasterizerState.sType                                  = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizerState.depthClampEnable                       = VK_FALSE;
         rasterizerState.rasterizerDiscardEnable                = VK_FALSE;
-        rasterizerState.polygonMode                            = VK_POLYGON_MODE_FILL;
+        rasterizerState.polygonMode                            = mPolygonMode;
         rasterizerState.lineWidth                              = 1.0f;
         rasterizerState.cullMode                               = mCullMode;  //VK_CULL_MODE_BACK_BIT;
         rasterizerState.frontFace                              = VK_FRONT_FACE_CLOCKWISE;

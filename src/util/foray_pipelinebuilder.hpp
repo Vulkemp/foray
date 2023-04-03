@@ -8,6 +8,9 @@
 namespace foray::util {
 
     /// @brief Class to quickly build a default pipeline. Ownership is transfered to caller.
+	/// TODO: THIS CLASS SHOULD BE REWORKED
+	/// => all properties of the pipeline should be configurable, for example by exposing the underlying structs directly, instead of individual
+	/// access methods
     class PipelineBuilder
     {
       public:
@@ -21,6 +24,7 @@ namespace foray::util {
         FORAY_PROPERTY_V(Context)
         FORAY_PROPERTY_V(RenderPass)
         FORAY_PROPERTY_V(CullMode)
+        FORAY_PROPERTY_V(PolygonMode)
         FORAY_PROPERTY_V(DynamicStates)
         FORAY_PROPERTY_V(PipelineLayout)
         FORAY_PROPERTY_V(DepthTestEnable)
@@ -42,6 +46,7 @@ namespace foray::util {
         VkRenderPass                                      mRenderPass{};
         std::vector<VkPipelineShaderStageCreateInfo>*     mShaderStageCreateInfos{};
         VkCullModeFlags                                   mCullMode{VK_CULL_MODE_BACK_BIT};
+        VkPolygonMode                                     mPolygonMode{VK_POLYGON_MODE_FILL};
         const std::vector<VkDynamicState>*                mDynamicStates{};
         std::vector<VkPipelineColorBlendAttachmentState>* mColorBlendAttachmentStates{};
         VkBool32                                          mDepthTestEnable{VK_TRUE};
