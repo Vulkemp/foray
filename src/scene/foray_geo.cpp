@@ -17,10 +17,11 @@ namespace foray::scene {
 
     void VertexInputStateBuilder::Build()
     {
+        Stride          = Stride > 0 ? Stride : (uint32_t)sizeof(Vertex);
         InputStateCI    = {};
         InputBindings   = {};
         InputAttributes = {};
-        InputBindings.push_back(VkVertexInputBindingDescription{.binding = Binding, .stride = sizeof(Vertex), .inputRate = VkVertexInputRate::VK_VERTEX_INPUT_RATE_VERTEX});
+        InputBindings.push_back(VkVertexInputBindingDescription{.binding = Binding, .stride = Stride, .inputRate = VkVertexInputRate::VK_VERTEX_INPUT_RATE_VERTEX});
 
         for(auto& component : Components)
         {

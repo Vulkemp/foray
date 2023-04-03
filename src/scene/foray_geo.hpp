@@ -30,12 +30,14 @@ namespace foray::scene {
         std::vector<VertexComponentBinding> Components;
         uint32_t                            Binding      = 0;
         uint32_t                            NextLocation = 0;
+        uint32_t                            Stride       = 0;
 
         std::vector<VkVertexInputAttributeDescription> InputAttributes{};
         std::vector<VkVertexInputBindingDescription>   InputBindings{};
         VkPipelineVertexInputStateCreateInfo           InputStateCI{};
 
         VertexInputStateBuilder& AddVertexComponentBinding(EVertexComponent component, std::optional<uint32_t> location = {});
+        VertexInputStateBuilder& SetStride(uint32_t stride) { Stride = stride; return *this; }
         void                     Build();
     };
 
