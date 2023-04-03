@@ -58,11 +58,13 @@ namespace foray::base {
                                                         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
             deviceSelector.add_required_extensions(requiredExtensions);
 
-            // Enable samplerAnisotropy
-            VkPhysicalDeviceFeatures deviceFeatures{};
-            deviceFeatures.samplerAnisotropy = VK_TRUE;
+			if(mEnableDefaultPhysicalDeviceFeatures)
+            {
+				// Enable samplerAnisotropy
+                mPhysicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
+			}
 
-            deviceSelector.set_required_features(deviceFeatures);
+            deviceSelector.set_required_features(mPhysicalDeviceFeatures);
         }
 
         if(!!mBeforePhysicalDeviceSelectFunc)

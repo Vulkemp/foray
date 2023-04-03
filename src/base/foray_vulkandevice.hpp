@@ -34,7 +34,9 @@ namespace foray::base {
 
         FORAY_PROPERTY_V(SetDefaultCapabilitiesToDeviceSelector)
         FORAY_PROPERTY_V(EnableDefaultDeviceFeatures)
+        FORAY_PROPERTY_V(EnableDefaultPhysicalDeviceFeatures)
         FORAY_PROPERTY_V(ShowConsoleDeviceSelectionPrompt)
+        FORAY_PROPERTY_R(PhysicalDeviceFeatures)
         FORAY_PROPERTY_R(PhysicalDevice)
         FORAY_PROPERTY_R(Device)
         FORAY_PROPERTY_R(DispatchTable)
@@ -62,6 +64,9 @@ namespace foray::base {
         bool mSetDefaultCapabilitiesToDeviceSelector = true;
         /// @brief Enables features listed in mDefaultFeatures member
         bool mEnableDefaultDeviceFeatures = true;
+        /// @brief Enables features a few physical device features (anisotrophy, etc.)
+		bool mEnableDefaultPhysicalDeviceFeatures = true;
+
         /// @brief If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index.
         bool mShowConsoleDeviceSelectionPrompt = false;
 
@@ -79,5 +84,7 @@ namespace foray::base {
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures    = {};
             VkPhysicalDeviceSynchronization2Features         Sync2FEatures                 = {};
         } mDefaultFeatures = {};
+
+		VkPhysicalDeviceFeatures mPhysicalDeviceFeatures{};
     };
 }  // namespace foray::base
