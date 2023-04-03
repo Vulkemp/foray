@@ -82,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Class to quickly build a default pipeline. Ownership is transfered to caller.  
+<p>Class to quickly build a default pipeline. Ownership is transfered to caller. TODO: THIS CLASS SHOULD BE REWORKED =&gt; all properties of the pipeline should be configurable, for example by exposing the underlying structs directly, instead of individual access methods.  
  <a href="classforay_1_1util_1_1PipelineBuilder.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="foray__pipelinebuilder_8hpp_source.html">foray_pipelinebuilder.hpp</a>&gt;</code></p>
@@ -114,6 +114,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a9230f65446fa71c91ceeed31aa42bcdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a059fcf9b7eee7737b16277102333e9c8"><td class="memItemLeft" align="right" valign="top">VkCullModeFlags&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1PipelineBuilder.html#a059fcf9b7eee7737b16277102333e9c8">mCullMode</a> {VK_CULL_MODE_BACK_BIT}</td></tr>
 <tr class="separator:a059fcf9b7eee7737b16277102333e9c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96462ebee9e8847f2e15b6a5d5b04bde"><td class="memItemLeft" align="right" valign="top">VkPolygonMode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1PipelineBuilder.html#a96462ebee9e8847f2e15b6a5d5b04bde">mPolygonMode</a> {VK_POLYGON_MODE_FILL}</td></tr>
+<tr class="separator:a96462ebee9e8847f2e15b6a5d5b04bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71bf4ec217563bc9f65405a8e732e728"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; VkDynamicState &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1PipelineBuilder.html#a71bf4ec217563bc9f65405a8e732e728">mDynamicStates</a> {}</td></tr>
 <tr class="separator:a71bf4ec217563bc9f65405a8e732e728"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaac051626ce96ed189d6decd53b3d17f"><td class="memItemLeft" align="right" valign="top">std::vector&lt; VkPipelineColorBlendAttachmentState &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1util_1_1PipelineBuilder.html#aaac051626ce96ed189d6decd53b3d17f">mColorBlendAttachmentStates</a> {}</td></tr>
@@ -132,7 +134,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:acd0dacc0fa648305e72aca14125424c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class to quickly build a default pipeline. Ownership is transfered to caller. </p>
+<div class="textblock"><p>Class to quickly build a default pipeline. Ownership is transfered to caller. TODO: THIS CLASS SHOULD BE REWORKED =&gt; all properties of the pipeline should be configurable, for example by exposing the underlying structs directly, instead of individual access methods. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae40004eac9a08808bf4087c93e6d0ab1" name="ae40004eac9a08808bf4087c93e6d0ab1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae40004eac9a08808bf4087c93e6d0ab1">&#9670;&#160;</a></span>PipelineBuilder() <span class="overload">[1/2]</span></h2>
@@ -442,6 +444,28 @@ Protected Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">VkPipelineLayout foray::util::PipelineBuilder::mPipelineLayout {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a96462ebee9e8847f2e15b6a5d5b04bde" name="a96462ebee9e8847f2e15b6a5d5b04bde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96462ebee9e8847f2e15b6a5d5b04bde">&#9670;&#160;</a></span>mPolygonMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">VkPolygonMode foray::util::PipelineBuilder::mPolygonMode {VK_POLYGON_MODE_FILL}</td>
         </tr>
       </table>
   </td>
