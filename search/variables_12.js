@@ -24,14 +24,15 @@ var searchData=
   ['srcstagemask_21',['SrcStageMask',['../structforay_1_1core_1_1ImageLayoutCache_1_1Barrier2.html#a5891d2ca77ed3ad46099cd05fd24047d',1,'foray::core::ImageLayoutCache::Barrier2::SrcStageMask()'],['../structforay_1_1core_1_1ManagedImage_1_1QuickTransition.html#a84f5f548a0bf2273ceb135e2c8e81de2',1,'foray::core::ManagedImage::QuickTransition::SrcStageMask()']]],
   ['stageciindex_22',['StageCiIndex',['../structforay_1_1rtpipe_1_1RtShaderCollection_1_1Entry.html#a46f17e8185a723ebb40bf79d384afd41',1,'foray::rtpipe::RtShaderCollection::Entry']]],
   ['start_23',['Start',['../structforay_1_1rtpipe_1_1ShaderBindingTableBase_1_1VectorRange.html#af38e1ad3d1046a1a0234fa7096afd39c',1,'foray::rtpipe::ShaderBindingTableBase::VectorRange']]],
-  ['state_24',['State',['../classforay_1_1osi_1_1EventInputBinary.html#ae08646e06bd45eadaeb500c175848363',1,'foray::osi::EventInputBinary::State()'],['../classforay_1_1osi_1_1EventInputAnalogue.html#a6a8d65de3389dfac836dd1bd27da0bed',1,'foray::osi::EventInputAnalogue::State()']]],
+  ['state_24',['State',['../classforay_1_1osi_1_1EventInputAnalogue.html#a6a8d65de3389dfac836dd1bd27da0bed',1,'foray::osi::EventInputAnalogue::State()'],['../classforay_1_1osi_1_1EventInputBinary.html#ae08646e06bd45eadaeb500c175848363',1,'foray::osi::EventInputBinary::State()']]],
   ['strafedown_25',['StrafeDown',['../structforay_1_1scene_1_1ncomp_1_1FreeCameraController_1_1InputStates.html#ad0de3f46bb1bf388430890906b070541',1,'foray::scene::ncomp::FreeCameraController::InputStates']]],
   ['strafeleft_26',['StrafeLeft',['../structforay_1_1scene_1_1ncomp_1_1FreeCameraController_1_1InputStates.html#ad0ae1eeb66cfda770c9dd0b7a9ccd235',1,'foray::scene::ncomp::FreeCameraController::InputStates']]],
   ['straferight_27',['StrafeRight',['../structforay_1_1scene_1_1ncomp_1_1FreeCameraController_1_1InputStates.html#a81ad04949e391c4648e30f3fe63b819a',1,'foray::scene::ncomp::FreeCameraController::InputStates']]],
   ['strafeup_28',['StrafeUp',['../structforay_1_1scene_1_1ncomp_1_1FreeCameraController_1_1InputStates.html#a82e47ae6ca06f2b056d762991fb001c9',1,'foray::scene::ncomp::FreeCameraController::InputStates']]],
-  ['subresourcerange_29',['SubresourceRange',['../structforay_1_1core_1_1ImageLayoutCache_1_1Barrier.html#a265631dcc0c431b202c164330cee621a',1,'foray::core::ImageLayoutCache::Barrier::SubresourceRange()'],['../structforay_1_1core_1_1ImageLayoutCache_1_1Barrier2.html#aa7f463e29fb017a3f2a9b73a7adf7941',1,'foray::core::ImageLayoutCache::Barrier2::SubresourceRange()']]],
-  ['swapchain_30',['Swapchain',['../structforay_1_1core_1_1Context.html#a7d9a36d88eee25a593d15c9ff3ffc6c2',1,'foray::core::Context']]],
-  ['swapchainimages_31',['SwapchainImages',['../structforay_1_1core_1_1Context.html#a516384c933825cba43beaab12e901f8d',1,'foray::core::Context']]],
-  ['swindows_32',['sWindows',['../classforay_1_1osi_1_1Window.html#a98bba54baad7542b76cc9754ebe72ed6',1,'foray::osi::Window']]],
-  ['sync2features_33',['Sync2FEatures',['../structforay_1_1base_1_1VulkanDevice_1_1DefaultFeatures.html#af0a359ba52fa5e322d4fbd3a81ce4c81',1,'foray::base::VulkanDevice::DefaultFeatures']]]
+  ['stride_29',['Stride',['../structforay_1_1scene_1_1VertexInputStateBuilder.html#a9636a72a2bfd772ed52bdfa9df34116a',1,'foray::scene::VertexInputStateBuilder']]],
+  ['subresourcerange_30',['SubresourceRange',['../structforay_1_1core_1_1ImageLayoutCache_1_1Barrier.html#a265631dcc0c431b202c164330cee621a',1,'foray::core::ImageLayoutCache::Barrier::SubresourceRange()'],['../structforay_1_1core_1_1ImageLayoutCache_1_1Barrier2.html#aa7f463e29fb017a3f2a9b73a7adf7941',1,'foray::core::ImageLayoutCache::Barrier2::SubresourceRange()']]],
+  ['swapchain_31',['Swapchain',['../structforay_1_1core_1_1Context.html#a7d9a36d88eee25a593d15c9ff3ffc6c2',1,'foray::core::Context']]],
+  ['swapchainimages_32',['SwapchainImages',['../structforay_1_1core_1_1Context.html#a516384c933825cba43beaab12e901f8d',1,'foray::core::Context']]],
+  ['swindows_33',['sWindows',['../classforay_1_1osi_1_1Window.html#a98bba54baad7542b76cc9754ebe72ed6',1,'foray::osi::Window']]],
+  ['sync2features_34',['Sync2FEatures',['../structforay_1_1base_1_1VulkanDevice_1_1DefaultFeatures.html#af0a359ba52fa5e322d4fbd3a81ce4c81',1,'foray::base::VulkanDevice::DefaultFeatures']]]
 ];

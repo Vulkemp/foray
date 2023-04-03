@@ -153,6 +153,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:af05a52091ca7d8b468d6b151701285f4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#af05a52091ca7d8b468d6b151701285f4">mEnableDefaultDeviceFeatures</a> = true</td></tr>
 <tr class="memdesc:af05a52091ca7d8b468d6b151701285f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables features listed in mDefaultFeatures member.  <br /></td></tr>
 <tr class="separator:af05a52091ca7d8b468d6b151701285f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fe79fcabaea89b65a7ee6e24d8d0679"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#a2fe79fcabaea89b65a7ee6e24d8d0679">mEnableDefaultPhysicalDeviceFeatures</a> = true</td></tr>
+<tr class="memdesc:a2fe79fcabaea89b65a7ee6e24d8d0679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables features a few physical device features (anisotrophy, etc.)  <br /></td></tr>
+<tr class="separator:a2fe79fcabaea89b65a7ee6e24d8d0679"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af148e1bce090b4eb64d18a873aaf5295"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#af148e1bce090b4eb64d18a873aaf5295">mShowConsoleDeviceSelectionPrompt</a> = false</td></tr>
 <tr class="memdesc:af148e1bce090b4eb64d18a873aaf5295"><td class="mdescLeft">&#160;</td><td class="mdescRight">If enabled, prompts the user in the console to select a device if multiple suitable devices are present. If disabled, selects the first index.  <br /></td></tr>
 <tr class="separator:af148e1bce090b4eb64d18a873aaf5295"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,6 +169,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a1ce8b560031ddc4dcaef60106cc01fd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca342e2f415f8cbe7937e73f0e8e7348"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="structforay_1_1base_1_1VulkanDevice_1_1DefaultFeatures.html">foray::base::VulkanDevice::DefaultFeatures</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#aca342e2f415f8cbe7937e73f0e8e7348">mDefaultFeatures</a> = {}</td></tr>
 <tr class="separator:aca342e2f415f8cbe7937e73f0e8e7348"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee0b6df62faf38c140d94780663d46fd"><td class="memItemLeft" align="right" valign="top">VkPhysicalDeviceFeatures&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classforay_1_1base_1_1VulkanDevice.html#aee0b6df62faf38c140d94780663d46fd">mPhysicalDeviceFeatures</a> {}</td></tr>
+<tr class="separator:aee0b6df62faf38c140d94780663d46fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Wraps selection and creation of a vulkan logical device. </p>
@@ -719,6 +724,30 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a2fe79fcabaea89b65a7ee6e24d8d0679" name="a2fe79fcabaea89b65a7ee6e24d8d0679"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fe79fcabaea89b65a7ee6e24d8d0679">&#9670;&#160;</a></span>mEnableDefaultPhysicalDeviceFeatures</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool foray::base::VulkanDevice::mEnableDefaultPhysicalDeviceFeatures = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enables features a few physical device features (anisotrophy, etc.) </p>
+
+</div>
+</div>
 <a id="a933b3ef49cc1ac2718fcc729c5e0bf64" name="a933b3ef49cc1ac2718fcc729c5e0bf64"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a933b3ef49cc1ac2718fcc729c5e0bf64">&#9670;&#160;</a></span>mPhysicalDevice</h2>
 
@@ -730,6 +759,28 @@ Protected Attributes</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">vkb::PhysicalDevice foray::base::VulkanDevice::mPhysicalDevice</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aee0b6df62faf38c140d94780663d46fd" name="aee0b6df62faf38c140d94780663d46fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee0b6df62faf38c140d94780663d46fd">&#9670;&#160;</a></span>mPhysicalDeviceFeatures</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">VkPhysicalDeviceFeatures foray::base::VulkanDevice::mPhysicalDeviceFeatures {}</td>
         </tr>
       </table>
   </td>
