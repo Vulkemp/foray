@@ -51,7 +51,7 @@ namespace foray::core {
         }
 
 #if FORAY_DEBUG
-        // attach debug information to iamge
+        // attach debug information to image
         if(mName.size())
         {
             UpdateDebugNames();
