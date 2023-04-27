@@ -12,7 +12,7 @@ namespace foray::core {
         cmdBufAllocateInfo.level              = cmdBufferLvl;
         cmdBufAllocateInfo.commandBufferCount = 1;
 
-        AssertVkResult(mContext->VkbDispatchTable->allocateCommandBuffers(&cmdBufAllocateInfo, &mCommandBuffer));
+        AssertVkResult(mContext->DispatchTable().allocateCommandBuffers(&cmdBufAllocateInfo, &mCommandBuffer));
 
         // If requested, also start recording for the new command buffer
         if(begin)
@@ -27,19 +27,19 @@ namespace foray::core {
     {
         VkCommandBufferBeginInfo commandBufferBI{};
         commandBufferBI.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        AssertVkResult(mContext->VkbDispatchTable->beginCommandBuffer(mCommandBuffer, &commandBufferBI));
+        AssertVkResult(mContext->DispatchTable().beginCommandBuffer(mCommandBuffer, &commandBufferBI));
         mIsRecording = true;
     }
 
     void CommandBuffer::End()
     {
-        AssertVkResult(mContext->VkbDispatchTable->endCommandBuffer(mCommandBuffer));
+        AssertVkResult(mContext->DispatchTable().endCommandBuffer(mCommandBuffer));
         mIsRecording = false;
     }
 
     void CommandBuffer::Reset(VkCommandBufferResetFlags flags)
     {
-        AssertVkResult(mContext->VkbDispatchTable->resetCommandBuffer(mCommandBuffer, flags));
+        AssertVkResult(mContext->DispatchTable().resetCommandBuffer(mCommandBuffer, flags));
     }
 
     void CommandBuffer::SetName(std::string_view name)
@@ -51,7 +51,7 @@ namespace foray::core {
     {
         if(!!mCommandBuffer)
         {
-            mContext->VkbDispatchTable->freeCommandBuffers(mContext->CommandPool, 1, &mCommandBuffer);
+            mContext->DispatchTable().freeCommandBuffers(mContext->CommandPool, 1, &mCommandBuffer);
             mCommandBuffer = nullptr;
         }
     }
@@ -62,7 +62,7 @@ namespace foray::core {
         CommandBuffer::Create(context, cmdBufferLvl, begin);
 
         VkFenceCreateInfo fenceCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-        mContext->VkbDispatchTable->createFence(&fenceCi, nullptr, &mFence);
+        mContext->DispatchTable().createFence(&fenceCi, nullptr, &mFence);
 
         return mCommandBuffer;
     }
@@ -80,7 +80,7 @@ namespace foray::core {
         submitInfo.pCommandBuffers    = &mCommandBuffer;
 
         // Submit to the queue
-        AssertVkResult(mContext->VkbDispatchTable->queueSubmit(mContext->Queue, 1, &submitInfo, mFence));
+        AssertVkResult(mContext->DispatchTable().queueSubmit(mContext->Queue, 1, &submitInfo, mFence));
     }
     void HostSyncCommandBuffer::SubmitAndWait()
     {
@@ -89,7 +89,7 @@ namespace foray::core {
     }
     bool HostSyncCommandBuffer::HasCompleted()
     {
-        VkResult result = mContext->VkbDispatchTable->getFenceStatus(mFence);
+        VkResult result = mContext->DispatchTable().getFenceStatus(mFence);
         if(result == VK_NOT_READY)
         {
             return false;
@@ -100,15 +100,15 @@ namespace foray::core {
     void HostSyncCommandBuffer::WaitForCompletion()
     {
         // Wait for the fence to signal that command buffer has finished executing
-        AssertVkResult(mContext->VkbDispatchTable->waitForFences(1, &mFence, VK_TRUE, UINT64_MAX));
-        AssertVkResult(mContext->VkbDispatchTable->resetFences(1, &mFence));
+        AssertVkResult(mContext->DispatchTable().waitForFences(1, &mFence, VK_TRUE, UINT64_MAX));
+        AssertVkResult(mContext->DispatchTable().resetFences(1, &mFence));
     }
 
     void HostSyncCommandBuffer::Destroy()
     {
         if(!!mFence)
         {
-            mContext->VkbDispatchTable->destroyFence(mFence, nullptr);
+            mContext->DispatchTable().destroyFence(mFence, nullptr);
             mFence = nullptr;
         }
         CommandBuffer::Destroy();
@@ -175,7 +175,7 @@ namespace foray::core {
                                  .signalSemaphoreInfoCount = (uint32_t)signalSemaphores.size(),
                                  .pSignalSemaphoreInfos    = signalSemaphores.data()};
 
-        AssertVkResult(mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, 1, &submitInfo, mFence));
+        AssertVkResult(mContext->DispatchTable().queueSubmit2(mContext->Queue, 1, &submitInfo, mFence));
     }
 
     void DeviceSyncCommandBuffer::WriteToSubmitInfo(std::vector<VkSubmitInfo2>& submitInfos)

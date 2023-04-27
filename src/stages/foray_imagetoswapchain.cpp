@@ -11,9 +11,9 @@ namespace foray::stages {
     {
         uint32_t swapChainImageIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
 
-        const core::SwapchainImageInfo& swapImage = mContext->SwapchainImages[swapChainImageIndex];
+        const core::SwapchainImageInfo& swapImage = mContext->WindowSwapchain->GetSwapchainImages()[swapChainImageIndex];
 
-        VkExtent2D swapChainSize = mContext->Swapchain->extent;
+        VkExtent2D swapChainSize = mContext->WindowSwapchain->GetExtent();
 
         SetDstImage(swapImage.Image, swapChainSize);
 

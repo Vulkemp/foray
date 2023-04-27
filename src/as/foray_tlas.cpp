@@ -107,7 +107,7 @@ namespace foray::as {
         VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
         {
             VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &asProperties};
-            vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice(), &prop2);
+            vkGetPhysicalDeviceProperties2(mContext->VkPhysicalDevice(), &prop2);
         }
 
         // STEP #1   Rebuild meta buffer, get and assign buffer offsets
@@ -185,7 +185,7 @@ namespace foray::as {
         // Query the worst -case AS size and scratch space size based on
         // the number of instances.
         VkAccelerationStructureBuildSizesInfoKHR sizeInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
-        mContext->VkbDispatchTable->getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &buildRangeInfo.primitiveCount, &sizeInfo);
+        mContext->DispatchTable().getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &buildRangeInfo.primitiveCount, &sizeInfo);
 
         // STEP #5    Create main and scratch memory and acceleration structure
 
@@ -205,7 +205,7 @@ namespace foray::as {
         createInfo.buffer = mTlasMemory.GetBuffer();
         createInfo.offset = 0;
 
-        AssertVkResult(mContext->VkbDispatchTable->createAccelerationStructureKHR(&createInfo, nullptr, &mAccelerationStructure));
+        AssertVkResult(mContext->DispatchTable().createAccelerationStructureKHR(&createInfo, nullptr, &mAccelerationStructure));
         buildInfo.dstAccelerationStructure = mAccelerationStructure;
 
         // Allocate the scratch buffer holding temporary build data.
@@ -235,7 +235,7 @@ namespace foray::as {
         // Create a one -element array of pointers to range info objects.
         VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &buildRangeInfo;
         // Build the TLAS.
-        mContext->VkbDispatchTable->cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
+        mContext->DispatchTable().cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
 
         cmdBuffer.SubmitAndWait();
 
@@ -245,7 +245,7 @@ namespace foray::as {
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
-        mTlasAddress = mContext->VkbDispatchTable->getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
+        mTlasAddress = mContext->DispatchTable().getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
 
         mDirty = false;
     }
@@ -314,7 +314,7 @@ namespace foray::as {
         VkAccelerationStructureBuildRangeInfoKHR  buildRangeInfo{.primitiveCount = static_cast<uint32_t>(mAnimatedBlasInstances.size() + mStaticBlasInstances.size())};
         VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &buildRangeInfo;
 
-        mContext->VkbDispatchTable->cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
+        mContext->DispatchTable().cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
     }
 
     void Tlas::Destroy()
@@ -323,7 +323,7 @@ namespace foray::as {
         mAnimatedBlasInstances.clear();
         if(!!mContext && !!mAccelerationStructure)
         {
-            mContext->VkbDispatchTable->destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
+            mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = VK_NULL_HANDLE;
         }
         if(mInstanceBuffer.Exists())

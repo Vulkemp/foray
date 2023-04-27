@@ -17,7 +17,7 @@ namespace foray::stages {
         virtual void InitForImage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder = 0);
         /// @brief Init the imgui stage for rendering to the swapchain
         /// @param context Requires Device, Swapchain & SwapchainImages
-        virtual void InitForSwapchain(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
+        virtual void InitForSwapchain(core::Context* context, int32_t resizeOrder = 0);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
         virtual void Destroy() override;
 

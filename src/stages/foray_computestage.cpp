@@ -15,16 +15,16 @@ namespace foray::stages {
     {
         ApiBeforeFrame(cmdBuffer, renderInfo);
 
-        mContext->VkbDispatchTable->cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipeline);
+        mContext->DispatchTable().cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipeline);
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
 
-        mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
+        mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
 
         glm::uvec3 groupSize;
         ApiBeforeDispatch(cmdBuffer, renderInfo, groupSize);
 
-        mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, groupSize.z);
+        mContext->DispatchTable().cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, groupSize.z);
     }
 
     void ComputeStageBase::CreatePipeline()
@@ -41,13 +41,13 @@ namespace foray::stages {
             .layout = mPipelineLayout,
         };
 
-        AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
+        AssertVkResult(mContext->DispatchTable().createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
     }
     void ComputeStageBase::ReloadShaders()
     {
         if (!!mPipeline)
         {
-            mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
+            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
             mShader.Destroy();
             ApiInitShader();
@@ -58,7 +58,7 @@ namespace foray::stages {
     {
         if (!!mPipeline)
         {
-            mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
+            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
         }
         mShader.Destroy();

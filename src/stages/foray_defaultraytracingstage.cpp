@@ -171,7 +171,7 @@ namespace foray::stages {
 
         VkExtent2D extent{mOutput.GetExtent3D().width, mOutput.GetExtent3D().height};
 
-        mContext->VkbDispatchTable->cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width,
+        mContext->DispatchTable().cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width,
                                                     extent.height, 1U);
     }
 }

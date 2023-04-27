@@ -268,7 +268,7 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CheckDeviceColorAttachmentCount()
     {
-        uint32_t max = mContext->VkbPhysicalDevice->properties.limits.maxColorAttachments;
+        uint32_t max = mContext->Device->GetPhysicalDevice().properties.limits.maxColorAttachments;
         FORAY_ASSERTFMT(mOutputList.size() <= max,
                         "Physical Device supports max of {} color attachments! As configured requires {}. See VkPhysicalDeviceLimits::maxColorAttachments.",
                         max, mOutputList.size())
@@ -356,7 +356,7 @@ namespace foray::stages {
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->Device(), &renderPassInfo, nullptr, &mRenderpass));
+        AssertVkResult(vkCreateRenderPass(mContext->VkDevice(), &renderPassInfo, nullptr, &mRenderpass));
     }
     void ConfigurableRasterStage::CreateFrameBuffer()
     {
@@ -377,7 +377,7 @@ namespace foray::stages {
         fbufCreateInfo.width                   = mDomain->GetExtent().width;
         fbufCreateInfo.height                  = mDomain->GetExtent().height;
         fbufCreateInfo.layers                  = 1;
-        AssertVkResult(vkCreateFramebuffer(mContext->Device(), &fbufCreateInfo, nullptr, &mFrameBuffer));
+        AssertVkResult(vkCreateFramebuffer(mContext->VkDevice(), &fbufCreateInfo, nullptr, &mFrameBuffer));
     }
 
     void ConfigurableRasterStage::SetupDescriptors()
@@ -467,10 +467,6 @@ namespace foray::stages {
         mPipeline = util::PipelineBuilder()
             .SetContext(mContext)
             .SetDomain(mDomain)
-            // Blend attachment states required for all color attachments
-            // This is important, as color write mask will otherwise be 0x0 and you
-            // won't see anything rendered to the attachment
-            .SetColorAttachmentBlendCount(mOutputList.size())
             .SetPipelineLayout(mPipelineLayout.GetPipelineLayout())
             .SetVertexInputStateBuilder(&vertexInputStateBuilder)
             .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
@@ -573,7 +569,7 @@ namespace foray::stages {
     {
         if(!!mFrameBuffer)
         {
-            vkDestroyFramebuffer(mContext->Device(), mFrameBuffer, nullptr);
+            vkDestroyFramebuffer(mContext->VkDevice(), mFrameBuffer, nullptr);
             mFrameBuffer = nullptr;
         }
 
@@ -596,7 +592,7 @@ namespace foray::stages {
         {
             return;
         }
-        VkDevice device = mContext->Device();
+        VkDevice device = mContext->VkDevice();
         if(mPipeline)
         {
             vkDestroyPipeline(device, mPipeline, nullptr);

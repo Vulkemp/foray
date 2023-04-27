@@ -206,13 +206,7 @@ namespace foray::base {
         // Check for shader recompilation
         if(mLastShadersCheckedTimestamp + 1 < renderInfo.SinceStart)
         {
-            mShaderManager.CheckAndUpdateShaders([this]() { AssertVkResult(this->mContext.VkbDispatchTable->deviceWaitIdle()); });
-            // mLastShadersCheckedTimestamp = renderInfo.SinceStart;
-            // std::unordered_set<uint64_t> recompiled;
-            // if()
-            // {
-            //     OnShadersRecompiled(recompiled);
-            // }
+            mShaderManager.CheckAndUpdateShaders([this]() { AssertVkResult(this->mContext.DispatchTable().deviceWaitIdle()); });
         }
 
         if(mEnableFrameRecordBenchmark)

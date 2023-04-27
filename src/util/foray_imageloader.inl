@@ -13,7 +13,7 @@ namespace foray::util {
     bool ImageLoader<FORMAT>::sFormatSupported(core::Context* context)
     {
         VkFormatProperties properties;
-        vkGetPhysicalDeviceFormatProperties(context->VkbPhysicalDevice->physical_device, FORMAT, &properties);
+        vkGetPhysicalDeviceFormatProperties(context->VkPhysicalDevice(), FORMAT, &properties);
         if((properties.linearTilingFeatures & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT & VkFormatFeatureFlagBits::VK_FORMAT_FEATURE_TRANSFER_DST_BIT) > 0)
         {
             return true;

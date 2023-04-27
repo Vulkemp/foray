@@ -9,7 +9,7 @@ namespace foray::base {
     {
         Destroy();
         mContext = context;
-        Assert(!!mContext->VkbDispatchTable, "[InFlightFrame::Create] Requires Dispatch table");
+        Assert(!!mContext->Device, "[InFlightFrame::Create] Requires Dispatch table");
         mPrimaryCommandBuffer.Create(context);
         mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
@@ -28,11 +28,11 @@ namespace foray::base {
         fenceCI.sType = VkStructureType::VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCI.flags = VkFenceCreateFlagBits::VK_FENCE_CREATE_SIGNALED_BIT;
 
-        AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCI, nullptr, &mSwapchainImageReady));
+        AssertVkResult(mContext->DispatchTable().createSemaphore(&semaphoreCI, nullptr, &mSwapchainImageReady));
 
-        AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCI, nullptr, &mPrimaryCompletedSemaphore));
+        AssertVkResult(mContext->DispatchTable().createSemaphore(&semaphoreCI, nullptr, &mPrimaryCompletedSemaphore));
 
-        AssertVkResult(mContext->VkbDispatchTable->createFence(&fenceCI, nullptr, &mPrimaryCompletedFence));
+        AssertVkResult(mContext->DispatchTable().createFence(&fenceCI, nullptr, &mPrimaryCompletedFence));
         mPrimaryCommandBuffer.SetFence(mPrimaryCompletedFence);
         mPrimaryCommandBuffer.AddSignalSemaphore(core::SemaphoreReference::Binary(mPrimaryCompletedSemaphore));
         if(auxCommandBufferCount == 0)
@@ -48,27 +48,27 @@ namespace foray::base {
 
         if(!!mSwapchainImageReady)
         {
-            mContext->VkbDispatchTable->destroySemaphore(mSwapchainImageReady, nullptr);
+            mContext->DispatchTable().destroySemaphore(mSwapchainImageReady, nullptr);
             mSwapchainImageReady = nullptr;
         }
         if(!!mPrimaryCompletedSemaphore)
         {
-            mContext->VkbDispatchTable->destroySemaphore(mPrimaryCompletedSemaphore, nullptr);
+            mContext->DispatchTable().destroySemaphore(mPrimaryCompletedSemaphore, nullptr);
             mPrimaryCompletedSemaphore = nullptr;
         }
         if(!!mPrimaryCompletedFence)
         {
-            mContext->VkbDispatchTable->destroyFence(mPrimaryCompletedFence, nullptr);
+            mContext->DispatchTable().destroyFence(mPrimaryCompletedFence, nullptr);
             mPrimaryCompletedFence = nullptr;
         }
         mContext = nullptr;
     }
     ESwapchainInteractResult InFlightFrame::AcquireSwapchainImage()
     {
-        Assert(!!(mContext->VkbDispatchTable), "[InFlightFrame::AcquireSwapchainImage] Requires Dispatch Table");
-        Assert(!!(mContext->Swapchain), "[InFlightFrame::AcquireSwapchainImage] Requires Swapchain");
-        VkSwapchainKHR swapchain = mContext->Swapchain->swapchain;
-        VkResult       result    = mContext->VkbDispatchTable->acquireNextImageKHR(swapchain, UINT64_MAX, mSwapchainImageReady, nullptr, &mSwapchainImageIndex);
+        Assert(!!(mContext->Device), "[InFlightFrame::AcquireSwapchainImage] Requires Dispatch Table");
+        Assert(!!(mContext->WindowSwapchain), "[InFlightFrame::AcquireSwapchainImage] Requires Swapchain");
+        VkSwapchainKHR swapchain = *mContext->WindowSwapchain;
+        VkResult       result    = mContext->DispatchTable().acquireNextImageKHR(swapchain, UINT64_MAX, mSwapchainImageReady, nullptr, &mSwapchainImageIndex);
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR)
         {
@@ -83,8 +83,8 @@ namespace foray::base {
 
     ESwapchainInteractResult InFlightFrame::Present()
     {
-        Assert(!!(mContext->VkbDispatchTable), "[InFlightFrame::AcquireSwapchainImage] Requires Dispatch Table");
-        Assert(!!(mContext->Swapchain), "[InFlightFrame::AcquireSwapchainImage] Requires Swapchain");
+        Assert(!!(mContext->Device), "[InFlightFrame::AcquireSwapchainImage] Requires Dispatch Table");
+        Assert(!!(mContext->WindowSwapchain), "[InFlightFrame::AcquireSwapchainImage] Requires Swapchain");
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -92,14 +92,14 @@ namespace foray::base {
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores    = &mPrimaryCompletedSemaphore;
 
-        VkSwapchainKHR swapChains[] = {mContext->Swapchain->swapchain};
+        VkSwapchainKHR swapChains[] = {*mContext->WindowSwapchain};
         presentInfo.swapchainCount  = 1;
         presentInfo.pSwapchains     = swapChains;
 
         presentInfo.pImageIndices = &mSwapchainImageIndex;
 
         // Present on the present queue
-        VkResult result = mContext->VkbDispatchTable->queuePresentKHR(mContext->Queue, &presentInfo);
+        VkResult result = mContext->DispatchTable().queuePresentKHR(mContext->Queue, &presentInfo);
 
         if(result == VkResult::VK_ERROR_OUT_OF_DATE_KHR || result == VkResult::VK_SUBOPTIMAL_KHR)
         {
@@ -114,7 +114,7 @@ namespace foray::base {
 
     void InFlightFrame::PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache)
     {
-        const core::SwapchainImageInfo& swapchainImage = mContext->SwapchainImages[mSwapchainImageIndex];
+        const core::SwapchainImageInfo& swapchainImage = mContext->WindowSwapchain->GetSwapchainImages()[mSwapchainImageIndex];
 
         core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                  .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
@@ -130,12 +130,12 @@ namespace foray::base {
             .pImageMemoryBarriers    = &vkBarrier,
         };
 
-        mContext->VkbDispatchTable->cmdPipelineBarrier2(cmdBuffer, &depInfo);
+        mContext->DispatchTable().cmdPipelineBarrier2(cmdBuffer, &depInfo);
     }
 
     void InFlightFrame::ClearSwapchainImage(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache)
     {
-        const core::SwapchainImageInfo& swapchainImage = mContext->SwapchainImages[mSwapchainImageIndex];
+        const core::SwapchainImageInfo& swapchainImage = mContext->WindowSwapchain->GetSwapchainImages()[mSwapchainImageIndex];
 
         core::ImageLayoutCache::Barrier2 barrier{
             .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
@@ -151,7 +151,7 @@ namespace foray::base {
                                  .imageMemoryBarrierCount = 1U,
                                  .pImageMemoryBarriers    = &vkBarrier};
 
-        mContext->VkbDispatchTable->cmdPipelineBarrier2(cmdBuffer, &depInfo);
+        mContext->DispatchTable().cmdPipelineBarrier2(cmdBuffer, &depInfo);
 
         VkImageSubresourceRange range{
             .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
@@ -161,7 +161,7 @@ namespace foray::base {
 
         // Clear swapchain image
         VkClearColorValue clearColor = VkClearColorValue{{0.7f, 0.1f, 0.3f, 1.f}};
-        mContext->VkbDispatchTable->cmdClearColorImage(cmdBuffer, swapchainImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
+        mContext->DispatchTable().cmdClearColorImage(cmdBuffer, swapchainImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
     }
 
     core::DeviceSyncCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index)
@@ -199,7 +199,7 @@ namespace foray::base {
 
     bool InFlightFrame::HasFinishedExecution()
     {
-        VkResult result = mContext->VkbDispatchTable->getFenceStatus(mPrimaryCompletedFence);
+        VkResult result = mContext->DispatchTable().getFenceStatus(mPrimaryCompletedFence);
         if(result == VK_NOT_READY)
         {
             return false;
@@ -209,12 +209,12 @@ namespace foray::base {
     }
     void InFlightFrame::WaitForExecutionFinished()
     {
-        AssertVkResult(mContext->VkbDispatchTable->waitForFences(1, &mPrimaryCompletedFence, VK_TRUE, UINT64_MAX));
+        AssertVkResult(mContext->DispatchTable().waitForFences(1, &mPrimaryCompletedFence, VK_TRUE, UINT64_MAX));
     }
 
     void InFlightFrame::ResetFence()
     {
-        AssertVkResult(mContext->VkbDispatchTable->resetFences(1, &mPrimaryCompletedFence));
+        AssertVkResult(mContext->DispatchTable().resetFences(1, &mPrimaryCompletedFence));
     }
 
     void InFlightFrame::SubmitAll()
@@ -225,7 +225,7 @@ namespace foray::base {
         {
             auxCommandBuffer->WriteToSubmitInfo(submitInfos);
         }
-        mContext->VkbDispatchTable->queueSubmit2(mContext->Queue, (uint32_t)submitInfos.size(), submitInfos.data(), mPrimaryCompletedFence);
+        mContext->DispatchTable().queueSubmit2(mContext->Queue, (uint32_t)submitInfos.size(), submitInfos.data(), mPrimaryCompletedFence);
     }
 
 }  // namespace foray::base

@@ -7,7 +7,7 @@ namespace foray::util {
     {
         if(!!mPipelineLayout)
         {
-            mContext->VkbDispatchTable->destroyPipelineLayout(mPipelineLayout, nullptr);
+            mContext->DispatchTable().destroyPipelineLayout(mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
         mDescriptorSetLayouts.clear();
@@ -48,7 +48,7 @@ namespace foray::util {
     {
         if(!!mPipelineLayout)
         {
-            mContext->VkbDispatchTable->destroyPipelineLayout(mPipelineLayout, nullptr);
+            mContext->DispatchTable().destroyPipelineLayout(mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
 
@@ -70,7 +70,7 @@ namespace foray::util {
             ci.pSetLayouts    = mDescriptorSetLayouts.data();
         }
 
-        AssertVkResult(mContext->VkbDispatchTable->createPipelineLayout(&ci, nullptr, &mPipelineLayout));
+        AssertVkResult(mContext->DispatchTable().createPipelineLayout(&ci, nullptr, &mPipelineLayout));
 
         return mPipelineLayout;
     }

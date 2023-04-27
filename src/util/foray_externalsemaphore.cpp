@@ -27,13 +27,13 @@ namespace foray::util
 
         VkSemaphoreCreateInfo semaphoreCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = &exportSemaphoreCi, .flags = 0};
 
-        AssertVkResult(mContext->VkbDispatchTable->createSemaphore(&semaphoreCi, nullptr, &mSemaphore));
+        AssertVkResult(mContext->DispatchTable().createSemaphore(&semaphoreCi, nullptr, &mSemaphore));
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         VkSemaphoreGetWin32HandleInfoKHR getWInfo{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, .semaphore = mSemaphore, .handleType = handleType};
 
-        mContext->VkbDispatchTable->getSemaphoreWin32HandleKHR(&getWInfo, &mHandle);
+        mContext->DispatchTable().getSemaphoreWin32HandleKHR(&getWInfo, &mHandle);
 #else
         VkSemaphoreGetFdInfoKHR               getFdInfo{
                           .sType      = VkStructureType::VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR,
@@ -41,7 +41,7 @@ namespace foray::util
                           .handleType = handleType,
         };
 
-        AssertVkResult(mContext->VkbDispatchTable->getSemaphoreFdKHR(&getFdInfo, &mHandle));
+        AssertVkResult(mContext->DispatchTable().getSemaphoreFdKHR(&getFdInfo, &mHandle));
 #endif
     }
 
@@ -62,7 +62,7 @@ namespace foray::util
 #endif
         if(!!mSemaphore)
         {
-            mContext->VkbDispatchTable->destroySemaphore(mSemaphore, nullptr);
+            mContext->DispatchTable().destroySemaphore(mSemaphore, nullptr);
             mSemaphore = nullptr;
         }
     }    

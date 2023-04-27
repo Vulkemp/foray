@@ -26,10 +26,10 @@ namespace foray::base {
     }
     void VulkanDevice::SelectPhysicalDevice()
     {
-        Assert(!!(mContext->VkbInstance), "[VulkanDevice::SelectPhysicalDevice] require instance to initialize device selection process!");
+        Assert(!!(mContext->Instance), "[VulkanDevice::SelectPhysicalDevice] require instance to initialize device selection process!");
 
         // create physical device selector
-        vkb::PhysicalDeviceSelector deviceSelector(*(mContext->VkbInstance), mContext->Window->GetOrCreateSurfaceKHR(mContext->Instance()));
+        vkb::PhysicalDeviceSelector deviceSelector(mContext->Instance->GetInstance(), mContext->WindowSwapchain->GetOrCreateSurface());
 
         std::vector<std::string> availableDevices = deviceSelector.select_device_names().value();
 
@@ -103,8 +103,8 @@ namespace foray::base {
                 }
             }
             logger()->info("Device Selector chooses \"{}\"", ret->at(selectIndex).name);
-            mPhysicalDevice             = ret->at(selectIndex);
-            mContext->VkbPhysicalDevice = &mPhysicalDevice;
+            mPhysicalDevice  = ret->at(selectIndex);
+            mContext->Device = this;
         }
         else
         {
@@ -121,15 +121,14 @@ namespace foray::base {
 
         mFeatures.BufferDeviceAdressFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES, .bufferDeviceAddress = VK_TRUE};
 
-        mFeatures.RayTracingPipelineFeatures = {.sType              = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
-                                                       .rayTracingPipeline = VK_TRUE};
+        mFeatures.RayTracingPipelineFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR, .rayTracingPipeline = VK_TRUE};
 
         mFeatures.AccelerationStructureFeatures = {.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
-                                                          .accelerationStructure = VK_TRUE};
+                                                   .accelerationStructure = VK_TRUE};
 
-        mFeatures.DescriptorIndexingFeatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
-                                                       .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
-                                                       .runtimeDescriptorArray                    = VK_TRUE};  // enable this for unbound descriptor arrays
+        mFeatures.DescriptorIndexingFeatures = {.sType                                     = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
+                                                .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
+                                                .runtimeDescriptorArray                    = VK_TRUE};  // enable this for unbound descriptor arrays
 
         mFeatures.Sync2FEatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES, .synchronization2 = VK_TRUE};
 
@@ -140,7 +139,7 @@ namespace foray::base {
             deviceBuilder.add_pNext(&mFeatures.DescriptorIndexingFeatures);
             deviceBuilder.add_pNext(&mFeatures.Sync2FEatures);
         }
-        if (mEnableRaytracingFeaturesAndExtensions)
+        if(mEnableRaytracingFeaturesAndExtensions)
         {
             deviceBuilder.add_pNext(&mFeatures.RayTracingPipelineFeatures);
             deviceBuilder.add_pNext(&mFeatures.AccelerationStructureFeatures);
@@ -155,10 +154,8 @@ namespace foray::base {
         FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
                         ret.error().message())
 
-        mDevice                    = *ret;
-        mDispatchTable             = mDevice.make_table();
-        mContext->VkbDevice        = &mDevice;
-        mContext->VkbDispatchTable = &mDispatchTable;
+        mDevice             = *ret;
+        mDispatchTable      = mDevice.make_table();
     }
 
     void VulkanDevice::Destroy()
@@ -172,9 +169,7 @@ namespace foray::base {
         mPhysicalDevice = vkb::PhysicalDevice();
         if(!!mContext)
         {
-            mContext->VkbPhysicalDevice = nullptr;
-            mContext->VkbDevice         = nullptr;
-            mContext->VkbDispatchTable  = nullptr;
+            mContext->Device            = nullptr;
         }
     }
 
@@ -189,9 +184,7 @@ namespace foray::base {
         mDispatchTable  = vkb::DispatchTable();
         if(!!mContext)
         {
-            mContext->VkbPhysicalDevice = nullptr;
-            mContext->VkbDevice         = nullptr;
-            mContext->VkbDispatchTable  = nullptr;
+            mContext->Device            = nullptr;
         }
     }
 

@@ -64,7 +64,7 @@ namespace foray::core {
 
             descriptorWrites.push_back(descriptorWrite);
         }
-        vkUpdateDescriptorSets(mContext->Device(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(mContext->VkDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
     void DescriptorSet::Destroy()
@@ -72,13 +72,13 @@ namespace foray::core {
         if(mDescriptorPool != VK_NULL_HANDLE)
         {
             mMapBindingToDescriptorInfo.clear();
-            vkDestroyDescriptorPool(mContext->Device(), mDescriptorPool, nullptr);
+            vkDestroyDescriptorPool(mContext->VkDevice(), mDescriptorPool, nullptr);
             mDescriptorPool = VK_NULL_HANDLE;
             mDescriptorSet  = VK_NULL_HANDLE;
         }
         if(mDescriptorSetLayout != VK_NULL_HANDLE && !mExternalLayout)
         {
-            vkDestroyDescriptorSetLayout(mContext->Device(), mDescriptorSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(mContext->VkDevice(), mDescriptorSetLayout, nullptr);
             mDescriptorSetLayout = VK_NULL_HANDLE;
         }
     }
@@ -242,7 +242,7 @@ namespace foray::core {
         poolInfo.pPoolSizes    = poolSizes.data();
         poolInfo.maxSets       = numSets;
 
-        AssertVkResult(vkCreateDescriptorPool(mContext->Device(), &poolInfo, nullptr, &mDescriptorPool));
+        AssertVkResult(vkCreateDescriptorPool(mContext->VkDevice(), &poolInfo, nullptr, &mDescriptorPool));
 
         // --------------------------------------------------------------------------------------------
         // allocate descriptor sets by their layout
@@ -254,7 +254,7 @@ namespace foray::core {
         descriptorSetAllocInfo.descriptorSetCount = numSets;
         descriptorSetAllocInfo.pSetLayouts        = layouts.data();
 
-        AssertVkResult(vkAllocateDescriptorSets(mContext->Device(), &descriptorSetAllocInfo, &mDescriptorSet));
+        AssertVkResult(vkAllocateDescriptorSets(mContext->VkDevice(), &descriptorSetAllocInfo, &mDescriptorSet));
 
         if (mName.size() > 0)
         {
@@ -291,7 +291,7 @@ namespace foray::core {
         layoutInfo.pBindings    = layoutBindings.data();
         layoutInfo.flags        = descriptorSetLayoutCreateFlags;
 
-        AssertVkResult(vkCreateDescriptorSetLayout(mContext->Device(), &layoutInfo, nullptr, &mDescriptorSetLayout));
+        AssertVkResult(vkCreateDescriptorSetLayout(mContext->VkDevice(), &layoutInfo, nullptr, &mDescriptorSetLayout));
     }
 
     void DescriptorSet::AssertBindingInUse(uint32_t binding)

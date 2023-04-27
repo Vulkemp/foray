@@ -10,7 +10,7 @@ namespace foray::rtpipe {
 
         if(!!mPipeline)
         {
-            mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
+            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
         }
 
@@ -23,7 +23,7 @@ namespace foray::rtpipe {
             VkPhysicalDeviceProperties2 prop2{};
             prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
             prop2.pNext = &pipelineProperties;
-            vkGetPhysicalDeviceProperties2(context->PhysicalDevice(), &prop2);
+            vkGetPhysicalDeviceProperties2(mContext->VkPhysicalDevice(), &prop2);
         }
 
 
@@ -62,13 +62,13 @@ namespace foray::rtpipe {
             .layout                       = mPipelineLayout,
         };
 
-        AssertVkResult(mContext->VkbDispatchTable->createRayTracingPipelinesKHR(nullptr, nullptr, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
+        AssertVkResult(mContext->DispatchTable().createRayTracingPipelinesKHR(nullptr, nullptr, 1, &raytracingPipelineCreateInfo, nullptr, &mPipeline));
 
 
         /// STEP # 4    Get shader handles, build SBTs
 
         std::vector<uint8_t> shaderHandleData(shaderGroupCis.size() * pipelineProperties.shaderGroupHandleSize);
-        AssertVkResult(mContext->VkbDispatchTable->getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
+        AssertVkResult(mContext->DispatchTable().getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
 
         {
             std::vector<const uint8_t*> handles(mRaygenSbt.GetGroups().size());
@@ -125,7 +125,7 @@ namespace foray::rtpipe {
         mHitSbt.Destroy();
         if(!!mPipeline)
         {
-            mContext->VkbDispatchTable->destroyPipeline(mPipeline, nullptr);
+            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
         }
     }

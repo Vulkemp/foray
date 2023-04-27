@@ -105,15 +105,15 @@ namespace foray::stages {
                 .layout = substage.PipelineLayout,
             };
 
-            AssertVkResult(mContext->VkbDispatchTable->createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &substage.Pipeline));
+            AssertVkResult(mContext->DispatchTable().createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &substage.Pipeline));
         }
     }
 
     void ComparerStage::DestroySubStage(SubStage& substage, bool final)
     {
-        if(!!mContext && !!mContext->VkbDispatchTable && !!substage.Pipeline)
+        if(!!mContext && !!mContext->Device && !!substage.Pipeline)
         {
-            mContext->VkbDispatchTable->destroyPipeline(substage.Pipeline, nullptr);
+            mContext->DispatchTable().destroyPipeline(substage.Pipeline, nullptr);
             substage.Pipeline = nullptr;
         }
         substage.Shader = nullptr;
@@ -171,7 +171,7 @@ namespace foray::stages {
         mMousePos = glm::ivec2(event->CurrentX, event->CurrentY);
         if(mFlipY)
         {
-            mMousePos.y = mContext->Swapchain->extent.height - mMousePos.y - 1;
+            mMousePos.y = mContext->WindowSwapchain->GetExtent().height - mMousePos.y - 1;
         }
     }
 
@@ -242,11 +242,11 @@ namespace foray::stages {
             vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
         }
         {  // Bind
-            mContext->VkbDispatchTable->cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.Pipeline);
+            mContext->DispatchTable().cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.Pipeline);
 
             VkDescriptorSet descriptorSet = substage.DescriptorSet.GetDescriptorSet();
 
-            mContext->VkbDispatchTable->cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout, 0U, 1U, &descriptorSet, 0U,
+            mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout, 0U, 1U, &descriptorSet, 0U,
                                                               nullptr);
         }
         glm::uvec2 groupSize;
@@ -275,10 +275,10 @@ namespace foray::stages {
                                .WriteOffset = writeOffset,
                                .WriteLeft   = (substage.Index == 0) ? VK_TRUE : VK_FALSE};
 
-            mContext->VkbDispatchTable->cmdPushConstants(cmdBuffer, substage.PipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &pushC);
+            mContext->DispatchTable().cmdPushConstants(cmdBuffer, substage.PipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &pushC);
         }
         {  // Dispatch
-            mContext->VkbDispatchTable->cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, 1U);
+            mContext->DispatchTable().cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, 1U);
         }
     }
 

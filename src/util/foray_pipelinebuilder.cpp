@@ -99,11 +99,18 @@ namespace foray::util {
         dynamicInfo.dynamicStateCount                = static_cast<uint32_t>(mDynamicStates == nullptr ? dynamicStates.size() : mDynamicStates->size());
         dynamicInfo.pDynamicStates                   = mDynamicStates == nullptr ? dynamicStates.data() : mDynamicStates->data();
 
+        VkPipelineVertexInputStateCreateInfo vertexInputCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
+
+        if(!!mVertexInputStateBuilder)
+        {
+            vertexInputCi = mVertexInputStateBuilder->InputStateCI;
+        }
+
         VkGraphicsPipelineCreateInfo pipelineInfo = {};
         pipelineInfo.sType                        = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount                   = mShaderStageCreateInfos->size();
         pipelineInfo.pStages                      = mShaderStageCreateInfos->data();
-        pipelineInfo.pVertexInputState            = &mVertexInputStateBuilder->InputStateCI;
+        pipelineInfo.pVertexInputState            = &vertexInputCi;
         pipelineInfo.pInputAssemblyState          = &inputAssemblyState;
         pipelineInfo.pViewportState               = &viewportState;
         pipelineInfo.pRasterizationState          = &rasterizerState;
@@ -117,7 +124,7 @@ namespace foray::util {
         pipelineInfo.basePipelineHandle           = VK_NULL_HANDLE;
 
         VkPipeline pipeline;
-        AssertVkResult(vkCreateGraphicsPipelines(mContext->Device(), mPipelineCache, 1, &pipelineInfo, nullptr, &pipeline));
+        AssertVkResult(vkCreateGraphicsPipelines(mContext->VkDevice(), mPipelineCache, 1, &pipelineInfo, nullptr, &pipeline));
         return pipeline;
     }
-}  // namespace foray
+}  // namespace foray::util

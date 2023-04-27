@@ -23,7 +23,7 @@ namespace foray::as {
 
         if(mAccelerationStructure != VK_NULL_HANDLE)
         {
-            mContext->VkbDispatchTable->destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
+            mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = VK_NULL_HANDLE;
         }
         mBlasAddress = {};
@@ -36,7 +36,7 @@ namespace foray::as {
         VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
         {
             VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &asProperties};
-            vkGetPhysicalDeviceProperties2(mContext->PhysicalDevice(), &prop2);
+            vkGetPhysicalDeviceProperties2(mContext->VkPhysicalDevice(), &prop2);
         }
 
         // STEP #1    Build geometries (1 primitve = 1 geometry)
@@ -103,7 +103,7 @@ namespace foray::as {
         // STEP #2    Fetch build sizes, (re)create buffers
 
         VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR};
-        mContext->VkbDispatchTable->getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, primitiveCounts.data(),
+        mContext->DispatchTable().getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, primitiveCounts.data(),
                                                                           &buildSizesInfo);
 
         if(buildSizesInfo.accelerationStructureSize > mBlasMemory.GetSize())
@@ -136,7 +136,7 @@ namespace foray::as {
                                                   .size          = buildSizesInfo.accelerationStructureSize,
                                                   .type          = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
                                                   .deviceAddress = {}};
-        mContext->VkbDispatchTable->createAccelerationStructureKHR(&asCi, nullptr, &mAccelerationStructure);
+        mContext->DispatchTable().createAccelerationStructureKHR(&asCi, nullptr, &mAccelerationStructure);
 
         buildGeometryInfo.dstAccelerationStructure = mAccelerationStructure;
 
@@ -151,7 +151,7 @@ namespace foray::as {
         commandBuffer.Create(context);
         commandBuffer.Begin();
         VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfosPtr = buildRangeInfos.data();
-        mContext->VkbDispatchTable->cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, &buildRangeInfosPtr);
+        mContext->DispatchTable().cmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo, &buildRangeInfosPtr);
         commandBuffer.SubmitAndWait();
 
         if(!!benchmark)
@@ -163,7 +163,7 @@ namespace foray::as {
         VkAccelerationStructureDeviceAddressInfoKHR acceleration_device_address_info{};
         acceleration_device_address_info.sType                 = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
-        mBlasAddress                                           = mContext->VkbDispatchTable->getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
+        mBlasAddress                                           = mContext->DispatchTable().getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
 
         if(!!benchmark)
         {
@@ -175,7 +175,7 @@ namespace foray::as {
     {
         if(!!mAccelerationStructure)
         {
-            mContext->VkbDispatchTable->destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
+            mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
             mAccelerationStructure = nullptr;
         }
         if(mBlasMemory.Exists())

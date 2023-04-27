@@ -20,7 +20,7 @@ namespace foray {
                                                .objectType   = objectType,
                                                .objectHandle = reinterpret_cast<uint64_t>(objectHandle),
                                                .pObjectName  = namecopy.data()};
-        context->VkbDispatchTable->setDebugUtilsObjectNameEXT(&nameInfo);
+        context->DispatchTable().setDebugUtilsObjectNameEXT(&nameInfo);
     }
 
 }  // namespace foray

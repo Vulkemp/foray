@@ -49,7 +49,7 @@ namespace foray::core {
         {
             // update image in image view create info
             mCreateInfo.ImageViewCI.image = mImage;
-            AssertVkResult(mContext->VkbDispatchTable->createImageView(&mCreateInfo.ImageViewCI, nullptr, &mImageView));
+            AssertVkResult(mContext->DispatchTable().createImageView(&mCreateInfo.ImageViewCI, nullptr, &mImageView));
         }
 
 #if FORAY_DEBUG
@@ -179,7 +179,7 @@ namespace foray::core {
         {
             if(!!mImageView)
             {
-                mContext->VkbDispatchTable->destroyImageView(mImageView, nullptr);
+                mContext->DispatchTable().destroyImageView(mImageView, nullptr);
                 mImageView = nullptr;
             }
             vmaDestroyImage(mContext->Allocator, mImage, mAllocation);
@@ -193,7 +193,7 @@ namespace foray::core {
     {
         VkImageFormatProperties props{};
         // check if image format together with required flags and usage is supported.
-        AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->PhysicalDevice(), createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
+        AssertVkResult(vkGetPhysicalDeviceImageFormatProperties(mContext->VkPhysicalDevice(), createInfo.ImageCI.format, createInfo.ImageCI.imageType, createInfo.ImageCI.tiling,
                                                                 createInfo.ImageCI.usage, createInfo.ImageCI.flags, &props));
     }
 

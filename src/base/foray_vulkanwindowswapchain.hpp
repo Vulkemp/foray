@@ -37,7 +37,6 @@ namespace foray::base {
         }
 
         FORAY_PROPERTY_R(Window)
-        FORAY_PROPERTY_V(Surface)
         FORAY_PROPERTY_R(Swapchain)
         FORAY_PROPERTY_R(SwapchainImages)
         FORAY_PROPERTY_V(Context)
@@ -49,10 +48,14 @@ namespace foray::base {
         inline bool Exists() const { return !!mSwapchain.swapchain; }
         void        Destroy();
 
+        VkSurfaceKHR GetOrCreateSurface();
+
         /// @brief Listens for WindowSizeChanged events to preemptively resize the swapchain
         virtual void OnWindowResized(const osi::EventWindowResized* message);
         /// @brief Call to recreate the swapchain
         void RecreateSwapchain();
+
+        inline operator VkSwapchainKHR() { return mSwapchain.swapchain; }
 
       protected:
         void ExtractSwapchainImages();

@@ -97,7 +97,7 @@ namespace foray::core {
         addressInfo.sType  = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
         addressInfo.buffer = mBuffer;
         addressInfo.pNext  = nullptr;
-        return vkGetBufferDeviceAddress(mContext->Device(), &addressInfo);
+        return vkGetBufferDeviceAddress(mContext->VkDevice(), &addressInfo);
     }
 
     void ManagedBuffer::SetName(std::string_view name)

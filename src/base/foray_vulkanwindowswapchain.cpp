@@ -18,23 +18,32 @@ namespace foray::base {
         mWindow.Create();
         if(!!mContext)
         {
-            mContext->Window = &mWindow;
+            mContext->WindowSwapchain = this;
         }
+    }
+    VkSurfaceKHR VulkanWindowSwapchain::GetOrCreateSurface()
+    {
+        if (!!mSurface)
+        {
+            return mSurface;
+        }
+        Assert(mWindow.Exists(), "[VulkanWindowSwapchain::GetOrCreateSurface] Window must be initialized");
+        Assert(!!mContext, "[VulkanWindowSwapchain::GetOrCreateSurface] Require context set");
+        Assert(!!mContext->Instance, "[VulkanWindowSwapchain::GetOrCreateSurface] Require Instance set");
+
+        mSurface = mWindow.GetOrCreateSurfaceKHR(*mContext->Instance);
+        return mSurface;
     }
     void VulkanWindowSwapchain::CreateSwapchain()
     {
         Assert(mWindow.Exists(), "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without window initialized");
         Assert(!!mContext, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without mContext set");
-        Assert(!!mContext->VkbInstance, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without Instance");
-        Assert(!!mContext->VkbDevice, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without Device");
-        Assert(!!mContext->VkbDispatchTable, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without DispatchTable");
+        Assert(!!mContext->Instance, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without Instance");
+        Assert(!!mContext->Device, "[VulkanWindowSwapchain::CreateSwapchain] Unable to create swapchain without Device");
 
-        if(!mSurface)
-        {
-            mSurface = mWindow.GetOrCreateSurfaceKHR(mContext->Instance());
-        }
+        GetOrCreateSurface();
 
-        vkb::SwapchainBuilder swapchainBuilder(*(mContext->VkbDevice), mSurface);
+        vkb::SwapchainBuilder swapchainBuilder(mContext->Device->GetDevice(), mSurface);
 
         // default swapchain image formats:
         // color format: VK_FORMAT_B8G8R8A8_SRGB
@@ -59,10 +68,6 @@ namespace foray::base {
 
         mSwapchain = *ret;
         mExtent = mSwapchain.extent;
-        if(!!mContext)
-        {
-            mContext->Swapchain = &mSwapchain;
-        }
 
         ExtractSwapchainImages();
 
@@ -107,10 +112,6 @@ namespace foray::base {
                 }
             }
         }
-        if(!!mContext)
-        {
-            mContext->SwapchainImages = mSwapchainImages;
-        }
     }
 
     void VulkanWindowSwapchain::OnWindowResized(const osi::EventWindowResized* message)
@@ -123,7 +124,7 @@ namespace foray::base {
 
     void VulkanWindowSwapchain::RecreateSwapchain()
     {
-        AssertVkResult(mContext->VkbDispatchTable->deviceWaitIdle());
+        AssertVkResult(mContext->DispatchTable().deviceWaitIdle());
 
         if(mWindow.Exists())
         {
@@ -157,26 +158,24 @@ namespace foray::base {
         }
         for(auto& image : mSwapchainImages)
         {
-            mContext->VkbDispatchTable->destroyImageView(image.ImageView, nullptr);
+            mContext->DispatchTable().destroyImageView(image.ImageView, nullptr);
         }
         mSwapchainImages.clear();
-        mContext->SwapchainImages.clear();
         if(!!mSwapchain.swapchain)
         {
             vkb::destroy_swapchain(mSwapchain);
             mSwapchain = vkb::Swapchain();
         }
-        mContext->Swapchain = nullptr;
         mExtent             = VkExtent2D{};
     }
 
     void VulkanWindowSwapchain::Destroy()
     {
         DestroySwapchain();
-        vkb::destroy_surface(mContext->Instance(), mSurface);
+        vkb::destroy_surface(mContext->VkInstance(), mSurface);
         mSurface = nullptr;
         mWindow.Destroy();
-        mContext->Window = nullptr;
+        mContext->WindowSwapchain = nullptr;
     }
 
 }  // namespace foray::base

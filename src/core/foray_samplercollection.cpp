@@ -112,7 +112,7 @@ namespace foray::core {
         else
         {
             SamplerInstance instance{.SamplerHash = hash, .RefCount = 1};
-            AssertVkResult(mContext->VkbDispatchTable->createSampler(&samplerCi, nullptr, &(instance.Sampler)));
+            AssertVkResult(mContext->DispatchTable().createSampler(&samplerCi, nullptr, &(instance.Sampler)));
             mSamplerInstances[hash] = instance;
             samplerRef.mHash      = hash;
             samplerRef.mSampler   = instance.Sampler;
@@ -131,7 +131,7 @@ namespace foray::core {
             instance.RefCount--;
             if(instance.RefCount == 0)
             {
-                mContext->VkbDispatchTable->destroySampler(instance.Sampler, nullptr);
+                mContext->DispatchTable().destroySampler(instance.Sampler, nullptr);
                 mSamplerInstances.erase(iter);
             }
         }
@@ -141,7 +141,7 @@ namespace foray::core {
         for(auto pair : mSamplerInstances)
         {
             SamplerInstance& instance = pair.second;
-            mContext->VkbDispatchTable->destroySampler(instance.Sampler, nullptr);
+            mContext->DispatchTable().destroySampler(instance.Sampler, nullptr);
         }
         mSamplerInstances.clear();
     }

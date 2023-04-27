@@ -44,14 +44,14 @@ namespace foray::core {
         moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         moduleCreateInfo.codeSize = sizeInBytes;
         moduleCreateInfo.pCode    = binaryBuffer;
-        mContext->VkbDispatchTable->createShaderModule(&moduleCreateInfo, NULL, &mShaderModule);
+        mContext->DispatchTable().createShaderModule(&moduleCreateInfo, NULL, &mShaderModule);
     }
 
     void ShaderModule::Destroy()
     {
         if(mShaderModule != nullptr)
         {
-            mContext->VkbDispatchTable->destroyShaderModule(mShaderModule, nullptr);
+            mContext->DispatchTable().destroyShaderModule(mShaderModule, nullptr);
             mShaderModule = nullptr;
         }
     }

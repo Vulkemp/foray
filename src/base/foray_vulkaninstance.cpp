@@ -35,9 +35,9 @@ namespace foray::base {
         }
         instanceBuilder.require_api_version(VK_MAKE_API_VERSION(0, 1, 3, 0));
         instanceBuilder.set_minimum_instance_version(VK_MAKE_API_VERSION(0, 1, 3, 0));
-        if(!!mContext && !!mContext->Window)
+        if(!!mContext && !!mContext->WindowSwapchain)
         {
-            std::vector<const char*> surfaceExtensions = mContext->Window->GetVkSurfaceExtensions();
+            std::vector<const char*> surfaceExtensions = mContext->WindowSwapchain->GetWindow().GetVkSurfaceExtensions();
             for(const char* ext : surfaceExtensions)
             {
                 instanceBuilder.enable_extension(ext);
@@ -54,7 +54,7 @@ namespace foray::base {
         mInstance = *ret;
         if(!!mContext)
         {
-            mContext->VkbInstance = &mInstance;
+            mContext->Instance = this;
         }
         if(mEnableDebugReport)
         {
@@ -69,7 +69,7 @@ namespace foray::base {
             createDebugReportCallback                                    = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(mInstance, "vkCreateDebugReportCallbackEXT");
 
             // Create the callback handle
-            createDebugReportCallback(mContext->Instance(), &ci, nullptr, &mDebugReportCallbackHandle);
+            createDebugReportCallback(mContext->VkInstance(), &ci, nullptr, &mDebugReportCallbackHandle);
         }
     }
 
@@ -81,7 +81,7 @@ namespace foray::base {
             destroyDebugReportCallback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(mInstance, "vkDestroyDebugReportCallbackEXT");
 
             // Create the callback handle
-            destroyDebugReportCallback(mContext->Instance(), mDebugReportCallbackHandle, nullptr);
+            destroyDebugReportCallback(mContext->VkInstance(), mDebugReportCallbackHandle, nullptr);
             mDebugReportCallbackHandle = nullptr;
         }
         if(!!mInstance.instance)
@@ -91,7 +91,7 @@ namespace foray::base {
         }
         if(!!mContext)
         {
-            mContext->VkbInstance = nullptr;
+            mContext->Instance = nullptr;
         }
     }
 
@@ -104,7 +104,7 @@ namespace foray::base {
         }
         if(!!mContext)
         {
-            mContext->VkbInstance = nullptr;
+            mContext->Instance = nullptr;
         }
     }
 

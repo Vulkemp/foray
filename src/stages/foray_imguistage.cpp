@@ -24,10 +24,10 @@ namespace foray::stages {
         InitImgui();
     }
 
-    void ImguiStage::InitForSwapchain(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
+    void ImguiStage::InitForSwapchain(core::Context* context, int32_t resizeOrder)
     {
         Destroy();
-        RenderStage::InitCallbacks(context, domain, resizeOrder);
+        RenderStage::InitCallbacks(context, context->WindowSwapchain, resizeOrder);
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
         mTargetImage = nullptr;
 
@@ -62,7 +62,7 @@ namespace foray::stages {
         pool_info.poolSizeCount              = std::size(pool_sizes);
         pool_info.pPoolSizes                 = pool_sizes;
 
-        AssertVkResult(vkCreateDescriptorPool(mContext->Device(), &pool_info, nullptr, &mImguiPool));
+        AssertVkResult(vkCreateDescriptorPool(mContext->VkDevice(), &pool_info, nullptr, &mImguiPool));
 
         // 2: initialize imgui library
 
@@ -70,13 +70,13 @@ namespace foray::stages {
         ImGui::CreateContext();
 
         //this initializes imgui for SDL
-        ImGui_ImplSDL2_InitForVulkan(mContext->Window->GetSdlWindowHandle());
+        ImGui_ImplSDL2_InitForVulkan(mContext->WindowSwapchain->GetWindow().GetSdlWindowHandle());
 
         //this initializes imgui for Vulkan
         ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance                  = mContext->Instance();
-        init_info.PhysicalDevice            = mContext->PhysicalDevice();
-        init_info.Device                    = mContext->Device();
+        init_info.Instance                  = mContext->VkInstance();
+        init_info.PhysicalDevice            = mContext->VkPhysicalDevice();
+        init_info.Device                    = mContext->VkDevice();
         init_info.Queue                     = mContext->Queue;
         init_info.DescriptorPool            = mImguiPool;
         init_info.MinImageCount             = 3;
@@ -101,13 +101,13 @@ namespace foray::stages {
         {
             for(VkFramebuffer frameBuffer : mFrameBuffers)
             {
-                vkDestroyFramebuffer(mContext->Device(), frameBuffer, nullptr);
+                vkDestroyFramebuffer(mContext->VkDevice(), frameBuffer, nullptr);
             }
             mFrameBuffers.clear();
         }
         if(mRenderPass)
         {
-            vkDestroyRenderPass(mContext->Device(), mRenderPass, nullptr);
+            vkDestroyRenderPass(mContext->VkDevice(), mRenderPass, nullptr);
             mRenderPass = nullptr;
         }
     }
@@ -129,7 +129,7 @@ namespace foray::stages {
         }
         else
         {
-            attachmentDescription.format  = mContext->Swapchain->image_format;
+            attachmentDescription.format  = mContext->WindowSwapchain->GetSwapchain().image_format;
             attachmentDescription.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
         }
 
@@ -167,9 +167,9 @@ namespace foray::stages {
         renderPassInfo.pSubpasses             = &subpass;
         renderPassInfo.dependencyCount        = 2;
         renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->Device(), &renderPassInfo, nullptr, &mRenderPass));
+        AssertVkResult(vkCreateRenderPass(mContext->VkDevice(), &renderPassInfo, nullptr, &mRenderPass));
 
-        mFrameBuffers.resize(!!mTargetImage ? 1 : mContext->SwapchainImages.size());
+        mFrameBuffers.resize(!!mTargetImage ? 1 : mContext->WindowSwapchain->GetSwapchainImages().size());
 
         for(uint32_t i = 0; i < mFrameBuffers.size(); i++)
         {
@@ -181,7 +181,7 @@ namespace foray::stages {
             }
             else
             {
-                attachmentView = mContext->SwapchainImages[i].ImageView;
+                attachmentView = mContext->WindowSwapchain->GetSwapchainImages()[i].ImageView;
             }
 
 
@@ -194,7 +194,7 @@ namespace foray::stages {
             fbufCreateInfo.width                   = mDomain->GetExtent().width;
             fbufCreateInfo.height                  = mDomain->GetExtent().height;
             fbufCreateInfo.layers                  = 1;
-            AssertVkResult(vkCreateFramebuffer(mContext->Device(), &fbufCreateInfo, nullptr, &frameBuffer));
+            AssertVkResult(vkCreateFramebuffer(mContext->VkDevice(), &fbufCreateInfo, nullptr, &frameBuffer));
         }
     }
 
@@ -207,7 +207,7 @@ namespace foray::stages {
             ImGui_ImplVulkan_Shutdown();
             ImGui_ImplSDL2_Shutdown();
             ImGui::DestroyContext();
-            vkDestroyDescriptorPool(mContext->Device(), mImguiPool, nullptr);
+            vkDestroyDescriptorPool(mContext->VkDevice(), mImguiPool, nullptr);
             mImguiPool = nullptr;
         }
     }
@@ -244,7 +244,7 @@ namespace foray::stages {
         {
             uint32_t swapchainIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
             frameBuffer             = mFrameBuffers[swapchainIndex];
-            image                   = mContext->SwapchainImages[swapchainIndex].Image;
+            image                   = mContext->WindowSwapchain->GetSwapchainImages()[swapchainIndex].Image;
         }
 
         VkRenderPassBeginInfo renderPassBeginInfo{};
