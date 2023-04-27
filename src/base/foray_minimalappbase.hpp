@@ -2,6 +2,7 @@
 #include "../core/foray_context.hpp"
 #include "../foray_logger.hpp"
 #include "../osi/foray_osmanager.hpp"
+#include "../foray_mem.hpp"
 #include "foray_renderloop.hpp"
 #include "foray_vulkaninstance.hpp"
 
@@ -44,7 +45,7 @@ namespace foray::base {
 
         RenderLoop     mRenderLoop;
         osi::OsManager mOsManager;
-        VulkanInstance mInstance;
+        Heap<VulkanInstance> mInstance;
         core::Context  mContext;
 
         event::Receiver<const osi::Event*> mOsEventReceiver;

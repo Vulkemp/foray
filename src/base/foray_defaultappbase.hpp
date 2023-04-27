@@ -2,6 +2,7 @@
 #include "../bench/foray_hostbenchmark.hpp"
 #include "../core/foray_samplercollection.hpp"
 #include "../core/foray_shadermanager.hpp"
+#include "../foray_mem.hpp"
 #include "../foray_vma.hpp"
 #include "../osi/foray_osmanager.hpp"
 #include "../stages/foray_stages_declares.hpp"
@@ -90,18 +91,18 @@ namespace foray::base {
         /// @brief [Internal] Finalizer
         virtual void Destroy();
 
-        RenderLoop              mRenderLoop;
-        osi::OsManager          mOsManager;
-        VulkanInstance          mInstance;
-        VulkanDevice            mDevice;
-        VulkanWindowSwapchain   mWindowSwapchain;
-        core::SamplerCollection mSamplerCollection;
-        core::Context           mContext;
-        core::ShaderManager     mShaderManager;
+        RenderLoop                    mRenderLoop;
+        osi::OsManager                mOsManager;
+        Heap<VulkanInstance>          mInstance;
+        Heap<VulkanDevice>            mDevice;
+        Heap<VulkanWindowSwapchain>   mWindowSwapchain;
+        Heap<core::SamplerCollection> mSamplerCollection;
+        Heap<core::ShaderManager>     mShaderManager;
+        core::Context                 mContext;
 
         /// @brief Increase this in an early init method to get auxiliary command buffers
         uint32_t                                        mAuxiliaryCommandBufferCount = 0;
-        std::array<InFlightFrame, INFLIGHT_FRAME_COUNT> mInFlightFrames;
+        std::array<Local<InFlightFrame>, INFLIGHT_FRAME_COUNT> mInFlightFrames;
         uint32_t                                        mInFlightFrameIndex = 0;
         uint64_t                                        mRenderedFrameCount = 0;
 

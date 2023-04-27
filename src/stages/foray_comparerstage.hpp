@@ -2,6 +2,7 @@
 #include "../core/foray_samplercollection.hpp"
 #include "../foray_glm.hpp"
 #include "foray_computestage.hpp"
+#include "../foray_mem.hpp"
 #include <array>
 
 namespace foray::stages {
@@ -14,15 +15,15 @@ namespace foray::stages {
         inline static constexpr std::string_view OutputName = "Comparer.Out";
 
         /// @brief Inits the comparer stage. SetInput() calls afterwards are required for function
-        virtual void Init(core::Context* context, RenderDomain* domain, bool flipY, int32_t resizeOrder = 0);
+        ComparerStage(core::Context* context, RenderDomain* domain, bool flipY, int32_t resizeOrder = 0);
+
+        virtual ~ComparerStage();
 
         /// @brief Pipeline barriers and compute shader dispatches
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         /// @brief If called the comparer stage will filter for MouseMoved events to update the pipette value returned
         virtual void HandleMouseMovedEvent(const osi::EventInputMouseMoved* event);
-
-        virtual void Destroy() override;
 
         enum class EInputType
         {
@@ -97,13 +98,13 @@ namespace foray::stages {
 
         std::array<SubStage, 2> mSubStages;
 
-        core::ManagedImage  mOutput;
-        core::ManagedBuffer mPipetteBuffer;
-        void*               mPipetteMap = nullptr;
+        Local<core::ManagedImage>  mOutput;
+        Local<core::ManagedBuffer> mPipetteBuffer;
+        void*                      mPipetteMap = nullptr;
 
         PipetteValue mPipetteValue;
 
-        std::array<core::ShaderModule, 3> mShaders;
+        std::array<Heap<core::ShaderModule>, 3> mShaders;
 
         fp32_t     mMixValue = 0.5;
         glm::ivec2 mMousePos = {};

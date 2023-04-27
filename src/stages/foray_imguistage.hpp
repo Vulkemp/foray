@@ -19,7 +19,6 @@ namespace foray::stages {
         /// @param context Requires Device, Swapchain & SwapchainImages
         virtual void InitForSwapchain(core::Context* context, int32_t resizeOrder = 0);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-        virtual void Destroy() override;
 
         /// @brief Switch background image and between modes at runtime
         /// @param backgroundImage Managed Image Background Image to render over. If set to nullptr, will use swapchain mode.
@@ -31,7 +30,7 @@ namespace foray::stages {
         /// @brief When the window has been resized, update the target images.
         virtual void OnResized(VkExtent2D extent) override;
 
-        inline virtual ~ImguiStage() { Destroy(); }
+        virtual ~ImguiStage();
 
       protected:
         VkClearValue mClearValue;

@@ -7,6 +7,9 @@ namespace foray::util {
     class ManagedUboBase : public core::ManagedResource
     {
       public:
+        ManagedUboBase(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
+        virtual ~ManagedUboBase() = default;
+
         inline size_t SizeOfUbo() const { return mUboBuffer.GetDeviceBuffer().GetSize(); }
 
         FORAY_PROPERTY_R(UboBuffer)
@@ -15,9 +18,7 @@ namespace foray::util {
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
         virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
         virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
-        void Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
         virtual bool Exists() const override;
-        virtual void Destroy() override;
 
         const core::ManagedBuffer* GetDeviceBuffer() const { return &(mUboBuffer.GetDeviceBuffer()); }
 
@@ -41,13 +42,12 @@ namespace foray::util {
     class ManagedUbo : public ManagedUboBase
     {
       protected:
-        T_UBO mData;
+        T_UBO mData = {};
 
       public:
-        inline ManagedUbo();
-        ~ManagedUbo();
+        inline ManagedUbo(core::Context* context, std::string_view name);
 
-        inline void  Create(core::Context* context, std::string_view name);
+        virtual ~ManagedUbo() = default;
         virtual void UpdateTo(uint32_t frameIndex) override;
 
 
@@ -55,24 +55,13 @@ namespace foray::util {
     };
 
     template <typename T_UBO>
-    ManagedUbo<T_UBO>::ManagedUbo() : ManagedUboBase(), mData{}
+    ManagedUbo<T_UBO>::ManagedUbo(core::Context* context, std::string_view name)
+     : ManagedUboBase(context, sizeof(T_UBO))
     {
-    }
-
-    template <typename T_UBO>
-    void ManagedUbo<T_UBO>::Create(core::Context* context, std::string_view name)
-    {
-        ManagedUboBase::Create(context, sizeof(T_UBO));
         if(name.size() > 0)
         {
             mUboBuffer.SetName(name);
         }
-    }
-
-    template <typename T_UBO>
-    inline ManagedUbo<T_UBO>::~ManagedUbo()
-    {
-        ManagedUboBase::Destroy();
     }
 
     template <typename T_UBO>

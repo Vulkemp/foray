@@ -67,8 +67,12 @@ namespace foray::core {
         vkUpdateDescriptorSets(mContext->VkDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 
-    void DescriptorSet::Destroy()
+    DescriptorSet::~DescriptorSet()
     {
+        if (!mContext)
+        {
+            return;
+        }
         if(mDescriptorPool != VK_NULL_HANDLE)
         {
             mMapBindingToDescriptorInfo.clear();

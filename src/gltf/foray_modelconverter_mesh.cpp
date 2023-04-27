@@ -13,11 +13,10 @@ namespace foray::gltf {
             logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
 
             PushGltfMeshToBuffers(gltfMesh, primitives);
-            auto mesh = std::make_unique<scene::Mesh>();
+            auto mesh = mGeo.GetMeshes().emplace_back();
             mesh->SetPrimitives(primitives);
             mesh->SetName(gltfMesh.name);
-            mIndexBindings.Meshes[i] = mesh.get();
-            mGeo.GetMeshes().push_back(std::move(mesh));
+            mIndexBindings.Meshes[i] = mesh;
         }
 
         auto& indexBuffer = *mIndexBuffer;

@@ -22,6 +22,6 @@ namespace foray::scene::gcomp {
       protected:
         std::vector<SimpleLight>                            mSimplifiedlights;
         std::unordered_map<ncomp::PunctualLight*, uint32_t> mComponentArrayBindings;
-        util::DualBuffer                                    mBuffer;
+        Local<util::DualBuffer>                                    mBuffer;
     };
 }  // namespace foray::scene::gcomp

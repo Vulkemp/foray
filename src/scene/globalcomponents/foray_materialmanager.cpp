@@ -3,7 +3,6 @@
 namespace foray::scene::gcomp {
     MaterialManager::MaterialManager(core::Context* context) : mBuffer(context, false)
     {
-        mBuffer.GetBuffer().SetName("MaterialManager");
     }
     void MaterialManager::UpdateDeviceLocal()
     {
@@ -13,9 +12,6 @@ namespace foray::scene::gcomp {
             mBuffer.GetVector().push_back(Material{});
         }
         mBuffer.InitOrUpdate();
-    }
-    void MaterialManager::Destroy()
-    {
-        mBuffer.Destroy();
+        mBuffer.GetBuffer()->SetName("MaterialManager");
     }
 }  // namespace foray

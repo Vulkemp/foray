@@ -146,19 +146,18 @@ namespace foray::as {
 
         VkDeviceSize instanceBufferSize = instanceBufferData.size() * sizeof(VkAccelerationStructureInstanceKHR);
 
-        if(instanceBufferSize > mInstanceBuffer.GetDeviceBuffer().GetSize())
+        if(!mInstanceBuffer || instanceBufferSize > mInstanceBuffer->GetDeviceBuffer().GetSize())
         {
             VkDeviceSize instanceBufferCapacity = instanceBufferSize + instanceBufferSize / 4;
-            mInstanceBuffer.Destroy();
             core::ManagedBuffer::CreateInfo instanceBufferCI(
                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
                 instanceBufferCapacity, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
-            mInstanceBuffer.Create(mContext, instanceBufferCI);
+            mInstanceBuffer.New(mContext, instanceBufferCI);
         }
 
         // Misuse the staging function to upload data to GPU
 
-        mInstanceBuffer.StageSection(0, instanceBufferData.data(), 0, instanceBufferSize);
+        mInstanceBuffer->StageSection(0, instanceBufferData.data(), 0, instanceBufferSize);
 
         // STEP #4    Get Size
 
@@ -170,7 +169,7 @@ namespace foray::as {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress()},
+            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer->GetDeviceBuffer().GetDeviceAddress()},
         };
 
         // Create the build info. The spec limits this to a single geometry, containing all instance references!
@@ -190,10 +189,9 @@ namespace foray::as {
         // STEP #5    Create main and scratch memory and acceleration structure
 
         // Allocate a buffer for the acceleration structure.
-        if(sizeInfo.accelerationStructureSize > mTlasMemory.GetSize())
+        if(!mTlasMemory || sizeInfo.accelerationStructureSize > mTlasMemory->GetSize())
         {
-            mTlasMemory.Destroy();
-            mTlasMemory.Create(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+            mTlasMemory.New(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                                sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas main buffer");
         }
 
@@ -202,22 +200,21 @@ namespace foray::as {
         VkAccelerationStructureCreateInfoKHR createInfo{VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR};
         createInfo.type   = buildInfo.type;
         createInfo.size   = sizeInfo.accelerationStructureSize;
-        createInfo.buffer = mTlasMemory.GetBuffer();
+        createInfo.buffer = mTlasMemory->GetBuffer();
         createInfo.offset = 0;
 
         AssertVkResult(mContext->DispatchTable().createAccelerationStructureKHR(&createInfo, nullptr, &mAccelerationStructure));
         buildInfo.dstAccelerationStructure = mAccelerationStructure;
 
         // Allocate the scratch buffer holding temporary build data.
-        if(sizeInfo.buildScratchSize > mScratchBuffer.GetSize())
+        if(!mScratchBuffer || sizeInfo.buildScratchSize > mScratchBuffer->GetSize())
         {
-            mScratchBuffer.Destroy();
             core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
                                                             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
             ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
-            mScratchBuffer.Create(mContext, ci);
+            mScratchBuffer.New(mContext, ci);
         }
-        buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
+        buildInfo.scratchData.deviceAddress = mScratchBuffer->GetDeviceAddress();
 
         // STEP #6    Build acceleration structure
 
@@ -225,7 +222,7 @@ namespace foray::as {
         cmdBuffer.Create(mContext);
         cmdBuffer.Begin();
 
-        mInstanceBuffer.CmdCopyToDevice(0, cmdBuffer);
+        mInstanceBuffer->CmdCopyToDevice(0, cmdBuffer);
 
         VkMemoryBarrier barrier{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -275,12 +272,12 @@ namespace foray::as {
 
         size_t writeOffset = sizeof(VkAccelerationStructureInstanceKHR) * mStaticBlasInstances.size();
         size_t writeSize   = sizeof(VkAccelerationStructureInstanceKHR) * mAnimatedBlasInstances.size();
-        mInstanceBuffer.StageSection(frameIndex, instanceBufferData.data(), writeOffset, writeSize);
+        mInstanceBuffer->StageSection(frameIndex, instanceBufferData.data(), writeOffset, writeSize);
 
         // STEP #2 Configure upload from host to device buffer for animated instances
 
         // copy previously staged instance data
-        mInstanceBuffer.CmdCopyToDevice(frameIndex, cmdBuffer);
+        mInstanceBuffer->CmdCopyToDevice(frameIndex, cmdBuffer);
 
         // STEP #3 Rebuild/Update TLAS
 
@@ -297,7 +294,7 @@ namespace foray::as {
         geometry.geometry.instances = VkAccelerationStructureGeometryInstancesDataKHR{
             .sType           = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR,
             .arrayOfPointers = VK_FALSE,
-            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer.GetDeviceBuffer().GetDeviceAddress()},
+            .data            = VkDeviceOrHostAddressConstKHR{.deviceAddress = mInstanceBuffer->GetDeviceBuffer().GetDeviceAddress()},
         };
 
         VkAccelerationStructureBuildGeometryInfoKHR buildInfo{.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR};
@@ -308,7 +305,7 @@ namespace foray::as {
         buildInfo.type                      = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
         buildInfo.dstAccelerationStructure  = mAccelerationStructure;
         buildInfo.srcAccelerationStructure  = mAccelerationStructure;
-        buildInfo.scratchData.deviceAddress = mScratchBuffer.GetDeviceAddress();
+        buildInfo.scratchData.deviceAddress = mScratchBuffer->GetDeviceAddress();
 
 
         VkAccelerationStructureBuildRangeInfoKHR  buildRangeInfo{.primitiveCount = static_cast<uint32_t>(mAnimatedBlasInstances.size() + mStaticBlasInstances.size())};
@@ -317,27 +314,11 @@ namespace foray::as {
         mContext->DispatchTable().cmdBuildAccelerationStructuresKHR(cmdBuffer, 1, &buildInfo, &pRangeInfo);
     }
 
-    void Tlas::Destroy()
+    Tlas::~Tlas()
     {
-        mStaticBlasInstances.clear();
-        mAnimatedBlasInstances.clear();
         if(!!mContext && !!mAccelerationStructure)
         {
             mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
-            mAccelerationStructure = VK_NULL_HANDLE;
         }
-        if(mInstanceBuffer.Exists())
-        {
-            mInstanceBuffer.Destroy();
-        }
-        if(mScratchBuffer.Exists())
-        {
-            mScratchBuffer.Destroy();
-        }
-        if(mTlasMemory.Exists())
-        {
-            mTlasMemory.Destroy();
-        }
-        mTlasAddress = 0;
     }
 }  // namespace foray::as

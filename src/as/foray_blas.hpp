@@ -4,6 +4,7 @@
 #include "../core/foray_managedbuffer.hpp"
 #include "../core/foray_managedresource.hpp"
 #include "../scene/foray_scene_declares.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::as {
 
@@ -14,13 +15,13 @@ namespace foray::as {
     class Blas : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR>
     {
       public:
-        virtual ~Blas() { Destroy(); }
+        virtual ~Blas();
 
         inline static const char* BENCH_RESET         = "Reset";
         inline static const char* BENCH_CREATESTRUCTS = "Create Build Structs";
-        inline static const char* BENCH_GETSIZES = "Get Build Sizes";
-        inline static const char* BENCH_CREATE = "Create";
-        inline static const char* BENCH_BUILD = "Build";
+        inline static const char* BENCH_GETSIZES      = "Get Build Sizes";
+        inline static const char* BENCH_CREATE        = "Create";
+        inline static const char* BENCH_BUILD         = "Build";
 
         inline virtual std::string_view GetTypeName() const override { return "Bottom-Level AS"; }
 
@@ -34,7 +35,6 @@ namespace foray::as {
         virtual void CreateOrUpdate(core::Context* context, const scene::Mesh* mesh, const scene::gcomp::GeometryStore* store, bench::HostBenchmark* benchmark = nullptr);
 
         inline virtual bool Exists() const override { return !mAccelerationStructure; }
-        virtual void        Destroy() override;
 
         FORAY_GETTER_V(AccelerationStructure)
         FORAY_GETTER_V(BlasAddress)
@@ -42,10 +42,10 @@ namespace foray::as {
         FORAY_GETTER_V(Mesh)
 
       protected:
-        core::Context*             mContext = nullptr;
-        const scene::Mesh*         mMesh    = nullptr;
-        core::ManagedBuffer        mBlasMemory;
-        VkAccelerationStructureKHR mAccelerationStructure{};
-        VkDeviceAddress            mBlasAddress{};
+        core::Context*                     mContext = nullptr;
+        const scene::Mesh*                 mMesh    = nullptr;
+        Local<core::ManagedBuffer> mBlasMemory;
+        VkAccelerationStructureKHR         mAccelerationStructure{};
+        VkDeviceAddress                    mBlasAddress{};
     };
 }  // namespace foray::as

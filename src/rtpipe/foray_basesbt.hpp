@@ -5,6 +5,7 @@
 #include "foray_rtshadertypes.hpp"
 #include <unordered_map>
 #include <vector>
+#include "../foray_mem.hpp"
 
 namespace foray::rtpipe {
 
@@ -50,7 +51,6 @@ namespace foray::rtpipe {
 
         FORAY_GETTER_V(EntryDataSize)
         FORAY_GETTER_V(AddressRegion)
-        FORAY_GETTER_CR(Buffer)
 
         /// @brief Access the custom data entry for a group
         std::vector<uint8_t>& GroupDataAt(GroupIndex groupIndex);
@@ -116,7 +116,7 @@ namespace foray::rtpipe {
 
 
       protected:
-        core::ManagedBuffer             mBuffer;
+        Local<core::ManagedBuffer>      mBuffer;
         VkStridedDeviceAddressRegionKHR mAddressRegion{};
 
         VkDeviceSize mEntryDataSize{};

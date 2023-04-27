@@ -50,9 +50,8 @@ namespace foray::base {
         /// @remark Will throw std::exception if building fails
         void        BuildDevice();
         inline bool Exists() const { return !!mDevice.device; }
-        void        Destroy();
 
-        ~VulkanDevice();
+        virtual ~VulkanDevice();
 
       protected:
         BeforePhysicalDeviceSelectFunctionPointer mBeforePhysicalDeviceSelectFunc = nullptr;

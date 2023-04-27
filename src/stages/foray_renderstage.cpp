@@ -46,12 +46,6 @@ namespace foray::stages {
         mOnResized.SetPriority(priority);
     }
 
-    void RenderStage::Destroy()
-    {
-        mOnResized.Destroy();
-        mOnShadersRecompiled.Destroy();
-    }
-
     std::vector<core::ManagedImage*> RenderStage::GetImageOutputs()
     {
         std::vector<core::ManagedImage*> result;
@@ -75,24 +69,6 @@ namespace foray::stages {
             FORAY_THROWFMT("Failed to get color attachment with name: {}", name)
         }
         return nullptr;
-    }
-    void RenderStage::OnResized(VkExtent2D extent)
-    {
-        for(auto& pair : mImageOutputs)
-        {
-            if(pair.second->Exists())
-            {
-                pair.second->Resize(extent);
-            }
-        }
-    }
-    void RenderStage::DestroyOutputImages()
-    {
-        for(auto& pair : mImageOutputs)
-        {
-            pair.second->Destroy();
-        }
-        mImageOutputs.clear();
     }
     void RenderStage::OnShadersRecompiled(const std::unordered_set<uint64_t>& recompiled)
     {

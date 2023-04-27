@@ -40,7 +40,7 @@ namespace foray::base {
     void MinimalAppBase::Init()
     {
         mOsManager.Init();
-        mInstance.Create();
+        mInstance->Create();
     }
 
     void MinimalAppBase::PollEvents()
@@ -59,7 +59,7 @@ namespace foray::base {
     void MinimalAppBase::Destroy()
     {
         mOsEventReceiver.Destroy();
-        mInstance.Destroy();
+        mInstance = nullptr;
         mOsManager.Destroy();
         logger()->flush();
     }

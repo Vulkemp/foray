@@ -2,11 +2,9 @@
 //#include "foray_hash.hpp"
 
 namespace foray::util {
-    void DualBuffer::Create(core::Context* context, const core::ManagedBuffer::CreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
+    DualBuffer::DualBuffer(core::Context* context, const core::ManagedBuffer::CreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount)
+     : mDeviceBuffer(context, devicebufferCreateInfo)
     {
-        Destroy();
-
-        mDeviceBuffer.Create(context, devicebufferCreateInfo);
         mStagingBufferMaps.resize(stageBufferCount, nullptr);
         mBufferCopies.resize(stageBufferCount);
 
@@ -20,9 +18,8 @@ namespace foray::util {
             {
                 stagingCI.Name = fmt::format("Staging for \"{}\" #{}", devicebufferCreateInfo.Name, i);
             }
-            auto& stagingBuffer = mStagingBuffers.emplace_back(std::make_unique<core::ManagedBuffer>());
+            auto& stagingBuffer = mStagingBuffers.emplace_back(context, stagingCI);
             auto& mapPoint      = mStagingBufferMaps[i];
-            stagingBuffer->Create(context, stagingCI);
             stagingBuffer->Map(mapPoint);
         }
     }
@@ -135,20 +132,5 @@ namespace foray::util {
             mStagingBuffers[i]->SetName(stagingBufferName);
         }
         return *this;
-    }
-
-    void DualBuffer::Destroy()
-    {
-        mStagingBufferMaps.clear();
-        for(auto& stagingBuffer : mStagingBuffers)
-        {
-            if(stagingBuffer && stagingBuffer->Exists())
-            {
-                stagingBuffer->Unmap();
-            }
-        }
-        mStagingBuffers.clear();  // Calls destructors
-        mBufferCopies.clear();
-        mDeviceBuffer.Destroy();
     }
 }  // namespace foray::util

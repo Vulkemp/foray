@@ -21,8 +21,6 @@ namespace foray::rtpipe {
                                        const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
                                        const std::vector<const uint8_t*>&                     handles)
     {
-        mBuffer.Destroy();
-
         /// STEP # 0    Calculate entry size
 
         VkDeviceSize entryCount = GetGroupArrayCount();
@@ -55,9 +53,9 @@ namespace foray::rtpipe {
         if(bufferSize > 0)
         {
 
-            mBuffer.Create(context, ci);
+            mBuffer.New(context, ci);
             mAddressRegion = VkStridedDeviceAddressRegionKHR{
-                .deviceAddress = mBuffer.GetDeviceAddress(),
+                .deviceAddress = mBuffer->GetDeviceAddress(),
                 .stride        = sbtEntrySize,
                 .size          = bufferSize,
             };
@@ -99,7 +97,7 @@ namespace foray::rtpipe {
 
         /// STEP # 3    Write buffer data
 
-        mBuffer.MapAndWrite(bufferData.data());
+        mBuffer->MapAndWrite(bufferData.data());
     }
 
     void ShaderBindingTableBase::SetData(GroupIndex groupIndex, const void* data)
@@ -138,13 +136,5 @@ namespace foray::rtpipe {
         }
         mEntryDataSize = newSize;
         return *this;
-    }
-
-    void ShaderBindingTableBase::Destroy()
-    {
-        mGroupData.clear();
-        mEntryDataSize = 0;
-        mBuffer.Destroy();
-        mAddressRegion = {};
     }
 }  // namespace foray::rtpipe

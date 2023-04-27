@@ -43,8 +43,8 @@ namespace foray::as {
         auto           primitives     = mesh->GetPrimitives();
         const uint32_t primitiveCount = primitives.size();
 
-        VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = store->GetVerticesBuffer().GetDeviceAddress()};
-        VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = store->GetIndicesBuffer().GetDeviceAddress()};
+        VkDeviceOrHostAddressConstKHR vertex_data_device_address{.deviceAddress = store->GetVerticesBuffer()->GetDeviceAddress()};
+        VkDeviceOrHostAddressConstKHR index_data_device_address{.deviceAddress = store->GetIndicesBuffer()->GetDeviceAddress()};
 
         std::vector<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos(primitiveCount);  // Counterparts to VkCmdDrawIndexed
         std::vector<uint32_t>                                 primitiveCounts(primitiveCount);  // Counts of vertices per geometry, used to determine build size of the BLAS
@@ -106,19 +106,17 @@ namespace foray::as {
         mContext->DispatchTable().getAccelerationStructureBuildSizesKHR(VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildGeometryInfo, primitiveCounts.data(),
                                                                           &buildSizesInfo);
 
-        if(buildSizesInfo.accelerationStructureSize > mBlasMemory.GetSize())
+        if(!mBlasMemory || buildSizesInfo.accelerationStructureSize > mBlasMemory->GetSize())
         {
-            mBlasMemory.Destroy();
-            mBlasMemory.Create(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, buildSizesInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0,
+            mBlasMemory.New(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR, buildSizesInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0,
                                name);
         }
 
-        core::ManagedBuffer                          scratchBuffer;
         std::string                                  scratchName = fmt::format("{} scratch", name);
         core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizesInfo.buildScratchSize,
                                                         VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
         ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
-        scratchBuffer.Create(mContext, ci);
+        core::ManagedBuffer                          scratchBuffer(mContext, ci);
         buildGeometryInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
 
         if(!!benchmark)
@@ -131,7 +129,7 @@ namespace foray::as {
         VkAccelerationStructureCreateInfoKHR asCi{.sType         = VkStructureType::VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR,
                                                   .pNext         = nullptr,
                                                   .createFlags   = 0U,
-                                                  .buffer        = mBlasMemory.GetBuffer(),
+                                                  .buffer        = mBlasMemory->GetBuffer(),
                                                   .offset        = 0U,
                                                   .size          = buildSizesInfo.accelerationStructureSize,
                                                   .type          = VkAccelerationStructureTypeKHR::VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
@@ -171,17 +169,11 @@ namespace foray::as {
         }
     }
 
-    void Blas::Destroy()
+    Blas::~Blas()
     {
         if(!!mAccelerationStructure)
         {
             mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
-            mAccelerationStructure = nullptr;
         }
-        if(mBlasMemory.Exists())
-        {
-            mBlasMemory.Destroy();
-        }
-        mBlasAddress = 0;
     }
 }  // namespace foray::as

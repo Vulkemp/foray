@@ -46,7 +46,8 @@ namespace foray::base {
         /// @brief Create the Swapchain
         void        CreateSwapchain();
         inline bool Exists() const { return !!mSwapchain.swapchain; }
-        void        Destroy();
+
+        virtual ~VulkanWindowSwapchain();
 
         VkSurfaceKHR GetOrCreateSurface();
 

@@ -46,7 +46,7 @@ namespace foray::scene::gcomp {
             mDrawOps.push_back(std::move(drawop));
         }
 
-        VkDeviceSize maxcount = mCurrentTransformBuffer.GetDeviceBuffer().GetSize() / sizeof(glm::mat4);
+        VkDeviceSize maxcount = mCurrentTransformBuffer->GetDeviceBuffer().GetSize() / sizeof(glm::mat4);
 
         if(maxcount < mTotalCount)
         {
@@ -63,14 +63,14 @@ namespace foray::scene::gcomp {
         core::ManagedBuffer::CreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT
                                                             | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                                         size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Current Transforms");
-        mCurrentTransformBuffer.Create(GetContext(), ci);
+        mCurrentTransformBuffer.New(GetContext(), ci);
         ci.Name = "Previous Transforms";
-        mPreviousTransformBuffer.Create(GetContext(), ci);
+        mPreviousTransformBuffer.New(GetContext(), ci);
     }
     void DrawDirector::DestroyBuffers()
     {
-        mCurrentTransformBuffer.Destroy();
-        mPreviousTransformBuffer.Destroy();
+        mCurrentTransformBuffer.Delete();
+        mPreviousTransformBuffer.Delete();
     }
 
     void DrawDirector::Update(SceneUpdateInfo& updateInfo)
@@ -85,7 +85,7 @@ namespace foray::scene::gcomp {
                                                          .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
                                                          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                         .buffer              = mPreviousTransformBuffer.GetBuffer(),
+                                                         .buffer              = mPreviousTransformBuffer->GetBuffer(),
                                                          .offset              = 0,
                                                          .size                = bufferSize};
         VkBufferMemoryBarrier currTransformBufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
@@ -93,7 +93,7 @@ namespace foray::scene::gcomp {
                                                          .dstAccessMask       = VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
                                                          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                                                         .buffer              = mPreviousTransformBuffer.GetBuffer(),
+                                                         .buffer              = mPreviousTransformBuffer->GetBuffer(),
                                                          .offset              = 0,
                                                          .size                = bufferSize};
 
@@ -103,7 +103,7 @@ namespace foray::scene::gcomp {
                              VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, memBarriers.size(), memBarriers.data(), 0, nullptr);
 
         VkBufferCopy copyRegion{.srcOffset = 0, .dstOffset = 0, .size = bufferSize};
-        vkCmdCopyBuffer(cmdBuffer, mCurrentTransformBuffer.GetDeviceBuffer().GetBuffer(), mPreviousTransformBuffer.GetBuffer(), 1, &copyRegion);
+        vkCmdCopyBuffer(cmdBuffer, mCurrentTransformBuffer->GetDeviceBuffer().GetBuffer(), mPreviousTransformBuffer->GetBuffer(), 1, &copyRegion);
 
         prevTransformBufferBarrier.srcAccessMask = VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT;
         prevTransformBufferBarrier.dstAccessMask = VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT;
@@ -125,9 +125,9 @@ namespace foray::scene::gcomp {
             }
         }
 
-        mCurrentTransformBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
+        mCurrentTransformBuffer->StageSection(updateInfo.RenderInfo.GetFrameNumber(), transformStates.data(), 0, transformStates.size() * sizeof(glm::mat4));
 
-        mCurrentTransformBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer);
+        mCurrentTransformBuffer->CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), cmdBuffer);
     }
 
     void DrawDirector::Draw(SceneDrawInfo& drawInfo)

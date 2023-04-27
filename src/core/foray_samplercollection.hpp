@@ -109,9 +109,7 @@ namespace foray::core {
 
         inline virtual bool Exists() const override { return mSamplerInstances.size() > 0; }
 
-        /// @brief Make sure no reference to any existing sampler will be used after calling this!
-        inline virtual void Destroy() override { ClearSamplerMap(); }
-        inline virtual ~SamplerCollection() { ClearSamplerMap(); }
+        virtual ~SamplerCollection() { ClearSamplerMap(); }
 
       protected:
         void GetSampler(SamplerReference& imageSampler, const VkSamplerCreateInfo& samplerCi);

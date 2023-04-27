@@ -27,7 +27,8 @@ namespace foray::core {
         Name               = name;
     }
 
-    void ManagedImage::Create(Context* context, const CreateInfo& createInfo)
+    ManagedImage::ManagedImage(Context* context, const CreateInfo& createInfo)
+     : VulkanResource<VK_OBJECT_TYPE_IMAGE>("Unnamed Buffer")
     {
         mContext    = context;
         mCreateInfo = createInfo;
@@ -61,26 +62,38 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedImage::Resize(const VkExtent2D& newExtent)
+    ManagedImage::CreateInfo ManagedImage::GetInfoForResize(const VkExtent2D& newExtent)
     {
         Assert(Exists(), "Attempted to resize image before initial creation!");
         mCreateInfo.ImageCI.extent = VkExtent3D{.width = newExtent.width, .height = newExtent.height, .depth = 1};
-        Destroy();
-        Create(mContext, mCreateInfo);
+        return mCreateInfo;
     }
-    void ManagedImage::Resize(const VkExtent3D& newExtent)
+    ManagedImage::CreateInfo ManagedImage::GetInfoForResize(const VkExtent3D& newExtent)
     {
         Assert(Exists(), "Attempted to resize image before initial creation!");
         mCreateInfo.ImageCI.extent = newExtent;
-        Destroy();
-        Create(mContext, mCreateInfo);
+        return mCreateInfo;
     }
 
-    void ManagedImage::Create(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
+    void ManagedImage::Resize(ManagedImage* image, const VkExtent3D& newextent)
     {
-        CreateInfo createInfo(usage, format, extent, name);
+        CreateInfo ci = image->GetInfoForResize(newextent);
+        core::Context* context = image->mContext;
+        image->~ManagedImage();
+        new (image) ManagedImage(context, ci);
+    }
+    void ManagedImage::Resize(ManagedImage* image, const VkExtent2D& newextent)
+    {
+        CreateInfo ci = image->GetInfoForResize(newextent);
+        core::Context* context = image->mContext;
+        image->~ManagedImage();
+        new (image) ManagedImage(context, ci);
+    }
 
-        Create(context, createInfo);
+
+    ManagedImage::ManagedImage(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
+     : ManagedImage(context, CreateInfo(usage, format, extent, name))
+    {
     }
 
     void ManagedImage::TransitionLayout(ManagedImage::QuickTransition& quickTransition, VkCommandBuffer commandBuffer)
@@ -121,8 +134,8 @@ namespace foray::core {
     void ManagedImage::WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
         // create staging buffer
-        ManagedBuffer stagingBuffer;
-        stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
+        ManagedBuffer stagingBuffer(mContext, ManagedBuffer::CreateForStaging(size, fmt::format("Staging for {}", GetName())));
+        stagingBuffer.MapAndWrite(data, size);
 
         cmdBuffer.Begin();
 
@@ -173,7 +186,7 @@ namespace foray::core {
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, region);
     }
 
-    void ManagedImage::Destroy()
+    ManagedImage::~ManagedImage()
     {
         if(mAllocation)
         {

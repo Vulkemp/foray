@@ -12,7 +12,7 @@ namespace foray::core {
       public:
         ShaderModule() = default;
 
-        inline ~ShaderModule() { Destroy(); }
+        virtual ~ShaderModule();
 
         /// @brief Loads by compiling from source using the ShaderManager
         /// @param context Requires ShaderMan, DispatchTable
@@ -56,8 +56,6 @@ namespace foray::core {
         void LoadFromBinary(Context* context, const uint32_t* binaryBuffer, size_t sizeInBytes);
 
         inline virtual bool Exists() const override { return !!mShaderModule; }
-
-        virtual void Destroy() override;
 
         /// @brief Fill a shader stage create info. .sType, .stage, .module, .pName fields are set, remainder default initialized
         VkPipelineShaderStageCreateInfo GetShaderStageCi(VkShaderStageFlagBits stage, const char* entry = "main") const;

@@ -3,19 +3,19 @@
 #include <spdlog/fmt/fmt.h>
 
 namespace foray::util {
-    void HistoryImage::Create(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags)
+    HistoryImage::HistoryImage(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags)
     {
         mSource                           = source;
         core::ManagedImage::CreateInfo ci = source->GetCreateInfo();
         ci.Name                           = fmt::format("History.{}", ci.Name);
         ci.ImageCI.usage |= VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | additionalUsageFlags;
-        mHistory.Create(context, ci);
+        mHistory.New(context, ci);
         mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     void HistoryImage::Resize(const VkExtent2D& size)
     {
-        mHistory.Resize(size);
+        core::ManagedImage::Resize(mHistory, size);
         mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
@@ -69,7 +69,7 @@ namespace foray::util {
                 .sType          = VkStructureType::VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2,
                 .srcImage       = mSource->GetImage(),
                 .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                .dstImage       = mHistory.GetImage(),
+                .dstImage       = mHistory->GetImage(),
                 .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .regionCount    = 1U,
                 .pRegions       = &imageCopy,
@@ -130,7 +130,7 @@ namespace foray::util {
                 .sType          = VkStructureType::VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2,
                 .srcImage       = image->mSource->GetImage(),
                 .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                .dstImage       = image->mHistory.GetImage(),
+                .dstImage       = image->mHistory->GetImage(),
                 .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .regionCount    = 1U,
                 .pRegions       = &imageCopy,
@@ -138,13 +138,6 @@ namespace foray::util {
 
             vkCmdCopyImage2(cmdBuffer, &copyInfo);
         }
-    }
-
-    void HistoryImage::Destroy()
-    {
-        mSource = nullptr;
-        mHistory.Destroy();
-        mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
 }  // namespace foray::util

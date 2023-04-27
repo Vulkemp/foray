@@ -73,7 +73,7 @@ namespace foray::base {
         }
     }
 
-    void VulkanInstance::Destroy()
+    VulkanInstance::~VulkanInstance()
     {
         if(!!mDebugReportCallbackHandle)
         {
@@ -84,19 +84,6 @@ namespace foray::base {
             destroyDebugReportCallback(mContext->VkInstance(), mDebugReportCallbackHandle, nullptr);
             mDebugReportCallbackHandle = nullptr;
         }
-        if(!!mInstance.instance)
-        {
-            vkb::destroy_instance(mInstance);
-            mInstance = vkb::Instance();
-        }
-        if(!!mContext)
-        {
-            mContext->Instance = nullptr;
-        }
-    }
-
-    VulkanInstance::~VulkanInstance()
-    {
         if(!!mInstance.instance)
         {
             vkb::destroy_instance(mInstance);

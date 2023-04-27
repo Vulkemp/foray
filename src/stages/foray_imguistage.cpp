@@ -13,7 +13,6 @@
 namespace foray::stages {
     void ImguiStage::InitForImage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder)
     {
-        Destroy();
         mContext     = context;
         mTargetImage = backgroundImage;
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
@@ -26,7 +25,6 @@ namespace foray::stages {
 
     void ImguiStage::InitForSwapchain(core::Context* context, int32_t resizeOrder)
     {
-        Destroy();
         RenderStage::InitCallbacks(context, context->WindowSwapchain, resizeOrder);
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
         mTargetImage = nullptr;
@@ -198,9 +196,8 @@ namespace foray::stages {
         }
     }
 
-    void ImguiStage::Destroy()
+    ImguiStage::~ImguiStage()
     {
-        mOnSdlEvent.Destroy();
         DestroyFrameBufferAndRenderPass();
         if(mImguiPool != nullptr)
         {

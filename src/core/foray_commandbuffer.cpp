@@ -47,12 +47,13 @@ namespace foray::core {
         SetObjectName(mContext, mCommandBuffer, name, true);
     }
 
-    void CommandBuffer::Destroy()
+    CommandBuffer::~CommandBuffer()
     {
-        if(!!mCommandBuffer)
+        if(!!mContext && !!mCommandBuffer)
         {
             mContext->DispatchTable().freeCommandBuffers(mContext->CommandPool, 1, &mCommandBuffer);
             mCommandBuffer = nullptr;
+            mContext = nullptr;
         }
     }
 
@@ -104,14 +105,12 @@ namespace foray::core {
         AssertVkResult(mContext->DispatchTable().resetFences(1, &mFence));
     }
 
-    void HostSyncCommandBuffer::Destroy()
+    HostSyncCommandBuffer::~HostSyncCommandBuffer()
     {
-        if(!!mFence)
+        if(!!mContext && !!mFence)
         {
             mContext->DispatchTable().destroyFence(mFence, nullptr);
-            mFence = nullptr;
         }
-        CommandBuffer::Destroy();
     }
 
     SemaphoreReference SemaphoreReference::Binary(VkSemaphore semaphore, VkPipelineStageFlags2 waitStage)

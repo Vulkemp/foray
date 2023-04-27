@@ -1,6 +1,7 @@
 #pragma once
 #include "../base/foray_base_declares.hpp"
 #include "../core/foray_managedimage.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::util {
     /// @brief Helper object managing a copy of an existing image for use as history information (reprojection etc.)
@@ -12,7 +13,9 @@ namespace foray::util {
         /// @param context Required to initiate own copy
         /// @param source Source image to copy
         /// @param additionalUsageFlags UsageFlags to apply to the createinfo for the copy
-        void Create(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags = 0U);
+        HistoryImage(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags = 0U);
+
+        virtual ~HistoryImage();
 
         void Resize(const VkExtent2D& size);
 
@@ -24,20 +27,16 @@ namespace foray::util {
         /// @brief Batch record pipeline barriers and cmdCopyImage for a set of history images
         static void sMultiCopySourceToHistory(const std::vector<HistoryImage*>& historyImages, VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
 
-        inline bool Exists() const { return mHistory.Exists(); }
+        inline core::ManagedImage& GetHistoryImage() { return *mHistory; }
 
-        void Destroy();
-
-        inline core::ManagedImage& GetHistoryImage() { return mHistory; }
-
-        inline operator core::ManagedImage&() { return mHistory; }
-        inline operator const core::ManagedImage&() const { return mHistory; }
+        inline operator core::ManagedImage&() { return *mHistory; }
+        inline operator const core::ManagedImage&() const { return *mHistory; }
 
         FORAY_PROPERTY_V(HistoricLayout)
 
       protected:
-        core::ManagedImage* mSource = nullptr;
-        core::ManagedImage  mHistory;
-        VkImageLayout mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        core::ManagedImage*       mSource = nullptr;
+        Local<core::ManagedImage> mHistory;
+        VkImageLayout             mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     };
 }  // namespace foray::util

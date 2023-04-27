@@ -61,18 +61,9 @@ namespace foray::util {
         FORAY_GETTER_CR(Info)
         FORAY_GETTER_CR(RawData)
 
-        inline void InitManagedImage(core::Context*                  context,
-                                     core::ManagedImage*             image,
-                                     core::ManagedImage::CreateInfo& ci,
-                                     VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
-        inline void InitManagedImage(core::Context*                  context,
-                                     core::HostSyncCommandBuffer&        cmdBuffer,
-                                     core::ManagedImage*             image,
-                                     core::ManagedImage::CreateInfo& ci,
-                                     VkImageLayout                   afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
         inline void UpdateManagedImageCI(core::ManagedImage::CreateInfo& ci) const;
-        inline void WriteManagedImageData(core::ManagedImage* image, VkImageLayout afterwrite) const;
-        inline void WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, VkImageLayout afterwrite) const;
+        inline void WriteManagedImageData(core::ManagedImage* image, VkImageLayout afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
+        inline void WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, VkImageLayout afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
 
       protected:
         ImageInfo                  mInfo;

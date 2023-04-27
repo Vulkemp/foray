@@ -5,14 +5,14 @@ namespace foray::scene::gcomp {
 
     bool GeometryStore::CmdBindBuffers(VkCommandBuffer commandBuffer)
     {
-        if(mVerticesBuffer.GetAllocation())
+        if(mVerticesBuffer)
         {
             const VkDeviceSize offsets[1]      = {0};
-            VkBuffer           vertexBuffers[] = {mVerticesBuffer.GetBuffer()};
+            VkBuffer           vertexBuffers[] = {mVerticesBuffer->GetBuffer()};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-            if(mIndicesBuffer.GetAllocation())
+            if(mIndicesBuffer)
             {
-                vkCmdBindIndexBuffer(commandBuffer, mIndicesBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindIndexBuffer(commandBuffer, mIndicesBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
             }
             return true;
         }
@@ -21,8 +21,6 @@ namespace foray::scene::gcomp {
 
     GeometryStore::GeometryStore()
     {
-        mIndicesBuffer.SetName("Indices");
-        mVerticesBuffer.SetName("Vertices");
     }
 
     void GeometryStore::InitOrUpdate()
@@ -34,27 +32,18 @@ namespace foray::scene::gcomp {
 
         VkDeviceSize verticesSize = mVertices.size() * sizeof(Vertex);
         VkDeviceSize indicesSize  = mIndices.size() * sizeof(uint32_t);
+        VkDeviceSize verticesBufferSize = mVerticesBuffer ? mVerticesBuffer->GetSize() : 0;
+        VkDeviceSize indicesBufferSize = mIndicesBuffer ? mIndicesBuffer->GetSize() : 0;
 
-        if(verticesSize > mVerticesBuffer.GetSize())
+        if(verticesSize > verticesBufferSize)
         {
-            mVerticesBuffer.Destroy();
-            mVerticesBuffer.Create(GetContext(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | bufferUsageFlags, verticesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mVerticesBuffer.New(GetContext(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | bufferUsageFlags, verticesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Vertices");
         }
-        if(indicesSize > mIndicesBuffer.GetSize())
+        if(indicesSize > indicesBufferSize)
         {
-            mIndicesBuffer.Destroy();
-            mIndicesBuffer.Create(GetContext(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | bufferUsageFlags, indicesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
+            mIndicesBuffer.New(GetContext(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | bufferUsageFlags, indicesSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Indices");
         }
-        mVerticesBuffer.WriteDataDeviceLocal(mVertices.data(), verticesSize);
-        mIndicesBuffer.WriteDataDeviceLocal(mIndices.data(), indicesSize);
-    }
-
-    void GeometryStore::Destroy()
-    {
-        mMeshes.clear();
-        mIndices.clear();
-        mVertices.clear();
-        mVerticesBuffer.Destroy();
-        mIndicesBuffer.Destroy();
+        mVerticesBuffer->WriteDataDeviceLocal(mVertices.data(), verticesSize);
+        mIndicesBuffer->WriteDataDeviceLocal(mIndices.data(), indicesSize);
     }
 }  // namespace foray::scene

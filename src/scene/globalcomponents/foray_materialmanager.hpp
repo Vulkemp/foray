@@ -15,14 +15,13 @@ namespace foray::scene::gcomp {
 
         /// @brief Apply changes made to the cpu local buffer to the device local buffer
         void UpdateDeviceLocal();
-        void Destroy();
 
-        inline virtual ~MaterialManager() { Destroy(); }
+        virtual ~MaterialManager() = default;
 
         FORAY_GETTER_CR(Buffer)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer().GetVkDescriptorBufferInfo(); }
-        inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer().GetBuffer(); }
+        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer()->GetVkDescriptorBufferInfo(); }
+        inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer()->GetBuffer(); }
 
 
       protected:

@@ -214,9 +214,13 @@ namespace foray::gltf {
 
                         VkImageLayout afterUpload = generateMipMaps ? VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL : VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-                        imageLoader.InitManagedImage(args.Context, &(texture.GetImage()), imageCI, afterUpload);
+                        imageLoader.UpdateManagedImageCI(imageCI);
 
-                        VkImage image = texture.GetImage().GetImage();
+                        texture.GetImage().New(args.Context, imageCI);
+
+                        imageLoader.WriteManagedImageData(texture.GetImage(), afterUpload);
+
+                        VkImage image = texture.GetImage()->GetImage();
 
                         if(generateMipMaps)
                         {

@@ -23,11 +23,7 @@ namespace foray::core {
         virtual std::string_view GetTypeName() const;
         /// @brief Return true, if the managed resource is allocated
         /// @details Example: Vulkan object stored could be nullptr or instantiated
-        virtual bool             Exists() const = 0;
-        /// @brief Destroy the resource.
-        /// @remark This method must be callable even if the resource has not been initialized yet.
-        /// This method must call any Destroy() overloads of child objects and of base classes
-        virtual void             Destroy()      = 0;
+        virtual bool             Exists() const {return true;}
 
         /// @brief Default constructor registers the resource
         ManagedResource();

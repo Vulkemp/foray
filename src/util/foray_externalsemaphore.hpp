@@ -7,9 +7,9 @@ namespace foray::util {
     class ExternalSemaphore : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SEMAPHORE>
     {
       public:
-        void                Create(core::Context* context);
+        ExternalSemaphore(core::Context* context);
+        ~ExternalSemaphore();
         inline virtual bool Exists() const override { return !!mSemaphore; }
-        virtual void        Destroy() override;
 
         FORAY_GETTER_V(Semaphore)
         FORAY_GETTER_V(Handle)

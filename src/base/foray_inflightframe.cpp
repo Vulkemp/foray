@@ -5,9 +5,8 @@
 
 namespace foray::base {
 
-    void InFlightFrame::Create(core::Context* context, uint32_t auxCommandBufferCount)
+    InFlightFrame::InFlightFrame(core::Context* context, uint32_t auxCommandBufferCount)
     {
-        Destroy();
         mContext = context;
         Assert(!!mContext->Device, "[InFlightFrame::Create] Requires Dispatch table");
         mPrimaryCommandBuffer.Create(context);
@@ -41,27 +40,20 @@ namespace foray::base {
         }
     }
 
-    void InFlightFrame::Destroy()
+    InFlightFrame::~InFlightFrame()
     {
-        mPrimaryCommandBuffer.Destroy();
-        mAuxiliaryCommandBuffers.resize(0);
-
         if(!!mSwapchainImageReady)
         {
             mContext->DispatchTable().destroySemaphore(mSwapchainImageReady, nullptr);
-            mSwapchainImageReady = nullptr;
         }
         if(!!mPrimaryCompletedSemaphore)
         {
             mContext->DispatchTable().destroySemaphore(mPrimaryCompletedSemaphore, nullptr);
-            mPrimaryCompletedSemaphore = nullptr;
         }
         if(!!mPrimaryCompletedFence)
         {
             mContext->DispatchTable().destroyFence(mPrimaryCompletedFence, nullptr);
-            mPrimaryCompletedFence = nullptr;
         }
-        mContext = nullptr;
     }
     ESwapchainInteractResult InFlightFrame::AcquireSwapchainImage()
     {

@@ -12,8 +12,7 @@ namespace foray::core {
     class ManagedImage : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_IMAGE>
     {
       public:
-        inline ManagedImage() : VulkanResource("Unnamed Image") {}
-        inline virtual ~ManagedImage() { Destroy(); }
+        virtual ~ManagedImage();
 
         /// @brief Combines all structs used for initialization
         struct CreateInfo
@@ -41,16 +40,19 @@ namespace foray::core {
 
         /// @brief Allocates image, creates image, creates imageview
         /// @param context Requires Allocator, DispatchTable, Device
-        virtual void Create(Context* context, const CreateInfo& createInfo);
+        ManagedImage(Context* context, const CreateInfo& createInfo);
 
         /// @brief Uses stored create info to recreate vulkan image with a new size.
-        virtual void Resize(const VkExtent3D& newextent);
+        CreateInfo GetInfoForResize(const VkExtent3D& newextent);
         /// @brief Uses stored create info to recreate vulkan image with a new size.
-        virtual void Resize(const VkExtent2D& newextent);
+        CreateInfo GetInfoForResize(const VkExtent2D& newextent);
+
+        static void Resize(ManagedImage* image, const VkExtent3D& newextent);
+        static void Resize(ManagedImage* image, const VkExtent2D& newextent);
 
         /// @brief Shorthand using common values. See CreateInfo for information
         /// @param context Requires Allocator, DispatchTable, Device
-        virtual void Create(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name = "Unnamed Image");
+        ManagedImage(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name = "Unnamed Image");
 
         /// @brief Helper struct translated to a VkImageMemoryBarrier2 struct for one-time layout transitions
         struct QuickTransition
@@ -81,9 +83,6 @@ namespace foray::core {
         /// image (no mimap, no layers) completely.
         void WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite);
         void WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite);
-
-        virtual void Destroy() override;
-        virtual bool Exists() const override { return mAllocation; }
 
         FORAY_GETTER_CR(CreateInfo)
         FORAY_GETTER_V(Image)

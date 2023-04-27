@@ -1,10 +1,9 @@
 #include "foray_computestage.hpp"
 
 namespace foray::stages {
-    void ComputeStageBase::Init(core::Context* context)
+    ComputeStageBase::ComputeStageBase(core::Context* context)
+     : RenderStage(context)
     {
-        Destroy();
-        mContext = context;
         ApiCreateDescriptorSet();
         ApiCreatePipelineLayout();
         ApiInitShader();
@@ -31,7 +30,7 @@ namespace foray::stages {
     {
         VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
-                                                      .module = mShader,
+                                                      .module = *mShader,
                                                       .pName  = "main"};
 
         VkComputePipelineCreateInfo pipelineCi
@@ -49,20 +48,17 @@ namespace foray::stages {
         {
             mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
-            mShader.Destroy();
+            mShader = nullptr;
             ApiInitShader();
             CreatePipeline();
         }
     } 
-    void ComputeStageBase::Destroy() 
+    ComputeStageBase::~ComputeStageBase() 
     {
         if (!!mPipeline)
         {
             mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
             mPipeline = nullptr;
         }
-        mShader.Destroy();
-        mDescriptorSet.Destroy();
-        mPipelineLayout.Destroy();
     }
 }  // namespace foray::stages

@@ -7,13 +7,13 @@ namespace foray::util {
     struct LoadParams
     {
         core::HostSyncCommandBuffer& CmdBuffer;
-        core::Context*           Context;
-        const osi::Utf8Path&     Path;
-        core::ManagedImage*      Image;
-        VkImageUsageFlags        Usage;
-        bool                     Final;
-        VkImageLayout            AfterWrite;
-        std::string_view         Name;
+        core::Context*               Context;
+        const osi::Utf8Path&         Path;
+        Local<core::ManagedImage>&   Image;
+        VkImageUsageFlags            Usage;
+        bool                         Final;
+        VkImageLayout                AfterWrite;
+        std::string_view             Name;
     };
 
     template <VkFormat format>
@@ -35,7 +35,9 @@ namespace foray::util {
         {
             ci.CreateImageView = false;
         }
-        imageLoader.InitManagedImage(params.Context, params.CmdBuffer, params.Image, ci, params.AfterWrite);
+        imageLoader.UpdateManagedImageCI(ci);
+        params.Image.New(params.Context, ci);
+        imageLoader.WriteManagedImageData(params.Image, params.AfterWrite);
     }
 
     void lLoad(VkFormat format, const LoadParams& params)
@@ -84,7 +86,7 @@ namespace foray::util {
     }
 
 
-    void EnvironmentMap::Create(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat, VkFormat storeFormat)
+    EnvironmentMap::EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat, VkFormat storeFormat)
     {
         core::HostSyncCommandBuffer cmdBuffer;
         cmdBuffer.Create(context);
@@ -124,12 +126,12 @@ namespace foray::util {
 
         if(loadFormat != storeFormat)
         {
-            core::ManagedImage temporaryImage;
+            Local<core::ManagedImage> temporaryImage;
 
             LoadParams params{.CmdBuffer  = cmdBuffer,
                               .Context    = context,
                               .Path       = path,
-                              .Image      = &temporaryImage,
+                              .Image      = temporaryImage,
                               .Usage      = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
                               .Final      = false,
                               .AfterWrite = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -137,13 +139,13 @@ namespace foray::util {
 
             lLoad(loadFormat, params);
 
-            extent   = temporaryImage.GetExtent2D();
+            extent   = temporaryImage->GetExtent2D();
             mipCount = (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height))));
             core::ManagedImage::CreateInfo ci(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, storeFormat, extent, name);
             ci.ImageCI.mipLevels                       = mipCount;
             ci.ImageViewCI.subresourceRange.levelCount = mipCount;
 
-            mImage.Create(context, ci);
+            mImage.New(context, ci);
 
             cmdBuffer.Reset();
             cmdBuffer.Begin();
@@ -158,7 +160,7 @@ namespace foray::util {
                 .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image               = mImage.GetImage(),
+                .image               = mImage->GetImage(),
                 .subresourceRange    = VkImageSubresourceRange{
                        .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 0, .levelCount = 1, .baseArrayLayer = 0, .layerCount = 1}};
 
@@ -175,9 +177,9 @@ namespace foray::util {
             };
 
             VkBlitImageInfo2 blitInfo{.sType          = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
-                                      .srcImage       = temporaryImage.GetImage(),
+                                      .srcImage       = temporaryImage->GetImage(),
                                       .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                      .dstImage       = mImage.GetImage(),
+                                      .dstImage       = mImage->GetImage(),
                                       .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                       .regionCount    = 1U,
                                       .pRegions       = &blit,
@@ -192,7 +194,7 @@ namespace foray::util {
             LoadParams params{.CmdBuffer  = cmdBuffer,
                               .Context    = context,
                               .Path       = path,
-                              .Image      = &mImage,
+                              .Image      = mImage,
                               .Usage      = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                               .Final      = true,
                               .AfterWrite = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -200,8 +202,8 @@ namespace foray::util {
 
             lLoad(loadFormat, params);
 
-            extent   = mImage.GetExtent2D();
-            mipCount = mImage.GetCreateInfo().ImageCI.mipLevels;
+            extent   = mImage->GetExtent2D();
+            mipCount = mImage->GetCreateInfo().ImageCI.mipLevels;
         }
 
         {
@@ -209,7 +211,7 @@ namespace foray::util {
             cmdBuffer.Begin();
 
             // Generate mip levels
-            VkImage image = mImage.GetImage();
+            VkImage image = mImage->GetImage();
 
             std::vector<VkImageMemoryBarrier2> barriers(2);
             VkImageMemoryBarrier2&             sourceBarrier = barriers[0];
@@ -315,11 +317,5 @@ namespace foray::util {
 
             mSampler.Init(context->SamplerCol, samplerCi);
         }
-    }
-
-    void EnvironmentMap::Destroy()
-    {
-        mImage.Destroy();
-        mSampler.Destroy();
     }
 }  // namespace foray::util

@@ -39,18 +39,17 @@ namespace foray::as {
         // STEP #3    Recreate Buffer (if needed)
 
         VkDeviceSize newBufferSize = capacity * sizeof(GeometryMeta);
-        VkDeviceSize oldBufferSize = mBuffer.GetSize();
+        VkDeviceSize oldBufferSize = mBuffer ? mBuffer->GetSize() : 0;
 
         if(newBufferSize > oldBufferSize)
         {
-            mBuffer.Destroy();
-            mBuffer.Create(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, newBufferSize,
+            mBuffer.New(mContext, VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, newBufferSize,
                            VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Blas Geometry Meta Buffer");
         }
 
         // STEP #4    Copy array to device
 
-        mBuffer.WriteDataDeviceLocal(bufferData.data(), newBufferSize);
+        mBuffer->WriteDataDeviceLocal(bufferData.data(), newBufferSize);
 
         return mBufferOffsets;
     }

@@ -25,20 +25,17 @@ namespace foray::stages {
         /// @param scene Scene provides Camera, Tlas, Geometry and Materials
         /// @param envMap Environment Map
         /// @param noiseImage Noise Texture
-        void Init(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
+        DefaultRaytracingStageBase(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
-        /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), DestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
-        virtual void Destroy() override;
-
         /// @brief Image Output of the Raytracing Stage
         inline static constexpr std::string_view OutputName = "Rt.Output";
 
-        inline core::ManagedImage* GetRtOutput() { return &mOutput; }
+        inline core::ManagedImage* GetRtOutput() { return mOutput; }
 
-        inline virtual ~DefaultRaytracingStageBase() {}
+        virtual ~DefaultRaytracingStageBase();
 
       protected:
         /// @brief Initializes mOutput
@@ -59,8 +56,6 @@ namespace foray::stages {
 
         /// @brief Creates a fully populated descriptorset. See rtbindpoints and shaders/rt_common/bindpoints.glsl
         virtual void CreateOrUpdateDescriptors();
-        /// @brief Destroys the descriptor set
-        virtual void DestroyDescriptors();
 
         /// @brief Calls ApiDestroyRtPipeline(), ApiCreateRtPipeline() in this order
         virtual void ReloadShaders() override;
@@ -84,7 +79,7 @@ namespace foray::stages {
         core::ManagedImage* mNoiseTexture = nullptr;
 
         /// @brief Image output
-        core::ManagedImage mOutput;
+        Local<core::ManagedImage> mOutput;
         /// @brief Main DescriptorSet & Layout
         core::DescriptorSet mDescriptorSet;
         /// @brief DescriptorSet::SetDescriptorAt requires persistent .pNext objects

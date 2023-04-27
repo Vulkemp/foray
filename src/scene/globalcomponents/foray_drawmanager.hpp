@@ -31,16 +31,16 @@ namespace foray::scene::gcomp {
         FORAY_GETTER_CR(CurrentTransformBuffer)
         FORAY_GETTER_CR(PreviousTransformBuffer)
 
-        inline VkDescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
-        inline VkDescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer.GetVkDescriptorBufferInfo(); }
-        inline VkBuffer               GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer.GetDeviceBuffer().GetBuffer(); }
-        inline VkBuffer               GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer.GetBuffer(); }
+        inline VkDescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
+        inline VkDescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer->GetVkDescriptorBufferInfo(); }
+        inline VkBuffer               GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetBuffer(); }
+        inline VkBuffer               GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer->GetBuffer(); }
 
         FORAY_GETTER_V(TotalCount)
 
       protected:
-        util::DualBuffer    mCurrentTransformBuffer;
-        core::ManagedBuffer mPreviousTransformBuffer;
+        Local<util::DualBuffer>    mCurrentTransformBuffer;
+        Local<core::ManagedBuffer> mPreviousTransformBuffer;
 
         void CreateBuffers(size_t transformCount);
         void DestroyBuffers();

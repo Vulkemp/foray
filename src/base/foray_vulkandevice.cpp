@@ -158,21 +158,6 @@ namespace foray::base {
         mDispatchTable      = mDevice.make_table();
     }
 
-    void VulkanDevice::Destroy()
-    {
-        if(!!mDevice.device)
-        {
-            vkb::destroy_device(mDevice);
-            mDevice = vkb::Device();
-        }
-        mDispatchTable  = vkb::DispatchTable();
-        mPhysicalDevice = vkb::PhysicalDevice();
-        if(!!mContext)
-        {
-            mContext->Device            = nullptr;
-        }
-    }
-
     VulkanDevice::~VulkanDevice()
     {
         if(!!mDevice.device)

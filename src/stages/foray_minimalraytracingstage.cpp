@@ -15,15 +15,12 @@
 
 namespace foray::stages {
 
-    void MinimalRaytracingStageBase::Init(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
+    MinimalRaytracingStageBase::MinimalRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
     {
-        Destroy();
         RenderStage::InitCallbacks(context, domain, resizeOrder);
         ApiCustomObjectsCreate();
         ApiCreateOutputImages();
         ApiCreateOrUpdateDescriptors();
-        ApiCreatePipelineLayout();
-        ApiCreateRtPipeline();
     }
     void MinimalRaytracingStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -36,13 +33,9 @@ namespace foray::stages {
         RenderStage::OnResized(extent);
         ApiCreateOrUpdateDescriptors();
     }
-    void MinimalRaytracingStageBase::Destroy()
+    MinimalRaytracingStageBase::~MinimalRaytracingStageBase()
     {
-        ApiDestroyRtPipeline();
         mPipelineLayout.Destroy();
-        ApiDestroyDescriptors();
-        DestroyOutputImages();
-        ApiCustomObjectsDestroy();
     }
     void MinimalRaytracingStageBase::ReloadShaders()
     {

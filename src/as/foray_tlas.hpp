@@ -19,7 +19,7 @@ namespace foray::as {
     {
       public:
         Tlas() = default;
-        virtual ~Tlas() { Destroy(); }
+        virtual ~Tlas();
 
         inline virtual std::string_view GetTypeName() const override { return "Top-Level AS"; }
 
@@ -29,7 +29,6 @@ namespace foray::as {
         virtual void UpdateLean(VkCommandBuffer cmdBuffer, uint32_t frameIndex);
 
         inline virtual bool Exists() const override { return !!mAccelerationStructure; }
-        virtual void        Destroy() override;
 
         FORAY_GETTER_V(AccelerationStructure)
         FORAY_GETTER_CR(TlasMemory)
@@ -65,9 +64,9 @@ namespace foray::as {
         core::Context*                   mContext               = nullptr;
         bool                             mDirty                 = false;
         VkAccelerationStructureKHR       mAccelerationStructure = nullptr;
-        core::ManagedBuffer              mTlasMemory;
-        util::DualBuffer                 mInstanceBuffer;
-        core::ManagedBuffer              mScratchBuffer;
+        Local<core::ManagedBuffer>       mTlasMemory;
+        Local<util::DualBuffer>          mInstanceBuffer;
+        Local<core::ManagedBuffer>       mScratchBuffer;
         VkDeviceAddress                  mTlasAddress = 0;
         std::map<uint64_t, BlasInstance> mAnimatedBlasInstances;
         std::map<uint64_t, BlasInstance> mStaticBlasInstances;

@@ -19,9 +19,8 @@ namespace foray::scene::gcomp {
         mUbo.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
     }
 
-    CameraManager::CameraManager(core::Context* context) : Component::UpdateCallback(ORDER_DEVICEUPLOAD)
+    CameraManager::CameraManager(core::Context* context) : Component::UpdateCallback(ORDER_DEVICEUPLOAD), mUbo(context, "Camera")
     {
-        mUbo.Create(context, "Camera");
     }
     void CameraManager::RefreshCameraList()
     {
@@ -64,7 +63,6 @@ namespace foray::scene::gcomp {
     {
         mSelectedCamera = nullptr;
         mCameras.clear();
-        mUbo.Destroy();
     }
 
 }  // namespace foray

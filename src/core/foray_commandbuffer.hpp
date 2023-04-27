@@ -10,7 +10,7 @@ namespace foray::core {
     {
       public:
         CommandBuffer() = default;
-        inline virtual ~CommandBuffer() { Destroy(); }
+        virtual ~CommandBuffer();
 
         /// @brief Create based on the contexts device, command pool and queue.
         virtual VkCommandBuffer Create(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
@@ -21,8 +21,6 @@ namespace foray::core {
         /// @brief vkResetCommandBuffer()
         virtual void Reset(VkCommandBufferResetFlags flags = 0);
 
-        /// @brief Destroys the associated resources
-        virtual void Destroy() override;
         virtual bool Exists() const override { return mCommandBuffer; }
         virtual void SetName(std::string_view name) override;
 
@@ -52,9 +50,7 @@ namespace foray::core {
         /// @brief Blocks CPU thread until commandbuffer has completed
         void WaitForCompletion();
 
-        virtual void Destroy() override;
-
-        inline virtual ~HostSyncCommandBuffer() { Destroy(); }
+        virtual ~HostSyncCommandBuffer();
 
       protected:
         VkFence mFence = nullptr;

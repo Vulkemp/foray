@@ -29,10 +29,6 @@ namespace foray::stages {
         ///  * All commands must be submitted to cmdBuffer
         inline virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) {}
 
-        /// @brief Destroy the render stage. Finalizes all components
-        virtual void Destroy();
-
-
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
         std::vector<core::ManagedImage*> GetImageOutputs();
         /// @brief Gets an image output
@@ -49,7 +45,7 @@ namespace foray::stages {
         /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
         /// @param extent New render size
         /// @remark Inheriting stages may override to update descriptor sets
-        virtual void OnResized(VkExtent2D extent);
+        virtual void OnResized(VkExtent2D extent) = 0;
 
         /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
         /// @details Implementation will check through shaders registered in 'mShaderKeys'. If any of them have been marked as recompiled, calls ReloadShaders()
@@ -57,8 +53,6 @@ namespace foray::stages {
 
         /// @brief Override this to reload all shaders and rebuild pipelines after a registered shader has been recompiled.
         virtual void ReloadShaders() {}
-        /// @brief Calls Destroy() on any image in mImageOutputs and clears mImageOutputs
-        virtual void DestroyOutputImages();
 
         /// @brief Inheriting types should emplace their images onto this collection to provide them in GetImageOutput interface
         std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;

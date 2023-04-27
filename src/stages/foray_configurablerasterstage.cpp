@@ -215,8 +215,8 @@ namespace foray::stages {
         FORAY_ASSERTFMT(mOutputMap.size() < MAX_OUTPUT_COUNT, "Can not exceed maximum output count of {}", MAX_OUTPUT_COUNT);
         FORAY_ASSERTFMT(!mOutputMap.contains(keycopy), "Raster stage already configured with an output named \"{}\"", name);
         Assert(!mPipeline, "Must add outputs before building!");
-        std::unique_ptr<Output>& output = mOutputMap[keycopy] = std::make_unique<Output>(name, recipe);
-        mOutputList.push_back(output.get());
+        Heap<Output>& output = mOutputMap[keycopy] = Heap<Output>(name, recipe);
+        mOutputList.push_back(output.GetData());
         return *this;
     }
     const ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::GetOutputRecipe(std::string_view name) const
@@ -233,8 +233,8 @@ namespace foray::stages {
     VkAttachmentDescription ConfigurableRasterStage::Output::GetAttachmentDescr() const
     {
         return VkAttachmentDescription{.flags          = 0,
-                                       .format         = Image.GetFormat(),
-                                       .samples        = Image.GetSampleCount(),
+                                       .format         = Image->GetFormat(),
+                                       .samples        = Image->GetSampleCount(),
                                        .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                        .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                        .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -245,15 +245,14 @@ namespace foray::stages {
 
     core::ManagedImage* ConfigurableRasterStage::GetDepthImage()
     {
-        return &mDepthImage;
+        return mDepthImage;
     }
 
     void ConfigurableRasterStage::Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
     {
-        Destroy();
         RenderStage::InitCallbacks(context, domain, resizeOrder);
-        mScene   = scene;
-        mName    = std::string(name);
+        mScene = scene;
+        mName  = std::string(name);
 
         CheckDeviceColorAttachmentCount();
         CreateOutputs(mDomain->GetExtent());
@@ -270,35 +269,32 @@ namespace foray::stages {
     {
         uint32_t max = mContext->Device->GetPhysicalDevice().properties.limits.maxColorAttachments;
         FORAY_ASSERTFMT(mOutputList.size() <= max,
-                        "Physical Device supports max of {} color attachments! As configured requires {}. See VkPhysicalDeviceLimits::maxColorAttachments.",
-                        max, mOutputList.size())
+                        "Physical Device supports max of {} color attachments! As configured requires {}. See VkPhysicalDeviceLimits::maxColorAttachments.", max,
+                        mOutputList.size())
     }
 
     void ConfigurableRasterStage::CreateOutputs(const VkExtent2D& size)
     {
         for(auto& pair : mOutputMap)
         {
-            core::ManagedImage& image  = pair.second->Image;
-            OutputRecipe&       recipe = pair.second->Recipe;
-            std::string_view    name   = pair.second->Name;
-
-            image.Destroy();
+            Local<core::ManagedImage>& image  = pair.second->Image;
+            OutputRecipe&              recipe = pair.second->Recipe;
+            std::string_view           name   = pair.second->Name;
 
             core::ManagedImage::CreateInfo ci(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT
                                                   | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
                                               recipe.ImageFormat, size, name);
-            image.Create(mContext, ci);
+            image.New(mContext, ci);
             std::string keycopy(name);
-            mImageOutputs[keycopy] = &image;
+            mImageOutputs[keycopy] = image;
         }
-        mDepthImage.Destroy();
         mDepthOutputName = fmt::format("{}.Depth", mName);
         VkImageUsageFlags depthUsage =
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         core::ManagedImage::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, size, mDepthOutputName);
         ci.ImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
-        mDepthImage.Create(mContext, ci);
-        mImageOutputs[mDepthOutputName] = &mDepthImage;
+        mDepthImage.New(mContext, ci);
+        mImageOutputs[mDepthOutputName] = mDepthImage;
     }
 
     void ConfigurableRasterStage::CreateRenderPass()
@@ -315,8 +311,8 @@ namespace foray::stages {
         uint32_t              depthLocation = mOutputList.size();
         VkAttachmentReference depthAttachmentRef{depthLocation, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
         attachmentDescr.push_back(VkAttachmentDescription{.flags          = 0,
-                                                          .format         = mDepthImage.GetFormat(),
-                                                          .samples        = mDepthImage.GetSampleCount(),
+                                                          .format         = mDepthImage->GetFormat(),
+                                                          .samples        = mDepthImage->GetSampleCount(),
                                                           .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                                           .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                                           .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -335,16 +331,20 @@ namespace foray::stages {
         subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
         subPassDependencies[0].dstSubpass          = 0;
         subPassDependencies[0].srcStageMask        = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[0].dstStageMask        = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        subPassDependencies[0].srcAccessMask       = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[0].dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[0].dependencyFlags     = VK_DEPENDENCY_BY_REGION_BIT;
+        subPassDependencies[0].dstStageMask =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        subPassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        subPassDependencies[0].dstAccessMask =
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        subPassDependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-        subPassDependencies[1].srcSubpass      = 0;
-        subPassDependencies[1].dstSubpass      = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        subPassDependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        subPassDependencies[1].srcSubpass = 0;
+        subPassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+        subPassDependencies[1].srcStageMask =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        subPassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        subPassDependencies[1].srcAccessMask =
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         subPassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
         subPassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
@@ -364,9 +364,9 @@ namespace foray::stages {
 
         for(uint32_t outLocation = 0; outLocation < mOutputList.size(); outLocation++)
         {
-            attachmentViews.push_back(mOutputList[outLocation]->Image.GetImageView());
+            attachmentViews.push_back(mOutputList[outLocation]->Image->GetImageView());
         }
-        attachmentViews.push_back(mDepthImage.GetImageView());
+        attachmentViews.push_back(mDepthImage->GetImageView());
 
         VkFramebufferCreateInfo fbufCreateInfo = {};
         fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -453,7 +453,7 @@ namespace foray::stages {
     void ConfigurableRasterStage::CreatePipeline()
     {
         util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule);
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, *mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, *mFragmentShaderModule);
 
         // vertex layout
         scene::VertexInputStateBuilder vertexInputStateBuilder;
@@ -575,48 +575,34 @@ namespace foray::stages {
 
         for(auto& pair : mOutputMap)
         {
-            core::ManagedImage& image = pair.second->Image;
-            if(image.Exists())
+            Local<core::ManagedImage>& image = pair.second->Image;
+            if(image)
             {
-                image.Resize(extent);
+                core::ManagedImage::Resize(image, extent);
             }
         }
-        mDepthImage.Resize(extent);
+        core::ManagedImage::Resize(mDepthImage, extent);
 
         CreateFrameBuffer();
     }
 
-    void ConfigurableRasterStage::Destroy()
+    ConfigurableRasterStage::~ConfigurableRasterStage()
     {
-        if(!mContext)
-        {
-            return;
-        }
-        VkDevice device = mContext->VkDevice();
-        if(mPipeline)
+        VkDevice device = !!mContext ? mContext->VkDevice() : nullptr;
+        if(device && mPipeline)
         {
             vkDestroyPipeline(device, mPipeline, nullptr);
-            mPipeline = nullptr;
         }
-        mPipelineLayout.Destroy();
-        mDescriptorSet.Destroy();
-        mVertexShaderModule.Destroy();
-        mFragmentShaderModule.Destroy();
-        RenderStage::DestroyOutputImages();
-        mDepthImage.Destroy();
-        if(mFrameBuffer)
+        if(device && mFrameBuffer)
         {
             vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
             mFrameBuffer = nullptr;
         }
-        if(mRenderpass)
+        if(device && mRenderpass)
         {
             vkDestroyRenderPass(device, mRenderpass, nullptr);
             mRenderpass = nullptr;
         }
-        mOutputList.clear();
-        mOutputMap.clear();
-        mContext = nullptr;
     }
 
     uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::Device* device)

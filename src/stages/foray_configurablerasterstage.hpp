@@ -2,6 +2,7 @@
 #include "../core/foray_shadermodule.hpp"
 #include "../scene/foray_scene_declares.hpp"
 #include "foray_rasterizedRenderStage.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::stages {
 
@@ -149,9 +150,7 @@ namespace foray::stages {
 
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
-        virtual void Destroy() override;
-
-        virtual ~ConfigurableRasterStage() { Destroy(); }
+        virtual ~ConfigurableRasterStage();
 
         /// @brief Gets the depth image
         core::ManagedImage* GetDepthImage();
@@ -170,26 +169,26 @@ namespace foray::stages {
       protected:
         struct Output
         {
-            std::string        Name;
-            core::ManagedImage Image;
-            OutputRecipe       Recipe;
+            std::string               Name;
+            Local<core::ManagedImage> Image;
+            OutputRecipe              Recipe;
 
             inline Output(std::string_view name, const OutputRecipe& recipe) : Name(name), Recipe(recipe) {}
             VkAttachmentDescription GetAttachmentDescr() const;
         };
-        using OutputMap  = std::unordered_map<std::string, std::unique_ptr<Output>>;
+        using OutputMap  = std::unordered_map<std::string, Heap<Output>>;
         using OutputList = std::vector<Output*>;
 
-        OutputMap          mOutputMap;
-        OutputList         mOutputList;
-        core::ManagedImage mDepthImage;
-        scene::Scene*      mScene = nullptr;
+        OutputMap                 mOutputMap;
+        OutputList                mOutputList;
+        Local<core::ManagedImage> mDepthImage;
+        scene::Scene*             mScene = nullptr;
 
         uint32_t mBuiltInFeaturesFlagsGlobal = 0;
         uint32_t mInterfaceFlagsGlobal       = 0;
 
-        core::ShaderModule mVertexShaderModule;
-        core::ShaderModule mFragmentShaderModule;
+        Local<core::ShaderModule> mVertexShaderModule;
+        Local<core::ShaderModule> mFragmentShaderModule;
 
         std::string mDepthOutputName = "";
         std::string mName            = "";

@@ -29,22 +29,10 @@ namespace foray::core {
             CreateInfo(VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
         };
 
+        static CreateInfo CreateForStaging(VkDeviceSize size, std::string_view bufferName = {});
       public:
-        ManagedBuffer() : VulkanResource("Unnamed Buffer"){};
-
-        /// @brief Creates the buffer based on createInfo
-        /// @param context Requires Allocator, Device, DispatchTable (CommandPool for certain shorthands)
-        void Create(Context* context, const CreateInfo& createInfo);
-        /// @brief Creates the buffer with VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_AUTO_PREFER_HOST, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT. If data is set, also maps writes and unmaps
-        /// @param context Requires Allocator, Device, DispatchTable
-        void CreateForStaging(Context* context, VkDeviceSize size, const void* data = nullptr, std::string_view bufferName = {});
-        /// @brief Simplified version of Create that omits the use of a create info but should be sufficient for many usecases
-        /// @param context Requires Allocator, Device, DispatchTable
-        void Create(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
-
-        virtual void Destroy() override;
-
-        virtual bool Exists() const override { return !!mAllocation; }
+        ManagedBuffer(Context* context, const CreateInfo& createInfo);
+        ManagedBuffer(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
 
         /// @brief Employ a staging buffer to upload data
         /// @param data data
@@ -67,13 +55,7 @@ namespace foray::core {
         /// @param size Amount to write. If zero, writes equal to the entire size of the buffer
         void MapAndWrite(const void* data, size_t size = 0);
 
-        inline virtual ~ManagedBuffer()
-        {
-            if(!!mAllocation)
-            {
-                Destroy();
-            }
-        }
+        virtual ~ManagedBuffer();
 
         FORAY_GETTER_V(Buffer);
         FORAY_GETTER_V(IsMapped);

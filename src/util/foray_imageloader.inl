@@ -90,34 +90,6 @@ namespace foray::util {
     }
 
     template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
-    {
-        if(!mInfo.Valid || !mRawData.size())
-        {
-            return;
-        }
-
-        UpdateManagedImageCI(ci);
-
-        image->Create(context, ci);
-        WriteManagedImageData(image, afterwrite);
-    }
-
-    template <VkFormat FORMAT>
-    inline void ImageLoader<FORMAT>::InitManagedImage(core::Context* context, core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, core::ManagedImage::CreateInfo& ci, VkImageLayout afterwrite) const
-    {
-        if(!mInfo.Valid || !mRawData.size())
-        {
-            return;
-        }
-
-        UpdateManagedImageCI(ci);
-
-        image->Create(context, ci);
-        WriteManagedImageData(cmdBuffer, image, afterwrite);
-    }
-
-    template <VkFormat FORMAT>
     inline void ImageLoader<FORMAT>::UpdateManagedImageCI(core::ManagedImage::CreateInfo& ci) const
     {
         ci.ImageCI.format        = FORMAT;

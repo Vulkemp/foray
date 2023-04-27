@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/foray_managedbuffer.hpp"
 #include "../foray_basics.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::util {
 
@@ -19,7 +20,7 @@ namespace foray::util {
       public:
         /// @brief Creates the dualbuffer setup
         /// @param devicebufferCreateInfo Used to initate the drawside buffer. Same size is used for staging buffers
-        void Create(core::Context* context, const core::ManagedBuffer::CreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
+        DualBuffer(core::Context* context, const core::ManagedBuffer::CreateInfo& devicebufferCreateInfo, uint32_t stageBufferCount = INFLIGHT_FRAME_COUNT);
 
         /// @brief Updates the entire staging buffer
         virtual void StageFullBuffer(uint32_t frameIndex, const void* data);
@@ -45,9 +46,7 @@ namespace foray::util {
         inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return VkDescriptorBufferInfo{.buffer = mDeviceBuffer.GetBuffer(), .offset = 0U, .range = VK_WHOLE_SIZE}; }
         inline VkBuffer GetDeviceVkBuffer() const { return mDeviceBuffer.GetBuffer(); }
 
-        void Destroy();
-
-        inline virtual ~DualBuffer() { Destroy(); }
+        virtual ~DualBuffer() = default;
 
         FORAY_GETTER_CR(DeviceBuffer)
 
@@ -55,7 +54,7 @@ namespace foray::util {
         /// @brief Memory locations the permanently mapped staging buffers are mapped to
         std::vector<void*> mStagingBufferMaps;
         /// @brief Permanently mapped host-local staging buffers (one per frame in flight)
-        std::vector<std::unique_ptr<core::ManagedBuffer>> mStagingBuffers;
+        std::vector<Heap<core::ManagedBuffer>> mStagingBuffers;
         /// @brief Record of all buffer copies submitted. Added to when writing to staging buffers, cleared when building the commandbuffer
         std::vector<std::vector<VkBufferCopy>> mBufferCopies;
         /// @brief The buffer used by the device

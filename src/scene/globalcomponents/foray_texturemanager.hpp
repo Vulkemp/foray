@@ -2,6 +2,7 @@
 #include "../../core/foray_managedimage.hpp"
 #include "../../core/foray_samplercollection.hpp"
 #include "../foray_component.hpp"
+#include "../../foray_mem.hpp"
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
@@ -16,7 +17,7 @@ namespace foray::scene::gcomp {
         struct Texture
         {
           public:
-            inline Texture() : mImage(), mSampler() { mSampler.SetManagedImage(&mImage); }
+            inline Texture() : mImage(), mSampler() { mSampler.SetManagedImage(mImage.GetData()); }
             virtual ~Texture() = default;
 
             FORAY_GETTER_CR(Image)
@@ -30,7 +31,7 @@ namespace foray::scene::gcomp {
             FORAY_PROPERTY_R(Sampler)
 
           protected:
-            core::ManagedImage         mImage;
+            Local<core::ManagedImage>         mImage;
             core::CombinedImageSampler mSampler;
         };
 

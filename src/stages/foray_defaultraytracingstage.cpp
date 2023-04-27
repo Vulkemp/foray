@@ -14,9 +14,8 @@
 #include <array>
 
 namespace foray::stages {
-    void DefaultRaytracingStageBase::Init(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
+    DefaultRaytracingStageBase::DefaultRaytracingStageBase(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
     {
-        Destroy();
         mScene          = scene;
         mEnvironmentMap = envMap;
         mNoiseTexture   = noiseImage;
@@ -25,7 +24,6 @@ namespace foray::stages {
         CreateOutputImages();
         CreateOrUpdateDescriptors();
         CreatePipelineLayout();
-        ApiCreateRtPipeline();
     }
     void DefaultRaytracingStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -38,13 +36,9 @@ namespace foray::stages {
         RenderStage::OnResized(extent);
         CreateOrUpdateDescriptors();
     }
-    void DefaultRaytracingStageBase::Destroy()
+    DefaultRaytracingStageBase::~DefaultRaytracingStageBase()
     {
-        ApiDestroyRtPipeline();
         mPipelineLayout.Destroy();
-        DestroyDescriptors();
-        DestroyOutputImages();
-        ApiCustomObjectsDestroy();
     }
     void DefaultRaytracingStageBase::ReloadShaders()
     {
@@ -55,8 +49,8 @@ namespace foray::stages {
     {
         VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        mOutput.Create(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
-        mImageOutputs[std::string(OutputName)] = &mOutput;
+        mOutput.New(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
+        mImageOutputs[std::string(OutputName)] = mOutput;
     }
     void DefaultRaytracingStageBase::CreatePipelineLayout()
     {
@@ -110,10 +104,6 @@ namespace foray::stages {
         {
             mDescriptorSet.Create(mContext, "RaytracingStageDescriptorSet");
         }
-    }
-    void DefaultRaytracingStageBase::DestroyDescriptors()
-    {
-        mDescriptorSet.Destroy();
     }
     void DefaultRaytracingStageBase::RecordFramePrepare(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -169,7 +159,7 @@ namespace foray::stages {
 
         VkStridedDeviceAddressRegionKHR callable_shader_sbt_entry = mPipeline.GetCallablesSbt().GetAddressRegion();
 
-        VkExtent2D extent{mOutput.GetExtent3D().width, mOutput.GetExtent3D().height};
+        VkExtent2D extent{mOutput->GetExtent2D()};
 
         mContext->DispatchTable().cmdTraceRaysKHR(cmdBuffer, &raygen_shader_sbt_entry, &miss_shader_sbt_entry, &hit_shader_sbt_entry, &callable_shader_sbt_entry, extent.width,
                                                     extent.height, 1U);

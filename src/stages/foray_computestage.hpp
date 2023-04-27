@@ -3,6 +3,7 @@
 #include "../foray_glm.hpp"
 #include "../util/foray_pipelinelayout.hpp"
 #include "foray_renderstage.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::stages {
     /// @brief Base class for compute shaders
@@ -18,14 +19,14 @@ namespace foray::stages {
       public:
         /// @brief Init
         /// @details Calls ApiCreateDescriptorSet(), ApiCreatePipelineLayout(), ApiInitShader(), CreatePipeline() in this order
-        void Init(core::Context* context);
+        ComputeStageBase(core::Context* context);
 
         /// @brief Calls ApiBeforeFrame(), binds pipeline and descriptor set, calls ApiBeforeDispatch()
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
-        virtual void Destroy() override;
+        virtual ~ComputeStageBase();
       protected:
-        core::ShaderModule mShader;
+        Local<core::ShaderModule> mShader;
 
         core::DescriptorSet  mDescriptorSet;
         util::PipelineLayout mPipelineLayout;

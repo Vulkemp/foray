@@ -47,7 +47,7 @@ namespace foray::core {
         mContext->DispatchTable().createShaderModule(&moduleCreateInfo, NULL, &mShaderModule);
     }
 
-    void ShaderModule::Destroy()
+    ShaderModule::~ShaderModule()
     {
         if(mShaderModule != nullptr)
         {

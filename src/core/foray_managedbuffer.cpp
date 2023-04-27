@@ -13,7 +13,8 @@ namespace foray::core {
     {
     }
 
-    void ManagedBuffer::Create(Context* context, const CreateInfo& createInfo)
+    ManagedBuffer::ManagedBuffer(Context* context, const CreateInfo& createInfo)
+     : VulkanResource(createInfo.Name.size() > 0 ? createInfo.Name : "Unnamed Buffer")
     {
         mContext   = context;
         mSize      = createInfo.BufferCreateInfo.size;
@@ -41,28 +42,15 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedBuffer::CreateForStaging(Context* context, VkDeviceSize size, const void* data, std::string_view bufferName)
+    ManagedBuffer::CreateInfo ManagedBuffer::CreateForStaging(VkDeviceSize size, std::string_view bufferName)
     {
-        // if (mName.length() == 0){
-        //     mName = fmt::format("Staging Buffer {0:x}", reinterpret_cast<uint64_t>(data));
-        // }
-        if(bufferName.length())
-        {
-            SetName(bufferName);
-        }
-        Create(context, VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
+        return CreateInfo(VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, size, VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
                VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-
-        if(data)
-        {
-            MapAndWrite(data, size);
-        }
     }
 
-    void ManagedBuffer::Create(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    ManagedBuffer::ManagedBuffer(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+     : ManagedBuffer(context, CreateInfo(usage, size, memoryUsage, flags, name))
     {
-        CreateInfo createInfo(usage, size, memoryUsage, flags, name);
-        Create(context, createInfo);
     }
 
     void ManagedBuffer::Map(void*& data)
@@ -125,11 +113,10 @@ namespace foray::core {
         vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
     }
 
-    void ManagedBuffer::Destroy()
+    ManagedBuffer::~ManagedBuffer()
     {
         if(!!mAllocation && mIsMapped)
         {
-            logger()->warn("ManagedBuffer::Destroy called before Unmap!");
             Unmap();
         }
         if(mContext && mContext->Allocator && mAllocation)
@@ -156,8 +143,8 @@ namespace foray::core {
     {
         Assert(size + offsetDstBuffer <= mAllocationInfo.size, "Attempt to write data to device local buffer failed. Size + offsets needs to fit into buffer allocation!");
 
-        ManagedBuffer stagingBuffer;
-        stagingBuffer.CreateForStaging(mContext, size, data, fmt::format("Staging for {}", GetName()));
+        ManagedBuffer stagingBuffer(mContext, CreateForStaging(size, fmt::format("Staging for {}", GetName())));
+        stagingBuffer.MapAndWrite(data, size);
 
         cmdBuffer.Begin();
 

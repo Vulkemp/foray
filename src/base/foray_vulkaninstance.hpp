@@ -38,10 +38,8 @@ namespace foray::base {
         /// @brief If mEnableDebugLayersAndCallbacks is set, configures validation and callback. If mBeforeInstanceBuildFunc is set, calls it. Finally, builds Instance.
         /// @remark Will throw std::exception on instance build failure
         void        Create();
-        inline bool Exists() const { return !!mInstance.instance; }
-        void        Destroy();
 
-        ~VulkanInstance();
+        virtual ~VulkanInstance();
 
       protected:
         static VkBool32 DefaultDebugMessengerCallback(VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,

@@ -3,7 +3,7 @@
 
 namespace foray::util
 {
-    void ExternalSemaphore::Create(core::Context* context)
+    ExternalSemaphore::ExternalSemaphore(core::Context* context)
     {
         mContext = context;
 
@@ -45,7 +45,7 @@ namespace foray::util
 #endif
     }
 
-    void ExternalSemaphore::Destroy()
+    ExternalSemaphore::~ExternalSemaphore()
     {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         if(mHandle != INVALID_HANDLE_VALUE)

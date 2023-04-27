@@ -31,10 +31,9 @@ namespace foray::base {
     class InFlightFrame
     {
       public:
-        void Create(core::Context* context, uint32_t auxCommandBufferCount = 0);
-        void Destroy();
+        InFlightFrame(core::Context* context, uint32_t auxCommandBufferCount = 0);
 
-        inline virtual ~InFlightFrame() { Destroy(); }
+        virtual ~InFlightFrame();
 
         /// @brief Acquires next swapchain image and stores the resulting index in mSwapchainImageIndex
         /// @return If result is Resized, the swapchain must be resized immediately

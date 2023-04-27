@@ -19,13 +19,11 @@ namespace foray::stages {
     {
       public:
         /// @brief Destroys, assigns context, calls ApiCreateOutputImages(), ApiCustomObjectsCreate(), ApiCreateOrUpdateDescriptors(), ApiCreatePipelineLayout(), ApiCreateRtPipeline() in this order
-        void Init(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
+        MinimalRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
+        ~MinimalRaytracingStageBase();
 
         /// @brief Calls ApiRecordFramePrepare(), ApiRecordFrameBind(), ApiRecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
-
-        /// @brief Calls ApiDestroyRtPipeline(), mPipelineLayout.Destroy(), ApiDestroyDescriptors(), ApiCustomObjectsDestroy() and DestroyOutputImages() in this order
-        virtual void Destroy() override;
 
       protected:
         /// @brief Inheriting types should setup their Output Images here and push them onto the RenderStage::mImageOutput collection

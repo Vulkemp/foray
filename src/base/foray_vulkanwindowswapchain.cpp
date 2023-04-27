@@ -132,7 +132,9 @@ namespace foray::base {
         }
         else
         {
-            Destroy();
+            vkb::destroy_surface(mContext->VkInstance(), mSurface);
+            mSurface = nullptr;
+            mWindow.Destroy();
             return;
         }
 
@@ -169,7 +171,7 @@ namespace foray::base {
         mExtent             = VkExtent2D{};
     }
 
-    void VulkanWindowSwapchain::Destroy()
+    VulkanWindowSwapchain::~VulkanWindowSwapchain()
     {
         DestroySwapchain();
         vkb::destroy_surface(mContext->VkInstance(), mSurface);

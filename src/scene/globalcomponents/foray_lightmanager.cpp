@@ -5,7 +5,6 @@
 namespace foray::scene::gcomp {
     void LightManager::CreateOrUpdate()
     {
-        mBuffer.Destroy();
         mSimplifiedlights.clear();
         mComponentArrayBindings.clear();
 
@@ -26,21 +25,21 @@ namespace foray::scene::gcomp {
 
         core::ManagedBuffer::CreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, bufferSize,
                                            VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Simplifiedlights");
-        mBuffer.Create(GetContext(), ci);
+        mBuffer.New(GetContext(), ci);
 
         uint32_t count = mSimplifiedlights.size();
-        mBuffer.StageSection(0, &count, 0, sizeof(count));
+        mBuffer->StageSection(0, &count, 0, sizeof(count));
 
         core::HostSyncCommandBuffer cmdBuf;
         if(count > 0)
         {
-            mBuffer.StageSection(0, mSimplifiedlights.data(), align, sizeof(SimpleLight) * count);
+            mBuffer->StageSection(0, mSimplifiedlights.data(), align, sizeof(SimpleLight) * count);
         }
 
         cmdBuf.Create(GetContext());
         cmdBuf.Begin();
 
-        mBuffer.CmdCopyToDevice(0, cmdBuf);
+        mBuffer->CmdCopyToDevice(0, cmdBuf);
 
         cmdBuf.SubmitAndWait();
     }
@@ -57,9 +56,9 @@ namespace foray::scene::gcomp {
 
         if(mSimplifiedlights.size() > 0)
         {
-            mBuffer.StageSection(updateInfo.RenderInfo.GetFrameNumber(), mSimplifiedlights.data(), alignof(SimpleLight), sizeof(SimpleLight) * mSimplifiedlights.size());
+            mBuffer->StageSection(updateInfo.RenderInfo.GetFrameNumber(), mSimplifiedlights.data(), alignof(SimpleLight), sizeof(SimpleLight) * mSimplifiedlights.size());
 
-            mBuffer.CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
+            mBuffer->CmdCopyToDevice(updateInfo.RenderInfo.GetFrameNumber(), updateInfo.CmdBuffer);
         }
     }
 

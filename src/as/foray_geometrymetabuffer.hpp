@@ -3,6 +3,7 @@
 #include "foray_as_declares.hpp"
 #include <unordered_map>
 #include <unordered_set>
+#include "../foray_mem.hpp"
 
 namespace foray::as {
     /// @brief Meta information for a Geometry (gltf equivalent = Primitive). For use in raytracing shaders.
@@ -58,13 +59,13 @@ namespace foray::as {
         FORAY_GETTER_CR(Buffer)
         FORAY_GETTER_MR(BufferOffsets)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetVkDescriptorBufferInfo(); }
+        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer->GetVkDescriptorBufferInfo(); }
 
       protected:
         core::Context* mContext = nullptr;
         /// @brief Maps BLAS to their offsets into the BlasMetaBuffers GeometryMeta array
         std::unordered_map<const Blas*, uint32_t> mBufferOffsets;
         /// @brief The device local buffer holding the array
-        core::ManagedBuffer mBuffer;
+        Local<core::ManagedBuffer> mBuffer;
     };
 }  // namespace foray::as

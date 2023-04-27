@@ -2,12 +2,10 @@
 #include "../foray_vma.hpp"
 
 namespace foray::util {
-    void ManagedUboBase::Create(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount)
+    ManagedUboBase::ManagedUboBase(core::Context* context, VkDeviceSize size, uint32_t stageBufferCount)
+     : mUboBuffer(context, core::ManagedBuffer::CreateInfo(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, size,
+                                                        VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE), stageBufferCount)
     {
-        Destroy();
-        core::ManagedBuffer::CreateInfo ci(VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT, size,
-                                                        VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
-        mUboBuffer.Create(context, ci, stageBufferCount);
     }
     void ManagedUboBase::CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer)
     {
@@ -28,10 +26,6 @@ namespace foray::util {
     bool ManagedUboBase::Exists() const
     {
         return mUboBuffer.Exists();
-    }
-    void ManagedUboBase::Destroy()
-    {
-        mUboBuffer.Destroy();
     }
 
 }  // namespace foray::util

@@ -54,6 +54,8 @@ namespace foray::core {
 
         ShaderManager() = default;
 
+        virtual ~ShaderManager() = default;
+
         /// @brief Calls glslc in path on linux, glslc.exe (derived from VULKAN_SDK environment variable) on windows
         /// @param args Arguments are passed as follows: GLSLC_EXECUTABLE --target-spv=spv1.5 OPTIMIZE ARGS
         /// (OPTIMIZE = -O0 for DEBUG, -O for RELEASE CMake targets)

@@ -25,9 +25,7 @@ namespace foray::core {
                     VkDescriptorSetLayoutCreateFlags descriptorSetLayoutCreateFlags = 0);
         /// @brief Rather than reallocating the descriptorset, rewrites all bindings to the descriptor set
         void Update();
-        /// @brief Destroys descriptorset and layout (latter only if also allocated by this object)
-        virtual void Destroy() override;
-        ~DescriptorSet() { Destroy(); }
+        virtual ~DescriptorSet();
 
         /// @brief Set a binding (buffer array)
         /// @param binding binding index
