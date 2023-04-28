@@ -147,6 +147,22 @@ namespace foray::core {
                                                 .ShaderStageFlags = shaderStageFlags};
     }
 
+    void DescriptorSet::SetDescriptorAt(
+            uint32_t binding, const Managed3dImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        SetDescriptorAt(binding, *image, layout, sampler, descriptorType, shaderStageFlags);
+    }
+    void DescriptorSet::SetDescriptorAt(
+            uint32_t binding, const Managed3dImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        AssertBindingInUse(binding);
+        AssertHandleNotNull(image.GetImageView(), binding);
+        mMapBindingToDescriptorInfo[binding] = {.ImageInfos       = {VkDescriptorImageInfo{.sampler = sampler, .imageView = image.GetImageView(), .imageLayout = layout}},
+                .DescriptorType   = descriptorType,
+                .DescriptorCount  = 1U,
+                .ShaderStageFlags = shaderStageFlags};
+    }
+
     void DescriptorSet::SetDescriptorAt(uint32_t                                  binding,
                                         const std::vector<VkDescriptorImageInfo>& imageInfos,
                                         VkDescriptorType                          descriptorType,

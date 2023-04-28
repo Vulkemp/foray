@@ -30,12 +30,32 @@ namespace foray::core {
         return Get(image->GetImage());
     }
 
+    VkImageLayout ImageLayoutCache::Get(const Managed3dImage& image) const
+    {
+        return Get(image.GetImage());
+    }
+
+    VkImageLayout ImageLayoutCache::Get(const Managed3dImage* image) const
+    {
+        return Get(image->GetImage());
+    }
+
     void ImageLayoutCache::Set(const ManagedImage& image, VkImageLayout layout)
     {
         Set(image.GetImage(), layout);
     }
 
     void ImageLayoutCache::Set(const ManagedImage* image, VkImageLayout layout)
+    {
+        Set(image->GetImage(), layout);
+    }
+
+    void ImageLayoutCache::Set(const Managed3dImage& image, VkImageLayout layout)
+    {
+        Set(image.GetImage(), layout);
+    }
+
+    void ImageLayoutCache::Set(const Managed3dImage* image, VkImageLayout layout)
     {
         Set(image->GetImage(), layout);
     }
@@ -65,6 +85,16 @@ namespace foray::core {
         return MakeBarrier(image.GetImage(), barrier);
     }
 
+    VkImageMemoryBarrier ImageLayoutCache::MakeBarrier(const Managed3dImage* image, const Barrier& barrier)
+    {
+        return MakeBarrier(image->GetImage(), barrier);
+    }
+
+    VkImageMemoryBarrier ImageLayoutCache::MakeBarrier(const Managed3dImage& image, const Barrier& barrier)
+    {
+        return MakeBarrier(image.GetImage(), barrier);
+    }
+
     VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(VkImage image, const Barrier2& barrier)
     {
         VkImageLayout oldLayout = Get(image);
@@ -88,6 +118,16 @@ namespace foray::core {
     }
 
     VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(const ManagedImage& image, const Barrier2& barrier)
+    {
+        return MakeBarrier(image.GetImage(), barrier);
+    }
+
+    VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(const Managed3dImage* image, const Barrier2& barrier)
+    {
+        return MakeBarrier(image->GetImage(), barrier);
+    }
+
+    VkImageMemoryBarrier2 ImageLayoutCache::MakeBarrier(const Managed3dImage& image, const Barrier2& barrier)
     {
         return MakeBarrier(image.GetImage(), barrier);
     }
@@ -122,6 +162,26 @@ namespace foray::core {
         VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
         vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
     }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
+                                      const Managed3dImage*  image,
+                                      const Barrier&       barrier,
+                                      VkPipelineStageFlags srcStageMask,
+                                      VkPipelineStageFlags dstStageMask,
+                                      VkDependencyFlags    depFlags)
+    {
+        VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
+        vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer      cmdBuffer,
+                                      const Managed3dImage&  image,
+                                      const Barrier&       barrier,
+                                      VkPipelineStageFlags srcStageMask,
+                                      VkPipelineStageFlags dstStageMask,
+                                      VkDependencyFlags    depFlags)
+    {
+        VkImageMemoryBarrier vkBarrier = MakeBarrier(image, barrier);
+        vkCmdPipelineBarrier(cmdBuffer, srcStageMask, dstStageMask, depFlags, 0, nullptr, 0, nullptr, 1U, &vkBarrier);
+    }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, VkImage image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
         VkImageMemoryBarrier2 vkBarrier = MakeBarrier(image, barrier);
@@ -139,6 +199,14 @@ namespace foray::core {
         CmdBarrier(cmdBuffer, image->GetImage(), barrier, depFlags);
     }
     void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const ManagedImage& image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    {
+        CmdBarrier(cmdBuffer, image.GetImage(), barrier, depFlags);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const Managed3dImage* image, const Barrier2& barrier, VkDependencyFlags depFlags)
+    {
+        CmdBarrier(cmdBuffer, image->GetImage(), barrier, depFlags);
+    }
+    void ImageLayoutCache::CmdBarrier(VkCommandBuffer cmdBuffer, const Managed3dImage& image, const Barrier2& barrier, VkDependencyFlags depFlags)
     {
         CmdBarrier(cmdBuffer, image.GetImage(), barrier, depFlags);
     }

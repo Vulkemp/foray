@@ -2,6 +2,7 @@
 #include "foray_managedbuffer.hpp"
 #include "foray_managedimage.hpp"
 #include "foray_managedresource.hpp"
+#include "foray_managed3dimage.hpp"
 #include <unordered_map>
 
 namespace foray::core {
@@ -57,14 +58,29 @@ namespace foray::core {
         /// @param binding binding index
         /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
         /// @param layout image layout as accessed from shader
-        void SetDescriptorAt(
-            uint32_t binding, const ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const ManagedImage *image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType,
+                             VkShaderStageFlags shaderStageFlags);
+
         /// @brief Set a binding (image)
         /// @param binding binding index
         /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
         /// @param layout image layout as accessed from shader
-        void SetDescriptorAt(
-            uint32_t binding, const ManagedImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const ManagedImage &image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType,
+                             VkShaderStageFlags shaderStageFlags);
+
+        /// @brief Set a binding (image)
+        /// @param binding binding index
+        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
+        /// @param layout image layout as accessed from shader
+        void SetDescriptorAt(uint32_t binding, const Managed3dImage *image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType,
+                             VkShaderStageFlags shaderStageFlags);
+
+        /// @brief Set a binding (image)
+        /// @param binding binding index
+        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
+        /// @param layout image layout as accessed from shader
+        void SetDescriptorAt(uint32_t binding, const Managed3dImage &image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType,
+                             VkShaderStageFlags shaderStageFlags);
 
         /// @brief Set a binding (image info array)
         /// @param binding binding index
