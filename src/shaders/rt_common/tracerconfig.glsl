@@ -5,6 +5,12 @@
 */
 
 #ifdef PUSHC_TRACERCONFIG
+
+#ifdef PUSH_CONSTANTS_DEFINED
+#error "Push constants were already defined!"
+#endif
+#define PUSH_CONSTANTS_DEFINED
+
 /// @brief Configuration parameters for raytracing
 layout(push_constant) uniform TracerConfigBlock
 {
