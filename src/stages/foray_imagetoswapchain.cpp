@@ -1,10 +1,10 @@
 #include "foray_imagetoswapchain.hpp"
 
 namespace foray::stages {
-    void ImageToSwapchainStage::Init(core::Context* context, core::ManagedImage* srcImage)
+    ImageToSwapchainStage::ImageToSwapchainStage(core::Context* context, core::ManagedImage* srcImage)
+     : BlitStage(srcImage, nullptr)
     {
         mContext = context;
-        BlitStage::Init(srcImage, nullptr);
     }
 
     void ImageToSwapchainStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)

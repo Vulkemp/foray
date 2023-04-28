@@ -1,7 +1,7 @@
 #pragma once
+#include "../core/foray_shadermodule.hpp"
 #include "foray_basesbt.hpp"
 #include "foray_rtshadertypes.hpp"
-#include "../core/foray_shadermodule.hpp"
 #include <vector>
 
 namespace foray::rtpipe {
@@ -9,32 +9,44 @@ namespace foray::rtpipe {
     class GeneralShaderBindingTable : public ShaderBindingTableBase
     {
       public:
-        /// @brief General shader group
-        struct ShaderGroup
+        class Builder : public ShaderBindingTableBase::Builder
         {
-            core::ShaderModule* Module = nullptr;
+          public:
+            Builder() = default;
+            inline Builder(RtShaderGroupType groupType) : mGroupType(groupType){}
+
+            Builder& SetEntry(int32_t groupIdx, core::ShaderModule* module, const void* data = nullptr, std::size_t size = 0)
+            {
+                SetEntryModule(groupIdx, module);
+                if(!!data && size > 0)
+                {
+                    SetEntryData(groupIdx, data, size);
+                }
+                return *this;
+            }
+            template <typename T>
+            Builder& SetEntry(int32_t groupIdx, core::ShaderModule* module, const T& data)
+            {
+                return SetEntry(groupIdx, module, &data, sizeof(T));
+            }
+            core::ShaderModule* GetEntryModule(int32_t groupIdx)
+            {
+                Assert(groupIdx >= 0 && groupIdx < (int32_t)mModules.size(), "Group Index out of range");
+                return mModules[groupIdx];
+            }
+            Builder& SetEntryModule(int32_t groupIdx, core::ShaderModule* module);
+
+            FORAY_PROPERTY_V(GroupType)
+            FORAY_PROPERTY_R(Modules)
+
+            void        WriteToShaderCollection(RtShaderCollection& collection) const;
+            VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
+
+          private:
+            RtShaderGroupType                mGroupType;
+            std::vector<core::ShaderModule*> mModules;
         };
 
-        explicit GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize = 0);
-
-        /// @brief Set shader group with shader
-        void SetGroup(GroupIndex groupIndex, core::ShaderModule* shader);
-        /// @brief Set shader group with shader and custom data
-        /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
-        void SetGroup(GroupIndex groupIndex, core::ShaderModule* shader, const void* data);
-
-        FORAY_GETTER_CR(Groups)
-        FORAY_GETTER_V(ShaderGroupType)
-
-        virtual void        WriteToShaderCollection(RtShaderCollection& collection) const override;
-        virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const override;
-
-        virtual void Destroy() override;
-
-      protected:
-        RtShaderGroupType              mShaderGroupType = RtShaderGroupType::Undefined;
-        std::vector<ShaderGroup> mGroups;
-
-        inline virtual size_t GetGroupArrayCount() const override { return mGroups.size(); }
-    };
+        GeneralShaderBindingTable(core::Context* context, const Builder& builder);
+   };
 }  // namespace foray::rtpipe

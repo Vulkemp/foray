@@ -27,10 +27,8 @@ namespace foray::util {
         /// @brief Batch record pipeline barriers and cmdCopyImage for a set of history images
         static void sMultiCopySourceToHistory(const std::vector<HistoryImage*>& historyImages, VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
 
-        inline core::ManagedImage& GetHistoryImage() { return *mHistory; }
+        inline core::ManagedImage* GetHistoryImage() { return mHistory.Get(); }
 
-        inline operator core::ManagedImage&() { return *mHistory; }
-        inline operator const core::ManagedImage&() const { return *mHistory; }
 
         FORAY_PROPERTY_V(HistoricLayout)
 

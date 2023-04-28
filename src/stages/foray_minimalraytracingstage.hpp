@@ -22,6 +22,8 @@ namespace foray::stages {
         MinimalRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
         ~MinimalRaytracingStageBase();
 
+        void DefaultInit();
+
         /// @brief Calls ApiRecordFramePrepare(), ApiRecordFrameBind(), ApiRecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
@@ -63,7 +65,7 @@ namespace foray::stages {
         /// @brief The pipeline layout manages descriptorset and pushconstant layouts
         util::PipelineLayout mPipelineLayout;
         /// @brief The pipeline manages shader binding tables
-        rtpipe::RtPipeline mPipeline;
+        Local<rtpipe::RtPipeline> mPipeline;
     };
 
 }  // namespace foray::stages

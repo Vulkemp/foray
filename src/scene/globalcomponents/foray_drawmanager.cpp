@@ -46,7 +46,7 @@ namespace foray::scene::gcomp {
             mDrawOps.push_back(std::move(drawop));
         }
 
-        VkDeviceSize maxcount = mCurrentTransformBuffer->GetDeviceBuffer().GetSize() / sizeof(glm::mat4);
+        VkDeviceSize maxcount = (mCurrentTransformBuffer ? mCurrentTransformBuffer->GetDeviceBuffer().GetSize() : 0) / sizeof(glm::mat4);
 
         if(maxcount < mTotalCount)
         {

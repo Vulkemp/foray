@@ -2,43 +2,29 @@
 #include "foray_rtshadercollection.hpp"
 
 namespace foray::rtpipe {
-    GeneralShaderBindingTable::GeneralShaderBindingTable(RtShaderGroupType groupType, VkDeviceSize entryDataSize)
-        : ShaderBindingTableBase(entryDataSize), mShaderGroupType(groupType)
+
+    GeneralShaderBindingTable::Builder& GeneralShaderBindingTable::Builder::SetEntryModule(int32_t groupIdx, core::ShaderModule* module)
     {
+        Assert(groupIdx >= 0);
+        if (groupIdx <= (int32_t)mModules.size())
+        {
+            mModules.resize(groupIdx + 1);
+        }
+        mModules[groupIdx] = module;
+        return *this;
     }
 
-    void GeneralShaderBindingTable::SetGroup(GroupIndex groupIndex, core::ShaderModule* shader)
-    {
-        Assert(groupIndex >= 0, "ShaderGroup index must be >= 0");
-        SetGroup(groupIndex, shader, nullptr);
-    }
-    void GeneralShaderBindingTable::SetGroup(GroupIndex groupIndex, core::ShaderModule* shader, const void* data)
-    {
-        Assert(groupIndex >= 0, "ShaderGroup index must be >= 0");
-        Assert(data == nullptr || mEntryDataSize > 0, "Set data size before passing data to groups!");
-        if(groupIndex >= (int32_t)mGroups.size())
-        {
-            mGroups.resize((size_t)(groupIndex + 1));
-            ArrayResized(mGroups.size());
-        }
-        if(mEntryDataSize > 0)
-        {
-            SetData(groupIndex, data);
-        }
-        mGroups[groupIndex] = ShaderGroup{shader};
-    }
-
-    ShaderBindingTableBase::VectorRange GeneralShaderBindingTable::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
+    ShaderBindingTableBase::VectorRange GeneralShaderBindingTable::Builder::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
                                                                                               const RtShaderCollection&                          shaderCollection) const
     {
         VectorRange range{(int32_t)groupCis.size(), 0};
-        for(const ShaderGroup& group : mGroups)
+        for(core::ShaderModule* module : mModules)
         {
             groupCis.push_back(VkRayTracingShaderGroupCreateInfoKHR{
                 .sType                           = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR,
                 .pNext                           = nullptr,
                 .type                            = VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR,
-                .generalShader                   = shaderCollection.IndexOf(group.Module),
+                .generalShader                   = shaderCollection.IndexOf(module),
                 .closestHitShader                = VK_SHADER_UNUSED_KHR,
                 .anyHitShader                    = VK_SHADER_UNUSED_KHR,
                 .intersectionShader              = VK_SHADER_UNUSED_KHR,
@@ -49,10 +35,10 @@ namespace foray::rtpipe {
         return range;
     }
 
-    void GeneralShaderBindingTable::WriteToShaderCollection(RtShaderCollection& collection) const
+    void GeneralShaderBindingTable::Builder::WriteToShaderCollection(RtShaderCollection& collection) const
     {
         RtShaderType shaderType;
-        switch(mShaderGroupType)
+        switch(mGroupType)
         {
             case RtShaderGroupType::Raygen:
                 shaderType = RtShaderType::Raygen;
@@ -67,15 +53,14 @@ namespace foray::rtpipe {
                 Exception::Throw("GeneralShaderBindingTable must be initialized to Raygen, Miss or Callable group type!");
                 break;
         }
-        for(const ShaderGroup& shader : mGroups)
+        for(core::ShaderModule* shader : mModules)
         {
-            collection.Add(shader.Module, shaderType);
+            collection.Add(shader, shaderType);
         }
     }
 
-    void GeneralShaderBindingTable::Destroy()
+    GeneralShaderBindingTable::GeneralShaderBindingTable(core::Context* context, const Builder& builder)
+        : ShaderBindingTableBase(context, builder)
     {
-        mGroups.clear();
-        ShaderBindingTableBase::Destroy();
     }
 }  // namespace foray::rtpipe

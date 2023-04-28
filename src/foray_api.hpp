@@ -4,6 +4,7 @@
 #include "foray_logger.hpp"
 #include "foray_vkb.hpp"
 #include "foray_vma.hpp"
+#include "foray_mem.hpp"
 
 #include "base/foray_base.hpp"
 #include "core/foray_core.hpp"

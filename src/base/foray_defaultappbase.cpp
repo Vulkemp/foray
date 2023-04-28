@@ -37,7 +37,7 @@ namespace foray::base {
         , mShaderManager(&mContext)
     {
 #if FORAY_DISABLE_RT
-        mDevice.SetEnableRaytracingFeaturesAndExtensions(false);
+        mDevice->SetEnableRaytracingFeaturesAndExtensions(false);
 #endif
     }
 
@@ -71,10 +71,10 @@ namespace foray::base {
         InitCreateVma();
         InitSyncObjects();
 
-        mSamplerCollection->Init(&mContext);
-        mContext.SamplerCol = mSamplerCollection;
+        mSamplerCollection.New(&mContext);
+        mContext.SamplerCol = mSamplerCollection.Get();
 
-        mContext.ShaderMan = mShaderManager;
+        mContext.ShaderMan = mShaderManager.Get();
 
         ApiInit();
     }
@@ -181,7 +181,7 @@ namespace foray::base {
 
     bool DefaultAppBase::CanRenderNextFrame()
     {
-        InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex];
+        InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex].Get();
 
         return currentFrame.HasFinishedExecution();
     }
@@ -216,7 +216,7 @@ namespace foray::base {
         }
 
         // Fetch next in flight frame
-        InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex];
+        InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex].Get();
 
         // Wait for it to finish vkWaitForFences(...)
         currentFrame.WaitForExecutionFinished();

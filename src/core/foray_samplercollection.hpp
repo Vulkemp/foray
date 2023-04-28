@@ -101,11 +101,10 @@ namespace foray::core {
         friend SamplerReference;
 
       public:
-        SamplerCollection() = default;
 
         /// @brief Prepares for use
         /// @param context Requires DispatchTable
-        inline void Init(core::Context* context) { mContext = context; }
+        SamplerCollection(core::Context* context) : mContext(context) { }
 
         inline virtual bool Exists() const override { return mSamplerInstances.size() > 0; }
 

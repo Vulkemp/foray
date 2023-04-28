@@ -1,32 +1,45 @@
 #include "foray_basesbt.hpp"
 
 namespace foray::rtpipe {
-    ShaderBindingTableBase::ShaderBindingTableBase(VkDeviceSize entryDataSize) : mEntryDataSize(entryDataSize) {}
 
-    std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(int32_t groupIndex)
+    ShaderBindingTableBase::Builder& ShaderBindingTableBase::Builder::SetEntryData(int32_t groupIdx, const void* data, std::size_t size)
     {
-        Assert(mEntryDataSize != 0, "Entry data size not set!");
-        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range");
-        return mGroupData[groupIndex];
+        Assert(groupIdx >= 0);
+        if(groupIdx >= (int32_t)mGroupData.size())
+        {
+            mGroupData.resize(groupIdx + 1);
+        }
+        if(size > mEntryDataSize)
+        {
+            mEntryDataSize = size;
+        }
+        mGroupData[groupIdx].resize(size);
+        memcpy(mGroupData[groupIdx].data(), data, size);
+        return *this;
     }
 
-    const std::vector<uint8_t>& ShaderBindingTableBase::GroupDataAt(GroupIndex groupIndex) const
+    std::span<const uint8_t> ShaderBindingTableBase::Builder::GetEntryData(int32_t groupIdx) const
     {
-        Assert(mEntryDataSize != 0, "Entry data size not set!");
-        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range");
-        return mGroupData[groupIndex];
+        Assert(groupIdx >= 0 && groupIdx < (int32_t)mGroupData.size(), "Group Index out of range");
+        return std::span{mGroupData[groupIdx].data(), mGroupData[groupIdx].size()};
     }
 
-    void ShaderBindingTableBase::Build(core::Context*                                 context,
-                                       const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties,
-                                       const std::vector<const uint8_t*>&                     handles)
+    // std::span<uint8_t> ShaderBindingTableBase::GetEntryData(int32_t groupIdx)
+    // {
+    //     Assert(groupIdx >= 0 && groupIdx < (int32_t)mConfig.GroupData.size(), "Group Index out of range");
+    //     return std::span{mConfig.GroupData[groupIdx].data(), mConfig.GroupData[groupIdx].size()};
+    // }
+
+    ShaderBindingTableBase::ShaderBindingTableBase(core::Context* context, const Builder& builder)
     {
         /// STEP # 0    Calculate entry size
 
-        VkDeviceSize entryCount = GetGroupArrayCount();
+        VkDeviceSize entryCount = builder.GetGroupData().size();
+
 
         // Calculate size of individual entries. These always consist of a shader handle, followed by optional shader data. Alignment rules have to be observed.
-        VkDeviceSize sbtEntrySize = pipelineProperties.shaderGroupHandleSize + mEntryDataSize;
+        const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& pipelineProperties = *builder.GetPipelineProperties();
+        VkDeviceSize                                           sbtEntrySize       = pipelineProperties.shaderGroupHandleSize + builder.GetEntryDataSize();
         if(pipelineProperties.shaderGroupHandleAlignment > 0)
         {
             // Make sure every entry start is aligned to the shader group handle alignment rule
@@ -74,22 +87,19 @@ namespace foray::rtpipe {
         for(int32_t i = 0; i < (int32_t)entryCount; i++)
         {
             uint8_t*       bufferEntry = bufferData.data() + (i * sbtEntrySize);
-            const uint8_t* handle      = handles[i];
+            const uint8_t* handle      = (*builder.GetSgHandles())[i];
             memcpy(bufferEntry, handle, (size_t)pipelineProperties.shaderGroupHandleSize);
 
             // (Optional) copy custom shader data to entry
 
-            if(mEntryDataSize > 0)
+            if(builder.GetEntryDataSize() > 0)
             {
-                bufferEntry                      = bufferEntry + pipelineProperties.shaderGroupHandleSize;
-                const std::vector<uint8_t>& data = GroupDataAt(i);
+                bufferEntry = bufferEntry + pipelineProperties.shaderGroupHandleSize;
+                memset(bufferEntry, 0, builder.GetEntryDataSize());
+                std::span<const uint8_t> data = builder.GetEntryData(i);
                 if(data.size() > 0)
                 {
-                    memcpy(bufferEntry, data.data(), mEntryDataSize);
-                }
-                else
-                {
-                    memset(bufferEntry, 0, mEntryDataSize);
+                    memcpy(bufferEntry, data.data(), data.size());
                 }
             }
         }
@@ -98,43 +108,5 @@ namespace foray::rtpipe {
         /// STEP # 3    Write buffer data
 
         mBuffer->MapAndWrite(bufferData.data());
-    }
-
-    void ShaderBindingTableBase::SetData(GroupIndex groupIndex, const void* data)
-    {
-        Assert(groupIndex >= 0 && groupIndex < (int32_t)GetGroupArrayCount(), "Group Index out of range!");
-        if(mEntryDataSize == 0 || !data)
-        {
-            return;
-        }
-        std::vector<uint8_t>& entry = mGroupData[groupIndex];
-        entry.resize(mEntryDataSize);
-        memcpy(entry.data(), data, mEntryDataSize);
-    }
-
-    void ShaderBindingTableBase::ArrayResized(size_t newSize)
-    {
-        if(mEntryDataSize == 0)
-        {
-            return;
-        }
-        mGroupData.resize(newSize);
-    }
-
-    ShaderBindingTableBase& ShaderBindingTableBase::SetEntryDataSize(VkDeviceSize newSize)
-    {
-        if(newSize == mEntryDataSize)
-        {
-            return *this;
-        }
-        if(mEntryDataSize > 0 && GetGroupArrayCount() > 0)
-        {
-            for(std::vector<uint8_t>& data : mGroupData)
-            {
-                data.resize(newSize);
-            }
-        }
-        mEntryDataSize = newSize;
-        return *this;
     }
 }  // namespace foray::rtpipe

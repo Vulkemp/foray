@@ -13,10 +13,11 @@ namespace foray::gltf {
             logger()->debug("Model Load: Processing mesh #{} \"{}\" with {} primitives", i, gltfMesh.name, gltfMesh.primitives.size());
 
             PushGltfMeshToBuffers(gltfMesh, primitives);
-            auto mesh = mGeo.GetMeshes().emplace_back();
+            auto& mesh = mGeo.GetMeshes().emplace_back();
+            mesh.New();
             mesh->SetPrimitives(primitives);
             mesh->SetName(gltfMesh.name);
-            mIndexBindings.Meshes[i] = mesh;
+            mIndexBindings.Meshes[i] = mesh.Get();
         }
 
         auto& indexBuffer = *mIndexBuffer;

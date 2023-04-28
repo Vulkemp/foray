@@ -6,9 +6,7 @@ namespace foray::stages {
     class ImageToSwapchainStage : public BlitStage
     {
       public:
-        ImageToSwapchainStage() = default;
-
-        void Init(core::Context* context, core::ManagedImage* srcImage);
+        ImageToSwapchainStage(core::Context* context, core::ManagedImage* srcImage);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
     };
 }  // namespace foray::stages

@@ -18,7 +18,7 @@ namespace foray::stages {
     {
       public:
         RenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0);
-        inline virtual ~RenderStage() {}
+        virtual ~RenderStage() = default;
 
         /// @brief Records a frame to cmdBuffer.
         /// @param cmdBuffer Command buffer to record to
@@ -45,7 +45,7 @@ namespace foray::stages {
         /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
         /// @param extent New render size
         /// @remark Inheriting stages may override to update descriptor sets
-        virtual void OnResized(VkExtent2D extent) = 0;
+        virtual void OnResized(VkExtent2D extent) {}
 
         /// @brief Notifies the stage that the shader compiler instance has recompiled a shader
         /// @details Implementation will check through shaders registered in 'mShaderKeys'. If any of them have been marked as recompiled, calls ReloadShaders()

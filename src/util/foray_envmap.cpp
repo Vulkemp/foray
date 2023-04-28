@@ -37,7 +37,7 @@ namespace foray::util {
         }
         imageLoader.UpdateManagedImageCI(ci);
         params.Image.New(params.Context, ci);
-        imageLoader.WriteManagedImageData(params.Image, params.AfterWrite);
+        imageLoader.WriteManagedImageData(params.Image.Get(), params.AfterWrite);
     }
 
     void lLoad(VkFormat format, const LoadParams& params)

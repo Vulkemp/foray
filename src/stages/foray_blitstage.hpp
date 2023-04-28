@@ -7,12 +7,11 @@ namespace foray::stages {
     class BlitStage : public RenderStage
     {
       public:
-        BlitStage() = default;
 
         /// @brief Initialization
         /// @param sourceImage Source Image
         /// @param destImage Destination Image
-        void Init(core::ManagedImage* sourceImage = nullptr, core::ManagedImage* destImage = nullptr);
+        BlitStage(core::ManagedImage* sourceImage = nullptr, core::ManagedImage* destImage = nullptr);
         /// @brief Records pipeline barriers for source and destination images, and the blit command itself
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 

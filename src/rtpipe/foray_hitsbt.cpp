@@ -2,29 +2,23 @@
 #include "foray_rtshadercollection.hpp"
 
 namespace foray::rtpipe {
-    void HitShaderBindingTable::SetGroup(GroupIndex groupIndex, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect)
+    HitShaderBindingTable::Builder& HitShaderBindingTable::Builder::SetEntryModules(int32_t             groupIdx,
+                                                                                    core::ShaderModule* closestHit,
+                                                                                    core::ShaderModule* anyHit,
+                                                                                    core::ShaderModule* intersect)
     {
-        SetGroup(groupIndex, closestHit, anyHit, intersect, nullptr);
-    }
-    void HitShaderBindingTable::SetGroup(GroupIndex groupIndex, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect, const void* data)
-    {
-        Assert(groupIndex >= 0, "ShaderGroup index must be >= 0");
-        Assert(data == nullptr || mEntryDataSize > 0, "Set data size before passing data to groups!");
-        if(groupIndex >= (int32_t)mGroups.size())
+        Assert(groupIdx >= 0);
+        if(groupIdx <= (int32_t)mModules.size())
         {
-            mGroups.resize((size_t)(groupIndex + 1));
-            ArrayResized(mGroups.size());
+            mModules.resize(groupIdx + 1);
         }
-        if(mEntryDataSize > 0)
-        {
-            SetData(groupIndex, data);
-        }
-        mGroups[groupIndex] = ShaderGroup{closestHit, anyHit, intersect};
+        mModules[groupIdx] = ShaderGroup{closestHit, anyHit, intersect};
+        return *this;
     }
 
-    void HitShaderBindingTable::WriteToShaderCollection(RtShaderCollection& shaderCollection) const
+    void HitShaderBindingTable::Builder::WriteToShaderCollection(RtShaderCollection& shaderCollection) const
     {
-        for(const ShaderGroup& group : mGroups)
+        for(const ShaderGroup& group : mModules)
         {
             if(!!group.ClosestHitModule)
             {
@@ -41,11 +35,11 @@ namespace foray::rtpipe {
         }
     }
 
-    ShaderBindingTableBase::VectorRange HitShaderBindingTable::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
-                                                                                          const RtShaderCollection&                          shaderCollection) const
+    ShaderBindingTableBase::VectorRange HitShaderBindingTable::Builder::WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis,
+                                                                                                   const RtShaderCollection&                          shaderCollection) const
     {
         VectorRange range{(int32_t)groupCis.size(), 0};
-        for(const ShaderGroup& group : mGroups)
+        for(const ShaderGroup& group : mModules)
         {
             VkRayTracingShaderGroupTypeKHR groupType = (!!group.IntersectModule) ? VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR :
                                                                                    VkRayTracingShaderGroupTypeKHR::VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
@@ -64,9 +58,5 @@ namespace foray::rtpipe {
         return range;
     }
 
-    void HitShaderBindingTable::Destroy()
-    {
-        mGroups.clear();
-        ShaderBindingTableBase::Destroy();
-    }
+    HitShaderBindingTable::HitShaderBindingTable(core::Context* context, const Builder& builder) : ShaderBindingTableBase(context, builder) {}
 }  // namespace foray::rtpipe

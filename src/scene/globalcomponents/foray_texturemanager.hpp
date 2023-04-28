@@ -1,8 +1,8 @@
 #pragma once
 #include "../../core/foray_managedimage.hpp"
 #include "../../core/foray_samplercollection.hpp"
-#include "../foray_component.hpp"
 #include "../../foray_mem.hpp"
+#include "../foray_component.hpp"
 #include <unordered_map>
 
 namespace foray::scene::gcomp {
@@ -17,7 +17,7 @@ namespace foray::scene::gcomp {
         struct Texture
         {
           public:
-            inline Texture() : mImage(), mSampler() { mSampler.SetManagedImage(mImage.GetData()); }
+            inline Texture() : mImage(), mSampler() {}
             virtual ~Texture() = default;
 
             FORAY_GETTER_CR(Image)
@@ -31,7 +31,7 @@ namespace foray::scene::gcomp {
             FORAY_PROPERTY_R(Sampler)
 
           protected:
-            Local<core::ManagedImage>         mImage;
+            Local<core::ManagedImage>  mImage;
             core::CombinedImageSampler mSampler;
         };
 
@@ -49,4 +49,4 @@ namespace foray::scene::gcomp {
       protected:
         std::unordered_map<int32_t, Texture> mTextures;
     };
-}  // namespace foray::scene
+}  // namespace foray::scene::gcomp

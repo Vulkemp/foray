@@ -42,32 +42,38 @@ namespace foray::base {
         fp32_t mSecondsPerFrame = 1.f / 60.f;
     };
 
-    /// @brief Manages a single threaded, automatically balancing application lifetime
-    class RenderLoop
+    struct LoopInfo
+    {
+        fp32_t   Delta           = 0.f;
+        fp32_t   TargetDelta     = 0.f;
+        uint64_t LoopFrameNumber = 0;
+        fp64_t   SinceStart      = 0.0;
+    };
+
+    class IApplication
     {
       public:
-        struct RenderInfo
-        {
-            fp32_t   Delta           = 0.f;
-            fp32_t   TargetDelta     = 0.f;
-            uint64_t LoopFrameNumber = 0;
-            fp64_t   SinceStart      = 0.0;
-        };
+        IApplication() = default;
+        virtual void IApplicationInit(RenderLoop*) {}
+        virtual void IApplicationLoop(const LoopInfo&) {}
+        virtual bool IApplicationLoopReady() {}
+        virtual void IApplicationProcessEvents() {}
+        virtual ~IApplication() = default;
+    };
 
+    class FuncPtrApplication
+    {
+      public:
         /// @brief Function pointer for application initialization
-        using InitFunctionPointer = std::function<void()>;
+        using InitFunctionPointer = std::function<void(RenderLoop*)>;
         /// @brief Function pointer for a single frame render action. Param#0 : Delta time in seconds
-        using RenderFunctionPointer = std::function<void(RenderInfo&)>;
+        using RenderFunctionPointer = std::function<void(const LoopInfo&)>;
         /// @brief Function pointer for the RenderLoop to check if application is ready to render next frame. Return true if ready.
         using RenderReadyFunctionPointer = std::function<bool()>;
         /// @brief Function pointer for application finalization
         using DestroyFunctionPointer = std::function<void()>;
         /// @brief Function pointer for system event polling and handling
         using PollEventsFunctionPointer = std::function<void()>;
-        /// @brief Function pointer for a callback when the renderloops state changes. Param#0: Old state Param#1: Next state
-        using OnStateChangedFunctionPointer = std::function<void(ELifetimeState, ELifetimeState)>;
-
-        inline RenderLoop() = default;
         /// @brief Constructor
         /// @param initFunc Function called once to initialize the application
         /// @param renderFunc Function called once per frame to render the application
@@ -75,18 +81,65 @@ namespace foray::base {
         /// @param destroyFunc Function called once to destroy application resources
         /// @param pollEventsFunc Function called 1...x times per frame to poll and handle system events
         /// @param onStateChangedFunc Function called everytime the renderloop state changes
-        inline RenderLoop(InitFunctionPointer           initFunc,
-                          RenderFunctionPointer         renderFunc,
-                          RenderReadyFunctionPointer    renderReadyFunc,
-                          DestroyFunctionPointer        destroyFunc,
-                          PollEventsFunctionPointer     pollEventsFunc,
-                          OnStateChangedFunctionPointer onStateChangedFunc)
-            : mInitFunc{initFunc}
-            , mRenderFunc{renderFunc}
-            , mRenderReadyFunc{renderReadyFunc}
-            , mDestroyFunc{destroyFunc}
-            , mPollEventsFunc{pollEventsFunc}
-            , mOnStateChangedFunc{onStateChangedFunc} {};
+        FuncPtrApplication(InitFunctionPointer        initFunc,
+                           RenderFunctionPointer      renderFunc,
+                           RenderReadyFunctionPointer renderReadyFunc,
+                           DestroyFunctionPointer     destroyFunc,
+                           PollEventsFunctionPointer  pollEventsFunc)
+            : mInitFunc{initFunc}, mRenderFunc{renderFunc}, mRenderReadyFunc{renderReadyFunc}, mDestroyFunc{destroyFunc}, mPollEventsFunc{pollEventsFunc}
+        {
+        }
+
+        virtual void IApplicationInit(RenderLoop* loop)
+        {
+            if(!!mInitFunc)
+            {
+                mInitFunc(loop);
+            }
+        }
+        virtual void IApplicationLoop(const LoopInfo& loopInfo)
+        {
+            if(!!mRenderFunc)
+            {
+                mRenderFunc(loopInfo);
+            }
+        }
+        virtual bool IApplicationLoopReady()
+        {
+            if(!!mRenderReadyFunc)
+            {
+                return mRenderReadyFunc();
+            }
+            return true;
+        }
+        virtual void IApplicationProcessEvents()
+        {
+            if(!!mPollEventsFunc)
+            {
+                mPollEventsFunc();
+            }
+        }
+        virtual ~FuncPtrApplication()
+        {
+            if(!!mDestroyFunc)
+            {
+                mDestroyFunc();
+            }
+        }
+
+      protected:
+        InitFunctionPointer        mInitFunc        = nullptr;
+        RenderFunctionPointer      mRenderFunc      = nullptr;
+        RenderReadyFunctionPointer mRenderReadyFunc = nullptr;
+        DestroyFunctionPointer     mDestroyFunc     = nullptr;
+        PollEventsFunctionPointer  mPollEventsFunc  = nullptr;
+    };
+
+    /// @brief Manages a single threaded, automatically balancing application lifetime
+    class RenderLoop
+    {
+      public:
+        inline explicit RenderLoop(IApplication& application) : mApplication(application){}
 
         /// @brief Runs the application through its full lifetime, invoking all function pointers which have been set
         /// @return The runResult value from RequestStop, or -1 on catched exception
@@ -132,12 +185,7 @@ namespace foray::base {
       protected:
         void AdvanceState();
 
-        InitFunctionPointer           mInitFunc           = nullptr;
-        RenderFunctionPointer         mRenderFunc         = nullptr;
-        RenderReadyFunctionPointer    mRenderReadyFunc    = nullptr;
-        DestroyFunctionPointer        mDestroyFunc        = nullptr;
-        PollEventsFunctionPointer     mPollEventsFunc     = nullptr;
-        OnStateChangedFunctionPointer mOnStateChangedFunc = nullptr;
+        IApplication& mApplication;
 
         ELifetimeState mState     = ELifetimeState::PreInit;
         int32_t        mRunResult = 0;

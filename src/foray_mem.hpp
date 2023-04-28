@@ -15,7 +15,7 @@ namespace foray {
         /// @tparam ...TArgs
         /// @param ...args
         template <typename... TArgs>
-        Heap(TArgs... args) : mData(new T(args...))
+        Heap(TArgs&&... args) : mData(new T(args...))
         {
         }
 
@@ -28,6 +28,11 @@ namespace foray {
         Heap(std::nullptr_t other) : mData(nullptr) {}
 
         Heap(const Heap<T>& other) = delete;
+        Heap(Heap<T>&& other)
+        {
+            mData       = other.mData;
+            other.mData = nullptr;  // other goes out of scope
+        }
 
         /// @brief Adopt another heap references value
         Heap<T>& operator=(Heap<T>& other)
@@ -47,8 +52,7 @@ namespace foray {
             return *this;
         }
 
-        Heap<T>& operator=(const Heap<T>& other)  = delete;
-        Heap<T>& operator=(const Heap<T>&& other) = delete;
+        Heap<T>& operator=(const Heap<T>& other) = delete;
 
         /// @brief Assign null (deletes stored value)
         Heap<T>& operator=(std::nullptr_t other)
@@ -60,30 +64,10 @@ namespace foray {
         virtual ~Heap() { Delete(); }
 
         /// @brief Dereference stored pointer
-        T& operator*()
-        {
-            Assert(!!mData, "Attempted to deref a nullptr!");
-            return *mData;
-        }
-
-        /// @brief Dereference stored pointer
         T* operator->()
         {
             Assert(!!mData, "Attempted to deref a nullptr!");
             return mData;
-        }
-
-        /// @brief Access stored pointer
-        operator T*() { return mData; }
-
-        /// @brief Access stored pointer
-        operator const T*() const { return mData; }
-
-        /// @brief Dereference stored pointer
-        const T& operator*() const
-        {
-            Assert(!!mData, "Attempted to deref a nullptr!");
-            return *mData;
         }
 
         /// @brief Dereference stored pointer
@@ -93,7 +77,25 @@ namespace foray {
             return mData;
         }
 
-        FORAY_GETTER_V(Data)
+        T* Get()
+        {
+            Assert(!!mData);
+            return mData;
+        }
+        const T* Get() const
+        {
+            Assert(!!mData);
+            return mData;
+        }
+
+        T* GetNullable()
+        {
+            return mData;
+        }
+        const T* GetNullable() const
+        {
+            return mData;
+        }
 
         operator bool() const { return !!mData; }
 
@@ -101,7 +103,7 @@ namespace foray {
 
         /// @brief Replace stored value with a newly allocated and constructed value
         template <typename... TArgs>
-        void New(TArgs... args)
+        void New(TArgs&&... args)
         {
             Delete();
             mData = new T(args...);
@@ -109,7 +111,7 @@ namespace foray {
 
         /// @brief Replace stored value with a newly constructed value, reusing an existing allocation if it exists
         template <typename... TArgs>
-        void InPlaceNew(TArgs... args)
+        void InPlaceNew(TArgs&&... args)
         {
             if(!!mData)
             {
@@ -144,7 +146,7 @@ namespace foray {
         T* mData = nullptr;
     };
 
-    template<typename T>
+    template <typename T>
     class Local
     {
       public:
@@ -154,7 +156,7 @@ namespace foray {
         /// @tparam ...TArgs
         /// @param ...args
         template <typename... TArgs>
-        Local(TArgs... args) : mExists(true)
+        Local(TArgs&&... args) : mExists(true)
         {
             new(reinterpret_cast<T*>(&mData)) T(args...);
         }
@@ -163,9 +165,14 @@ namespace foray {
         /// @param other
         Local(std::nullptr_t other) : mData({}), mExists(false) {}
 
-        Local(const Local<T>& other)                = delete;
-        Local<T>& operator=(const Local<T>& other)  = delete;
-        Local<T>& operator=(const Local<T>&& other) = delete;
+        Local(const Local<T>& other) = delete;
+        Local(Local<T>&& other)
+        {
+            mExists = true;
+            memcpy(mData, other.mData, sizeof(T));
+            other.mExists = false;
+        }
+        Local<T>& operator=(const Local<T>& other) = delete;
 
         /// @brief Assign null (deletes stored value)
         Local<T>& operator=(std::nullptr_t other)
@@ -176,31 +183,16 @@ namespace foray {
 
         virtual ~Local() { Delete(); }
 
-        /// @brief Dereference stored pointer
-        T& operator*()
-        {
-            Assert(mExists, "Attempted to deref a nullptr!");
-            return reinterpret_cast<T&>(mData);
-        }
+        operator bool() { return mExists; }
+        operator bool() const { return mExists; }
+
+        bool Exists() const { return mExists; }
 
         /// @brief Dereference stored pointer
         T* operator->()
         {
             Assert(mExists, "Attempted to deref a nullptr!");
             return reinterpret_cast<T*>(&mData);
-        }
-
-        /// @brief Access stored pointer
-        operator T*() { return mExists ? reinterpret_cast<T*>(&mData) : nullptr; }
-
-        /// @brief Access stored pointer
-        operator const T*() const { return mExists ? reinterpret_cast<const T*>(&mData) : nullptr; }
-
-        /// @brief Dereference stored pointer
-        const T& operator*() const
-        {
-            Assert(mExists, "Attempted to deref a nullptr!");
-            return reinterpret_cast<const T&>(mData);
         }
 
         /// @brief Dereference stored pointer
@@ -210,19 +202,33 @@ namespace foray {
             return reinterpret_cast<const T*>(&mData);
         }
 
-        T* GetData() { return reinterpret_cast<T*>(&mData); }
-        const T* GetData() const { return reinterpret_cast<const T*>(&mData); }
+        T* Get()
+        {
+            Assert(mExists);
+            return reinterpret_cast<T*>(&mData);
+        }
+        const T* Get() const
+        {
+            Assert(mExists);
+            return reinterpret_cast<const T*>(&mData);
+        }
 
-        operator bool() const { return mExists; }
-
-        bool Exists() const { return mExists; }
+        T* GetNullable()
+        {
+            return mExists ? reinterpret_cast<T*>(&mData) : nullptr;
+        }
+        const T* GetNullable() const
+        {
+            return mExists ? reinterpret_cast<const T*>(&mData) : nullptr;
+        }
 
         /// @brief Replace stored value with a newly allocated and constructed value
         template <typename... TArgs>
-        void New(TArgs... args)
+        void New(TArgs&&... args)
         {
             Delete();
             new(reinterpret_cast<T*>(&mData)) T(args...);
+            mExists = true;
         }
 
         /// @brief Delete the stored value
@@ -236,7 +242,6 @@ namespace foray {
         }
 
       private:
-
         struct alignas(alignof(T)) AlignedArea
         {
             uint8_t Data[sizeof(T)];

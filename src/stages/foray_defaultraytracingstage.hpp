@@ -21,11 +21,13 @@ namespace foray::stages {
     class DefaultRaytracingStageBase : public RenderStage
     {
       public:
+        DefaultRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder = 0);
+
         /// @brief Nominal init for DefaultRaytracingStageBase
         /// @param scene Scene provides Camera, Tlas, Geometry and Materials
         /// @param envMap Environment Map
         /// @param noiseImage Noise Texture
-        DefaultRaytracingStageBase(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
+        void Init(scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
@@ -33,7 +35,7 @@ namespace foray::stages {
         /// @brief Image Output of the Raytracing Stage
         inline static constexpr std::string_view OutputName = "Rt.Output";
 
-        inline core::ManagedImage* GetRtOutput() { return mOutput; }
+        inline core::ManagedImage* GetRtOutput() { return mOutput.Get(); }
 
         virtual ~DefaultRaytracingStageBase();
 
@@ -88,7 +90,7 @@ namespace foray::stages {
         /// @brief The pipeline layout manages descriptorset and pushconstant layouts
         util::PipelineLayout mPipelineLayout;
         /// @brief The pipeline manages shader binding tables
-        rtpipe::RtPipeline mPipeline;
+        Local<rtpipe::RtPipeline> mPipeline;
 
         /// @brief If set to anything other than ~0U a uint push constant containing the current frame idx as a seed value is added
         uint32_t mRngSeedPushCOffset = 0;

@@ -30,7 +30,7 @@ namespace foray::stages {
     {
         VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT,
-                                                      .module = *mShader,
+                                                      .module = *mShader.Get(),
                                                       .pName  = "main"};
 
         VkComputePipelineCreateInfo pipelineCi

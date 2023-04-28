@@ -1,22 +1,30 @@
 #include "foray_rtpipeline.hpp"
+#include <array>
 
 namespace foray::rtpipe {
 
-    RtPipeline::RtPipeline() : mRaygenSbt(RtShaderGroupType::Raygen), mMissSbt(RtShaderGroupType::Miss), mCallablesSbt(RtShaderGroupType::Callable), mHitSbt() {}
-
-    void RtPipeline::Build(core::Context* context, VkPipelineLayout pipelineLayout)
+    RtPipeline::RtPipeline(core::Context* context, const Builder& builderConst) : mContext(context), mPipelineLayout(builderConst.GetPipelineLayout())
     {
         /// STEP # 0    Reset, get physical device properties
 
-        if(!!mPipeline)
-        {
-            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
-            mPipeline = nullptr;
-        }
+        Builder builder = builderConst;  // Need a copy to be able to assure correct SBT sizing
 
-        mContext         = context;
-        mPipelineLayout = pipelineLayout;
-        mShaderCollection.Clear();
+        {
+            std::array<GeneralShaderBindingTable::Builder*, 3> generalSbtBuilders({&builder.GetRaygenSbtBuilder(), &builder.GetMissSbtBuilder(), &builder.GetCallableSbtBuilder()});
+            for(GeneralShaderBindingTable::Builder* builder : generalSbtBuilders)
+            {
+                if(builder->GetModules().size() > builder->GetGroupData().size())
+                {
+                    builder->GetGroupData().resize(builder->GetModules().size());
+                }
+            }
+            HitShaderBindingTable::Builder& hitSbtBuilder = builder.GetHitSbtBuilder();
+
+            if(hitSbtBuilder.GetModules().size() > hitSbtBuilder.GetGroupData().size())
+            {
+                hitSbtBuilder.GetGroupData().resize(hitSbtBuilder.GetModules().size());
+            }
+        }
 
         VkPhysicalDeviceRayTracingPipelinePropertiesKHR pipelineProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR};
         {
@@ -27,12 +35,14 @@ namespace foray::rtpipe {
         }
 
 
-        /// STEP # 1    Rebuild shader collection
+        /// STEP # 1    Build shader collection
 
-        mRaygenSbt.WriteToShaderCollection(mShaderCollection);
-        mMissSbt.WriteToShaderCollection(mShaderCollection);
-        mCallablesSbt.WriteToShaderCollection(mShaderCollection);
-        mHitSbt.WriteToShaderCollection(mShaderCollection);
+        RtShaderCollection shaderCollection;
+
+        builder.GetRaygenSbtBuilder().WriteToShaderCollection(shaderCollection);
+        builder.GetMissSbtBuilder().WriteToShaderCollection(shaderCollection);
+        builder.GetCallableSbtBuilder().WriteToShaderCollection(shaderCollection);
+        builder.GetHitSbtBuilder().WriteToShaderCollection(shaderCollection);
 
 
         /// STEP # 2    Collect ShaderGroup, build sorted vector
@@ -43,10 +53,10 @@ namespace foray::rtpipe {
 
         ShaderBindingTableBase::VectorRange raygenGroupHandleRange, missGroupHandleRange, callablesGroupHandleRange, hitGroupHandleRange;
 
-        raygenGroupHandleRange    = mRaygenSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        missGroupHandleRange      = mMissSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        callablesGroupHandleRange = mCallablesSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
-        hitGroupHandleRange       = mHitSbt.WriteToShaderGroupCiVector(shaderGroupCis, mShaderCollection);
+        raygenGroupHandleRange    = builder.GetRaygenSbtBuilder().WriteToShaderGroupCiVector(shaderGroupCis, shaderCollection);
+        missGroupHandleRange      = builder.GetMissSbtBuilder().WriteToShaderGroupCiVector(shaderGroupCis, shaderCollection);
+        callablesGroupHandleRange = builder.GetCallableSbtBuilder().WriteToShaderGroupCiVector(shaderGroupCis, shaderCollection);
+        hitGroupHandleRange       = builder.GetHitSbtBuilder().WriteToShaderGroupCiVector(shaderGroupCis, shaderCollection);
 
 
         /// STEP # 3    Build RT pipeline
@@ -54,8 +64,8 @@ namespace foray::rtpipe {
         // Create the ray tracing pipeline
         VkRayTracingPipelineCreateInfoKHR raytracingPipelineCreateInfo{
             .sType                        = VkStructureType::VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR,
-            .stageCount                   = static_cast<uint32_t>(mShaderCollection.GetShaderStageCis().size()),
-            .pStages                      = mShaderCollection.GetShaderStageCis().data(),
+            .stageCount                   = static_cast<uint32_t>(shaderCollection.GetShaderStageCis().size()),
+            .pStages                      = shaderCollection.GetShaderStageCis().data(),
             .groupCount                   = static_cast<uint32_t>(shaderGroupCis.size()),
             .pGroups                      = shaderGroupCis.data(),
             .maxPipelineRayRecursionDepth = pipelineProperties.maxRayRecursionDepth,
@@ -71,44 +81,52 @@ namespace foray::rtpipe {
         AssertVkResult(mContext->DispatchTable().getRayTracingShaderGroupHandlesKHR(mPipeline, 0, shaderGroupCis.size(), shaderHandleData.size(), shaderHandleData.data()));
 
         {
-            std::vector<const uint8_t*> handles(mRaygenSbt.GetGroups().size());
+            GeneralShaderBindingTable::Builder& sbtBuilder = builder.GetRaygenSbtBuilder();
+            std::vector<const uint8_t*> handles(sbtBuilder.GetModules().size());
             for(int32_t i = 0; i < raygenGroupHandleRange.Count; i++)
             {
                 size_t         handleOffset = (i + raygenGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
                 handles[i]                  = handlePtr;
             }
-            mRaygenSbt.Build(context, pipelineProperties, handles);
+            sbtBuilder.SetSgHandles(&handles).SetPipelineProperties(&pipelineProperties);
+            mRaygenSbt.New(context, sbtBuilder);
         }
         {
-            std::vector<const uint8_t*> handles(mMissSbt.GetGroups().size());
+            GeneralShaderBindingTable::Builder& sbtBuilder = builder.GetMissSbtBuilder();
+            std::vector<const uint8_t*> handles(sbtBuilder.GetModules().size());
             for(int32_t i = 0; i < missGroupHandleRange.Count; i++)
             {
                 size_t         handleOffset = (i + missGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
                 handles[i]                  = handlePtr;
             }
-            mMissSbt.Build(context, pipelineProperties, handles);
+            sbtBuilder.SetSgHandles(&handles).SetPipelineProperties(&pipelineProperties);
+            mMissSbt.New(context, sbtBuilder);
         }
         {
-            std::vector<const uint8_t*> handles(mCallablesSbt.GetGroups().size());
+            GeneralShaderBindingTable::Builder& sbtBuilder = builder.GetCallableSbtBuilder();
+            std::vector<const uint8_t*> handles(sbtBuilder.GetModules().size());
             for(int32_t i = 0; i < callablesGroupHandleRange.Count; i++)
             {
                 size_t         handleOffset = (i + callablesGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
                 handles[i]                  = handlePtr;
             }
-            mCallablesSbt.Build(context, pipelineProperties, handles);
+            sbtBuilder.SetSgHandles(&handles).SetPipelineProperties(&pipelineProperties);
+            mCallablesSbt.New(context, sbtBuilder);
         }
         {
-            std::vector<const uint8_t*> handles(mHitSbt.GetGroups().size());
+            HitShaderBindingTable::Builder& sbtBuilder = builder.GetHitSbtBuilder();
+            std::vector<const uint8_t*> handles(sbtBuilder.GetModules().size());
             for(int32_t i = 0; i < hitGroupHandleRange.Count; i++)
             {
                 size_t         handleOffset = (i + hitGroupHandleRange.Start) * pipelineProperties.shaderGroupHandleSize;
                 const uint8_t* handlePtr    = shaderHandleData.data() + handleOffset;
                 handles[i]                  = handlePtr;
             }
-            mHitSbt.Build(context, pipelineProperties, handles);
+            sbtBuilder.SetSgHandles(&handles).SetPipelineProperties(&pipelineProperties);
+            mHitSbt.New(context, sbtBuilder);
         }
     }
 
@@ -117,12 +135,18 @@ namespace foray::rtpipe {
         vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipeline);
     }
 
-    void RtPipeline::Destroy()
+    void RtPipeline::CmdTraceRays(VkCommandBuffer cmdBuffer, VkExtent3D launchSize) const
     {
-        mRaygenSbt.Destroy();
-        mMissSbt.Destroy();
-        mCallablesSbt.Destroy();
-        mHitSbt.Destroy();
+        VkStridedDeviceAddressRegionKHR raygenSbtRegion = mRaygenSbt->GetAddressRegion();
+        VkStridedDeviceAddressRegionKHR missSbtRegion = mMissSbt->GetAddressRegion();
+        VkStridedDeviceAddressRegionKHR hitSbtRegion = mHitSbt->GetAddressRegion();
+        VkStridedDeviceAddressRegionKHR callableSbtRegion = mCallablesSbt->GetAddressRegion();
+
+        mContext->DispatchTable().cmdTraceRaysKHR(cmdBuffer, &raygenSbtRegion, &missSbtRegion, &hitSbtRegion, &callableSbtRegion, launchSize.width, launchSize.height, launchSize.depth);
+    }
+
+    RtPipeline::~RtPipeline()
+    {
         if(!!mPipeline)
         {
             mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);

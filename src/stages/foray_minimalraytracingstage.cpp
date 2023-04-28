@@ -15,13 +15,19 @@
 
 namespace foray::stages {
 
-    MinimalRaytracingStageBase::MinimalRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
+    MinimalRaytracingStageBase::MinimalRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder)
     {
         RenderStage::InitCallbacks(context, domain, resizeOrder);
+    }
+
+    void MinimalRaytracingStageBase::DefaultInit()
+    {
         ApiCustomObjectsCreate();
         ApiCreateOutputImages();
         ApiCreateOrUpdateDescriptors();
+        ApiCreateRtPipeline();
     }
+
     void MinimalRaytracingStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         ApiRecordFramePrepare(cmdBuffer, renderInfo);

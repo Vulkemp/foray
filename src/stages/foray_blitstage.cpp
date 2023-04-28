@@ -2,7 +2,7 @@
 #include "../foray_logger.hpp"
 
 namespace foray::stages {
-    void BlitStage::Init(core::ManagedImage* srcImage, core::ManagedImage* dstImage)
+    BlitStage::BlitStage(core::ManagedImage* srcImage, core::ManagedImage* dstImage)
     {
         SetSrcImage(srcImage);
         SetDstImage(dstImage);

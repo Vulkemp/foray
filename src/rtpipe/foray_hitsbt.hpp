@@ -16,26 +16,41 @@ namespace foray::rtpipe {
             core::ShaderModule* IntersectModule  = nullptr;
         };
 
-        inline explicit HitShaderBindingTable(VkDeviceSize entryDataSize = 0) : ShaderBindingTableBase(entryDataSize) {}
+        class Builder : public ShaderBindingTableBase::Builder
+        {
+          public:
+            Builder& SetEntry(
+                int32_t groupIdx, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect, const void* data = nullptr, std::size_t size = 0)
+            {
+                SetEntryModules(groupIdx, closestHit, anyHit, intersect);
+                if(!!data && size > 0)
+                {
+                    SetEntryData(groupIdx, data, size);
+                }
+                return *this;
+            }
+            template <typename T>
+            Builder& SetEntry(int32_t groupIdx, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect, const T& data)
+            {
+                return SetEntry(groupIdx, closestHit, anyHit, intersect, &data, sizeof(T));
+            }
+            ShaderGroup GetEntryModules(int32_t groupIdx)
+            {
+                Assert(groupIdx >= 0 && groupIdx < (int32_t)mModules.size(), "Group Index out of range");
+                return mModules[groupIdx];
+            }
+            Builder& SetEntryModules(int32_t groupIdx, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect);
 
-        /// @brief Set shader group with shader
-        void SetGroup(GroupIndex groupIndex, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect);
-        /// @brief Set shader group with shader and custom data
-        /// @param data pointer to a memory area of mEntryDataSize size. Use SetShaderDataSize(...) before adding shaders!
-        void SetGroup(GroupIndex groupIndex, core::ShaderModule* closestHit, core::ShaderModule* anyHit, core::ShaderModule* intersect, const void* data);
+            FORAY_PROPERTY_R(Modules)
 
-        virtual void        WriteToShaderCollection(RtShaderCollection& collection) const override;
-        virtual VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const override;
+            void        WriteToShaderCollection(RtShaderCollection& collection) const;
+            VectorRange WriteToShaderGroupCiVector(std::vector<VkRayTracingShaderGroupCreateInfoKHR>& groupCis, const RtShaderCollection& shaderCollection) const;
 
+          private:
+            std::vector<ShaderGroup> mModules;
+        };
 
-        FORAY_GETTER_CR(Groups)
-
-        virtual void Destroy() override;
-
-      protected:
-        std::vector<ShaderGroup> mGroups;
-
-        inline virtual size_t GetGroupArrayCount() const override { return mGroups.size(); }
+        HitShaderBindingTable(core::Context* context, const Builder& builder);
     };
 
-}  // namespace foray
+}  // namespace foray::rtpipe

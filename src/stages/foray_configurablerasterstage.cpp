@@ -216,7 +216,7 @@ namespace foray::stages {
         FORAY_ASSERTFMT(!mOutputMap.contains(keycopy), "Raster stage already configured with an output named \"{}\"", name);
         Assert(!mPipeline, "Must add outputs before building!");
         Heap<Output>& output = mOutputMap[keycopy] = Heap<Output>(name, recipe);
-        mOutputList.push_back(output.GetData());
+        mOutputList.push_back(output.Get());
         return *this;
     }
     const ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::GetOutputRecipe(std::string_view name) const
@@ -245,7 +245,7 @@ namespace foray::stages {
 
     core::ManagedImage* ConfigurableRasterStage::GetDepthImage()
     {
-        return mDepthImage;
+        return mDepthImage.Get();
     }
 
     void ConfigurableRasterStage::Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
@@ -286,7 +286,7 @@ namespace foray::stages {
                                               recipe.ImageFormat, size, name);
             image.New(mContext, ci);
             std::string keycopy(name);
-            mImageOutputs[keycopy] = image;
+            mImageOutputs[keycopy] = image.Get();
         }
         mDepthOutputName = fmt::format("{}.Depth", mName);
         VkImageUsageFlags depthUsage =
@@ -294,7 +294,7 @@ namespace foray::stages {
         core::ManagedImage::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, size, mDepthOutputName);
         ci.ImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
         mDepthImage.New(mContext, ci);
-        mImageOutputs[mDepthOutputName] = mDepthImage;
+        mImageOutputs[mDepthOutputName] = mDepthImage.Get();
     }
 
     void ConfigurableRasterStage::CreateRenderPass()
@@ -446,14 +446,16 @@ namespace foray::stages {
         }
 
         mShaderKeys.resize(2);
-        mShaderKeys[0] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.vert", mVertexShaderModule, shaderConfig);
-        mShaderKeys[1] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.frag", mFragmentShaderModule, shaderConfig);
+        mVertexShaderModule.New();
+        mFragmentShaderModule.New();
+        mShaderKeys[0] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.vert", mVertexShaderModule.Get(), shaderConfig);
+        mShaderKeys[1] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.frag", mFragmentShaderModule.Get(), shaderConfig);
     }
 
     void ConfigurableRasterStage::CreatePipeline()
     {
         util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, *mVertexShaderModule).Add(VK_SHADER_STAGE_FRAGMENT_BIT, *mFragmentShaderModule);
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, *mVertexShaderModule.Get()).Add(VK_SHADER_STAGE_FRAGMENT_BIT, *mFragmentShaderModule.Get());
 
         // vertex layout
         scene::VertexInputStateBuilder vertexInputStateBuilder;
@@ -467,6 +469,7 @@ namespace foray::stages {
         mPipeline = util::PipelineBuilder()
             .SetContext(mContext)
             .SetDomain(mDomain)
+            .SetColorAttachmentBlendCount(mOutputList.size())
             .SetPipelineLayout(mPipelineLayout.GetPipelineLayout())
             .SetVertexInputStateBuilder(&vertexInputStateBuilder)
             .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
@@ -560,9 +563,9 @@ namespace foray::stages {
 
         for(uint32_t i = 0; i < mOutputList.size(); i++)
         {
-            renderInfo.GetImageLayoutCache().Set(mOutputList[i]->Image, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            renderInfo.GetImageLayoutCache().Set(mOutputList[i]->Image.Get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
-        renderInfo.GetImageLayoutCache().Set(mDepthImage, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+        renderInfo.GetImageLayoutCache().Set(mDepthImage.Get(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
     }
 
     void ConfigurableRasterStage::OnResized(VkExtent2D extent)
@@ -578,10 +581,10 @@ namespace foray::stages {
             Local<core::ManagedImage>& image = pair.second->Image;
             if(image)
             {
-                core::ManagedImage::Resize(image, extent);
+                core::ManagedImage::Resize(image.Get(), extent);
             }
         }
-        core::ManagedImage::Resize(mDepthImage, extent);
+        core::ManagedImage::Resize(mDepthImage.Get(), extent);
 
         CreateFrameBuffer();
     }

@@ -21,23 +21,14 @@ namespace foray::base {
             return -1;
         }
 
-        bool hasRenderFunc = !!mRenderFunc;
-
-        if(!hasRenderFunc)
-        {
-            logger()->warn("[RenderLoop::Run] called with the following recommended functions not configured:{}", (hasRenderFunc ? "" : " RenderFunc"));
-        }
-
 #ifdef FORAY_CATCH_EXCEPTIONS
         try
         {
 #endif
 
             AdvanceState();  // ELifetimeState::Initializing
-            if(!!mInitFunc)
-            {
-                mInitFunc();
-            }
+
+            mApplication.IApplicationInit();
 
             AdvanceState();  // ELifetimeState::Running
 
@@ -50,10 +41,7 @@ namespace foray::base {
 
             while(mState == ELifetimeState::Running)
             {
-                if(!!mPollEventsFunc)
-                {
-                    mPollEventsFunc();
-                }
+                mApplication.IApplicationProcessEvents();
 
                 timePerTick = timespan_t(mFrameTiming.GetSecondsPerFrame());  // Recalculate time per tick, as it may have been changed
 
@@ -61,16 +49,13 @@ namespace foray::base {
                 timespan_t  delta      = now - lastTick;
                 timespan_t  sinceStart = now - start;
 
-                bool canRender = delta + balance >= timePerTick;
-                if(canRender && !!mRenderReadyFunc)
-                {
-                    canRender = mRenderReadyFunc();
-                }
-
                 while(mFrameTimes.size() > 0 && mFrameTimes.front().Timestamp + mMaxFrameTimeAge < sinceStart.count())
                 {
                     mFrameTimes.erase(mFrameTimes.begin());
                 }
+
+                bool canRender = delta + balance >= timePerTick;
+                canRender      = canRender && mApplication.IApplicationLoopReady();
 
                 if(canRender)
                 {
@@ -88,14 +73,11 @@ namespace foray::base {
                         FrameTime frameTime{.Delta = delta.count(), .Timestamp = sinceStart.count()};
                         mFrameTimes.emplace_back(frameTime);
 
-                        if(!!mRenderFunc)
-                        {
-                            RenderInfo renderInfo{
-                                .Delta = delta.count(), .TargetDelta = mFrameTiming.GetSecondsPerFrame(), .LoopFrameNumber = mRenderedFrameCount, .SinceStart = sinceStart.count()};
+                        LoopInfo loopInfo{
+                            .Delta = delta.count(), .TargetDelta = mFrameTiming.GetSecondsPerFrame(), .LoopFrameNumber = mRenderedFrameCount, .SinceStart = sinceStart.count()};
 
-                            mRenderFunc(renderInfo);
-                            mRenderedFrameCount++;
-                        }
+                        mApplication.IApplicationLoop(loopInfo);
+                        mRenderedFrameCount++;
                     }
                 }
                 else
@@ -105,11 +87,6 @@ namespace foray::base {
             }
 
             AdvanceState();  // ELifetimeState::Destroying
-
-            if(!!mDestroyFunc)
-            {
-                mDestroyFunc();
-            }
 
 #ifdef FORAY_CATCH_EXCEPTIONS
         }
@@ -124,37 +101,6 @@ namespace foray::base {
         // This will not call any callbacks, as it might have already been finalized
         mState = ELifetimeState::Finalized;
         return mRunResult;
-    }
-
-    RenderLoop& RenderLoop::SetInitFunc(InitFunctionPointer func)
-    {
-        mInitFunc = func;
-        return *this;
-    }
-    RenderLoop& RenderLoop::SetRenderFunc(RenderFunctionPointer func)
-    {
-        mRenderFunc = func;
-        return *this;
-    }
-    RenderLoop& RenderLoop::SetRenderReadyFunc(RenderReadyFunctionPointer func)
-    {
-        mRenderReadyFunc = func;
-        return *this;
-    }
-    RenderLoop& RenderLoop::SetDestroyFunc(DestroyFunctionPointer func)
-    {
-        mDestroyFunc = func;
-        return *this;
-    }
-    RenderLoop& RenderLoop::SetPollEventsFunc(PollEventsFunctionPointer func)
-    {
-        mPollEventsFunc = func;
-        return *this;
-    }
-    RenderLoop& RenderLoop::SetOnStateChangedFunc(OnStateChangedFunctionPointer func)
-    {
-        mOnStateChangedFunc = func;
-        return *this;
     }
 
     void RenderLoop::RequestStop(int32_t runResult)

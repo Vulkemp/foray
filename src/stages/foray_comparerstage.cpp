@@ -31,7 +31,7 @@ namespace foray::stages {
             VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT, mDomain->GetExtent(), OutputName);
         mOutput.New(mContext, ci);
-        mImageOutputs[std::string(mOutput->GetName())] = mOutput;
+        mImageOutputs[std::string(mOutput->GetName())] = mOutput.Get();
     }
     void ComparerStage::LoadShaders()
     {
@@ -79,9 +79,9 @@ namespace foray::stages {
         {  // Descriptor Set
             substage.DescriptorSet.SetDescriptorAt(0, substage.InputSampled.GetVkDescriptorInfo(), VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                    VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-            substage.DescriptorSet.SetDescriptorAt(1, mOutput, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            substage.DescriptorSet.SetDescriptorAt(1, mOutput.Get(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                    VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-            substage.DescriptorSet.SetDescriptorAt(2, mPipetteBuffer, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            substage.DescriptorSet.SetDescriptorAt(2, mPipetteBuffer.Get(), VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
             if(substage.DescriptorSet.Exists())
             {
                 substage.DescriptorSet.Update();
@@ -150,7 +150,7 @@ namespace foray::stages {
 
         mSubStages[index].Input  = input;
         mSubStages[index].Index  = index;
-        mSubStages[index].Shader = mShaders[(size_t)input.Type];
+        mSubStages[index].Shader = mShaders[(size_t)input.Type].Get();
 
         if(!!mContext)
         {
@@ -176,7 +176,7 @@ namespace foray::stages {
             {
                 substage.DescriptorSet.SetDescriptorAt(0, substage.InputSampled.GetVkDescriptorInfo(), VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                                        VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-                substage.DescriptorSet.SetDescriptorAt(1, mOutput, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                substage.DescriptorSet.SetDescriptorAt(1, mOutput.Get(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                        VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
                 substage.DescriptorSet.Update();
             }
@@ -225,7 +225,7 @@ namespace foray::stages {
                     .DstAccessMask = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT,
                     .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
                 };
-                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().MakeBarrier(mOutput, barrier));
+                vkBarriers[index++] = (renderInfo.GetImageLayoutCache().MakeBarrier(mOutput.Get(), barrier));
             }
 
             VkDependencyInfo depInfo{
