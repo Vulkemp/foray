@@ -3,7 +3,7 @@
 #include "../foray_basics.hpp"
 #include "../foray_vulkan.hpp"
 #include "foray_inflightframe.hpp"
-#include "foray_renderloop.hpp"
+#include "foray_applifetime.hpp"
 #include <vector>
 
 namespace foray::base {
@@ -40,7 +40,7 @@ namespace foray::base {
         /// @brief Initialize based on loopRenderInfo and InFlightFrame
         /// @remark RenderLoop::RenderInfo::LoopFrameNumber is not used as mFrameNumber, 
         /// as the render index can be prevented from incrementing if the swapchain is resized before a frame could be recorded
-        FrameRenderInfo(const RenderLoop::RenderInfo& loopRenderInfo, InFlightFrame* inflightFrame)
+        FrameRenderInfo(const LoopInfo& loopRenderInfo, InFlightFrame* inflightFrame)
             : mFrameTime(loopRenderInfo.Delta), mSinceStart(loopRenderInfo.SinceStart), mFrameNumber(0), mInFlightFrame(inflightFrame)
         {
         }

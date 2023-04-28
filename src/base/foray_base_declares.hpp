@@ -1,7 +1,7 @@
 #pragma once
 
 namespace foray::base {
-    class RenderLoop;
+    class AppLoopBase;
     class VulkanInstance;
     class VulkanDevice;
     class VulkanWindowSwapchain;

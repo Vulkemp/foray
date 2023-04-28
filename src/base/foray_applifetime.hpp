@@ -1,11 +1,10 @@
 #pragma once
 #include "../foray_basics.hpp"
+#include "foray_base_declares.hpp"
 #include <functional>
-#include <limits>
-#include <list>
-#include <vector>
 
 namespace foray::base {
+
 
     /// @brief The lifetime states an application progresses through chronologically
     enum class ELifetimeState
@@ -17,8 +16,6 @@ namespace foray::base {
         Destroying,
         Finalized
     };
-
-    void PrintStateChange(ELifetimeState oldState, ELifetimeState newState);
 
     /// @brief Controls an apps render scheduling timing
     class AppFrameTiming
@@ -53,10 +50,10 @@ namespace foray::base {
     class IApplication
     {
       public:
-        IApplication() = default;
-        virtual void IApplicationInit(RenderLoop*) {}
-        virtual void IApplicationLoop(const LoopInfo&) {}
-        virtual bool IApplicationLoopReady() {}
+        // IApplication(AppLoopBase*) {}
+        virtual void IApplicationInit() {}
+        virtual void IApplicationLoop(LoopInfo&) {}
+        virtual bool IApplicationLoopReady() { return true; }
         virtual void IApplicationProcessEvents() {}
         virtual ~IApplication() = default;
     };
@@ -65,9 +62,9 @@ namespace foray::base {
     {
       public:
         /// @brief Function pointer for application initialization
-        using InitFunctionPointer = std::function<void(RenderLoop*)>;
+        using InitFunctionPointer = std::function<void()>;
         /// @brief Function pointer for a single frame render action. Param#0 : Delta time in seconds
-        using RenderFunctionPointer = std::function<void(const LoopInfo&)>;
+        using RenderFunctionPointer = std::function<void(LoopInfo&)>;
         /// @brief Function pointer for the RenderLoop to check if application is ready to render next frame. Return true if ready.
         using RenderReadyFunctionPointer = std::function<bool()>;
         /// @brief Function pointer for application finalization
@@ -90,14 +87,14 @@ namespace foray::base {
         {
         }
 
-        virtual void IApplicationInit(RenderLoop* loop)
+        virtual void IApplicationInit()
         {
             if(!!mInitFunc)
             {
-                mInitFunc(loop);
+                mInitFunc();
             }
         }
-        virtual void IApplicationLoop(const LoopInfo& loopInfo)
+        virtual void IApplicationLoop(LoopInfo& loopInfo)
         {
             if(!!mRenderFunc)
             {
@@ -135,72 +132,4 @@ namespace foray::base {
         PollEventsFunctionPointer  mPollEventsFunc  = nullptr;
     };
 
-    /// @brief Manages a single threaded, automatically balancing application lifetime
-    class RenderLoop
-    {
-      public:
-        inline explicit RenderLoop(IApplication& application) : mApplication(application){}
-
-        /// @brief Runs the application through its full lifetime, invoking all function pointers which have been set
-        /// @return The runResult value from RequestStop, or -1 on catched exception
-        int32_t Run();
-        /// @brief Request the finalization of the application as soon as possible
-        /// @param runResult The result the encompassing Run() call should return
-        void RequestStop(int32_t runResult = 0);
-        /// @brief Returns true, if the internal state is ELifetimeState::Running; false otherwise
-        bool IsRunning() const;
-
-        /// @brief Analysis
-        struct FrameTimeAnalysis
-        {
-            /// @brief Total time in seconds of the analyzed frametimes
-            fp32_t TotalTime = 0.f;
-            /// @brief Count of frametimes analyzed
-            uint32_t Count = 0;
-            /// @brief Minimum frame time in seconds recorded
-            fp32_t MinFrameTime = std::numeric_limits<fp32_t>::infinity();
-            /// @brief Maximum frame time in seconds recorded
-            fp32_t MaxFrameTime = 0.f;
-            /// @brief Average frame time in seconds recorded
-            fp32_t AvgFrameTime = 0.f;
-        };
-
-        /// @brief Analyse all stored frame times. Note: MaxFrameTimeAge member determines maximum possible frame time age
-        FrameTimeAnalysis AnalyseFrameTimes() const;
-        /// @brief Get all stored frame times (in seconds) by pushing them on the vector
-        void GetFrameTimes(std::vector<fp32_t>& outFrameTimes) const;
-
-        RenderLoop& SetInitFunc(InitFunctionPointer func);
-        RenderLoop& SetRenderFunc(RenderFunctionPointer func);
-        RenderLoop& SetRenderReadyFunc(RenderReadyFunctionPointer func);
-        RenderLoop& SetDestroyFunc(DestroyFunctionPointer func);
-        RenderLoop& SetPollEventsFunc(PollEventsFunctionPointer func);
-        RenderLoop& SetOnStateChangedFunc(OnStateChangedFunctionPointer func);
-
-        FORAY_GETTER_V(State)
-
-        FORAY_GETTER_MR(FrameTiming)
-        FORAY_PROPERTY_V(MaxFrameTimeAge)
-
-      protected:
-        void AdvanceState();
-
-        IApplication& mApplication;
-
-        ELifetimeState mState     = ELifetimeState::PreInit;
-        int32_t        mRunResult = 0;
-
-        AppFrameTiming mFrameTiming;
-        uint64_t       mRenderedFrameCount = 0;
-
-
-        struct FrameTime
-        {
-            fp32_t Delta     = 0.f;
-            fp64_t Timestamp = 0;
-        };
-
-        std::list<FrameTime> mFrameTimes;
-        fp32_t               mMaxFrameTimeAge = 1.f;
-    };
 }  // namespace foray::base

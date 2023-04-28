@@ -5,15 +5,11 @@
 #include "../foray_logger.hpp"
 #include "../osi/foray_osi_event.hpp"
 #include "../stages/foray_renderstage.hpp"
+#include "foray_applicationloop.hpp"
 
 namespace foray::base {
-    DefaultAppBase::DefaultAppBase()
-        : mRenderLoop([this]() { this->Init(); },
-                      [this](RenderLoop::RenderInfo& renderInfo) { this->Render(renderInfo); },
-                      [this]() { return this->CanRenderNextFrame(); },
-                      [this]() { this->Destroy(); },
-                      [this]() { this->PollEvents(); },
-                      &PrintStateChange)
+    DefaultAppBase::DefaultAppBase(AppLoopBase* apploop)
+        : mAppLoop(apploop)
         , mOsManager()
         , mInstance(
               &mContext,
@@ -41,12 +37,7 @@ namespace foray::base {
 #endif
     }
 
-    int32_t DefaultAppBase::Run()
-    {
-        return mRenderLoop.Run();
-    }
-
-    void DefaultAppBase::Init()
+    void DefaultAppBase::IApplicationInit()
     {
         ApiBeforeInit();
 
@@ -137,11 +128,9 @@ namespace foray::base {
         }
     }
 
-    void DefaultAppBase::Destroy()
+    DefaultAppBase::~DefaultAppBase()
     {
         AssertVkResult(mDevice->GetDispatchTable().deviceWaitIdle());
-
-        ApiDestroy();
 
         mOnSwapchainResized.Destroy();
         mOnOsEvent.Destroy();
@@ -159,15 +148,16 @@ namespace foray::base {
 
         vmaDestroyAllocator(mContext.Allocator);
         mContext.Allocator = nullptr;
-        mWindowSwapchain = nullptr;
-        mDevice = nullptr;
-        mInstance = nullptr;
+        mWindowSwapchain   = nullptr;
+        mDevice            = nullptr;
+        mInstance          = nullptr;
     }
 
     void DefaultAppBase::RecreateSwapchain()
     {
         VkSurfaceCapabilitiesKHR surfaceCapabilities{};
-        AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mDevice->GetPhysicalDevice(), mWindowSwapchain->GetWindow().GetOrCreateSurfaceKHR(mInstance->GetInstance()), &surfaceCapabilities));
+        AssertVkResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mDevice->GetPhysicalDevice(), mWindowSwapchain->GetWindow().GetOrCreateSurfaceKHR(mInstance->GetInstance()),
+                                                                 &surfaceCapabilities));
 
         if(surfaceCapabilities.maxImageExtent.width == 0 || surfaceCapabilities.maxImageExtent.height == 0)
         {
@@ -179,14 +169,14 @@ namespace foray::base {
         mWindowSwapchain->RecreateSwapchain();
     }
 
-    bool DefaultAppBase::CanRenderNextFrame()
+    bool DefaultAppBase::IApplicationLoopReady()
     {
         InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex].Get();
 
         return currentFrame.HasFinishedExecution();
     }
 
-    void DefaultAppBase::PollEvents()
+    void DefaultAppBase::IApplicationProcessEvents()
     {
         while(mOsManager.PollEvent())
             ;
@@ -198,11 +188,11 @@ namespace foray::base {
         if(event->Type == osi::Event::EType::WindowCloseRequested && event->Source && osi::Window::Windows().size() <= 1)
         {
             // The last window has been requested to close, oblige by stopping the renderloop
-            mRenderLoop.RequestStop();
+            mAppLoop->RequestStop();
         }
     }
 
-    void DefaultAppBase::Render(RenderLoop::RenderInfo& renderInfo)
+    void DefaultAppBase::IApplicationLoop(LoopInfo& renderInfo)
     {
         // Check for shader recompilation
         if(mLastShadersCheckedTimestamp + 1 < renderInfo.SinceStart)
@@ -277,7 +267,7 @@ namespace foray::base {
         if(result == ESwapchainInteractResult::Resized)
         {
             // Redo Swapchain
-            if(mRenderLoop.IsRunning())
+            if(mAppLoop->IsRunning())
             {
                 RecreateSwapchain();
             }

@@ -6,8 +6,8 @@
 #include "../foray_vma.hpp"
 #include "../osi/foray_osmanager.hpp"
 #include "../stages/foray_stages_declares.hpp"
+#include "foray_applifetime.hpp"
 #include "foray_framerenderinfo.hpp"
-#include "foray_renderloop.hpp"
 #include "foray_vulkandevice.hpp"
 #include "foray_vulkaninstance.hpp"
 #include "foray_vulkanwindowswapchain.hpp"
@@ -17,13 +17,12 @@
 namespace foray::base {
 
     /// @brief Intended as base class for demo applications. Compared to MinimalAppBase it offers a complete simple vulkan setup.
-    class DefaultAppBase
+    class DefaultAppBase : public IApplication
     {
       public:
-        DefaultAppBase();
-        virtual ~DefaultAppBase() = default;
+        explicit DefaultAppBase(AppLoopBase* apploop);
+        virtual ~DefaultAppBase();
 
-        FORAY_GETTER_MR(RenderLoop)
         FORAY_GETTER_MR(OsManager)
         FORAY_GETTER_MR(Instance)
         FORAY_GETTER_MR(Device)
@@ -61,11 +60,19 @@ namespace foray::base {
         /// @brief Called back once the frame of the index has finished executing on the GPU, so QueryResults etc. are ready to be obtained
         /// @param frameIndex Index of the frame that has finished executing
         inline virtual void ApiFrameFinishedExecuting(uint64_t frameIndex) {}
-        /// @brief Called after the application has been requested to shut down but before DefaultAppBase finalizes itself.
-        inline virtual void ApiDestroy() {}
+
+public: // IApplication interface
 
         /// @brief [Internal] Initializes DefaultAppBase
-        virtual void Init();
+        virtual void IApplicationInit() override;
+        /// @brief [Internal] Polls and distributes events from the SDL subsystem
+        virtual void IApplicationProcessEvents() override;
+        /// @brief [Internal] Checks next frames InFlightFrame object for completed execution
+        virtual bool IApplicationLoopReady() override;
+        /// @brief [Internal] Image Acquire, Image Present
+        virtual void IApplicationLoop(LoopInfo& renderInfo) override;
+
+protected:
         /// @brief [Internal] Initializes Queue
         virtual void InitGetQueue();
         /// @brief [Internal] Initializes Command Pool
@@ -78,20 +85,11 @@ namespace foray::base {
         /// @brief [Internal] Recreates the swapchain
         virtual void RecreateSwapchain();
 
-        /// @brief [Internal] Polls and distributes events from the SDL subsystem
-        virtual void PollEvents();
 
-        /// @brief [Internal] Checks next frames InFlightFrame object for completed execution
-        virtual bool CanRenderNextFrame();
-        /// @brief [Internal] Image Acquire, Image Present
-        virtual void Render(RenderLoop::RenderInfo& renderInfo);
         /// @brief [Internal] Shader recompile handler
         virtual void OnOsEvent(const osi::Event* event);
 
-        /// @brief [Internal] Finalizer
-        virtual void Destroy();
-
-        RenderLoop                    mRenderLoop;
+        AppLoopBase*                  mAppLoop;
         osi::OsManager                mOsManager;
         Heap<VulkanInstance>          mInstance;
         Heap<VulkanDevice>            mDevice;
@@ -101,10 +99,10 @@ namespace foray::base {
         core::Context                 mContext;
 
         /// @brief Increase this in an early init method to get auxiliary command buffers
-        uint32_t                                        mAuxiliaryCommandBufferCount = 0;
+        uint32_t                                               mAuxiliaryCommandBufferCount = 0;
         std::array<Local<InFlightFrame>, INFLIGHT_FRAME_COUNT> mInFlightFrames;
-        uint32_t                                        mInFlightFrameIndex = 0;
-        uint64_t                                        mRenderedFrameCount = 0;
+        uint32_t                                               mInFlightFrameIndex = 0;
+        uint64_t                                               mRenderedFrameCount = 0;
 
         fp64_t mLastShadersCheckedTimestamp = 0.0;
 

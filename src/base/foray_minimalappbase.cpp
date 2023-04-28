@@ -1,5 +1,5 @@
 #include "foray_minimalappbase.hpp"
-
+#include "foray_applicationloop.hpp"
 #include "../foray_logger.hpp"
 #include "../osi/foray_osi_event.hpp"
 #include "../osi/foray_window.hpp"
@@ -12,13 +12,8 @@ namespace foray::base {
         logger()->info("Lifetime State: {} => {}", NAMEOF_ENUM(oldState), NAMEOF_ENUM(newState));
     }
 
-    MinimalAppBase::MinimalAppBase(bool printStateChanges)
-        : mRenderLoop([this]() { this->Init(); },
-                      [this](RenderLoop::RenderInfo& renderInfo) { this->ApiRender(renderInfo); },
-                      [this]() { return this->ApiCanRenderNextFrame(); },
-                      [this]() { this->Destroy(); },
-                      [this]() { this->PollEvents(); },
-                      (printStateChanges ? &PrintStateChange : nullptr))
+    MinimalAppBase::MinimalAppBase(AppLoopBase* apploop)
+        : mAppLoop(apploop)
         , mOsManager()
         , mInstance(
               &mContext,
@@ -32,18 +27,13 @@ namespace foray::base {
     {
     }
 
-    int32_t MinimalAppBase::Run()
-    {
-        return mRenderLoop.Run();
-    }
-
-    void MinimalAppBase::Init()
+    void MinimalAppBase::IApplicationInit()
     {
         mOsManager.Init();
         mInstance->Create();
     }
 
-    void MinimalAppBase::PollEvents()
+    void MinimalAppBase::IApplicationProcessEvents()
     {
         while (mOsManager.PollEvent()) ;
     }
@@ -53,10 +43,10 @@ namespace foray::base {
         ApiOnOsEvent(event);
         if (event->Type == osi::Event::EType::WindowCloseRequested && osi::Window::Windows().size() == 1)
         {
-            mRenderLoop.RequestStop();
+            mAppLoop->RequestStop();
         }
     }
-    void MinimalAppBase::Destroy()
+    MinimalAppBase::~MinimalAppBase()
     {
         mOsEventReceiver.Destroy();
         mInstance = nullptr;
