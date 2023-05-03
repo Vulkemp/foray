@@ -30,8 +30,9 @@ vec3 diffuseBrdf(vec3 rgb)
 vec3 EvaluateMaterial(in HitSample hit, in MaterialBufferObject material, in MaterialProbe probe)
 {
 	float tempVDotH1 = 1 - abs(dot(hit.wOut, hit.wHalf));
+	// carry sign over as negative first argument is undefined behaviour (does not work on RDNA2 for example)
 	float signVDotH1 = sign(tempVDotH1);
-	float tempVDotH = pow(abs(tempVDotH1), 5) * signVDotH1; // carry sign over as negative first argument is undefined behaviour (does not work on RDNA2 for example)
+	float tempVDotH = pow(abs(tempVDotH1), 5) * signVDotH1;
 
 	vec4 baseColor = probe.BaseColor;
 	float alpha = probe.MetallicRoughness.g * probe.MetallicRoughness.g;
