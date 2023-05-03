@@ -76,6 +76,7 @@ namespace foray::core {
             mCollection = nullptr;
         }
     }
+
     CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
     CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
     CombinedImageSampler& CombinedImageSampler::operator=(const CombinedImageSampler& other)
@@ -93,6 +94,28 @@ namespace foray::core {
         SamplerReference::Init(context, samplerCi);
     }
     void CombinedImageSampler::Init(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
+    {
+        mManagedImage = image;
+        SamplerReference::Init(context, samplerCi);
+    }
+
+    Combined3dImageSampler::Combined3dImageSampler(const Combined3dImageSampler& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
+    Combined3dImageSampler::Combined3dImageSampler(Combined3dImageSampler&& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
+    Combined3dImageSampler& Combined3dImageSampler::operator=(const Combined3dImageSampler& other)
+    {
+        SamplerReference::operator=(other);
+        mManagedImage = other.mManagedImage;
+        return *this;
+    }
+    Combined3dImageSampler::Combined3dImageSampler(core::Context* context, core::Managed3dImage* image, const VkSamplerCreateInfo& samplerCi)
+            : SamplerReference(context, samplerCi), mManagedImage(image)
+    {
+    }
+    void Combined3dImageSampler::Init(core::Context* context, const VkSamplerCreateInfo& samplerCi)
+    {
+        SamplerReference::Init(context, samplerCi);
+    }
+    void Combined3dImageSampler::Init(core::Context* context, core::Managed3dImage* image, const VkSamplerCreateInfo& samplerCi)
     {
         mManagedImage = image;
         SamplerReference::Init(context, samplerCi);

@@ -1,6 +1,7 @@
 #pragma once
 #include "foray_managedimage.hpp"
 #include "foray_managedresource.hpp"
+#include "foray_managed3dimage.hpp"
 #include <unordered_map>
 
 namespace foray::core {
@@ -91,6 +92,44 @@ namespace foray::core {
       protected:
         /// @brief Reference used only for descriptor image info filling
         core::ManagedImage* mManagedImage = nullptr;
+    };
+
+    /// @brief Wraps an image + sampler combination
+    /// @remark Only useful if .pNext field of sampler createinfo remains zero. Image fields are optional.
+    class Combined3dImageSampler : public SamplerReference
+    {
+    public:
+        Combined3dImageSampler() = default;
+        Combined3dImageSampler(const Combined3dImageSampler& other);
+        Combined3dImageSampler(Combined3dImageSampler&& other);
+        Combined3dImageSampler& operator=(const Combined3dImageSampler& other);
+
+        /// @brief Construct and initialize
+        /// @param context Requires SamplerCol field
+        /// @param image Image
+        /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
+        Combined3dImageSampler(core::Context* context, core::Managed3dImage* image, const VkSamplerCreateInfo& samplerCi);
+
+        /// @brief Initializes by fetching a matching sampler from sampler collection
+        /// @param context Requires SamplerCol field
+        /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
+        void Init(core::Context* context, const VkSamplerCreateInfo& samplerCi);
+        /// @brief Initializes by fetching a matching sampler from sampler collection
+        /// @param context Requires SamplerCol field
+        /// @param image Image
+        /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
+        void Init(core::Context* context, core::Managed3dImage* image, const VkSamplerCreateInfo& samplerCi);
+
+        /// @brief Build descriptor image info
+        VkDescriptorImageInfo GetVkDescriptorInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
+        {
+            return VkDescriptorImageInfo{.sampler = mSampler, .imageView = (!!mManagedImage) ? mManagedImage->GetImageView() : nullptr, .imageLayout = layout};
+        }
+
+        FORAY_PROPERTY_V(ManagedImage)
+    protected:
+        /// @brief Reference used only for descriptor image info filling
+        core::Managed3dImage* mManagedImage = nullptr;
     };
 
     /// @brief Provides sampler objects based on VkSamplerCreateInfo specifications.
