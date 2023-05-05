@@ -1,8 +1,8 @@
 #pragma once
 #include "../core/foray_samplercollection.hpp"
 #include "../foray_glm.hpp"
-#include "foray_computestage.hpp"
 #include "../foray_mem.hpp"
+#include "foray_computestage.hpp"
 #include <array>
 
 namespace foray::stages {
@@ -66,13 +66,13 @@ namespace foray::stages {
       protected:
         struct SubStage
         {
-            uint32_t                   Index;
-            InputInfo                  Input;
-            core::CombinedImageSampler InputSampled;
-            core::ShaderModule*        Shader;
-            core::DescriptorSet        DescriptorSet;
-            util::PipelineLayout       PipelineLayout;
-            VkPipeline                 Pipeline = nullptr;
+            uint32_t                    Index;
+            InputInfo                   Input;
+            core::CombinedImageSampler  InputSampled;
+            core::ShaderModule*         Shader;
+            core::DescriptorSet         DescriptorSet;
+            Local<util::PipelineLayout> PipelineLayout;
+            VkPipeline                  Pipeline = nullptr;
         };
 
         void CreateSubStage(SubStage& substage);

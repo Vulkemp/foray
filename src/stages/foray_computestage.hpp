@@ -29,7 +29,7 @@ namespace foray::stages {
         Local<core::ShaderModule> mShader;
 
         core::DescriptorSet  mDescriptorSet;
-        util::PipelineLayout mPipelineLayout;
+        Local<util::PipelineLayout> mPipelineLayout;
 
         VkPipeline mPipeline = nullptr;
 

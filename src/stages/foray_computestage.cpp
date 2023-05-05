@@ -18,7 +18,7 @@ namespace foray::stages {
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
 
-        mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
+        mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U, nullptr);
 
         glm::uvec3 groupSize;
         ApiBeforeDispatch(cmdBuffer, renderInfo, groupSize);
@@ -37,7 +37,7 @@ namespace foray::stages {
         {
             .sType = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
             .stage = shaderStageCi,
-            .layout = mPipelineLayout,
+            .layout = mPipelineLayout.GetRef(),
         };
 
         AssertVkResult(mContext->DispatchTable().createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));

@@ -41,7 +41,6 @@ namespace foray::stages {
     }
     MinimalRaytracingStageBase::~MinimalRaytracingStageBase()
     {
-        mPipelineLayout.Destroy();
     }
     void MinimalRaytracingStageBase::ReloadShaders()
     {

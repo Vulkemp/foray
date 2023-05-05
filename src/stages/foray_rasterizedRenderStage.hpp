@@ -8,7 +8,7 @@ namespace foray::stages {
     class RasterizedRenderStage : public RenderStage
     {
       public:
-        inline RasterizedRenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr) : RenderStage(context, domain) {}
+        inline RasterizedRenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0) : RenderStage(context, domain, priority) {}
 
         FORAY_GETTER_CR(FrameBuffer)
         FORAY_GETTER_CR(Renderpass)
@@ -25,6 +25,6 @@ namespace foray::stages {
         VkRenderPass         mRenderpass    = nullptr;
         core::DescriptorSet  mDescriptorSet;
         VkPipeline           mPipeline       = nullptr;
-        util::PipelineLayout mPipelineLayout;
+        Local<util::PipelineLayout> mPipelineLayout;
     };
 }  // namespace foray::stages

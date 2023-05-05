@@ -1,8 +1,8 @@
 #pragma once
 #include "../core/foray_shadermodule.hpp"
+#include "../foray_mem.hpp"
 #include "../scene/foray_scene_declares.hpp"
 #include "foray_rasterizedRenderStage.hpp"
-#include "../foray_mem.hpp"
 
 namespace foray::stages {
 
@@ -134,19 +134,40 @@ namespace foray::stages {
             static const OutputRecipe DepthAndDerivative;
         };
 
-        /// @brief Enable a builtin feature (such as ALPHATEST) regardless of outputs generated
-        ConfigurableRasterStage& EnableBuiltInFeature(BuiltInFeaturesFlagBits feature);
+        class Builder
+        {
+          public:
+            using OutputMap  = std::unordered_map<std::string, OutputRecipe>;
+            /// @brief Enable a builtin feature (such as ALPHATEST) regardless of outputs generated
+            Builder& EnableBuiltInFeature(BuiltInFeaturesFlagBits feature);
 
-        /// @brief Add an Output to the GBuffer
-        /// @remarks MUST be called before Build(), ONLY MAX CGBuffer::MAX_OUTPUT_COUNT may be set!
-        /// @param name Identifier (access the generated image via GetImageOutput(name))
-        /// @param recipe Information for layout and type of data generated and calculation
-        ConfigurableRasterStage& AddOutput(std::string_view name, const OutputRecipe& recipe);
+            /// @brief Add an Output to the GBuffer
+            /// @remarks MUST be called before Build(), ONLY MAX CGBuffer::MAX_OUTPUT_COUNT may be set!
+            /// @param name Identifier (access the generated image via GetImageOutput(name))
+            /// @param recipe Information for layout and type of data generated and calculation
+            Builder& AddOutput(std::string_view name, const OutputRecipe& recipe);
+            /// @brief Access to an output recipe
+            OutputRecipe& GetOutputRecipe(std::string_view name);
+            /// @brief Readonly access to an output recipe
+            const OutputRecipe& GetOutputRecipe(std::string_view name) const;
+
+            FORAY_GETTER_V(BuiltInFeaturesFlagsGlobal)
+            FORAY_GETTER_V(InterfaceFlagsGlobal)
+            FORAY_GETTER_CR(OutputMap)
+
+          private:
+            uint32_t  mBuiltInFeaturesFlagsGlobal = 0;
+            uint32_t mInterfaceFlagsGlobal = 0;
+            OutputMap mOutputMap;
+        };
+
+
         /// @brief Readonly access to an output recipe
         const OutputRecipe& GetOutputRecipe(std::string_view name) const;
 
-        /// @brief Builds the GBuffer. Make sure to add all outputs before!
-        virtual void Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, std::string_view name = "ConfigurableRasterStage");
+        /// @brief Builds the Configurable Raster Stage
+        ConfigurableRasterStage(
+            core::Context* context, const Builder& builder, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder = 0, std::string_view name = "ConfigurableRasterStage");
 
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 

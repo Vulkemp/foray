@@ -3,30 +3,27 @@
 
 namespace foray::util {
 
-    void PipelineLayout::Destroy()
+    PipelineLayout::~PipelineLayout()
     {
         if(!!mPipelineLayout)
         {
             mContext->DispatchTable().destroyPipelineLayout(mPipelineLayout, nullptr);
             mPipelineLayout = nullptr;
         }
-        mDescriptorSetLayouts.clear();
-        mPushConstantRanges.clear();
-        mPushConstantOffset = 0U;
     }
 
-    void PipelineLayout::AddDescriptorSetLayout(VkDescriptorSetLayout layout)
+    void PipelineLayout::Builder::AddDescriptorSetLayout(VkDescriptorSetLayout layout)
     {
         mDescriptorSetLayouts.push_back(layout);
     }
-    void PipelineLayout::AddDescriptorSetLayouts(const std::vector<VkDescriptorSetLayout>& layouts)
+    void PipelineLayout::Builder::AddDescriptorSetLayouts(const std::vector<VkDescriptorSetLayout>& layouts)
     {
         for(VkDescriptorSetLayout layout : layouts)
         {
             mDescriptorSetLayouts.push_back(layout);
         }
     }
-    void PipelineLayout::AddPushConstantRange(VkPushConstantRange range)
+    void PipelineLayout::Builder::AddPushConstantRange(VkPushConstantRange range)
     {
         if(range.offset == ~0U)
         {
@@ -36,7 +33,7 @@ namespace foray::util {
 
         mPushConstantRanges.push_back(range);
     }
-    void PipelineLayout::AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges)
+    void PipelineLayout::Builder::AddPushConstantRanges(const std::vector<VkPushConstantRange>& ranges)
     {
         for(const VkPushConstantRange& range : ranges)
         {
@@ -44,47 +41,25 @@ namespace foray::util {
         }
     }
 
-    VkPipelineLayout PipelineLayout::Build(core::Context* context, VkPipelineLayoutCreateFlags flags, void* pNext)
+    PipelineLayout::PipelineLayout(core::Context* context, const Builder& builder)
+     : mContext(context)
     {
-        if(!!mPipelineLayout)
-        {
-            mContext->DispatchTable().destroyPipelineLayout(mPipelineLayout, nullptr);
-            mPipelineLayout = nullptr;
-        }
-
-        mContext = context;
-
         VkPipelineLayoutCreateInfo ci = {
             .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-            .pNext = pNext,
-            .flags = flags,
+            .pNext = builder.GetPNext(),
+            .flags = builder.GetFlags(),
         };
-        if(mPushConstantRanges.size() > 0)
+        if(builder.GetPushConstantRanges().size() > 0)
         {
-            ci.pushConstantRangeCount = mPushConstantRanges.size();
-            ci.pPushConstantRanges    = mPushConstantRanges.data();
+            ci.pushConstantRangeCount = builder.GetPushConstantRanges().size();
+            ci.pPushConstantRanges    = builder.GetPushConstantRanges().data();
         }
-        if(mDescriptorSetLayouts.size() > 0)
+        if(builder.GetDescriptorSetLayouts().size() > 0)
         {
-            ci.setLayoutCount = mDescriptorSetLayouts.size();
-            ci.pSetLayouts    = mDescriptorSetLayouts.data();
+            ci.setLayoutCount = builder.GetDescriptorSetLayouts().size();
+            ci.pSetLayouts    = builder.GetDescriptorSetLayouts().data();
         }
 
         AssertVkResult(mContext->DispatchTable().createPipelineLayout(&ci, nullptr, &mPipelineLayout));
-
-        return mPipelineLayout;
     }
-
-    VkPipelineLayout PipelineLayout::Build(core::Context*                            context,
-                                           const std::vector<VkDescriptorSetLayout>& descriptorLayouts,
-                                           const std::vector<VkPushConstantRange>&   pushConstantRanges,
-                                           VkPipelineLayoutCreateFlags               flags,
-                                           void*                                     pNext)
-    {
-        AddDescriptorSetLayouts(descriptorLayouts);
-        AddPushConstantRanges(pushConstantRanges);
-
-        return Build(context, flags, pNext);
-    }
-
 }  // namespace foray::util

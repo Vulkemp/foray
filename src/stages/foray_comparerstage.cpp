@@ -89,9 +89,10 @@ namespace foray::stages {
             }
         }
         {  // Pipeline Layout
-            substage.PipelineLayout.AddDescriptorSetLayout(substage.DescriptorSet.GetDescriptorSetLayout());
-            substage.PipelineLayout.AddPushConstantRange<PushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
-            substage.PipelineLayout.Build(mContext);
+            util::PipelineLayout::Builder builder;
+            builder.AddDescriptorSetLayout(substage.DescriptorSet.GetDescriptorSetLayout());
+            builder.AddPushConstantRange<PushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
+            substage.PipelineLayout.New(mContext, builder);
         }
         {  // Pipeline
             VkPipelineShaderStageCreateInfo shaderStageCi{.sType  = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -102,7 +103,7 @@ namespace foray::stages {
             VkComputePipelineCreateInfo pipelineCi{
                 .sType  = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
                 .stage  = shaderStageCi,
-                .layout = substage.PipelineLayout,
+                .layout = substage.PipelineLayout.GetRef(),
             };
 
             AssertVkResult(mContext->DispatchTable().createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &substage.Pipeline));
@@ -235,7 +236,7 @@ namespace foray::stages {
 
             VkDescriptorSet descriptorSet = substage.DescriptorSet.GetDescriptorSet();
 
-            mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout, 0U, 1U, &descriptorSet, 0U,
+            mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U,
                                                               nullptr);
         }
         glm::uvec2 groupSize;
@@ -264,7 +265,7 @@ namespace foray::stages {
                                .WriteOffset = writeOffset,
                                .WriteLeft   = (substage.Index == 0) ? VK_TRUE : VK_FALSE};
 
-            mContext->DispatchTable().cmdPushConstants(cmdBuffer, substage.PipelineLayout, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &pushC);
+            mContext->DispatchTable().cmdPushConstants(cmdBuffer, substage.PipelineLayout.GetRef(), VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, 0U, sizeof(PushConstant), &pushC);
         }
         {  // Dispatch
             mContext->DispatchTable().cmdDispatch(cmdBuffer, groupSize.x, groupSize.y, 1U);

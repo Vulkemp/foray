@@ -43,7 +43,6 @@ namespace foray::stages {
     }
     DefaultRaytracingStageBase::~DefaultRaytracingStageBase()
     {
-        mPipelineLayout.Destroy();
     }
     void DefaultRaytracingStageBase::ReloadShaders()
     {
@@ -59,12 +58,13 @@ namespace foray::stages {
     }
     void DefaultRaytracingStageBase::CreatePipelineLayout()
     {
-        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        util::PipelineLayout::Builder builder;
+        builder.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
         if(mRngSeedPushCOffset != ~0U)
         {
-            mPipelineLayout.AddPushConstantRange<uint32_t>(RTSTAGEFLAGS, mRngSeedPushCOffset);
+            builder.AddPushConstantRange<uint32_t>(RTSTAGEFLAGS, mRngSeedPushCOffset);
         }
-        mPipelineLayout.Build(mContext);
+        mPipelineLayout.New(mContext, builder);
     }
     void DefaultRaytracingStageBase::CreateOrUpdateDescriptors()
     {
@@ -146,14 +146,14 @@ namespace foray::stages {
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
 
-        vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout, 0U, 1U, &descriptorSet, 0U, nullptr);
+        vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U, nullptr);
     }
     void DefaultRaytracingStageBase::RecordFrameTraceRays(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
         if(mRngSeedPushCOffset != ~0U)
         {
             uint32_t pushC = renderInfo.GetFrameNumber();
-            vkCmdPushConstants(cmdBuffer, mPipelineLayout, RTSTAGEFLAGS, mRngSeedPushCOffset, sizeof(pushC), &pushC);
+            vkCmdPushConstants(cmdBuffer, mPipelineLayout.GetRef(), RTSTAGEFLAGS, mRngSeedPushCOffset, sizeof(pushC), &pushC);
         }
 
         mPipeline->CmdTraceRays(cmdBuffer, mOutput->GetExtent2D());

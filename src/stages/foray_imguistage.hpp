@@ -9,15 +9,13 @@ namespace foray::stages {
     class ImguiStage : public RenderStage
     {
       public:
-        inline ImguiStage() = default;
-
         /// @brief Init the imgui stage for rendering over a generic background image
         /// @param context Requires Device
         /// @param backgroundImage Managed Image Background Image to render over
-        virtual void InitForImage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder = 0);
+        ImguiStage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder = 0);
         /// @brief Init the imgui stage for rendering to the swapchain
         /// @param context Requires Device, Swapchain & SwapchainImages
-        virtual void InitForSwapchain(core::Context* context, int32_t resizeOrder = 0);
+        ImguiStage(core::Context* context, int32_t resizeOrder = 0);
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         /// @brief Switch background image and between modes at runtime

@@ -15,7 +15,7 @@ namespace foray::util {
         /// @param additionalUsageFlags UsageFlags to apply to the createinfo for the copy
         HistoryImage(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags = 0U);
 
-        virtual ~HistoryImage();
+        virtual ~HistoryImage() = default;
 
         void Resize(const VkExtent2D& size);
 

@@ -88,7 +88,7 @@ namespace foray::stages {
         VkWriteDescriptorSetAccelerationStructureKHR mDescriptorAccelerationStructureInfo{};
 
         /// @brief The pipeline layout manages descriptorset and pushconstant layouts
-        util::PipelineLayout mPipelineLayout;
+        Local<util::PipelineLayout> mPipelineLayout;
         /// @brief The pipeline manages shader binding tables
         Local<rtpipe::RtPipeline> mPipeline;
 

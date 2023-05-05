@@ -180,7 +180,7 @@ namespace foray::stages {
         return *this;
     }
 
-    ConfigurableRasterStage& ConfigurableRasterStage::EnableBuiltInFeature(BuiltInFeaturesFlagBits feature)
+    ConfigurableRasterStage::Builder& ConfigurableRasterStage::Builder::EnableBuiltInFeature(BuiltInFeaturesFlagBits feature)
     {
         mBuiltInFeaturesFlagsGlobal |= (uint32_t)feature;
         switch(feature)
@@ -209,15 +209,33 @@ namespace foray::stages {
         return *this;
     }
 
-    ConfigurableRasterStage& ConfigurableRasterStage::AddOutput(std::string_view name, const OutputRecipe& recipe)
+    ConfigurableRasterStage::Builder& ConfigurableRasterStage::Builder::AddOutput(std::string_view name, const OutputRecipe& recipe)
     {
         std::string keycopy(name);
         FORAY_ASSERTFMT(mOutputMap.size() < MAX_OUTPUT_COUNT, "Can not exceed maximum output count of {}", MAX_OUTPUT_COUNT);
         FORAY_ASSERTFMT(!mOutputMap.contains(keycopy), "Raster stage already configured with an output named \"{}\"", name);
-        Assert(!mPipeline, "Must add outputs before building!");
-        Heap<Output>& output = mOutputMap[keycopy] = Heap<Output>(name, recipe);
-        mOutputList.push_back(output.Get());
+        mOutputMap[keycopy] = recipe;
         return *this;
+    }
+    const ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::Builder::GetOutputRecipe(std::string_view name) const
+    {
+        std::string               keycopy(name);
+        OutputMap::const_iterator iter = mOutputMap.find(keycopy);
+        if(iter != mOutputMap.cend())
+        {
+            return iter->second;
+        }
+        FORAY_THROWFMT("CGBuffer builder does not contain output \"{}\"!", name);
+    }
+    ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::Builder::GetOutputRecipe(std::string_view name)
+    {
+        std::string         keycopy(name);
+        OutputMap::iterator iter = mOutputMap.find(keycopy);
+        if(iter != mOutputMap.end())
+        {
+            return iter->second;
+        }
+        FORAY_THROWFMT("CGBuffer builder does not contain output \"{}\"!", name);
     }
     const ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::GetOutputRecipe(std::string_view name) const
     {
@@ -248,11 +266,22 @@ namespace foray::stages {
         return mDepthImage.Get();
     }
 
-    void ConfigurableRasterStage::Build(core::Context* context, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
+    ConfigurableRasterStage::ConfigurableRasterStage(
+        core::Context* context, const Builder& builder, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
+        : RasterizedRenderStage(context, domain, resizeOrder)
     {
-        RenderStage::InitCallbacks(context, domain, resizeOrder);
         mScene = scene;
         mName  = std::string(name);
+
+        mBuiltInFeaturesFlagsGlobal = builder.GetBuiltInFeaturesFlagsGlobal();
+        mInterfaceFlagsGlobal       = builder.GetInterfaceFlagsGlobal();
+
+        for (const auto& kvp : builder.GetOutputMap())
+        {
+            Heap<Output> output(kvp.first, kvp.second);
+            mOutputList.push_back(output.Get());
+            mOutputMap[kvp.first] = output;
+        }
 
         CheckDeviceColorAttachmentCount();
         CreateOutputs(mDomain->GetExtent());
@@ -400,9 +429,10 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CreatePipelineLayout()
     {
-        mPipelineLayout.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
-        mPipelineLayout.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
-        mPipelineLayout.Build(mContext);
+        util::PipelineLayout::Builder builder;
+        builder.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        builder.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        mPipelineLayout.New(mContext, builder);
     }
 
     void ConfigurableRasterStage::ConfigureAndCompileShaders()
@@ -468,7 +498,7 @@ namespace foray::stages {
             .SetContext(mContext)
             .SetDomain(mDomain)
             .SetColorAttachmentBlendCount(mOutputList.size())
-            .SetPipelineLayout(mPipelineLayout.GetPipelineLayout())
+            .SetPipelineLayout(mPipelineLayout->GetPipelineLayout())
             .SetVertexInputStateBuilder(&vertexInputStateBuilder)
             .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
             .SetPipelineCache(mContext->PipelineCache)
@@ -551,9 +581,9 @@ namespace foray::stages {
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
         // Instanced object
-        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout.GetRef(), 0, 1, &descriptorSet, 0, nullptr);
 
-        mScene->Draw(renderInfo, mPipelineLayout, cmdBuffer);
+        mScene->Draw(renderInfo, mPipelineLayout.GetRef(), cmdBuffer);
 
         vkCmdEndRenderPass(cmdBuffer);
 
