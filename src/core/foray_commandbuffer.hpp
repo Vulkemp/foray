@@ -9,11 +9,9 @@ namespace foray::core {
     class CommandBuffer : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER>
     {
       public:
-        CommandBuffer() = default;
+        CommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
         virtual ~CommandBuffer();
 
-        /// @brief Create based on the contexts device, command pool and queue.
-        virtual VkCommandBuffer Create(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
         /// @brief vkBeginCommandBuffer();
         virtual void Begin();
         /// @brief vkEndCommandBuffer()
@@ -21,7 +19,6 @@ namespace foray::core {
         /// @brief vkResetCommandBuffer()
         virtual void Reset(VkCommandBufferResetFlags flags = 0);
 
-        virtual bool Exists() const override { return mCommandBuffer; }
         virtual void SetName(std::string_view name) override;
 
         inline operator VkCommandBuffer() const { return mCommandBuffer; }
@@ -39,7 +36,7 @@ namespace foray::core {
     {
       public:
         /// @brief Create based on the contexts device, command pool and queue.
-        virtual VkCommandBuffer Create(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false) override;
+        HostSyncCommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
 
         /// @brief Submits but doesn't synchronize. Use HasCompleted() and/or WaitForCompletion() to synchronize
         void Submit();
@@ -85,6 +82,11 @@ namespace foray::core {
     class DeviceSyncCommandBuffer : public CommandBuffer
     {
       public:
+        inline DeviceSyncCommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false)
+            : CommandBuffer(context, cmdBufferLvl, begin)
+        {
+        }
+
         /// @brief Adds a semaphore to wait for before execution of the commandbuffer
         virtual DeviceSyncCommandBuffer& AddWaitSemaphore(const SemaphoreReference& semaphore);
         /// @brief Adds a semaphore to signal after execution of commandbuffer has finished

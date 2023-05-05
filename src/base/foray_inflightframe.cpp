@@ -9,14 +9,13 @@ namespace foray::base {
     {
         mContext = context;
         Assert(!!mContext->Device, "[InFlightFrame::Create] Requires Dispatch table");
-        mPrimaryCommandBuffer.Create(context);
-        mPrimaryCommandBuffer.SetName("Primary CommandBuffer");
+        mPrimaryCommandBuffer.New(context);
+        mPrimaryCommandBuffer->SetName("Primary CommandBuffer");
         mAuxiliaryCommandBuffers.resize(auxCommandBufferCount);
         for(int32_t i = 0; i < (int32_t)auxCommandBufferCount; i++)
         {
-            std::unique_ptr<core::DeviceSyncCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
-            buf                                             = std::make_unique<core::DeviceSyncCommandBuffer>();
-            buf->Create(context);
+            Local<core::DeviceSyncCommandBuffer>& buf = mAuxiliaryCommandBuffers[i];
+            buf.New(context);
             buf->SetName(fmt::format("Auxiliary CommandBuffer #{}", i));
         }
 
@@ -32,11 +31,11 @@ namespace foray::base {
         AssertVkResult(mContext->DispatchTable().createSemaphore(&semaphoreCI, nullptr, &mPrimaryCompletedSemaphore));
 
         AssertVkResult(mContext->DispatchTable().createFence(&fenceCI, nullptr, &mPrimaryCompletedFence));
-        mPrimaryCommandBuffer.SetFence(mPrimaryCompletedFence);
-        mPrimaryCommandBuffer.AddSignalSemaphore(core::SemaphoreReference::Binary(mPrimaryCompletedSemaphore));
+        mPrimaryCommandBuffer->SetFence(mPrimaryCompletedFence);
+        mPrimaryCommandBuffer->AddSignalSemaphore(core::SemaphoreReference::Binary(mPrimaryCompletedSemaphore));
         if(auxCommandBufferCount == 0)
         {
-            mPrimaryCommandBuffer.AddWaitSemaphore(core::SemaphoreReference::Binary(mSwapchainImageReady));
+            mPrimaryCommandBuffer->AddWaitSemaphore(core::SemaphoreReference::Binary(mSwapchainImageReady));
         }
     }
 
@@ -158,35 +157,35 @@ namespace foray::base {
 
     core::DeviceSyncCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index)
     {
-        return *mAuxiliaryCommandBuffers[index];
+        return mAuxiliaryCommandBuffers[index].GetRef();
     }
     core::DeviceSyncCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer()
     {
-        return mPrimaryCommandBuffer;
+        return mPrimaryCommandBuffer.GetRef();
     }
     core::DeviceSyncCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index)
     {
         if(index == PRIMARY_COMMAND_BUFFER)
         {
-            return mPrimaryCommandBuffer;
+            return mPrimaryCommandBuffer.GetRef();
         }
-        return *mAuxiliaryCommandBuffers[index];
+        return mAuxiliaryCommandBuffers[index].GetRef();
     }
     const core::DeviceSyncCommandBuffer& InFlightFrame::GetAuxiliaryCommandBuffer(uint32_t index) const
     {
-        return *mAuxiliaryCommandBuffers[index];
+        return mAuxiliaryCommandBuffers[index].GetRef();
     }
     const core::DeviceSyncCommandBuffer& InFlightFrame::GetPrimaryCommandBuffer() const
     {
-        return mPrimaryCommandBuffer;
+        return mPrimaryCommandBuffer.GetRef();
     }
     const core::DeviceSyncCommandBuffer& InFlightFrame::GetCommandBuffer(CmdBufferIndex index) const
     {
         if(index == PRIMARY_COMMAND_BUFFER)
         {
-            return mPrimaryCommandBuffer;
+            return mPrimaryCommandBuffer.GetRef();
         }
-        return *mAuxiliaryCommandBuffers[index];
+        return mAuxiliaryCommandBuffers[index].GetRef();
     }
 
     bool InFlightFrame::HasFinishedExecution()
@@ -212,8 +211,8 @@ namespace foray::base {
     void InFlightFrame::SubmitAll()
     {
         std::vector<VkSubmitInfo2> submitInfos;
-        mPrimaryCommandBuffer.WriteToSubmitInfo(submitInfos);
-        for (std::unique_ptr<core::DeviceSyncCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
+        mPrimaryCommandBuffer->WriteToSubmitInfo(submitInfos);
+        for (Local<core::DeviceSyncCommandBuffer>& auxCommandBuffer : mAuxiliaryCommandBuffers)
         {
             auxCommandBuffer->WriteToSubmitInfo(submitInfos);
         }

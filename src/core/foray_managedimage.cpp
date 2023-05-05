@@ -2,6 +2,7 @@
 #include "../util/foray_fmtutilities.hpp"
 #include "foray_commandbuffer.hpp"
 #include "foray_managedbuffer.hpp"
+#include "../foray_mem.hpp"
 
 namespace foray::core {
     ManagedImage::CreateInfo::CreateInfo()
@@ -109,26 +110,26 @@ namespace foray::core {
             .image               = mImage,
             .subresourceRange = VkImageSubresourceRange{.aspectMask = quickTransition.AspectMask, .levelCount = VK_REMAINING_MIP_LEVELS, .layerCount = VK_REMAINING_ARRAY_LAYERS}};
 
-        core::HostSyncCommandBuffer hostCmdBuffer;
+        Local<core::HostSyncCommandBuffer> hostCmdBuffer;
 
         if(!commandBuffer)
         {
-            commandBuffer = hostCmdBuffer.Create(mContext);
-            hostCmdBuffer.Begin();
+            hostCmdBuffer.New(mContext);
+            hostCmdBuffer->Begin();
+            commandBuffer = hostCmdBuffer.GetRef();
         }
 
         vkCmdPipelineBarrier(commandBuffer, quickTransition.SrcStageMask, quickTransition.DstStageMask, 0, 0, nullptr, 0, nullptr, 1U, &barrier);
 
-        if(hostCmdBuffer.Exists())
+        if(hostCmdBuffer)
         {
-            hostCmdBuffer.SubmitAndWait();
+            hostCmdBuffer->SubmitAndWait();
         }
     }
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
     {
-        HostSyncCommandBuffer cmdBuffer;
-        cmdBuffer.Create(mContext);
+        HostSyncCommandBuffer cmdBuffer(mContext);
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite, imageCopy);
     }
     void ManagedImage::WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite, VkBufferImageCopy& imageCopy)
@@ -166,8 +167,7 @@ namespace foray::core {
 
     void ManagedImage::WriteDeviceLocalData(const void* data, size_t size, VkImageLayout layoutAfterWrite)
     {
-        HostSyncCommandBuffer cmdBuffer;
-        cmdBuffer.Create(mContext);
+        HostSyncCommandBuffer cmdBuffer(mContext);
         WriteDeviceLocalData(cmdBuffer, data, size, layoutAfterWrite);
     }
     void ManagedImage::WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite)

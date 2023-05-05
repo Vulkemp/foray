@@ -3,9 +3,9 @@
 
 namespace foray::core {
 
-    VkCommandBuffer CommandBuffer::Create(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+    CommandBuffer::CommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+      : mContext(context)
     {
-        mContext = context;
         VkCommandBufferAllocateInfo cmdBufAllocateInfo{};
         cmdBufAllocateInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         cmdBufAllocateInfo.commandPool        = mContext->CommandPool;
@@ -19,8 +19,6 @@ namespace foray::core {
         {
             Begin();
         }
-
-        return mCommandBuffer;
     }
 
     void CommandBuffer::Begin()
@@ -58,14 +56,12 @@ namespace foray::core {
     }
 
     /// @brief Create based on the contexts device, command pool and queue.
-    VkCommandBuffer HostSyncCommandBuffer::Create(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+    HostSyncCommandBuffer::HostSyncCommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl, bool begin)
+       : CommandBuffer(context, cmdBufferLvl, begin)
     {
-        CommandBuffer::Create(context, cmdBufferLvl, begin);
 
         VkFenceCreateInfo fenceCi{.sType = VkStructureType::VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
         mContext->DispatchTable().createFence(&fenceCi, nullptr, &mFence);
-
-        return mCommandBuffer;
     }
 
     void HostSyncCommandBuffer::Submit()

@@ -171,7 +171,7 @@ namespace foray::base {
 
     bool DefaultAppBase::IApplicationLoopReady()
     {
-        InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex].Get();
+        InFlightFrame& currentFrame = mInFlightFrames[mInFlightFrameIndex].GetRef();
 
         return currentFrame.HasFinishedExecution();
     }

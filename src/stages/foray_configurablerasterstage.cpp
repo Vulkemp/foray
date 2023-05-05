@@ -446,16 +446,14 @@ namespace foray::stages {
         }
 
         mShaderKeys.resize(2);
-        mVertexShaderModule.New();
-        mFragmentShaderModule.New();
-        mShaderKeys[0] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.vert", mVertexShaderModule.Get(), shaderConfig);
-        mShaderKeys[1] = mContext->ShaderMan->CompileShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.frag", mFragmentShaderModule.Get(), shaderConfig);
+        mShaderKeys[0] = mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.vert", mVertexShaderModule, shaderConfig);
+        mShaderKeys[1] = mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/configurablerasterstage/crs.frag", mFragmentShaderModule, shaderConfig);
     }
 
     void ConfigurableRasterStage::CreatePipeline()
     {
         util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, *mVertexShaderModule.Get()).Add(VK_SHADER_STAGE_FRAGMENT_BIT, *mFragmentShaderModule.Get());
+        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule.GetRef()).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule.GetRef());
 
         // vertex layout
         scene::VertexInputStateBuilder vertexInputStateBuilder;

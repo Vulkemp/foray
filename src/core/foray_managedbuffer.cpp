@@ -135,8 +135,7 @@ namespace foray::core {
 
     void ManagedBuffer::WriteDataDeviceLocal(const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)
     {
-        HostSyncCommandBuffer cmdBuffer;
-        cmdBuffer.Create(mContext);
+        HostSyncCommandBuffer cmdBuffer(mContext);
         WriteDataDeviceLocal(cmdBuffer, data, size, offsetDstBuffer);
     }
     void ManagedBuffer::WriteDataDeviceLocal(HostSyncCommandBuffer& cmdBuffer, const void* data, VkDeviceSize size, VkDeviceSize offsetDstBuffer)

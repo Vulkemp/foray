@@ -84,8 +84,7 @@ namespace foray::stages {
         ImGui_ImplVulkan_Init(&init_info, mRenderPass);
 
         //execute a gpu command to upload imgui font textures
-        core::HostSyncCommandBuffer cmdBuf;
-        cmdBuf.Create(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        core::HostSyncCommandBuffer cmdBuf(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         ImGui_ImplVulkan_CreateFontsTexture(cmdBuf.GetCommandBuffer());
         cmdBuf.SubmitAndWait();
 

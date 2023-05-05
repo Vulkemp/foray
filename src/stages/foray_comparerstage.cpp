@@ -35,12 +35,9 @@ namespace foray::stages {
     }
     void ComparerStage::LoadShaders()
     {
-        mShaders[(size_t)EInputType::Float].New();
-        mShaders[(size_t)EInputType::Int].New();
-        mShaders[(size_t)EInputType::Uint].New();
-        mShaders[(size_t)EInputType::Float]->LoadFromBinary(mContext, SHADER_F, sizeof(SHADER_F));
-        mShaders[(size_t)EInputType::Int]->LoadFromBinary(mContext, SHADER_I, sizeof(SHADER_I));
-        mShaders[(size_t)EInputType::Uint]->LoadFromBinary(mContext, SHADER_U, sizeof(SHADER_U));
+        mShaders[(size_t)EInputType::Float].New(mContext, SHADER_F, sizeof(SHADER_F));
+        mShaders[(size_t)EInputType::Int].New(mContext, SHADER_I, sizeof(SHADER_I));
+        mShaders[(size_t)EInputType::Uint].New(mContext, SHADER_U, sizeof(SHADER_U));
     }
     void ComparerStage::CreatePipetteBuffer()
     {

@@ -97,6 +97,15 @@ namespace foray {
             return mData;
         }
 
+        T& GetRef()
+        {
+            return mData;
+        }
+        const T& GetRef() const
+        {
+            return mData;
+        }
+
         operator bool() const { return !!mData; }
 
         bool Exists() const { return !!mData; }
@@ -169,7 +178,8 @@ namespace foray {
         Local(Local<T>&& other)
         {
             mExists = true;
-            memcpy(mData, other.mData, sizeof(T));
+            mData = other.mData;
+            other.mData = {};
             other.mExists = false;
         }
         Local<T>& operator=(const Local<T>& other) = delete;
@@ -220,6 +230,17 @@ namespace foray {
         const T* GetNullable() const
         {
             return mExists ? reinterpret_cast<const T*>(&mData) : nullptr;
+        }
+
+        T& GetRef()
+        {
+            Assert(mExists);
+            return *reinterpret_cast<T*>(&mData);
+        }
+        const T& GetRef() const
+        {
+            Assert(mExists);
+            return *reinterpret_cast<const T*>(&mData);
         }
 
         /// @brief Replace stored value with a newly allocated and constructed value

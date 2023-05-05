@@ -1,5 +1,6 @@
 #pragma once
 #include "../foray_event.hpp"
+#include "../foray_mem.hpp"
 #include "../osi/foray_env.hpp"
 #include "foray_core_declares.hpp"
 #include <set>
@@ -25,7 +26,7 @@ namespace foray::core {
 
     /// @brief Shader manager maintains a structure of shader compilations
     /// @details
-    /// When registering a shader file compilation via CompileShader(..):
+    /// When registering a shader file compilation via CompileAndLoadShader(..):
     ///  - The shader compilation action is saved and tracked via a key
     ///  - Any changes to the shader source file or files included via #include directives in the shader (recursively resolved) cause attempt of recompiling the shader.
     ///  - CheckAndUpdate function checks files as described and returns set of successfully recompiled shader compilation keys.
@@ -34,8 +35,8 @@ namespace foray::core {
       public:
         using KeySet = std::unordered_set<uint64_t>;
 
-        /// @param context If set, is used as fallback for CompileShader() context argument
-        inline explicit ShaderManager(core::Context* context = nullptr) : mContext(context) {}
+        /// @param context If set, is used as fallback for CompileAndLoadShader() context argument
+        inline explicit ShaderManager(core::Context* context) : mContext(context) {}
 
         /// @brief Accesses sourceFilePath, scans for dependencies, compiles if necessary, loads into shaderModule
         /// @param sourceFilePath Path to the shader source file
@@ -43,14 +44,17 @@ namespace foray::core {
         /// @param config Configure compilation parameters
         /// @param context Context for initialization of ShaderModule. If set to nullptr, will use ShaderManager context
         /// @return Returns the key to this unique shader compilation
-        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const ShaderCompilerConfig& config = {}, core::Context* context = nullptr);
-        /// @brief Accesses sourceFilePath, scans for dependencies, compiles if necessary, loads into shaderModule
-        /// @param sourceFilePath Path to the shader source file
-        /// @param shaderModule Output shadermodule to initialize
-        /// @param config Configure compilation parameters
-        /// @param context Context for initialization of ShaderModule. If set to nullptr, will use ShaderManager context
-        /// @return Returns the key to this unique shader compilation
-        uint64_t CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& config = {}, core::Context* context = nullptr);
+        template <class TWrapper>
+        inline uint64_t CompileAndLoadShader(osi::Utf8Path sourceFilePath, TWrapper& shaderModule, const ShaderCompilerConfig& config = {})
+        {
+            osi::Utf8Path spvPath;
+            uint64_t      compileHash = 0;
+            CompileAndLoadShader(sourceFilePath, config, spvPath, compileHash);
+            shaderModule.New(mContext, spvPath);
+            return compileHash;
+        }
+
+        void CompileAndLoadShader(osi::Utf8Path sourceFilePath, const ShaderCompilerConfig& compileCfg, osi::Utf8Path& outSpvPath, uint64_t& outCompileKey);
 
         ShaderManager() = default;
 
@@ -143,9 +147,9 @@ namespace foray::core {
         };
 
         /// @brief Map of shader compilation keys to tracked compilations
-        std::unordered_map<uint64_t, std::unique_ptr<ShaderCompilation>> mTrackedCompilations;
+        std::unordered_map<uint64_t, Heap<ShaderCompilation>> mTrackedCompilations;
         /// @brief Map of include file paths to include file structs
-        std::unordered_map<osi::Utf8Path, std::unique_ptr<IncludeFile>> mTrackedIncludeFiles;
+        std::unordered_map<osi::Utf8Path, Heap<IncludeFile>> mTrackedIncludeFiles;
 
 
         /// @brief Discover and register all includes for a shader compilation

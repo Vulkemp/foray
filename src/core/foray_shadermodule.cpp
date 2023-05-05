@@ -8,13 +8,10 @@
 namespace fs = std::filesystem;
 
 namespace foray::core {
-    uint64_t ShaderModule::CompileFromSource(Context* context, const osi::Utf8Path& path, const ShaderCompilerConfig& config)
+    ShaderModule::ShaderModule(Context* context, const osi::Utf8Path& spirvFilePath)
+     : mContext(context)
     {
-        return context->ShaderMan->CompileShader(path, this, config, context);
-    }
-    void ShaderModule::LoadFromFile(Context* context, const osi::Utf8Path& path)
-    {
-        osi::Utf8Path absolutePath = path.IsRelative() ? path.MakeAbsolute() : path;
+        osi::Utf8Path absolutePath = spirvFilePath.IsRelative() ? spirvFilePath.MakeAbsolute() : spirvFilePath;
 
         std::ifstream file((fs::path)absolutePath, std::ios::binary | std::ios::in | std::ios::ate);
 
@@ -28,23 +25,26 @@ namespace foray::core {
         char* readPtr = reinterpret_cast<char*>(binaryBuffer.data());
         file.read(readPtr, static_cast<std::streamsize>(fileSize));
         file.close();
-        LoadFromBinary(context, binaryBuffer.data(), fileSize);
-    }
-
-    void ShaderModule::LoadFromBinary(Context* context, const uint8_t* binaryBuffer, size_t sizeInBytes)
-    {
-        LoadFromBinary(context, reinterpret_cast<const uint32_t*>(binaryBuffer), sizeInBytes);
-    }
-
-    void ShaderModule::LoadFromBinary(Context* context, const uint32_t* binaryBuffer, size_t sizeInBytes)
-    {
-        mContext = context;
 
         VkShaderModuleCreateInfo moduleCreateInfo{};
         moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        moduleCreateInfo.codeSize = sizeInBytes;
-        moduleCreateInfo.pCode    = binaryBuffer;
-        mContext->DispatchTable().createShaderModule(&moduleCreateInfo, NULL, &mShaderModule);
+        moduleCreateInfo.codeSize = binaryBuffer.size() * sizeof(uint32_t);
+        moduleCreateInfo.pCode    = binaryBuffer.data();
+        AssertVkResult(mContext->DispatchTable().createShaderModule(&moduleCreateInfo, NULL, &mShaderModule));
+    }
+
+    ShaderModule::ShaderModule(Context* context, const uint32_t* spirvBinary, size_t size) : mContext(context)
+    {
+        VkShaderModuleCreateInfo moduleCreateInfo{};
+        moduleCreateInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        moduleCreateInfo.codeSize = size;
+        moduleCreateInfo.pCode    = spirvBinary;
+        AssertVkResult(mContext->DispatchTable().createShaderModule(&moduleCreateInfo, NULL, &mShaderModule));
+    }
+
+    ShaderModule::ShaderModule(Context* context, std::span<const uint32_t> spirvBinary) 
+     : ShaderModule(context, spirvBinary.data(), spirvBinary.size() * sizeof(uint32_t))
+    {
     }
 
     ShaderModule::~ShaderModule()
@@ -64,15 +64,13 @@ namespace foray::core {
 
     VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCi(VkShaderStageFlagBits stage, const char* entry) const
     {
-        return
-        VkPipelineShaderStageCreateInfo
-        {
-            .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-            .pNext = nullptr,
-            .flags = 0,
-            .stage = stage,
-            .module = mShaderModule,
-            .pName = entry,
+        return VkPipelineShaderStageCreateInfo{
+            .sType               = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .pNext               = nullptr,
+            .flags               = 0,
+            .stage               = stage,
+            .module              = mShaderModule,
+            .pName               = entry,
             .pSpecializationInfo = nullptr,
         };
     }

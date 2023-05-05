@@ -88,8 +88,7 @@ namespace foray::util {
 
     EnvironmentMap::EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat, VkFormat storeFormat)
     {
-        core::HostSyncCommandBuffer cmdBuffer;
-        cmdBuffer.Create(context);
+        core::HostSyncCommandBuffer cmdBuffer(context);
 
         VkExtent2D extent   = {};
         uint32_t   mipCount = 0;

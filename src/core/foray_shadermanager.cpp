@@ -73,13 +73,17 @@ constexpr std::string_view OPTIMIZE = " -O";
 #pragma endregion
 #pragma region Compile Shader
 
-    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& compileOptions, core::Context* context)
+    // uint64_t ShaderManager::CompileAndLoadShader(osi::Utf8Path sourceFilePath, ShaderModule* shaderModule, const ShaderCompilerConfig& compileOptions)
+    // {
+    //     osi::Utf8Path spvPath;
+    //     uint64_t compileHash = 0;
+    //     CompileAndLoadShader(sourceFilePath, compileOptions, spvPath, compileHash);
+    //     shaderModule.LoadFromFile(mContext, spvPath);
+    //     return compileHash;
+    // }
+
+    void ShaderManager::CompileAndLoadShader(osi::Utf8Path sourceFilePath, const ShaderCompilerConfig& compileCfg, osi::Utf8Path& outSpvPath, uint64_t& outCompileKey) 
     {
-        return CompileShader(sourceFilePath, *shaderModule, compileOptions, context);
-    }
-    uint64_t ShaderManager::CompileShader(osi::Utf8Path sourceFilePath, ShaderModule& shaderModule, const ShaderCompilerConfig& compileOptions, core::Context* context)
-    {
-        context = !context ? mContext : context;
         if(sourceFilePath.IsRelative())
         {
             sourceFilePath = sourceFilePath.MakeAbsolute();
@@ -90,18 +94,17 @@ constexpr std::string_view OPTIMIZE = " -O";
         bool isFile = !fs::is_directory((fs::path)sourceFilePath);
         FORAY_ASSERTFMT(exists && isFile, "[ShaderManager::GetShaderBinary] Shader source file \"{}\" does not exist or is not a file!", (const std::string&)sourceFilePath);
 
-        uint64_t compileHash = MakeHash((const std::string&)sourceFilePath, compileOptions);
+        outCompileKey = MakeHash((const std::string&)sourceFilePath, compileCfg);
 
-        auto iter = mTrackedCompilations.find(compileHash);
+        auto iter = mTrackedCompilations.find(outCompileKey);
         if(iter != mTrackedCompilations.end())
         {
-            const osi::Utf8Path& spvPath = iter->second->SpvPath;
-            shaderModule.LoadFromFile(context, spvPath);
-            return iter->second->Hash;
+            outSpvPath = iter->second->SpvPath;
+            return;
         }
 
-        std::unique_ptr<ShaderCompilation>& compilation = mTrackedCompilations[compileHash] =
-            std::make_unique<ShaderCompilation>(this, sourceFilePath, compileOptions, compileHash);
+        Heap<ShaderCompilation> compilation(this, sourceFilePath, compileCfg, outCompileKey);
+
 
         compilation->FindIncludes();
         WriteTimeLookup     lookup;
@@ -112,9 +115,9 @@ constexpr std::string_view OPTIMIZE = " -O";
         }
         Assert(checkResult != ECompileCheckResult::MissingInput, "Missing Input file");
 
-        const osi::Utf8Path& spvPath = compilation->SpvPath;
-        shaderModule.LoadFromFile(context, spvPath);
-        return compileHash;
+        outSpvPath = compilation->SpvPath;
+        Heap<ShaderCompilation>& swapTo = mTrackedCompilations[outCompileKey];
+        compilation.Swap(swapTo);
     }
 
 #pragma endregion
@@ -319,10 +322,10 @@ constexpr std::string_view OPTIMIZE = " -O";
         auto iter = mTrackedIncludeFiles.find(path);
         if(iter != mTrackedIncludeFiles.end())
         {
-            return iter->second.get();
+            return iter->second.Get();
         }
 
-        IncludeFile* include = (mTrackedIncludeFiles[path] = std::make_unique<IncludeFile>(path)).get();
+        Heap<IncludeFile> include(path);
 
         std::vector<osi::Utf8Path> includeDirectives;
 
@@ -356,7 +359,11 @@ constexpr std::string_view OPTIMIZE = " -O";
             }
         }
 
-        return include;
+        IncludeFile* includePtr = include.Get();
+
+        mTrackedIncludeFiles[path].Swap(include);
+
+        return includePtr;
     }
 
     void ShaderManager::ShaderCompilation::FindIncludes()
@@ -415,7 +422,7 @@ constexpr std::string_view OPTIMIZE = " -O";
         WriteTimeLookup lookup;
         for(auto& entry : mTrackedCompilations)
         {
-            ShaderCompilation*  compilation = entry.second.get();
+            ShaderCompilation*  compilation = entry.second.Get();
             ECompileCheckResult check       = compilation->NeedsCompile(lookup);
             if(check == ECompileCheckResult::NeedsRecompile)
             {

@@ -225,8 +225,7 @@ namespace foray::gltf {
 
                         if(generateMipMaps)
                         {
-                            core::HostSyncCommandBuffer cmdBuf;
-                            cmdBuf.Create(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+                            core::HostSyncCommandBuffer cmdBuf(args.Context, VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
                             cmdBuf.SetName(fmt::format("Tex Mipmap Thread #{}", args.ThreadIndex));
 
                             std::vector<VkImageMemoryBarrier2> barriers(2);

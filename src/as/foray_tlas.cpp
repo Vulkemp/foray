@@ -218,8 +218,7 @@ namespace foray::as {
 
         // STEP #6    Build acceleration structure
 
-        core::HostSyncCommandBuffer cmdBuffer;
-        cmdBuffer.Create(mContext);
+        core::HostSyncCommandBuffer cmdBuffer(mContext);
         cmdBuffer.Begin();
 
         mInstanceBuffer->CmdCopyToDevice(0, cmdBuffer);

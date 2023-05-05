@@ -1,6 +1,6 @@
 #include "foray_applicationloop.hpp"
 #include "../foray_logger.hpp"
-#include "SDL.h"
+#include <sdl2/SDL.h>
 
 namespace foray::base {
     void AppLoopBase::PrintStateChange(ELifetimeState oldState, ELifetimeState newState)
