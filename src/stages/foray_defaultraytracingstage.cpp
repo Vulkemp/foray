@@ -59,7 +59,7 @@ namespace foray::stages {
     void DefaultRaytracingStageBase::CreatePipelineLayout()
     {
         util::PipelineLayout::Builder builder;
-        builder.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        builder.AddDescriptorSetLayout(mDescriptorSet.GetLayout());
         if(mRngSeedPushCOffset != ~0U)
         {
             builder.AddPushConstantRange<uint32_t>(RTSTAGEFLAGS, mRngSeedPushCOffset);
@@ -79,11 +79,7 @@ namespace foray::stages {
 
         VkAccelerationStructureKHR accelStructure = tlas.GetAccelerationStructure();
 
-        mDescriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
-        mDescriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-        mDescriptorAccelerationStructureInfo.pAccelerationStructures    = &accelStructure;
-
-        mDescriptorSet.SetDescriptorAt(BIND_TLAS, &mDescriptorAccelerationStructureInfo, 1, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_TLAS, accelStructure, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_OUT_IMAGE, mOutput.Get(), VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_CAMERA_UBO, cameraManager->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_VERTICES, geometryStore->GetVerticesBuffer().Get(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
@@ -101,14 +97,7 @@ namespace foray::stages {
             mDescriptorSet.SetDescriptorAt(BIND_NOISETEX, mNoiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
         }
 
-        if(mDescriptorSet.Exists())
-        {
-            mDescriptorSet.Update();
-        }
-        else
-        {
-            mDescriptorSet.Create(mContext, "RaytracingStageDescriptorSet");
-        }
+        mDescriptorSet.CreateOrUpdate(mContext, "RaytracingStageDescriptorSet");
     }
     void DefaultRaytracingStageBase::RecordFramePrepare(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -144,7 +133,7 @@ namespace foray::stages {
     {
         mPipeline->CmdBindPipeline(cmdBuffer);
 
-        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
 
         vkCmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U, nullptr);
     }

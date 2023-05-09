@@ -16,7 +16,7 @@ namespace foray::stages {
 
         mContext->DispatchTable().cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipeline);
 
-        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
 
         mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, mPipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U, nullptr);
 

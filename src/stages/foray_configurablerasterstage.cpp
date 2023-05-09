@@ -424,13 +424,13 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CreateDescriptorSets()
     {
-        mDescriptorSet.Create(mContext, fmt::format("{}.DescriptorSet", mName));
+        mDescriptorSet.CreateOrUpdate(mContext, fmt::format("{}.DescriptorSet", mName));
     }
 
     void ConfigurableRasterStage::CreatePipelineLayout()
     {
         util::PipelineLayout::Builder builder;
-        builder.AddDescriptorSetLayout(mDescriptorSet.GetDescriptorSetLayout());
+        builder.AddDescriptorSetLayout(mDescriptorSet.GetLayout());
         builder.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         mPipelineLayout.New(mContext, builder);
     }
@@ -579,7 +579,7 @@ namespace foray::stages {
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
 
-        VkDescriptorSet descriptorSet = mDescriptorSet.GetDescriptorSet();
+        VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
         // Instanced object
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout.GetRef(), 0, 1, &descriptorSet, 0, nullptr);
 

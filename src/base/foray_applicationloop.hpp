@@ -142,6 +142,8 @@ namespace foray::base {
 
                 AdvanceState();  // ELifetimeState::Destroying
 
+                app.Delete();
+
 #ifdef FORAY_CATCH_EXCEPTIONS
             }
 

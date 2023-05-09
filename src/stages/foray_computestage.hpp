@@ -1,9 +1,10 @@
 #pragma once
 #include "../core/foray_shadermodule.hpp"
 #include "../foray_glm.hpp"
+#include "../foray_mem.hpp"
+#include "../util/foray_descriptorsetsimple.hpp"
 #include "../util/foray_pipelinelayout.hpp"
 #include "foray_renderstage.hpp"
-#include "../foray_mem.hpp"
 
 namespace foray::stages {
     /// @brief Base class for compute shaders
@@ -25,10 +26,11 @@ namespace foray::stages {
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         virtual ~ComputeStageBase();
+
       protected:
         Local<core::ShaderModule> mShader;
 
-        core::DescriptorSet  mDescriptorSet;
+        util::DescriptorSetSimple   mDescriptorSet;
         Local<util::PipelineLayout> mPipelineLayout;
 
         VkPipeline mPipeline = nullptr;

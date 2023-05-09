@@ -1,6 +1,7 @@
 #pragma once
-#include "foray_renderstage.hpp"
 #include "../util/foray_pipelinelayout.hpp"
+#include "foray_renderstage.hpp"
+#include "../util/foray_descriptorsetsimple.hpp"
 
 namespace foray::stages {
 
@@ -21,10 +22,10 @@ namespace foray::stages {
         virtual void CreatePipelineLayout(){};
 
       protected:
-        VkFramebuffer        mFrameBuffer   = nullptr;
-        VkRenderPass         mRenderpass    = nullptr;
-        core::DescriptorSet  mDescriptorSet;
-        VkPipeline           mPipeline       = nullptr;
+        VkFramebuffer               mFrameBuffer = nullptr;
+        VkRenderPass                mRenderpass  = nullptr;
+        util::DescriptorSetSimple   mDescriptorSet;
+        VkPipeline                  mPipeline = nullptr;
         Local<util::PipelineLayout> mPipelineLayout;
     };
 }  // namespace foray::stages

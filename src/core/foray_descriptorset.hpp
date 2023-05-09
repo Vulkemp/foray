@@ -1,128 +1,136 @@
 #pragma once
-#include "foray_managedbuffer.hpp"
-#include "foray_managedimage.hpp"
-#include "foray_managedresource.hpp"
+#include "foray_context.hpp"
+#include "foray_descriptorbinding.hpp"
 #include <unordered_map>
 
 namespace foray::core {
 
-    /// @brief Helps with the creation of a VkDescriptorSetLayout and VkDescriptorSet.
-    /// @details
-    /// Not supported:
-    /// - immutable samplers
-    /// - descriptorSetLayout pNext
-    class DescriptorSet : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_DESCRIPTOR_SET>
+    using DescriptorTypeCountMap = std::unordered_map<VkDescriptorType, uint32_t>;
+    using DescriptorBindingMap   = std::unordered_map<const DescriptorBindingBase*, uint32_t>;
+
+    /// @brief Wrapper managing the lifetime of a descriptorset layout
+    class DescriptorLayout
     {
       public:
-        /// @brief Creates the VkDescriptorSet
-        /// @param context Requires Device, DispatchTable
-        /// @param debugName Debug object name
-        /// @param predefinedLayout Allows reusing an already defined layout
-        /// @param descriptorSetLayoutCreateFlags flags
-        void Create(Context*                         context,
-                    std::string                      debugName,
-                    VkDescriptorSetLayout            predefinedLayout               = VK_NULL_HANDLE,
-                    VkDescriptorSetLayoutCreateFlags descriptorSetLayoutCreateFlags = 0);
-        /// @brief Rather than reallocating the descriptorset, rewrites all bindings to the descriptor set
-        void Update();
-        virtual ~DescriptorSet();
-
-        /// @brief Set a binding (buffer array)
-        /// @param binding binding index
-        /// @param buffers vector of buffers. Is converted to a VkDescriptorBufferInfos vector.
-        void SetDescriptorAt(uint32_t binding, const std::vector<const ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (buffer)
-        /// @param binding binding index
-        /// @param buffer buffer. Is converted to a VkDescriptorBufferInfo object.
-        void SetDescriptorAt(uint32_t binding, const ManagedBuffer& buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (buffer)
-        /// @param binding binding index
-        /// @param buffer buffer. Is converted to a VkDescriptorBufferInfo object.
-        void SetDescriptorAt(uint32_t binding, const ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-
-        /// @brief Set a binding (image array)
-        /// @param binding binding index
-        /// @param images image array. Is converted to a VkDescriptorImageInfo vector (shared layout and sampler).
-        /// @param layout image layout as accessed from shader
-        /// @param sampler shared sampler
-        void SetDescriptorAt(uint32_t                                binding,
-                             const std::vector<const ManagedImage*>& images,
-                             VkImageLayout                           layout,
-                             VkSampler                               sampler,
-                             VkDescriptorType                        descriptorType,
-                             VkShaderStageFlags                      shaderStageFlags);
-        /// @brief Set a binding (image)
-        /// @param binding binding index
-        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
-        /// @param layout image layout as accessed from shader
-        void SetDescriptorAt(
-            uint32_t binding, const ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (image)
-        /// @param binding binding index
-        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
-        /// @param layout image layout as accessed from shader
-        void SetDescriptorAt(
-            uint32_t binding, const ManagedImage& image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-
-        /// @brief Set a binding (image info array)
-        /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorImageInfo>& imageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (buffer info array)
-        /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorBufferInfo>& bufferInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (image info)
-        /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (buffer info)
-        /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (custom / .pNext)
-        /// @param binding binding index
-        /// @param pNext address assigned to VkDescriptorWrite::pNext
-        void SetDescriptorAt(uint32_t binding, void* pNext, uint32_t DescriptorCount, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (CombinedImageSampler)
-        /// @param binding binding index
-        /// @param sampledImage Image + Sampler combo
-        /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler& sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (CombinedImageSampler)
-        /// @param binding binding index
-        /// @param sampledImage Image + Sampler combo
-        /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, const CombinedImageSampler* sampledImage, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-        /// @brief Set a binding (CombinedImageSampler)
-        /// @param binding binding index
-        /// @param sampledImage Image + Sampler vector (shared layout)
-        /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, const std::vector<const CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
-
-        bool Exists() const override { return mDescriptorSet != VK_NULL_HANDLE; }
-
-        FORAY_GETTER_V(DescriptorSet)
-        FORAY_GETTER_V(DescriptorSetLayout)
-
-      protected:
-        struct DescriptorInfo
+        class Builder
         {
-            std::vector<VkDescriptorBufferInfo> BufferInfos;
-            std::vector<VkDescriptorImageInfo>  ImageInfos;
-            void*                               pNext{nullptr};
-            VkDescriptorType                    DescriptorType;
-            uint32_t                            DescriptorCount;
-            VkShaderStageFlags                  ShaderStageFlags;
+          public:
+            Builder& AddBinding(DescriptorBindingBase* binding);
+            Builder& SetBinding(uint32_t index, DescriptorBindingBase* binding);
+
+            FORAY_PROPERTY_V(PNext)
+            FORAY_PROPERTY_V(Flags)
+            FORAY_PROPERTY_R(Bindings)
+
+          protected:
+            void*                               mPNext = nullptr;
+            VkDescriptorSetLayoutCreateFlags    mFlags = 0;
+            std::vector<DescriptorBindingBase*> mBindings;
         };
 
-        std::unordered_map<uint32_t, DescriptorInfo> mMapBindingToDescriptorInfo;
-        Context*                                     mContext{};
-        VkDescriptorPool                             mDescriptorPool{};
-        VkDescriptorSetLayout                        mDescriptorSetLayout{};
-        bool                                         mExternalLayout = false;
-        VkDescriptorSet                              mDescriptorSet{};
+        DescriptorLayout(Context* context, const Builder& builder);
 
-        void CreateDescriptorSet();
-        void CreateDescriptorSetLayout(VkDescriptorSetLayoutCreateFlags descriptorSetLayoutCreateFlags);
+        virtual ~DescriptorLayout();
 
-        void AssertBindingInUse(uint32_t binding);
-        void AssertHandleNotNull(void* handle, uint32_t binding);
+        FORAY_GETTER_V(Context)
+        FORAY_GETTER_V(Layout)
+        FORAY_GETTER_CR(PerSetRequirements)
+        FORAY_GETTER_CR(BindObjToBinding)
+
+      protected:
+        Context*               mContext;
+        VkDescriptorSetLayout  mLayout;
+        DescriptorTypeCountMap mPerSetRequirements;
+        DescriptorBindingMap   mBindObjToBinding;
     };
+
+    /// @brief Wrapper managing the lifetime of a descriptor pool
+    class DescriptorPool
+    {
+      public:
+        class Builder
+        {
+          public:
+            Builder& AddSets(const DescriptorLayout* layout, uint32_t count = 1);
+
+            FORAY_PROPERTY_V(PNext)
+            FORAY_PROPERTY_V(Flags)
+            FORAY_PROPERTY_V(MaxSets)
+            FORAY_PROPERTY_R(TypeCounts)
+          protected:
+            void*                       mPNext   = nullptr;
+            VkDescriptorPoolCreateFlags mFlags   = 0;
+            uint32_t                    mMaxSets = 0;
+            DescriptorTypeCountMap      mTypeCounts;
+        };
+
+        /// @brief The UBER pool
+        /// @remarks
+        /// COMBINED_IMAGE_SAMPLER     : 256
+        /// STORAGE_IMAGE              : 128
+        /// UNIFORM_BUFFER             : 64
+        /// STORAGE_BUFFER             : 64
+        /// ACCELERATION_STRUCTURE_KHR : 16
+        DescriptorPool(core::Context* context);
+        DescriptorPool(core::Context* context, const Builder& builder);
+        virtual ~DescriptorPool();
+
+        FORAY_GETTER_V(Context)
+        FORAY_GETTER_V(Pool)
+        FORAY_GETTER_V(AllowFree)
+
+      protected:
+        Context*         mContext;
+        VkDescriptorPool mPool;
+        bool             mAllowFree;
+    };
+
+    /// @brief Wrapper managing lifetime and state of a descriptor set
+    class DescriptorSet
+    {
+      public:
+        class Builder
+        {
+          public:
+            FORAY_PROPERTY_V(PNext)
+            FORAY_PROPERTY_V(Pool)
+            FORAY_PROPERTY_V(Layout)
+          protected:
+            void*             mPNext  = nullptr;
+            DescriptorPool*   mPool   = nullptr;
+            DescriptorLayout* mLayout = nullptr;
+        };
+
+        DescriptorSet(Context* context, const Builder& builder);
+        virtual ~DescriptorSet();
+
+        /// @brief Update information
+        /// @remark If adding VkWriteDescriptorSet instead of binding object refs, .dstBinding must be set!
+        class UpdateInfo
+        {
+          public:
+            UpdateInfo& AddWrite(const VkWriteDescriptorSet& write);
+            UpdateInfo& AddWrite(const core::DescriptorBindingBase* binding);
+
+            FORAY_PROPERTY_R(BindingWrites)
+            FORAY_PROPERTY_R(VkWrites)
+          protected:
+            std::vector<const core::DescriptorBindingBase*> mBindingWrites;
+            std::vector<VkWriteDescriptorSet>               mVkWrites;
+        };
+
+        void Update(const UpdateInfo& update);
+
+        FORAY_GETTER_V(Context)
+        FORAY_GETTER_V(Layout)
+        FORAY_GETTER_V(Set)
+
+      protected:
+        Context*             mContext;
+        DescriptorPool*      mPool;
+        DescriptorLayout*    mLayout;
+        VkDescriptorSet      mSet;
+        DescriptorBindingMap mBindObjToBinding;
+    };
+
 }  // namespace foray::core

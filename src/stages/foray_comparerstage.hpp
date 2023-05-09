@@ -3,6 +3,8 @@
 #include "../foray_glm.hpp"
 #include "../foray_mem.hpp"
 #include "foray_computestage.hpp"
+#include "../core/foray_managedimage.hpp"
+#include "../core/foray_managedbuffer.hpp"
 #include <array>
 
 namespace foray::stages {
@@ -70,7 +72,7 @@ namespace foray::stages {
             InputInfo                   Input;
             core::CombinedImageSampler  InputSampled;
             core::ShaderModule*         Shader;
-            core::DescriptorSet         DescriptorSet;
+            util::DescriptorSetSimple   DescriptorSet;
             Local<util::PipelineLayout> PipelineLayout;
             VkPipeline                  Pipeline = nullptr;
         };

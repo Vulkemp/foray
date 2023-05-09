@@ -2,6 +2,7 @@
 #include "../core/foray_core_declares.hpp"
 #include "../rtpipe/foray_rtpipeline.hpp"
 #include "../scene/foray_scene_declares.hpp"
+#include "../util/foray_descriptorsetsimple.hpp"
 #include "../util/foray_pipelinelayout.hpp"
 #include "foray_raytracingshared.hpp"
 #include "foray_renderstage.hpp"
@@ -83,7 +84,7 @@ namespace foray::stages {
         /// @brief Image output
         Local<core::ManagedImage> mOutput;
         /// @brief Main DescriptorSet & Layout
-        core::DescriptorSet mDescriptorSet;
+        util::DescriptorSetSimple mDescriptorSet;
         /// @brief DescriptorSet::SetDescriptorAt requires persistent .pNext objects
         VkWriteDescriptorSetAccelerationStructureKHR mDescriptorAccelerationStructureInfo{};
 

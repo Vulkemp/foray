@@ -90,7 +90,7 @@ namespace foray::stages {
         }
         {  // Pipeline Layout
             util::PipelineLayout::Builder builder;
-            builder.AddDescriptorSetLayout(substage.DescriptorSet.GetDescriptorSetLayout());
+            builder.AddDescriptorSetLayout(substage.DescriptorSet.GetLayout());
             builder.AddPushConstantRange<PushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT);
             substage.PipelineLayout.New(mContext, builder);
         }
@@ -234,7 +234,7 @@ namespace foray::stages {
         {  // Bind
             mContext->DispatchTable().cmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.Pipeline);
 
-            VkDescriptorSet descriptorSet = substage.DescriptorSet.GetDescriptorSet();
+            VkDescriptorSet descriptorSet = substage.DescriptorSet.GetSet();
 
             mContext->DispatchTable().cmdBindDescriptorSets(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_COMPUTE, substage.PipelineLayout.GetRef(), 0U, 1U, &descriptorSet, 0U,
                                                               nullptr);
