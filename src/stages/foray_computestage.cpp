@@ -1,13 +1,9 @@
 #include "foray_computestage.hpp"
 
 namespace foray::stages {
-    ComputeStageBase::ComputeStageBase(core::Context* context)
-     : RenderStage(context)
+    ComputeStageBase::ComputeStageBase(core::Context* context, RenderDomain* domain, uint32_t resizeOrder)
+     : RenderStage(context, domain, resizeOrder)
     {
-        ApiCreateDescriptorSet();
-        ApiCreatePipelineLayout();
-        ApiInitShader();
-        CreatePipeline();
     }
 
     void ComputeStageBase::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -42,17 +38,6 @@ namespace foray::stages {
 
         AssertVkResult(mContext->DispatchTable().createComputePipelines(nullptr, 1U, &pipelineCi, nullptr, &mPipeline));
     }
-    void ComputeStageBase::ReloadShaders()
-    {
-        if (!!mPipeline)
-        {
-            mContext->DispatchTable().destroyPipeline(mPipeline, nullptr);
-            mPipeline = nullptr;
-            mShader = nullptr;
-            ApiInitShader();
-            CreatePipeline();
-        }
-    } 
     ComputeStageBase::~ComputeStageBase() 
     {
         if (!!mPipeline)

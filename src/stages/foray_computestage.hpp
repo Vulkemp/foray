@@ -12,15 +12,12 @@ namespace foray::stages {
     /// # Features
     ///  * Pipeline building
     ///  * Binding and Dispatch
-    /// # Inheriting
-    ///  * Required Overrides: ApiInitShader(), ApiCreateDescriptorSet(), ApiCreatePipelineLayout(), ApiBeforeDispatch()
-    ///  * Optional Overrides: ApiBeforeFrame()
     class ComputeStageBase : public RenderStage
     {
       public:
         /// @brief Init
         /// @details Calls ApiCreateDescriptorSet(), ApiCreatePipelineLayout(), ApiInitShader(), CreatePipeline() in this order
-        ComputeStageBase(core::Context* context);
+        ComputeStageBase(core::Context* context, RenderDomain* domain = nullptr, uint32_t resizeOrder = 0);
 
         /// @brief Calls ApiBeforeFrame(), binds pipeline and descriptor set, calls ApiBeforeDispatch()
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
@@ -35,12 +32,6 @@ namespace foray::stages {
 
         VkPipeline mPipeline = nullptr;
 
-        /// @brief Load a shader into mShader module
-        inline virtual void ApiInitShader(){};
-        /// @brief Create the descriptor set
-        inline virtual void ApiCreateDescriptorSet(){};
-        /// @brief Configure and create the pipelinelayout
-        inline virtual void ApiCreatePipelineLayout(){};
         /// @brief Prepare resources used in the compute shader
         inline virtual void ApiBeforeFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo){};
         /// @brief Push constants and configure the Group size
@@ -48,7 +39,5 @@ namespace foray::stages {
         inline virtual void ApiBeforeDispatch(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo, glm::uvec3& groupSize){};
 
         virtual void CreatePipeline();
-
-        virtual void ReloadShaders() override;
     };
 }  // namespace foray::stages

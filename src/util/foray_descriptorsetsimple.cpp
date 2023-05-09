@@ -136,6 +136,13 @@ namespace foray::util {
     }
 
     void DescriptorSetSimple::SetDescriptorAt(
+        uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    {
+        std::vector<VkDescriptorImageInfo> imageInfos({VkDescriptorImageInfo{.imageView = image->GetImageView(), .imageLayout = layout}});
+        SetDescriptorAt(binding, imageInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, shaderStageFlags);
+    }
+
+    void DescriptorSetSimple::SetDescriptorAt(
         uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
         std::vector<VkDescriptorImageInfo> imageInfos({VkDescriptorImageInfo{.sampler = sampler, .imageView = image->GetImageView(), .imageLayout = layout}});
