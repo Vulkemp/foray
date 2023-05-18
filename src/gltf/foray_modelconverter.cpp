@@ -13,12 +13,13 @@ namespace foray::gltf {
         , mMaterialBuffer(*(scene->GetComponent<scene::gcomp::MaterialManager>()))
         , mGeo(*(scene->GetComponent<scene::gcomp::GeometryStore>()))
         , mTextures(*(scene->GetComponent<scene::gcomp::TextureManager>()))
+        , mBenchmark(false)
     {
     }
 
     void ModelConverter::LoadGltfModel(osi::Utf8Path utf8Path, core::Context* context, const ModelConverterOptions& options)
     {
-        mBenchmark.Begin();
+        mBenchmark.Start();
         mContext = context ? context : mScene->GetContext();
         mOptions = options;
         tinygltf::TinyGLTF gltfContext;
@@ -68,7 +69,7 @@ namespace foray::gltf {
             Exception::Throw("Failed to load file");
         }
 
-        mBenchmark.LogTimestamp("tinyGltf::LoadFromFile()");
+        mBenchmark.LogTimestamp("tinyGltf");
 
         logger()->info("Model Load: Preparing scene buffers ...");
 
@@ -151,7 +152,7 @@ namespace foray::gltf {
 
         Reset();
 
-        mBenchmark.End();
+        mBenchmark.Finalize("Reset");
 
         logger()->info("Model Load: Done");
     }

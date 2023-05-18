@@ -3,8 +3,8 @@
 #include "../core/foray_context.hpp"
 #include "../core/foray_managedbuffer.hpp"
 #include "../core/foray_managedresource.hpp"
-#include "../scene/foray_scene_declares.hpp"
 #include "../foray_mem.hpp"
+#include "../scene/foray_scene_declares.hpp"
 
 namespace foray::as {
 
@@ -22,6 +22,7 @@ namespace foray::as {
         inline static const char* BENCH_GETSIZES      = "Get Build Sizes";
         inline static const char* BENCH_CREATE        = "Create";
         inline static const char* BENCH_BUILD         = "Build";
+        inline static const char* BENCH_GETADDRESS    = "Get AS Address";
 
         inline virtual std::string_view GetTypeName() const override { return "Bottom-Level AS"; }
 
@@ -42,10 +43,10 @@ namespace foray::as {
         FORAY_GETTER_V(Mesh)
 
       protected:
-        core::Context*                     mContext = nullptr;
-        const scene::Mesh*                 mMesh    = nullptr;
+        core::Context*             mContext = nullptr;
+        const scene::Mesh*         mMesh    = nullptr;
         Local<core::ManagedBuffer> mBlasMemory;
-        VkAccelerationStructureKHR         mAccelerationStructure{};
-        VkDeviceAddress                    mBlasAddress{};
+        VkAccelerationStructureKHR mAccelerationStructure{};
+        VkDeviceAddress            mBlasAddress{};
     };
 }  // namespace foray::as

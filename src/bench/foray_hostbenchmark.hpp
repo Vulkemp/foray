@@ -7,11 +7,21 @@ namespace foray::bench {
     class HostBenchmark : public BenchmarkBase
     {
       public:
-        /// @brief Begins a new benchmark and records the "Begin" timestamp
-        void Begin();
+        explicit HostBenchmark(bool useIdSet);
+        virtual ~HostBenchmark();
+
         /// @brief Logs timestamp of id
-        void LogTimestamp(const char* id);
-        /// @brief Records the "End" timestamp and finalizes the benchmark
-        void End();
+        void LogTimestamp(std::string_view id);
+        void Start();
+        void Finalize(std::string_view id = "");
+        void Pause();
+        void Resume();
+
+      protected:
+        fp64_t                 mLast;
+        fp64_t                 mPause;
+        bool                   mIsPaused;
+        Local<util::StringSet> mIdSet;
+        Local<RepetitionLog>   mRecording;
     };
-}  // namespace foray
+}  // namespace foray::bench

@@ -46,7 +46,7 @@ namespace foray::gltf {
 
         FORAY_GETTER_V(Scene)
 
-        FORAY_GETTER_CR(Benchmark)
+        FORAY_GETTER_MR(Benchmark)
 
       protected:
         core::Context* mContext = nullptr;

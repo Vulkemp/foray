@@ -2,43 +2,49 @@
 #include "../core/foray_context.hpp"
 
 namespace foray::bench {
-    void DeviceBenchmark::Create(core::Context* context, const std::vector<const char*>& queryNames, uint32_t uniqueSets)
+    DeviceBenchmark::DeviceBenchmark(core::Context* context, bool useIdSet, uint32_t queryCount, uint32_t uniqueSets)
+        : mContext(context), mQueryCount(queryCount), mSets(uniqueSets)
     {
-        mContext = context;
-
         mTimestampPeriod = (fp64_t)mContext->Device->GetPhysicalDevice().properties.limits.timestampPeriod;
 
-        std::vector<const char*> test(queryNames);
-        mQueryNames = queryNames;
-        for(int32_t i = 0; i < (int32_t)mQueryNames.size(); i++)
+        for(QueryPoolSet& set : mSets)
         {
-            mQueryIds[mQueryNames[i]] = i;
-        }
-
-        mQueryPools.resize(uniqueSets);
-
-        for(uint32_t frameIndex = 0; frameIndex < uniqueSets; frameIndex++)
-        {
-            auto& pool = mQueryPools[frameIndex];
-
             VkQueryPoolCreateInfo poolCi{.sType              = VkStructureType::VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO,
                                          .pNext              = nullptr,
                                          .flags              = 0,
                                          .queryType          = VkQueryType::VK_QUERY_TYPE_TIMESTAMP,
-                                         .queryCount         = static_cast<uint32_t>(mQueryNames.size()),
+                                         .queryCount         = static_cast<uint32_t>(mQueryCount),
                                          .pipelineStatistics = 0};
 
-            mContext->DispatchTable().createQueryPool(&poolCi, nullptr, &pool);
+            mContext->DispatchTable().createQueryPool(&poolCi, nullptr, &set.Pool);
+        }
+
+        if(useIdSet)
+        {
+            mIdSet.New();
         }
     }
 
     void DeviceBenchmark::CmdResetQuery(VkCommandBuffer cmdBuffer, uint64_t frameIndex)
     {
-        mContext->DispatchTable().cmdResetQueryPool(cmdBuffer, mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size());
+        QueryPoolSet& set = mSets[frameIndex % mSets.size()];
+        set.RecordedIds.clear();
+        mContext->DispatchTable().cmdResetQueryPool(cmdBuffer, set.Pool, 0, mQueryCount);
     }
-    void DeviceBenchmark::CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, const char* name, VkPipelineStageFlagBits stageFlagBit)
+    void DeviceBenchmark::CmdWriteBeginTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, VkPipelineStageFlagBits stageFlagBit) 
     {
-        mContext->DispatchTable().cmdWriteTimestamp(cmdBuffer, stageFlagBit, mQueryPools[frameIndex % mQueryPools.size()], mQueryIds[name]);
+        static const char* BEGIN = "Begin";
+        CmdWriteTimestamp(cmdBuffer, frameIndex, BEGIN, stageFlagBit);
+    }
+    void DeviceBenchmark::CmdWriteTimestamp(VkCommandBuffer cmdBuffer, uint64_t frameIndex, std::string_view name, VkPipelineStageFlagBits stageFlagBit)
+    {
+        QueryPoolSet& set = mSets[frameIndex % mSets.size()];
+        mContext->DispatchTable().cmdWriteTimestamp(cmdBuffer, stageFlagBit, set.Pool, (uint32_t)set.RecordedIds.size());
+        if(mIdSet)
+        {
+            name = mIdSet->Add(name);
+        }
+        set.RecordedIds.push_back(name);
     }
 
     struct QueryResult
@@ -47,38 +53,33 @@ namespace foray::bench {
         uint64_t Available;
     };
 
-    bool DeviceBenchmark::LogQueryResults(uint64_t frameIndex)
+    bool DeviceBenchmark::AttemptRetrieveResults(uint64_t frameIndex)
     {
-        std::vector<QueryResult> results(mQueryNames.size());
-        mContext->DispatchTable().getQueryPoolResults(mQueryPools[frameIndex % mQueryPools.size()], 0, mQueryNames.size(), sizeof(QueryResult) * results.size(), results.data(),
-                              sizeof(QueryResult), VkQueryResultFlagBits::VK_QUERY_RESULT_64_BIT | VkQueryResultFlagBits::VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
+        std::vector<QueryResult> results(mQueryCount);
+        QueryPoolSet&            set = mSets[frameIndex % mSets.size()];
+        mContext->DispatchTable().getQueryPoolResults(set.Pool, 0, set.RecordedIds.size(), sizeof(QueryResult) * results.size(), results.data(), sizeof(QueryResult),
+                                                      VkQueryResultFlagBits::VK_QUERY_RESULT_64_BIT | VkQueryResultFlagBits::VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
 
-        if(results[0].Available == 0)
+        if(results[set.RecordedIds.size() - 1].Available == 0)
         {
             return false;
         }
 
-        if(std::string_view(BenchmarkTimestamp::BEGIN) == mQueryNames.front() && std::string_view(BenchmarkTimestamp::END) == mQueryNames.back())
+        RepetitionLog recording;
+
+        fp64_t start = ConvertQueryResultToMillis(results.front().Timestamp);
+
+        for(int32_t id = 1; id < (int32_t)set.RecordedIds.size(); id++)
         {
-            BenchmarkBase::Begin(ConvertQueryResultToMillis(results.front().Timestamp));
-            for(int32_t id = 1; id < (int32_t)results.size() - 1; id++)
-            {
-                BenchmarkBase::LogTimestamp(mQueryNames[id], ConvertQueryResultToMillis(results[id].Timestamp));
-            }
-            BenchmarkBase::End(ConvertQueryResultToMillis(results.back().Timestamp));
+            fp64_t delta = ConvertQueryResultToMillis(results[id].Timestamp) - start;
+            recording.Append(nullptr, set.RecordedIds[id], delta);
         }
-        else
-        {
-            BenchmarkBase::Begin(ConvertQueryResultToMillis(results.front().Timestamp));
-            for(int32_t id = 0; id < (int32_t)results.size(); id++)
-            {
-                BenchmarkBase::LogTimestamp(mQueryNames[id], ConvertQueryResultToMillis(results[id].Timestamp));
-            }
-            BenchmarkBase::End(ConvertQueryResultToMillis(results.back().Timestamp));
-        }
+
+        mOnLogFinalized.Invoke(recording);
 
         return true;
     }
+
 
     fp64_t DeviceBenchmark::ConvertQueryResultToMillis(uint64_t result)
     {
@@ -86,12 +87,11 @@ namespace foray::bench {
         return nanos / (1000.0 * 1000.0);
     }
 
-    void DeviceBenchmark::Destroy()
+    DeviceBenchmark::~DeviceBenchmark()
     {
-        for(auto pool : mQueryPools)
+        for(QueryPoolSet& set : mSets)
         {
-            mContext->DispatchTable().destroyQueryPool(pool, nullptr);
+            mContext->DispatchTable().destroyQueryPool(set.Pool, nullptr);
         }
-        mQueryPools.clear();
     }
-}  // namespace foray
+}  // namespace foray::bench

@@ -13,7 +13,7 @@ namespace foray::as {
         // STEP #0    Reset state
         if(!!benchmark)
         {
-            benchmark->Begin();
+            benchmark->Start();
         }
 
         mContext = context;
@@ -164,7 +164,7 @@ namespace foray::as {
 
         if(!!benchmark)
         {
-            benchmark->End();
+            benchmark->Finalize(BENCH_GETADDRESS);
         }
     }
 

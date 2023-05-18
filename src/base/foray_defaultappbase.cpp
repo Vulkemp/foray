@@ -31,6 +31,7 @@ namespace foray::base {
               nullptr,
               nullptr)
         , mShaderManager(&mContext)
+        , mHostFrameRecordBenchmark(false)
     {
 #if FORAY_DISABLE_RT
         mDevice->SetEnableRaytracingFeaturesAndExtensions(false);
@@ -200,10 +201,7 @@ namespace foray::base {
             mShaderManager->CheckAndUpdateShaders([this]() { AssertVkResult(this->mContext.DispatchTable().deviceWaitIdle()); });
         }
 
-        if(mEnableFrameRecordBenchmark)
-        {
-            mHostFrameRecordBenchmark.Begin();
-        }
+        mHostFrameRecordBenchmark.Start();
 
         // Fetch next in flight frame
         InFlightFrame& currentFrame = *mInFlightFrames[mInFlightFrameIndex].Get();
@@ -217,28 +215,18 @@ namespace foray::base {
             ApiFrameFinishedExecuting(mRenderedFrameCount - INFLIGHT_FRAME_COUNT);
         }
 
-        if(mEnableFrameRecordBenchmark)
-        {
-            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_WAITONFENCE);
-        }
+        mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_WAITONFENCE);
 
         // Acquire the swapchain image
         ESwapchainInteractResult result = currentFrame.AcquireSwapchainImage();
 
-        if(mEnableFrameRecordBenchmark)
-        {
-            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_ACQUIRESWAPIMAGE);
-        }
+        mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_ACQUIRESWAPIMAGE);
 
         if(result == ESwapchainInteractResult::Resized)
         {  // Recreate swapchain
             RecreateSwapchain();
-            if(mEnableFrameRecordBenchmark)
-            {
-                mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
-                mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_PRESENT);
-                mHostFrameRecordBenchmark.End();
-            }
+            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
+            mHostFrameRecordBenchmark.Finalize(FRAMERECORDBENCH_PRESENT);
             return;
         }
 
@@ -255,10 +243,7 @@ namespace foray::base {
         //      - Prepare swapchain image for use, write to it, and prepare it for submit
         ApiRender(frameRenderInfo);
 
-        if(mEnableFrameRecordBenchmark)
-        {
-            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
-        }
+        mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_RECORDCMDBUFFERS);
 
         // Present the swapchain image
         result = currentFrame.Present();
@@ -273,11 +258,7 @@ namespace foray::base {
             }
         }
 
-        if(mEnableFrameRecordBenchmark)
-        {
-            mHostFrameRecordBenchmark.LogTimestamp(FRAMERECORDBENCH_PRESENT);
-            mHostFrameRecordBenchmark.End();
-        }
+        mHostFrameRecordBenchmark.Finalize(FRAMERECORDBENCH_PRESENT);
 
         // Advance frame index
         mRenderedFrameCount++;
