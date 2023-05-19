@@ -10,13 +10,13 @@
 namespace foray::scene {
 
     /// @brief Base class for all types manageable by registry
-    class Component : public NoMoveDefaults, public Polymorphic
+    class Component : public NoMoveDefaults
     {
       public:
         friend Registry;
 
         /// @brief Base class for implementing the update callback
-        class UpdateCallback : public Polymorphic, public event::PriorityReceiver<TUpdateMessage>
+        class UpdateCallback : public event::PriorityReceiver<TUpdateMessage>
         {
           public:
             inline UpdateCallback(int32_t priority)
@@ -24,6 +24,8 @@ namespace foray::scene {
                     nullptr, [this](TUpdateMessage msg) { this->Update(msg); }, priority)
             {
             }
+
+            virtual ~UpdateCallback() = default;
 
             /// @brief Invoked first each frame. Use for changes to the node hierarchy and transforms
             inline virtual void Update(TUpdateMessage updateInfo) = 0;
@@ -39,23 +41,27 @@ namespace foray::scene {
             inline DrawCallback() : event::Receiver<TDrawMessage>(
                     nullptr, [this](TDrawMessage msg) { this->Draw(msg); }){}
 
+            virtual ~DrawCallback() = default;
+
             /// @brief Invoked last each frame. Use to submit draw calls (and related)
             inline virtual void Draw(TDrawMessage drawInfo) = 0;
         };
 
         /// @brief Base class for implementing the onevent callback
-        class OnEventCallback : public Polymorphic, public event::Receiver<TOsEventMessage>
+        class OnEventCallback : public event::Receiver<TOsEventMessage>
         {
           public:
             inline OnEventCallback() : event::Receiver<TOsEventMessage>(
                     nullptr, [this](TOsEventMessage msg) { this->OnOsEvent(msg); }){}
+
+            virtual ~OnEventCallback() = default;
 
             /// @brief Invoked with every event received by the application
             inline virtual void OnOsEvent(TOsEventMessage event) = 0;
         };
 
         /// @brief Destructor. Provide virtual constructors in inheriting classes, to make sure they get finalized correctly.
-        inline virtual ~Component() {}
+        inline virtual ~Component() = default;
 
         FORAY_GETTER_V(Registry)
         FORAY_PROPERTY_R(Name)

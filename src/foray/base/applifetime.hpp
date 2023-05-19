@@ -39,22 +39,32 @@ namespace foray::base {
         fp32_t mSecondsPerFrame = 1.f / 60.f;
     };
 
+    /// @brief Info describing a loop iteration
     struct LoopInfo
     {
+        /// @brief Delta time in seconds of current loop iteration since previous
         fp32_t   Delta           = 0.f;
+        /// @brief Targeted delta time
         fp32_t   TargetDelta     = 0.f;
+        /// @brief Iteration index
         uint64_t LoopFrameNumber = 0;
+        /// @brief Total time since application launched
         fp64_t   SinceStart      = 0.0;
     };
 
     class IApplication
     {
       public:
-        // IApplication(AppLoopBase*) {}
+        /// @brief Initialization, called once at start
         virtual void IApplicationInit() {}
+        /// @brief Called once per loop iteration
         virtual void IApplicationLoop(LoopInfo&) {}
+        /// @brief Called before attempting a loop iteration
+        /// @return True indicates the application is ready for next iteration, false otherwise
         virtual bool IApplicationLoopReady() { return true; }
+        /// @brief Called in between processing of loop iterations to process events
         virtual void IApplicationProcessEvents() {}
+        /// @brief Virtual destructor
         virtual ~IApplication() = default;
     };
 

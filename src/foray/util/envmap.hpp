@@ -2,7 +2,7 @@
 #include "../core/managedimage.hpp"
 #include "../core/samplercollection.hpp"
 #include "util_declares.hpp"
-#include "../osi/env.hpp"
+#include "../osi/path.hpp"
 #include "../mem.hpp"
 
 namespace foray::util {

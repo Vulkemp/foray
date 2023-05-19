@@ -1,6 +1,6 @@
 #pragma once
 #include "logsink.hpp"
-#include "../osi/env.hpp"
+#include "../osi/path.hpp"
 #include <fstream>
 
 namespace foray::bench

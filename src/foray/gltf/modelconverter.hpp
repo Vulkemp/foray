@@ -4,7 +4,7 @@
 #include "../scene/geo.hpp"
 #include "../scene/scene.hpp"
 #include "../scene/scene_declares.hpp"
-#include "../osi/env.hpp"
+#include "../osi/path.hpp"
 #include <map>
 #include <set>
 #include <tinygltf/tiny_gltf.h>

@@ -7,7 +7,7 @@
 #include "../core/shadermanager.hpp"
 #include "../event.hpp"
 #include "../basics.hpp"
-#include "../osi/env.hpp"
+#include "../osi/path.hpp"
 #include "renderdomain.hpp"
 #include <unordered_map>
 
