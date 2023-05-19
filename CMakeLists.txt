@@ -50,7 +50,7 @@ include_directories(SYSTEM
 
 # subdirectories
 
-add_subdirectory("src/shaders")
+add_subdirectory("src/foray/shaders")
 
 # Set nonstrict mode for third party stuff
 set_property(GLOBAL PROPERTY COMPILE_FLAGS ${NONSTRICT_FLAGS})
@@ -71,7 +71,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC "FORAY_SHADER_DIR=\"${FORAY_SH
 
 option(FORAY_PRECOMPILE_THIRDPARTY_HEADERS "Enables packing third party includes into a precompiled header. Helps a little with build times." ON)
 if (FORAY_PRECOMPILE_THIRDPARTY_HEADERS)
-    target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/foray_precompile.hpp")
+    target_precompile_headers(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/foray/precompile.hpp")
 endif()
 
 option(FORAY_CATCH_EXCEPTIONS "Sets exception catch mode: OFF = No central exceptions catcher. Aids live debugging, but won't print error message to console. ON = Catch exceptions centrally and log error message." OFF)

@@ -1,0 +1,8 @@
+#include "animationmanager.hpp"
+#include "cameramanager.hpp"
+#include "drawmanager.hpp"
+#include "geometrymanager.hpp"
+#include "materialmanager.hpp"
+#include "lightmanager.hpp"
+#include "texturemanager.hpp"
+#include "tlasmanager.hpp"
