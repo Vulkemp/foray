@@ -63,8 +63,8 @@ namespace foray::stages {
         virtual void ReloadShaders() override;
 
         /// @brief Pipeline barriers
-        virtual void RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo,
-                                         std::vector<VkImageMemoryBarrier2> &imageBarriers, std::vector<VkBufferMemoryBarrier2> &bufferBarriers);
+        virtual void RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo &renderInfo, std::vector<VkImageMemoryBarrier2> &imageFullBarriers,
+                                         std::vector<VkImageMemoryBarrier2> &imageByRegionBarriers, std::vector<VkBufferMemoryBarrier2> &bufferBarriers);
         /// @brief Bind pipeline and descriptorset
         virtual void RecordFrameBind(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo);
         /// @brief Push constant and Trace rays

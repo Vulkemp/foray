@@ -27,18 +27,37 @@ namespace foray::stages {
     {
         // barriers
         {
-            std::vector<VkImageMemoryBarrier2> imageBarriers;
+            std::vector<VkImageMemoryBarrier2> imageFullBarriers;
+            std::vector<VkImageMemoryBarrier2> imageByRegionBarriers;
             std::vector<VkBufferMemoryBarrier2> bufferBarriers;
-            RecordFrameBarriers(cmdBuffer, renderInfo, imageBarriers, bufferBarriers);
-            VkDependencyInfo depInfo{
-                    .sType                    = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-                    .dependencyFlags          = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-                    .bufferMemoryBarrierCount = (uint32_t) bufferBarriers.size(),
-                    .pBufferMemoryBarriers    = bufferBarriers.data(),
-                    .imageMemoryBarrierCount  = (uint32_t) imageBarriers.size(),
-                    .pImageMemoryBarriers     = imageBarriers.data(),
-            };
-            vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+            RecordFrameBarriers(cmdBuffer, renderInfo, imageFullBarriers, imageByRegionBarriers, bufferBarriers);
+
+            bool bufferBarriersUsed = bufferBarriers.empty();
+            if (!imageFullBarriers.empty()) {
+                VkDependencyInfo depInfo{
+                        .sType                    = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                        .dependencyFlags          = 0,
+                        .bufferMemoryBarrierCount = !bufferBarriersUsed ? (uint32_t) bufferBarriers.size() : 0,
+                        .pBufferMemoryBarriers    = !bufferBarriersUsed ? bufferBarriers.data() : nullptr,
+                        .imageMemoryBarrierCount  = (uint32_t) imageFullBarriers.size(),
+                        .pImageMemoryBarriers     = imageFullBarriers.data(),
+                };
+                vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+                bufferBarriersUsed = true;
+            }
+            if (!imageByRegionBarriers.empty() || !bufferBarriersUsed) {
+                VkDependencyInfo depInfo{
+                        .sType                    = VkStructureType::VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+                        .dependencyFlags          = VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+                        .bufferMemoryBarrierCount = !bufferBarriersUsed ? (uint32_t) bufferBarriers.size() : 0,
+                        .pBufferMemoryBarriers    = !bufferBarriersUsed ? bufferBarriers.data() : nullptr,
+                        .imageMemoryBarrierCount  = (uint32_t) imageByRegionBarriers.size(),
+                        .pImageMemoryBarriers     = imageByRegionBarriers.data(),
+                };
+                vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
+                bufferBarriersUsed = true;
+            }
+            assert(bufferBarriersUsed);
         }
 
         RecordFrameBind(cmdBuffer, renderInfo);
@@ -118,8 +137,8 @@ namespace foray::stages {
     {
         mDescriptorSet.Destroy();
     }
-    void RaytracingStageBase::RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo &renderInfo, std::vector<VkImageMemoryBarrier2> &imageBarriers,
-                                                  std::vector<VkBufferMemoryBarrier2> &bufferBarriers) {
+    void RaytracingStageBase::RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo &renderInfo, std::vector<VkImageMemoryBarrier2> &imageFullBarriers,
+                                                  std::vector<VkImageMemoryBarrier2> &imageByRegionBarriers, std::vector<VkBufferMemoryBarrier2> &bufferBarriers) {
         auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
         bufferBarriers.push_back(cameraManager->GetUbo().MakeBarrierPrepareForRead(VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR, VK_ACCESS_SHADER_READ_BIT));
     }

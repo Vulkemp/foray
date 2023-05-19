@@ -17,11 +17,12 @@ namespace foray::stages {
         RaytracingStageBase::CreateOrUpdateDescriptors();
     }
 
-    void DefaultRaytracingStageBase::RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo &renderInfo, std::vector<VkImageMemoryBarrier2> &imageBarriers,
+    void DefaultRaytracingStageBase::RecordFrameBarriers(VkCommandBuffer cmdBuffer, base::FrameRenderInfo &renderInfo,
+                                                         std::vector<VkImageMemoryBarrier2> &imageFullBarriers, std::vector<VkImageMemoryBarrier2> &imageByRegionBarriers,
                                                          std::vector<VkBufferMemoryBarrier2> &bufferBarriers) {
-        RaytracingStageBase::RecordFrameBarriers(cmdBuffer, renderInfo, imageBarriers, bufferBarriers);
+        RaytracingStageBase::RecordFrameBarriers(cmdBuffer, renderInfo, imageFullBarriers, imageByRegionBarriers, bufferBarriers);
 
-        imageBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mOutput, core::ImageLayoutCache::Barrier2{
+        imageByRegionBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(mOutput, core::ImageLayoutCache::Barrier2{
                 .SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                 .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
                 .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
