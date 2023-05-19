@@ -67,12 +67,14 @@ namespace foray::bench {
 
         RepetitionLog recording;
 
-        fp64_t start = ConvertQueryResultToMillis(results.front().Timestamp);
+        fp64_t prev = ConvertQueryResultToMillis(results.front().Timestamp);
 
-        for(int32_t id = 1; id < (int32_t)set.RecordedIds.size(); id++)
+        for(int32_t idx = 1; idx < (int32_t)set.RecordedIds.size(); idx++)
         {
-            fp64_t delta = ConvertQueryResultToMillis(results[id].Timestamp) - start;
-            recording.Append(nullptr, set.RecordedIds[id], delta);
+            fp64_t current = ConvertQueryResultToMillis(results[idx].Timestamp);
+            fp64_t delta = current - prev;
+            recording.Append(nullptr, set.RecordedIds[idx], delta);
+            prev = current;
         }
 
         mOnLogFinalized.Invoke(recording);

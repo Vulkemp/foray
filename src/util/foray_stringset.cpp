@@ -40,7 +40,8 @@ namespace foray::util {
                 return stored;
             }
         }
-        mBlocks.emplace_back(Heap<Block>(Block()));
+        mBlocks.emplace_back(Heap<Block>());
+        mBlocks.back().New();
         std::string_view stored = mBlocks.back()->Add(str);
         mStringViews[hash]      = stored;
         return stored;
@@ -64,7 +65,8 @@ namespace foray::util {
     bool StringSet::Block::CanAdd(std::string_view str) const
     {
         const uint8_t* End = Data + BLOCKSIZE;
-        return End - str.size() > Free;
+        size_t Capacity = End - Free;
+        return str.size() + 1 <= Capacity;
     }
 
     StringSet::Block::Block() : Data(), Free(Data) {}
@@ -73,7 +75,7 @@ namespace foray::util {
     {
         memcpy(Free, str.data(), str.size());
         std::string_view result(reinterpret_cast<char*>(Free), str.size());
-        Free += str.size();
+        Free += str.size() + 1;
         return result;
     }
 }  // namespace foray::util
