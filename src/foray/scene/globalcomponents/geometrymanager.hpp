@@ -18,8 +18,8 @@ namespace foray::scene::gcomp {
 
         FORAY_PROPERTY_R(Indices)
         FORAY_PROPERTY_R(Vertices)
-        FORAY_PROPERTY_R(IndicesBuffer)
-        FORAY_PROPERTY_R(VerticesBuffer)
+        FORAY_GETTER_MEM(IndicesBuffer)
+        FORAY_GETTER_MEM(VerticesBuffer)
 
         virtual ~GeometryStore() = default;
 

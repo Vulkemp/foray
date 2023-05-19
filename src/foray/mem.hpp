@@ -88,23 +88,11 @@ namespace foray {
             return mData;
         }
 
-        T* GetNullable()
-        {
-            return mData;
-        }
-        const T* GetNullable() const
-        {
-            return mData;
-        }
+        T*       GetNullable() { return mData; }
+        const T* GetNullable() const { return mData; }
 
-        T& GetRef()
-        {
-            return mData;
-        }
-        const T& GetRef() const
-        {
-            return mData;
-        }
+        T&       GetRef() { return mData; }
+        const T& GetRef() const { return mData; }
 
         operator bool() const { return !!mData; }
 
@@ -177,9 +165,9 @@ namespace foray {
         Local(const Local<T>& other) = delete;
         Local(Local<T>&& other)
         {
-            mExists = true;
-            mData = other.mData;
-            other.mData = {};
+            mExists       = true;
+            mData         = other.mData;
+            other.mData   = {};
             other.mExists = false;
         }
         Local<T>& operator=(const Local<T>& other) = delete;
@@ -223,14 +211,8 @@ namespace foray {
             return reinterpret_cast<const T*>(&mData);
         }
 
-        T* GetNullable()
-        {
-            return mExists ? reinterpret_cast<T*>(&mData) : nullptr;
-        }
-        const T* GetNullable() const
-        {
-            return mExists ? reinterpret_cast<const T*>(&mData) : nullptr;
-        }
+        T*       GetNullable() { return mExists ? reinterpret_cast<T*>(&mData) : nullptr; }
+        const T* GetNullable() const { return mExists ? reinterpret_cast<const T*>(&mData) : nullptr; }
 
         T& GetRef()
         {
@@ -269,4 +251,22 @@ namespace foray {
         } mData;
         bool mExists;
     };
+
+/// @brief Return mutable stored pointer of Heap/Local wrapped member
+#define FORAY_GETTER_MMEM(member)                                                                                                                                                  \
+    inline auto* Get##member()                                                                                                                                                     \
+    {                                                                                                                                                                              \
+        return m##member.Get();                                                                                                                                                    \
+    }
+
+/// @brief Return const stored pointer of Heap/Local wrapped member
+#define FORAY_GETTER_CMEM(member)                                                                                                                                                  \
+    inline const auto* Get##member() const                                                                                                                                         \
+    {                                                                                                                                                                              \
+        return m##member.Get();                                                                                                                                                    \
+    }
+
+#define FORAY_GETTER_MEM(member)                                                                                                                                                   \
+    FORAY_GETTER_MMEM(member)                                                                                                                                                      \
+    FORAY_GETTER_CMEM(member)
 }  // namespace foray

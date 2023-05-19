@@ -28,8 +28,8 @@ namespace foray::scene::gcomp {
         /// @brief Draws the scene using the currently bound pipeline and renderpass. Vertex and Index buffers must be bound
         virtual void Draw(SceneDrawInfo&) override;
 
-        FORAY_GETTER_CR(CurrentTransformBuffer)
-        FORAY_GETTER_CR(PreviousTransformBuffer)
+        FORAY_GETTER_MEM(CurrentTransformBuffer)
+        FORAY_GETTER_MEM(PreviousTransformBuffer)
 
         inline VkDescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
         inline VkDescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer->GetVkDescriptorBufferInfo(); }

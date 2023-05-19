@@ -48,17 +48,17 @@ namespace foray::as {
     }
     uint64_t Tlas::AddBlasInstanceAuto(scene::ncomp::MeshInstance* meshInstance)
     {
-        auto        transform = meshInstance->GetNode()->GetTransform();
-        const auto& blas      = meshInstance->GetMesh()->GetBlas();
+        auto      transform = meshInstance->GetNode()->GetTransform();
+        as::Blas* blas      = meshInstance->GetMesh()->GetBlas();
 
         if(transform->GetStatic())
         {
-            return AddBlasInstanceStatic(blas, transform->GetGlobalMatrix());
+            return AddBlasInstanceStatic(*blas, transform->GetGlobalMatrix());
         }
         else
         {
             BlasInstance::TransformUpdateFunc getFunc = [transform](glm::mat4& out) { out = transform->GetGlobalMatrix(); };
-            return AddBlasInstanceAnimated(blas, getFunc);
+            return AddBlasInstanceAnimated(*blas, getFunc);
         }
     }
     uint64_t Tlas::AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc)
@@ -90,7 +90,7 @@ namespace foray::as {
 
     void Tlas::CreateOrUpdate(core::Context* context)
     {
-        if (!!context)
+        if(!!context)
         {
             mContext = context;
         }
@@ -148,7 +148,7 @@ namespace foray::as {
 
         if(!mInstanceBuffer || instanceBufferSize > mInstanceBuffer->GetDeviceBuffer().GetSize())
         {
-            VkDeviceSize instanceBufferCapacity = instanceBufferSize + instanceBufferSize / 4;
+            VkDeviceSize                    instanceBufferCapacity = instanceBufferSize + instanceBufferSize / 4;
             core::ManagedBuffer::CreateInfo instanceBufferCI(
                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
                 instanceBufferCapacity, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
@@ -192,7 +192,7 @@ namespace foray::as {
         if(!mTlasMemory || sizeInfo.accelerationStructureSize > mTlasMemory->GetSize())
         {
             mTlasMemory.New(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                               sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas main buffer");
+                            sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas main buffer");
         }
 
         // Create the acceleration structure object.
@@ -210,7 +210,7 @@ namespace foray::as {
         if(!mScratchBuffer || sizeInfo.buildScratchSize > mScratchBuffer->GetSize())
         {
             core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
-                                                            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
+                                               VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
             ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
             mScratchBuffer.New(mContext, ci);
         }

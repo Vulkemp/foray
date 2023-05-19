@@ -21,4 +21,9 @@ namespace foray::scene::gcomp {
     }
 
 
-}  // namespace foray::scene
+    void TextureManager::Texture::CreateImage(core::Context* context, const core::ManagedImage::CreateInfo& ci)
+    {
+        mImage.New(context, ci);
+    }
+
+}  // namespace foray::scene::gcomp

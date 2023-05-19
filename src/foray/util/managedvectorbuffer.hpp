@@ -37,10 +37,8 @@ namespace foray::util {
         virtual ~ManagedVectorBuffer();
 
         FORAY_PROPERTY_V(Context)
-        FORAY_GETTER_MR(Vector)
-        FORAY_GETTER_CR(Vector)
-        FORAY_GETTER_MR(Buffer)
-        FORAY_GETTER_CR(Buffer)
+        FORAY_GETTER_R(Vector)
+        FORAY_GETTER_MEM(Buffer)
         FORAY_GETTER_V(DeviceCount)
         FORAY_GETTER_V(DeviceCapacity)
 

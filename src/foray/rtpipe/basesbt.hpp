@@ -73,6 +73,7 @@ namespace foray::rtpipe {
         /// @param context Context
         ShaderBindingTableBase(core::Context* context, const Builder& builder);
 
+        FORAY_GETTER_MEM(Buffer)
         FORAY_GETTER_V(AddressRegion)
       protected:
         Local<core::ManagedBuffer>      mBuffer;

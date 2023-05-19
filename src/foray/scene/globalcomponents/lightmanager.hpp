@@ -1,7 +1,7 @@
 #pragma once
 #include "../../util/dualbuffer.hpp"
-#include "../components/punctuallight.hpp"
 #include "../component.hpp"
+#include "../components/punctuallight.hpp"
 #include "../lights.hpp"
 #include <unordered_map>
 
@@ -17,11 +17,11 @@ namespace foray::scene::gcomp {
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
 
-        FORAY_PROPERTY_R(Buffer)
+        FORAY_GETTER_MEM(Buffer)
 
       protected:
         std::vector<SimpleLight>                            mSimplifiedlights;
         std::unordered_map<ncomp::PunctualLight*, uint32_t> mComponentArrayBindings;
-        Local<util::DualBuffer>                                    mBuffer;
+        Local<util::DualBuffer>                             mBuffer;
     };
 }  // namespace foray::scene::gcomp

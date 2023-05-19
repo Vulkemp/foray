@@ -216,10 +216,10 @@ namespace foray::gltf {
 
                         imageLoader.UpdateManagedImageCI(imageCI);
 
-                        texture.GetImage().New(args.Context, imageCI);
-                        texture.GetSampler().SetManagedImage(texture.GetImage().Get());
+                        texture.CreateImage(args.Context, imageCI);
+                        texture.GetSampler().SetManagedImage(texture.GetImage());
 
-                        imageLoader.WriteManagedImageData(texture.GetImage().Get(), afterUpload);
+                        imageLoader.WriteManagedImageData(texture.GetImage(), afterUpload);
 
                         VkImage image = texture.GetImage()->GetImage();
 

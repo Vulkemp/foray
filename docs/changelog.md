@@ -12,6 +12,7 @@ Documents major and minor changes, patches only if critical fixes were applied.
         * `Heap` loosely based on `std::unique_ptr`, but allows moving pointers from one to another
         * `Local` loosely based on `std::optional`
         * Both share the same API to allow swapping implementations around with minimal changes needed
+        * Come with their own set of `FORAY_GETTER` macros defining accessors to the underlying pointer directly
     * `event` API introduces a global method of passing events from delegates to receivers
     * Rename all files to make including files more conventional and easier to read
         * Removed `foray_` prefix, moved files below `foray` directory instead: `#include <bench/foray_logsink.hpp>` becomes `#include <foray/bench/logsink.hpp>`
@@ -39,6 +40,7 @@ Documents major and minor changes, patches only if critical fixes were applied.
     * Tonemapping
     * Automatic exposure
     * Implementation of [NRD (denoisers)](https://github.com/NVIDIAGameWorks/RayTracingDenoiser)
+    * TAA (temporal anti-aliasing)
     * Port existing implementations to foray2.0
         * Restir DI
         * Spatial Irradiance Cache

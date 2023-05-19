@@ -14,7 +14,7 @@ namespace foray::stages {
         FORAY_GETTER_CR(FrameBuffer)
         FORAY_GETTER_CR(Renderpass)
         FORAY_GETTER_CR(Pipeline)
-        FORAY_GETTER_CR(PipelineLayout)
+        FORAY_GETTER_MEM(PipelineLayout)
 
         virtual void SetupDescriptors(){};
         virtual void CreateDescriptorSets(){};

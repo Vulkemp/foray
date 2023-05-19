@@ -15,8 +15,8 @@ namespace foray::util {
 
         virtual ~EnvironmentMap() = default;
 
+        FORAY_GETTER_MEM(Image)
         FORAY_GETTER_CR(Sampler)
-        FORAY_GETTER_CR(Image)
 
       protected:
         Local<core::ManagedImage> mImage;

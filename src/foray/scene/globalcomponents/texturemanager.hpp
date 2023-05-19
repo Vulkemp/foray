@@ -20,8 +20,9 @@ namespace foray::scene::gcomp {
             inline Texture() : mImage(), mSampler() {}
             virtual ~Texture() = default;
 
-            FORAY_GETTER_CR(Image)
-            FORAY_GETTER_MR(Image)
+            void CreateImage(core::Context* context, const core::ManagedImage::CreateInfo& ci);
+
+            FORAY_GETTER_MEM(Image)
 
             inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
             {

@@ -55,15 +55,20 @@ namespace foray::scene {
         virtual void CmdDraw(SceneDrawInfo& drawInfo);
         virtual void CmdDrawInstanced(SceneDrawInfo& drawInfo, uint32_t instanceCount);
 
-        virtual void BuildAccelerationStructure(core::Context* context, gcomp::GeometryStore* store) { mBlas.CreateOrUpdate(context, this, store); }
+        virtual void BuildAccelerationStructure(core::Context* context, gcomp::GeometryStore* store)
+        {
+            as::Blas::Builder builder;
+            builder.SetMesh(this).SetGeometryStore(store).SetUpdateAfterBuild(false);
+            mBlas.New(context, builder);
+        }
 
         FORAY_PROPERTY_R(Primitives)
-        FORAY_GETTER_MR(Blas)
         FORAY_PROPERTY_R(Name)
+        FORAY_GETTER_MEM(Blas)
 
       protected:
         std::vector<Primitive> mPrimitives;
-        as::Blas               mBlas;
+        Heap<as::Blas>         mBlas;
         std::string            mName = "";
     };
 }  // namespace foray::scene

@@ -261,11 +261,6 @@ namespace foray::stages {
                                        .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
     }
 
-    core::ManagedImage* ConfigurableRasterStage::GetDepthImage()
-    {
-        return mDepthImage.Get();
-    }
-
     ConfigurableRasterStage::ConfigurableRasterStage(
         core::Context* context, const Builder& builder, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
         : RasterizedRenderStage(context, domain, resizeOrder)

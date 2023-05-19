@@ -19,7 +19,7 @@ namespace foray::util {
 
         virtual ~NoiseSource() = default;
 
-        FORAY_GETTER_R(Image)
+        FORAY_GETTER_MEM(Image)
 
       protected:
         Local<core::ManagedImage> mImage;

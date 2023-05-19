@@ -31,10 +31,10 @@ namespace foray::rtpipe {
         };
 
       public:
-        FORAY_GETTER_R(RaygenSbt)
-        FORAY_GETTER_R(HitSbt)
-        FORAY_GETTER_R(MissSbt)
-        FORAY_GETTER_R(CallablesSbt)
+        FORAY_GETTER_MEM(RaygenSbt)
+        FORAY_GETTER_MEM(MissSbt)
+        FORAY_GETTER_MEM(CallablesSbt)
+        FORAY_GETTER_MEM(HitSbt)
         FORAY_GETTER_V(Pipeline)
         FORAY_GETTER_V(PipelineLayout)
 

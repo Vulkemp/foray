@@ -173,8 +173,7 @@ namespace foray::stages {
 
         virtual ~ConfigurableRasterStage();
 
-        /// @brief Gets the depth image
-        core::ManagedImage* GetDepthImage();
+        FORAY_GETTER_MEM(DepthImage)
 
         FORAY_PROPERTY_V(FlipY)
 
