@@ -23,4 +23,12 @@ uint CalculateSeedXTEA(ivec2 texelPos, uint seed)
     return CalculateSeedXTEA((texelPos.x << 16) | texelPos.y, seed);
 }
 
+// only works until 1024 for each component
+// [10bits x] 0 [10bits y] 0 [10 bits z]
+//            ^ bit 21     ^ bit 10
+uint CalculateSeedXTEA(uvec3 voxel, uint seed) {
+	const uint mask = (1 << 10) - 1;
+	return CalculateSeedXTEA((voxel.x & mask) << 22 | (voxel.y & mask) << 11 | (voxel.z & mask), seed);
+}
+
 #endif // XTEANOISE_GLSL
