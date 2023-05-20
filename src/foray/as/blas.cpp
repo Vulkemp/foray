@@ -13,7 +13,6 @@ namespace foray::as {
         , mMesh(builder.GetMesh())
         , mVertexBuffer(builder.GetVertexBuffer())
         , mIndexBuffer(builder.GetIndexBuffer())
-        , mAsProperties(VkPhysicalDeviceAccelerationStructurePropertiesKHR{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR})
     {
         // STEP #0    Reset state
         if(!!benchmark)
@@ -22,11 +21,6 @@ namespace foray::as {
         }
 
         std::string name = fmt::format("Blas #{:x}", reinterpret_cast<uint64_t>(mMesh));
-
-        {
-            VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &mAsProperties};
-            vkGetPhysicalDeviceProperties2(mContext->VkPhysicalDevice(), &prop2);
-        }
 
         mBuildInfo.New(context, mMesh, mVertexBuffer, mIndexBuffer);
         VkAccelerationStructureBuildGeometryInfoKHR& geoInfo = mBuildInfo->GeoInfo;
@@ -47,7 +41,7 @@ namespace foray::as {
         std::string                     scratchName = fmt::format("{} scratch", name);
         core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizes.buildScratchSize,
                                            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
-        ci.Alignment = mAsProperties.minAccelerationStructureScratchOffsetAlignment;
+        ci.Alignment = mContext->Device->GetProperties().AsProperties.minAccelerationStructureScratchOffsetAlignment;
         mScratchMemory.New(mContext, ci);
         geoInfo.scratchData.deviceAddress = mScratchMemory->GetDeviceAddress();
 

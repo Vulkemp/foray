@@ -82,7 +82,6 @@ namespace foray::as {
         const scene::Mesh*                                 mMesh         = nullptr;
         core::ManagedBuffer*                               mVertexBuffer = nullptr;
         core::ManagedBuffer*                               mIndexBuffer  = nullptr;
-        VkPhysicalDeviceAccelerationStructurePropertiesKHR mAsProperties = {};
         Local<BuildInfo>                                   mBuildInfo;
         Local<core::ManagedBuffer>                         mBlasMemory;
         Local<core::ManagedBuffer>                         mScratchMemory;

@@ -16,12 +16,12 @@ namespace foray::scene::gcomp {
 
         virtual void Update(SceneUpdateInfo& updateInfo) override;
 
-        FORAY_GETTER_CR(Tlas)
+        FORAY_GETTER_MEM(Tlas)
         FORAY_GETTER_CR(MeshInstances)
         FORAY_GETTER_CR(BlasInstanceIds)
 
       private:
-        as::Tlas                                    mTlas;
+        Local<as::Tlas>                                    mTlas;
         std::unordered_map<uint64_t, ncomp::MeshInstance*> mMeshInstances;
         std::unordered_map<ncomp::MeshInstance*, uint64_t> mBlasInstanceIds;
     };

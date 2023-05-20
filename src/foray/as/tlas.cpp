@@ -10,35 +10,62 @@
 
 namespace foray::as {
 
-    void Tlas::RemoveBlasInstance(uint64_t id)
+    Tlas::Builder& Tlas::Builder::AddBlasInstance(scene::ncomp::MeshInstance* meshInstance)
     {
-        mDirty = true;
-        {
-            auto iter = mStaticBlasInstances.find(id);
-            if(iter != mStaticBlasInstances.end())
-            {
-                mStaticBlasInstances.erase(iter);
-            }
-        }
-        {
-            auto iter = mAnimatedBlasInstances.find(id);
-            if(iter != mAnimatedBlasInstances.end())
-            {
-                mAnimatedBlasInstances.erase(iter);
-            }
-        }
+        uint64_t key;
+        return AddBlasInstance(meshInstance, key);
     }
-    const BlasInstance* Tlas::GetBlasInstance(uint64_t id) const
+    Tlas::Builder& Tlas::Builder::AddBlasInstance(scene::ncomp::MeshInstance* meshInstance, uint64_t& OUT_key)
+    {
+        auto      transform = meshInstance->GetNode()->GetTransform();
+        as::Blas* blas      = meshInstance->GetMesh()->GetBlas();
+
+        if(transform->GetStatic())
+        {
+            AddBlasInstanceStatic(*blas, transform->GetGlobalMatrix(), OUT_key);
+        }
+        else
+        {
+            BlasInstance::TransformUpdateFunc getFunc = [transform](glm::mat4& out) { out = transform->GetGlobalMatrix(); };
+            AddBlasInstanceAnimated(*blas, getFunc, OUT_key);
+        }
+        return *this;
+    }
+    Tlas::Builder& Tlas::Builder::AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc)
+    {
+        uint64_t key;
+        return AddBlasInstanceAnimated(blas, getUpdatedGlobalTransformFunc, key);
+    }
+    Tlas::Builder& Tlas::Builder::AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc, uint64_t& OUT_key)
+    {
+        mAnimatedBlasInstances.emplace(mNextKey, BlasInstance(mNextKey, &blas, getUpdatedGlobalTransformFunc));
+        OUT_key = mNextKey;
+        mNextKey++;
+        return *this;
+    }
+    Tlas::Builder& Tlas::Builder::AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform)
+    {
+        uint64_t key;
+        return AddBlasInstanceStatic(blas, transform, key);
+    }
+    Tlas::Builder& Tlas::Builder::AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform, uint64_t& OUT_key)
+    {
+        mStaticBlasInstances.emplace(mNextKey, BlasInstance(mNextKey, &blas, transform));
+        OUT_key = mNextKey;
+        mNextKey++;
+        return *this;
+    }
+    BlasInstance* Tlas::Builder::FindBlasInstance(uint64_t key)
     {
         {
-            auto iter = mStaticBlasInstances.find(id);
+            auto iter = mStaticBlasInstances.find(key);
             if(iter != mStaticBlasInstances.end())
             {
                 return &(iter->second);
             }
         }
         {
-            auto iter = mAnimatedBlasInstances.find(id);
+            auto iter = mAnimatedBlasInstances.find(key);
             if(iter != mAnimatedBlasInstances.end())
             {
                 return &(iter->second);
@@ -46,70 +73,31 @@ namespace foray::as {
         }
         return nullptr;
     }
-    uint64_t Tlas::AddBlasInstanceAuto(scene::ncomp::MeshInstance* meshInstance)
+    Tlas::Builder& Tlas::Builder::RemoveBlasInstance(uint64_t key)
     {
-        auto      transform = meshInstance->GetNode()->GetTransform();
-        as::Blas* blas      = meshInstance->GetMesh()->GetBlas();
-
-        if(transform->GetStatic())
         {
-            return AddBlasInstanceStatic(*blas, transform->GetGlobalMatrix());
+            auto iter = mStaticBlasInstances.find(key);
+            if(iter != mStaticBlasInstances.end())
+            {
+                mStaticBlasInstances.erase(iter);
+            }
         }
-        else
         {
-            BlasInstance::TransformUpdateFunc getFunc = [transform](glm::mat4& out) { out = transform->GetGlobalMatrix(); };
-            return AddBlasInstanceAnimated(*blas, getFunc);
+            auto iter = mAnimatedBlasInstances.find(key);
+            if(iter != mAnimatedBlasInstances.end())
+            {
+                mAnimatedBlasInstances.erase(iter);
+            }
         }
-    }
-    uint64_t Tlas::AddBlasInstanceAnimated(const Blas& blas, BlasInstance::TransformUpdateFunc getUpdatedGlobalTransformFunc)
-    {
-        mDirty      = true;
-        uint64_t id = mNextId;
-        mNextId++;
-
-        mAnimatedBlasInstances.emplace(id, BlasInstance(id, &blas, getUpdatedGlobalTransformFunc));
-        return id;
-    }
-    uint64_t Tlas::AddBlasInstanceStatic(const Blas& blas, const glm::mat4& transform)
-    {
-        mDirty      = true;
-        uint64_t id = mNextId;
-        mNextId++;
-
-        mStaticBlasInstances.emplace(id, BlasInstance(id, &blas, transform));
-        return id;
+        return *this;
     }
 
-    void Tlas::ClearBlasInstances()
+    Tlas::Tlas(core::Context* context, const Builder& builder)
+        : mContext(context)
+        , mAccelerationStructure(builder.GetAccelerationStructure())
+        , mAnimatedBlasInstances(builder.GetAnimatedBlasInstances())
+        , mStaticBlasInstances(builder.GetStaticBlasInstances())
     {
-        mDirty = true;
-        mAnimatedBlasInstances.clear();
-        mStaticBlasInstances.clear();
-    }
-
-
-    void Tlas::CreateOrUpdate(core::Context* context)
-    {
-        if(!!context)
-        {
-            mContext = context;
-        }
-
-        if(!mDirty)
-        {
-            return;
-        }
-
-
-        // STEP #0   Reset state
-        bool rebuild = mAccelerationStructure != nullptr;
-
-        VkPhysicalDeviceAccelerationStructurePropertiesKHR asProperties{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
-        {
-            VkPhysicalDeviceProperties2 prop2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, .pNext = &asProperties};
-            vkGetPhysicalDeviceProperties2(mContext->VkPhysicalDevice(), &prop2);
-        }
-
         // STEP #1   Rebuild meta buffer, get and assign buffer offsets
         std::unordered_set<const Blas*> usedBlas;  // used to reconstruct the meta info buffer
         for(const auto& blasInstancePair : mStaticBlasInstances)
@@ -120,7 +108,7 @@ namespace foray::as {
         {
             usedBlas.emplace(blasInstancePair.second.GetBlas());
         }
-        auto offsets = mMetaBuffer.CreateOrUpdate(mContext, usedBlas);
+        mMetaBuffer.New(mContext, usedBlas);
 
         // STEP #2   Build instance buffer data. Static first, animated after (this way the buffer data that is updated every frame is in memory in one region)
         std::vector<VkAccelerationStructureInstanceKHR> instanceBufferData;  // Vector of instances (each being a reference to a BLAS, with a transform)
@@ -128,13 +116,13 @@ namespace foray::as {
         for(auto& blasInstancePair : mStaticBlasInstances)
         {
             auto& blasInstance = blasInstancePair.second;
-            blasInstance.SetGeometryMetaOffset(offsets[blasInstance.GetBlas()]);
+            blasInstance.SetGeometryMetaOffset(mMetaBuffer->GetOffsetOf(blasInstance.GetBlas()));
             instanceBufferData.push_back(blasInstance.GetAsInstance());
         }
         for(auto& blasInstancePair : mAnimatedBlasInstances)
         {
             auto& blasInstance = blasInstancePair.second;
-            blasInstance.SetGeometryMetaOffset(offsets[blasInstance.GetBlas()]);
+            blasInstance.SetGeometryMetaOffset(mMetaBuffer->GetOffsetOf(blasInstance.GetBlas()));
             instanceBufferData.push_back(blasInstance.GetAsInstance());
         }
 
@@ -146,18 +134,14 @@ namespace foray::as {
 
         VkDeviceSize instanceBufferSize = instanceBufferData.size() * sizeof(VkAccelerationStructureInstanceKHR);
 
-        if(!mInstanceBuffer || instanceBufferSize > mInstanceBuffer->GetDeviceBuffer().GetSize())
-        {
-            VkDeviceSize                    instanceBufferCapacity = instanceBufferSize + instanceBufferSize / 4;
-            core::ManagedBuffer::CreateInfo instanceBufferCI(
-                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-                instanceBufferCapacity, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
-            mInstanceBuffer.New(mContext, instanceBufferCI);
-        }
+        core::ManagedBuffer::CreateInfo instanceBufferCI(
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, instanceBufferSize,
+            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
+        mInstanceBuffer.New(mContext, instanceBufferCI);
 
         // Misuse the staging function to upload data to GPU
 
-        mInstanceBuffer->StageSection(0, instanceBufferData.data(), 0, instanceBufferSize);
+        mInstanceBuffer->StageFullBuffer(0, instanceBufferData.data());
 
         // STEP #4    Get Size
 
@@ -177,7 +161,7 @@ namespace foray::as {
         buildInfo.flags                    = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR | VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR;
         buildInfo.geometryCount            = 1;
         buildInfo.pGeometries              = &geometry;
-        buildInfo.mode                     = rebuild ? VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR : VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        buildInfo.mode                     = !!mAccelerationStructure ? VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR : VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
         buildInfo.type                     = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
         buildInfo.srcAccelerationStructure = mAccelerationStructure;
 
@@ -189,11 +173,8 @@ namespace foray::as {
         // STEP #5    Create main and scratch memory and acceleration structure
 
         // Allocate a buffer for the acceleration structure.
-        if(!mTlasMemory || sizeInfo.accelerationStructureSize > mTlasMemory->GetSize())
-        {
-            mTlasMemory.New(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                            sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas main buffer");
-        }
+        mTlasMemory.New(mContext, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                        sizeInfo.accelerationStructureSize, VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas main buffer");
 
         // Create the acceleration structure object.
         // (Data has not yet been set.)
@@ -207,13 +188,10 @@ namespace foray::as {
         buildInfo.dstAccelerationStructure = mAccelerationStructure;
 
         // Allocate the scratch buffer holding temporary build data.
-        if(!mScratchBuffer || sizeInfo.buildScratchSize > mScratchBuffer->GetSize())
-        {
-            core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
-                                               VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
-            ci.Alignment = asProperties.minAccelerationStructureScratchOffsetAlignment;
-            mScratchBuffer.New(mContext, ci);
-        }
+        core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sizeInfo.buildScratchSize,
+                                           VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, 0, "Tlas Scratch");
+        ci.Alignment = mContext->Device->GetProperties().AsProperties.minAccelerationStructureScratchOffsetAlignment;
+        mScratchBuffer.New(mContext, ci);
         buildInfo.scratchData.deviceAddress = mScratchBuffer->GetDeviceAddress();
 
         // STEP #6    Build acceleration structure
@@ -242,20 +220,13 @@ namespace foray::as {
         acceleration_device_address_info.accelerationStructure = mAccelerationStructure;
 
         mTlasAddress = mContext->DispatchTable().getAccelerationStructureDeviceAddressKHR(&acceleration_device_address_info);
-
-        mDirty = false;
     }
 
-    void Tlas::UpdateLean(VkCommandBuffer cmdBuffer, uint32_t frameIndex)
+    void Tlas::CmdUpdate(VkCommandBuffer cmdBuffer, uint32_t frameIndex)
     {
         if(!mAnimatedBlasInstances.size())
         {
             return;
-        }
-
-        if(mDirty)
-        {
-            Exception::Throw("Tlas::UpdateLean called when Tlas is in dirty state! Use Tlas::CreateOrUpdate to properly reconfigure!");
         }
 
         // STEP #1 Grab updated transforms of animated instances and upload them to host buffer
@@ -315,9 +286,6 @@ namespace foray::as {
 
     Tlas::~Tlas()
     {
-        if(!!mContext && !!mAccelerationStructure)
-        {
-            mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
-        }
+        mContext->DispatchTable().destroyAccelerationStructureKHR(mAccelerationStructure, nullptr);
     }
 }  // namespace foray::as

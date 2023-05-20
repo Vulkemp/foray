@@ -105,6 +105,16 @@ namespace foray::base {
             logger()->info("Device Selector chooses \"{}\"", ret->at(selectIndex).name);
             mPhysicalDevice  = ret->at(selectIndex);
             mContext->Device = this;
+
+            mProperties.Properties2 = VkPhysicalDeviceProperties2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+            mProperties.AsProperties = VkPhysicalDeviceAccelerationStructurePropertiesKHR{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
+
+            if (mEnableRaytracingFeaturesAndExtensions)
+            {
+                mProperties.Properties2.pNext = &mProperties.AsProperties;
+            }
+
+            vkGetPhysicalDeviceProperties2(mPhysicalDevice, &mProperties.Properties2);
         }
         else
         {

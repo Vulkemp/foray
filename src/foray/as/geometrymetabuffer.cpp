@@ -3,12 +3,9 @@
 #include "blas.hpp"
 
 namespace foray::as {
-    const std::unordered_map<const Blas*, uint32_t>& GeometryMetaBuffer::CreateOrUpdate(core::Context* context, const std::unordered_set<const Blas*>& entries)
+    GeometryMetaBuffer::GeometryMetaBuffer(core::Context* context, const std::unordered_set<const Blas*>& entries)
+     : mContext(context)
     {
-        // STEP #0   Reset State
-        mContext = context;
-        mBufferOffsets.clear();
-
         // STEP #1   Calculate required capacity
 
         uint64_t capacity = 0;
@@ -50,7 +47,9 @@ namespace foray::as {
         // STEP #4    Copy array to device
 
         mBuffer->WriteDataDeviceLocal(bufferData.data(), newBufferSize);
-
-        return mBufferOffsets;
+    }
+    uint32_t GeometryMetaBuffer::GetOffsetOf(const Blas* blas)
+    {
+        return mBufferOffsets[blas];
     }
 }  // namespace foray::as

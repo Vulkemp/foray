@@ -53,8 +53,9 @@ namespace foray::as {
     class GeometryMetaBuffer
     {
       public:
-        /// @brief (re)creates the meta buffer
-        const std::unordered_map<const Blas*, uint32_t>& CreateOrUpdate(core::Context* context, const std::unordered_set<const Blas*>& entries);
+        GeometryMetaBuffer(core::Context* context, const std::unordered_set<const Blas*>& entries);
+
+        uint32_t GetOffsetOf(const Blas* blas);
 
         FORAY_GETTER_MEM(Buffer)
         FORAY_GETTER_MR(BufferOffsets)

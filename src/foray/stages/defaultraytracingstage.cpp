@@ -3,22 +3,18 @@
 #include "../core/shadermanager.hpp"
 #include "../core/shadermodule.hpp"
 #include "../scene/components/meshinstance.hpp"
-#include "../scene/scene.hpp"
 #include "../scene/globalcomponents/cameramanager.hpp"
 #include "../scene/globalcomponents/geometrymanager.hpp"
 #include "../scene/globalcomponents/materialmanager.hpp"
 #include "../scene/globalcomponents/texturemanager.hpp"
 #include "../scene/globalcomponents/tlasmanager.hpp"
+#include "../scene/scene.hpp"
 #include "../util/pipelinebuilder.hpp"
 #include "../util/shaderstagecreateinfos.hpp"
 #include <array>
 
 namespace foray::stages {
-    DefaultRaytracingStageBase::DefaultRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder)
-     : RenderStage(context, domain, resizeOrder)
-    {
-
-    }
+    DefaultRaytracingStageBase::DefaultRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder) {}
     void DefaultRaytracingStageBase::Init(scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
     {
         mScene          = scene;
@@ -41,9 +37,7 @@ namespace foray::stages {
         RenderStage::OnResized(extent);
         CreateOrUpdateDescriptors();
     }
-    DefaultRaytracingStageBase::~DefaultRaytracingStageBase()
-    {
-    }
+    DefaultRaytracingStageBase::~DefaultRaytracingStageBase() {}
     void DefaultRaytracingStageBase::ReloadShaders()
     {
         ApiDestroyRtPipeline();
@@ -51,7 +45,8 @@ namespace foray::stages {
     }
     void DefaultRaytracingStageBase::CreateOutputImages()
     {
-        VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        VkImageUsageFlags imageUsageFlags =
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
         mOutput.New(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
         mImageOutputs[std::string(OutputName)] = mOutput.Get();
@@ -70,14 +65,14 @@ namespace foray::stages {
     {
         using namespace rtbindpoints;
 
-        const as::Tlas&               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
-        const as::GeometryMetaBuffer& metaBuffer     = tlas.GetMetaBuffer();
+        const as::Tlas*               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
+        VkAccelerationStructureKHR    accelStructure = tlas->GetAccelerationStructure();
+        const as::GeometryMetaBuffer* metaBuffer     = tlas->GetMetaBuffer();
         auto                          materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
         auto                          textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
         auto                          cameraManager  = mScene->GetComponent<scene::gcomp::CameraManager>();
         auto                          geometryStore  = mScene->GetComponent<scene::gcomp::GeometryStore>();
 
-        VkAccelerationStructureKHR accelStructure = tlas.GetAccelerationStructure();
 
         mDescriptorSet.SetDescriptorAt(BIND_TLAS, accelStructure, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_OUT_IMAGE, mOutput.Get(), VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
@@ -86,7 +81,7 @@ namespace foray::stages {
         mDescriptorSet.SetDescriptorAt(BIND_INDICES, geometryStore->GetIndicesBuffer(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_MATERIAL_BUFFER, materialBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
         mDescriptorSet.SetDescriptorAt(BIND_TEXTURES_ARRAY, textureStore->GetDescriptorInfos(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, RTSTAGEFLAGS);
-        mDescriptorSet.SetDescriptorAt(BIND_GEOMETRYMETA, metaBuffer.GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
+        mDescriptorSet.SetDescriptorAt(BIND_GEOMETRYMETA, metaBuffer->GetVkDescriptorInfo(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, RTSTAGEFLAGS);
 
         if(!!mEnvironmentMap)
         {
@@ -105,12 +100,12 @@ namespace foray::stages {
         std::vector<VkBufferMemoryBarrier2> bufferBarriers;
 
         {  // Image Memory Barriers
-            imageBarriers.push_back(
-                renderInfo.GetImageLayoutCache().MakeBarrier(mOutput.Get(), core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-                                                                                                       .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
-                                                                                                       .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
-                                                                                                       .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                                                                       .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
+            imageBarriers.push_back(renderInfo.GetImageLayoutCache().MakeBarrier(
+                mOutput.Get(), core::ImageLayoutCache::Barrier2{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+                                                                .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
+                                                                .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
+                                                                .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
+                                                                .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
         }
         {
             auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();
@@ -147,4 +142,4 @@ namespace foray::stages {
 
         mPipeline->CmdTraceRays(cmdBuffer, mOutput->GetExtent2D());
     }
-}
+}  // namespace foray::stages
