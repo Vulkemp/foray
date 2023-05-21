@@ -11,7 +11,7 @@ namespace foray::core {
             if(!!binding)
             {
                 std::string error;
-                if(!binding->Validate(error))
+                if(!binding->ValidateForBind(error))
                 {
                     FORAY_THROWFMT("Validation of descriptor binding failed: {}", error)
                 }
@@ -184,6 +184,11 @@ namespace foray::core {
     }
     DescriptorSet::UpdateInfo& DescriptorSet::UpdateInfo::AddWrite(const core::DescriptorBindingBase* binding)
     {
+        std::string error;
+        if (!binding->ValidateForWrite(error))
+        {
+            FORAY_THROWFMT("DescriptorWrite validation failed {}", error)
+        }
         mBindingWrites.push_back(binding);
         return *this;
     }

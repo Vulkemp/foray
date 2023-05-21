@@ -12,6 +12,13 @@ namespace foray::core {
         return false;                                                                                                                                                              \
     }
 
+    bool DescriptorBindingBase::ValidateForBind(std::string& out_message) const
+    {
+        VALIDATE(mCount > 0, "Count must be > 0")
+        VALIDATE(mStageFlags > 0, "Stageflags not set")
+        return true;
+    }
+
     VkDescriptorSetLayoutBinding DescriptorBindingBase::GetBinding() const
     {
         // clang-format off
@@ -35,9 +42,12 @@ namespace foray::core {
         }
     }
 
-    bool DescriptorBindingImageBase::Validate(std::string& out_message) const
+    bool DescriptorBindingImageBase::ValidateForWrite(std::string& out_message) const
     {
-        VALIDATE(mCount > 0, "Count must be > 0")
+        if(!DescriptorBindingBase::ValidateForBind(out_message))
+        {
+            return false;
+        }
         VALIDATE(mImageInfos.size() == mCount, "Image Info array size must match count")
         VALIDATE((mImmutableSamplers.size() == mCount || mImmutableSamplers.size() == 0), "Immutable samplers array size must be zero or equal count")
         return true;
@@ -123,9 +133,9 @@ namespace foray::core {
     }
 
 
-    bool DescriptorBindingSampler::Validate(std::string& out_message) const
+    bool DescriptorBindingSampler::ValidateForWrite(std::string& out_message) const
     {
-        if(!DescriptorBindingImageBase::Validate(out_message))
+        if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
         {
             return false;
         }
@@ -192,9 +202,9 @@ namespace foray::core {
     {
     }
 
-    bool DescriptorBindingCombinedImageSampler::Validate(std::string& out_message) const
+    bool DescriptorBindingCombinedImageSampler::ValidateForWrite(std::string& out_message) const
     {
-        if(!DescriptorBindingImageBase::Validate(out_message))
+        if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
         {
             return false;
         }
@@ -245,9 +255,9 @@ namespace foray::core {
     {
     }
 
-    bool DescriptorBindingStorageImage::Validate(std::string& out_message) const
+    bool DescriptorBindingStorageImage::ValidateForWrite(std::string& out_message) const
     {
-        if(!DescriptorBindingImageBase::Validate(out_message))
+        if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
         {
             return false;
         }
@@ -290,9 +300,9 @@ namespace foray::core {
     }
 
 
-    bool DescriptorBindingSampledImage::Validate(std::string& out_message) const
+    bool DescriptorBindingSampledImage::ValidateForWrite(std::string& out_message) const
     {
-        if(!DescriptorBindingImageBase::Validate(out_message))
+        if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
         {
             return false;
         }
@@ -334,9 +344,12 @@ namespace foray::core {
     {
     }
 
-    bool DescriptorBindingBufferBase::Validate(std::string& out_message) const
+    bool DescriptorBindingBufferBase::ValidateForWrite(std::string& out_message) const
     {
-        VALIDATE(mCount > 0, "Count must be > 0")
+        if(!DescriptorBindingBase::ValidateForBind(out_message))
+        {
+            return false;
+        }
         VALIDATE(mBufferInfos.size() == mCount, "Image Info array size must match count")
         for(uint32_t i = 0; i < mCount; i++)
         {
@@ -430,9 +443,12 @@ namespace foray::core {
         SetState(accelerationStructure);
     }
 
-    bool DescriptorBindingAccelerationStructure::Validate(std::string& out_message) const
+    bool DescriptorBindingAccelerationStructure::ValidateForWrite(std::string& out_message) const
     {
-        VALIDATE(mCount > 0, "Count must be > 0")
+        if(!DescriptorBindingBase::ValidateForBind(out_message))
+        {
+            return false;
+        }
         VALIDATE(mDescriptorPNext.pAccelerationStructures == mAccelerationStructures.data(), "PNext acceleration structure pointer not kept up to date");
         VALIDATE(mDescriptorPNext.accelerationStructureCount == (uint32_t)mAccelerationStructures.size(), "PNext acceleration structure count incorrect");
         VALIDATE(mAccelerationStructures.size() == mCount, "Image Info array size must match count")

@@ -27,7 +27,6 @@ namespace foray::stages {
       protected:
         Local<core::ShaderModule> mShader;
 
-        util::DescriptorSetSimple   mDescriptorSet;
         Local<util::PipelineLayout> mPipelineLayout;
 
         VkPipeline mPipeline = nullptr;

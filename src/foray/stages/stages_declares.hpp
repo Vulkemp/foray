@@ -3,6 +3,7 @@
 namespace foray::stages
 {
     class RenderStage;
+    class RenderDomain;
     class RasterizedRenderStage;
     class MinimalRaytracingStageBase;
     class DefaultRaytracingStageBase;
