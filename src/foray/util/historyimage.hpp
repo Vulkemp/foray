@@ -32,8 +32,8 @@ namespace foray::util {
         FORAY_PROPERTY_V(HistoricLayout)
 
       protected:
-        core::ManagedImage*       mSource = nullptr;
-        Local<core::ManagedImage> mHistory;
-        VkImageLayout             mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        core::ManagedImage*      mSource = nullptr;
+        core::Local_ManagedImage mHistory;
+        VkImageLayout            mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     };
 }  // namespace foray::util

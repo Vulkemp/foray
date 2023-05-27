@@ -1,9 +1,10 @@
 #include "rasterpipeline.hpp"
 #include "../stages/renderdomain.hpp"
+#include "../core/context.hpp"
 
 namespace foray::util {
     RasterPipeline::RasterPipeline(core::Context* context, const Builder& builder, stages::RenderDomain* domain)
-        : mContext(context), mRenderpass(builder.GetRenderpass()), mDomain(domain)
+        : mContext(context), mRenderpass(builder.GetRenderpass()), mExtent(builder.GetRenderpass()->GetExtent())
     {
         // clang-format off
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyCi{
@@ -16,19 +17,17 @@ namespace foray::util {
             .patchControlPoints = 1u
         };
 
-        VkExtent2D extent = mDomain->GetExtent();
-
         VkViewport viewport{
             .x = 0,
             .y = 0,
-            .width = (fp32_t)extent.width,
-            .height = (fp32_t)extent.height,
+            .width = (fp32_t)mExtent.width,
+            .height = (fp32_t)mExtent.height,
             .minDepth = 0,
             .maxDepth = 1
         };
         VkRect2D scissors{
             .offset = {0u, 0u},
-            .extent = extent
+            .extent = mExtent
         };
 
         VkPipelineViewportStateCreateInfo viewportCi{
@@ -65,32 +64,47 @@ namespace foray::util {
             .blendConstants = {1.f, 1.f, 1.f, 1.f}
         };
 
+        VkPipelineDynamicStateCreateInfo dynamicCi{
+            .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .dynamicStateCount = 0u,
+            .pDynamicStates = nullptr,
+        };
+
         VkGraphicsPipelineCreateInfo pipelineCi{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
             .stageCount = (uint32_t)builder.GetShaderStages().size(),
             .pStages = builder.GetShaderStages().data(),
-            .pVertexInputState = &builder.GetVertexInputStateBuilder(),
+            .pVertexInputState = &builder.GetVertexInputStateCi(),
             .pInputAssemblyState = &inputAssemblyCi,
             .pTessellationState = &tesselationCi,
             .pViewportState = &viewportCi,
             .pRasterizationState = &rasterCi,
             .pMultisampleState = &multisampleCi,
             .pDepthStencilState = &builder.GetDepthStateCi(),
-            .pColorBlendState = ,
-            .pDynamicState = ,
-            .layout = ,
-            .renderPass = ,
-            .subpass = ,
+            .pColorBlendState = &colorBlendCi,
+            .pDynamicState = &dynamicCi,
+            .layout = builder.GetPipelineLayout(),
+            .renderPass = builder.GetRenderpass()->GetRenderpass(),
+            .subpass = 0u,
             .basePipelineHandle = mPipeline,
             .basePipelineIndex = 0u,
         };
-
         // clang-format on
+
+        AssertVkResult(vkCreateGraphicsPipelines(mContext->VkDevice(), builder.GetPipelineCache(), 1u, &pipelineCi, nullptr, &mPipeline));
     }
 
-    RasterPipeline::~RasterPipeline() {}
+    RasterPipeline::~RasterPipeline() 
+    {
+        vkDestroyPipeline(mContext->VkDevice(), mPipeline, nullptr);
+    }
+
+    void RasterPipeline::CmdBindPipeline(VkCommandBuffer cmdBuffer) 
+    {
+        vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
+    }
 
 
     RasterPipeline::Builder& RasterPipeline::Builder::InitDepthStateCi(BuiltinDepthInit depthInit)
@@ -130,6 +144,8 @@ namespace foray::util {
             //         .maxDepthBounds = ,
             //     };
             //     break;
+            default:
+                FORAY_THROWFMT("Unhandled value {}", NAMEOF_ENUM(depthInit))
         }
         return *this;
     }

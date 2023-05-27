@@ -2,7 +2,7 @@
 #include "../core/shadermodule.hpp"
 #include "../mem.hpp"
 #include "../scene/scene_declares.hpp"
-#include "rasterizedRenderStage.hpp"
+#include "rasterizedstage.hpp"
 
 namespace foray::stages {
 
@@ -137,7 +137,7 @@ namespace foray::stages {
         class Builder
         {
           public:
-            using OutputMap  = std::unordered_map<std::string, OutputRecipe>;
+            using OutputMap = std::unordered_map<std::string, OutputRecipe>;
             /// @brief Enable a builtin feature (such as ALPHATEST) regardless of outputs generated
             Builder& EnableBuiltInFeature(BuiltInFeaturesFlagBits feature);
 
@@ -157,7 +157,7 @@ namespace foray::stages {
 
           private:
             uint32_t  mBuiltInFeaturesFlagsGlobal = 0;
-            uint32_t mInterfaceFlagsGlobal = 0;
+            uint32_t  mInterfaceFlagsGlobal       = 0;
             OutputMap mOutputMap;
         };
 
@@ -189,26 +189,28 @@ namespace foray::stages {
       protected:
         struct Output
         {
-            std::string               Name;
-            Local<core::ManagedImage> Image;
-            OutputRecipe              Recipe;
+            std::string              Name;
+            core::Local_ManagedImage Image;
+            OutputRecipe             Recipe;
 
             inline Output(std::string_view name, const OutputRecipe& recipe) : Name(name), Recipe(recipe) {}
-            VkAttachmentDescription GetAttachmentDescr() const;
+            util::Renderpass::Builder::Attachment GetAttachment();
         };
         using OutputMap  = std::unordered_map<std::string, Heap<Output>>;
         using OutputList = std::vector<Output*>;
 
-        OutputMap                 mOutputMap;
-        OutputList                mOutputList;
-        Local<core::ManagedImage> mDepthImage;
-        scene::Scene*             mScene = nullptr;
+        OutputMap                mOutputMap;
+        OutputList               mOutputList;
+        core::Local_ManagedImage mDepthImage;
+        scene::Scene*            mScene = nullptr;
 
         uint32_t mBuiltInFeaturesFlagsGlobal = 0;
         uint32_t mInterfaceFlagsGlobal       = 0;
 
         Local<core::ShaderModule> mVertexShaderModule;
         Local<core::ShaderModule> mFragmentShaderModule;
+
+        util::DescriptorSetSimple mDescriptorSet;
 
         std::string mDepthOutputName = "";
         std::string mName            = "";
@@ -218,10 +220,9 @@ namespace foray::stages {
         virtual void CheckDeviceColorAttachmentCount();
         virtual void CreateOutputs(const VkExtent2D& size);
         virtual void CreateRenderPass();
-        virtual void CreateFrameBuffer();
-        virtual void SetupDescriptors() override;
-        virtual void CreateDescriptorSets() override;
-        virtual void CreatePipelineLayout() override;
+        virtual void SetupDescriptors();
+        virtual void CreateDescriptorSets();
+        virtual void CreatePipelineLayout();
         virtual void ConfigureAndCompileShaders();
         virtual void CreatePipeline();
         virtual void OnResized(VkExtent2D extent) override;

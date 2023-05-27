@@ -1,8 +1,8 @@
 #include "managedimage.hpp"
+#include "../mem.hpp"
 #include "../util/fmtutilities.hpp"
 #include "commandbuffer.hpp"
 #include "managedbuffer.hpp"
-#include "../mem.hpp"
 
 namespace foray::core {
     ManagedImage::CreateInfo::CreateInfo()
@@ -28,8 +28,7 @@ namespace foray::core {
         Name               = name;
     }
 
-    ManagedImage::ManagedImage(Context* context, const CreateInfo& createInfo)
-     : VulkanResource<VK_OBJECT_TYPE_IMAGE>("Unnamed Buffer")
+    ManagedImage::ManagedImage(Context* context, const CreateInfo& createInfo) : VulkanResource<VK_OBJECT_TYPE_IMAGE>("Unnamed Buffer")
     {
         mContext    = context;
         mCreateInfo = createInfo;
@@ -76,24 +75,8 @@ namespace foray::core {
         return mCreateInfo;
     }
 
-    void ManagedImage::Resize(ManagedImage* image, const VkExtent3D& newextent)
-    {
-        CreateInfo ci = image->GetInfoForResize(newextent);
-        core::Context* context = image->mContext;
-        image->~ManagedImage();
-        new (image) ManagedImage(context, ci);
-    }
-    void ManagedImage::Resize(ManagedImage* image, const VkExtent2D& newextent)
-    {
-        CreateInfo ci = image->GetInfoForResize(newextent);
-        core::Context* context = image->mContext;
-        image->~ManagedImage();
-        new (image) ManagedImage(context, ci);
-    }
-
-
     ManagedImage::ManagedImage(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name)
-     : ManagedImage(context, CreateInfo(usage, format, extent, name))
+        : ManagedImage(context, CreateInfo(usage, format, extent, name))
     {
     }
 
@@ -228,11 +211,33 @@ namespace foray::core {
             SetObjectName(mContext, mImage, debugName, false);
             vmaSetAllocationName(mContext->Allocator, mAllocation, debugName.c_str());
         }
-        if (!!mImageView) {  // Image View
+        if(!!mImageView)
+        {  // Image View
             std::string debugName = fmt::format("ManImgView \"{}\"", mName);
             SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE_VIEW, mImageView, debugName);
         }
     }
 
+
+    void Local_ManagedImage::New(core::Context* context, const ManagedImage::CreateInfo& createInfo)
+    {
+        Local<ManagedImage>::New(context, createInfo);
+    }
+
+    void Local_ManagedImage::Resize(VkExtent2D extent)
+    {
+        Assert(Exists());
+        core::Context*           context = GetRef().GetContext();
+        ManagedImage::CreateInfo ci      = GetRef().GetInfoForResize(extent);
+        New(context, ci);
+    }
+
+    void Local_ManagedImage::Resize(VkExtent3D extent)
+    {
+        Assert(Exists());
+        core::Context*           context = GetRef().GetContext();
+        ManagedImage::CreateInfo ci      = GetRef().GetInfoForResize(extent);
+        New(context, ci);
+    }
 
 }  // namespace foray::core

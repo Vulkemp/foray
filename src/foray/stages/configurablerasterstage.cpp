@@ -1,12 +1,11 @@
 #include "configurablerasterstage.hpp"
 #include "../core/shadermanager.hpp"
 #include "../scene/geo.hpp"
-#include "../scene/scene.hpp"
 #include "../scene/globalcomponents/cameramanager.hpp"
 #include "../scene/globalcomponents/drawmanager.hpp"
 #include "../scene/globalcomponents/materialmanager.hpp"
 #include "../scene/globalcomponents/texturemanager.hpp"
-#include "../util/pipelinebuilder.hpp"
+#include "../scene/scene.hpp"
 #include "../util/shaderstagecreateinfos.hpp"
 
 namespace foray::stages {
@@ -248,17 +247,21 @@ namespace foray::stages {
         FORAY_THROWFMT("CGBuffer does not contain output \"{}\"!", name);
     }
 
-    VkAttachmentDescription ConfigurableRasterStage::Output::GetAttachmentDescr() const
+    util::Renderpass::Builder::Attachment ConfigurableRasterStage::Output::GetAttachment()
     {
-        return VkAttachmentDescription{.flags          = 0,
-                                       .format         = Image->GetFormat(),
-                                       .samples        = Image->GetSampleCount(),
-                                       .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
-                                       .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
-                                       .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                       .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                                       .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                       .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
+        return util::Renderpass::Builder::Attachment{.Source      = util::Renderpass::AttachmentSource::ManagedImage,
+                                                     .Images      = {Image.Get()},
+                                                     .Layout      = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                                                     .Description = VkAttachmentDescription{.flags          = 0,
+                                                                                            .format         = Image->GetFormat(),
+                                                                                            .samples        = Image->GetSampleCount(),
+                                                                                            .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
+                                                                                            .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
+                                                                                            .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                                                                            .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                                                                                            .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                                                            .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                                                     .ClearValue  = {Recipe.ClearValue}};
     }
 
     ConfigurableRasterStage::ConfigurableRasterStage(
@@ -271,7 +274,7 @@ namespace foray::stages {
         mBuiltInFeaturesFlagsGlobal = builder.GetBuiltInFeaturesFlagsGlobal();
         mInterfaceFlagsGlobal       = builder.GetInterfaceFlagsGlobal();
 
-        for (const auto& kvp : builder.GetOutputMap())
+        for(const auto& kvp : builder.GetOutputMap())
         {
             Heap<Output> output(kvp.first, kvp.second);
             mOutputList.push_back(output.Get());
@@ -281,7 +284,6 @@ namespace foray::stages {
         CheckDeviceColorAttachmentCount();
         CreateOutputs(mDomain->GetExtent());
         CreateRenderPass();
-        CreateFrameBuffer();
         SetupDescriptors();
         CreateDescriptorSets();
         CreatePipelineLayout();
@@ -323,85 +325,20 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CreateRenderPass()
     {
+        util::Renderpass::Builder builder;
+
+
         std::vector<VkAttachmentReference>   colorAttachmentRefs;
         std::vector<VkAttachmentDescription> attachmentDescr;
 
         for(uint32_t outLocation = 0; outLocation < mOutputList.size(); outLocation++)
         {
-            colorAttachmentRefs.push_back({outLocation, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL});
-            attachmentDescr.push_back(mOutputList[outLocation]->GetAttachmentDescr());
+            builder.AddAttachmentColor(mOutputList[outLocation]->GetAttachment());
         }
+        builder.SetAttachmentDepthStencil(mDepthImage.Get());
+        builder.SetInitialSize(mDomain->GetExtent());
 
-        uint32_t              depthLocation = mOutputList.size();
-        VkAttachmentReference depthAttachmentRef{depthLocation, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
-        attachmentDescr.push_back(VkAttachmentDescription{.flags          = 0,
-                                                          .format         = mDepthImage->GetFormat(),
-                                                          .samples        = mDepthImage->GetSampleCount(),
-                                                          .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
-                                                          .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
-                                                          .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                          .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                                                          .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                          .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL});
-
-        // Subpass description
-        VkSubpassDescription subpass    = {};
-        subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = colorAttachmentRefs.size();
-        subpass.pColorAttachments       = colorAttachmentRefs.data();
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-        VkSubpassDependency subPassDependencies[2] = {};
-        subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[0].dstSubpass          = 0;
-        subPassDependencies[0].srcStageMask        = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[0].dstStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        subPassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[0].dstAccessMask =
-            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-        subPassDependencies[1].srcSubpass = 0;
-        subPassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[1].srcStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        subPassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[1].srcAccessMask =
-            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.pAttachments           = attachmentDescr.data();
-        renderPassInfo.attachmentCount        = (uint32_t)attachmentDescr.size();
-        renderPassInfo.subpassCount           = 1;
-        renderPassInfo.pSubpasses             = &subpass;
-        renderPassInfo.dependencyCount        = 2;
-        renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->VkDevice(), &renderPassInfo, nullptr, &mRenderpass));
-    }
-    void ConfigurableRasterStage::CreateFrameBuffer()
-    {
-        std::vector<VkImageView> attachmentViews;
-
-        for(uint32_t outLocation = 0; outLocation < mOutputList.size(); outLocation++)
-        {
-            attachmentViews.push_back(mOutputList[outLocation]->Image->GetImageView());
-        }
-        attachmentViews.push_back(mDepthImage->GetImageView());
-
-        VkFramebufferCreateInfo fbufCreateInfo = {};
-        fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbufCreateInfo.pNext                   = NULL;
-        fbufCreateInfo.renderPass              = mRenderpass;
-        fbufCreateInfo.pAttachments            = attachmentViews.data();
-        fbufCreateInfo.attachmentCount         = (uint32_t)attachmentViews.size();
-        fbufCreateInfo.width                   = mDomain->GetExtent().width;
-        fbufCreateInfo.height                  = mDomain->GetExtent().height;
-        fbufCreateInfo.layers                  = 1;
-        AssertVkResult(vkCreateFramebuffer(mContext->VkDevice(), &fbufCreateInfo, nullptr, &mFrameBuffer));
+        mRenderpass.New(mContext, builder);
     }
 
     void ConfigurableRasterStage::SetupDescriptors()
@@ -488,18 +425,6 @@ namespace foray::stages {
         vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Uv);
         vertexInputStateBuilder.Build();
 
-        // clang-format off
-        mPipeline = util::PipelineBuilder()
-            .SetContext(mContext)
-            .SetDomain(mDomain)
-            .SetColorAttachmentBlendCount(mOutputList.size())
-            .SetPipelineLayout(mPipelineLayout->GetPipelineLayout())
-            .SetVertexInputStateBuilder(&vertexInputStateBuilder)
-            .SetShaderStageCreateInfos(shaderStageCreateInfos.Get())
-            .SetPipelineCache(mContext->PipelineCache)
-            .SetRenderPass(mRenderpass)
-            .Build();
-        // clang-format on
     }
 
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -547,32 +472,9 @@ namespace foray::stages {
         }
         clearValues.back().depthStencil = VkClearDepthStencilValue{1.f, 0};
 
-        VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass        = mRenderpass;
-        renderPassBeginInfo.framebuffer       = mFrameBuffer;
-        renderPassBeginInfo.renderArea.extent = mDomain->GetExtent();
-        renderPassBeginInfo.clearValueCount   = static_cast<uint32_t>(clearValues.size());
-        renderPassBeginInfo.pClearValues      = clearValues.data();
+        mRenderpass->CmdBeginRenderpass(cmdBuffer, renderInfo.GetInFlightFrame()->GetSwapchainImageIndex());
 
-        vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkExtent2D renderSize = mDomain->GetExtent();
-        VkViewport viewport   = {};
-        if(mFlipY)
-        {
-            viewport = VkViewport{0.f, (float)renderSize.height, (float)renderSize.width, (float)renderSize.height * -1.f, 0.0f, 1.0f};
-        }
-        else
-        {
-            viewport = VkViewport{0.f, 0.f, (float)renderSize.width, (float)renderSize.height, 0.0f, 1.0f};
-        }
-        vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
-
-        VkRect2D scissor{VkOffset2D{}, VkExtent2D{mDomain->GetExtent()}};
-        vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-
-        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
+        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline->GetPipeline());
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
         // Instanced object
@@ -593,42 +495,20 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::OnResized(VkExtent2D extent)
     {
-        if(!!mFrameBuffer)
-        {
-            vkDestroyFramebuffer(mContext->VkDevice(), mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-
         for(auto& pair : mOutputMap)
         {
-            Local<core::ManagedImage>& image = pair.second->Image;
-            if(image)
+            if (pair.second->Image.Exists())
             {
-                core::ManagedImage::Resize(image.Get(), extent);
+                pair.second->Image.Resize(extent);
             }
         }
-        core::ManagedImage::Resize(mDepthImage.Get(), extent);
+        mDepthImage.Resize(extent);
 
-        CreateFrameBuffer();
+        mRenderpass->ResizeFramebuffers(extent);
     }
 
     ConfigurableRasterStage::~ConfigurableRasterStage()
     {
-        VkDevice device = !!mContext ? mContext->VkDevice() : nullptr;
-        if(device && mPipeline)
-        {
-            vkDestroyPipeline(device, mPipeline, nullptr);
-        }
-        if(device && mFrameBuffer)
-        {
-            vkDestroyFramebuffer(device, mFrameBuffer, nullptr);
-            mFrameBuffer = nullptr;
-        }
-        if(device && mRenderpass)
-        {
-            vkDestroyRenderPass(device, mRenderpass, nullptr);
-            mRenderpass = nullptr;
-        }
     }
 
     uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::Device* device)

@@ -9,7 +9,6 @@
 #include "../scene/globalcomponents/materialmanager.hpp"
 #include "../scene/globalcomponents/texturemanager.hpp"
 #include "../scene/globalcomponents/tlasmanager.hpp"
-#include "../util/pipelinebuilder.hpp"
 #include "../util/shaderstagecreateinfos.hpp"
 #include <array>
 

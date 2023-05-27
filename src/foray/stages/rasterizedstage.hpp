@@ -1,7 +1,9 @@
 #pragma once
-#include "../util/pipelinelayout.hpp"
-#include "renderstage.hpp"
 #include "../util/descriptorsetsimple.hpp"
+#include "../util/pipelinelayout.hpp"
+#include "../util/rasterpipeline.hpp"
+#include "../util/renderpass.hpp"
+#include "renderstage.hpp"
 
 namespace foray::stages {
 
@@ -11,21 +13,13 @@ namespace foray::stages {
       public:
         inline RasterizedRenderStage(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0) : RenderStage(context, domain, priority) {}
 
-        FORAY_GETTER_CR(FrameBuffer)
-        FORAY_GETTER_CR(Renderpass)
-        FORAY_GETTER_CR(Pipeline)
+        FORAY_GETTER_MEM(Renderpass)
+        FORAY_GETTER_MEM(Pipeline)
         FORAY_GETTER_MEM(PipelineLayout)
 
-        virtual void SetupDescriptors(){};
-        virtual void CreateDescriptorSets(){};
-        virtual void UpdateDescriptors(){};
-        virtual void CreatePipelineLayout(){};
-
       protected:
-        VkFramebuffer               mFrameBuffer = nullptr;
-        VkRenderPass                mRenderpass  = nullptr;
-        util::DescriptorSetSimple   mDescriptorSet;
-        VkPipeline                  mPipeline = nullptr;
+        Local<util::Renderpass>     mRenderpass;
         Local<util::PipelineLayout> mPipelineLayout;
+        Local<util::RasterPipeline> mPipeline;
     };
 }  // namespace foray::stages

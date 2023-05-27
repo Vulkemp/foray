@@ -15,7 +15,7 @@ namespace foray::util {
 
     void HistoryImage::Resize(const VkExtent2D& size)
     {
-        core::ManagedImage::Resize(mHistory.Get(), size);
+        mHistory.Resize(size);
         mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     }
 

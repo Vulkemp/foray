@@ -1,5 +1,6 @@
 #pragma once
 #include "../basics.hpp"
+#include "../mem.hpp"
 #include "../vulkan.hpp"
 #include "commandbuffer.hpp"
 #include "context.hpp"
@@ -47,9 +48,6 @@ namespace foray::core {
         /// @brief Uses stored create info to recreate vulkan image with a new size.
         CreateInfo GetInfoForResize(const VkExtent2D& newextent);
 
-        static void Resize(ManagedImage* image, const VkExtent3D& newextent);
-        static void Resize(ManagedImage* image, const VkExtent2D& newextent);
-
         /// @brief Shorthand using common values. See CreateInfo for information
         /// @param context Requires Allocator, DispatchTable, Device
         ManagedImage(Context* context, VkImageUsageFlags usage, VkFormat format, const VkExtent2D& extent, std::string_view name = "Unnamed Image");
@@ -85,6 +83,7 @@ namespace foray::core {
         void WriteDeviceLocalData(HostSyncCommandBuffer& cmdBuffer, const void* data, size_t size, VkImageLayout layoutAfterWrite);
 
         FORAY_GETTER_CR(CreateInfo)
+        FORAY_GETTER_V(Context)
         FORAY_GETTER_V(Image)
         FORAY_GETTER_V(ImageView)
         FORAY_GETTER_V(Allocation)
@@ -110,5 +109,13 @@ namespace foray::core {
 
         void CheckImageFormatSupport(const CreateInfo& createInfo);
         void UpdateDebugNames();
+    };
+
+    class Local_ManagedImage : public Local<ManagedImage>
+    {
+      public:
+        void New(core::Context* context, const ManagedImage::CreateInfo& createInfo);
+        void Resize(VkExtent2D extent);
+        void Resize(VkExtent3D extent);
     };
 }  // namespace foray::core

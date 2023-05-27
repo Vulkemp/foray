@@ -3,7 +3,6 @@
 #include "../core/shadermodule.hpp"
 #include "../osi/osmanager.hpp"
 #include "../osi/window.hpp"
-#include "../util/pipelinebuilder.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_sdl.h>
@@ -11,8 +10,7 @@
 
 
 namespace foray::stages {
-    ImguiStage::ImguiStage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder)
-     : RenderStage(context, domain, resizeOrder)
+    ImguiStage::ImguiStage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder)
     {
         mTargetImage = backgroundImage;
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
@@ -23,8 +21,7 @@ namespace foray::stages {
         InitImgui();
     }
 
-    ImguiStage::ImguiStage(core::Context* context, int32_t resizeOrder)
-     : RenderStage(context, context->WindowSwapchain, resizeOrder)
+    ImguiStage::ImguiStage(core::Context* context, int32_t resizeOrder) : RenderStage(context, context->WindowSwapchain, resizeOrder)
     {
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
         mTargetImage = nullptr;
@@ -81,7 +78,7 @@ namespace foray::stages {
         init_info.ImageCount                = 3;
         init_info.MSAASamples               = VK_SAMPLE_COUNT_1_BIT;
 
-        ImGui_ImplVulkan_Init(&init_info, mRenderPass);
+        ImGui_ImplVulkan_Init(&init_info, mRenderpass->GetRenderpass());
 
         //execute a gpu command to upload imgui font textures
         core::HostSyncCommandBuffer cmdBuf(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -94,105 +91,28 @@ namespace foray::stages {
 
     void ImguiStage::DestroyFrameBufferAndRenderPass()
     {
-        if(mFrameBuffers.size() > 0)
-        {
-            for(VkFramebuffer frameBuffer : mFrameBuffers)
-            {
-                vkDestroyFramebuffer(mContext->VkDevice(), frameBuffer, nullptr);
-            }
-            mFrameBuffers.clear();
-        }
-        if(mRenderPass)
-        {
-            vkDestroyRenderPass(mContext->VkDevice(), mRenderPass, nullptr);
-            mRenderPass = nullptr;
-        }
+        mRenderpass.Delete();
     }
 
     void ImguiStage::PrepareRenderpass()
     {
         // size + 1 for depth attachment description
-        VkAttachmentDescription attachmentDescription{.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD,
-                                                      .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
-                                                      .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                      .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                                                      .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-                                                      .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
+        util::Renderpass::Builder builder;
+
+        VkImageLayout before = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkImageLayout during = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         if(!!mTargetImage)
         {
-            attachmentDescription.format  = mTargetImage->GetFormat();
-            attachmentDescription.samples = mTargetImage->GetSampleCount();
+            builder.AddAttachmentColorRW(mTargetImage, during, before);
         }
         else
         {
-            attachmentDescription.format  = mContext->WindowSwapchain->GetSwapchain().image_format;
-            attachmentDescription.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
+            builder.AddAttachmentColorRW(mContext->WindowSwapchain, during, before);
         }
+        builder.SetInitialSize(mDomain->GetExtent());
 
-        VkAttachmentReference colorAttachmentReference{.attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
-
-        // Subpass description
-        VkSubpassDescription subpass    = {};
-        subpass.pipelineBindPoint       = VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount    = 1U;
-        subpass.pColorAttachments       = &colorAttachmentReference;
-        subpass.pDepthStencilAttachment = nullptr;
-
-        VkSubpassDependency subPassDependencies[2] = {};
-        subPassDependencies[0].srcSubpass          = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[0].dstSubpass          = 0;
-        subPassDependencies[0].srcStageMask        = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[0].dstStageMask        = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subPassDependencies[0].srcAccessMask       = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[0].dstAccessMask       = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[0].dependencyFlags     = VK_DEPENDENCY_BY_REGION_BIT;
-
-        subPassDependencies[1].srcSubpass      = 0;
-        subPassDependencies[1].dstSubpass      = VK_SUBPASS_EXTERNAL;
-        subPassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subPassDependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        subPassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        subPassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
-        subPassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.pAttachments           = &attachmentDescription;
-        renderPassInfo.attachmentCount        = 1U;
-        renderPassInfo.subpassCount           = 1;
-        renderPassInfo.pSubpasses             = &subpass;
-        renderPassInfo.dependencyCount        = 2;
-        renderPassInfo.pDependencies          = subPassDependencies;
-        AssertVkResult(vkCreateRenderPass(mContext->VkDevice(), &renderPassInfo, nullptr, &mRenderPass));
-
-        mFrameBuffers.resize(!!mTargetImage ? 1 : mContext->WindowSwapchain->GetSwapchainImages().size());
-
-        for(uint32_t i = 0; i < mFrameBuffers.size(); i++)
-        {
-            VkFramebuffer& frameBuffer    = mFrameBuffers[i];
-            VkImageView    attachmentView = nullptr;
-            if(!!mTargetImage)
-            {
-                attachmentView = mTargetImage->GetImageView();
-            }
-            else
-            {
-                attachmentView = mContext->WindowSwapchain->GetSwapchainImages()[i].ImageView;
-            }
-
-
-            VkFramebufferCreateInfo fbufCreateInfo = {};
-            fbufCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            fbufCreateInfo.pNext                   = NULL;
-            fbufCreateInfo.renderPass              = mRenderPass;
-            fbufCreateInfo.pAttachments            = &attachmentView;
-            fbufCreateInfo.attachmentCount         = 1U;
-            fbufCreateInfo.width                   = mDomain->GetExtent().width;
-            fbufCreateInfo.height                  = mDomain->GetExtent().height;
-            fbufCreateInfo.layers                  = 1;
-            AssertVkResult(vkCreateFramebuffer(mContext->VkDevice(), &fbufCreateInfo, nullptr, &frameBuffer));
-        }
+        mRenderpass.New(mContext, builder);
     }
 
     ImguiStage::~ImguiStage()
@@ -210,8 +130,7 @@ namespace foray::stages {
 
     void ImguiStage::OnResized(VkExtent2D extent)
     {
-        DestroyFrameBufferAndRenderPass();
-        PrepareRenderpass();
+        mRenderpass->ResizeFramebuffers(extent);
     }
 
     void ImguiStage::SetBackgroundImage(core::ManagedImage* newTargetImage)
@@ -229,27 +148,17 @@ namespace foray::stages {
 
     void ImguiStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        VkImage       image       = nullptr;
-        VkFramebuffer frameBuffer = nullptr;
+        VkImage  image          = nullptr;
+        uint32_t swapchainIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
+
         if(!!mTargetImage)
         {
-            frameBuffer = mFrameBuffers.front();
-            image       = mTargetImage->GetImage();
+            image = mTargetImage->GetImage();
         }
         else
         {
-            uint32_t swapchainIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
-            frameBuffer             = mFrameBuffers[swapchainIndex];
-            image                   = mContext->WindowSwapchain->GetSwapchainImages()[swapchainIndex].Image;
+            image = mContext->WindowSwapchain->GetSwapchainImages()[swapchainIndex].Image;
         }
-
-        VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType             = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass        = mRenderPass;
-        renderPassBeginInfo.framebuffer       = frameBuffer;
-        renderPassBeginInfo.renderArea.extent = mDomain->GetExtent();
-        // renderPassBeginInfo.clearValueCount   = 1U;
-        // renderPassBeginInfo.pClearValues      = &mClearValue;
 
         core::ImageLayoutCache::Barrier2 barrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                  .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
@@ -258,7 +167,7 @@ namespace foray::stages {
                                                  .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
         renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, image, barrier);
 
-        vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        mRenderpass->CmdBeginRenderpass(cmdBuffer, swapchainIndex);
 
         // imgui drawing
         {
@@ -275,7 +184,7 @@ namespace foray::stages {
             ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
         }
 
-        vkCmdEndRenderPass(cmdBuffer);
+        mRenderpass->CmdEndRenderpass(cmdBuffer, renderInfo.GetImageLayoutCache());
     }
 
 }  // namespace foray::stages
