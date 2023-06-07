@@ -26,6 +26,9 @@ namespace foray::gltf {
         const std::string extVolume_attenuationDistance = "attenuationDistance";
         const std::string extVolume_attenuationColor    = "attenuationColor";
 
+        const std::string extEmissiveStrength           = "KHR_materials_emissive_strength";
+        const std::string extEmissiveStrength_value     = "emissiveStrength";
+
 
         for(int32_t i = 0; i < (int32_t)mGltfModel.materials.size(); i++)
         {
@@ -47,6 +50,21 @@ namespace foray::gltf {
             material.EmissiveFactor       = glm::vec3(gltfMaterial.emissiveFactor[0], gltfMaterial.emissiveFactor[1], gltfMaterial.emissiveFactor[2]);
             material.EmissiveTextureIndex = _calcTextureIndex(gltfMaterial.emissiveTexture.index, mIndexBindings.TextureBufferOffset);
             material.NormalTextureIndex   = _calcTextureIndex(gltfMaterial.normalTexture.index, mIndexBindings.TextureBufferOffset);
+
+            {  // EmissiveStrength
+                const auto iter = gltfMaterial.extensions.find(extEmissiveStrength);
+                if(iter != gltfMaterial.extensions.cend())
+                {
+                    if(iter->second.IsObject() && iter->second.Has(extEmissiveStrength_value))
+                    {
+                        const auto value = iter->second.Get(extEmissiveStrength_value);
+                        if(value.IsNumber())
+                        {
+                            material.EmissiveFactor *= (fp32_t)value.GetNumberAsDouble();
+                        }
+                    }
+                }
+            }
 
             {  // Index of Refraction
                 const auto iter = gltfMaterial.extensions.find(extIor);
