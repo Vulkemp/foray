@@ -82,7 +82,7 @@ namespace foray::stages {
         core::ManagedImage* mNoiseTexture = nullptr;
 
         /// @brief Image output
-        Local<core::ManagedImage> mOutput;
+        core::Local_ManagedImage mOutput;
         /// @brief Main DescriptorSet & Layout
         util::DescriptorSetSimple mDescriptorSet;
         /// @brief DescriptorSet::SetDescriptorAt requires persistent .pNext objects

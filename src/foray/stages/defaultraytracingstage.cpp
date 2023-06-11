@@ -34,6 +34,7 @@ namespace foray::stages {
     void DefaultRaytracingStageBase::OnResized(VkExtent2D extent)
     {
         RenderStage::OnResized(extent);
+        mOutput.Resize(extent);
         CreateOrUpdateDescriptors();
     }
     DefaultRaytracingStageBase::~DefaultRaytracingStageBase() {}
@@ -47,7 +48,9 @@ namespace foray::stages {
         VkImageUsageFlags imageUsageFlags =
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        mOutput.New(mContext, imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
+        core::ManagedImage::CreateInfo imageCi(imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
+
+        mOutput.New(mContext, imageCi);
         mImageOutputs[std::string(OutputName)] = mOutput.Get();
     }
     void DefaultRaytracingStageBase::CreatePipelineLayout()

@@ -11,7 +11,6 @@ namespace foray::stages
     void RasterPostProcessBase::ReloadShaders() 
     {
         mShaderKeys.push_back(mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/rasterpostprocessstage/rasterpp.vert", mVertexShader));
-        mPipeline.New(mContext, mPipelineBuilder);
     }
 
     void RasterPostProcessBase::CmdDraw(VkCommandBuffer cmdBuffer) 
