@@ -19,7 +19,11 @@ namespace foray::stages
         vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
     }
 
-    void RasterPostProcessBase::ConfigurePipelineBuilder() {}
+    void RasterPostProcessBase::ConfigurePipelineBuilder() 
+    {
+        mPipelineBuilder.Default_PostProcess(mVertexShader->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT), mFragmentShader->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), 
+        &mRenderAttachments, mDomain->GetExtent(), mPipelineLayout->GetPipelineLayout());
+    }
 
 
 } // namespace foray::stages

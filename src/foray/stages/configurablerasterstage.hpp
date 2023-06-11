@@ -196,7 +196,6 @@ namespace foray::stages {
             OutputRecipe             Recipe;
 
             inline Output(std::string_view name, const OutputRecipe& recipe) : Name(name), Recipe(recipe) {}
-            util::Renderpass::Builder::Attachment GetAttachment();
         };
         using OutputMap  = std::unordered_map<std::string, Heap<Output>>;
         using OutputList = std::vector<Output*>;

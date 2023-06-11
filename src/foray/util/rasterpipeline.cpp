@@ -3,8 +3,7 @@
 #include "../stages/renderdomain.hpp"
 
 namespace foray::util {
-    RasterPipeline::RasterPipeline(core::Context* context, const Builder& builder)
-        : mContext(context), mRenderpass(builder.GetRenderpass()), mExtent(builder.GetRenderpass()->GetExtent())
+    RasterPipeline::RasterPipeline(core::Context* context, const Builder& builder) : mContext(context), mExtent(builder.GetExtent())
     {
         // clang-format off
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyCi{
@@ -71,9 +70,11 @@ namespace foray::util {
             .pDynamicStates = builder.GetDynamicStates().data(),
         };
 
+        VkPipelineRenderingCreateInfo renderingCi = builder.GetRenderAttachments()->MakePipelineRenderingCi();
+
         VkGraphicsPipelineCreateInfo pipelineCi{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            .pNext = nullptr,
+            .pNext = &renderingCi,
             .flags = 0,
             .stageCount = (uint32_t)builder.GetShaderStages().size(),
             .pStages = builder.GetShaderStages().data(),
@@ -87,7 +88,7 @@ namespace foray::util {
             .pColorBlendState = &colorBlendCi,
             .pDynamicState = &dynamicCi,
             .layout = builder.GetPipelineLayout(),
-            .renderPass = builder.GetRenderpass()->GetRenderpass(),
+            .renderPass = nullptr,
             .subpass = 0u,
             .basePipelineHandle = mPipeline,
             .basePipelineIndex = 0u,
@@ -108,6 +109,52 @@ namespace foray::util {
     }
 
 
+    RasterPipeline::Builder& RasterPipeline::Builder::Default_SceneDrawing(VkPipelineShaderStageCreateInfo&& vertex,
+                                                                           VkPipelineShaderStageCreateInfo&& fragment,
+                                                                           RenderAttachments*                attachments,
+                                                                           VkExtent2D                        extent,
+                                                                           VkPipelineLayout                  pipelineLayout,
+                                                                           BuiltinDepthInit                  depth)
+    {
+        mRenderAttachments = attachments;
+        mShaderStages.reserve(2);
+        mShaderStages.emplace_back(vertex);
+        mShaderStages.emplace_back(fragment);
+        mVertexInputStateBuilder = scene::VertexInputStateBuilder();
+        mVertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Position)
+            .AddVertexComponentBinding(scene::EVertexComponent::Normal)
+            .AddVertexComponentBinding(scene::EVertexComponent::Tangent)
+            .AddVertexComponentBinding(scene::EVertexComponent::Uv)
+            .Build();
+        SetVertexInputStateCi(mVertexInputStateBuilder.InputStateCI);
+        InitDepthStateCi(depth);
+        SetExtent(extent);
+        SetAttachmentBlends(attachments);
+        mDynamicStates = {VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT, VkDynamicState::VK_DYNAMIC_STATE_SCISSOR};
+        SetPipelineLayout(pipelineLayout);
+        return *this;
+    }
+
+    RasterPipeline::Builder& RasterPipeline::Builder::Default_PostProcess(VkPipelineShaderStageCreateInfo&& vertex,
+                                                                          VkPipelineShaderStageCreateInfo&& fragment,
+                                                                           RenderAttachments*                attachments,
+                                                                           VkExtent2D                        extent,
+                                                                          VkPipelineLayout                  pipelineLayout)
+    {
+        mRenderAttachments = attachments;
+        mShaderStages.reserve(2);
+        mShaderStages.emplace_back(vertex);
+        mShaderStages.emplace_back(fragment);
+        mVertexInputStateCi = VkPipelineVertexInputStateCreateInfo{.sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
+        mCullModeFlags      = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+        InitDepthStateCi(BuiltinDepthInit::Disabled);
+        SetExtent(extent);
+        SetAttachmentBlends(attachments);
+        mDynamicStates = {VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT, VkDynamicState::VK_DYNAMIC_STATE_SCISSOR};
+        SetPipelineLayout(pipelineLayout);
+        return *this;
+    }
+
     RasterPipeline::Builder& RasterPipeline::Builder::InitDepthStateCi(BuiltinDepthInit depthInit)
     {
         switch(depthInit)
@@ -125,32 +172,36 @@ namespace foray::util {
                                                                       .depthWriteEnable      = VK_TRUE,
                                                                       .depthCompareOp        = VkCompareOp::VK_COMPARE_OP_LESS_OR_EQUAL,
                                                                       .depthBoundsTestEnable = VK_FALSE,
-                                                                      .stencilTestEnable     = VK_FALSE, .maxDepthBounds = 100000.f};
+                                                                      .stencilTestEnable     = VK_FALSE,
+                                                                      .maxDepthBounds        = 1.f};
                 break;
-            // case BuiltinDepthInit::Inverted:
-            //     mDepthStateCi = VkPipelineDepthStencilStateCreateInfo{
-            //         .sType = ,
-            //         .pNext = ,
-            //         .flags = ,
-            //         .depthTestEnable = ,
-            //         .depthWriteEnable = ,
-            //         .depthCompareOp = ,
-            //         .depthBoundsTestEnable = ,
-            //         .stencilTestEnable = ,
-            //         .front = ,
-            //         .back = ,
-            //         .minDepthBounds = ,
-            //         .maxDepthBounds = ,
-            //     };
-            //     break;
+            case BuiltinDepthInit::Inverted:
+                mDepthStateCi = VkPipelineDepthStencilStateCreateInfo{
+                    .sType                 = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                    .depthTestEnable       = VK_TRUE,
+                    .depthWriteEnable      = VK_TRUE,
+                    .depthCompareOp        = VkCompareOp::VK_COMPARE_OP_GREATER,
+                    .depthBoundsTestEnable = VK_FALSE,
+                    .stencilTestEnable     = VK_FALSE,
+                    .minDepthBounds        = 1.f,
+                };
+                break;
             default:
                 FORAY_THROWFMT("Unhandled value {}", NAMEOF_ENUM(depthInit))
         }
         return *this;
     }
 
-    RasterPipeline::Builder& RasterPipeline::Builder::InitDefaultAttachmentBlendStates(bool hasDepth)
+    RasterPipeline::Builder& RasterPipeline::Builder::SetAttachmentBlends(RenderAttachments* attachments)
     {
+        uint32_t colorAttachmentCount = attachments->GetAttachments().size();
+        if(colorAttachmentCount > 0)
+        {
+            const VkColorComponentFlags flags = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT
+                                                | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
+            mAttachmentBlends =
+                std::vector<VkPipelineColorBlendAttachmentState>(colorAttachmentCount, VkPipelineColorBlendAttachmentState{.blendEnable = VK_FALSE, .colorWriteMask = flags});
+        }
         return *this;
     }
 

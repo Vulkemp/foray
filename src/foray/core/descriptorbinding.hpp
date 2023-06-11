@@ -110,6 +110,18 @@ namespace foray::core {
         DescriptorBindingSampledImage& SetState(const ManagedImage* image, VkImageLayout layout);
     };
 
+    /// @brief A descriptor binding of an input attachment (special attachment type in rasterized passes)
+    class DescriptorBindingInputAttachment : public DescriptorBindingImageBase
+    {
+      public:
+        DescriptorBindingInputAttachment(uint32_t count = 1);
+
+        virtual bool                   ValidateForWrite(std::string& out_message) const override;
+        DescriptorBindingInputAttachment& SetState(uint32_t count, VkImageView* views, VkImageLayout layout);
+        DescriptorBindingInputAttachment& SetState(VkImageView view, VkImageLayout layout);
+        DescriptorBindingInputAttachment& SetState(const ManagedImage* image, VkImageLayout layout);
+    };
+
     /// @brief Base class for shared code for all supported buffer descriptor bindings
     class DescriptorBindingBufferBase : public DescriptorBindingBase
     {

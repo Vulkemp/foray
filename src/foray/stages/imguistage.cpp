@@ -78,7 +78,8 @@ namespace foray::stages {
         init_info.ImageCount                = 3;
         init_info.MSAASamples               = VK_SAMPLE_COUNT_1_BIT;
 
-        ImGui_ImplVulkan_Init(&init_info, mRenderpass->GetRenderpass());
+        mRenderingCi = mRenderAttachments.MakePipelineRenderingCi();
+        ImGui_ImplVulkan_Init(&init_info, nullptr, &mRenderingCi);
 
         //execute a gpu command to upload imgui font textures
         core::HostSyncCommandBuffer cmdBuf(mContext, VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -91,28 +92,18 @@ namespace foray::stages {
 
     void ImguiStage::DestroyFrameBufferAndRenderPass()
     {
-        mRenderpass.Delete();
     }
 
     void ImguiStage::PrepareRenderpass()
     {
-        // size + 1 for depth attachment description
-        util::Renderpass::Builder builder;
-
-        VkImageLayout before = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        VkImageLayout during = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
         if(!!mTargetImage)
         {
-            builder.AddAttachmentColorRW(mTargetImage, during, before);
+            mRenderAttachments.AddAttachmentLoaded(mTargetImage, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
         else
         {
-            builder.AddAttachmentColorRW(mContext->WindowSwapchain, during, before);
+            mRenderAttachments.AddAttachmentLoaded(mContext->WindowSwapchain, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
-        builder.SetInitialSize(mDomain->GetExtent());
-
-        mRenderpass.New(mContext, builder);
     }
 
     ImguiStage::~ImguiStage()
@@ -130,7 +121,6 @@ namespace foray::stages {
 
     void ImguiStage::OnResized(VkExtent2D extent)
     {
-        mRenderpass->ResizeFramebuffers(extent);
     }
 
     void ImguiStage::SetBackgroundImage(core::ManagedImage* newTargetImage)
@@ -167,7 +157,7 @@ namespace foray::stages {
                                                  .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
         renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, image, barrier);
 
-        mRenderpass->CmdBeginRenderpass(cmdBuffer, swapchainIndex);
+        mRenderAttachments.CmdBeginRendering(cmdBuffer, mDomain->GetExtent(), renderInfo.GetImageLayoutCache(), swapchainIndex);
 
         // imgui drawing
         {
@@ -184,7 +174,7 @@ namespace foray::stages {
             ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBuffer);
         }
 
-        mRenderpass->CmdEndRenderpass(cmdBuffer, renderInfo.GetImageLayoutCache());
+        vkCmdEndRendering(cmdBuffer);
     }
 
 }  // namespace foray::stages

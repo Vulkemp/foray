@@ -1,6 +1,6 @@
 #pragma once
-#include "rasterizedstage.hpp"
 #include "../osi/osi_event.hpp"
+#include "rasterizedstage.hpp"
 #include <functional>
 #include <sdl2/SDL.h>
 
@@ -43,7 +43,8 @@ namespace foray::stages {
 
         void HandleSdlEvent(const osi::EventRawSDL* event);
 
-        Local<util::Renderpass> mRenderpass;
+        util::RenderAttachments mRenderAttachments;
+        VkPipelineRenderingCreateInfo mRenderingCi;
 
         event::Receiver<const osi::EventRawSDL*> mOnSdlEvent;
     };

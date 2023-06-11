@@ -271,28 +271,11 @@ namespace foray::stages {
         FORAY_THROWFMT("CGBuffer does not contain output \"{}\"!", name);
     }
 
-    util::Renderpass::Builder::Attachment ConfigurableRasterStage::Output::GetAttachment()
-    {
-        return util::Renderpass::Builder::Attachment{.Source      = util::Renderpass::AttachmentSource::ManagedImage,
-                                                     .Images      = {Image.Get()},
-                                                     .Layout      = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                                     .Description = VkAttachmentDescription{.flags          = 0,
-                                                                                            .format         = Image->GetFormat(),
-                                                                                            .samples        = Image->GetSampleCount(),
-                                                                                            .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
-                                                                                            .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
-                                                                                            .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                                                            .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                                                                                            .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                                                            .finalLayout    = VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
-                                                     .ClearValue  = {Recipe.ClearValue}};
-    }
 
     ConfigurableRasterStage::ConfigurableRasterStage(
         core::Context* context, const Builder& builder, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
         : RasterizedRenderStage(context, domain, resizeOrder)
     {
-        logger()->info("CRS Begin Build");
         mScene = scene;
         mName  = std::string(name);
 
@@ -314,7 +297,6 @@ namespace foray::stages {
         CreatePipelineLayout();
         ConfigureAndCompileShaders();
         CreatePipeline();
-        logger()->info("CRS End Build");
     }
 
     void ConfigurableRasterStage::CheckDeviceColorAttachmentCount()
@@ -351,20 +333,11 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CreateRenderPass()
     {
-        util::Renderpass::Builder builder;
-
-
-        std::vector<VkAttachmentReference>   colorAttachmentRefs;
-        std::vector<VkAttachmentDescription> attachmentDescr;
-
-        for(uint32_t outLocation = 0; outLocation < mOutputList.size(); outLocation++)
+        for(Output* output : mOutputList)
         {
-            builder.AddAttachmentColor(mOutputList[outLocation]->GetAttachment());
+            mRenderAttachments.AddAttachmentCleared(output->Image.Get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, output->Recipe.ClearValue);
         }
-        builder.SetAttachmentDepthStencil(mDepthImage.Get(), 1.f);
-        builder.SetInitialSize(mDomain->GetExtent());
-
-        mRenderpass.New(mContext, builder);
+        mRenderAttachments.SetDepthAttachmentCleared(mDepthImage.Get(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VkClearDepthStencilValue{1.f});
     }
 
     void ConfigurableRasterStage::SetupDescriptors()
@@ -440,46 +413,19 @@ namespace foray::stages {
 
     void ConfigurableRasterStage::CreatePipeline()
     {
-        util::ShaderStageCreateInfos shaderStageCreateInfos;
-        shaderStageCreateInfos.Add(VK_SHADER_STAGE_VERTEX_BIT, mVertexShaderModule.GetRef()).Add(VK_SHADER_STAGE_FRAGMENT_BIT, mFragmentShaderModule.GetRef());
-
         // vertex layout
-        scene::VertexInputStateBuilder vertexInputStateBuilder;
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Position);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Normal);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Tangent);
-        vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Uv);
-        vertexInputStateBuilder.Build();
-
         util::RasterPipeline::Builder builder;
-        builder.InitDepthStateCi(util::RasterPipeline::BuiltinDepthInit::Normal);
-        builder.GetDynamicStates().emplace_back(VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT);
-        builder.GetDynamicStates().emplace_back(VkDynamicState::VK_DYNAMIC_STATE_SCISSOR);
-        builder.SetVertexInputStateCi(vertexInputStateBuilder.InputStateCI);
-
-        {
-            std::vector<VkPipelineShaderStageCreateInfo> shaders = {mVertexShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT),
-                                                                    mFragmentShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT)};
-            builder.SetShaderStages(shaders);
-        }
-
-        {
-            const VkColorComponentFlags flags = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT
-                                                | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
-            std::vector<VkPipelineColorBlendAttachmentState> blends(mOutputList.size(), VkPipelineColorBlendAttachmentState{.blendEnable = VK_FALSE, .colorWriteMask = flags});
-            builder.SetAttachmentBlends(blends);
-        }
-
-        builder.SetPipelineLayout(mPipelineLayout->GetPipelineLayout());
-        builder.SetRenderpass(mRenderpass.Get());
-        builder.SetCullModeFlags(VkCullModeFlagBits::VK_CULL_MODE_NONE);
+        builder.Default_SceneDrawing(mVertexShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT),
+                                     mFragmentShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), &mRenderAttachments, mDomain->GetExtent(),
+                                     mPipelineLayout->GetPipelineLayout(), util::RasterPipeline::BuiltinDepthInit::Normal);
+        // builder.SetCullModeFlags(VkCullModeFlagBits::VK_CULL_MODE_NONE);
 
         mPipeline.New(mContext, builder);
     }
 
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        {
+        {  // Synchronize buffer access
             std::vector<VkBufferMemoryBarrier2> bufferBarriers;
 
             VkBufferMemoryBarrier2 bufferBarrier{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
@@ -514,32 +460,30 @@ namespace foray::stages {
             vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
         }
 
-        std::vector<VkClearValue> clearValues(mOutputList.size() + 1);
+        VkExtent2D extent{mDomain->GetExtent()};
 
-        for(uint32_t i = 0; i < mOutputList.size(); i++)
-        {
-            clearValues[i].color = mOutputList[i]->Recipe.ClearValue;
-        }
-        clearValues.back().depthStencil = VkClearDepthStencilValue{1.f, 0};
+        // Begin rendering
+        mRenderAttachments.CmdBeginRendering(cmdBuffer, extent, renderInfo.GetImageLayoutCache(), renderInfo.GetInFlightFrame()->GetSwapchainImageIndex());
 
-        mRenderpass->CmdBeginRenderpass(cmdBuffer, renderInfo.GetInFlightFrame()->GetSwapchainImageIndex());
+        {  // Bind pipeline
+            vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline->GetPipeline());
 
-        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline->GetPipeline());
-        {
-            VkExtent2D extent{mDomain->GetExtent()};
-            VkRect2D   rect{{}, extent};
-            vkCmdSetScissor(cmdBuffer, 0u, 1u, &rect);
+            // update dynamic state
+            VkRect2D   scissor{{}, extent};
             VkViewport viewport{.x = 0.f, .y = 0.f, .width = (fp32_t)extent.width, .height = (fp32_t)extent.height, .minDepth = 0.f, .maxDepth = 1.f};
+            vkCmdSetScissor(cmdBuffer, 0u, 1u, &scissor);
             vkCmdSetViewport(cmdBuffer, 0u, 1u, &viewport);
         }
 
+        // Bind descriptorset
         VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
-        // Instanced object
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout.GetRef(), 0, 1, &descriptorSet, 0, nullptr);
 
+        // draw scene
         mScene->Draw(renderInfo, mPipelineLayout.GetRef(), cmdBuffer);
 
-        mRenderpass->CmdEndRenderpass(cmdBuffer, renderInfo.GetImageLayoutCache());
+        // end renderpass
+        vkCmdEndRendering(cmdBuffer);
     }
 
     void ConfigurableRasterStage::OnResized(VkExtent2D extent)
@@ -552,8 +496,6 @@ namespace foray::stages {
             }
         }
         mDepthImage.Resize(extent);
-
-        mRenderpass->ResizeFramebuffers(extent);
     }
 
     ConfigurableRasterStage::~ConfigurableRasterStage() {}

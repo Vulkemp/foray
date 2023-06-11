@@ -299,7 +299,6 @@ namespace foray::core {
     {
     }
 
-
     bool DescriptorBindingSampledImage::ValidateForWrite(std::string& out_message) const
     {
         if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
@@ -334,6 +333,50 @@ namespace foray::core {
     }
 
     DescriptorBindingSampledImage& DescriptorBindingSampledImage::SetState(const ManagedImage* image, VkImageLayout layout)
+    {
+        VkImageView view = image->GetImageView();
+        return SetState(1u, &view, layout);
+    }
+
+    DescriptorBindingInputAttachment::DescriptorBindingInputAttachment(uint32_t count)
+            : DescriptorBindingImageBase(VkDescriptorType::VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, count)
+    {
+    }
+
+    bool DescriptorBindingInputAttachment::ValidateForWrite(std::string& out_message) const
+    {
+        if(!DescriptorBindingImageBase::ValidateForWrite(out_message))
+        {
+            return false;
+        }
+        VALIDATE(mImmutableSamplers.size() == 0, "Storage Image descriptor bindings may not have samplers")
+        for(uint32_t i = 0; i < (uint32_t)mImageInfos.size(); i++)
+        {
+            const VkDescriptorImageInfo& info = mImageInfos[i];
+            VALIDATE(!!info.imageView, fmt::format("Index {}: ImageView must not be nullptr!", i))
+            VALIDATE(!info.sampler, fmt::format("Index {}: Sampler must be nullptr!", i))
+        }
+        return true;
+    }
+
+    DescriptorBindingInputAttachment& DescriptorBindingInputAttachment::SetState(uint32_t count, VkImageView* views, VkImageLayout layout)
+    {
+        Assert(mCount == count, "Input count vs. descriptor count mismatch!");
+        Assert(!!views, "unexpected nullptr");
+        for(uint32_t i = 0; i < count; i++)
+        {
+            FORAY_ASSERTFMT(!!views[i], "Index {}: ImageView is nullptr!", i)
+            mImageInfos[i] = VkDescriptorImageInfo{.imageView = views[i], .imageLayout = layout};
+        }
+        return *this;
+    }
+
+    DescriptorBindingInputAttachment& DescriptorBindingInputAttachment::SetState(VkImageView view, VkImageLayout layout)
+    {
+        return SetState(1u, &view, layout);
+    }
+
+    DescriptorBindingInputAttachment& DescriptorBindingInputAttachment::SetState(const ManagedImage* image, VkImageLayout layout)
     {
         VkImageView view = image->GetImageView();
         return SetState(1u, &view, layout);

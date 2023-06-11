@@ -1,8 +1,8 @@
 #pragma once
+#include "../core/shadermodule.hpp"
 #include "../util/pipelinelayout.hpp"
 #include "../util/rasterpipeline.hpp"
-#include "../util/renderpass.hpp"
-#include "../core/shadermodule.hpp"
+#include "../util/renderattachments.hpp"
 #include "renderstage.hpp"
 
 namespace foray::stages {
@@ -19,7 +19,7 @@ namespace foray::stages {
 
         Local<core::ShaderModule>     mVertexShader;
         Local<core::ShaderModule>     mFragmentShader;
-        Local<util::Renderpass>       mRenderpass;
+        util::RenderAttachments       mRenderAttachments;
         Local<util::PipelineLayout>   mPipelineLayout;
         Local<util::RasterPipeline>   mPipeline;
         util::RasterPipeline::Builder mPipelineBuilder;

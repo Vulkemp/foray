@@ -5,7 +5,7 @@
 #include "../scene/geo.hpp"
 #include "../stages/stages_declares.hpp"
 #include "../vulkan.hpp"
-#include "renderpass.hpp"
+#include "renderattachments.hpp"
 
 namespace foray::util {
     class RasterPipeline : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_PIPELINE>
@@ -13,16 +13,33 @@ namespace foray::util {
       public:
         enum class BuiltinDepthInit
         {
+            /// @brief No depth test
             Disabled,
+            /// @brief 0: Near 1: Far
+            /// @remark Be sure to clear the depth image with 1.f
             Normal,
+            /// @brief 1: Near 0: Far
+            /// @remark Be sure to clear the depth image with 0.f
             Inverted
         };
 
         class Builder
         {
           public:
+            Builder& Default_SceneDrawing(VkPipelineShaderStageCreateInfo&& vertex,
+                                          VkPipelineShaderStageCreateInfo&& fragment,
+                                          RenderAttachments*                attachments,
+                                          VkExtent2D                        extent,
+                                          VkPipelineLayout                  pipelineLayout,
+                                          BuiltinDepthInit                  depth = BuiltinDepthInit::Normal);
+            Builder& Default_PostProcess(VkPipelineShaderStageCreateInfo&& vertex,
+                                         VkPipelineShaderStageCreateInfo&& fragment,
+                                         RenderAttachments*                attachments,
+                                         VkExtent2D                        extent,
+                                         VkPipelineLayout                  pipelineLayout);
+
             Builder& InitDepthStateCi(BuiltinDepthInit depthInit);
-            Builder& InitDefaultAttachmentBlendStates(bool hasDepth);
+            Builder& SetAttachmentBlends(RenderAttachments* renderattachments);
             FORAY_PROPERTY_R(ShaderStages)
             FORAY_PROPERTY_R(VertexInputStateCi)
             FORAY_PROPERTY_V(PrimitiveTopology)
@@ -32,8 +49,9 @@ namespace foray::util {
             FORAY_PROPERTY_R(DepthStateCi)
             FORAY_PROPERTY_R(AttachmentBlends)
             FORAY_PROPERTY_R(DynamicStates)
+            FORAY_PROPERTY_V(RenderAttachments)
             FORAY_PROPERTY_V(PipelineLayout)
-            FORAY_PROPERTY_V(Renderpass)
+            FORAY_PROPERTY_V(Extent)
             FORAY_PROPERTY_V(PipelineCache)
           protected:
             std::vector<VkPipelineShaderStageCreateInfo>     mShaderStages;
@@ -45,9 +63,13 @@ namespace foray::util {
             VkPipelineDepthStencilStateCreateInfo            mDepthStateCi{};
             std::vector<VkPipelineColorBlendAttachmentState> mAttachmentBlends;
             std::vector<VkDynamicState>                      mDynamicStates;
-            VkPipelineLayout                                 mPipelineLayout;
-            Renderpass*                                      mRenderpass    = nullptr;
+            RenderAttachments*                                mRenderAttachments;
+            VkPipelineLayout                                 mPipelineLayout = nullptr;
+            VkExtent2D                                       mExtent{};
             VkPipelineCache                                  mPipelineCache = nullptr;
+
+          private:
+            scene::VertexInputStateBuilder mVertexInputStateBuilder;
         };
 
         RasterPipeline(core::Context* context, const Builder& builder);
@@ -57,13 +79,11 @@ namespace foray::util {
 
         FORAY_GETTER_V(Pipeline)
         FORAY_GETTER_V(Extent)
-        FORAY_GETTER_V(Renderpass)
 
       protected:
-        core::Context* mContext    = nullptr;
-        VkPipeline     mPipeline   = nullptr;
-        Renderpass*    mRenderpass = nullptr;
-        VkExtent2D     mExtent     = {};
+        core::Context* mContext  = nullptr;
+        VkPipeline     mPipeline = nullptr;
+        VkExtent2D     mExtent   = {};
     };
 
 }  // namespace foray::util

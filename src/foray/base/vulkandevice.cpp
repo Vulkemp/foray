@@ -1,8 +1,8 @@
 #include "vulkandevice.hpp"
 #include "../core/context.hpp"
 #include "../logger.hpp"
-#include "../vulkan.hpp"
 #include "../osi/window.hpp"
+#include "../vulkan.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -49,11 +49,13 @@ namespace foray::base {
             deviceSelector.set_minimum_version(1U, 3U);
 
             // Set raytracing extensions
-            std::vector<const char*> requiredExtensions{VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME, VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-                                                        // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
-                                                        VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME,
-                                                        // Better pipeline barrier and submit calls
-                                                        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
+            std::vector<const char*> requiredExtensions{
+                VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+                VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+                VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+                // Relaxed block layout allows custom strides for buffer layouts. Used for index buffer and vertex buffer in rt shaders
+                VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME,
+            };
             deviceSelector.add_required_extensions(requiredExtensions);
 
             // Enable samplerAnisotropy
@@ -62,6 +64,14 @@ namespace foray::base {
 
             deviceSelector.set_required_features(deviceFeatures);
         }
+
+        {  // Enable dynamic rendering and sync2
+            VkPhysicalDeviceVulkan13Features deviceFeatures{};
+            deviceFeatures.dynamicRendering = VK_TRUE;
+            deviceFeatures.synchronization2 = VK_TRUE;
+            deviceSelector.set_required_features_13(deviceFeatures);
+        }
+
 
         if(mEnableRaytracingFeaturesAndExtensions)
         {
@@ -107,9 +117,10 @@ namespace foray::base {
             mContext->Device = this;
 
             mProperties.Properties2 = VkPhysicalDeviceProperties2{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
-            mProperties.AsProperties = VkPhysicalDeviceAccelerationStructurePropertiesKHR{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
+            mProperties.AsProperties =
+                VkPhysicalDeviceAccelerationStructurePropertiesKHR{.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR};
 
-            if (mEnableRaytracingFeaturesAndExtensions)
+            if(mEnableRaytracingFeaturesAndExtensions)
             {
                 mProperties.Properties2.pNext = &mProperties.AsProperties;
             }
@@ -140,14 +151,10 @@ namespace foray::base {
                                                 .shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
                                                 .runtimeDescriptorArray                    = VK_TRUE};  // enable this for unbound descriptor arrays
 
-        mFeatures.Sync2FEatures = {.sType = VkStructureType::VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES, .synchronization2 = VK_TRUE};
-
-
         if(mEnableDefaultFeaturesAndExtensions)
         {
             deviceBuilder.add_pNext(&mFeatures.BufferDeviceAdressFeatures);
             deviceBuilder.add_pNext(&mFeatures.DescriptorIndexingFeatures);
-            deviceBuilder.add_pNext(&mFeatures.Sync2FEatures);
         }
         if(mEnableRaytracingFeaturesAndExtensions)
         {
@@ -164,8 +171,8 @@ namespace foray::base {
         FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
                         ret.error().message())
 
-        mDevice             = *ret;
-        mDispatchTable      = mDevice.make_table();
+        mDevice        = *ret;
+        mDispatchTable = mDevice.make_table();
     }
 
     VulkanDevice::~VulkanDevice()
@@ -179,7 +186,7 @@ namespace foray::base {
         mDispatchTable  = vkb::DispatchTable();
         if(!!mContext)
         {
-            mContext->Device            = nullptr;
+            mContext->Device = nullptr;
         }
     }
 

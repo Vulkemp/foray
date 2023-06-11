@@ -95,7 +95,6 @@ namespace foray::base {
             VkPhysicalDeviceRayTracingPipelineFeaturesKHR    RayTracingPipelineFeatures    = {};
             VkPhysicalDeviceAccelerationStructureFeaturesKHR AccelerationStructureFeatures = {};
             VkPhysicalDeviceDescriptorIndexingFeaturesEXT    DescriptorIndexingFeatures    = {};
-            VkPhysicalDeviceSynchronization2Features         Sync2FEatures                 = {};
         } mFeatures = {};
 
         Properties mProperties = {};
