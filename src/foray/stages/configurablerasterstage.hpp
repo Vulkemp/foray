@@ -87,6 +87,8 @@ namespace foray::stages {
             UVEC4,
         };
 
+        static uint32_t GetFragmentOutputComponentCount(FragmentOutputType type);
+
         /// @brief Defines the custom GBuffer output to generate
         struct OutputRecipe
         {

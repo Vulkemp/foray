@@ -1,9 +1,9 @@
 #include "rasterpipeline.hpp"
-#include "../stages/renderdomain.hpp"
 #include "../core/context.hpp"
+#include "../stages/renderdomain.hpp"
 
 namespace foray::util {
-    RasterPipeline::RasterPipeline(core::Context* context, const Builder& builder, stages::RenderDomain* domain)
+    RasterPipeline::RasterPipeline(core::Context* context, const Builder& builder)
         : mContext(context), mRenderpass(builder.GetRenderpass()), mExtent(builder.GetRenderpass()->GetExtent())
     {
         // clang-format off
@@ -41,12 +41,12 @@ namespace foray::util {
         VkPipelineRasterizationStateCreateInfo rasterCi{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
             .depthClampEnable = VK_FALSE,
-            .rasterizerDiscardEnable = VK_TRUE,
+            .rasterizerDiscardEnable = VK_FALSE,
             .polygonMode = builder.GetPolygonMode(),
             .cullMode = builder.GetCullModeFlags(),
             .frontFace = builder.GetFrontFace(),
             .depthBiasEnable = VK_FALSE,
-            .lineWidth = builder.GetPolygonMode() == VkPolygonMode::VK_POLYGON_MODE_LINE ? 1.f : 0.f
+            .lineWidth = 1.f
         };
 
         VkPipelineMultisampleStateCreateInfo multisampleCi{
@@ -59,15 +59,16 @@ namespace foray::util {
         VkPipelineColorBlendStateCreateInfo colorBlendCi{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
             .logicOpEnable = VK_FALSE,
+            .logicOp = VkLogicOp::VK_LOGIC_OP_COPY,
             .attachmentCount = (uint32_t)builder.GetAttachmentBlends().size(),
             .pAttachments = builder.GetAttachmentBlends().data(),
-            .blendConstants = {1.f, 1.f, 1.f, 1.f}
+            .blendConstants = {0.f, 0.f, 0.f, 0.f}
         };
 
         VkPipelineDynamicStateCreateInfo dynamicCi{
             .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-            .dynamicStateCount = 0u,
-            .pDynamicStates = nullptr,
+            .dynamicStateCount = (uint32_t)builder.GetDynamicStates().size(),
+            .pDynamicStates = builder.GetDynamicStates().data(),
         };
 
         VkGraphicsPipelineCreateInfo pipelineCi{
@@ -96,12 +97,12 @@ namespace foray::util {
         AssertVkResult(vkCreateGraphicsPipelines(mContext->VkDevice(), builder.GetPipelineCache(), 1u, &pipelineCi, nullptr, &mPipeline));
     }
 
-    RasterPipeline::~RasterPipeline() 
+    RasterPipeline::~RasterPipeline()
     {
         vkDestroyPipeline(mContext->VkDevice(), mPipeline, nullptr);
     }
 
-    void RasterPipeline::CmdBindPipeline(VkCommandBuffer cmdBuffer) 
+    void RasterPipeline::CmdBindPipeline(VkCommandBuffer cmdBuffer)
     {
         vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline);
     }
@@ -119,14 +120,12 @@ namespace foray::util {
                 };
                 break;
             case BuiltinDepthInit::Normal:
-                mDepthStateCi = VkPipelineDepthStencilStateCreateInfo{
-                    .sType = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-                    .depthTestEnable = VK_TRUE,
-                    .depthWriteEnable = VK_TRUE,
-                    .depthCompareOp = VkCompareOp::VK_COMPARE_OP_GREATER,
-                    .depthBoundsTestEnable = VK_FALSE,
-                    .stencilTestEnable = VK_FALSE
-                };
+                mDepthStateCi = VkPipelineDepthStencilStateCreateInfo{.sType                 = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                                                                      .depthTestEnable       = VK_TRUE,
+                                                                      .depthWriteEnable      = VK_TRUE,
+                                                                      .depthCompareOp        = VkCompareOp::VK_COMPARE_OP_LESS_OR_EQUAL,
+                                                                      .depthBoundsTestEnable = VK_FALSE,
+                                                                      .stencilTestEnable     = VK_FALSE, .maxDepthBounds = 100000.f};
                 break;
             // case BuiltinDepthInit::Inverted:
             //     mDepthStateCi = VkPipelineDepthStencilStateCreateInfo{

@@ -62,6 +62,7 @@ namespace foray::util {
                 core::ManagedImage** img, uint32_t count, VkImageLayout during, VkImageLayout before, VkImageLayout after = VkImageLayout::VK_IMAGE_LAYOUT_MAX_ENUM);
             Builder& SetAttachmentDepthStencil(const Attachment& attachment);
             Builder& SetAttachmentDepthStencil(core::ManagedImage* img,
+                                               fp32_t              depthClearValue,
                                                VkImageLayout       during = VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
                                                VkImageLayout       after  = VkImageLayout::VK_IMAGE_LAYOUT_MAX_ENUM);
             Builder& RemoveAttachmentDepthStencil();
@@ -117,7 +118,9 @@ namespace foray::util {
 
         static const uint32_t FRAMEBUFFERIDX_INVALID = ~0u;
 
-        uint32_t                   mCurrentFrameBufferIdx = FRAMEBUFFERIDX_INVALID;
+        uint32_t                   mCurrentFramebufferIdx = FRAMEBUFFERIDX_INVALID;
         std::vector<VkImageLayout> mPostRenderStates;
+
+        uint32_t GetFrameBufIdx(uint32_t in) const;
     };
 }  // namespace foray::util

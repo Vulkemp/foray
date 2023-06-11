@@ -85,7 +85,7 @@ namespace foray::util {
                                   .flags          = 0,
                                   .format         = img->GetFormat(),
                                   .samples        = img->GetSampleCount(),
-                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                   .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                   .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                                   .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -108,7 +108,7 @@ namespace foray::util {
                                   .flags          = 0,
                                   .format         = swapchain->GetSwapchain().image_format,
                                   .samples        = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
-                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                   .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                   .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                                   .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -131,7 +131,7 @@ namespace foray::util {
                                   .flags          = 0,
                                   .format         = img[0]->GetFormat(),
                                   .samples        = img[0]->GetSampleCount(),
-                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                  .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
                                   .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
                                   .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
                                   .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -218,26 +218,28 @@ namespace foray::util {
         return *this;
     }
 
-    Renderpass::Builder& Renderpass::Builder::SetAttachmentDepthStencil(core::ManagedImage* img, VkImageLayout during, VkImageLayout after)
+    Renderpass::Builder& Renderpass::Builder::SetAttachmentDepthStencil(core::ManagedImage* img, fp32_t depthClearValue, VkImageLayout during, VkImageLayout after)
     {
         if(after == VkImageLayout::VK_IMAGE_LAYOUT_MAX_ENUM)
         {
             after = during;
         }
-        return SetAttachmentDepthStencil(Attachment{.Source      = AttachmentSource::ManagedImage,
-                                                    .Images      = {img},
-                                                    .Layout      = during,
-                                                    .Description = VkAttachmentDescription{
-                                                        .flags          = 0,
-                                                        .format         = img->GetFormat(),
-                                                        .samples        = img->GetSampleCount(),
-                                                        .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                        .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
-                                                        .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-                                                        .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
-                                                        .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                        .finalLayout    = after,
-                                                    }});
+        return SetAttachmentDepthStencil(Attachment{.Source = AttachmentSource::ManagedImage,
+                                                    .Images = {img},
+                                                    .Layout = during,
+                                                    .Description =
+                                                        VkAttachmentDescription{
+                                                            .flags          = 0,
+                                                            .format         = img->GetFormat(),
+                                                            .samples        = img->GetSampleCount(),
+                                                            .loadOp         = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_CLEAR,
+                                                            .storeOp        = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_STORE,
+                                                            .stencilLoadOp  = VkAttachmentLoadOp::VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+                                                            .stencilStoreOp = VkAttachmentStoreOp::VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                                                            .initialLayout  = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                            .finalLayout    = after,
+                                                        },
+                                                    .ClearValue = VkClearValue{.depthStencil = VkClearDepthStencilValue{.depth = depthClearValue, .stencil = 0u}}});
     }
 
     Renderpass::Builder& Renderpass::Builder::RemoveAttachmentDepthStencil()
@@ -260,7 +262,7 @@ namespace foray::util {
             uint32_t attachmentCount = 0;
             attachmentCount += (uint32_t)builder.GetInput().size();
             attachmentCount += (uint32_t)builder.GetColor().size();
-            attachmentCount += builder.GetDepthStencil() ? 1u : 0u;
+            attachmentCount += builder.HasDepthStencil() ? 1u : 0u;
             mAttachments.reserve(attachmentCount);
             mPostRenderStates.reserve(attachmentCount);
             mClearValues.reserve(attachmentCount);
@@ -293,7 +295,7 @@ namespace foray::util {
             }
         }
 
-        if(builder.GetDepthStencil())
+        if(builder.HasDepthStencil())
         {  // Depth / Stencil attachment
             const Builder::Attachment& builderAttachment = *builder.GetDepthStencil();
 
@@ -345,7 +347,7 @@ namespace foray::util {
             {
                 beforeAccessFlags |= VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT | VkAccessFlagBits::VK_ACCESS_MEMORY_WRITE_BIT;
                 subpassStageFlags |= VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-                subpassAccessFlags |= VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                subpassAccessFlags |= VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 afterAccessFlags |= VkAccessFlagBits::VK_ACCESS_MEMORY_READ_BIT | VkAccessFlagBits::VK_ACCESS_MEMORY_WRITE_BIT;
             }
 
@@ -411,15 +413,15 @@ namespace foray::util {
         return *this;
     }
 
-    void Renderpass::CmdBeginRenderpass(VkCommandBuffer cmdBuffer, uint64_t frameBufIdx)
+    void Renderpass::CmdBeginRenderpass(VkCommandBuffer cmdBuffer, uint64_t framebufIdx)
     {
-        mCurrentFrameBufferIdx = frameBufIdx % mFramebuffers.size();
+        mCurrentFramebufferIdx = framebufIdx % mFramebuffers.size();
 
         VkRect2D renderArea{VkOffset2D{}, mExtent};
 
         VkRenderPassBeginInfo beginInfo{.sType           = VkStructureType::VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
                                         .renderPass      = mRenderpass,
-                                        .framebuffer     = mFramebuffers[frameBufIdx],
+                                        .framebuffer     = mFramebuffers[mCurrentFramebufferIdx],
                                         .renderArea      = renderArea,
                                         .clearValueCount = (uint32_t)mClearValues.size(),
                                         .pClearValues    = mClearValues.data()};
@@ -428,7 +430,7 @@ namespace foray::util {
 
     void Renderpass::CmdEndRenderpass(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& layoutCache)
     {
-        Assert(mCurrentFrameBufferIdx != FRAMEBUFFERIDX_INVALID);
+        Assert(mCurrentFramebufferIdx != FRAMEBUFFERIDX_INVALID);
         for(uint32_t i = 0; i < (uint32_t)mAttachments.size(); i++)
         {
             AttachmentInfo& info   = mAttachments[i];
@@ -437,18 +439,21 @@ namespace foray::util {
             switch(info.Source)
             {
                 case AttachmentSource::Bare:
-                    image = info.BareRefs[mCurrentFrameBufferIdx % info.BareRefs.size()].Image;
+                    image = info.BareRefs[mCurrentFramebufferIdx % info.BareRefs.size()].Image;
+                    break;
                 case AttachmentSource::ManagedImage:
-                    image = info.Images[mCurrentFrameBufferIdx % info.Images.size()]->GetImage();
+                    image = info.Images[mCurrentFramebufferIdx % info.Images.size()]->GetImage();
+                    break;
                 case AttachmentSource::Swapchain:
-                    image = info.Swapchain->GetSwapchainImages()[mCurrentFrameBufferIdx % info.Swapchain->GetSwapchainImages().size()].Image;
+                    image = info.Swapchain->GetSwapchainImages()[mCurrentFramebufferIdx % info.Swapchain->GetSwapchainImages().size()].Image;
+                    break;
             }
             if(!!image)
             {
                 layoutCache.Set(image, layout);
             }
-            mCurrentFrameBufferIdx = FRAMEBUFFERIDX_INVALID;
         }
+        mCurrentFramebufferIdx = FRAMEBUFFERIDX_INVALID;
         vkCmdEndRenderPass(cmdBuffer);
     }
 

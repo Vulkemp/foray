@@ -236,6 +236,30 @@ namespace foray::stages {
         }
         FORAY_THROWFMT("CGBuffer builder does not contain output \"{}\"!", name);
     }
+    uint32_t ConfigurableRasterStage::GetFragmentOutputComponentCount(FragmentOutputType type)
+    {
+        switch(type)
+        {
+            case FragmentOutputType::FLOAT:
+            case FragmentOutputType::INT:
+            case FragmentOutputType::UINT:
+                return 1u;
+            case FragmentOutputType::VEC2:
+            case FragmentOutputType::IVEC2:
+            case FragmentOutputType::UVEC2:
+                return 2u;
+            case FragmentOutputType::VEC3:
+            case FragmentOutputType::IVEC3:
+            case FragmentOutputType::UVEC3:
+                return 3u;
+            case FragmentOutputType::VEC4:
+            case FragmentOutputType::IVEC4:
+            case FragmentOutputType::UVEC4:
+                return 4u;
+            default:
+                return 0u;
+        }
+    }
     const ConfigurableRasterStage::OutputRecipe& ConfigurableRasterStage::GetOutputRecipe(std::string_view name) const
     {
         std::string               keycopy(name);
@@ -268,6 +292,7 @@ namespace foray::stages {
         core::Context* context, const Builder& builder, scene::Scene* scene, RenderDomain* domain, int32_t resizeOrder, std::string_view name)
         : RasterizedRenderStage(context, domain, resizeOrder)
     {
+        logger()->info("CRS Begin Build");
         mScene = scene;
         mName  = std::string(name);
 
@@ -289,6 +314,7 @@ namespace foray::stages {
         CreatePipelineLayout();
         ConfigureAndCompileShaders();
         CreatePipeline();
+        logger()->info("CRS End Build");
     }
 
     void ConfigurableRasterStage::CheckDeviceColorAttachmentCount()
@@ -335,7 +361,7 @@ namespace foray::stages {
         {
             builder.AddAttachmentColor(mOutputList[outLocation]->GetAttachment());
         }
-        builder.SetAttachmentDepthStencil(mDepthImage.Get());
+        builder.SetAttachmentDepthStencil(mDepthImage.Get(), 1.f);
         builder.SetInitialSize(mDomain->GetExtent());
 
         mRenderpass.New(mContext, builder);
@@ -425,6 +451,30 @@ namespace foray::stages {
         vertexInputStateBuilder.AddVertexComponentBinding(scene::EVertexComponent::Uv);
         vertexInputStateBuilder.Build();
 
+        util::RasterPipeline::Builder builder;
+        builder.InitDepthStateCi(util::RasterPipeline::BuiltinDepthInit::Normal);
+        builder.GetDynamicStates().emplace_back(VkDynamicState::VK_DYNAMIC_STATE_VIEWPORT);
+        builder.GetDynamicStates().emplace_back(VkDynamicState::VK_DYNAMIC_STATE_SCISSOR);
+        builder.SetVertexInputStateCi(vertexInputStateBuilder.InputStateCI);
+
+        {
+            std::vector<VkPipelineShaderStageCreateInfo> shaders = {mVertexShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT),
+                                                                    mFragmentShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT)};
+            builder.SetShaderStages(shaders);
+        }
+
+        {
+            const VkColorComponentFlags flags = VkColorComponentFlagBits::VK_COLOR_COMPONENT_R_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_G_BIT
+                                                | VkColorComponentFlagBits::VK_COLOR_COMPONENT_B_BIT | VkColorComponentFlagBits::VK_COLOR_COMPONENT_A_BIT;
+            std::vector<VkPipelineColorBlendAttachmentState> blends(mOutputList.size(), VkPipelineColorBlendAttachmentState{.blendEnable = VK_FALSE, .colorWriteMask = flags});
+            builder.SetAttachmentBlends(blends);
+        }
+
+        builder.SetPipelineLayout(mPipelineLayout->GetPipelineLayout());
+        builder.SetRenderpass(mRenderpass.Get());
+        builder.SetCullModeFlags(VkCullModeFlagBits::VK_CULL_MODE_NONE);
+
+        mPipeline.New(mContext, builder);
     }
 
     void ConfigurableRasterStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
@@ -475,6 +525,13 @@ namespace foray::stages {
         mRenderpass->CmdBeginRenderpass(cmdBuffer, renderInfo.GetInFlightFrame()->GetSwapchainImageIndex());
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipeline->GetPipeline());
+        {
+            VkExtent2D extent{mDomain->GetExtent()};
+            VkRect2D   rect{{}, extent};
+            vkCmdSetScissor(cmdBuffer, 0u, 1u, &rect);
+            VkViewport viewport{.x = 0.f, .y = 0.f, .width = (fp32_t)extent.width, .height = (fp32_t)extent.height, .minDepth = 0.f, .maxDepth = 1.f};
+            vkCmdSetViewport(cmdBuffer, 0u, 1u, &viewport);
+        }
 
         VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
         // Instanced object
@@ -482,22 +539,14 @@ namespace foray::stages {
 
         mScene->Draw(renderInfo, mPipelineLayout.GetRef(), cmdBuffer);
 
-        vkCmdEndRenderPass(cmdBuffer);
-
-        // The GBuffer determines the images layouts
-
-        for(uint32_t i = 0; i < mOutputList.size(); i++)
-        {
-            renderInfo.GetImageLayoutCache().Set(mOutputList[i]->Image.Get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-        }
-        renderInfo.GetImageLayoutCache().Set(mDepthImage.Get(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+        mRenderpass->CmdEndRenderpass(cmdBuffer, renderInfo.GetImageLayoutCache());
     }
 
     void ConfigurableRasterStage::OnResized(VkExtent2D extent)
     {
         for(auto& pair : mOutputMap)
         {
-            if (pair.second->Image.Exists())
+            if(pair.second->Image.Exists())
             {
                 pair.second->Image.Resize(extent);
             }
@@ -507,9 +556,7 @@ namespace foray::stages {
         mRenderpass->ResizeFramebuffers(extent);
     }
 
-    ConfigurableRasterStage::~ConfigurableRasterStage()
-    {
-    }
+    ConfigurableRasterStage::~ConfigurableRasterStage() {}
 
     uint32_t ConfigurableRasterStage::GetDeviceMaxAttachmentCount(vkb::Device* device)
     {

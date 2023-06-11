@@ -253,6 +253,13 @@ namespace foray {
     };
 
 /// @brief Return mutable stored pointer of Heap/Local wrapped member
+#define FORAY_HAS_MEM(member)                                                                                                                                                      \
+    inline bool Has##member() const                                                                                                                                                \
+    {                                                                                                                                                                              \
+        return m##member.Exists();                                                                                                                                                 \
+    }
+
+/// @brief Return mutable stored pointer of Heap/Local wrapped member
 #define FORAY_GETTER_MMEM(member)                                                                                                                                                  \
     inline auto* Get##member()                                                                                                                                                     \
     {                                                                                                                                                                              \
@@ -267,6 +274,7 @@ namespace foray {
     }
 
 #define FORAY_GETTER_MEM(member)                                                                                                                                                   \
+    FORAY_HAS_MEM(member)                                                                                                                                                          \
     FORAY_GETTER_MMEM(member)                                                                                                                                                      \
     FORAY_GETTER_CMEM(member)
 }  // namespace foray

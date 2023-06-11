@@ -1,9 +1,9 @@
 #pragma once
 #include "../basics.hpp"
 #include "../core/core_declares.hpp"
+#include "../core/managedresource.hpp"
 #include "../scene/geo.hpp"
 #include "../stages/stages_declares.hpp"
-#include "../core/managedresource.hpp"
 #include "../vulkan.hpp"
 #include "renderpass.hpp"
 
@@ -31,6 +31,7 @@ namespace foray::util {
             FORAY_PROPERTY_V(FrontFace)
             FORAY_PROPERTY_R(DepthStateCi)
             FORAY_PROPERTY_R(AttachmentBlends)
+            FORAY_PROPERTY_R(DynamicStates)
             FORAY_PROPERTY_V(PipelineLayout)
             FORAY_PROPERTY_V(Renderpass)
             FORAY_PROPERTY_V(PipelineCache)
@@ -43,12 +44,13 @@ namespace foray::util {
             VkFrontFace                                      mFrontFace         = VkFrontFace::VK_FRONT_FACE_CLOCKWISE;
             VkPipelineDepthStencilStateCreateInfo            mDepthStateCi{};
             std::vector<VkPipelineColorBlendAttachmentState> mAttachmentBlends;
+            std::vector<VkDynamicState>                      mDynamicStates;
             VkPipelineLayout                                 mPipelineLayout;
             Renderpass*                                      mRenderpass    = nullptr;
             VkPipelineCache                                  mPipelineCache = nullptr;
         };
 
-        RasterPipeline(core::Context* context, const Builder& builder, stages::RenderDomain* domain);
+        RasterPipeline(core::Context* context, const Builder& builder);
         virtual ~RasterPipeline();
 
         void CmdBindPipeline(VkCommandBuffer cmdBuffer);
@@ -61,7 +63,7 @@ namespace foray::util {
         core::Context* mContext    = nullptr;
         VkPipeline     mPipeline   = nullptr;
         Renderpass*    mRenderpass = nullptr;
-        VkExtent2D     mExtent = {};
+        VkExtent2D     mExtent     = {};
     };
 
 }  // namespace foray::util
