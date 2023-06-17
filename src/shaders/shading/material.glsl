@@ -48,4 +48,9 @@ vec3 EvaluateMaterial(in HitSample hit, in MaterialBufferObject material, in Mat
 	// return vec3(tempVDotH);
 }
 
+vec3 EvaluateMaterialOnlyDiffuse(in HitSample hit, in MaterialBufferObject material, in MaterialProbe probe)
+{
+	return diffuseBrdf(probe.BaseColor.rgb);
+}
+
 #endif // MATERIAL_GLSL
