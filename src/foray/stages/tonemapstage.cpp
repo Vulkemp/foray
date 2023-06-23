@@ -2,16 +2,21 @@
 #include <imgui/imgui.h>
 
 namespace foray::stages {
-    TonemapStage::TonemapStage(foray::core::Context* context, foray::core::ManagedImage* input, int32_t resizeOrder)
-        : RasterPostProcessBase(context, context->WindowSwapchain, resizeOrder), mInput(input)
+    TonemapStage::TonemapStage(foray::core::Context* context, foray::core::ManagedImage* input, VkImageView autoExposureImg, int32_t resizeOrder)
+        : RasterPostProcessBase(context, context->WindowSwapchain, resizeOrder), mInput(input), mAutoExposureImage(autoExposureImg)
     {
-        // Shader
-        mShaderKeys.push_back(mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/tonemapstage/tonemap.frag", mFragmentShader));
-        CreateSampler();
+        LoadShader();
+        CreateSamplers();
         CreateDescriptorSet();
         CreateRenderpass();
         CreatePipelineLayout();
         CreatePipeline();
+    }
+    void TonemapStage::SetAutoExposureImage(VkImageView autoExposureImg)
+    {
+        Assert((bool)mAutoExposureImage == (bool)autoExposureImg);
+        mAutoExposureImage = autoExposureImg;
+        CreateDescriptorSet();
     }
     void TonemapStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
@@ -87,25 +92,60 @@ namespace foray::stages {
         return mPushC.Exposure;
     }
 
-    void TonemapStage::CreateSampler()
+    void TonemapStage::LoadShader()
     {
-        VkSamplerCreateInfo samplerCi{
-            .sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-            .magFilter    = VkFilter::VK_FILTER_NEAREST,
-            .minFilter    = VkFilter::VK_FILTER_NEAREST,
-            .mipmapMode   = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-            .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-            .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-            .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-            .maxLod       = 1,
-            .borderColor  = VkBorderColor::VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK,
-        };
-        mInputSampled.Init(mContext, mInput, samplerCi);
+        core::ShaderCompilerConfig config;
+        if(!!mAutoExposureImage)
+        {
+            config.Definitions.push_back("TONEMAP_AUTOEXPOSURE=1");
+        }
+        mShaderKeys.push_back(mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/tonemapstage/tonemap.frag", mFragmentShader, config));
+    }
+
+    void TonemapStage::CreateSamplers()
+    {
+        {
+            VkSamplerCreateInfo samplerCi{
+                .sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                .magFilter    = VkFilter::VK_FILTER_NEAREST,
+                .minFilter    = VkFilter::VK_FILTER_NEAREST,
+                .mipmapMode   = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+                .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .maxLod       = 1,
+                .borderColor  = VkBorderColor::VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK,
+            };
+            mInputSampled.Init(mContext, mInput, samplerCi);
+        }
+        if(!!mAutoExposureImage)
+        {
+            VkSamplerCreateInfo samplerCi{
+                .sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+                .magFilter    = VkFilter::VK_FILTER_NEAREST,
+                .minFilter    = VkFilter::VK_FILTER_NEAREST,
+                .mipmapMode   = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+                .addressModeU = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .addressModeV = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .addressModeW = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+                .maxLod       = 1,
+                .borderColor  = VkBorderColor::VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK,
+            };
+            mAutoExposureSampler.Init(mContext->SamplerCol, samplerCi);
+        }
     }
 
     void TonemapStage::CreateDescriptorSet()
     {
         mDescriptorSet.SetDescriptorAt(0, &mInputSampled, VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        if(!!mAutoExposureImage)
+        {
+            mDescriptorSet.SetDescriptorAt(1,
+                                           VkDescriptorImageInfo{.sampler     = mAutoExposureSampler.GetSampler(),
+                                                                 .imageView   = mAutoExposureImage,
+                                                                 .imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+                                           VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        }
         mDescriptorSet.CreateOrUpdate(mContext, "Tonemap");
     }
     void TonemapStage::CreateRenderpass()
@@ -127,7 +167,7 @@ namespace foray::stages {
     }
     void TonemapStage::ReloadShaders()
     {
-        mShaderKeys.push_back(mContext->ShaderMan->CompileAndLoadShader(FORAY_SHADER_DIR "/tonemapstage/tonemap.frag", mFragmentShader));
+        LoadShader();
         RasterPostProcessBase::ReloadShaders();
         CreatePipeline();
     }

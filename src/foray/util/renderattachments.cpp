@@ -101,6 +101,7 @@ namespace foray::util {
         barrier.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         barrier.SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
         barrier.NewLayout     = Layout;
+        barrier.SubresourceRange.layerCount = VK_REMAINING_MIP_LEVELS;
 
         if(LoadOp != EAttachmentLoadOp::Load)
         {
@@ -257,15 +258,15 @@ namespace foray::util {
     }
     RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<BareAttachment> images, VkImageLayout layout)
     {
-        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
+        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
     }
     RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<core::ManagedImage*> images, VkImageLayout layout)
     {
-        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
+        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
     }
     RenderAttachments& RenderAttachments::AddAttachmentLoaded(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout)
     {
-        return AddAttachment(Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Discard, true));
+        return AddAttachment(Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Load, true));
     }
     RenderAttachments& RenderAttachments::AddAttachmentLoaded(BareAttachment image, VkImageLayout layout)
     {

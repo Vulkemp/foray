@@ -36,7 +36,7 @@ namespace foray::stages {
         /// @param noThrow If set, will return nullptr instead of throwing std::exception if no match is found
         core::ManagedImage* GetImageOutput(std::string_view name, bool noThrow = false);
 
-        void SetResizeOrder(int32_t priority);
+        virtual void SetResizeOrder(int32_t priority);
 
       protected:
 

@@ -7,6 +7,7 @@
 #include "../scene/globalcomponents/texturemanager.hpp"
 #include "../scene/scene.hpp"
 #include "../util/shaderstagecreateinfos.hpp"
+#include <vulkan/vulkan_format_traits.hpp>
 
 namespace foray::stages {
 
@@ -21,26 +22,26 @@ namespace foray::stages {
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::UV | (uint32_t)FragmentInputFlagBits::NORMAL | (uint32_t)FragmentInputFlagBits::TANGENT,
          .BuiltInFeaturesFlags = (uint32_t)BuiltInFeaturesFlagBits::NORMALMAPPING,
          .Type                 = FragmentOutputType::VEC4,
-         .ImageFormat          = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
+         .ImageFormat          = VkFormat::VK_FORMAT_R8G8B8A8_SNORM,
          .Result               = "normalMapped,0"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::Albedo = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::UV,
          .BuiltInFeaturesFlags = (uint32_t)BuiltInFeaturesFlagBits::MATERIALPROBE,
          .Type                 = FragmentOutputType::VEC4,
-         .ImageFormat          = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
+         .ImageFormat          = VkFormat::VK_FORMAT_R8G8B8A8_SRGB,
          .Result               = "probe.BaseColor.rgb,1"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::MaterialId = 
         {.Type = FragmentOutputType::INT, 
-         .ImageFormat = VkFormat::VK_FORMAT_R32_SINT, 
+         .ImageFormat = VkFormat::VK_FORMAT_R16_SINT, 
          .ClearValue         = {{-1}},
          .Result = "PushConstant.MaterialIndex"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::MeshInstanceId = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::MESHID,
          .Type               = FragmentOutputType::INT,
-         .ImageFormat        = VkFormat::VK_FORMAT_R32_SINT,
+         .ImageFormat        = VkFormat::VK_FORMAT_R16_SINT,
          .ClearValue         = {{-1}},
          .Result             = "MeshInstanceId"};
 
@@ -316,7 +317,7 @@ namespace foray::stages {
             std::string_view           name   = pair.second->Name;
 
             core::ManagedImage::CreateInfo ci(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT
-                                                  | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+                                                  | /*VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT |*/ VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
                                               recipe.ImageFormat, size, name);
             image.New(mContext, ci);
             std::string keycopy(name);
