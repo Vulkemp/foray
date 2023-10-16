@@ -1,7 +1,7 @@
 var searchData=
 [
   ['id_0',['Id',['../classforay_1_1bench_1_1BenchmarkTimestamp.html#acf3172b49d6883da12c6f35ee522bbf1',1,'foray::bench::BenchmarkTimestamp']]],
-  ['image_1',['Image',['../structforay_1_1core_1_1SwapchainImageInfo.html#a29eb194ce35e33c86c5e468347a82bb5',1,'foray::core::SwapchainImageInfo::Image()'],['../structforay_1_1stages_1_1GBufferStage_1_1PerImageInfo.html#ace97a44864284a368e0a5f8571171183',1,'foray::stages::GBufferStage::PerImageInfo::Image()'],['../structforay_1_1stages_1_1ComparerStage_1_1InputInfo.html#a0d26d03697b59e67d166d12e4710e9e1',1,'foray::stages::ComparerStage::InputInfo::Image()']]],
+  ['image_1',['image',['../structforay_1_1core_1_1SwapchainImageInfo.html#a29eb194ce35e33c86c5e468347a82bb5',1,'foray::core::SwapchainImageInfo::Image'],['../structforay_1_1stages_1_1GBufferStage_1_1PerImageInfo.html#ace97a44864284a368e0a5f8571171183',1,'foray::stages::GBufferStage::PerImageInfo::Image'],['../structforay_1_1stages_1_1ComparerStage_1_1InputInfo.html#a0d26d03697b59e67d166d12e4710e9e1',1,'foray::stages::ComparerStage::InputInfo::Image']]],
   ['imageci_2',['ImageCI',['../structforay_1_1core_1_1ManagedImage_1_1CreateInfo.html#ae6fec33916ea0ea3c39d6a1163c14c3c',1,'foray::core::ManagedImage::CreateInfo']]],
   ['imageinfos_3',['ImageInfos',['../structforay_1_1core_1_1DescriptorSet_1_1DescriptorInfo.html#a0feb73d3542f13f0cd4285fa88ab7a64',1,'foray::core::DescriptorSet::DescriptorInfo']]],
   ['imageview_4',['ImageView',['../structforay_1_1core_1_1SwapchainImageInfo.html#a6933930daf70dd218a1d84a5c3f146bc',1,'foray::core::SwapchainImageInfo']]],
@@ -14,7 +14,7 @@ var searchData=
   ['indexbufferoffset_11',['IndexBufferOffset',['../structforay_1_1as_1_1GeometryMeta.html#a02844ab0256bc2dd0b5ff0567f61dba9',1,'foray::as::GeometryMeta']]],
   ['indexbufferstart_12',['IndexBufferStart',['../structforay_1_1gltf_1_1ModelConverter_1_1IndexBindings.html#a102edfb50f6ac760ffc0bf3d9e930dbb',1,'foray::gltf::ModelConverter::IndexBindings']]],
   ['indexofrefraction_13',['IndexOfRefraction',['../structforay_1_1scene_1_1Material.html#a87845175832d38233f429e4516ea3c86',1,'foray::scene::Material']]],
-  ['indices_14',['Indices',['../structforay_1_1scene_1_1EmissiveTriangle.html#a9f6b610f52239c00a879aa0068c5908a',1,'foray::scene::EmissiveTriangle::Indices()'],['../structforay_1_1scene_1_1Primitive.html#ab783ff3f5a9fb33d25255a42bbd4f763',1,'foray::scene::Primitive::Indices()']]],
+  ['indices_14',['indices',['../structforay_1_1scene_1_1EmissiveTriangle.html#a9f6b610f52239c00a879aa0068c5908a',1,'foray::scene::EmissiveTriangle::Indices'],['../structforay_1_1scene_1_1Primitive.html#ab783ff3f5a9fb33d25255a42bbd4f763',1,'foray::scene::Primitive::Indices']]],
   ['inflight_5fframe_5fcount_15',['INFLIGHT_FRAME_COUNT',['../namespaceforay.html#a15b6b3f8d9dc6448821cf9a73ef346a6',1,'foray']]],
   ['input_16',['Input',['../structforay_1_1stages_1_1ComparerStage_1_1SubStage.html#a99b72bc7b4e3d266029255cb61a8be60',1,'foray::stages::ComparerStage::SubStage']]],
   ['inputattributes_17',['InputAttributes',['../structforay_1_1scene_1_1VertexInputStateBuilder.html#a8d71c424171e520445818fce8ac25d4b',1,'foray::scene::VertexInputStateBuilder']]],

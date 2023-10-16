@@ -10,7 +10,7 @@ var searchData=
   ['shaderbindingtablebase_7',['ShaderBindingTableBase',['../classforay_1_1rtpipe_1_1ShaderBindingTableBase.html',1,'foray::rtpipe']]],
   ['shadercompilation_8',['ShaderCompilation',['../structforay_1_1core_1_1ShaderManager_1_1ShaderCompilation.html',1,'foray::core::ShaderManager']]],
   ['shadercompilerconfig_9',['ShaderCompilerConfig',['../structforay_1_1core_1_1ShaderCompilerConfig.html',1,'foray::core']]],
-  ['shadergroup_10',['ShaderGroup',['../structforay_1_1rtpipe_1_1GeneralShaderBindingTable_1_1ShaderGroup.html',1,'foray::rtpipe::GeneralShaderBindingTable::ShaderGroup'],['../structforay_1_1rtpipe_1_1HitShaderBindingTable_1_1ShaderGroup.html',1,'foray::rtpipe::HitShaderBindingTable::ShaderGroup']]],
+  ['shadergroup_10',['shadergroup',['../structforay_1_1rtpipe_1_1GeneralShaderBindingTable_1_1ShaderGroup.html',1,'foray::rtpipe::GeneralShaderBindingTable::ShaderGroup'],['../structforay_1_1rtpipe_1_1HitShaderBindingTable_1_1ShaderGroup.html',1,'foray::rtpipe::HitShaderBindingTable::ShaderGroup']]],
   ['shadermanager_11',['ShaderManager',['../classforay_1_1core_1_1ShaderManager.html',1,'foray::core']]],
   ['shadermodule_12',['ShaderModule',['../classforay_1_1core_1_1ShaderModule.html',1,'foray::core']]],
   ['shaderstagecreateinfos_13',['ShaderStageCreateInfos',['../classforay_1_1util_1_1ShaderStageCreateInfos.html',1,'foray::util']]],

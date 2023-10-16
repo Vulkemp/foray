@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['source_20code_20overview_0',['Source Code Overview',['../md_src_readme.html',1,'']]],
-  ['synchronization_20in_20foray_20_28and_20vulkan_29_1',['Synchronization in Foray (and Vulkan)',['../md_docs_synchronization.html',1,'']]]
+  ['foray_0',['Notes on how to build upon Foray',['../md_docs_2useforay.html',1,'']]],
+  ['foray_20and_20vulkan_1',['Synchronization in Foray (and Vulkan)',['../md_docs_2synchronization.html',1,'']]],
+  ['foray_20library_2',['Foray Library',['../index.html',1,'']]]
 ];

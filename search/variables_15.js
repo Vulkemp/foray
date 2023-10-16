@@ -1,7 +1,7 @@
 var searchData=
 [
   ['valid_0',['Valid',['../classforay_1_1util_1_1ImageLoader_1_1ImageInfo.html#ab6658d34d871ea10ccebaad290ba6676',1,'foray::util::ImageLoader::ImageInfo']]],
-  ['value_1',['Value',['../structforay_1_1scene_1_1AnimationKeyframe.html#aa0c4cce64b48c0774e17070b83f0e979',1,'foray::scene::AnimationKeyframe::Value()'],['../structforay_1_1stages_1_1ComparerStage_1_1PipetteValue.html#ac2092a7fb99398776c6b68675b5be650',1,'foray::stages::ComparerStage::PipetteValue::Value()']]],
+  ['value_1',['value',['../structforay_1_1scene_1_1AnimationKeyframe.html#aa0c4cce64b48c0774e17070b83f0e979',1,'foray::scene::AnimationKeyframe::Value'],['../structforay_1_1stages_1_1ComparerStage_1_1PipetteValue.html#ac2092a7fb99398776c6b68675b5be650',1,'foray::stages::ComparerStage::PipetteValue::Value']]],
   ['version_2',['Version',['../classforay_1_1util_1_1impl_1_1ExrLoaderCache.html#a2b25504630edbca923fc5aa5a8efd25f',1,'foray::util::impl::ExrLoaderCache']]],
   ['vertexorindexcount_3',['VertexOrIndexCount',['../structforay_1_1scene_1_1Primitive.html#a5f0243fd4cae129aa24656942af51b30',1,'foray::scene::Primitive']]],
   ['vertices_4',['Vertices',['../structforay_1_1scene_1_1Primitive.html#a69bcf79a356b4df808ed9266a90bd9d9',1,'foray::scene::Primitive']]],
