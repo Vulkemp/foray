@@ -8,6 +8,69 @@
 #include <sstream>
 
 namespace foray::base {
+    VulkanDevice::Selector::Selector(Ref<IVulkanInstance> instance, View<osi::Window> window)
+        : Instance(instance), Surface(!!window ? window->GetOrCreateSurfaceKHR(instance) : nullptr)
+    {
+        std::vector<vk::PhysicalDevice> devices = Instance->Get().enumeratePhysicalDevices();
+
+        for(vk::PhysicalDevice device : devices)
+        {
+            Adapters.push_back(device);
+        }
+    }
+
+    std::vector<Ref<const VulkanAdapterInfo>> VulkanDevice::Selector::GetCompatibleAdapters(bool logDecisionMaking)
+    {
+        std::span<const VulkanAdapterInfo>        adapters = Instance->GetAdapterInfos();
+        std::vector<Ref<const VulkanAdapterInfo>> result;
+        std::stringstream                         strbuilder;
+        strbuilder << "Found " << adapters.size() << " installed Vulkan Device(s):\n";
+        for(const VulkanAdapterInfo& info : adapters)
+        {
+            strbuilder
+                << fmt::format("[{:x}] {} ({})", info.Properties.properties.deviceID, info.Properties.properties.deviceName, NAMEOF_ENUM(info.Properties.properties.deviceType));
+            result.push_back(&info);
+        }
+
+        if(logDecisionMaking)
+        {
+            logger()->info(strbuilder.str());
+        }
+        strbuilder.clear();
+
+        //
+
+        return result;
+    }
+
+    Ref<const VulkanAdapterInfo> VulkanDevice::Selector::SelectCompatibleAdapterAsserted(bool logDecisionMaking, bool questionUser)
+    {
+        std::vector<Ref<const VulkanAdapterInfo>> adapters = GetCompatibleAdapters(logDecisionMaking);
+        Assert(!adapters.empty(), "No suitable device available!");
+
+        uint32_t          selectIndex = 0;
+        if(questionUser && adapters.size() > 1)
+        {
+            std::stringstream strbuilder;
+            strbuilder << "Device Selector has detected " << ret->size() << " suitable devices:\n";
+            for(int32_t index = 0; index < (int32_t)ret->size(); index++)
+            {
+                strbuilder << std::setw(3) << index << "  " << ret->at(index).name << "\n";
+            }
+            strbuilder << "Type a number in the range [0..." << (ret->size() - 1) << "]: ";
+            std::cout << strbuilder.str() << std::flush;
+            char in[256] = {};
+            std::cin >> std::setw(255) >> in;
+            selectIndex = (uint32_t)strtoul(in, nullptr, 10);
+            if(selectIndex >= ret->size())
+            {
+                selectIndex = 0;
+            }
+        }
+        logger()->info("Selecting device [{:x}] {} ({})", adapters[selectIndex]->Properties.properties.deviceID, adapters[selectIndex]->Properties.properties.deviceName, NAMEOF_ENUM(adapters[selectIndex]->Properties.properties.deviceType));
+        return adapters[selectIndex];
+    }
+
     VulkanDevice& VulkanDevice::SetBeforePhysicalDeviceSelectFunc(BeforePhysicalDeviceSelectFunctionPointer beforePhysicalDeviceSelectFunc)
     {
         mBeforePhysicalDeviceSelectFunc = beforePhysicalDeviceSelectFunc;
@@ -77,7 +140,7 @@ namespace foray::base {
         {
             // Set raytracing extensions
             std::vector<const char*> requiredExtensions{VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,  // acceleration structure
-                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,    // rt pipeline
+                                                        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,  // rt pipeline
                                                         // dependencies of acceleration structure
                                                         VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
                                                         // dependencies of rt pipeline
@@ -130,8 +193,8 @@ namespace foray::base {
         else
         {
             logger()->warn("Device Selector failed to find suitable device!");
-            FORAY_THROWFMT("[VulkanDevice::SelectPhysicalDevice] vkb Device Selector failed to find a satisifying device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
-                           ret.error().message())
+            FORAY_THROWFMT("[VulkanDevice::SelectPhysicalDevice] vkb Device Selector failed to find a satisifying device. vk::Result: {} Reason: {}",
+                           PrintVkResult(ret.vk_result()), ret.error().message())
         }
     }
     void VulkanDevice::BuildDevice()
@@ -168,7 +231,7 @@ namespace foray::base {
         }
 
         auto ret = deviceBuilder.build();
-        FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. VkResult: {} Reason: {}", PrintVkResult(ret.vk_result()),
+        FORAY_ASSERTFMT(ret.has_value(), "[VulkanDevice::BuildDevice] vkb Device Builder failed to build device. vk::Result: {} Reason: {}", PrintVkResult(ret.vk_result()),
                         ret.error().message())
 
         mDevice        = *ret;

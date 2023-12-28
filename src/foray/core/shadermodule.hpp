@@ -7,8 +7,8 @@
 #include <span>
 
 namespace foray::core {
-    /// @brief Wraps shader code driver handle (VkShaderModule). See ShaderManager for compiling shaders dynamically.
-    class ShaderModule : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SHADER_MODULE>
+    /// @brief Wraps shader code driver handle (vk::ShaderModule). See ShaderManager for compiling shaders dynamically.
+    class ShaderModule : public core::VulkanResource<vk::ObjectType::eShaderModule>
     {
       public:
         ShaderModule(Context* context, const osi::Utf8Path& spirvFilePath);
@@ -27,13 +27,13 @@ namespace foray::core {
         inline ShaderModule(Context* context, const uint32_t binaryBuffer[ARR_SIZE]);
 
         /// @brief Fill a shader stage create info. .sType, .stage, .module, .pName fields are set, remainder default initialized
-        VkPipelineShaderStageCreateInfo GetShaderStageCi(VkShaderStageFlagBits stage, const char* entry = "main") const;
+        VkPipelineShaderStageCreateInfo GetShaderStageCi(vk::ShaderStageFlagBits stage, const char* entry = "main") const;
 
-        operator VkShaderModule() const;
+        operator vk::ShaderModule() const;
 
       protected:
         Context*       mContext           = nullptr;
-        VkShaderModule mShaderModule      = nullptr;
+        vk::ShaderModule mShaderModule      = nullptr;
         uint64_t       mShaderCompilerKey = 0;
     };
 

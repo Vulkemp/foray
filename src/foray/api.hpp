@@ -24,7 +24,7 @@ namespace foray::api {
     using Context = foray::core::Context;
 
     using ManagedBuffer = foray::core::ManagedBuffer;
-    using ManagedImage  = foray::core::ManagedImage;
+    using Image  = foray::core::Image;
 
     using ConfigurableRasterStage    = foray::stages::ConfigurableRasterStage;
     using ImguiStage                 = foray::stages::ImguiStage;

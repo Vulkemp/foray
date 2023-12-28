@@ -8,7 +8,7 @@ namespace foray::core {
 
     ManagedBuffer::CreateInfo::CreateInfo() : BufferCreateInfo{.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO} {}
 
-    ManagedBuffer::CreateInfo::CreateInfo(VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    ManagedBuffer::CreateInfo::CreateInfo(vk::BufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
         : BufferCreateInfo{.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, .size = size, .usage = usage}, AllocationCreateInfo{.flags = flags, .usage = memoryUsage}, Name(name)
     {
     }
@@ -48,7 +48,7 @@ namespace foray::core {
                VmaAllocationCreateFlagBits::VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
     }
 
-    ManagedBuffer::ManagedBuffer(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
+    ManagedBuffer::ManagedBuffer(Context* context, vk::BufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags, std::string_view name)
      : ManagedBuffer(context, CreateInfo(usage, size, memoryUsage, flags, name))
     {
     }
@@ -79,7 +79,7 @@ namespace foray::core {
         vmaUnmapMemory(mContext->Allocator, mAllocation);
     }
 
-    VkDeviceAddress ManagedBuffer::GetDeviceAddress() const
+    vk::DeviceAddress ManagedBuffer::GetDeviceAddress() const
     {
         VkBufferDeviceAddressInfo addressInfo;
         addressInfo.sType  = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
@@ -99,7 +99,7 @@ namespace foray::core {
 #endif
     }
 
-    void ManagedBuffer::FillVkDescriptorBufferInfo(VkDescriptorBufferInfo& bufferInfo) const
+    void ManagedBuffer::FillVkDescriptorBufferInfo(vk::DescriptorBufferInfo& bufferInfo) const
     {
         bufferInfo.buffer = mBuffer;
         bufferInfo.offset = 0;

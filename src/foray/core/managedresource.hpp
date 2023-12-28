@@ -45,12 +45,12 @@ namespace foray::core {
         std::string mName;
     };
 
-    /// @brief Uses nameof.hpp's NAMEOF_ENUM function to stringify VkObjectType
-    std::string_view PrintVkObjectType(VkObjectType objecType);
+    /// @brief Uses nameof.hpp's NAMEOF_ENUM function to stringify vk::ObjectType
+    std::string_view PrintVkObjectType(vk::ObjectType objecType);
 
-    /// @brief ManagedResource variant which automates GetTypeName() overloading by returning a stringified version of VkObjectType
+    /// @brief ManagedResource variant which automates GetTypeName() overloading by returning a stringified version of vk::ObjectType
     /// @tparam OBJECT_TYPE Object type managed by the inheriting class
-    template <VkObjectType OBJECT_TYPE>
+    template <vk::ObjectType OBJECT_TYPE>
     class VulkanResource : public ManagedResource
     {
       public:
@@ -69,13 +69,13 @@ namespace foray::core {
         inline virtual void SetObjectName(core::Context* context, const void* handle, std::string_view name, bool updateResourceName = true);
     };
 
-    template <VkObjectType OBJECT_TYPE>
+    template <vk::ObjectType OBJECT_TYPE>
     inline std::string_view VulkanResource<OBJECT_TYPE>::GetTypeName() const
     {
         return PrintVkObjectType(OBJECT_TYPE);
     }
 
-    template <VkObjectType OBJECT_TYPE>
+    template <vk::ObjectType OBJECT_TYPE>
     inline void VulkanResource<OBJECT_TYPE>::SetObjectName(core::Context* context, const void* handle, std::string_view name, bool updateResourceName)
     {
 #ifdef FORAY_DEBUG

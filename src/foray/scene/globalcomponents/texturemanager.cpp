@@ -10,9 +10,9 @@ namespace foray::scene::gcomp {
         mTextures.clear();
     }
 
-    std::vector<VkDescriptorImageInfo> TextureManager::GetDescriptorInfos(VkImageLayout layout)
+    std::vector<vk::DescriptorImageInfo> TextureManager::GetDescriptorInfos(vk::ImageLayout layout)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos(mTextures.size());
+        std::vector<vk::DescriptorImageInfo> imageInfos(mTextures.size());
         for(size_t i = 0; i < mTextures.size(); i++)
         {
             imageInfos[i] = mTextures[i].GetDescriptorImageInfo(layout);
@@ -21,9 +21,10 @@ namespace foray::scene::gcomp {
     }
 
 
-    void TextureManager::Texture::CreateImage(core::Context* context, const core::ManagedImage::CreateInfo& ci)
+    void TextureManager::Texture::CreateImage(core::Context* context, const core::Image::CreateInfo& ci)
     {
         mImage.New(context, ci);
+        mImageView.New(mImage.Get());
     }
 
 }  // namespace foray::scene::gcomp

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../core/managedimage.hpp"
+#include "../../core/image.hpp"
 #include "../../core/samplercollection.hpp"
 #include "../../mem.hpp"
 #include "../component.hpp"
@@ -20,11 +20,12 @@ namespace foray::scene::gcomp {
             inline Texture() : mImage(), mSampler() {}
             virtual ~Texture() = default;
 
-            void CreateImage(core::Context* context, const core::ManagedImage::CreateInfo& ci);
+            void CreateImage(core::Context* context, const core::Image::CreateInfo& ci);
 
             FORAY_GETTER_MEM(Image)
+            FORAY_GETTER_MEM(ImageView)
 
-            inline VkDescriptorImageInfo GetDescriptorImageInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
+            inline vk::DescriptorImageInfo GetDescriptorImageInfo(vk::ImageLayout layout = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
             {
                 return mSampler.GetVkDescriptorInfo();
             }
@@ -32,14 +33,15 @@ namespace foray::scene::gcomp {
             FORAY_PROPERTY_R(Sampler)
 
           protected:
-            Local<core::ManagedImage>  mImage;
+            Local<core::Image>  mImage;
+            Local<core::ImageViewRef> mImageView;
             core::CombinedImageSampler mSampler;
         };
 
         FORAY_GETTER_CR(Textures)
         FORAY_GETTER_MR(Textures)
 
-        std::vector<VkDescriptorImageInfo> GetDescriptorInfos(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        std::vector<vk::DescriptorImageInfo> GetDescriptorInfos(vk::ImageLayout layout = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         inline Texture& PrepareTexture(int32_t texId)
         {

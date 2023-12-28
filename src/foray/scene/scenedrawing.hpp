@@ -23,7 +23,7 @@ namespace foray::scene {
 
     inline VkShaderStageFlags DrawPushConstant::GetShaderStageFlags()
     {
-        return VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT;
+        return vk::ShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT;
     }
 
     inline VkPushConstantRange DrawPushConstant::GetPushConstantRange()

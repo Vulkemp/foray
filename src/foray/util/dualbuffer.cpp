@@ -51,8 +51,8 @@ namespace foray::util {
         }
 
         uint32_t                   index        = frameIndex % mStagingBuffers.size();  // Current in-flight index
-        VkBuffer                   source       = mStagingBuffers[index]->GetBuffer();  // Staging buffer containing the delta
-        VkBuffer                   dest         = mDeviceBuffer.GetBuffer();            // Buffer the device uses for drawing
+        vk::Buffer                   source       = mStagingBuffers[index]->GetBuffer();  // Staging buffer containing the delta
+        vk::Buffer                   dest         = mDeviceBuffer.GetBuffer();            // Buffer the device uses for drawing
         std::vector<VkBufferCopy>& bufferCopies = mBufferCopies[index];                 // copy actions submitted to the device
 
         if(bufferCopies.size() == 0)
@@ -100,7 +100,7 @@ namespace foray::util {
         bufferCopies.clear();
     }
 
-    void DualBuffer::CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    void DualBuffer::CmdPrepareForRead(VkCommandBuffer cmdBuffer, vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const
     {
         VkBufferMemoryBarrier2 barrier = MakeBarrierPrepareForRead(dstStageMask, dstAccessMask);
 
@@ -109,7 +109,7 @@ namespace foray::util {
         vkCmdPipelineBarrier2(cmdBuffer, &depInfo);
     }
 
-    VkBufferMemoryBarrier2 DualBuffer::MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    VkBufferMemoryBarrier2 DualBuffer::MakeBarrierPrepareForRead(vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const
     {
         return VkBufferMemoryBarrier2{.sType               = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2,
                                       .srcStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,

@@ -1,6 +1,6 @@
 #pragma once
 #include "../base/base_declares.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp"
 #include "../mem.hpp"
 
 namespace foray::util {
@@ -13,7 +13,7 @@ namespace foray::util {
         /// @param context Required to initiate own copy
         /// @param source Source image to copy
         /// @param additionalUsageFlags UsageFlags to apply to the createinfo for the copy
-        HistoryImage(core::Context* context, core::ManagedImage* source, VkImageUsageFlags additionalUsageFlags = 0U);
+        HistoryImage(core::Context* context, core::Image* source, VkImageUsageFlags additionalUsageFlags = 0U);
 
         virtual ~HistoryImage() = default;
 
@@ -32,8 +32,8 @@ namespace foray::util {
         FORAY_PROPERTY_V(HistoricLayout)
 
       protected:
-        core::ManagedImage*      mSource = nullptr;
-        core::Local_ManagedImage mHistory;
-        VkImageLayout            mHistoricLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+        core::Image*      mSource = nullptr;
+        core::Local_Image mHistory;
+        vk::ImageLayout            mHistoricLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
     };
 }  // namespace foray::util

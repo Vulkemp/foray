@@ -8,7 +8,7 @@
 #include "renderattachments.hpp"
 
 namespace foray::util {
-    class RasterPipeline : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_PIPELINE>
+    class RasterPipeline : public core::VulkanResource<vk::ObjectType::VK_OBJECT_TYPE_PIPELINE>
     {
       public:
         enum class BuiltinDepthInit

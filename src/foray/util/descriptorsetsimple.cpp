@@ -1,6 +1,6 @@
 #include "descriptorsetsimple.hpp"
 #include "../core/managedbuffer.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp"
 
 namespace foray::util {
     DescriptorSetSimple::DescriptorSetSimple(core::Context* context) : mContext(context) {}
@@ -30,7 +30,7 @@ namespace foray::util {
     }
 
     void DescriptorSetSimple::SetDescriptorAt(uint32_t                                  binding,
-                                              const std::vector<VkDescriptorImageInfo>& imageInfos,
+                                              const std::vector<vk::DescriptorImageInfo>& imageInfos,
                                               VkDescriptorType                          descriptorType,
                                               VkShaderStageFlags                        shaderStageFlags)
     {
@@ -72,7 +72,7 @@ namespace foray::util {
         bindingObj->SetState(count, imageInfos.data());
     }
     void DescriptorSetSimple::SetDescriptorAt(uint32_t                                   binding,
-                                              const std::vector<VkDescriptorBufferInfo>& bufferInfos,
+                                              const std::vector<vk::DescriptorBufferInfo>& bufferInfos,
                                               VkDescriptorType                           descriptorType,
                                               VkShaderStageFlags                         shaderStageFlags)
     {
@@ -109,80 +109,80 @@ namespace foray::util {
                                               VkDescriptorType                               descriptorType,
                                               VkShaderStageFlags                             shaderStageFlags)
     {
-        std::vector<VkDescriptorBufferInfo> bufferInfos;
+        std::vector<vk::DescriptorBufferInfo> bufferInfos;
         bufferInfos.reserve(buffers.size());
         for(const core::ManagedBuffer* buffer : buffers)
         {
-            bufferInfos.push_back(VkDescriptorBufferInfo{.buffer = buffer->GetBuffer(), .range = VK_WHOLE_SIZE});
+            bufferInfos.push_back(vk::DescriptorBufferInfo{.buffer = buffer->GetBuffer(), .range = VK_WHOLE_SIZE});
         }
         SetDescriptorAt(binding, bufferInfos, descriptorType, shaderStageFlags);
     }
 
     void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const core::ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorBufferInfo> bufferInfos({VkDescriptorBufferInfo{.buffer = buffer->GetBuffer(), .range = VK_WHOLE_SIZE}});
+        std::vector<vk::DescriptorBufferInfo> bufferInfos({vk::DescriptorBufferInfo{.buffer = buffer->GetBuffer(), .range = VK_WHOLE_SIZE}});
         SetDescriptorAt(binding, bufferInfos, descriptorType, shaderStageFlags);
     }
 
-    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const std::vector<const core::ManagedImage*>& images, VkImageLayout layout, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const std::vector<const core::ImageViewRef*>& images, vk::ImageLayout layout, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos;
+        std::vector<vk::DescriptorImageInfo> imageInfos;
         imageInfos.reserve(images.size());
-        for(const core::ManagedImage* image : images)
+        for(const core::Image* image : images)
         {
-            imageInfos.push_back(VkDescriptorImageInfo{.imageView = image->GetImageView(), .imageLayout = layout});
+            imageInfos.push_back(vk::DescriptorImageInfo{.imageView = image->GetView(), .imageLayout = layout});
         }
         SetDescriptorAt(binding, imageInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, shaderStageFlags);
     }
 
     void DescriptorSetSimple::SetDescriptorAt(
-        uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+        uint32_t binding, const core::ImageViewRef* image, vk::ImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos({VkDescriptorImageInfo{.imageView = image->GetImageView(), .imageLayout = layout}});
+        std::vector<vk::DescriptorImageInfo> imageInfos({vk::DescriptorImageInfo{.imageView = image->GetView(), .imageLayout = layout}});
         SetDescriptorAt(binding, imageInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, shaderStageFlags);
     }
 
     void DescriptorSetSimple::SetDescriptorAt(
-        uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+        uint32_t binding, const core::ImageViewRef* image, vk::ImageLayout layout, vk::Sampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos({VkDescriptorImageInfo{.sampler = sampler, .imageView = image->GetImageView(), .imageLayout = layout}});
+        std::vector<vk::DescriptorImageInfo> imageInfos({vk::DescriptorImageInfo{.sampler = sampler, .imageView = image->GetView(), .imageLayout = layout}});
         SetDescriptorAt(binding, imageInfos, descriptorType, shaderStageFlags);
     }
 
-    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const vk::DescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos({imageInfo});
+        std::vector<vk::DescriptorImageInfo> imageInfos({imageInfo});
         SetDescriptorAt(binding, imageInfos, descriptorType, shaderStageFlags);
     }
 
-    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const vk::DescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorBufferInfo> bufferInfos({bufferInfo});
+        std::vector<vk::DescriptorBufferInfo> bufferInfos({bufferInfo});
         SetDescriptorAt(binding, bufferInfos, descriptorType, shaderStageFlags);
     }
 
-    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const core::CombinedImageSampler* sampledImage, VkImageLayout layout, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, const core::CombinedImageSampler* sampledImage, vk::ImageLayout layout, VkShaderStageFlags shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos(
-            {VkDescriptorImageInfo{.sampler = sampledImage->GetSampler(), .imageView = sampledImage->GetManagedImage()->GetImageView(), .imageLayout = layout}});
+        std::vector<vk::DescriptorImageInfo> imageInfos(
+            {vk::DescriptorImageInfo{.sampler = sampledImage->GetSampler(), .imageView = sampledImage->GetImageView()->GetView(), .imageLayout = layout}});
         SetDescriptorAt(binding, imageInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStageFlags);
     }
 
     void DescriptorSetSimple::SetDescriptorAt(uint32_t                                              binding,
                                               const std::vector<const core::CombinedImageSampler*>& sampledImages,
-                                              VkImageLayout                                         layout,
+                                              vk::ImageLayout                                         layout,
                                               VkShaderStageFlags                                    shaderStageFlags)
     {
-        std::vector<VkDescriptorImageInfo> imageInfos;
+        std::vector<vk::DescriptorImageInfo> imageInfos;
         imageInfos.reserve(sampledImages.size());
         for(const core::CombinedImageSampler* sampledImage : sampledImages)
         {
-            imageInfos.push_back(VkDescriptorImageInfo{.sampler = sampledImage->GetSampler(), .imageView = sampledImage->GetManagedImage()->GetImageView(), .imageLayout = layout});
+            imageInfos.push_back(vk::DescriptorImageInfo{.sampler = sampledImage->GetSampler(), .imageView = sampledImage->GetImageView()->GetView(), .imageLayout = layout});
         }
         SetDescriptorAt(binding, imageInfos, VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, shaderStageFlags);
     }
 
-    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, VkAccelerationStructureKHR accelerationStructure, VkShaderStageFlags shaderStageFlags)
+    void DescriptorSetSimple::SetDescriptorAt(uint32_t binding, vk::AccelerationStructureKHR accelerationStructure, VkShaderStageFlags shaderStageFlags)
     {
         PrepareBinding(binding, 1u, VkDescriptorType::VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR);
         core::DescriptorBindingAccelerationStructure* bindingObj;

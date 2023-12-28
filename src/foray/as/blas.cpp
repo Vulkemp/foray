@@ -39,9 +39,9 @@ namespace foray::as {
         }
 
         std::string                     scratchName = fmt::format("{} scratch", name);
-        core::ManagedBuffer::CreateInfo ci(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, buildSizes.buildScratchSize,
+        core::ManagedBuffer::CreateInfo ci(vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress, buildSizes.buildScratchSize,
                                            VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT, scratchName);
-        ci.Alignment = mContext->Device->GetProperties().AsProperties.minAccelerationStructureScratchOffsetAlignment;
+        ci.Alignment = mContext->Device->GetAdapter().AsProperties.minAccelerationStructureScratchOffsetAlignment;
         mScratchMemory.New(mContext, ci);
         geoInfo.scratchData.deviceAddress = mScratchMemory->GetDeviceAddress();
 

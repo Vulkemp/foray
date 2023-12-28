@@ -86,7 +86,7 @@ namespace foray::core {
     }
     bool HostSyncCommandBuffer::HasCompleted()
     {
-        VkResult result = mContext->DispatchTable().getFenceStatus(mFence);
+        vk::Result result = mContext->DispatchTable().getFenceStatus(mFence);
         if(result == VK_NOT_READY)
         {
             return false;
@@ -109,11 +109,11 @@ namespace foray::core {
         }
     }
 
-    SemaphoreReference SemaphoreReference::Binary(VkSemaphore semaphore, VkPipelineStageFlags2 waitStage)
+    SemaphoreReference SemaphoreReference::Binary(VkSemaphore semaphore, vk::PipelineStageFlags2 waitStage)
     {
         return SemaphoreReference{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_BINARY, .TimelineValue = 0, .Semaphore = semaphore, .WaitStage = waitStage};
     }
-    SemaphoreReference SemaphoreReference::Timeline(VkSemaphore semaphore, uint64_t value, VkPipelineStageFlags2 waitStage)
+    SemaphoreReference SemaphoreReference::Timeline(VkSemaphore semaphore, uint64_t value, vk::PipelineStageFlags2 waitStage)
     {
         return SemaphoreReference{.SemaphoreType = VkSemaphoreType::VK_SEMAPHORE_TYPE_TIMELINE, .TimelineValue = value, .Semaphore = semaphore, .WaitStage = waitStage};
     }

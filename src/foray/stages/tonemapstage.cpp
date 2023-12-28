@@ -2,7 +2,7 @@
 #include <imgui/imgui.h>
 
 namespace foray::stages {
-    TonemapStage::TonemapStage(foray::core::Context* context, foray::core::ManagedImage* input, VkImageView autoExposureImg, int32_t resizeOrder)
+    TonemapStage::TonemapStage(foray::core::Context* context, foray::core::Image* input, vk::ImageView autoExposureImg, int32_t resizeOrder)
         : RasterPostProcessBase(context, context->WindowSwapchain, resizeOrder), mInput(input), mAutoExposureImage(autoExposureImg)
     {
         LoadShader();
@@ -12,7 +12,7 @@ namespace foray::stages {
         CreatePipelineLayout();
         CreatePipeline();
     }
-    void TonemapStage::SetAutoExposureImage(VkImageView autoExposureImg)
+    void TonemapStage::SetAutoExposureImage(vk::ImageView autoExposureImg)
     {
         Assert((bool)mAutoExposureImage == (bool)autoExposureImg);
         mAutoExposureImage = autoExposureImg;
@@ -24,7 +24,7 @@ namespace foray::stages {
                                                  .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                  .DstStageMask  = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
                                                  .DstAccessMask = VK_ACCESS_2_SHADER_SAMPLED_READ_BIT,
-                                                 .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+                                                 .NewLayout     = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
         renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, mInput, barrier, VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT);
 
         VkExtent2D extent{mDomain->GetExtent()};
@@ -45,7 +45,7 @@ namespace foray::stages {
         VkDescriptorSet descriptorSet = mDescriptorSet.GetSet();
         vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mPipelineLayout.GetRef(), 0, 1, &descriptorSet, 0, nullptr);
 
-        vkCmdPushConstants(cmdBuffer, mPipelineLayout->GetPipelineLayout(), VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushC), &mPushC);
+        vkCmdPushConstants(cmdBuffer, mPipelineLayout->GetPipelineLayout(), vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushC), &mPushC);
 
         RasterPostProcessBase::CmdDraw(cmdBuffer);
 
@@ -63,11 +63,12 @@ namespace foray::stages {
             "Passthrough",
             "Aces",
             "AMD",
+            "Reinhard"
         };
         int current = (int)mPushC.TonemapperIdx;
         if(ImGui::Combo("Tonemapper", &current, tonemappers, (int32_t)std::size(tonemappers)))
         {
-            mPushC.TonemapperIdx = std::clamp<uint32_t>((uint32_t)current, 0u, 2u);
+            mPushC.TonemapperIdx = std::clamp<uint32_t>((uint32_t)current, 0u, 3u);
         }
         ImGui::SliderFloat("Exposure", &mPushC.Exposure, 0.1, 15);
     }
@@ -105,7 +106,7 @@ namespace foray::stages {
     void TonemapStage::CreateSamplers()
     {
         {
-            VkSamplerCreateInfo samplerCi{
+            vk::SamplerCreateInfo samplerCi{
                 .sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                 .magFilter    = VkFilter::VK_FILTER_NEAREST,
                 .minFilter    = VkFilter::VK_FILTER_NEAREST,
@@ -120,7 +121,7 @@ namespace foray::stages {
         }
         if(!!mAutoExposureImage)
         {
-            VkSamplerCreateInfo samplerCi{
+            vk::SamplerCreateInfo samplerCi{
                 .sType        = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                 .magFilter    = VkFilter::VK_FILTER_NEAREST,
                 .minFilter    = VkFilter::VK_FILTER_NEAREST,
@@ -137,26 +138,26 @@ namespace foray::stages {
 
     void TonemapStage::CreateDescriptorSet()
     {
-        mDescriptorSet.SetDescriptorAt(0, &mInputSampled, VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        mDescriptorSet.SetDescriptorAt(0, &mInputSampled, vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         if(!!mAutoExposureImage)
         {
             mDescriptorSet.SetDescriptorAt(1,
-                                           VkDescriptorImageInfo{.sampler     = mAutoExposureSampler.GetSampler(),
+                                           vk::DescriptorImageInfo{.sampler     = mAutoExposureSampler.GetSampler(),
                                                                  .imageView   = mAutoExposureImage,
-                                                                 .imageLayout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
-                                           VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+                                                                 .imageLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+                                           VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         }
         mDescriptorSet.CreateOrUpdate(mContext, "Tonemap");
     }
     void TonemapStage::CreateRenderpass()
     {
-        mRenderAttachments.AddAttachmentDiscarded(mContext->WindowSwapchain, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        mRenderAttachments.AddAttachmentDiscarded(mContext->WindowSwapchain, vk::ImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     }
     void TonemapStage::CreatePipelineLayout()
     {
         util::PipelineLayout::Builder builder;
         builder.AddDescriptorSetLayout(mDescriptorSet.GetLayout());
-        builder.AddPushConstantRange<PushC>(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        builder.AddPushConstantRange<PushC>(vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         mPipelineLayout.New(mContext, builder);
     }
     void TonemapStage::CreatePipeline()

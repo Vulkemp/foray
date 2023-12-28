@@ -8,7 +8,7 @@ namespace foray::scene::gcomp {
         if(mVerticesBuffer)
         {
             const VkDeviceSize offsets[1]      = {0};
-            VkBuffer           vertexBuffers[] = {mVerticesBuffer->GetBuffer()};
+            vk::Buffer           vertexBuffers[] = {mVerticesBuffer->GetBuffer()};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
             if(mIndicesBuffer)
             {
@@ -25,7 +25,7 @@ namespace foray::scene::gcomp {
 
     void GeometryStore::InitOrUpdate()
     {
-        VkBufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        vk::BufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
         // enable calls to GetBufferDeviceAdress & using the buffer as source for acceleration structure building
         bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;

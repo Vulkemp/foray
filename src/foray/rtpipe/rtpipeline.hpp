@@ -44,8 +44,8 @@ namespace foray::rtpipe {
         /// @brief vkCmdBindPipeline(cmdBuffer, RayTracingBindPoint, mPipeline)
         void CmdBindPipeline(VkCommandBuffer cmdBuffer) const;
 
-        void CmdTraceRays(VkCommandBuffer cmdBuffer, VkExtent3D launchSize) const;
-        void CmdTraceRays(VkCommandBuffer cmdBuffer, VkExtent2D launchSize) const { CmdTraceRays(cmdBuffer, VkExtent3D{launchSize.width, launchSize.height, 1}); }
+        void CmdTraceRays(VkCommandBuffer cmdBuffer, vk::Extent3D launchSize) const;
+        void CmdTraceRays(VkCommandBuffer cmdBuffer, VkExtent2D launchSize) const { CmdTraceRays(cmdBuffer, vk::Extent3D{launchSize.width, launchSize.height, 1}); }
 
         virtual ~RtPipeline();
 

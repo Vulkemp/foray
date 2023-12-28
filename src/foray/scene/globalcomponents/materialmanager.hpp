@@ -20,8 +20,8 @@ namespace foray::scene::gcomp {
 
         FORAY_GETTER_CR(Buffer)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer()->GetVkDescriptorBufferInfo(); }
-        inline VkBuffer               GetVkBuffer() const { return mBuffer.GetBuffer()->GetBuffer(); }
+        inline vk::DescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer.GetBuffer()->GetVkDescriptorBufferInfo(); }
+        inline vk::Buffer               GetVkBuffer() const { return mBuffer.GetBuffer()->GetBuffer(); }
 
 
       protected:

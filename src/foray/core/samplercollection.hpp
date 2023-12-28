@@ -1,5 +1,5 @@
 #pragma once
-#include "managedimage.hpp"
+#include "imageview.hpp"
 #include "managedresource.hpp"
 #include <unordered_map>
 
@@ -7,7 +7,7 @@ namespace foray::core {
 
     class SamplerCollection;
 
-    /// @brief Represents a reference to a VkSampler object managed by a SamplerCollection
+    /// @brief Represents a reference to a vk::Sampler object managed by a SamplerCollection
     /// @remark Only useful if .pNext field of sampler createinfo remains zero.
     class SamplerReference
     {
@@ -23,32 +23,32 @@ namespace foray::core {
         /// @brief Construct and initialize
         /// @param context Requires SamplerCol field
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        SamplerReference(Context* context, const VkSamplerCreateInfo& samplerCi);
+        SamplerReference(Context* context, const vk::SamplerCreateInfo& samplerCi);
         /// @brief Construct and initialize
         /// @param collection Collection to get a sampler from
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        SamplerReference(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi);
+        SamplerReference(SamplerCollection* collection, const vk::SamplerCreateInfo& samplerCi);
 
         /// @brief Initializes by fetching a matching sampler from sampler collection
         /// @param context Requires SamplerCol field
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        void Init(Context* context, const VkSamplerCreateInfo& samplerCi);
+        void Init(Context* context, const vk::SamplerCreateInfo& samplerCi);
         /// @brief Initializes by fetching a matching sampler from sampler collection
         /// @param collection Collection to get a sampler from
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        void Init(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi);
+        void Init(SamplerCollection* collection, const vk::SamplerCreateInfo& samplerCi);
 
         /// @brief Returns the sampler and deinitializes
         void Destroy();
 
-        inline operator VkSampler() const { return mSampler; }
+        inline operator vk::Sampler() const { return mSampler; }
 
         FORAY_GETTER_V(Sampler)
         FORAY_GETTER_V(Hash)
         FORAY_GETTER_V(Collection)
       protected:
         /// @brief Sampler (owned by SamplerCollection, this is a loan)
-        VkSampler mSampler = nullptr;
+        vk::Sampler mSampler;
         /// @brief Hash of the Sampler CreateInfo
         uint64_t mHash = (uint64_t)0;
         /// @brief Collection owning the Sampler object
@@ -69,34 +69,34 @@ namespace foray::core {
         /// @param context Requires SamplerCol field
         /// @param image Image
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        CombinedImageSampler(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi);
+        CombinedImageSampler(core::Context* context, core::ImageViewRef* image, const vk::SamplerCreateInfo& samplerCi);
 
         /// @brief Initializes by fetching a matching sampler from sampler collection
         /// @param context Requires SamplerCol field
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        void Init(core::Context* context, const VkSamplerCreateInfo& samplerCi);
+        void Init(core::Context* context, const vk::SamplerCreateInfo& samplerCi);
         /// @brief Initializes by fetching a matching sampler from sampler collection
         /// @param context Requires SamplerCol field
         /// @param image Image
         /// @param samplerCi Sampler create info (Note: DO NOT USE for non zero .pNext)
-        void Init(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi);
+        void Init(core::Context* context, core::ImageViewRef* image, const vk::SamplerCreateInfo& samplerCi);
 
         /// @brief Build descriptor image info
-        VkDescriptorImageInfo GetVkDescriptorInfo(VkImageLayout layout = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const
+        vk::DescriptorImageInfo GetVkDescriptorInfo(vk::ImageLayout layout = vk::ImageLayout::eReadOnlyOptimal) const
         {
-            return VkDescriptorImageInfo{.sampler = mSampler, .imageView = (!!mManagedImage) ? mManagedImage->GetImageView() : nullptr, .imageLayout = layout};
+            return vk::DescriptorImageInfo(mSampler, (!!mImageView) ? mImageView->GetView() : nullptr, layout);
         }
 
-        FORAY_PROPERTY_V(ManagedImage)
+        FORAY_PROPERTY_V(ImageView)
       protected:
         /// @brief Reference used only for descriptor image info filling
-        core::ManagedImage* mManagedImage = nullptr;
+        core::ImageViewRef* mImageView = nullptr;
     };
 
-    /// @brief Provides sampler objects based on VkSamplerCreateInfo specifications.
-    /// @remark Exclusively designed to work with SamplerReference to ensure proper reference counting! Works only for VkSamplerCreateInfo without .pNext set
+    /// @brief Provides sampler objects based on vk::SamplerCreateInfo specifications.
+    /// @remark Exclusively designed to work with SamplerReference to ensure proper reference counting! Works only for vk::SamplerCreateInfo without .pNext set
     /// Will count references to a unique sampler type, and automatically reuse sampler types and destroy
-    class SamplerCollection : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SAMPLER>
+    class SamplerCollection : public core::VulkanResource<vk::ObjectType::eSampler>
     {
         friend SamplerReference;
 
@@ -111,19 +111,19 @@ namespace foray::core {
         virtual ~SamplerCollection() { ClearSamplerMap(); }
 
       protected:
-        void GetSampler(SamplerReference& imageSampler, const VkSamplerCreateInfo& samplerCi);
+        void GetSampler(SamplerReference& imageSampler, const vk::SamplerCreateInfo& samplerCi);
 
         void Register(SamplerReference& imageSampler);
         void Unregister(SamplerReference& imageSampler);
 
         void            ClearSamplerMap();
-        static uint64_t GetHash(const VkSamplerCreateInfo& samplerCi);
+        static uint64_t GetHash(const vk::SamplerCreateInfo& samplerCi);
 
         core::Context* mContext = nullptr;
 
         struct SamplerInstance
         {
-            VkSampler Sampler     = nullptr;
+            vk::Sampler Sampler     = nullptr;
             uint64_t  SamplerHash = 0ULL;
             uint64_t  RefCount    = 0ULL;
         };

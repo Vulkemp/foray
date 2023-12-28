@@ -3,8 +3,7 @@
 #include "exception.hpp"
 
 namespace foray {
-    /// @brief Movable std::unique_ptr alternative
-    /// @tparam T Stored Type
+    /// @brief A smart, nullable single-object storage in heap bound to the local scope (stack or object field)
     template <typename T>
     class Heap
     {
@@ -91,8 +90,16 @@ namespace foray {
         T*       GetNullable() { return mData; }
         const T* GetNullable() const { return mData; }
 
-        T&       GetRef() { return mData; }
-        const T& GetRef() const { return mData; }
+        T& GetRef()
+        {
+            Assert(!!mData);
+            return *mData;
+        }
+        const T& GetRef() const
+        {
+            return Assert(!!mData);
+            *mData;
+        }
 
         operator bool() const { return !!mData; }
 
@@ -144,42 +151,39 @@ namespace foray {
     };
 
     template <typename T>
-    class Local
+    class LocalBase
     {
       public:
-        Local() : mData({}), mExists(false) {}
+        LocalBase() : mData({}), mExists(false) {}
 
-        /// @brief Allocates heap space, and initializes a new T instance
-        /// @tparam ...TArgs
-        /// @param ...args
         template <typename... TArgs>
-        Local(TArgs&&... args) : mExists(true)
+        LocalBase(TArgs&&... args) : mExists(true)
         {
             new(reinterpret_cast<T*>(&mData)) T(args...);
         }
 
         /// @brief Initializes to null
         /// @param other
-        Local(std::nullptr_t other) : mData({}), mExists(false) {}
+        LocalBase(std::nullptr_t other) : mData({}), mExists(false) {}
 
-        Local(const Local<T>& other) = delete;
-        Local(Local<T>&& other)
+        LocalBase(const LocalBase<T>& other) = delete;
+        LocalBase(LocalBase<T>&& other)
         {
             mExists       = true;
             mData         = other.mData;
             other.mData   = {};
             other.mExists = false;
         }
-        Local<T>& operator=(const Local<T>& other) = delete;
+        LocalBase<T>& operator=(const LocalBase<T>& other) = delete;
 
         /// @brief Assign null (deletes stored value)
-        Local<T>& operator=(std::nullptr_t other)
+        LocalBase<T>& operator=(std::nullptr_t other)
         {
             Delete();
             return *this;
         }
 
-        virtual ~Local() { Delete(); }
+        virtual ~LocalBase() { Delete(); }
 
         operator bool() { return mExists; }
         operator bool() const { return mExists; }
@@ -244,13 +248,161 @@ namespace foray {
             }
         }
 
-      private:
+      protected:
         struct alignas(alignof(T)) AlignedArea
         {
             uint8_t Data[sizeof(T)];
         } mData;
         bool mExists;
     };
+
+    /// @brief A smart, nullable single-object storage in the local scope (stack or object field)
+    template <typename T>
+    class Local : public LocalBase<T>
+    {
+      public:
+        Local() : LocalBase<T>() {}
+
+        template <typename... TArgs>
+        Local(TArgs&&... args) : LocalBase<T>(args...)
+        {
+        }
+
+        Local(std::nullptr_t other) : LocalBase<T>(other) {}
+
+        Local(LocalBase<T>&& other) : LocalBase<T>(other) {}
+
+        Local<T>& operator=(std::nullptr_t other)
+        {
+            LocalBase<T>::operator=(other);
+            return *this;
+        }
+    };
+
+    /// @brief A nullable, non-owning ptr to a single object
+    template <typename T>
+    class View
+    {
+      public:
+        View() : mData(nullptr){};
+        View(std::nullptr_t) : mData(nullptr) {}
+        View(T* data) : mData(data) {}
+
+        /// @brief Dereference stored pointer
+        T* operator->()
+        {
+            Assert(!!mData, "Attempted to deref a nullptr!");
+            return mData;
+        }
+
+        /// @brief Dereference stored pointer
+        const T* operator->() const
+        {
+            Assert(!!mData, "Attempted to deref a nullptr!");
+            return mData;
+        }
+
+        T* Get()
+        {
+            Assert(!!mData);
+            return mData;
+        }
+        const T* Get() const
+        {
+            Assert(!!mData);
+            return mData;
+        }
+
+        T*       GetNullable() { return mData; }
+        const T* GetNullable() const { return mData; }
+
+        T& GetRef()
+        {
+            Assert(!!mData);
+            return *mData;
+        }
+        const T& GetRef() const
+        {
+            Assert(!!mData);
+            return *mData;
+        }
+
+        operator bool() const { return !!mData; }
+
+        bool Exists() const { return !!mData; }
+
+      protected:
+        T* mData;
+    };
+
+    // A guaranteed-valid, non-owning pointer to a single object
+    template <typename T>
+    class Ref
+    {
+      public:
+        Ref() = delete;
+        Ref(T* data) : mData(data) {Assert(!!mData, "Ref initialized with invalid data!");}
+        Ref(T& data) : mData(data) {}
+        Ref(Local<T>& data) : mData(data.GetRef()) {}
+        Ref(Heap<T>& data) : mData(data.GetRef()) {}
+        Ref(View<T>& data) : mData(data.GetRef()) {}
+
+        /// @brief Dereference stored pointer
+        T* operator->()
+        {
+            return mData;
+        }
+
+        /// @brief Dereference stored pointer
+        const T* operator->() const
+        {
+            return mData;
+        }
+
+        T* Get()
+        {
+            return mData;
+        }
+        const T* Get() const
+        {
+            return mData;
+        }
+
+        T*       GetNullable() { return mData; }
+        const T* GetNullable() const { return mData; }
+
+        T& GetRef()
+        {
+            return *mData;
+        }
+        const T& GetRef() const
+        {
+            return *mData;
+        }
+
+        operator bool() const { return true; }
+
+        bool Exists() const { return true; }
+
+      protected:
+        T* mData;
+    };
+
+#define FORAY_LOCAL_SPECIALIZATION_DEFAULTS(Type)                                                                                                                                  \
+    Local() : LocalBase<Type>() {}                                                                                                                                                 \
+    Local(std::nullptr_t other) : LocalBase<Type>(other) {}                                                                                                                        \
+    Local(Local<Type>&& other)                                                                                                                                                     \
+    {                                                                                                                                                                              \
+        mExists       = true;                                                                                                                                                      \
+        mData         = other.mData;                                                                                                                                               \
+        other.mData   = {};                                                                                                                                                        \
+        other.mExists = false;                                                                                                                                                     \
+    }                                                                                                                                                                              \
+    Local<Type>& operator=(std::nullptr_t other)                                                                                                                                   \
+    {                                                                                                                                                                              \
+        LocalBase<Type>::operator=(other);                                                                                                                                         \
+        return *this;                                                                                                                                                              \
+    }
 
 /// @brief Return mutable stored pointer of Heap/Local wrapped member
 #define FORAY_HAS_MEM(member)                                                                                                                                                      \
@@ -277,4 +429,7 @@ namespace foray {
     FORAY_HAS_MEM(member)                                                                                                                                                          \
     FORAY_GETTER_MMEM(member)                                                                                                                                                      \
     FORAY_GETTER_CMEM(member)
+
+#define FORAY_STACKALLOC(type, count) reinterpret_cast<type*>(__builtin_alloca_with_align(sizeof(type) * count, alignof(type)))
+
 }  // namespace foray

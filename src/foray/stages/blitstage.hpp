@@ -11,35 +11,35 @@ namespace foray::stages {
         /// @brief Initialization
         /// @param sourceImage Source Image
         /// @param destImage Destination Image
-        BlitStage(core::ManagedImage* sourceImage = nullptr, core::ManagedImage* destImage = nullptr);
+        BlitStage(core::Image* sourceImage = nullptr, core::Image* destImage = nullptr);
         /// @brief Records pipeline barriers for source and destination images, and the blit command itself
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
         /// @brief Set source Image (nullptr allowed)
-        virtual void SetSrcImage(core::ManagedImage* image);
+        virtual void SetSrcImage(core::Image* image);
         /// @brief Set source Image (nullptr allowed)
-        virtual void SetSrcImage(VkImage image, VkExtent2D size);
+        virtual void SetSrcImage(vk::Image image, VkExtent2D size);
 
         /// @brief Set destination Image (nullptr allowed)
-        virtual void SetDstImage(core::ManagedImage* image);
+        virtual void SetDstImage(core::Image* image);
         /// @brief Set destination Image (nullptr allowed)
-        virtual void SetDstImage(VkImage image, VkExtent2D size);
+        virtual void SetDstImage(vk::Image image, VkExtent2D size);
 
         FORAY_PROPERTY_V(FlipX)
         FORAY_PROPERTY_V(FlipY)
 
       protected:
-        /// @brief If set, preferred over mSrcVkImage member. Allows for recreated ManagedImage instances.
-        core::ManagedImage* mSrcImage = nullptr;
+        /// @brief If set, preferred over mSrcVkImage member. Allows for recreated Image instances.
+        core::Image* mSrcImage = nullptr;
         /// @brief Fallback to mSrcImage
-        VkImage mSrcVkImage = nullptr;
+        vk::Image mSrcVkImage = nullptr;
         /// @brief Fallback to mSrcImage
         VkExtent2D mSrcImageSize = {};
 
-        /// @brief If set, preferred over mDStVkImage member. Allows for recreated ManagedImage instances.
-        core::ManagedImage* mDstImage = nullptr;
+        /// @brief If set, preferred over mDStVkImage member. Allows for recreated Image instances.
+        core::Image* mDstImage = nullptr;
         /// @brief Fallback to mDstImage
-        VkImage mDstVkImage = nullptr;
+        vk::Image mDstVkImage = nullptr;
         /// @brief Fallback to mDstImage
         VkExtent2D mDstImageSize = {};
 

@@ -8,7 +8,7 @@
 
 namespace foray::util {
     /// @brief Class that holds memory ownership of a vulkan pipeline layout
-    class PipelineLayout : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_PIPELINE_LAYOUT>
+    class PipelineLayout : public core::VulkanResource<vk::ObjectType::VK_OBJECT_TYPE_PIPELINE_LAYOUT>
     {
       public:
         virtual ~PipelineLayout();

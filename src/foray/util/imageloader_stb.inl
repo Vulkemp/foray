@@ -15,7 +15,7 @@ namespace foray::util {
 
     }  // namespace impl
 
-    template <VkFormat FORMAT>
+    template <vk::Format FORMAT>
     bool ImageLoader<FORMAT>::PopulateImageInfo_Stb()
     {
         using namespace impl;
@@ -94,7 +94,7 @@ namespace foray::util {
         }
     }  // namespace impl
 
-    template <VkFormat FORMAT>
+    template <vk::Format FORMAT>
     bool ImageLoader<FORMAT>::Load_Stb()
     {
         using namespace impl;

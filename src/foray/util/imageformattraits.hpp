@@ -41,8 +41,8 @@ namespace foray::util {
     using ComponentTraits_PackedAlpha2Color30 =
         ComponentTraits<uint32_t, 0b11, false, false>;  // Component where the entire texel value is packed into a 32 bit value. Alpha has two bits
 
-    /// @brief Describes the traits of a VkFormat value
-    template <VkFormat FORMAT>
+    /// @brief Describes the traits of a vk::Format value
+    template <vk::Format FORMAT>
     class ImageFormatTraits
     {
       public:
@@ -175,114 +175,114 @@ namespace foray::util {
 
 #pragma region float half
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R16G16B16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R16G16B16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R16G16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R16G16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R16_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp16, 1>
     {
     };
 #pragma endregion
 #pragma region float full
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32B32A32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32B32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp32, 1>
     {
     };
 #pragma endregion
 #pragma region float double
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64B64A64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R64G64B64A64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64B64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R64G64B64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R64G64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R64G64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R64_SFLOAT> : public ImageFormatTraitsBase<ComponentTraits_Fp64, 1>
     {
     };
 #pragma endregion
 #pragma region integer 32 unsigned
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32A32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32B32A32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32B32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32B32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32G32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32G32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R32_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt32, 1>
     {
     };
 #pragma endregion
 #pragma region integer 8 unsigned
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8A8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8B8A8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8B8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8_UINT> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8A8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8B8A8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 4>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8B8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8B8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 3>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8G8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8G8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 2>
     {
     };
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_R8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_R8_UNORM> : public ImageFormatTraitsBase<ComponentTraits_UInt8, 1>
     {
     };
 #pragma endregion
 #pragma region integer packed 10 + 10 + 10 + 2 unsigned
 
     template <>
-    class ImageFormatTraits<VkFormat::VK_FORMAT_A2R10G10B10_UINT_PACK32>
+    class ImageFormatTraits<vk::Format::VK_FORMAT_A2R10G10B10_UINT_PACK32>
     {
       public:
         using COMPONENT_TRAITS                            = ComponentTraits_PackedAlpha2Color30;

@@ -135,7 +135,7 @@ namespace foray::as {
         VkDeviceSize instanceBufferSize = instanceBufferData.size() * sizeof(VkAccelerationStructureInstanceKHR);
 
         core::ManagedBuffer::CreateInfo instanceBufferCI(
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, instanceBufferSize,
+            vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR, instanceBufferSize,
             VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT, "BLAS Instances Buffer");
         mInstanceBuffer.New(mContext, instanceBufferCI);
 

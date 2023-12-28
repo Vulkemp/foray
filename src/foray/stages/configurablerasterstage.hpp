@@ -99,7 +99,7 @@ namespace foray::stages {
             /// @brief Type of output generated. Pasted to "layout(location *) out TYPE output;"
             FragmentOutputType Type = FragmentOutputType::FLOAT;
             /// @brief Image format of the GBuffer output
-            VkFormat ImageFormat = VkFormat::VK_FORMAT_UNDEFINED;
+            vk::Format ImageFormat = vk::Format::VK_FORMAT_UNDEFINED;
             /// @brief What value to clear the screen with
             VkClearColorValue ClearValue = {};
             /// @brief Optional calculation (pasted before result assignment)

@@ -3,13 +3,13 @@
 #include "../core/context.hpp"
 #include "../core/core_declares.hpp"
 #include "../core/descriptorset.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/rendertarget.hpp"
 #include "../core/shadermanager.hpp"
 #include "../event.hpp"
 #include "../basics.hpp"
 #include "../osi/path.hpp"
 #include "renderdomain.hpp"
-#include <unordered_map>
+#include <span>
 
 namespace foray::stages {
 
@@ -30,11 +30,7 @@ namespace foray::stages {
         inline virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) {}
 
         /// @brief Gets a vector to all color attachments that will be included in a texture array and can be referenced in the shader pass.
-        std::vector<core::ManagedImage*> GetImageOutputs();
-        /// @brief Gets an image output
-        /// @param name Identifier
-        /// @param noThrow If set, will return nullptr instead of throwing std::exception if no match is found
-        core::ManagedImage* GetImageOutput(std::string_view name, bool noThrow = false);
+        std::span<core::RenderTargetState*> GetImageOutputs();
 
         virtual void SetResizeOrder(int32_t priority);
 
@@ -42,7 +38,7 @@ namespace foray::stages {
 
         void InitCallbacks(core::Context* context = nullptr, RenderDomain* domain = nullptr, int32_t priority = 0);
 
-        /// @brief Default implementation accesses mImageOutputs and calls ManagedImage::Resize(extent) on any set image
+        /// @brief Default implementation accesses mImageOutputs and calls Image::Resize(extent) on any set image
         /// @param extent New render size
         /// @remark Inheriting stages may override to update descriptor sets
         virtual void OnResized(VkExtent2D extent) {}
@@ -55,7 +51,7 @@ namespace foray::stages {
         virtual void ReloadShaders() {}
 
         /// @brief Inheriting types should emplace their images onto this collection to provide them in GetImageOutput interface
-        std::unordered_map<std::string, core::ManagedImage*> mImageOutputs;
+        std::vector<IRenderTarget*> mImageOutputs;
         /// @brief Inheriting types should emplace their shader keys onto this collection such that if a shader has been recompiled, ReloadShaders() will be called
         std::vector<uint64_t> mShaderKeys;
         /// @brief Context object the renderstage is built upon

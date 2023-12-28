@@ -44,9 +44,9 @@ namespace foray::base {
         ESwapchainInteractResult Present();
 
         /// @brief Writes vkCmdClearColorImage cmd to the primary command buffer for the acquired image
-        void ClearSwapchainImage(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache);
+        void ClearSwapchainImage(VkCommandBuffer cmdBuffer);
         /// @brief Adds a Pipeline barrier transitioning the swapchain image into present layout and assuring all writes to it have finished
-        void PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer, core::ImageLayoutCache& imgLayoutCache);
+        void PrepareSwapchainImageForPresent(VkCommandBuffer cmdBuffer);
 
         /// @brief Non-blocking check wether the frame has been finished execution
         bool HasFinishedExecution();
@@ -78,6 +78,7 @@ namespace foray::base {
 
         FORAY_GETTER_V(SwapchainImageIndex)
         FORAY_GETTER_V(SwapchainImageReady)
+        FORAY_GETTER_V(SwapchainFrameImageView)
         FORAY_GETTER_V(PrimaryCompletedSemaphore)
         FORAY_GETTER_V(PrimaryCompletedFence)
 
@@ -95,6 +96,7 @@ namespace foray::base {
         /// @brief Fence signalled after the primary / all command buffers have finished execution
         VkFence mPrimaryCompletedFence = nullptr;
 
-        uint32_t mSwapchainImageIndex = 0;
+        uint32_t              mSwapchainImageIndex = 0;
+        core::RenderTargetState mSwapchainFrameImageView;
     };
 }  // namespace foray::base

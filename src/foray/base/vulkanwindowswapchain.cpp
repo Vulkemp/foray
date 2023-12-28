@@ -51,8 +51,8 @@ namespace foray::base {
         swapchainBuilder.use_default_format_selection();
 
         // tell vulkan the swapchain images will be used as color attachments and blit dest
-        swapchainBuilder.add_image_usage_flags(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        swapchainBuilder.add_image_usage_flags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+        swapchainBuilder.add_image_usage_flags(vk::ImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+        swapchainBuilder.add_image_usage_flags(vk::ImageUsageFlagBits::eTransferDst);
 
         // use mailbox if possible, else fallback to fifo
         swapchainBuilder.use_default_present_mode_selection();
@@ -63,7 +63,7 @@ namespace foray::base {
         }
 
         auto ret = swapchainBuilder.build();
-        FORAY_ASSERTFMT(ret.has_value(), "[VulkanWindowSwapchain::CreateSwapchain] vkb Swapchain Builder failed to build swapchain. VkResult: {} Reason: {}",
+        FORAY_ASSERTFMT(ret.has_value(), "[VulkanWindowSwapchain::CreateSwapchain] vkb Swapchain Builder failed to build swapchain. vk::Result: {} Reason: {}",
                         PrintVkResult(ret.vk_result()), ret.error().message())
 
         mSwapchain = *ret;
@@ -85,32 +85,11 @@ namespace foray::base {
         Assert(imageviews.has_value(), "[VulkanWindowSwapchain::ExtractSwapchainImages] Failed to acquire swapchain image views!");
         for(uint32_t i = 0; i < imageCount; i++)
         {
-            core::SwapchainImageInfo& swapImage = mSwapchainImages[i];
+            Local<core::SwapchainRenderTarget>& swapImage = mSwapchainImages[i];
 
-            swapImage = core::SwapchainImageInfo{
-                .Image     = images.value()[i],
-                .ImageView = imageviews.value()[i],
-            };
+            std::string_view name = "RT.Swapchain";
 
-            if(!!mMakeSwapchainImageNameFunc)
-            {
-                swapImage.Name = mMakeSwapchainImageNameFunc(i);
-            }
-            else
-            {
-                swapImage.Name = fmt::format("SwapImage #{}", i);
-            }
-            if(mNameSwapchainImages)
-            {
-                if(!!mContext)
-                {
-                    SetVulkanObjectName(mContext, VkObjectType::VK_OBJECT_TYPE_IMAGE, swapImage.Image, swapImage.Name);
-                }
-                else if(i == 0)
-                {
-                    logger()->warn("[VulkanWindowSwapchain::ExtractSwapchainImages] mNameSwapchainImages enabled but mContext not set! Unable to set vulkan object names!");
-                }
-            }
+            swapImage.New(name, images.value()[i], imageviews.value()[i], mSwapchain.image_format, mSwapchain.extent);
         }
     }
 
@@ -132,7 +111,7 @@ namespace foray::base {
         }
         else
         {
-            vkb::destroy_surface(mContext->VkInstance(), mSurface);
+            vkb::destroy_surface(mContext->vk::Instance(), mSurface);
             mSurface = nullptr;
             mWindow.Destroy();
             return;
@@ -152,6 +131,23 @@ namespace foray::base {
         }
     }
 
+    core::SwapchainRenderTarget* VulkanWindowSwapchain::GetSwapchainFrameImage(uint32_t index)
+    {
+        Assert(index < mSwapchainImages.size(), "Index out of range.");
+        return mSwapchainImages[index].Get();
+    }
+
+    const core::SwapchainRenderTarget* VulkanWindowSwapchain::GetSwapchainFrameImage(uint32_t index) const
+    {
+        Assert(index < mSwapchainImages.size(), "Index out of range.");
+        return mSwapchainImages[index].Get();
+    }
+
+    uint32_t VulkanWindowSwapchain::GetSwapchainFrameImageCount() const
+    {
+        return (uint32_t)mSwapchainImages.size();
+    }
+
     void VulkanWindowSwapchain::DestroySwapchain()
     {
         if(!mContext)
@@ -160,7 +156,7 @@ namespace foray::base {
         }
         for(auto& image : mSwapchainImages)
         {
-            mContext->DispatchTable().destroyImageView(image.ImageView, nullptr);
+            image->DestroyView(mContext);
         }
         mSwapchainImages.clear();
         if(!!mSwapchain.swapchain)
@@ -174,7 +170,7 @@ namespace foray::base {
     VulkanWindowSwapchain::~VulkanWindowSwapchain()
     {
         DestroySwapchain();
-        vkb::destroy_surface(mContext->VkInstance(), mSurface);
+        vkb::destroy_surface(mContext->vk::Instance(), mSurface);
         mSurface = nullptr;
         mWindow.Destroy();
         mContext->WindowSwapchain = nullptr;

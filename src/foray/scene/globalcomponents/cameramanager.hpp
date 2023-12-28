@@ -13,7 +13,7 @@ namespace foray::scene::gcomp {
       public:
         FORAY_GETTER_CR(Ubo)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mUbo.GetVkDescriptorBufferInfo(); }
+        inline vk::DescriptorBufferInfo GetVkDescriptorInfo() const { return mUbo.GetVkDescriptorBufferInfo(); }
 
         CameraManager(core::Context* context);
         virtual void RefreshCameraList();

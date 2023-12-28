@@ -29,7 +29,7 @@ namespace foray::util {
         {
             Undefined,
             Bare,
-            ManagedImage,
+            Image,
             Swapchain
         };
 
@@ -45,9 +45,9 @@ namespace foray::util {
 
         struct BareAttachment
         {
-            VkImage     Image;
-            VkImageView View;
-            VkFormat    Format;
+            vk::Image     Image;
+            vk::ImageView View;
+            vk::Format    Format;
         };
 
         /// @brief Description of an attachment
@@ -59,12 +59,12 @@ namespace foray::util {
             EAttachmentSource Source;
             /// @brief Only populated if Source == EAttachmentSource::Bare
             std::vector<BareAttachment> BareRefs;
-            /// @brief Only populated if Source == EAttachmentSource::ManagedImage
-            std::vector<core::ManagedImage*> Images;
+            /// @brief Only populated if Source == EAttachmentSource::Image
+            std::vector<core::ImageViewRef*> Images;
             /// @brief Only populated if Source == EAttachmentSource::Swapchain
             base::VulkanWindowSwapchain* Swapchain = nullptr;
             /// @brief Image layout during rendering
-            VkImageLayout Layout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+            vk::ImageLayout Layout = vk::ImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
             /// @brief Loading old data, clearing, doing nothing (discard)
             EAttachmentLoadOp LoadOp = EAttachmentLoadOp::Clear;
             /// @brief false: no data is written (dont_care) true: data is written (store)
@@ -73,18 +73,18 @@ namespace foray::util {
             VkClearValue ClearValue = VkClearValue{};
 
             Attachment();
-            Attachment(EAttachmentBindpoint bindpoint, std::span<BareAttachment>, VkImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
-            Attachment(EAttachmentBindpoint bindpoint, std::span<core::ManagedImage*>, VkImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
-            Attachment(EAttachmentBindpoint bindpoint, base::VulkanWindowSwapchain*, VkImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
+            Attachment(EAttachmentBindpoint bindpoint, std::span<BareAttachment>, vk::ImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
+            Attachment(EAttachmentBindpoint bindpoint, std::span<core::ImageViewRef*>, vk::ImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
+            Attachment(EAttachmentBindpoint bindpoint, base::VulkanWindowSwapchain*, vk::ImageLayout layout, EAttachmentLoadOp mode, bool store, VkClearValue clearValue = {});
 
             /// @brief Get image from source member according to EAttachmentSource value
             /// @param resourceIdx For source members with multiple values, select value with "resourceIdx % count"
-            VkImage GetSourceImage(uint32_t resourceIdx) const;
+            vk::Image GetSourceImage(uint32_t resourceIdx) const;
             /// @brief Get image view from source member according to EAttachmentSource value
             /// @param resourceIdx For source members with multiple values, select value with "resourceIdx % count"
-            VkImageView GetSourceView(uint32_t resourceIdx) const;
+            vk::ImageView GetSourceView(uint32_t resourceIdx) const;
             /// @brief Get the format of the underlying image according to EAttachmentSource value
-            VkFormat GetSourceFormat() const;
+            vk::Format GetSourceFormat() const;
             /// @brief Make an attachment info according to EAttachmentSource value
             /// @param resourceIdx For source members with multiple values, select value with "resourceIdx % count"
             VkRenderingAttachmentInfo GetAttachmentInfo(uint32_t resourceIdx) const;
@@ -105,85 +105,85 @@ namespace foray::util {
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& SetAttachmentCleared(uint32_t idx, core::ManagedImage* image, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& SetAttachmentCleared(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& SetAttachmentCleared(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& SetAttachmentCleared(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param idx Id / fragment output location
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& SetAttachmentCleared(uint32_t idx, BareAttachment image, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& SetAttachmentCleared(uint32_t idx, BareAttachment image, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& SetAttachmentCleared(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& SetAttachmentCleared(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param idx Id / fragment output location
         /// @param swapchain images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& SetAttachmentCleared(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& SetAttachmentCleared(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout, VkClearColorValue clearValue);
 #pragma endregion
 #pragma region Discarded
         /// @brief Set an output attachment (discarded before write)
         /// @param idx Id / fragment output location
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, core::ManagedImage* image, VkImageLayout layout);
+        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout);
         /// @brief Set an output attachment (discarded before write)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout);
+        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout);
         /// @brief Set an output attachment (discarded before write)
         /// @param idx Id / fragment output location
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, BareAttachment image, VkImageLayout layout);
+        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, BareAttachment image, vk::ImageLayout layout);
         /// @brief Set an output attachment (discarded before write)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout);
+        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout);
         /// @brief Set an output attachment (discarded before write)
         /// @param idx Id / fragment output location
         /// @param swapchain images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout);
+        RenderAttachments& SetAttachmentDiscarded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout);
 #pragma endregion
 #pragma region Loaded
         /// @brief Set an output attachment (loaded where not written to)
         /// @param idx Id / fragment output location
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentLoaded(uint32_t idx, core::ManagedImage* image, VkImageLayout layout);
+        RenderAttachments& SetAttachmentLoaded(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout);
         /// @brief Set an output attachment (loaded where not written to)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentLoaded(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout);
+        RenderAttachments& SetAttachmentLoaded(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout);
         /// @brief Set an output attachment (loaded where not written to)
         /// @param idx Id / fragment output location
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentLoaded(uint32_t idx, BareAttachment image, VkImageLayout layout);
+        RenderAttachments& SetAttachmentLoaded(uint32_t idx, BareAttachment image, vk::ImageLayout layout);
         /// @brief Set an output attachment (loaded where not written to)
         /// @param idx Id / fragment output location
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentLoaded(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout);
+        RenderAttachments& SetAttachmentLoaded(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout);
         /// @brief Set an output attachment (loaded where not written to)
         /// @param idx Id / fragment output location
         /// @param swapchain images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
-        RenderAttachments& SetAttachmentLoaded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout);
+        RenderAttachments& SetAttachmentLoaded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout);
 #pragma endregion
 #pragma endregion
 #pragma region Add Color Output Attachment
@@ -195,54 +195,54 @@ namespace foray::util {
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& AddAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& AddAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& AddAttachmentCleared(std::span<core::ManagedImage*> images, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& AddAttachmentCleared(std::span<core::ImageViewRef*> images, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param image image to use as attachment
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& AddAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& AddAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param images images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& AddAttachmentCleared(std::span<BareAttachment> images, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& AddAttachmentCleared(std::span<BareAttachment> images, vk::ImageLayout layout, VkClearColorValue clearValue);
         /// @brief Set an output attachment (cleared where not written to)
         /// @param swapchain images to use as attachments (selected via resourceIdx)
         /// @param layout layout of the image during rendering
         /// @param clearValue clear value to clear non-rendered areas with
-        RenderAttachments& AddAttachmentCleared(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout, VkClearColorValue clearValue);
+        RenderAttachments& AddAttachmentCleared(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout, VkClearColorValue clearValue);
 #pragma endregion
 #pragma region Discarded
-        RenderAttachments& AddAttachmentDiscarded(core::ManagedImage* image, VkImageLayout layout);
-        RenderAttachments& AddAttachmentDiscarded(std::span<core::ManagedImage*> images, VkImageLayout layout);
-        RenderAttachments& AddAttachmentDiscarded(BareAttachment image, VkImageLayout layout);
-        RenderAttachments& AddAttachmentDiscarded(std::span<BareAttachment> images, VkImageLayout layout);
-        RenderAttachments& AddAttachmentDiscarded(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout);
+        RenderAttachments& AddAttachmentDiscarded(core::ImageViewRef* image, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentDiscarded(std::span<core::ImageViewRef*> images, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentDiscarded(BareAttachment image, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentDiscarded(std::span<BareAttachment> images, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentDiscarded(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout);
 #pragma endregion
 #pragma region Loaded
-        RenderAttachments& AddAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout);
-        RenderAttachments& AddAttachmentLoaded(std::span<core::ManagedImage*> images, VkImageLayout layout);
-        RenderAttachments& AddAttachmentLoaded(BareAttachment image, VkImageLayout layout);
-        RenderAttachments& AddAttachmentLoaded(std::span<BareAttachment> images, VkImageLayout layout);
-        RenderAttachments& AddAttachmentLoaded(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout);
+        RenderAttachments& AddAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentLoaded(std::span<core::ImageViewRef*> images, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentLoaded(BareAttachment image, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentLoaded(std::span<BareAttachment> images, vk::ImageLayout layout);
+        RenderAttachments& AddAttachmentLoaded(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout);
 #pragma endregion
 #pragma endregion
 #pragma region Set Depth Attachment
-        RenderAttachments& SetDepthAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
-        RenderAttachments& SetDepthAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
-        RenderAttachments& SetDepthAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout, bool store = true);
-        RenderAttachments& SetDepthAttachmentLoaded(BareAttachment image, VkImageLayout layout, bool store = true);
+        RenderAttachments& SetDepthAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
+        RenderAttachments& SetDepthAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
+        RenderAttachments& SetDepthAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout, bool store = true);
+        RenderAttachments& SetDepthAttachmentLoaded(BareAttachment image, vk::ImageLayout layout, bool store = true);
 #pragma endregion
 #pragma region Set Stencil Attachment
-        RenderAttachments& SetStencilAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
-        RenderAttachments& SetStencilAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
-        RenderAttachments& SetStencilAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout, bool store = true);
-        RenderAttachments& SetStencilAttachmentLoaded(BareAttachment image, VkImageLayout layout, bool store = true);
+        RenderAttachments& SetStencilAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
+        RenderAttachments& SetStencilAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store = true);
+        RenderAttachments& SetStencilAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout, bool store = true);
+        RenderAttachments& SetStencilAttachmentLoaded(BareAttachment image, vk::ImageLayout layout, bool store = true);
 #pragma endregion
 
         FORAY_PROPERTY_R(Attachments)
@@ -261,6 +261,6 @@ namespace foray::util {
         uint32_t                mLayerCount = 1;
         uint32_t                mViewMask   = 0;
         void*                   mPNext      = nullptr;
-        std::vector<VkFormat>   mAttachmentFormats;
+        std::vector<vk::Format>   mAttachmentFormats;
     };
 }  // namespace foray::util

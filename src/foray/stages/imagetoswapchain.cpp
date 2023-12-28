@@ -1,7 +1,7 @@
 #include "imagetoswapchain.hpp"
 
 namespace foray::stages {
-    ImageToSwapchainStage::ImageToSwapchainStage(core::Context* context, core::ManagedImage* srcImage)
+    ImageToSwapchainStage::ImageToSwapchainStage(core::Context* context, core::Image* srcImage)
      : BlitStage(srcImage, nullptr)
     {
         mContext = context;

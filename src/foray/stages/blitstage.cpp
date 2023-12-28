@@ -2,7 +2,7 @@
 #include "../logger.hpp"
 
 namespace foray::stages {
-    BlitStage::BlitStage(core::ManagedImage* srcImage, core::ManagedImage* dstImage)
+    BlitStage::BlitStage(core::Image* srcImage, core::Image* dstImage)
     {
         SetSrcImage(srcImage);
         SetDstImage(dstImage);
@@ -28,13 +28,13 @@ namespace foray::stages {
                                                           .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                           .DstStageMask  = VK_PIPELINE_STAGE_2_BLIT_BIT,
                                                           .DstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT,
-                                                          .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL};
+                                                          .NewLayout     = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL};
 
         core::ImageLayoutCache::Barrier2 dstImgMemBarrier{.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                                           .SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT,
                                                           .DstStageMask  = VK_PIPELINE_STAGE_2_BLIT_BIT,
                                                           .DstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                                                          .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL};
+                                                          .NewLayout     = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL};
 
         std::vector<VkImageMemoryBarrier2> barriers;
         barriers.reserve(2);
@@ -66,16 +66,16 @@ namespace foray::stages {
 
         VkBlitImageInfo2 blitInfo{.sType          = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
                                   .srcImage       = !!mSrcImage ? mSrcImage->GetImage() : mSrcVkImage,
-                                  .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                  .srcImageLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                   .dstImage       = !!mDstImage ? mDstImage->GetImage() : mDstVkImage,
-                                  .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                  .dstImageLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                   .regionCount    = 1U,
                                   .pRegions       = &imageBlit,
                                   .filter         = mFilter};
 
         vkCmdBlitImage2(cmdBuffer, &blitInfo);
     }
-    void BlitStage::SetSrcImage(core::ManagedImage* image)
+    void BlitStage::SetSrcImage(core::Image* image)
     {
         if(!!image && image->Exists())
         {
@@ -86,13 +86,13 @@ namespace foray::stages {
             SetSrcImage(nullptr, VkExtent2D{});
         }
     }
-    void BlitStage::SetSrcImage(VkImage image, VkExtent2D size)
+    void BlitStage::SetSrcImage(vk::Image image, VkExtent2D size)
     {
         mSrcImage     = nullptr;
         mSrcVkImage   = image;
         mSrcImageSize = size;
     }
-    void BlitStage::SetDstImage(core::ManagedImage* image)
+    void BlitStage::SetDstImage(core::Image* image)
     {
         if(!!image && image->Exists())
         {
@@ -103,7 +103,7 @@ namespace foray::stages {
             SetDstImage(nullptr, VkExtent2D{});
         }
     }
-    void BlitStage::SetDstImage(VkImage image, VkExtent2D size)
+    void BlitStage::SetDstImage(vk::Image image, VkExtent2D size)
     {
         mDstImage     = nullptr;
         mDstVkImage   = image;
@@ -118,8 +118,8 @@ namespace foray::stages {
         int32_t dstHeight;
         if(!!mSrcImage)
         {
-            srcWidth  = (int32_t)mSrcImage->GetExtent3D().width;
-            srcHeight = (int32_t)mSrcImage->GetExtent3D().height;
+            srcWidth  = (int32_t)mSrcImage->GetExtent().width;
+            srcHeight = (int32_t)mSrcImage->GetExtent().height;
         }
         else
         {
@@ -128,8 +128,8 @@ namespace foray::stages {
         }
         if(!!mDstImage)
         {
-            dstWidth  = (int32_t)mDstImage->GetExtent3D().width;
-            dstHeight = (int32_t)mDstImage->GetExtent3D().height;
+            dstWidth  = (int32_t)mDstImage->GetExtent().width;
+            dstHeight = (int32_t)mDstImage->GetExtent().height;
         }
         else
         {

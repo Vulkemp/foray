@@ -47,6 +47,29 @@ namespace foray::util {
         return stored;
     }
 
+    bool StringSet::Has(const char* data, size_t size) const
+    {
+        if(size > 0)
+        {
+            return Has(std::string_view(data, size));
+        }
+        else
+        {
+            return Has(std::string_view(data));
+        }
+    }
+
+    bool StringSet::Has(const std::string& str) const
+    {
+        return Has(std::string_view(str));
+    }
+
+    bool StringSet::Has(std::string_view str) const
+    {
+        uint64_t hash = std::hash<std::string_view>()(str);
+        return mStringViews.contains(hash);
+    }
+
     void StringSet::Clear()
     {
         mBlocks.clear();

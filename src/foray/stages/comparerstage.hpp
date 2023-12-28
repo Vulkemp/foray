@@ -3,7 +3,7 @@
 #include "../glm.hpp"
 #include "../mem.hpp"
 #include "computestage.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp
 #include "../core/managedbuffer.hpp"
 #include <array>
 
@@ -38,13 +38,13 @@ namespace foray::stages {
         struct InputInfo
         {
             /// @brief Image
-            core::ManagedImage* Image = nullptr;
+            core::Image* Image = nullptr;
             /// @brief Channels per pixel
             uint32_t ChannelCount = 4;
             /// @brief Scale applied to each channel before writing to output
             glm::vec4 Scale = glm::vec4(1.f);
             /// @brief Aspect required for the barrier to function
-            VkImageAspectFlags Aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+            vk::ImageAspectFlags Aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
             /// @brief Channel type (required to select correct shader input)
             EInputType Type = EInputType::Float;
         };
@@ -100,7 +100,7 @@ namespace foray::stages {
 
         std::array<SubStage, 2> mSubStages;
 
-        Local<core::ManagedImage>  mOutput;
+        Local<core::DefaultRenderTarget>  mOutput;
         Local<core::ManagedBuffer> mPipetteBuffer;
         void*                      mPipetteMap = nullptr;
 

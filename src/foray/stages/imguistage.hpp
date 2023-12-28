@@ -12,7 +12,7 @@ namespace foray::stages {
         /// @brief Init the imgui stage for rendering over a generic background image
         /// @param context Requires Device
         /// @param backgroundImage Managed Image Background Image to render over
-        ImguiStage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder = 0);
+        ImguiStage(core::Context* context, RenderDomain* domain, core::Image* backgroundImage, int32_t resizeOrder = 0);
         /// @brief Init the imgui stage for rendering to the swapchain
         /// @param context Requires Device, Swapchain & SwapchainImages
         ImguiStage(core::Context* context, int32_t resizeOrder = 0);
@@ -20,7 +20,7 @@ namespace foray::stages {
 
         /// @brief Switch background image and between modes at runtime
         /// @param backgroundImage Managed Image Background Image to render over. If set to nullptr, will use swapchain mode.
-        virtual void SetBackgroundImage(core::ManagedImage* backgroundImage);
+        virtual void SetBackgroundImage(core::Image* backgroundImage);
 
         /// @brief Add a function that renders an imgui window. Example:
         void AddWindowDraw(std::function<void()> windowDraw) { mWindowDraws.push_back(windowDraw); }
@@ -33,7 +33,7 @@ namespace foray::stages {
       protected:
         VkClearValue mClearValue;
 
-        core::ManagedImage*                mTargetImage = nullptr;
+        core::Image*                mTargetImage = nullptr;
         VkDescriptorPool                   mImguiPool{};
         std::vector<std::function<void()>> mWindowDraws;
 

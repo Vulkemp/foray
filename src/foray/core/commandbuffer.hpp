@@ -6,7 +6,7 @@
 namespace foray::core {
 
     /// @brief VkCommandBuffer wrapper
-    class CommandBuffer : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_COMMAND_BUFFER>
+    class CommandBuffer : public VulkanResource<vk::ObjectType::eCommandBuffer>
     {
       public:
         CommandBuffer(Context* context, VkCommandBufferLevel cmdBufferLvl = VK_COMMAND_BUFFER_LEVEL_PRIMARY, bool begin = false);
@@ -63,17 +63,17 @@ namespace foray::core {
         /// @brief Semaphore
         VkSemaphore Semaphore = nullptr;
         /// @brief Stage masks
-        VkPipelineStageFlags2 WaitStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        vk::PipelineStageFlags2 WaitStage = vk::PipelineStageFlagBits2::eAllCommands;
 
         /// @brief Shorthand for initializing a SemaphoreReference struct for a binary semaphore
         /// @param semaphore Semaphore
         /// @param waitStage Wait / Signal stage masks
-        static SemaphoreReference Binary(VkSemaphore semaphore, VkPipelineStageFlags2 waitStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
+        static SemaphoreReference Binary(VkSemaphore semaphore, vk::PipelineStageFlags2 waitStage = vk::PipelineStageFlagBits2::eAllCommands);
         /// @brief Shorthand for initializing a SemaphoreReference struct for a timeline semaphore
         /// @param semaphore Semaphore
         /// @param value Timeline value to wait for / signal
         /// @param waitStage Wait / Signal stage masks
-        static SemaphoreReference Timeline(VkSemaphore semaphore, uint64_t value, VkPipelineStageFlags2 waitStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
+        static SemaphoreReference Timeline(VkSemaphore semaphore, uint64_t value, vk::PipelineStageFlags2 waitStage = vk::PipelineStageFlagBits2::eAllCommands);
 
         operator VkSemaphoreSubmitInfo() const;
     };

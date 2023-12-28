@@ -1,33 +1,34 @@
 #include "renderattachments.hpp"
 #include "../core/imagelayoutcache.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/imageview.hpp"
+#include "../core/image.hpp"
 
 namespace foray::util {
     RenderAttachments::Attachment::Attachment() : Source(EAttachmentSource::Undefined) {}
     RenderAttachments::Attachment::Attachment(
-        EAttachmentBindpoint bindpoint, std::span<BareAttachment> images, VkImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
+        EAttachmentBindpoint bindpoint, std::span<BareAttachment> images, vk::ImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
         : Bindpoint(bindpoint), Source(EAttachmentSource::Bare), BareRefs(images.begin(), images.end()), Layout(layout), LoadOp(loadop), Store(store), ClearValue(clearValue)
     {
     }
     RenderAttachments::Attachment::Attachment(
-        EAttachmentBindpoint bindpoint, std::span<core::ManagedImage*> images, VkImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
-        : Bindpoint(bindpoint), Source(EAttachmentSource::ManagedImage), Images(images.begin(), images.end()), Layout(layout), LoadOp(loadop), Store(store), ClearValue(clearValue)
+        EAttachmentBindpoint bindpoint, std::span<core::ImageViewRef*> images, vk::ImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
+        : Bindpoint(bindpoint), Source(EAttachmentSource::Image), Images(images.begin(), images.end()), Layout(layout), LoadOp(loadop), Store(store), ClearValue(clearValue)
     {
     }
     RenderAttachments::Attachment::Attachment(
-        EAttachmentBindpoint bindpoint, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
+        EAttachmentBindpoint bindpoint, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout, EAttachmentLoadOp loadop, bool store, VkClearValue clearValue)
         : Bindpoint(bindpoint), Source(EAttachmentSource::Swapchain), Swapchain(swapchain), Layout(layout), LoadOp(loadop), Store(store), ClearValue(clearValue)
     {
     }
 
-    VkImage RenderAttachments::Attachment::GetSourceImage(uint32_t resourceIdx) const
+    vk::Image RenderAttachments::Attachment::GetSourceImage(uint32_t resourceIdx) const
     {
         switch(Source)
         {
             case EAttachmentSource::Bare:
                 return BareRefs[resourceIdx % (uint32_t)BareRefs.size()].Image;
-            case EAttachmentSource::ManagedImage:
-                return Images[resourceIdx % (uint32_t)Images.size()]->GetImage();
+            case EAttachmentSource::Image:
+                return Images[resourceIdx % (uint32_t)Images.size()]->GetImage()->GetImage();
             case EAttachmentSource::Swapchain: {
                 std::vector<core::SwapchainImageInfo>& swapImgs = Swapchain->GetSwapchainImages();
                 return swapImgs[resourceIdx % swapImgs.size()].Image;
@@ -37,14 +38,14 @@ namespace foray::util {
         }
     }
 
-    VkImageView RenderAttachments::Attachment::GetSourceView(uint32_t resourceIdx) const
+    vk::ImageView RenderAttachments::Attachment::GetSourceView(uint32_t resourceIdx) const
     {
         switch(Source)
         {
             case EAttachmentSource::Bare:
                 return BareRefs[resourceIdx % (uint32_t)BareRefs.size()].View;
-            case EAttachmentSource::ManagedImage:
-                return Images[resourceIdx % (uint32_t)Images.size()]->GetImageView();
+            case EAttachmentSource::Image:
+                return Images[resourceIdx % (uint32_t)Images.size()]->GetView();
             case EAttachmentSource::Swapchain: {
                 std::vector<core::SwapchainImageInfo>& swapImgs = Swapchain->GetSwapchainImages();
                 return swapImgs[resourceIdx % swapImgs.size()].ImageView;
@@ -54,14 +55,14 @@ namespace foray::util {
         }
     }
 
-    VkFormat RenderAttachments::Attachment::GetSourceFormat() const
+    vk::Format RenderAttachments::Attachment::GetSourceFormat() const
     {
         switch(Source)
         {
             case EAttachmentSource::Bare:
                 return BareRefs[0].Format;
-            case EAttachmentSource::ManagedImage:
-                return Images[0]->GetFormat();
+            case EAttachmentSource::Image:
+                return Images[0]->GetImage()->GetFormat();
             case EAttachmentSource::Swapchain:
                 return Swapchain->GetSwapchain().image_format;
             default:
@@ -96,17 +97,16 @@ namespace foray::util {
 
     VkImageMemoryBarrier2 RenderAttachments::Attachment::MakeBarrier(uint32_t resourceIdx, core::ImageLayoutCache& layoutCache) const
     {
-        VkImage                          image = GetSourceImage(resourceIdx);
+        vk::Image                          image = GetSourceImage(resourceIdx);
         core::ImageLayoutCache::Barrier2 barrier;
         barrier.SrcStageMask  = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         barrier.SrcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
         barrier.NewLayout     = Layout;
-        barrier.SubresourceRange.layerCount = VK_REMAINING_MIP_LEVELS;
 
         if(LoadOp != EAttachmentLoadOp::Load)
         {
             // We aren't reading any data, setting the source layout manually to undefined
-            layoutCache.Set(image, VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED);
+            layoutCache.Set(image, vk::ImageLayout::VK_IMAGE_LAYOUT_UNDEFINED);
         }
 
         switch(Bindpoint)
@@ -127,6 +127,11 @@ namespace foray::util {
                 break;
         }
 
+        if (Source == EAttachmentSource::Image)
+        {
+            barrier.SubresourceRange = Images[0]->GetSubResource().MakeVkSubresourceRange();
+        }
+
         return layoutCache.MakeBarrier(image, barrier);
     }
 
@@ -140,66 +145,66 @@ namespace foray::util {
         return *this;
     }
 
-    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, core::ManagedImage* image, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
-        return SetAttachmentCleared(idx, std::span<core::ManagedImage*>(&image, 1u), layout, clearValue);
+        return SetAttachmentCleared(idx, std::span<core::ImageViewRef*>(&image, 1u), layout, clearValue);
     }
 
-    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
 
-    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, BareAttachment image, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, BareAttachment image, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return SetAttachmentCleared(idx, std::span<BareAttachment>(&image, 1u), layout, clearValue);
     }
 
-    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::SetAttachmentCleared(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, core::ManagedImage* image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout)
     {
-        return SetAttachmentDiscarded(idx, std::span<core::ManagedImage*>(&image, 1u), layout);
+        return SetAttachmentDiscarded(idx, std::span<core::ImageViewRef*>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, BareAttachment image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentDiscarded(uint32_t idx, BareAttachment image, vk::ImageLayout layout)
     {
         return SetAttachmentDiscarded(idx, std::span<BareAttachment>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, core::ManagedImage* image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, core::ImageViewRef* image, vk::ImageLayout layout)
     {
-        return SetAttachmentLoaded(idx, std::span<core::ManagedImage*>(&image, 1u), layout);
+        return SetAttachmentLoaded(idx, std::span<core::ImageViewRef*>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, std::span<BareAttachment> images, VkImageLayout layout)
-    {
-        return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
-    }
-    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, std::span<core::ManagedImage*> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, std::span<BareAttachment> images, vk::ImageLayout layout)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, std::span<core::ImageViewRef*> images, vk::ImageLayout layout)
+    {
+        return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
+    }
+    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout)
     {
         return SetAttachment(idx, Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Load, true));
     }
-    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, BareAttachment image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::SetAttachmentLoaded(uint32_t idx, BareAttachment image, vk::ImageLayout layout)
     {
         return SetAttachmentLoaded(idx, std::span<BareAttachment>(&image, 1u), layout);
     }
@@ -209,109 +214,109 @@ namespace foray::util {
         return *this;
     }
 
-    RenderAttachments& RenderAttachments::AddAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::AddAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
-        return AddAttachmentCleared(std::span<core::ManagedImage*>(&image, 1u), layout, clearValue);
+        return AddAttachmentCleared(std::span<core::ImageViewRef*>(&image, 1u), layout, clearValue);
     }
 
-    RenderAttachments& RenderAttachments::AddAttachmentCleared(std::span<core::ManagedImage*> images, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::AddAttachmentCleared(std::span<core::ImageViewRef*> images, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
 
-    RenderAttachments& RenderAttachments::AddAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::AddAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return AddAttachmentCleared(std::span<BareAttachment>(&image, 1u), layout, clearValue);
     }
 
-    RenderAttachments& RenderAttachments::AddAttachmentCleared(std::span<BareAttachment> images, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::AddAttachmentCleared(std::span<BareAttachment> images, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentCleared(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout, VkClearColorValue clearValue)
+    RenderAttachments& RenderAttachments::AddAttachmentCleared(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout, VkClearColorValue clearValue)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Clear, true, VkClearValue{.color = {clearValue}}));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(core::ManagedImage* image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(core::ImageViewRef* image, vk::ImageLayout layout)
     {
-        return AddAttachmentDiscarded(std::span<core::ManagedImage*>(&image, 1u), layout);
+        return AddAttachmentDiscarded(std::span<core::ImageViewRef*>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(std::span<core::ManagedImage*> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(std::span<core::ImageViewRef*> images, vk::ImageLayout layout)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(std::span<BareAttachment> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(std::span<BareAttachment> images, vk::ImageLayout layout)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Discard, true));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(BareAttachment image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentDiscarded(BareAttachment image, vk::ImageLayout layout)
     {
         return AddAttachmentDiscarded(std::span<BareAttachment>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::AddAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout)
     {
-        return AddAttachmentLoaded(std::span<core::ManagedImage*>(&image, 1u), layout);
+        return AddAttachmentLoaded(std::span<core::ImageViewRef*>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<BareAttachment> images, VkImageLayout layout)
-    {
-        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
-    }
-    RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<core::ManagedImage*> images, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<BareAttachment> images, vk::ImageLayout layout)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentLoaded(base::VulkanWindowSwapchain* swapchain, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentLoaded(std::span<core::ImageViewRef*> images, vk::ImageLayout layout)
+    {
+        return AddAttachment(Attachment(EAttachmentBindpoint::Color, images, layout, EAttachmentLoadOp::Load, true));
+    }
+    RenderAttachments& RenderAttachments::AddAttachmentLoaded(base::VulkanWindowSwapchain* swapchain, vk::ImageLayout layout)
     {
         return AddAttachment(Attachment(EAttachmentBindpoint::Color, swapchain, layout, EAttachmentLoadOp::Load, true));
     }
-    RenderAttachments& RenderAttachments::AddAttachmentLoaded(BareAttachment image, VkImageLayout layout)
+    RenderAttachments& RenderAttachments::AddAttachmentLoaded(BareAttachment image, vk::ImageLayout layout)
     {
         return AddAttachmentLoaded(std::span<BareAttachment>(&image, 1u), layout);
     }
-    RenderAttachments& RenderAttachments::SetDepthAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
+    RenderAttachments& RenderAttachments::SetDepthAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
     {
-        mDepthAttachment.New(Attachment(EAttachmentBindpoint::Depth, std::span<core::ManagedImage*>(&image, 1u), layout, EAttachmentLoadOp::Clear, store,
+        mDepthAttachment.New(Attachment(EAttachmentBindpoint::Depth, std::span<core::ImageViewRef*>(&image, 1u), layout, EAttachmentLoadOp::Clear, store,
                                         VkClearValue{.depthStencil = {clearValue}}));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetDepthAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
+    RenderAttachments& RenderAttachments::SetDepthAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
     {
         mDepthAttachment.New(
             Attachment(EAttachmentBindpoint::Depth, std::span<BareAttachment>(&image, 1u), layout, EAttachmentLoadOp::Clear, store, VkClearValue{.depthStencil = {clearValue}}));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetDepthAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout, bool store)
+    RenderAttachments& RenderAttachments::SetDepthAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout, bool store)
     {
-        mDepthAttachment.New(Attachment(EAttachmentBindpoint::Depth, std::span<core::ManagedImage*>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
+        mDepthAttachment.New(Attachment(EAttachmentBindpoint::Depth, std::span<core::ImageViewRef*>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetDepthAttachmentLoaded(BareAttachment image, VkImageLayout layout, bool store)
+    RenderAttachments& RenderAttachments::SetDepthAttachmentLoaded(BareAttachment image, vk::ImageLayout layout, bool store)
     {
         mDepthAttachment.New(Attachment(EAttachmentBindpoint::Depth, std::span<BareAttachment>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetStencilAttachmentCleared(core::ManagedImage* image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
+    RenderAttachments& RenderAttachments::SetStencilAttachmentCleared(core::ImageViewRef* image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
     {
-        mStencilAttachment.New(Attachment(EAttachmentBindpoint::Stencil, std::span<core::ManagedImage*>(&image, 1u), layout, EAttachmentLoadOp::Clear, store,
+        mStencilAttachment.New(Attachment(EAttachmentBindpoint::Stencil, std::span<core::ImageViewRef*>(&image, 1u), layout, EAttachmentLoadOp::Clear, store,
                                           VkClearValue{.depthStencil = {clearValue}}));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetStencilAttachmentCleared(BareAttachment image, VkImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
+    RenderAttachments& RenderAttachments::SetStencilAttachmentCleared(BareAttachment image, vk::ImageLayout layout, VkClearDepthStencilValue clearValue, bool store)
     {
         mStencilAttachment.New(
             Attachment(EAttachmentBindpoint::Stencil, std::span<BareAttachment>(&image, 1u), layout, EAttachmentLoadOp::Clear, store, VkClearValue{.depthStencil = {clearValue}}));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetStencilAttachmentLoaded(core::ManagedImage* image, VkImageLayout layout, bool store)
+    RenderAttachments& RenderAttachments::SetStencilAttachmentLoaded(core::ImageViewRef* image, vk::ImageLayout layout, bool store)
     {
-        mStencilAttachment.New(Attachment(EAttachmentBindpoint::Stencil, std::span<core::ManagedImage*>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
+        mStencilAttachment.New(Attachment(EAttachmentBindpoint::Stencil, std::span<core::ImageViewRef*>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
         return *this;
     }
-    RenderAttachments& RenderAttachments::SetStencilAttachmentLoaded(BareAttachment image, VkImageLayout layout, bool store)
+    RenderAttachments& RenderAttachments::SetStencilAttachmentLoaded(BareAttachment image, vk::ImageLayout layout, bool store)
     {
         mStencilAttachment.New(Attachment(EAttachmentBindpoint::Stencil, std::span<BareAttachment>(&image, 1u), layout, EAttachmentLoadOp::Load, store));
         return *this;
@@ -329,8 +334,8 @@ namespace foray::util {
             .viewMask                = mViewMask,
             .colorAttachmentCount    = (uint32_t)mAttachmentFormats.size(),
             .pColorAttachmentFormats = mAttachmentFormats.data(),
-            .depthAttachmentFormat   = mDepthAttachment.Exists() ? mDepthAttachment->GetSourceFormat() : VkFormat::VK_FORMAT_UNDEFINED,
-            .stencilAttachmentFormat = mStencilAttachment.Exists() ? mStencilAttachment->GetSourceFormat() : VkFormat::VK_FORMAT_UNDEFINED
+            .depthAttachmentFormat   = mDepthAttachment.Exists() ? mDepthAttachment->GetSourceFormat() : vk::Format::VK_FORMAT_UNDEFINED,
+            .stencilAttachmentFormat = mStencilAttachment.Exists() ? mStencilAttachment->GetSourceFormat() : vk::Format::VK_FORMAT_UNDEFINED
         };
     }
     void RenderAttachments::CmdBeginRendering(VkCommandBuffer cmdBuffer, VkExtent2D extent, core::ImageLayoutCache& layoutCache, uint32_t resourceIdx) const

@@ -25,7 +25,7 @@
 ```
 ./core
 ```
-* Abstractions for VkCommandBuffer, VkDescriptorSet, VkBuffer, VkImage, VkShaderModule
+* Abstractions for VkCommandBuffer, VkDescriptorSet, vk::Buffer, vk::Image, vk::ShaderModule
 * Manager classes for shaders and samplers
 * Context struct implementation
 ## glTF Loader Implementation

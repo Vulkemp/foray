@@ -15,58 +15,58 @@ namespace foray::stages {
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::WorldPos =  
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::WORLDPOS,
          .Type               = FragmentOutputType::VEC4,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT,
          .Result             = "WorldPos,0"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::WorldNormal = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::UV | (uint32_t)FragmentInputFlagBits::NORMAL | (uint32_t)FragmentInputFlagBits::TANGENT,
          .BuiltInFeaturesFlags = (uint32_t)BuiltInFeaturesFlagBits::NORMALMAPPING,
          .Type                 = FragmentOutputType::VEC4,
-         .ImageFormat          = VkFormat::VK_FORMAT_R8G8B8A8_SNORM,
+         .ImageFormat          = vk::Format::VK_FORMAT_R8G8B8A8_SNORM,
          .Result               = "normalMapped,0"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::Albedo = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::UV,
          .BuiltInFeaturesFlags = (uint32_t)BuiltInFeaturesFlagBits::MATERIALPROBE,
          .Type                 = FragmentOutputType::VEC4,
-         .ImageFormat          = VkFormat::VK_FORMAT_R8G8B8A8_SRGB,
+         .ImageFormat          = vk::Format::VK_FORMAT_R8G8B8A8_SRGB,
          .Result               = "probe.BaseColor.rgb,1"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::MaterialId = 
         {.Type = FragmentOutputType::INT, 
-         .ImageFormat = VkFormat::VK_FORMAT_R16_SINT, 
+         .ImageFormat = vk::Format::VK_FORMAT_R16_SINT, 
          .ClearValue         = {{-1}},
          .Result = "PushConstant.MaterialIndex"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::MeshInstanceId = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::MESHID,
          .Type               = FragmentOutputType::INT,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16_SINT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16_SINT,
          .ClearValue         = {{-1}},
          .Result             = "MeshInstanceId"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::UV = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::UV,
          .Type               = FragmentOutputType::VEC2,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16G16_SFLOAT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16G16_SFLOAT,
          .Result             = "UV"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::ScreenMotion = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::DEVICEPOS | (uint32_t)FragmentInputFlagBits::DEVICEPOSOLD,
          .Type               = FragmentOutputType::VEC2,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16G16_SFLOAT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16G16_SFLOAT,
          .Result             = "((DevicePosOld.xy / DevicePosOld.w) - (DevicePos.xy / DevicePos.w)) * 0.5"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::WorldMotion = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::WORLDPOS | (uint32_t)FragmentInputFlagBits::WORLDPOSOLD,
          .Type               = FragmentOutputType::VEC4,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT,
          .Result             = "WorldPosOld - WorldPos, 0.f"};
 
     const ConfigurableRasterStage::OutputRecipe ConfigurableRasterStage::Templates::DepthAndDerivative = 
         {.FragmentInputFlags = (uint32_t)FragmentInputFlagBits::DEVICEPOS,
          .Type               = FragmentOutputType::VEC2,
-         .ImageFormat        = VkFormat::VK_FORMAT_R16G16_SFLOAT,
+         .ImageFormat        = vk::Format::VK_FORMAT_R16G16_SFLOAT,
          .ClearValue         = {{65504.f, 0.f}},
          .Calculation        = "float linearZ = DevicePos.z * DevicePos.w; float derivative = max(abs(dFdx(linearZ)), abs(dFdy(linearZ)));",
          .Result             = "linearZ, derivative"};
@@ -312,12 +312,12 @@ namespace foray::stages {
     {
         for(auto& pair : mOutputMap)
         {
-            Local<core::ManagedImage>& image  = pair.second->Image;
+            Local<core::Image>& image  = pair.second->Image;
             OutputRecipe&              recipe = pair.second->Recipe;
             std::string_view           name   = pair.second->Name;
 
-            core::ManagedImage::CreateInfo ci(VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT
-                                                  | /*VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT |*/ VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+            core::Image::CreateInfo ci(vk::ImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | vk::ImageUsageFlagBits::eSampled
+                                                  | /*vk::ImageUsageFlagBits::eStorage |*/ vk::ImageUsageFlagBits::eTransferSrc,
                                               recipe.ImageFormat, size, name);
             image.New(mContext, ci);
             std::string keycopy(name);
@@ -325,8 +325,8 @@ namespace foray::stages {
         }
         mDepthOutputName = fmt::format("{}.Depth", mName);
         VkImageUsageFlags depthUsage =
-            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        core::ManagedImage::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, size, mDepthOutputName);
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | eSampled | eTransferSrc;
+        core::Image::CreateInfo ci(depthUsage, VK_FORMAT_D32_SFLOAT, size, mDepthOutputName);
         ci.ImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT;
         mDepthImage.New(mContext, ci);
         mImageOutputs[mDepthOutputName] = mDepthImage.Get();
@@ -336,9 +336,9 @@ namespace foray::stages {
     {
         for(Output* output : mOutputList)
         {
-            mRenderAttachments.AddAttachmentCleared(output->Image.Get(), VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, output->Recipe.ClearValue);
+            mRenderAttachments.AddAttachmentCleared(output->Image.Get(), vk::ImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, output->Recipe.ClearValue);
         }
-        mRenderAttachments.SetDepthAttachmentCleared(mDepthImage.Get(), VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VkClearDepthStencilValue{1.f});
+        mRenderAttachments.SetDepthAttachmentCleared(mDepthImage.Get(), vk::ImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VkClearDepthStencilValue{1.f});
     }
 
     void ConfigurableRasterStage::SetupDescriptors()
@@ -363,7 +363,7 @@ namespace foray::stages {
     {
         util::PipelineLayout::Builder builder;
         builder.AddDescriptorSetLayout(mDescriptorSet.GetLayout());
-        builder.AddPushConstantRange<scene::DrawPushConstant>(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
+        builder.AddPushConstantRange<scene::DrawPushConstant>(vk::ShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT);
         mPipelineLayout.New(mContext, builder);
     }
 
@@ -416,8 +416,8 @@ namespace foray::stages {
     {
         // vertex layout
         util::RasterPipeline::Builder builder;
-        builder.Default_SceneDrawing(mVertexShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT),
-                                     mFragmentShaderModule->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), &mRenderAttachments, mDomain->GetExtent(),
+        builder.Default_SceneDrawing(mVertexShaderModule->GetShaderStageCi(vk::ShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT),
+                                     mFragmentShaderModule->GetShaderStageCi(vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), &mRenderAttachments, mDomain->GetExtent(),
                                      mPipelineLayout->GetPipelineLayout(), util::RasterPipeline::BuiltinDepthInit::Normal);
         // builder.SetCullModeFlags(VkCullModeFlagBits::VK_CULL_MODE_NONE);
 

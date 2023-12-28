@@ -9,14 +9,14 @@ namespace foray::util {
         core::HostSyncCommandBuffer& CmdBuffer;
         core::Context*               Context;
         const osi::Utf8Path&         Path;
-        Local<core::ManagedImage>&   Image;
+        Local<core::Image>&   Image;
         VkImageUsageFlags            Usage;
         bool                         Final;
-        VkImageLayout                AfterWrite;
+        vk::ImageLayout                AfterWrite;
         std::string_view             Name;
     };
 
-    template <VkFormat format>
+    template <vk::Format format>
     void lLoadF(const LoadParams& params)
     {
         foray::util::ImageLoader<format> imageLoader;
@@ -24,60 +24,61 @@ namespace foray::util {
 
         VkExtent2D extent = imageLoader.GetInfo().Extent;
 
-        foray::core::ManagedImage::CreateInfo ci(params.Usage, format, extent, params.Name);
+        // (params.Usage, format, extent, params.Name);
+        foray::core::Image::CreateInfo ci;
         if(params.Final)
         {
             uint32_t mipCount                          = (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height))));
-            ci.ImageCI.mipLevels                       = mipCount;
-            ci.ImageViewCI.subresourceRange.levelCount = mipCount;
+            ci = foray::core::Image::CreateInfo::PresetTexture(format, extent, mipCount);
         }
         else
         {
-            ci.CreateImageView = false;
+            ci = foray::core::Image::CreateInfo::PresetTexture(format, extent, 1u);
+            ci.SetUsageFlags(vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst);
         }
         imageLoader.UpdateManagedImageCI(ci);
         params.Image.New(params.Context, ci);
         imageLoader.WriteManagedImageData(params.Image.Get(), params.AfterWrite);
     }
 
-    void lLoad(VkFormat format, const LoadParams& params)
+    void lLoad(vk::Format format, const LoadParams& params)
     {
         switch(format)
         {
-            case VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT:
+            case vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT:
                 lLoadF<VK_FORMAT_R16G16B16A16_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT:
+            case vk::Format::VK_FORMAT_R32G32B32A32_SFLOAT:
                 lLoadF<VK_FORMAT_R32G32B32A32_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R8G8B8A8_UNORM:
+            case vk::Format::VK_FORMAT_R8G8B8A8_UNORM:
                 lLoadF<VK_FORMAT_R8G8B8A8_UNORM>(params);
                 break;
-            case VkFormat::VK_FORMAT_R16G16B16_SFLOAT:
+            case vk::Format::VK_FORMAT_R16G16B16_SFLOAT:
                 lLoadF<VK_FORMAT_R16G16B16_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R32G32B32_SFLOAT:
+            case vk::Format::VK_FORMAT_R32G32B32_SFLOAT:
                 lLoadF<VK_FORMAT_R32G32B32_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R8G8B8_UNORM:
+            case vk::Format::VK_FORMAT_R8G8B8_UNORM:
                 lLoadF<VK_FORMAT_R8G8B8_UNORM>(params);
                 break;
-            case VkFormat::VK_FORMAT_R16G16_SFLOAT:
+            case vk::Format::VK_FORMAT_R16G16_SFLOAT:
                 lLoadF<VK_FORMAT_R16G16_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R32G32_SFLOAT:
+            case vk::Format::VK_FORMAT_R32G32_SFLOAT:
                 lLoadF<VK_FORMAT_R32G32_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R8G8_UNORM:
+            case vk::Format::VK_FORMAT_R8G8_UNORM:
                 lLoadF<VK_FORMAT_R8G8_UNORM>(params);
                 break;
-            case VkFormat::VK_FORMAT_R16_SFLOAT:
+            case vk::Format::VK_FORMAT_R16_SFLOAT:
                 lLoadF<VK_FORMAT_R16_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R32_SFLOAT:
+            case vk::Format::VK_FORMAT_R32_SFLOAT:
                 lLoadF<VK_FORMAT_R32_SFLOAT>(params);
                 break;
-            case VkFormat::VK_FORMAT_R8_UNORM:
+            case vk::Format::VK_FORMAT_R8_UNORM:
                 lLoadF<VK_FORMAT_R8_UNORM>(params);
                 break;
             default:
@@ -86,35 +87,35 @@ namespace foray::util {
     }
 
 
-    EnvironmentMap::EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat, VkFormat storeFormat)
+    EnvironmentMap::EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, vk::Format loadFormat, vk::Format storeFormat)
     {
         core::HostSyncCommandBuffer cmdBuffer(context);
 
         VkExtent2D extent   = {};
         uint32_t   mipCount = 0;
 
-        if(loadFormat == VkFormat::VK_FORMAT_UNDEFINED)
+        if(loadFormat == vk::Format::VK_FORMAT_UNDEFINED)
         {
             switch(storeFormat)
             {
-                case VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT:
-                case VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT:
-                case VkFormat::VK_FORMAT_R8G8B8A8_UNORM:
+                case vk::Format::VK_FORMAT_R32G32B32A32_SFLOAT:
+                case vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT:
+                case vk::Format::VK_FORMAT_R8G8B8A8_UNORM:
                     loadFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
                     break;
-                case VkFormat::VK_FORMAT_R32G32B32_SFLOAT:
-                case VkFormat::VK_FORMAT_R16G16B16_SFLOAT:
-                case VkFormat::VK_FORMAT_R8G8B8_UNORM:
+                case vk::Format::VK_FORMAT_R32G32B32_SFLOAT:
+                case vk::Format::VK_FORMAT_R16G16B16_SFLOAT:
+                case vk::Format::VK_FORMAT_R8G8B8_UNORM:
                     loadFormat = VK_FORMAT_R32G32B32_SFLOAT;
                     break;
-                case VkFormat::VK_FORMAT_R32G32_SFLOAT:
-                case VkFormat::VK_FORMAT_R16G16_SFLOAT:
-                case VkFormat::VK_FORMAT_R8G8_UNORM:
+                case vk::Format::VK_FORMAT_R32G32_SFLOAT:
+                case vk::Format::VK_FORMAT_R16G16_SFLOAT:
+                case vk::Format::VK_FORMAT_R8G8_UNORM:
                     loadFormat = VK_FORMAT_R32G32_SFLOAT;
                     break;
-                case VkFormat::VK_FORMAT_R32_SFLOAT:
-                case VkFormat::VK_FORMAT_R16_SFLOAT:
-                case VkFormat::VK_FORMAT_R8_UNORM:
+                case vk::Format::VK_FORMAT_R32_SFLOAT:
+                case vk::Format::VK_FORMAT_R16_SFLOAT:
+                case vk::Format::VK_FORMAT_R8_UNORM:
                     loadFormat = VK_FORMAT_R32_SFLOAT;
                     break;
                 default:
@@ -125,24 +126,22 @@ namespace foray::util {
 
         if(loadFormat != storeFormat)
         {
-            Local<core::ManagedImage> temporaryImage;
+            Local<core::Image> temporaryImage;
 
             LoadParams params{.CmdBuffer  = cmdBuffer,
                               .Context    = context,
                               .Path       = path,
                               .Image      = temporaryImage,
-                              .Usage      = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+                              .Usage      = eTransferDst | eTransferSrc,
                               .Final      = false,
-                              .AfterWrite = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                              .AfterWrite = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                               .Name       = "Temporary Image"};
 
             lLoad(loadFormat, params);
 
             extent   = temporaryImage->GetExtent2D();
             mipCount = (uint32_t)(floorf(log2f((fp32_t)std::max(extent.width, extent.height))));
-            core::ManagedImage::CreateInfo ci(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, storeFormat, extent, name);
-            ci.ImageCI.mipLevels                       = mipCount;
-            ci.ImageViewCI.subresourceRange.levelCount = mipCount;
+            core::Image::CreateInfo ci = core::Image::CreateInfo::PresetTexture(storeFormat, extent, mipCount);
 
             mImage.New(context, ci);
 
@@ -155,8 +154,8 @@ namespace foray::util {
                 .srcAccessMask       = VK_ACCESS_2_NONE,
                 .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
                 .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                .oldLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .image               = mImage->GetImage(),
@@ -177,9 +176,9 @@ namespace foray::util {
 
             VkBlitImageInfo2 blitInfo{.sType          = VkStructureType::VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2,
                                       .srcImage       = temporaryImage->GetImage(),
-                                      .srcImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                      .srcImageLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                       .dstImage       = mImage->GetImage(),
-                                      .dstImageLayout = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                      .dstImageLayout = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                       .regionCount    = 1U,
                                       .pRegions       = &blit,
                                       .filter         = VkFilter::VK_FILTER_NEAREST};
@@ -194,15 +193,15 @@ namespace foray::util {
                               .Context    = context,
                               .Path       = path,
                               .Image      = mImage,
-                              .Usage      = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                              .Usage      = eTransferDst | eTransferSrc | eSampled,
                               .Final      = true,
-                              .AfterWrite = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                              .AfterWrite = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                               .Name       = name};
 
             lLoad(loadFormat, params);
 
             extent   = mImage->GetExtent2D();
-            mipCount = mImage->GetCreateInfo().ImageCI.mipLevels;
+            mipCount = mImage->GetCreateInfo().GetMipLevelCount();
         }
 
         {
@@ -210,7 +209,7 @@ namespace foray::util {
             cmdBuffer.Begin();
 
             // Generate mip levels
-            VkImage image = mImage->GetImage();
+            vk::Image image = mImage->GetImage();
 
             std::vector<VkImageMemoryBarrier2> barriers(2);
             VkImageMemoryBarrier2&             sourceBarrier = barriers[0];
@@ -221,8 +220,8 @@ namespace foray::util {
                                                   .srcAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
                                                   .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
                                                   .dstAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT,
-                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                  .oldLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                  .newLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                                   .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .image               = image,
@@ -233,8 +232,8 @@ namespace foray::util {
                                                   .srcAccessMask       = VK_ACCESS_2_NONE,
                                                   .dstStageMask        = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
                                                   .dstAccessMask       = VK_ACCESS_2_TRANSFER_WRITE_BIT,
-                                                  .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-                                                  .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                  .oldLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+                                                  .newLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                   .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                                   .image               = image,
@@ -262,7 +261,7 @@ namespace foray::util {
                         .aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT, .mipLevel = (uint32_t)i + 1, .baseArrayLayer = 0, .layerCount = 1}};
                 blit.srcOffsets[1] = srcArea;
                 blit.dstOffsets[1] = dstArea;
-                vkCmdBlitImage(cmdBuffer, image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, image, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit,
+                vkCmdBlitImage(cmdBuffer, image, vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, image, vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit,
                                VkFilter::VK_FILTER_LINEAR);
             }
 
@@ -273,8 +272,8 @@ namespace foray::util {
                                           .srcAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
                                           .dstStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                           .dstAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT,
-                                          .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                          .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                          .oldLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                          .newLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                           .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                           .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                           .image               = image,
@@ -285,8 +284,8 @@ namespace foray::util {
                                           .srcAccessMask       = VK_ACCESS_2_TRANSFER_READ_BIT | VK_ACCESS_2_TRANSFER_WRITE_BIT,
                                           .dstStageMask        = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
                                           .dstAccessMask       = VK_ACCESS_2_MEMORY_READ_BIT,
-                                          .oldLayout           = VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                          .newLayout           = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                          .oldLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                          .newLayout           = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                           .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                           .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                                           .image               = image,
@@ -302,7 +301,7 @@ namespace foray::util {
         }
 
         {  // Init sampler
-            VkSamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            vk::SamplerCreateInfo samplerCi{.sType                   = VkStructureType::VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
                                           .magFilter               = VkFilter::VK_FILTER_LINEAR,
                                           .minFilter               = VkFilter::VK_FILTER_LINEAR,
                                           .addressModeU            = VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,

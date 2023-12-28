@@ -12,7 +12,7 @@ namespace foray::as {
     /// @details
     /// This class takes the geometry referenced by a mesh from a geometrystore, and builds a bottom level acceleration structure from it.
     /// It manages (owns) both the BLAs buffer aswell as the handle and exposes the Blas' device address.
-    class Blas : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR>
+    class Blas : public core::VulkanResource<vk::ObjectType::eAccelerationStructureKHR>
     {
       public:
         class Builder
@@ -85,7 +85,7 @@ namespace foray::as {
         Local<BuildInfo>                                   mBuildInfo;
         Local<core::ManagedBuffer>                         mBlasMemory;
         Local<core::ManagedBuffer>                         mScratchMemory;
-        VkAccelerationStructureKHR                         mAccelerationStructure = nullptr;
-        VkDeviceAddress                                    mBlasAddress           = {};
+        vk::AccelerationStructureKHR                         mAccelerationStructure = nullptr;
+        vk::DeviceAddress                                    mBlasAddress           = {};
     };
 }  // namespace foray::as

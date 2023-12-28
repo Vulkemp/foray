@@ -1,6 +1,6 @@
 #pragma once
 #include "../basics.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp"
 #include "../core/samplercollection.hpp"
 #include "../mem.hpp"
 
@@ -22,7 +22,7 @@ namespace foray::util {
         FORAY_GETTER_MEM(Image)
 
       protected:
-        Local<core::ManagedImage> mImage;
+        Local<core::Image> mImage;
 
     };
 }  // namespace foray

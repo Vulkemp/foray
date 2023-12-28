@@ -16,7 +16,7 @@ namespace foray::util {
 
         std::vector<VkPipelineShaderStageCreateInfo>* Get() { return &mShaderStageCreateInfos; };
 
-        ShaderStageCreateInfos& Add(VkShaderStageFlagBits flagBits, VkShaderModule shaderModule)
+        ShaderStageCreateInfos& Add(vk::ShaderStageFlagBits flagBits, vk::ShaderModule shaderModule)
         {
             VkPipelineShaderStageCreateInfo shaderStageInfo{};
             shaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

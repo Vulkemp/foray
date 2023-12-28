@@ -1,9 +1,9 @@
 #pragma once
-#include "../core/swapchainimageinfo.hpp"
-#include "../vkb.hpp"
+#include "../core/swapchainimage.hpp"
 #include "../osi/osi_declares.hpp"
 #include "../osi/window.hpp"
 #include "../stages/renderdomain.hpp"
+#include "../vkb.hpp"
 #include "base_declares.hpp"
 #include <functional>
 
@@ -38,7 +38,6 @@ namespace foray::base {
 
         FORAY_PROPERTY_R(Window)
         FORAY_PROPERTY_R(Swapchain)
-        FORAY_PROPERTY_R(SwapchainImages)
         FORAY_PROPERTY_V(Context)
 
         /// @brief Create the Window
@@ -58,6 +57,10 @@ namespace foray::base {
 
         inline operator VkSwapchainKHR() { return mSwapchain.swapchain; }
 
+        core::SwapchainRenderTarget*       GetSwapchainFrameImage(uint32_t index);
+        const core::SwapchainRenderTarget* GetSwapchainFrameImage(uint32_t index) const;
+        uint32_t                         GetSwapchainFrameImageCount() const;
+
       protected:
         void ExtractSwapchainImages();
         void DestroySwapchain();
@@ -71,9 +74,9 @@ namespace foray::base {
 
         core::Context* mContext = nullptr;
 
-        osi::Window                           mWindow;
-        VkSurfaceKHR                          mSurface = nullptr;
-        vkb::Swapchain                        mSwapchain;
-        std::vector<core::SwapchainImageInfo> mSwapchainImages;
+        osi::Window                            mWindow;
+        VkSurfaceKHR                           mSurface = nullptr;
+        vkb::Swapchain                         mSwapchain;
+        std::vector<Local<core::SwapchainRenderTarget>> mSwapchainImages;
     };
 }  // namespace foray::base

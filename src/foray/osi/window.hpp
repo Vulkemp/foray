@@ -60,7 +60,7 @@ namespace foray::osi {
 
         virtual uint32_t SDLId() const;
 
-        virtual VkSurfaceKHR             GetOrCreateSurfaceKHR(VkInstance instance);
+        virtual VkSurfaceKHR             GetOrCreateSurfaceKHR(vk::Instance instance);
         virtual std::vector<const char*> GetVkSurfaceExtensions() const;
 
       protected:

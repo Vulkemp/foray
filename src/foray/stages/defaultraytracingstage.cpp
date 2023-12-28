@@ -14,7 +14,7 @@
 
 namespace foray::stages {
     DefaultRaytracingStageBase::DefaultRaytracingStageBase(core::Context* context, RenderDomain* domain, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder) {}
-    void DefaultRaytracingStageBase::Init(scene::Scene* scene, core::CombinedImageSampler* envMap, core::ManagedImage* noiseImage)
+    void DefaultRaytracingStageBase::Init(scene::Scene* scene, core::CombinedImageSampler* envMap, core::Image* noiseImage)
     {
         mScene          = scene;
         mEnvironmentMap = envMap;
@@ -46,9 +46,9 @@ namespace foray::stages {
     void DefaultRaytracingStageBase::CreateOutputImages()
     {
         VkImageUsageFlags imageUsageFlags =
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | eStorage | eTransferSrc | eTransferDst | eSampled;
 
-        core::ManagedImage::CreateInfo imageCi(imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
+        core::Image::CreateInfo imageCi(imageUsageFlags, VK_FORMAT_R16G16B16A16_SFLOAT, mDomain->GetExtent(), OutputName);
 
         mOutput.New(mContext, imageCi);
         mImageOutputs[std::string(OutputName)] = mOutput.Get();
@@ -68,7 +68,7 @@ namespace foray::stages {
         using namespace rtbindpoints;
 
         const as::Tlas*               tlas           = mScene->GetComponent<scene::gcomp::TlasManager>()->GetTlas();
-        VkAccelerationStructureKHR    accelStructure = tlas->GetAccelerationStructure();
+        vk::AccelerationStructureKHR    accelStructure = tlas->GetAccelerationStructure();
         const as::GeometryMetaBuffer* metaBuffer     = tlas->GetMetaBuffer();
         auto                          materialBuffer = mScene->GetComponent<scene::gcomp::MaterialManager>();
         auto                          textureStore   = mScene->GetComponent<scene::gcomp::TextureManager>();
@@ -91,7 +91,7 @@ namespace foray::stages {
         }
         if(!!mNoiseTexture)
         {
-            mDescriptorSet.SetDescriptorAt(BIND_NOISETEX, mNoiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
+            mDescriptorSet.SetDescriptorAt(BIND_NOISETEX, mNoiseTexture, vk::ImageLayout::VK_IMAGE_LAYOUT_GENERAL, nullptr, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, RTSTAGEFLAGS);
         }
 
         mDescriptorSet.CreateOrUpdate(mContext, "RaytracingStageDescriptorSet");
@@ -107,7 +107,7 @@ namespace foray::stages {
                                                                 .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
                                                                 .DstStageMask  = VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR,
                                                                 .DstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
-                                                                .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
+                                                                .NewLayout     = vk::ImageLayout::VK_IMAGE_LAYOUT_GENERAL}));
         }
         {
             auto cameraManager = mScene->GetComponent<scene::gcomp::CameraManager>();

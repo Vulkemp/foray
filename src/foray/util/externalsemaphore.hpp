@@ -4,7 +4,7 @@
 namespace foray::util {
 
     /// @brief Timeline Semaphore exposing handles for synchronization with other Apis (e.g. Cuda for OptiX denoising)
-    class ExternalSemaphore : public core::VulkanResource<VkObjectType::VK_OBJECT_TYPE_SEMAPHORE>
+    class ExternalSemaphore : public core::VulkanResource<vk::ObjectType::VK_OBJECT_TYPE_SEMAPHORE>
     {
       public:
         ExternalSemaphore(core::Context* context);

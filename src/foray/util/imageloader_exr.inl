@@ -134,7 +134,7 @@ namespace foray::util {
 
     }  // namespace impl
 
-    template <VkFormat FORMAT>
+    template <vk::Format FORMAT>
     bool ImageLoader<FORMAT>::PopulateImageInfo_TinyExr()
     {
         const char* exrError = nullptr;
@@ -217,7 +217,7 @@ namespace foray::util {
         return true;
     }
 
-    template <VkFormat FORMAT>
+    template <vk::Format FORMAT>
     bool ImageLoader<FORMAT>::Load_TinyExr()
     {
         using namespace impl;
@@ -248,7 +248,7 @@ namespace foray::util {
 
         // STEP #4: Move EXR lib data to custom data vector
 
-        // Storing as VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT, so resize to pixelcount * 4 components * x bytes per component (2 or 4)
+        // Storing as vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT, so resize to pixelcount * 4 components * x bytes per component (2 or 4)
         mRawData.resize(FORMAT_TRAITS::BYTESTRIDE * mInfo.Extent.width * mInfo.Extent.height);
 
         EXRTile single_image_tile;

@@ -10,7 +10,7 @@
 
 
 namespace foray::stages {
-    ImguiStage::ImguiStage(core::Context* context, RenderDomain* domain, core::ManagedImage* backgroundImage, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder)
+    ImguiStage::ImguiStage(core::Context* context, RenderDomain* domain, core::Image* backgroundImage, int32_t resizeOrder) : RenderStage(context, domain, resizeOrder)
     {
         mTargetImage = backgroundImage;
         mOnSdlEvent.Set(context->OsManager->OnEventRawSDL(), [this](const osi::EventRawSDL* event) { this->HandleSdlEvent(event); });
@@ -69,7 +69,7 @@ namespace foray::stages {
 
         //this initializes imgui for Vulkan
         ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance                  = mContext->VkInstance();
+        init_info.Instance                  = mContext->vk::Instance();
         init_info.PhysicalDevice            = mContext->VkPhysicalDevice();
         init_info.Device                    = mContext->VkDevice();
         init_info.Queue                     = mContext->Queue;
@@ -98,11 +98,11 @@ namespace foray::stages {
     {
         if(!!mTargetImage)
         {
-            mRenderAttachments.AddAttachmentLoaded(mTargetImage, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            mRenderAttachments.AddAttachmentLoaded(mTargetImage, vk::ImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
         else
         {
-            mRenderAttachments.AddAttachmentLoaded(mContext->WindowSwapchain, VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            mRenderAttachments.AddAttachmentLoaded(mContext->WindowSwapchain, vk::ImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         }
     }
 
@@ -123,7 +123,7 @@ namespace foray::stages {
     {
     }
 
-    void ImguiStage::SetBackgroundImage(core::ManagedImage* newTargetImage)
+    void ImguiStage::SetBackgroundImage(core::Image* newTargetImage)
     {
         mTargetImage = newTargetImage;
         DestroyFrameBufferAndRenderPass();
@@ -138,7 +138,7 @@ namespace foray::stages {
 
     void ImguiStage::RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo)
     {
-        VkImage  image          = nullptr;
+        vk::Image  image          = nullptr;
         uint32_t swapchainIndex = renderInfo.GetInFlightFrame()->GetSwapchainImageIndex();
 
         if(!!mTargetImage)
@@ -154,7 +154,7 @@ namespace foray::stages {
                                                  .SrcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT,
                                                  .DstStageMask  = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
                                                  .DstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                                                 .NewLayout     = VkImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
+                                                 .NewLayout     = vk::ImageLayout::VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL};
         renderInfo.GetImageLayoutCache().CmdBarrier(cmdBuffer, image, barrier);
 
         mRenderAttachments.CmdBeginRendering(cmdBuffer, mDomain->GetExtent(), renderInfo.GetImageLayoutCache(), swapchainIndex);

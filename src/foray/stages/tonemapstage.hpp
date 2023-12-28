@@ -6,9 +6,9 @@ namespace foray::stages {
     class TonemapStage : public RasterPostProcessBase
     {
       public:
-        TonemapStage(core::Context* context, core::ManagedImage* input, VkImageView autoExposureImg = nullptr, int32_t resizeOrder = 0);
+        TonemapStage(core::Context* context, core::Image* input, vk::ImageView autoExposureImg = nullptr, int32_t resizeOrder = 0);
 
-        void SetAutoExposureImage(VkImageView autoExposureImg);
+        void SetAutoExposureImage(vk::ImageView autoExposureImg);
 
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
 
@@ -20,7 +20,8 @@ namespace foray::stages {
         {
             Passthrough,
             ACES,
-            AMD
+            AMD,
+            Reinhard
         };
 
         void   SetMode(EMode mode);
@@ -46,9 +47,9 @@ namespace foray::stages {
 
 
         util::DescriptorSetSimple  mDescriptorSet;
-        core::ManagedImage*        mInput;
+        core::Image*        mInput;
         core::CombinedImageSampler mInputSampled;
-        VkImageView                mAutoExposureImage;
+        vk::ImageView                mAutoExposureImage;
         core::SamplerReference     mAutoExposureSampler;
     };
 }  // namespace foray::stages

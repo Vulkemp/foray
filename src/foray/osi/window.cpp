@@ -133,7 +133,7 @@ namespace foray::osi {
         return 0;
     }
 
-    VkSurfaceKHR Window::GetOrCreateSurfaceKHR(VkInstance instance)
+    VkSurfaceKHR Window::GetOrCreateSurfaceKHR(vk::Instance instance)
     {
         if(!Exists())
         {

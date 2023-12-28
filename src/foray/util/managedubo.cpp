@@ -11,15 +11,15 @@ namespace foray::util {
     {
         mUboBuffer.CmdCopyToDevice(frameIndex, cmdBuffer);
     }
-    void ManagedUboBase::CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    void ManagedUboBase::CmdPrepareForRead(VkCommandBuffer cmdBuffer, vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const
     {
         mUboBuffer.CmdPrepareForRead(cmdBuffer, dstStageMask, dstAccessMask);
     }
-    VkBufferMemoryBarrier2 ManagedUboBase::MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const
+    VkBufferMemoryBarrier2 ManagedUboBase::MakeBarrierPrepareForRead(vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const
     {
         return mUboBuffer.MakeBarrierPrepareForRead(dstStageMask, dstAccessMask);
     }
-    VkDescriptorBufferInfo ManagedUboBase::GetVkDescriptorBufferInfo() const
+    vk::DescriptorBufferInfo ManagedUboBase::GetVkDescriptorBufferInfo() const
     {
         return mUboBuffer.GetVkDescriptorInfo();
     }

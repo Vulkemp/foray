@@ -46,9 +46,9 @@ namespace foray::stages {
         mOnResized.SetPriority(priority);
     }
 
-    std::vector<core::ManagedImage*> RenderStage::GetImageOutputs()
+    std::vector<core::Image*> RenderStage::GetImageOutputs()
     {
-        std::vector<core::ManagedImage*> result;
+        std::vector<core::Image*> result;
         result.reserve(mImageOutputs.size());
         for(auto& output : mImageOutputs)
         {
@@ -56,7 +56,7 @@ namespace foray::stages {
         }
         return result;
     }
-    core::ManagedImage* RenderStage::GetImageOutput(const std::string_view name, bool noThrow)
+    core::Image* RenderStage::GetImageOutput(const std::string_view name, bool noThrow)
     {
         std::string namecopy(name);
         auto        iter = mImageOutputs.find(namecopy);

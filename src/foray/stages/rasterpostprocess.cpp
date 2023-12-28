@@ -20,7 +20,7 @@ namespace foray::stages
 
     void RasterPostProcessBase::ConfigurePipelineBuilder() 
     {
-        mPipelineBuilder.Default_PostProcess(mVertexShader->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT), mFragmentShader->GetShaderStageCi(VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), 
+        mPipelineBuilder.Default_PostProcess(mVertexShader->GetShaderStageCi(vk::ShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT), mFragmentShader->GetShaderStageCi(vk::ShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT), 
         &mRenderAttachments, mDomain->GetExtent(), mPipelineLayout->GetPipelineLayout());
     }
 

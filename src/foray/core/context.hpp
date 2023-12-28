@@ -26,27 +26,27 @@ namespace foray::core {
         /// @brief Vma Allocator
         VmaAllocator Allocator = nullptr;
         /// @brief Queue (in default setups used for all commands)
-        VkQueue Queue = nullptr;
+        vk::Queue Queue = nullptr;
         /// @brief Queue Family Index
         uint32_t QueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         /// @brief Command Pool
-        VkCommandPool CommandPool = nullptr;
+        vk::CommandPool CommandPool = nullptr;
         /// @brief Pipeline Cache
-        VkPipelineCache PipelineCache = nullptr;
+        vk::PipelineCache PipelineCache = nullptr;
         /// @brief Sampler Collection
         SamplerCollection* SamplerCol = nullptr;
         /// @brief Shader Manager
         ShaderManager* ShaderMan = nullptr;
 
-        inline operator VkInstance() { return *Instance; }
-        inline operator VkPhysicalDevice() { return *Device; }
-        inline operator VkDevice() { return *Device; }
-        inline operator VkQueue() { return Queue; }
+        inline operator vk::Instance() { return *Instance; }
+        inline operator vk::PhysicalDevice() { return *Device; }
+        inline operator vk::Device() { return *Device; }
+        inline operator vk::Queue() { return Queue; }
 
-        inline VkInstance VkInstance() { return *Instance; }
-        inline VkPhysicalDevice VkPhysicalDevice() { return *Device; }
-        inline VkDevice VkDevice() { return *Device; }
-        inline VkQueue VkQueue() { return Queue; }
+        inline vk::Instance vk::Instance() { return *Instance; }
+        inline vk::PhysicalDevice VkPhysicalDevice() { return *Device; }
+        inline vk::Device VkDevice() { return *Device; }
+        inline vk::Queue VkQueue() { return Queue; }
 
         vkb::DispatchTable& DispatchTable() { return Device->GetDispatchTable(); }
     };

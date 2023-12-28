@@ -33,7 +33,7 @@ namespace foray::core {
     {
         Destroy();
     }
-    SamplerReference::SamplerReference(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi)
+    SamplerReference::SamplerReference(SamplerCollection* collection, const vk::SamplerCreateInfo& samplerCi)
     {
         mCollection = collection;
         if(!!mCollection)
@@ -41,7 +41,7 @@ namespace foray::core {
             mCollection->GetSampler(*this, samplerCi);
         }
     }
-    SamplerReference::SamplerReference(Context* context, const VkSamplerCreateInfo& samplerCi)
+    SamplerReference::SamplerReference(Context* context, const vk::SamplerCreateInfo& samplerCi)
     {
         mCollection = context->SamplerCol;
         if(!!mCollection)
@@ -49,7 +49,7 @@ namespace foray::core {
             mCollection->GetSampler(*this, samplerCi);
         }
     }
-    void SamplerReference::Init(SamplerCollection* collection, const VkSamplerCreateInfo& samplerCi)
+    void SamplerReference::Init(SamplerCollection* collection, const vk::SamplerCreateInfo& samplerCi)
     {
         Destroy();
         mCollection = collection;
@@ -58,7 +58,7 @@ namespace foray::core {
             mCollection->GetSampler(*this, samplerCi);
         }
     }
-    void SamplerReference::Init(Context* context, const VkSamplerCreateInfo& samplerCi)
+    void SamplerReference::Init(Context* context, const vk::SamplerCreateInfo& samplerCi)
     {
         Destroy();
         mCollection = context->SamplerCol;
@@ -76,29 +76,29 @@ namespace foray::core {
             mCollection = nullptr;
         }
     }
-    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
-    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : SamplerReference(other), mManagedImage(other.mManagedImage) {}
+    CombinedImageSampler::CombinedImageSampler(const CombinedImageSampler& other) : SamplerReference(other), mImageView(other.mImageView) {}
+    CombinedImageSampler::CombinedImageSampler(CombinedImageSampler&& other) : SamplerReference(other), mImageView(other.mImageView) {}
     CombinedImageSampler& CombinedImageSampler::operator=(const CombinedImageSampler& other)
     {
         SamplerReference::operator=(other);
-        mManagedImage = other.mManagedImage;
+        mImageView = other.mImageView;
         return *this;
     }
-    CombinedImageSampler::CombinedImageSampler(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
-        : SamplerReference(context, samplerCi), mManagedImage(image)
+    CombinedImageSampler::CombinedImageSampler(core::Context* context, core::ImageViewRef* image, const vk::SamplerCreateInfo& samplerCi)
+        : SamplerReference(context, samplerCi), mImageView(image)
     {
     }
-    void CombinedImageSampler::Init(core::Context* context, const VkSamplerCreateInfo& samplerCi)
+    void CombinedImageSampler::Init(core::Context* context, const vk::SamplerCreateInfo& samplerCi)
     {
         SamplerReference::Init(context, samplerCi);
     }
-    void CombinedImageSampler::Init(core::Context* context, core::ManagedImage* image, const VkSamplerCreateInfo& samplerCi)
+    void CombinedImageSampler::Init(core::Context* context, core::ImageViewRef* image, const vk::SamplerCreateInfo& samplerCi)
     {
-        mManagedImage = image;
+        mImageView = image;
         SamplerReference::Init(context, samplerCi);
     }
 
-    void SamplerCollection::GetSampler(SamplerReference& samplerRef, const VkSamplerCreateInfo& samplerCi)
+    void SamplerCollection::GetSampler(SamplerReference& samplerRef, const vk::SamplerCreateInfo& samplerCi)
     {
         uint64_t hash = GetHash(samplerCi);
         auto     iter = mSamplerInstances.find(hash);
@@ -145,7 +145,7 @@ namespace foray::core {
         }
         mSamplerInstances.clear();
     }
-    uint64_t SamplerCollection::GetHash(const VkSamplerCreateInfo& samplerCi)
+    uint64_t SamplerCollection::GetHash(const vk::SamplerCreateInfo& samplerCi)
     {
         Assert(samplerCi.pNext == nullptr, "Cannot hash .pNext values!");
         size_t hash = 0;

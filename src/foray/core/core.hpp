@@ -5,7 +5,7 @@
 #include "descriptorset.hpp"
 #include "imagelayoutcache.hpp"
 #include "managedbuffer.hpp"
-#include "managedimage.hpp"
+#include "image.hpp
 #include "managedresource.hpp"
 #include "shadermanager.hpp"
 #include "shadermodule.hpp"

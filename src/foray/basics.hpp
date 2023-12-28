@@ -26,6 +26,12 @@ namespace foray {
 
     /// @brief Inflight frame count is the amount of frames 'in flight' aka frames recorded on the host before waiting for the device to finish rendering a previous frame.
     inline constexpr uint32_t INFLIGHT_FRAME_COUNT = 2;
+
+    struct Range
+    {
+        uint32_t Base  = 0;
+        uint32_t Count = 1;
+    };
 }  // namespace foray
 
 /// @brief Return value
@@ -80,3 +86,73 @@ namespace foray {
     FORAY_GETTER_MR(member)                                                                                                                                                        \
     FORAY_GETTER_CR(member)                                                                                                                                                        \
     FORAY_SETTER_R(member)
+
+#define FORAY_GETTER_HASFLAG(member)                                                                                                                                               \
+    inline bool Has##member##Bits(auto bit) const                                                                                                                                  \
+    {                                                                                                                                                                              \
+        return (m##member & bit) != 0;                                                                                                                                             \
+    }
+
+#define FORAY_SETTER_ADDFLAG(member)                                                                                                                                               \
+    inline auto& Add##member##Bits(auto bit)                                                                                                                                       \
+    {                                                                                                                                                                              \
+        m##member |= bit;                                                                                                                                                          \
+        return *this;                                                                                                                                                              \
+    }
+
+#define FORAY_SETTER_REMOVEFLAG(member)                                                                                                                                            \
+    inline auto& Remove##member##Bits(auto bit)                                                                                                                                    \
+    {                                                                                                                                                                              \
+        m##member &= ~bit;                                                                                                                                                         \
+        return *this;                                                                                                                                                              \
+    }
+
+#define FORAY_GETTER_FLAG(member)                                                                                                                                                  \
+    FORAY_GETTER_V(member)                                                                                                                                                         \
+    FORAY_GETTER_HASFLAG(member)
+#define FORAY_SETTER_FLAG(member)                                                                                                                                                  \
+    FORAY_SETTER_V(member)                                                                                                                                                         \
+    FORAY_SETTER_ADDFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_REMOVEFLAG(member)
+
+#define FORAY_PROPERTY_FLAG(member)                                                                                                                                                \
+    FORAY_GETTER_V(member)                                                                                                                                                         \
+    FORAY_GETTER_HASFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_V(member)                                                                                                                                                         \
+    FORAY_SETTER_ADDFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_REMOVEFLAG(member)
+
+#define FORAY_GETTER_HASVKFLAG(member)                                                                                                                                               \
+    inline bool Has##member##Bits(auto bit) const                                                                                                                                  \
+    {                                                                                                                                                                              \
+        return (m##member & bit) != 0;                                                                                                                                             \
+    }
+
+#define FORAY_SETTER_ADDVKFLAG(member)                                                                                                                                               \
+    inline auto& Add##member##Bits(auto bit)                                                                                                                                       \
+    {                                                                                                                                                                              \
+        m##member |= bit;                                                                                                                                                          \
+        return *this;                                                                                                                                                              \
+    }
+
+#define FORAY_SETTER_REMOVEVKFLAG(member)                                                                                                                                            \
+    inline auto& Remove##member##Bits(auto bit)                                                                                                                                    \
+    {                                                                                                                                                                              \
+        m##member &= ~bit;                                                                                                                                                         \
+        return *this;                                                                                                                                                              \
+    }
+
+#define FORAY_GETTER_VKFLAG(member)                                                                                                                                                  \
+    FORAY_GETTER_V(member)                                                                                                                                                         \
+    FORAY_GETTER_HASVKFLAG(member)
+#define FORAY_SETTER_VKFLAG(member)                                                                                                                                                  \
+    FORAY_SETTER_V(member)                                                                                                                                                         \
+    FORAY_SETTER_ADDVKFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_REMOVEVKFLAG(member)
+
+#define FORAY_PROPERTY_VKFLAG(member)                                                                                                                                                \
+    FORAY_GETTER_V(member)                                                                                                                                                         \
+    FORAY_GETTER_HASVKFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_V(member)                                                                                                                                                         \
+    FORAY_SETTER_ADDVKFLAG(member)                                                                                                                                                   \
+    FORAY_SETTER_REMOVEVKFLAG(member)

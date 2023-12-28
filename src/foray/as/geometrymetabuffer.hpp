@@ -60,7 +60,7 @@ namespace foray::as {
         FORAY_GETTER_MEM(Buffer)
         FORAY_GETTER_MR(BufferOffsets)
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer->GetVkDescriptorBufferInfo(); }
+        inline vk::DescriptorBufferInfo GetVkDescriptorInfo() const { return mBuffer->GetVkDescriptorBufferInfo(); }
 
       protected:
         core::Context* mContext = nullptr;

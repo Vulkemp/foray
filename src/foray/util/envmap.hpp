@@ -1,5 +1,5 @@
 #pragma once
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp"
 #include "../core/samplercollection.hpp"
 #include "util_declares.hpp"
 #include "../osi/path.hpp"
@@ -11,7 +11,7 @@ namespace foray::util {
     class EnvironmentMap : public NoMoveDefaults
     {
       public:
-        EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, VkFormat loadFormat = VkFormat::VK_FORMAT_UNDEFINED, VkFormat storeFormat = VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT);
+        EnvironmentMap(core::Context* context, const osi::Utf8Path& path, std::string_view name, vk::Format loadFormat = vk::Format::VK_FORMAT_UNDEFINED, vk::Format storeFormat = vk::Format::VK_FORMAT_R16G16B16A16_SFLOAT);
 
         virtual ~EnvironmentMap() = default;
 
@@ -19,7 +19,7 @@ namespace foray::util {
         FORAY_GETTER_CR(Sampler)
 
       protected:
-        Local<core::ManagedImage> mImage;
+        Local<core::Image> mImage;
         core::SamplerReference mSampler;
     };
 }  // namespace foray::util

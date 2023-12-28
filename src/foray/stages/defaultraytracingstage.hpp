@@ -28,7 +28,7 @@ namespace foray::stages {
         /// @param scene Scene provides Camera, Tlas, Geometry and Materials
         /// @param envMap Environment Map
         /// @param noiseImage Noise Texture
-        void Init(scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::ManagedImage* noiseImage = nullptr);
+        void Init(scene::Scene* scene, core::CombinedImageSampler* envMap = nullptr, core::Image* noiseImage = nullptr);
 
         /// @brief Calls RecordFramePrepare(), RecordFrameBind(), RecordFrameTraceRays() in this order
         virtual void RecordFrame(VkCommandBuffer cmdBuffer, base::FrameRenderInfo& renderInfo) override;
@@ -36,13 +36,13 @@ namespace foray::stages {
         /// @brief Image Output of the Raytracing Stage
         inline static constexpr std::string_view OutputName = "Rt.Output";
 
-        inline core::ManagedImage* GetRtOutput() { return mOutput.Get(); }
+        inline core::Image* GetRtOutput() { return mOutput.Get(); }
 
         virtual ~DefaultRaytracingStageBase();
 
       protected:
         /// @brief Initializes mOutput
-        /// @details mOutput initialized as rgba32f with Swapchains extent and usage flags VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
+        /// @details mOutput initialized as rgba32f with Swapchains extent and usage flags VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | eStorage | eTransferSrc | eTransferDst
         virtual void CreateOutputImages();
 
         /// @brief Creates Pipeline layout with mDescriptorSets layout and an optional single uint pushconstant (see mRngSeedPushCOffset)
@@ -79,7 +79,7 @@ namespace foray::stages {
         /// @brief (Optional) Environment Map
         core::CombinedImageSampler* mEnvironmentMap = nullptr;
         /// @brief (Optional) Noise source image
-        core::ManagedImage* mNoiseTexture = nullptr;
+        core::Image* mNoiseTexture = nullptr;
 
         /// @brief Image output
         core::Local_ManagedImage mOutput;

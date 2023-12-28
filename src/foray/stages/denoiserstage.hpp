@@ -10,11 +10,11 @@ namespace foray::stages {
     {
         RenderDomain* Domain = nullptr;
         /// @brief The primary input. Noisy linear radiance data, usually from the raytracer directly.
-        core::ManagedImage* PrimaryInput = nullptr;
+        core::Image* PrimaryInput = nullptr;
         /// @brief Misc. input Images (e.g. Mesh Id, Material Id, History data)
-        std::unordered_map<std::string, core::ManagedImage*> AuxiliaryInputs;
+        std::unordered_map<std::string, core::Image*> AuxiliaryInputs;
         /// @brief The primary output. Denoised Image from the denoiser
-        core::ManagedImage* PrimaryOutput = nullptr;
+        core::Image* PrimaryOutput = nullptr;
         /// @brief Customizable pointer to auxiliary data
         void* AuxiliaryData = nullptr;
         /// @brief Semaphore for synchronisation of externally computing denoisers (e.g. OptiX Denoiser)
@@ -22,7 +22,7 @@ namespace foray::stages {
         bench::DeviceBenchmark*  Benchmark = nullptr;
 
         inline DenoiserConfig() {}
-        inline DenoiserConfig(core::ManagedImage* primaryIn, core::ManagedImage* primaryOut) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut) {}
+        inline DenoiserConfig(core::Image* primaryIn, core::Image* primaryOut) : PrimaryInput(primaryIn), PrimaryOutput(primaryOut) {}
     };
 
     /// @brief Base class for denoiser implementations

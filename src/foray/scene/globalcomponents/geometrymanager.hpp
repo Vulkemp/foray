@@ -26,8 +26,8 @@ namespace foray::scene::gcomp {
         FORAY_PROPERTY_R(Meshes)
 
         bool                   CmdBindBuffers(VkCommandBuffer commandBuffer);
-        VkDescriptorBufferInfo GetVertexBufferDescriptorInfo() const { return mVerticesBuffer->GetVkDescriptorBufferInfo(); }
-        VkDescriptorBufferInfo GetIndexBufferDescriptorInfo() const { return mIndicesBuffer->GetVkDescriptorBufferInfo(); }
+        vk::DescriptorBufferInfo GetVertexBufferDescriptorInfo() const { return mVerticesBuffer->GetVkDescriptorBufferInfo(); }
+        vk::DescriptorBufferInfo GetIndexBufferDescriptorInfo() const { return mIndicesBuffer->GetVkDescriptorBufferInfo(); }
 
       protected:
         Local<core::ManagedBuffer> mIndicesBuffer;

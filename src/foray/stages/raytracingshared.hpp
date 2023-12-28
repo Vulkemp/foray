@@ -27,7 +27,7 @@ namespace foray::stages {
     }  // namespace rtbindpoints
 
     /// @brief All shaderstage flags usable in a raytracing pipeline
-    inline constexpr VkShaderStageFlags RTSTAGEFLAGS = VkShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR
-                                                       | VkShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
-                                                       | VkShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR | VkShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+    inline constexpr VkShaderStageFlags RTSTAGEFLAGS = vk::ShaderStageFlagBits::VK_SHADER_STAGE_RAYGEN_BIT_KHR | vk::ShaderStageFlagBits::VK_SHADER_STAGE_MISS_BIT_KHR
+                                                       | vk::ShaderStageFlagBits::VK_SHADER_STAGE_CALLABLE_BIT_KHR | vk::ShaderStageFlagBits::VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+                                                       | vk::ShaderStageFlagBits::VK_SHADER_STAGE_ANY_HIT_BIT_KHR | vk::ShaderStageFlagBits::VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
 }

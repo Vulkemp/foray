@@ -56,13 +56,13 @@ namespace foray::core {
         }
     }
 
-    ShaderModule::operator VkShaderModule() const
+    ShaderModule::operator vk::ShaderModule() const
     {
-        Assert(mShaderModule, "Attempt to access VkShaderModule but shader module is nullptr");
+        Assert(mShaderModule, "Attempt to access vk::ShaderModule but shader module is nullptr");
         return mShaderModule;
     }
 
-    VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCi(VkShaderStageFlagBits stage, const char* entry) const
+    VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCi(vk::ShaderStageFlagBits stage, const char* entry) const
     {
         return VkPipelineShaderStageCreateInfo{
             .sType               = VkStructureType::VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,

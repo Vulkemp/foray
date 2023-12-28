@@ -135,7 +135,7 @@ namespace foray::rtpipe {
         vkCmdBindPipeline(cmdBuffer, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, mPipeline);
     }
 
-    void RtPipeline::CmdTraceRays(VkCommandBuffer cmdBuffer, VkExtent3D launchSize) const
+    void RtPipeline::CmdTraceRays(VkCommandBuffer cmdBuffer, vk::Extent3D launchSize) const
     {
         VkStridedDeviceAddressRegionKHR raygenSbtRegion = mRaygenSbt->GetAddressRegion();
         VkStridedDeviceAddressRegionKHR missSbtRegion = mMissSbt->GetAddressRegion();

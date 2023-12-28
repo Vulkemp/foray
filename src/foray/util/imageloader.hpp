@@ -1,6 +1,6 @@
 #pragma once
 #include "../core/commandbuffer.hpp"
-#include "../core/managedimage.hpp"
+#include "../core/image.hpp"
 #include "../basics.hpp"
 #include "../vulkan.hpp"
 #include "../osi/path.hpp"
@@ -24,7 +24,7 @@ namespace foray::util {
     /// # Supported File Types
     ///  * PNG, JPG, BMP, HDR via StbImage (plus a few other, see <tinygltf/stb_image.h>)
     ///  * EXR via TinyExr
-    template <VkFormat FORMAT>
+    template <vk::Format FORMAT>
     class ImageLoader
     {
       public:
@@ -61,9 +61,9 @@ namespace foray::util {
         FORAY_GETTER_CR(Info)
         FORAY_GETTER_CR(RawData)
 
-        inline void UpdateManagedImageCI(core::ManagedImage::CreateInfo& ci) const;
-        inline void WriteManagedImageData(core::ManagedImage* image, VkImageLayout afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
-        inline void WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::ManagedImage* image, VkImageLayout afterwrite = VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
+        inline void UpdateManagedImageCI(core::Image::CreateInfo& ci) const;
+        inline void WriteManagedImageData(core::Image* image, vk::ImageLayout afterwrite = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
+        inline void WriteManagedImageData(core::HostSyncCommandBuffer& cmdBuffer, core::Image* image, vk::ImageLayout afterwrite = vk::ImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) const;
 
       protected:
         ImageInfo                  mInfo;

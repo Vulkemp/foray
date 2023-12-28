@@ -49,7 +49,7 @@ namespace foray::as {
             BlasInstanceMap            mAnimatedBlasInstances;
             BlasInstanceMap            mStaticBlasInstances;
             uint64_t                   mNextKey   = 0;
-            VkAccelerationStructureKHR mAccelerationStructure = nullptr;
+            vk::AccelerationStructureKHR mAccelerationStructure = nullptr;
         };
 
         Tlas(core::Context* context, const Builder& builder);
@@ -66,7 +66,7 @@ namespace foray::as {
         FORAY_GETTER_V(TlasAddress)
         FORAY_GETTER_MEM(MetaBuffer)
 
-        operator VkAccelerationStructureKHR() { return mAccelerationStructure; }
+        operator vk::AccelerationStructureKHR() { return mAccelerationStructure; }
 
         /// @brief Get A BLAS instance by id
         const BlasInstance* GetBlasInstance(uint64_t id) const;
@@ -76,11 +76,11 @@ namespace foray::as {
 
       protected:
         core::Context*                   mContext               = nullptr;
-        VkAccelerationStructureKHR       mAccelerationStructure = nullptr;
+        vk::AccelerationStructureKHR       mAccelerationStructure = nullptr;
         Local<core::ManagedBuffer>       mTlasMemory;
         Local<util::DualBuffer>          mInstanceBuffer;
         Local<core::ManagedBuffer>       mScratchBuffer;
-        VkDeviceAddress                  mTlasAddress = 0;
+        vk::DeviceAddress                  mTlasAddress = 0;
         std::map<uint64_t, BlasInstance> mAnimatedBlasInstances;
         std::map<uint64_t, BlasInstance> mStaticBlasInstances;
         Local<GeometryMetaBuffer>        mMetaBuffer;

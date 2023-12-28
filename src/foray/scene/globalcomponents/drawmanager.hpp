@@ -31,10 +31,10 @@ namespace foray::scene::gcomp {
         FORAY_GETTER_MEM(CurrentTransformBuffer)
         FORAY_GETTER_MEM(PreviousTransformBuffer)
 
-        inline VkDescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
-        inline VkDescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer->GetVkDescriptorBufferInfo(); }
-        inline VkBuffer               GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetBuffer(); }
-        inline VkBuffer               GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer->GetBuffer(); }
+        inline vk::DescriptorBufferInfo GetCurrentTransformsDescriptorInfo() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetVkDescriptorBufferInfo(); }
+        inline vk::DescriptorBufferInfo GetPreviousTransformsDescriptorInfo() const { return mPreviousTransformBuffer->GetVkDescriptorBufferInfo(); }
+        inline vk::Buffer               GetCurrentTransformsVkBuffer() const { return mCurrentTransformBuffer->GetDeviceBuffer().GetBuffer(); }
+        inline vk::Buffer               GetPreviousTransformsVkBuffer() const { return mPreviousTransformBuffer->GetBuffer(); }
 
         FORAY_GETTER_V(TotalCount)
 

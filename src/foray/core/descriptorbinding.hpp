@@ -46,32 +46,32 @@ namespace foray::core {
     class DescriptorBindingImageBase : public DescriptorBindingBase
     {
       public:
-        DescriptorBindingImageBase(VkDescriptorType type, VkShaderStageFlags stageFlags = 0, uint32_t count = 1, VkSampler* immutableSamplers = nullptr);
+        DescriptorBindingImageBase(VkDescriptorType type, VkShaderStageFlags stageFlags = 0, uint32_t count = 1, vk::Sampler* immutableSamplers = nullptr);
 
         virtual bool                         ValidateForWrite(std::string& out_message) const override;
         virtual VkDescriptorSetLayoutBinding GetBinding() const override;
         virtual VkWriteDescriptorSet         GetState() const override;
-        DescriptorBindingImageBase&          SetState(uint32_t count, const VkDescriptorImageInfo* imageInfos);
+        DescriptorBindingImageBase&          SetState(uint32_t count, const vk::DescriptorImageInfo* imageInfos);
 
         FORAY_PROPERTY_R(ImageInfos)
         FORAY_PROPERTY_R(ImmutableSamplers)
 
       protected:
-        std::vector<VkDescriptorImageInfo> mImageInfos;
-        std::vector<VkSampler>             mImmutableSamplers;
+        std::vector<vk::DescriptorImageInfo> mImageInfos;
+        std::vector<vk::Sampler>             mImmutableSamplers;
     };
 
     /// @brief A descriptor binding of Sampler type. Only relevant for hlsl.
     class DescriptorBindingSampler : public DescriptorBindingImageBase
     {
       public:
-        DescriptorBindingSampler(VkShaderStageFlags stageFlags = 0, uint32_t count = 1, VkSampler* immutableSamplers = nullptr);
+        DescriptorBindingSampler(VkShaderStageFlags stageFlags = 0, uint32_t count = 1, vk::Sampler* immutableSamplers = nullptr);
 
         virtual bool              ShouldWrite() const override;
         virtual bool              ValidateForWrite(std::string& out_message) const override;
-        DescriptorBindingSampler& SetState(uint32_t count, VkSampler* samplers);
+        DescriptorBindingSampler& SetState(uint32_t count, vk::Sampler* samplers);
         DescriptorBindingSampler& SetState(uint32_t count, const SamplerReference* samplers);
-        DescriptorBindingSampler& SetState(VkSampler sampler);
+        DescriptorBindingSampler& SetState(vk::Sampler sampler);
         DescriptorBindingSampler& SetState(const SamplerReference* sampler);
     };
 
@@ -79,11 +79,11 @@ namespace foray::core {
     class DescriptorBindingCombinedImageSampler : public DescriptorBindingImageBase
     {
       public:
-        DescriptorBindingCombinedImageSampler(VkShaderStageFlags stageFlags = 0, uint32_t count = 1, VkSampler* immutableSamplers = nullptr);
+        DescriptorBindingCombinedImageSampler(VkShaderStageFlags stageFlags = 0, uint32_t count = 1, vk::Sampler* immutableSamplers = nullptr);
 
         virtual bool                           ValidateForWrite(std::string& out_message) const override;
-        DescriptorBindingCombinedImageSampler& SetState(uint32_t count, const CombinedImageSampler* combinedImageSamplers, VkImageLayout layout);
-        DescriptorBindingCombinedImageSampler& SetState(const CombinedImageSampler* combinedImageSampler, VkImageLayout layout);
+        DescriptorBindingCombinedImageSampler& SetState(uint32_t count, const CombinedImageSampler* combinedImageSamplers, vk::ImageLayout layout);
+        DescriptorBindingCombinedImageSampler& SetState(const CombinedImageSampler* combinedImageSampler, vk::ImageLayout layout);
     };
 
     /// @brief A descriptor binding of a storage image. glsl: image2D/image3D
@@ -93,9 +93,9 @@ namespace foray::core {
         DescriptorBindingStorageImage(VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
 
         virtual bool                   ValidateForWrite(std::string& out_message) const override;
-        DescriptorBindingStorageImage& SetState(uint32_t count, VkImageView* views, VkImageLayout layout);
-        DescriptorBindingStorageImage& SetState(VkImageView view, VkImageLayout layout);
-        DescriptorBindingStorageImage& SetState(const ManagedImage* image, VkImageLayout layout);
+        DescriptorBindingStorageImage& SetState(uint32_t count, vk::ImageView* views, vk::ImageLayout layout);
+        DescriptorBindingStorageImage& SetState(vk::ImageView view, vk::ImageLayout layout);
+        DescriptorBindingStorageImage& SetState(const ImageViewRef* image, vk::ImageLayout layout);
     };
 
     /// @brief A descriptor binding of an image (not storage, but accessed by individual sampleres. only relevant in hlsl)
@@ -105,9 +105,9 @@ namespace foray::core {
         DescriptorBindingSampledImage(VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
 
         virtual bool                   ValidateForWrite(std::string& out_message) const override;
-        DescriptorBindingSampledImage& SetState(uint32_t count, VkImageView* views, VkImageLayout layout);
-        DescriptorBindingSampledImage& SetState(VkImageView view, VkImageLayout layout);
-        DescriptorBindingSampledImage& SetState(const ManagedImage* image, VkImageLayout layout);
+        DescriptorBindingSampledImage& SetState(uint32_t count, vk::ImageView* views, vk::ImageLayout layout);
+        DescriptorBindingSampledImage& SetState(vk::ImageView view, vk::ImageLayout layout);
+        DescriptorBindingSampledImage& SetState(const ImageViewRef* image, vk::ImageLayout layout);
     };
 
     /// @brief A descriptor binding of an input attachment (special attachment type in rasterized passes)
@@ -117,9 +117,9 @@ namespace foray::core {
         DescriptorBindingInputAttachment(uint32_t count = 1);
 
         virtual bool                   ValidateForWrite(std::string& out_message) const override;
-        DescriptorBindingInputAttachment& SetState(uint32_t count, VkImageView* views, VkImageLayout layout);
-        DescriptorBindingInputAttachment& SetState(VkImageView view, VkImageLayout layout);
-        DescriptorBindingInputAttachment& SetState(const ManagedImage* image, VkImageLayout layout);
+        DescriptorBindingInputAttachment& SetState(uint32_t count, vk::ImageView* views, vk::ImageLayout layout);
+        DescriptorBindingInputAttachment& SetState(vk::ImageView view, vk::ImageLayout layout);
+        DescriptorBindingInputAttachment& SetState(const ImageViewRef* image, vk::ImageLayout layout);
     };
 
     /// @brief Base class for shared code for all supported buffer descriptor bindings
@@ -127,20 +127,20 @@ namespace foray::core {
     {
       public:
         DescriptorBindingBufferBase(VkDescriptorType type, VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
-        DescriptorBindingBufferBase(VkDescriptorType type, VkShaderStageFlags stageFlags, VkBuffer buffer);
+        DescriptorBindingBufferBase(VkDescriptorType type, VkShaderStageFlags stageFlags, vk::Buffer buffer);
 
         virtual bool                 ValidateForWrite(std::string& out_message) const override;
         virtual VkWriteDescriptorSet GetState() const override;
 
-        DescriptorBindingBufferBase& SetState(uint32_t count, VkBuffer* buffers);
-        DescriptorBindingBufferBase& SetState(VkBuffer buffer);
-        DescriptorBindingBufferBase& SetState(uint32_t count, const VkDescriptorBufferInfo* bufferInfos);
+        DescriptorBindingBufferBase& SetState(uint32_t count, vk::Buffer* buffers);
+        DescriptorBindingBufferBase& SetState(vk::Buffer buffer);
+        DescriptorBindingBufferBase& SetState(uint32_t count, const vk::DescriptorBufferInfo* bufferInfos);
         DescriptorBindingBufferBase& SetState(const ManagedBuffer* buffer);
 
         FORAY_PROPERTY_R(BufferInfos)
 
       protected:
-        std::vector<VkDescriptorBufferInfo> mBufferInfos;
+        std::vector<vk::DescriptorBufferInfo> mBufferInfos;
     };
 
     /// @brief A descriptor binding of Storage buffer type. glsl: buffer ...
@@ -148,7 +148,7 @@ namespace foray::core {
     {
       public:
         DescriptorBindingStorageBuffer(VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
-        DescriptorBindingStorageBuffer(VkShaderStageFlags stageFlags, VkBuffer buffer);
+        DescriptorBindingStorageBuffer(VkShaderStageFlags stageFlags, vk::Buffer buffer);
     };
 
     /// @brief A descriptor binding of Uniform buffer type. glsl: uniform ...
@@ -156,7 +156,7 @@ namespace foray::core {
     {
       public:
         DescriptorBindingUniformBuffer(VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
-        DescriptorBindingUniformBuffer(VkShaderStageFlags stageFlags, VkBuffer buffer);
+        DescriptorBindingUniformBuffer(VkShaderStageFlags stageFlags, vk::Buffer buffer);
     };
 
     /// @brief A descriptor binding of Acceleration Structure type. glsl: uniform accelerationStructureEXT
@@ -164,17 +164,17 @@ namespace foray::core {
     {
       public:
         DescriptorBindingAccelerationStructure(VkShaderStageFlags stageFlags = 0, uint32_t count = 1);
-        DescriptorBindingAccelerationStructure(VkShaderStageFlags stageFlags, VkAccelerationStructureKHR accelerationStructure);
+        DescriptorBindingAccelerationStructure(VkShaderStageFlags stageFlags, vk::AccelerationStructureKHR accelerationStructure);
 
         virtual bool                 ValidateForWrite(std::string& out_message) const override;
         virtual VkWriteDescriptorSet GetState() const override;
 
-        DescriptorBindingAccelerationStructure& SetState(uint32_t count, VkAccelerationStructureKHR* accelerationStructures);
-        DescriptorBindingAccelerationStructure& SetState(VkAccelerationStructureKHR accelerationStructure);
+        DescriptorBindingAccelerationStructure& SetState(uint32_t count, vk::AccelerationStructureKHR* accelerationStructures);
+        DescriptorBindingAccelerationStructure& SetState(vk::AccelerationStructureKHR accelerationStructure);
         DescriptorBindingAccelerationStructure& SetState(const as::Tlas* accelerationStructure);
 
       protected:
-        std::vector<VkAccelerationStructureKHR>      mAccelerationStructures;
+        std::vector<vk::AccelerationStructureKHR>      mAccelerationStructures;
         VkWriteDescriptorSetAccelerationStructureKHR mDescriptorPNext;
     };
 }  // namespace foray::core

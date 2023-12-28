@@ -6,10 +6,10 @@ namespace foray::util {
 
     NoiseSource::NoiseSource(core::Context* context, uint32_t edge, uint32_t depth)
     {
-        VkImageUsageFlags usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT;
+        VkImageUsageFlags usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage;
 
-        core::ManagedImage::CreateInfo ci(usage, VkFormat::VK_FORMAT_R32_UINT, VkExtent2D{.width = edge, .height = edge}, "Noise Source");
-        ci.ImageCI.extent.depth = depth;
+        core::Image::CreateInfo ci = core::Image::CreateInfo::PresetTexture(vk::Format::VK_FORMAT_R32_UINT, VkExtent2D{edge, edge, depth}, 1u);
+        ci.AddUsageFlagsBits(vk::ImageUsageFlagBits::eStorage).SetName("Noise Source");
 
         mImage.New(context, ci);
 
@@ -17,7 +17,7 @@ namespace foray::util {
     }
     void NoiseSource::Regenerate()
     {
-        int32_t               valueCount = mImage->GetExtent3D().width * mImage->GetExtent3D().height * mImage->GetExtent3D().depth;
+        int32_t               valueCount = mImage->GetExtent().width * mImage->GetExtent().height * mImage->GetExtent().depth;
         std::vector<uint32_t> values     = std::vector<uint32_t>(valueCount);
 
         std::mt19937_64 rngEngine;
@@ -27,6 +27,6 @@ namespace foray::util {
         {
             values[i + 0] = static_cast<uint32_t>(rngEngine() % max);
         }
-        mImage->WriteDeviceLocalData(values.data(), sizeof(float) * (size_t)valueCount, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL);
+        mImage->WriteDeviceLocalData(values.data(), sizeof(float) * (size_t)valueCount, vk::ImageLayout::VK_IMAGE_LAYOUT_GENERAL);
     }
 }  // namespace foray::util

@@ -33,18 +33,18 @@ namespace foray::util {
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
 
         /// @brief Prepares the device buffer for read access with a pipeline barrier (must be called before read access happens to the buffer)
-        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
+        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const;
 
         /// @brief Returns a barrier which prepares the device buffer for read access
-        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
+        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const;
 
         inline bool Exists() const { return mDeviceBuffer.Exists(); }
 
         inline std::string GetName() const { return mDeviceBuffer.GetName(); }
         DualBuffer&        SetName(std::string_view name);
 
-        inline VkDescriptorBufferInfo GetVkDescriptorInfo() const { return VkDescriptorBufferInfo{.buffer = mDeviceBuffer.GetBuffer(), .offset = 0U, .range = VK_WHOLE_SIZE}; }
-        inline VkBuffer GetDeviceVkBuffer() const { return mDeviceBuffer.GetBuffer(); }
+        inline vk::DescriptorBufferInfo GetVkDescriptorInfo() const { return vk::DescriptorBufferInfo{.buffer = mDeviceBuffer.GetBuffer(), .offset = 0U, .range = VK_WHOLE_SIZE}; }
+        inline vk::Buffer GetDeviceVkBuffer() const { return mDeviceBuffer.GetBuffer(); }
 
         virtual ~DualBuffer() = default;
 

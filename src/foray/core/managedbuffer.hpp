@@ -7,8 +7,8 @@
 
 namespace foray::core {
 
-    /// @brief Wraps allocation and lifetime functionality of a VkBuffer
-    class ManagedBuffer : public VulkanResource<VkObjectType::VK_OBJECT_TYPE_BUFFER>
+    /// @brief Wraps allocation and lifetime functionality of a vk::Buffer
+    class ManagedBuffer : public VulkanResource<vk::ObjectType::eBuffer>
     {
       public:
         /// @brief Combines all structs used for initialization
@@ -20,19 +20,19 @@ namespace foray::core {
             VmaAllocationCreateInfo AllocationCreateInfo{};
             /// @brief If non zero, Vma's aligned buffer allocate function is invoked
             VkDeviceSize Alignment{};
-            /// @brief Debug name assigned to both VmaAllocation and VkBuffer vulkan object
+            /// @brief Debug name assigned to both VmaAllocation and vk::Buffer vulkan object
             std::string Name{};
 
             /// @brief Default constructor (initializes .sType field and nulls everything else)
             CreateInfo();
             /// @brief Shorthand for most commonly used fields
-            CreateInfo(VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
+            CreateInfo(vk::BufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
         };
 
         static CreateInfo CreateForStaging(VkDeviceSize size, std::string_view bufferName = {});
       public:
         ManagedBuffer(Context* context, const CreateInfo& createInfo);
-        ManagedBuffer(Context* context, VkBufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
+        ManagedBuffer(Context* context, vk::BufferUsageFlags usage, VkDeviceSize size, VmaMemoryUsage memoryUsage, VmaAllocationCreateFlags flags = {}, std::string_view name = "");
 
         /// @brief Employ a staging buffer to upload data
         /// @param data data
@@ -66,19 +66,19 @@ namespace foray::core {
         FORAY_GETTER_V(Alignment);
 
         /// @brief Gets the buffers device address
-        VkDeviceAddress GetDeviceAddress() const;
+        vk::DeviceAddress GetDeviceAddress() const;
 
-        /// @brief Sets the buffers name. Decorates VkBuffer, VmaAllocation and VulkanResource base class.
+        /// @brief Sets the buffers name. Decorates vk::Buffer, VmaAllocation and VulkanResource base class.
         virtual void SetName(std::string_view name) override;
 
-        /// @brief Fills VkDescriptorBufferInfo object with zero offset and full buffer size
-        inline VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const { return VkDescriptorBufferInfo{.buffer = mBuffer, .offset = 0, .range = mSize}; }
+        /// @brief Fills vk::DescriptorBufferInfo object with zero offset and full buffer size
+        inline vk::DescriptorBufferInfo GetVkDescriptorBufferInfo() const { return vk::DescriptorBufferInfo(mBuffer, 0, mSize); }
         /// @brief Same as GetVkDescriptorBufferInfo, but writing to an existing object
-        void FillVkDescriptorBufferInfo(VkDescriptorBufferInfo& bufferInfo) const;
+        void FillVkDescriptorBufferInfo(vk::DescriptorBufferInfo& bufferInfo) const;
 
       protected:
         Context*          mContext{};
-        VkBuffer          mBuffer{};
+        vk::Buffer          mBuffer{};
         VmaAllocation     mAllocation{};
         VmaAllocationInfo mAllocationInfo{};
         VkDeviceSize      mSize      = {};

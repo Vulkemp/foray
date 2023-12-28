@@ -11,10 +11,10 @@ namespace foray::util {
 
         /// @brief Set a binding (image info array)
         /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorImageInfo>& imageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<vk::DescriptorImageInfo>& imageInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (buffer info array)
         /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const std::vector<VkDescriptorBufferInfo>& bufferInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<vk::DescriptorBufferInfo>& bufferInfos, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
 
         /// @brief Set a binding (buffer array)
@@ -23,49 +23,49 @@ namespace foray::util {
         void SetDescriptorAt(uint32_t binding, const std::vector<const core::ManagedBuffer*>& buffers, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (buffer)
         /// @param binding binding index
-        /// @param buffer buffer. Is converted to a VkDescriptorBufferInfo object.
+        /// @param buffer buffer. Is converted to a vk::DescriptorBufferInfo object.
         void SetDescriptorAt(uint32_t binding, const core::ManagedBuffer* buffer, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
         /// @brief Set a binding (storage image array)
         /// @param binding binding index
-        /// @param images image array. Is converted to a VkDescriptorImageInfo vector (shared layout and sampler).
+        /// @param images image array. Is converted to a vk::DescriptorImageInfo vector (shared layout and sampler).
         /// @param layout image layout as accessed from shader
         /// @param sampler shared sampler
-        void SetDescriptorAt(uint32_t binding, const std::vector<const core::ManagedImage*>& images, VkImageLayout layout, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<const core::ImageViewRef*>& images, vk::ImageLayout layout, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (image)
         /// @param binding binding index
-        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
+        /// @param images image. Is converted to a vk::DescriptorImageInfo object (with layout and sampler).
         /// @param layout image layout as accessed from shader
         void SetDescriptorAt(
-            uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+            uint32_t binding, const core::ImageViewRef* image, vk::ImageLayout layout, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (image)
         /// @param binding binding index
-        /// @param images image. Is converted to a VkDescriptorImageInfo object (with layout and sampler).
+        /// @param images image. Is converted to a vk::DescriptorImageInfo object (with layout and sampler).
         /// @param layout image layout as accessed from shader
         void SetDescriptorAt(
-            uint32_t binding, const core::ManagedImage* image, VkImageLayout layout, VkSampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+            uint32_t binding, const core::ImageViewRef* image, vk::ImageLayout layout, vk::Sampler sampler, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
 
         /// @brief Set a binding (image info)
         /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const VkDescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const vk::DescriptorImageInfo& imageInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (buffer info)
         /// @param binding binding index
-        void SetDescriptorAt(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const vk::DescriptorBufferInfo& bufferInfo, VkDescriptorType descriptorType, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (CombinedImageSampler)
         /// @param binding binding index
         /// @param sampledImage Image + Sampler combo
         /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, const core::CombinedImageSampler* sampledImage, VkImageLayout layout, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const core::CombinedImageSampler* sampledImage, vk::ImageLayout layout, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (CombinedImageSampler)
         /// @param binding binding index
         /// @param sampledImage Image + Sampler vector (shared layout)
         /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, const std::vector<const core::CombinedImageSampler*>& sampledImages, VkImageLayout layout, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, const std::vector<const core::CombinedImageSampler*>& sampledImages, vk::ImageLayout layout, VkShaderStageFlags shaderStageFlags);
         /// @brief Set a binding (AccelerationStructure)
         /// @param binding binding index
         /// @param accelerationStructure Acceleration Structure
         /// @param layout ImageLayout
-        void SetDescriptorAt(uint32_t binding, VkAccelerationStructureKHR accelerationStructure, VkShaderStageFlags shaderStageFlags);
+        void SetDescriptorAt(uint32_t binding, vk::AccelerationStructureKHR accelerationStructure, VkShaderStageFlags shaderStageFlags);
 
         void CreateOrUpdate(core::Context* context, std::string debugName);
         void Create(core::Context* context, std::string debugName);

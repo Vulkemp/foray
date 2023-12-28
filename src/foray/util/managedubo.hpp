@@ -16,17 +16,17 @@ namespace foray::util {
 
         virtual void UpdateTo(uint32_t frameIndex) = 0;
         virtual void CmdCopyToDevice(uint32_t frameIndex, VkCommandBuffer cmdBuffer);
-        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
-        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(VkPipelineStageFlags2 dstStageMask, VkAccessFlags2 dstAccessMask) const;
+        virtual void CmdPrepareForRead(VkCommandBuffer cmdBuffer, vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const;
+        virtual VkBufferMemoryBarrier2 MakeBarrierPrepareForRead(vk::PipelineStageFlags2 dstStageMask, vk::AccessFlags2 dstAccessMask) const;
         virtual bool Exists() const override;
 
         const core::ManagedBuffer* GetDeviceBuffer() const { return &(mUboBuffer.GetDeviceBuffer()); }
 
-        operator VkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
+        operator vk::Buffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
 
-        VkDescriptorBufferInfo GetVkDescriptorBufferInfo() const;
+        vk::DescriptorBufferInfo GetVkDescriptorBufferInfo() const;
 
-        VkBuffer GetVkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
+        vk::Buffer GetVkBuffer() const { return mUboBuffer.GetDeviceBuffer().GetBuffer(); }
 
       protected:
         DualBuffer mUboBuffer;

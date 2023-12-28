@@ -83,11 +83,11 @@ namespace foray::core {
         return fmt::format("\"{}\" ({})", name, type);
     }
 
-    std::string_view PrintVkObjectType(VkObjectType objectType)
+    std::string_view PrintVkObjectType(vk::ObjectType objectType)
     {
         if(objectType > NAMEOF_ENUM_RANGE_MAX)
         {
-            return "VkObjectType (Out of NAMEOF_ENUM_RANGE)";
+            return "vk::ObjectType (Out of NAMEOF_ENUM_RANGE)";
         }
         else
         {

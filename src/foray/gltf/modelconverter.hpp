@@ -74,7 +74,7 @@ namespace foray::gltf {
             int32_t MaterialBufferOffset;
             /// @brief Vector mapping gltfModel mesh index to Mesh*
             std::vector<scene::Mesh*> Meshes;
-            /// @brief Vector mapping gltfModel texture index to ManagedImage*
+            /// @brief Vector mapping gltfModel texture index to Image*
             int32_t TextureBufferOffset;
             size_t  IndexBufferStart;
         } mIndexBindings = {};
@@ -90,7 +90,7 @@ namespace foray::gltf {
         scene::gcomp::TextureManager&   mTextures;
         bench::HostBenchmark   mBenchmark;
 
-        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, VkSamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
+        static void sTranslateSampler(const tinygltf::Sampler& tinygltfSampler, vk::SamplerCreateInfo& outsamplerCI, bool& generateMipMaps);
 
         void RecursivelyTranslateNodes(int32_t currentIndex, scene::Node* parent = nullptr);
 
