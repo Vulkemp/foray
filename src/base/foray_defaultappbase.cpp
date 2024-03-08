@@ -19,7 +19,7 @@ namespace foray::base {
               &mContext,
               [this](vkb::InstanceBuilder& builder) { this->ApiBeforeInstanceCreate(builder); },
 #if FORAY_DEBUG || FORAY_VALIDATION  // Set validation layers and debug callbacks on / off
-              true
+              false
 #else
               false
 #endif
