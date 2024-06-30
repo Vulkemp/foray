@@ -27,7 +27,7 @@ namespace foray::scene::ncomp {
             {
                 mSpeedExponent--;
             }
-            if(buttonId == osi::EButton::Keyboard_Space && pressed)
+            if((buttonId == osi::EButton::Keyboard_Tab || buttonId == osi::EButton::Keyboard_E) && pressed)
             {
                 int code = SDL_SetRelativeMouseMode(mUseMouse ? SDL_FALSE : SDL_TRUE);
                 if(code < 0)
