@@ -31,9 +31,9 @@ constexpr std::string_view OPTIMIZE = " -O";
 
         size_t hash = {};
         util::AccumulateHash(hash, OPTIMIZE);
-        for(uint i = 0; i < 15; i++)
+        for(uint32_t i = 0; i < 15; i++)
         {
-            util::AccumulateHash(hash, absoluteUniqueSourceFilePath[absoluteUniqueSourceFilePath.length() - i]);
+            util::AccumulateHash(hash, absoluteUniqueSourceFilePath[absoluteUniqueSourceFilePath.length() - i - 1]);
         }
         // util::AccumulateHash(hash, absoluteUniqueSourceFilePath);
         // util::AccumulateHash(hash, includeDirs.size());
