@@ -11,11 +11,11 @@ namespace foray::core {
 
     namespace fs = std::filesystem;
 
-#ifdef FORAY_DEBUG
+// #ifdef FORAY_DEBUG
 constexpr std::string_view OPTIMIZE = " -O0";
-#else
-constexpr std::string_view OPTIMIZE = " -O";
-#endif
+// #else
+// constexpr std::string_view OPTIMIZE = " -O";
+// #endif
 
 #pragma region Hashing, File Time
 
