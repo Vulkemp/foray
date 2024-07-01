@@ -21,34 +21,39 @@ constexpr std::string_view OPTIMIZE = " -O";
 
     uint64_t ShaderManager::MakeHash(std::string_view absoluteUniqueSourceFilePath, const ShaderCompilerConfig& options)
     {
-        // Use sets so the order as hashed is consistent
-        std::set<std::string_view> includeDirs;
-        includeDirs.insert(options.IncludeDirs.cbegin(), options.IncludeDirs.cend());
+        // // Use sets so the order as hashed is consistent
+        // std::set<std::string_view> includeDirs;
+        // includeDirs.insert(options.IncludeDirs.cbegin(), options.IncludeDirs.cend());
         std::set<std::string_view> definitions;
         definitions.insert(options.Definitions.cbegin(), options.Definitions.cend());
-        std::set<std::string_view> additionalOptions;
-        additionalOptions.insert(options.AdditionalOptions.cbegin(), options.AdditionalOptions.cend());
+        // std::set<std::string_view> additionalOptions;
+        // additionalOptions.insert(options.AdditionalOptions.cbegin(), options.AdditionalOptions.cend());
 
         size_t hash = {};
         util::AccumulateHash(hash, OPTIMIZE);
-        util::AccumulateHash(hash, absoluteUniqueSourceFilePath);
-        util::AccumulateHash(hash, includeDirs.size());
-        for(std::string_view path : includeDirs)
+        for(uint i = 0; i < 15; i++)
         {
-            util::AccumulateHash(hash, path);
+            util::AccumulateHash(hash, absoluteUniqueSourceFilePath[absoluteUniqueSourceFilePath.length() - i]);
         }
+        // util::AccumulateHash(hash, absoluteUniqueSourceFilePath);
+        // util::AccumulateHash(hash, includeDirs.size());
+        // for(std::string_view path : includeDirs)
+        // {
+        //     util::AccumulateHash(hash, path);
+        // }
         util::AccumulateHash(hash, definitions.size());
         for(std::string_view def : definitions)
         {
             util::AccumulateHash(hash, def);
         }
-        util::AccumulateHash(hash, options.EntryPoint);
-        util::AccumulateHash(hash, additionalOptions.size());
-        for(std::string_view option : additionalOptions)
-        {
-            util::AccumulateHash(hash, option);
-        }
+        // util::AccumulateHash(hash, options.EntryPoint);
+        // util::AccumulateHash(hash, additionalOptions.size());
+        // for(std::string_view option : additionalOptions)
+        // {
+        //     util::AccumulateHash(hash, option);
+        // }
         return (uint64_t)hash;
+        // return 0xDEADBEEF;
     }
 
     fs::file_time_type ShaderManager::GetWriteTime(const osi::Utf8Path& path, WriteTimeLookup& writeTimeLookup)
