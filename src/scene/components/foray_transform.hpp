@@ -34,7 +34,7 @@ namespace foray::scene::ncomp {
 
 
         glm::vec3 mTranslation      = {};
-        glm::quat mRotation         = {};
+        glm::quat mRotation         = {1, 0, 0, 0};
         glm::vec3 mScale            = glm::vec3(1.f);
         glm::mat4 mLocalMatrix      = glm::mat4(1.f);
         glm::mat4 mGlobalMatrix     = glm::mat4(1.f);

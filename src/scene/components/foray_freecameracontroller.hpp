@@ -25,6 +25,8 @@ namespace foray::scene::ncomp {
 
         FORAY_PROPERTY_V(InvertYAxis)
         FORAY_PROPERTY_V(InvertAll)
+        FORAY_PROPERTY_V(Yaw)
+        FORAY_PROPERTY_V(Pitch)
         FORAY_PROPERTY_V(SpeedExponent)
 
       protected:
