@@ -55,6 +55,8 @@ namespace foray::scene {
         /// @brief Updates lights. If your project requires punctual lights, this must be called after altering the scene
         void UpdateLightManager();
 
+        void ClearNodes();
+
       protected:
         core::Context* mContext;
         /// @brief Buffer holding ownership of all nodes
