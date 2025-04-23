@@ -2,9 +2,9 @@
 function(foray_compileshader SrcPath DstPath)
 
 # Make sure GLSLC Exe is available
-if (NOT Vulkan_GLSLC_EXECUTABLE)
-    message(FATAL_ERROR "Vulkan Package must be located before using the compileshader(...) can be used")
-endif()
+#if (NOT Vulkan_GLSLC_EXECUTABLE)
+#    message(FATAL_ERROR "Vulkan Package must be located before using the compileshader(...) can be used")
+#endif()
 
 # Make sure source file exists
 if (NOT EXISTS ${SrcPath})
